@@ -1,26 +1,133 @@
-name: Build manylinux wheel
+name: Build and test distributions
 
 on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      expected-tag:
+        description: Optional release tag to validate against package metadata
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-
+  source:
+    runs-on: ubuntu-24.04
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install "build>=1.2,<2" "twine>=6,<7" "ruff>=0.11,<1" "pytest>=8,<10"
+      - run: ruff check src tests tools
+      # By default build reconstructs the wheel from the newly generated sdist.
+      - run: python -m build
+      - run: python -m twine check --strict dist/*
+      - name: Check archive contents and release version
+        env:
+          EXPECTED_TAG: ${{ inputs.expected-tag }}
+        run: python tools/check_dist.py --tag "$EXPECTED_TAG"
+      - name: Test the installed wheel without a checkout import path
+        shell: bash
+        run: |
+          python -m pip install dist/*.whl
+          cd "$RUNNER_TEMP"
+          python -I -m pytest "$GITHUB_WORKSPACE/tests" -q --import-mode=importlib
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist-sdist
+          path: dist/*.tar.gz
+          if-no-files-found: error
 
-    - name: Build wheel (manylinux2014, Python 3.8)
-      uses: RalfG/python-wheels-manylinux-build@v0.4.2
-      with:
-        python-versions: "cp38"
-        package-path: .
-        build-requirements: "pybind11"
+  wheels:
+    name: Wheels (${{ matrix.arch }} / ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            arch: x86_64
+          - os: ubuntu-24.04-arm
+            arch: aarch64
+          - os: macos-15-intel
+            arch: x86_64
+          - os: macos-15
+            arch: arm64
+          - os: windows-2022
+            arch: AMD64
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Native C++ tests (no Python dependency)
+        run: >-
+          cmake -S . -B .build-native -DCMAKE_BUILD_TYPE=Release
+          -DMY_CTOOLS_BUILD_PYTHON=OFF -DMY_CTOOLS_BUILD_TESTS=ON
+      - run: cmake --build .build-native --config Release --parallel 2
+      - run: ctest --test-dir .build-native -C Release --output-on-failure
+      - run: python -m pip install cibuildwheel==4.2.1
+      - name: Build, repair and test every wheel
+        run: python -m cibuildwheel --output-dir wheelhouse
+        env:
+          CIBW_ARCHS: ${{ matrix.arch }}
+      - run: python tools/check_dist.py wheelhouse
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist-wheels-${{ matrix.os }}-${{ matrix.arch }}
+          path: wheelhouse/*.whl
+          if-no-files-found: error
 
-    - name: Upload built wheel
-      uses: actions/upload-artifact@v4
-      with:
-        name: my_ctools-manylinux-wheel
-        path: dist/*.whl
+  numpy-minimum:
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        python: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install "numpy==1.26.4" ".[test]"
+      - run: python -I -m pytest tests -q --import-mode=importlib
+
+  sanitizers:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - run: >-
+          cmake -S . -B .build-sanitized -DCMAKE_BUILD_TYPE=RelWithDebInfo
+          -DMY_CTOOLS_BUILD_PYTHON=OFF -DMY_CTOOLS_BUILD_TESTS=ON -DMY_CTOOLS_SANITIZE=ON
+      - run: cmake --build .build-sanitized --parallel 2
+      - run: ctest --test-dir .build-sanitized --output-on-failure
+        env:
+          ASAN_OPTIONS: detect_leaks=1
+          UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build an instrumented Python extension
+        run: python -m pip install ".[test]" --config-settings=cmake.define.MY_CTOOLS_SANITIZE=ON
+      - name: Exercise bindings and kernels under sanitizers
+        shell: bash
+        run: |
+          export LD_PRELOAD="$(gcc -print-file-name=libasan.so)"
+          python -I -m pytest tests -q --import-mode=importlib
+        env:
+          ASAN_OPTIONS: detect_leaks=0:halt_on_error=1
+          UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1

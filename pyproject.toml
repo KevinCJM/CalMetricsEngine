@@ -1,3 +1,72 @@
 [build-system]
-requires = ["setuptools>=42", "wheel", "pybind11"]
-build-backend = "setuptools.build_meta"
+requires = ["scikit-build-core>=0.11.6,<2", "pybind11>=3.0.4,<4"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "my_ctools"
+version = "0.2.0"
+description = "Portable, ahead-of-time C++ numerical kernels for Python fund analytics"
+readme = "README.md"
+requires-python = ">=3.10,<3.15"
+authors = [{ name = "KevinCJM" }]
+dependencies = ["numpy>=1.26,<3"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Programming Language :: C++",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Operating System :: Microsoft :: Windows",
+  "Operating System :: MacOS",
+  "Operating System :: POSIX :: Linux",
+]
+
+[project.urls]
+Repository = "https://github.com/KevinCJM/My_C_Tools"
+Issues = "https://github.com/KevinCJM/My_C_Tools/issues"
+
+[project.optional-dependencies]
+test = ["pytest>=8,<10"]
+dev = ["pytest>=8,<10", "build>=1.2,<2", "twine>=6,<7", "ruff>=0.11,<1", "pybind11>=3.0.4,<4"]
+
+[tool.scikit-build]
+minimum-version = "build-system.requires"
+cmake.version = ">=3.20"
+cmake.build-type = "Release"
+wheel.packages = ["src/my_ctools"]
+sdist.include = ["cpp/**", "src/**", "tests/**", "tools/**", "docs/**", "CMakeLists.txt", "README.md", ".github/workflows/*.yml"]
+sdist.exclude = [".venv*/**", ".build*/**", "build/**", "dist/**", "wheelhouse/**", "docs/.ai-hermes-user-memory/**", "**/__pycache__/**", ".codegraph/**"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --import-mode=importlib"
+filterwarnings = ["error"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501"]
+
+[tool.cibuildwheel]
+build = "cp3{10,11,12,13,14}-*"
+skip = "*-win32 *-win_arm64 *-manylinux_i686 *-musllinux_i686"
+test-requires = ["pytest>=8,<10"]
+test-sources = ["tests"]
+test-command = "python -m pytest tests -q --import-mode=importlib"
+
+[tool.cibuildwheel.linux]
+manylinux-x86_64-image = "manylinux2014"
+manylinux-aarch64-image = "manylinux2014"
+musllinux-x86_64-image = "musllinux_1_2"
+musllinux-aarch64-image = "musllinux_1_2"
+
+[tool.cibuildwheel.macos]
+environment = { MACOSX_DEPLOYMENT_TARGET = "11.0" }
