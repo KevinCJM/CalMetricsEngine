@@ -1,8 +1,8 @@
-#include "my_ctools/kernels.hpp"
-#include "my_ctools/calendar.hpp"
+#include "calmetrics_engine/finance.hpp"
+#include "calmetrics_engine/calendar.hpp"
 
-namespace my_ctools {
-void largest_streak(MatrixView values, const std::int64_t* dates, bool positive,
+namespace calmetrics_engine {
+void largest_streak(MatrixView values, VectorView<std::int64_t> dates, bool positive,
                     double* result, std::int64_t* periods,
                     std::vector<std::string>& starts, std::vector<std::string>& ends,
                     unsigned threads) {
@@ -46,7 +46,7 @@ void largest_streak(MatrixView values, const std::int64_t* dates, bool positive,
     });
 }
 
-void longest_streak(MatrixView values, const std::int64_t* dates, bool positive,
+void longest_streak(MatrixView values, VectorView<std::int64_t> dates, bool positive,
                     double* result, std::int64_t* periods,
                     std::vector<std::string>& starts, std::vector<std::string>& ends,
                     unsigned threads) {
@@ -77,4 +77,4 @@ void longest_streak(MatrixView values, const std::int64_t* dates, bool positive,
         }
     });
 }
-}  // namespace my_ctools
+}  // namespace calmetrics_engine

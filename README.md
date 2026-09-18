@@ -1,138 +1,258 @@
-# My C Tools
+# CalMetricsEngine
 
-Precompiled C++17 numerical kernels for Python financial analytics. One native
-extension, no runtime JIT compilation, and no mandatory AVX instruction set.
+AOT calculation engine for quantitative finance and fund research.
 
-**Version 0.2.0 is prepared in this repository; building a wheel does not publish
-it to PyPI.** See [publishing](docs/publishing.md) before creating a public release.
-The repository currently does not specify a redistribution license; the owner
-must confirm the license before public distribution.
+CalMetricsEngine is being built as the reusable execution layer behind the fund
+investment research platform:
+
+```text
+DSL / AST
+    ↓
+Typed DAG
+    ↓
+Operator Lowering
+    ↓
+Native Execution Plan
+    ↓
+PyBind11 / C++17
+```
+
+The current 0.3.0 code line establishes the native foundation: portable C++ kernels,
+a strict zero-copy NumPy boundary, cross-platform wheels, and one native extension.
+The production DSL / Typed DAG currently living in FundInvestmentResearchPlatform
+will be extracted only after contract-equivalence tests are in place.
 
 ## Install
 
-After the corresponding version has been published:
+After publication:
 
 ```bash
-python -m pip install --only-binary=:all: "my-ctools==0.2.0"
+python -m pip install --only-binary=:all: "calmetrics-engine==0.3.0"
 ```
 
-`--only-binary` fails clearly when no compatible wheel exists, rather than trying
-to compile on the application server. The distribution name is `my_ctools`
-(`my-ctools` is the normalized pip name); the import name remains `my_ctools`.
-
-To install the current checkout before publication, with a C++17 compiler:
+From the current checkout:
 
 ```bash
 python -m pip install .
 ```
 
-Build dependencies are isolated automatically. Binary wheel users need Python
-and NumPy, not CMake, a C++ compiler, Numba or a startup warmup step.
+Import:
 
-## Platform matrix
+```python
+import calmetrics_engine as engine
+```
 
-The configured CI builds and tests these targets. A target is release-ready only
-when its CI lane passes; configuration alone is not evidence of a successful run.
-Local verification results are in [the verification report](docs/verification-2026-09-18.md).
+## Why this engine
 
-| Operating system | CPU architecture | Binary baseline |
-| --- | --- | --- |
-| Linux glibc | x86_64, aarch64 | manylinux2014 / glibc 2.17+ |
-| Linux musl | x86_64, aarch64 | musllinux 1.2 |
-| macOS 11+ | Intel x86_64, Apple Silicon arm64 | Separate architecture wheels |
-| Windows | AMD64 | 64-bit MSVC build |
+- No runtime JIT compilation or service-start warmup.
+- PyBind11/C++ AOT backend.
+- Exact-dtype, strided, zero-copy NumPy inputs.
+- C-contiguous, Fortran-order, sliced and readonly arrays are supported directly.
+- GIL released during native numerical work.
+- Portable baseline wheels instead of mandatory AVX.
+- One numerical implementation per reusable operator.
+- Designed for future single-call Typed-DAG execution and workspace reuse.
 
-CPython **3.10–3.14**, ordinary GIL-enabled builds; NumPy **1.26–2.x** subject to
-its Python-version compatibility. Python 3.8/3.9, PyPy, free-threaded Python,
-32-bit CPUs, Windows ARM64 and GPU acceleration are not in this release's matrix.
-Other platforms may compile from source but are not claimed as tested targets.
+## Zero-copy input contract
 
-Wheels are specific to OS, CPU and Python ABI: there is not one binary that runs
-on every machine. The build never adds `-march=native`, `-mavx*` or `/arch:AVX*`.
-The `_simd` suffix on a legacy function is retained for API compatibility, not as
-a guarantee of a hand-written SIMD implementation.
-
-## Use
+CalMetricsEngine does not silently normalize calculation inputs.
 
 ```python
 import numpy as np
-import my_ctools as mc
+import calmetrics_engine as engine
 
-returns = np.array([[0.01, 0.02], [-0.03, 0.01], [0.02, -0.01]], dtype=np.float64)
-dates = np.array(["2026-01-01", "2026-01-02", "2026-01-03"], dtype="datetime64[ns]")
+values = np.arange(40, dtype=np.float64).reshape(10, 4)
+view = values[:, ::2]                 # non-contiguous view, no copy
 
-std = mc.cal_std_mean(returns)  # (2,), sample std, not a mean/std tuple
-mean_std = mc.cal_std_mean_simd(returns)  # (2, 2): means first, sample stds second
-drawdown, drawdown_dates, recovery = mc.cal_max_dd(returns, dates)
-print(mc.build_info())
-
-# Explicit per-call parallelism; 0 selects automatically, default is 1.
-std_parallel = mc.cal_std_mean(returns, n_threads=2)
-
-# Historical submodule imports remain valid.
-from my_ctools.cal_max_dd import cal_max_dd
+result = engine.cal_std_mean(view)    # C++ reads the original strides directly
+assert np.shares_memory(view, values)
 ```
 
-| Function | Return contract |
+Current input rules:
+
+- Values: NumPy `float64` ndarray.
+- Group ids: NumPy `int32` ndarray.
+- Dates / indices: NumPy `int64` ndarray.
+- Dates may also be exact `datetime64[ns]`; they are viewed as int64 without copying.
+- Arrays must be aligned.
+- Readonly arrays are supported.
+- Wrong dtype, Python lists, or incompatible objects fail instead of being copied.
+
+Outputs and required scratch/workspace memory may be allocated. The contract is
+**zero input copies and zero unnecessary intermediate copies**, not “no allocation”.
+
+## High-performance data preparation
+
+The generic native API can read strided NumPy views without copying. The future
+high-throughput SIMD batch path has a stricter preferred layout: each product's
+observations should be stored contiguously with unit stride.
+
+Recommended product-major representation:
+
+```text
+values  = [ product_0 ][ product_1 ][ product_2 ] ... [ product_n ]
+dates   = [ product_0 ][ product_1 ][ product_2 ] ... [ product_n ]
+offsets = [0, p0_end, p1_end, ..., total_observations]
+```
+
+C++ locates one product by pointer arithmetic:
+
+```text
+begin = offsets[product]
+end   = offsets[product + 1]
+
+product_values = values + begin
+length         = end - begin
+```
+
+Different intervals of the same product should be represented as
+`product_id + start_offset + end_offset`, not materialized as new NumPy arrays.
+
+For multiple fields, prefer Structure of Arrays (SoA):
+
+```text
+returns[total_observations]
+close[total_observations]
+volume[total_observations]
+dates[total_observations]
+offsets[product_count + 1]
+```
+
+The calling application should perform dtype normalization, sorting/alignment,
+and any unavoidable data compaction once at the ingestion boundary. After data
+enters CalMetricsEngine, hot-path code must not silently call
+`astype`, `copy`, `np.ascontiguousarray`, advanced indexing, or equivalent
+operations that materialize another input array.
+
+### NaN and SIMD
+
+NaN does not disable SIMD by itself, but per-element missing-value branches and
+masks can reduce SIMD throughput. Missing-data semantics must never be changed
+only for speed.
+
+The intended execution lanes are:
+
+1. **Dense SIMD lane** — metadata proves the block contains no NaN.
+2. **Masked SIMD lane** — vector masks preserve the operator's NaN contract.
+3. **Valid-span lane** — use contiguous valid spans when the operator semantics allow it.
+4. **Scalar fallback** — irregular sparse missingness where SIMD is not beneficial.
+5. **Reject** — operators whose contract forbids NaN fail explicitly.
+
+Do not delete observations or fill NaN unless the operator's documented financial
+semantics explicitly require that behavior.
+
+## Parallel execution model
+
+Heavy batch execution will use one scheduling authority rather than letting each
+business module create independent pools.
+
+The Scheduler will consider:
+
+```text
+products × intervals × DAG cost × observations
++ scenario count
++ input/workspace bytes
++ CPU budget
++ memory budget
++ hard-stop requirements
+```
+
+Preferred hierarchy:
+
+- small job: single thread + SIMD
+- medium CPU job: one process + native thread pool + SIMD
+- large independent product batches: process pool + shared memory + per-process thread budget + SIMD
+- hard-stop/fault-isolated jobs: separate process
+
+When a process pool reads the same large input dataset, workers should attach to
+shared memory or mmap and receive only descriptors/offsets. Large NumPy arrays
+should not be pickled into every worker.
+
+Process count and native thread count must share one CPU budget. For example,
+`4 processes × 4 threads` may be valid on a 16-core machine; `8 × 16` is
+oversubscription and is not acceptable by default.
+
+Metric-level parallelism is not the first choice because many indicators share
+upstream DAG work. Product blocks, interval blocks and scenario blocks are
+usually better scheduling dimensions.
+
+The detailed implementation rules for future changes are in [AGENTS.md](AGENTS.md).
+
+## Current finance kernels
+
+| Function | Result |
 | --- | --- |
-| `cal_std_mean(input)` | Column sample standard deviations, `(N,)`, ddof=1 |
-| `cal_std_mean_simd(input)` | Means and sample standard deviations, `(2, N)` |
-| `cal_cpr(f_type, funds_value)` | Per-column persistence ratios, `(N,)` |
-| `cal_max_dd(funds_val, day_arr)` | `(drawdown, YYYYMMDD_dates, recovery_periods)` |
-| `cal_longest_dd_recover(funds_val)` | Longest drawdown-recovery periods, `(N,)` |
-| `cal_all_largest_indicators(array_value, dates, i_code="positive")` | Dict with `r`, `p`, `s`, `l` |
-| `cal_all_longest_indicators(a_value, dates, i_code="positive")` | `(return, starts, ends, periods)` |
-| `cal_rolling_gain_loss(i_code, funds_val, start_idx, end_idx, day_arr)` | Nine arrays: mean, median, win rate, three gain buckets, three loss buckets |
+| `cal_std_mean` | Column sample standard deviation |
+| `cal_std_mean_simd` | Column means and sample standard deviations |
+| `cal_cpr` | Persistence ratio by peer group |
+| `cal_max_dd` | Maximum drawdown, date and recovery period |
+| `cal_longest_dd_recover` | Longest drawdown-recovery duration |
+| `cal_all_largest_indicators` | Largest streak statistics |
+| `cal_all_longest_indicators` | Longest streak statistics |
+| `cal_rolling_gain_loss` | Rolling return distribution statistics |
 
-All eight functions also accept keyword-only `n_threads=1`; valid values are
-0–256. Default single-thread execution avoids multiplying native threads across
-web-server workers. `n_threads=0` is bounded by detected hardware and work size.
-The GIL is released only while the numerical kernel runs. There is no global
-thread pool; independent calls can execute concurrently.
+These kernels retain their existing financial calculation semantics. The rename
+and memory architecture change do not silently redefine formulas.
 
-### Array and memory contract
+## Architecture
 
-Values are 2-D `(observations, columns)`. Already aligned, native-endian,
-C-contiguous `float64` arrays are borrowed without copying. Other real numeric
-arrays are normalized once; slices, Fortran-order arrays, `float32` or unaligned
-buffers may therefore need a copy. Read-only inputs are supported. **Do not
-modify an input concurrently with a running calculation.** Outputs own their
-NumPy memory and remain valid after inputs are deleted.
+```text
+src/calmetrics_engine/
+    Python public boundary
+          ↓
+cpp/bindings.cpp
+    dtype / ndim / stride validation
+          ↓
+cpp/include/calmetrics_engine/
+    ArrayView / threading / numeric / calendar contracts
+          ↓
+cpp/finance/
+    pure C++ finance kernels
+```
 
-Group identifiers are `int32`; dates and indices are `int64`. Integer narrowing
-is range-checked. Dates may be integer nanoseconds or exact `datetime64[ns]`
-arrays; NaT and other datetime units are rejected. Rolling dates must be sorted,
-and start/end indices are inclusive. `(-1, -1)` denotes an inactive column.
-Private `_core` functions reject incompatible arrays instead of converting them;
-the `_core` interface is not a stable public API.
+The Python package contains one native extension:
 
-Empty columns return empty outputs. For zero observations, statistics, CPR and
-rolling outputs are NaN; longest periods are 0; maximum drawdown returns NaN,
-empty dates and the historical not-recovered sentinel `1000000`. For existing
-nonempty data, legacy NaN, tie-breaking and return layouts are retained.
+```text
+calmetrics_engine._native
+```
 
-### Deliberately retained legacy behavior
+The target architecture adds the compiler/runtime layers without creating a
+second DSL:
 
-This is an architecture release, not a financial-methodology rewrite. In
-particular, both `positive` and `negative` streak modes select positive input
-segments in the old algorithm; the negative mode changes accumulation. The
-longest-streak implementation also retains its last-row denominator when the
-selected segment starts at row zero. Maximum drawdown retains its original
-backward-fill semantics. Rolling statistics retain the original `tail + 1`
-exclusion, with its unsafe negative array index corrected.
+```text
+FundInvestmentResearchPlatform
+        │
+        │ current production Typed DSL / DAG contracts
+        ▼
+CalMetricsEngine
+├── compiler       DSL / AST / types / Typed DAG
+├── operators      versioned operator contracts
+├── runtime        lowering / liveness / memory plan
+└── native         C++ operator execution
+```
 
-The historical variance formula uses sums and squared sums; it may suffer
-cancellation for large-offset or almost-constant data. This release does not
-silently replace that formula. See [the design](docs/architecture-upgrade-2026-09-18.md)
-for the precise compatibility boundary and regression methodology.
+See [docs/architecture.md](docs/architecture.md).
 
-## Develop and test
+## Platform matrix
 
-Python 3.12 is a convenient development interpreter. Use an isolated environment:
+Configured CI targets:
+
+| OS | Architectures |
+| --- | --- |
+| Linux glibc | x86_64, aarch64 |
+| Linux musl | x86_64, aarch64 |
+| macOS 11+ | x86_64, arm64 |
+| Windows | AMD64 |
+
+CPython 3.10–3.14 and NumPy 1.26–2.x are covered by the configured matrix.
+
+Published wheels must not use `-march=native`, mandatory `-mavx*`, or
+host-only CPU assumptions. Architecture-specific optimization may be added later
+only through tested runtime dispatch or separate safe wheel policy.
+
+## Development
 
 ```bash
-python -m venv .venv
-# Activate .venv using the command appropriate to your shell.
 python -m pip install ".[dev]"
 python -m build
 python tools/check_dist.py
@@ -141,41 +261,34 @@ python -I -m pytest tests -q --import-mode=importlib
 ruff check src tests tools
 ```
 
-`python -m build` first builds an sdist, then reconstructs the wheel from it.
-Install that wheel in a clean environment to test the actual artifact rather
-than only the checkout. If local pip configuration is unrelated to this project,
-`python -m build --installer uv` is supported with uv installed; do not commit
-local indexes, proxy settings or credentials into the repository.
-
-For standalone C++ tests, without Python headers or pybind11:
+Native-only tests:
 
 ```bash
-cmake -S . -B .build-native -DMY_CTOOLS_BUILD_PYTHON=OFF -DMY_CTOOLS_BUILD_TESTS=ON
+cmake -S . -B .build-native \
+  -DCALMETRICS_ENGINE_BUILD_PYTHON=OFF \
+  -DCALMETRICS_ENGINE_BUILD_TESTS=ON
 cmake --build .build-native --config Release
 ctest --test-dir .build-native -C Release --output-on-failure
 ```
 
-GCC/Clang builds can add `-DMY_CTOOLS_SANITIZE=ON` for address and undefined-behavior
-sanitizers. Golden Python fixtures come from the actual historical Git C++
-implementations, not from the rewritten kernels. Regeneration is an explicit
-developer operation: `python tools/legacy_reference.py --write`.
+Sanitizers on GCC/Clang:
 
-## Architecture
-
-```text
-src/my_ctools/          Public API, normalization, legacy import paths
-        ↓
-cpp/bindings.cpp        Array checks, NumPy allocation, GIL and bindings
-        ↓
-cpp/kernels/           Pure C++ algorithms
-        ↓
-cpp/include/my_ctools/ Shared array view, calendar and bounded parallelism
+```bash
+cmake -S . -B .build-sanitized \
+  -DCALMETRICS_ENGINE_BUILD_PYTHON=OFF \
+  -DCALMETRICS_ENGINE_BUILD_TESTS=ON \
+  -DCALMETRICS_ENGINE_SANITIZE=ON
 ```
 
-The package produces exactly one `my_ctools._core` extension. New kernels should
-reuse the same validation, calendar and threading facilities, and ship with
-numerical references and boundary tests. Do not introduce Numba, Python imports
-inside kernels, unconditional architecture-specific instructions, or financial
-business orchestration from downstream applications.
+## Design rules
 
-Build and release instructions: [publishing](docs/publishing.md).
+1. Python decides **what to calculate**; C++ performs **how it is calculated**.
+2. Reusable mathematics belongs in CalMetricsEngine, not duplicated across business centers.
+3. Primitive DAG execution should cross Python/C++ once per plan, not once per node.
+4. Native kernels accept views and explicit strides; contiguity is an optimization, not a prerequisite.
+5. No runtime Numba/JIT dependency in CalMetricsEngine.
+6. Business-specific orchestration remains in the research platform.
+7. Coupled black-box kernels are allowed only for genuinely inseparable recursive,
+   fitting or jointly constrained algorithms.
+
+Build and release details: [docs/publishing.md](docs/publishing.md).

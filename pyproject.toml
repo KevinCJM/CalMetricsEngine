@@ -3,9 +3,9 @@ requires = ["scikit-build-core>=0.11.6,<2", "pybind11>=3.0.4,<4"]
 build-backend = "scikit_build_core.build"
 
 [project]
-name = "my_ctools"
-version = "0.2.0"
-description = "Portable, ahead-of-time C++ numerical kernels for Python fund analytics"
+name = "calmetrics-engine"
+version = "0.3.0"
+description = "Typed calculation engine with a PyBind11/C++ AOT numerical backend for financial research"
 readme = "README.md"
 requires-python = ">=3.10,<3.15"
 authors = [{ name = "KevinCJM" }]
@@ -27,20 +27,44 @@ classifiers = [
 ]
 
 [project.urls]
-Repository = "https://github.com/KevinCJM/My_C_Tools"
-Issues = "https://github.com/KevinCJM/My_C_Tools/issues"
+Repository = "https://github.com/KevinCJM/CalMetricsEngine"
+Issues = "https://github.com/KevinCJM/CalMetricsEngine/issues"
 
 [project.optional-dependencies]
 test = ["pytest>=8,<10"]
-dev = ["pytest>=8,<10", "build>=1.2,<2", "twine>=6,<7", "ruff>=0.11,<1", "pybind11>=3.0.4,<4"]
+dev = [
+  "pytest>=8,<10",
+  "build>=1.2,<2",
+  "twine>=6,<7",
+  "ruff>=0.11,<1",
+  "pybind11>=3.0.4,<4",
+]
 
 [tool.scikit-build]
 minimum-version = "build-system.requires"
 cmake.version = ">=3.20"
 cmake.build-type = "Release"
-wheel.packages = ["src/my_ctools"]
-sdist.include = ["cpp/**", "src/**", "tests/**", "tools/**", "docs/**", "CMakeLists.txt", "README.md", ".github/workflows/*.yml"]
-sdist.exclude = [".venv*/**", ".build*/**", "build/**", "dist/**", "wheelhouse/**", "docs/.ai-hermes-user-memory/**", "**/__pycache__/**", ".codegraph/**"]
+wheel.packages = ["src/calmetrics_engine"]
+sdist.include = [
+  "cpp/**",
+  "src/**",
+  "tests/**",
+  "tools/**",
+  "docs/**",
+  "CMakeLists.txt",
+  "README.md",
+  ".github/workflows/*.yml",
+]
+sdist.exclude = [
+  ".venv*/**",
+  ".build*/**",
+  "build/**",
+  "dist/**",
+  "wheelhouse/**",
+  "docs/.ai-hermes-user-memory/**",
+  "**/__pycache__/**",
+  ".codegraph/**",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

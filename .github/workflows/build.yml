@@ -74,7 +74,7 @@ jobs:
       - name: Native C++ tests (no Python dependency)
         run: >-
           cmake -S . -B .build-native -DCMAKE_BUILD_TYPE=Release
-          -DMY_CTOOLS_BUILD_PYTHON=OFF -DMY_CTOOLS_BUILD_TESTS=ON
+          -DCALMETRICS_ENGINE_BUILD_PYTHON=OFF -DCALMETRICS_ENGINE_BUILD_TESTS=ON
       - run: cmake --build .build-native --config Release --parallel 2
       - run: ctest --test-dir .build-native -C Release --output-on-failure
       - run: python -m pip install cibuildwheel==4.2.1
@@ -112,7 +112,7 @@ jobs:
           persist-credentials: false
       - run: >-
           cmake -S . -B .build-sanitized -DCMAKE_BUILD_TYPE=RelWithDebInfo
-          -DMY_CTOOLS_BUILD_PYTHON=OFF -DMY_CTOOLS_BUILD_TESTS=ON -DMY_CTOOLS_SANITIZE=ON
+          -DCALMETRICS_ENGINE_BUILD_PYTHON=OFF -DCALMETRICS_ENGINE_BUILD_TESTS=ON -DCALMETRICS_ENGINE_SANITIZE=ON
       - run: cmake --build .build-sanitized --parallel 2
       - run: ctest --test-dir .build-sanitized --output-on-failure
         env:
@@ -122,7 +122,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Build an instrumented Python extension
-        run: python -m pip install ".[test]" --config-settings=cmake.define.MY_CTOOLS_SANITIZE=ON
+        run: python -m pip install ".[test]" --config-settings=cmake.define.CALMETRICS_ENGINE_SANITIZE=ON
       - name: Exercise bindings and kernels under sanitizers
         shell: bash
         run: |

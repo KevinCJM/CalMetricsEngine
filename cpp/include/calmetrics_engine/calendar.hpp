@@ -5,7 +5,7 @@
 #include <limits>
 #include <string>
 
-namespace my_ctools {
+namespace calmetrics_engine {
 inline constexpr std::int64_t ns_per_second = 1'000'000'000;
 inline constexpr std::int64_t seconds_per_day = 86'400;
 inline constexpr std::int64_t ns_per_day = ns_per_second * seconds_per_day;
@@ -64,4 +64,4 @@ inline std::int64_t add_months_ns(std::int64_t ns, int months) {
     if (seconds > maximum / ns_per_second) return maximum;
     return seconds * ns_per_second;
 }
-}  // namespace my_ctools
+}  // namespace calmetrics_engine

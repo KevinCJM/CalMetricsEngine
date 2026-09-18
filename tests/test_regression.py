@@ -6,7 +6,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-import my_ctools
+import calmetrics_engine
 
 CASES = json.loads((Path(__file__).parent / "data/legacy_reference.json").read_text())["cases"]
 
@@ -49,7 +49,7 @@ def assert_result(actual, expected):
 def test_legacy_numerical_contract(case, threads):
     args = [decode(value) for value in case["args"]]
     snapshots = [arg.copy() if isinstance(arg, np.ndarray) else arg for arg in args]
-    result = getattr(my_ctools, case["name"])(*args, n_threads=threads)
+    result = getattr(calmetrics_engine, case["name"])(*args, n_threads=threads)
     assert_result(result, decode(case["expected"]))
     for arg, snapshot in zip(args, snapshots, strict=True):
         if isinstance(arg, np.ndarray):

@@ -1,9 +1,9 @@
-#include "my_ctools/kernels.hpp"
-#include "my_ctools/calendar.hpp"
+#include "calmetrics_engine/finance.hpp"
+#include "calmetrics_engine/calendar.hpp"
 
-namespace my_ctools {
-void rolling_gain(MatrixView values, const std::int64_t* starts, const std::int64_t* ends,
-                  const std::int64_t* dates, int months,
+namespace calmetrics_engine {
+void rolling_gain(MatrixView values, VectorView<std::int64_t> starts, VectorView<std::int64_t> ends,
+                  VectorView<std::int64_t> dates, int months,
                   const std::array<double*, 9>& outputs, unsigned threads) {
     if (values.cols == 0) return;
     if (values.rows == 0) {
@@ -68,4 +68,4 @@ void rolling_gain(MatrixView values, const std::int64_t* starts, const std::int6
         }
     });
 }
-}  // namespace my_ctools
+}  // namespace calmetrics_engine

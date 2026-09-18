@@ -1,7 +1,7 @@
-#include "my_ctools/kernels.hpp"
+#include "calmetrics_engine/finance.hpp"
 #include <map>
 
-namespace my_ctools {
+namespace calmetrics_engine {
 void column_statistics(MatrixView values, double* stds, double* means, unsigned threads) {
     parallel_columns(values.cols, threads, [&](std::size_t first, std::size_t step) {
         for (std::size_t col = first; col < values.cols; col += step) {
@@ -26,7 +26,7 @@ void column_statistics(MatrixView values, double* stds, double* means, unsigned 
     });
 }
 
-void cpr(MatrixView values, const std::int32_t* types, double* result, unsigned threads) {
+void cpr(MatrixView values, VectorView<std::int32_t> types, double* result, unsigned threads) {
     std::map<std::int32_t, std::vector<std::size_t>> grouped;
     for (std::size_t col = 0; col < values.cols; ++col) grouped[types[col]].push_back(col);
     std::vector<const std::vector<std::size_t>*> groups;
@@ -65,4 +65,4 @@ void cpr(MatrixView values, const std::int32_t* types, double* result, unsigned 
         }
     });
 }
-}  // namespace my_ctools
+}  // namespace calmetrics_engine

@@ -1,8 +1,8 @@
-"""Portable, precompiled C++ financial analytics. No runtime compilation."""
+"""CalMetricsEngine: AOT native calculation backend for financial research."""
 
-from . import cal_std_mean as cal_std_mean_module  # noqa: F401 - historical module alias
+from . import cal_std_mean as cal_std_mean_module  # noqa: F401
 from ._api import build_info
-from ._core import __version__
+from ._native import __version__
 from .cal_all_largest_indicators import cal_all_largest_indicators
 from .cal_all_longest_indicators import cal_all_longest_indicators
 from .cal_cpr import cal_cpr

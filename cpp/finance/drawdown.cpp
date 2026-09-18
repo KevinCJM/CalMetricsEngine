@@ -1,7 +1,7 @@
-#include "my_ctools/kernels.hpp"
-#include "my_ctools/calendar.hpp"
+#include "calmetrics_engine/finance.hpp"
+#include "calmetrics_engine/calendar.hpp"
 
-namespace my_ctools {
+namespace calmetrics_engine {
 void longest_recovery(MatrixView values, std::int64_t* result, unsigned threads) {
     parallel_columns(values.cols, threads, [&](std::size_t first, std::size_t step) {
         for (std::size_t col = first; col < values.cols; col += step) {
@@ -20,7 +20,7 @@ void longest_recovery(MatrixView values, std::int64_t* result, unsigned threads)
     });
 }
 
-void max_drawdown(MatrixView values, const std::int64_t* dates, double* result,
+void max_drawdown(MatrixView values, VectorView<std::int64_t> dates, double* result,
                   std::vector<std::string>& result_dates, std::int64_t* recovery,
                   unsigned threads) {
     parallel_columns(values.cols, threads, [&](std::size_t first, std::size_t step) {
@@ -69,4 +69,4 @@ void max_drawdown(MatrixView values, const std::int64_t* dates, double* result,
         }
     });
 }
-}  // namespace my_ctools
+}  // namespace calmetrics_engine
