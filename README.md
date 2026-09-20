@@ -17,10 +17,17 @@ Native Execution Plan
 PyBind11 / C++17
 ```
 
-The current 0.3.0 code line establishes the native foundation: portable C++ kernels,
-a strict zero-copy NumPy boundary, cross-platform wheels, and one native extension.
-The production DSL / Typed DAG currently living in FundInvestmentResearchPlatform
-will be extracted only after contract-equivalence tests are in place.
+The current 0.3.0 code line is **C++ first**: restricted AST parsing, shared-DAG
+compilation, CSE, alias-aware liveness, cost planning, CPU admission, thread/process
+pools, shared-memory ownership and all 118 canonical operators execute in C++.
+Python retains public import names, NumPy ownership adaptation and an asyncio await
+bridge. A complete synchronous request crosses PyBind once, not once per worker.
+The eight existing finance APIs retain their numerical contracts.
+
+The production semantic Typed DSL / causality contracts currently living in the
+research platform have **not** been migrated. Phase 2 intentionally provides a
+narrow mathematical graph compiler so the execution runtime can mature without
+creating a second incompatible business DSL. No PyPI publication is implied by local builds.
 
 ## Install
 
@@ -51,7 +58,102 @@ import calmetrics_engine as engine
 - GIL released during native numerical work.
 - Portable baseline wheels instead of mandatory AVX.
 - One numerical implementation per reusable operator.
-- Designed for future single-call Typed-DAG execution and workspace reuse.
+- Whole synchronous requests cross Python/C++ once; C++ workers reuse liveness-planned arenas.
+- Native worker processes use the packaged `calmetrics_worker`, without a Python interpreter.
+- Shared process outputs return as native-owned NumPy views without a final result copy.
+- Adaptive product/interval scheduling with one CPU budget across threads, processes and async jobs.
+- Process execution can use parent-owned shared memory instead of pickling large inputs.
+
+## Canonical operators
+
+```python
+import numpy as np
+from calmetrics_engine import operators as op
+
+values = np.array([0.01, -0.02, 0.03, 0.005], dtype=np.float64)
+assert len(op.catalog()) == 118
+volatility = op.std(values, ddof=1)
+
+output = np.empty_like(values)
+result, audit = op.add(values, 1.0, out=output, simd="auto", audit=True)
+assert result is output
+assert audit["input_copy_bytes"] == 0
+
+workspace = op.Workspace()
+q95 = op.quantile(values, 0.95, workspace=workspace)
+```
+
+`operators` provides elementwise, masks, reductions, rolling/scan, matrix,
+regression, state projections and compatible composite names. All calculations
+execute in C++; Python only exports the native registry. Ordinary `std` defaults
+to `ddof=1`, while `rolling_std` defaults to `ddof=0`. Missing values are handled by
+each operator's contract, never silently dropped to enable SIMD.
+
+Named functions, `op.call(name, ...)` and cached `op.get(name)` handles use the
+same implementation. `out=` must not overlap input arrays. `Workspace` is
+exclusive to one running call. `lag`, `transpose` and matrix `diag` default to
+read-only views that retain their input owner.
+
+See [the API and memory contract](docs/canonical-operators.md),
+[the detailed design](docs/canonical-operators-design.md), and
+[verification and performance evidence](docs/canonical-operators-acceptance.md).
+
+## Native graph execution
+
+```python
+import numpy as np
+from calmetrics_engine import AdaptiveScheduler, GraphCompiler
+
+graph = GraphCompiler({"nav": "series"}).compile([
+    "mean(divide(difference(nav,1),lag(nav,1)))",
+    "std(divide(difference(nav,1),lag(nav,1)),1)",
+])
+
+# Product-major storage: two products, five observations each.
+nav = np.array([1.0, 1.1, 1.05, 1.2, 1.3,
+                2.0, 2.1, 2.0, 2.2, 2.3], dtype=np.float64)
+starts = np.array([0, 5], dtype=np.int64)
+ends = np.array([5, 10], dtype=np.int64)
+product_ids = np.array([0, 1], dtype=np.int64)
+
+with AdaptiveScheduler(cpu_budget=4) as scheduler:
+    plan = scheduler.plan(
+        graph, {"nav": nav}, starts, ends, product_ids=product_ids
+    )
+    result = scheduler.execute(
+        graph,
+        {"nav": nav},
+        starts,
+        ends,
+        plan=plan,
+        product_ids=product_ids,
+    )
+
+print(plan.metadata())
+print(result.values)
+```
+
+The planner chooses single/thread/process execution from the **post-fusion physical DAG cost**,
+product/interval shape, input bytes and resource budgets. Product/interval chunks are balanced by
+estimated physical row work, and a one/few-row request may fork dependency-closed heavy DAG
+branches when ordinary row parallelism cannot fill the CPU budget. Process jobs use SharedMemory when required;
+`execute_async` / `execute_many_async` provide coroutine orchestration while numerical
+loops remain in C++.
+
+The native graph executor fuses compatible reductions across roots so one source is not rescanned
+for every statistic. Ordinary `scheduler.execute()` reuses compatible bound inputs while returning
+independent results. For the lowest hot-loop overhead, call `scheduler.prepare_execution(...)` once
+and then `PreparedGraphExecution.run()`. Prepared output is deliberately reused and overwritten on
+the next run. Changing bound dtype, pointer, shape or interval geometry requires rebinding/replanning;
+do not mutate buffers concurrently with execution.
+
+Performance is tested against the real BetterSaaTaa compiled NJIT batch on the same data/formulas,
+with alternating paired execution. Required Native/NJIT thresholds are `<= 0.90` for prepared/batch
+execution and `<= 1.00` for ordinary scheduler micro workloads. These are measured workload gates,
+not a guarantee for every formula or CPU, and require explicitly running the gate tool.
+
+See [the C++-first design](docs/cpp-first-design.md) and
+[current acceptance evidence](docs/cpp-first-acceptance.md).
 
 ## Zero-copy input contract
 
@@ -68,7 +170,7 @@ result = engine.cal_std_mean(view)    # C++ reads the original strides directly
 assert np.shares_memory(view, values)
 ```
 
-Current input rules:
+Input rules for the existing top-level `cal_*` finance APIs:
 
 - Values: NumPy `float64` ndarray.
 - Group ids: NumPy `int32` ndarray.
@@ -81,11 +183,16 @@ Current input rules:
 Outputs and required scratch/workspace memory may be allocated. The contract is
 **zero input copies and zero unnecessary intermediate copies**, not “no allocation”.
 
+Canonical operators separately accept exact native float64 arrays and bool/uint8
+masks in their declared scalar/vector/matrix signatures. Their `days_between`
+operator consumes calendar-day numbers, not raw nanosecond timestamps. See the
+operator contract before reusing a finance API's date or shape conventions.
+
 ## High-performance data preparation
 
-The generic native API can read strided NumPy views without copying. The future
-high-throughput SIMD batch path has a stricter preferred layout: each product's
-observations should be stored contiguously with unit stride.
+The generic native operator APIs can read strided NumPy views without copying. The Phase-2
+graph/SIMD batch path intentionally has a stricter layout: each product's observations
+must be stored contiguously with unit stride.
 
 Recommended product-major representation:
 
@@ -141,12 +248,13 @@ The intended execution lanes are:
 Do not delete observations or fill NaN unless the operator's documented financial
 semantics explicitly require that behavior.
 
-## Parallel execution model
+## Adaptive execution model
 
-Heavy batch execution will use one scheduling authority rather than letting each
-business module create independent pools.
+One C++ `AdaptiveScheduler` owns admission and native pools; business modules must not create
+competing thread/process pools around it. Python `asyncio.to_thread` is only a blocking-request
+await adapter, not the engine's numerical worker pool.
 
-The Scheduler will consider:
+The planner considers:
 
 ```text
 products × intervals × DAG cost × observations
@@ -157,24 +265,39 @@ products × intervals × DAG cost × observations
 + hard-stop requirements
 ```
 
-Preferred hierarchy:
+Current hierarchy:
 
-- small job: single thread + SIMD
-- medium CPU job: one process + native thread pool + SIMD
-- large independent product batches: process pool + shared memory + per-process thread budget + SIMD
-- hard-stop/fault-isolated jobs: separate process
+- small CPU graph: one native call + SIMD
+- medium/large in-process graph: bounded persistent thread pool + SIMD
+- very large input/work or isolation requirement: process pool; large shared inputs use SharedMemory
+- hard-stop/fault-isolated graph: disposable isolated process + SharedMemory
+- coroutine API: orchestration/waiting only; numerical loops remain native
 
-When a process pool reads the same large input dataset, workers should attach to
-shared memory or mmap and receive only descriptors/offsets. Large NumPy arrays
-should not be pickled into every worker.
+Product blocks are preferred when `product_ids` provide enough independent products;
+otherwise the scheduler partitions interval rows. Both modes use physical-work weighting. If there
+are too few rows to use the CPU budget, the compiler can expose independent root components as
+precompiled DAG branches; shared operation prefixes and fusion groups remain together. Metrics are
+never blindly split into independent jobs.
 
-Process count and native thread count must share one CPU budget. For example,
-`4 processes × 4 threads` may be valid on a 16-core machine; `8 × 16` is
-oversubscription and is not acceptable by default.
+Native processes reading a large dataset attach to shared mappings using descriptors/offsets;
+they do not pickle NumPy arrays or start Python. A `SharedInputBundle` can reuse shared inputs
+across calls. Workers write disjoint result rows into shared output; the returned NumPy view pins
+the C++ owner and remains valid after engine close, with no final copy. Preparing shared storage
+from a normal array still requires one explicitly counted boundary copy.
 
-Metric-level parallelism is not the first choice because many indicators share
-upstream DAG work. Product blocks, interval blocks and scenario blocks are
-usually better scheduling dimensions.
+All numerical entry points share one **process-wide native C++ CPU-admission budget and
+persistent ThreadPool**. Each AdaptiveScheduler/Engine may impose a smaller local CPU cap, but Graph
+requests and legacy finance APIs still acquire from the same NativeScheduler, so independent callers
+cannot silently oversubscribe each other. Legacy `n_threads` remains a compatibility request ceiling,
+not permission to create private threads.
+
+Phase 2 intentionally uses either `1 process × N threads` or `N processes × 1 native graph
+thread`; hybrid process×thread execution is disabled until benchmarks justify it.
+
+Metric-level parallelism is not the first choice because many indicators share upstream DAG
+work. Product and interval blocks remain preferred; DAG branch fork/join is a coarse fallback only
+for independent heavy root components after shared prefixes/fusion relationships have been
+collapsed.
 
 The detailed implementation rules for future changes are in [AGENTS.md](AGENTS.md).
 
@@ -191,45 +314,39 @@ The detailed implementation rules for future changes are in [AGENTS.md](AGENTS.m
 | `cal_all_longest_indicators` | Longest streak statistics |
 | `cal_rolling_gain_loss` | Rolling return distribution statistics |
 
-These kernels retain their existing financial calculation semantics. The rename
-and memory architecture change do not silently redefine formulas.
+These kernels retain their existing financial calculation semantics. Their historical
+`n_threads` argument is now only a per-request upper bound routed through the same process-wide
+native Scheduler used by the Graph runtime; the finance kernels no longer create private thread
+groups. The rename and memory architecture change do not silently redefine formulas.
 
 ## Architecture
 
 ```text
-src/calmetrics_engine/
-    Python public boundary
+Python import aliases / NumPy owner adaptation / async await bridge
+          ↓ one native request boundary
+cpp/compiler.cpp       restricted AST / shared DAG / CSE / alias liveness
+cpp/planner.cpp        physical cost / weighted partition / DAG branch strategy
+cpp/scheduler.cpp      process-wide CPU admission / lazy persistent ThreadPool
+cpp/native_runtime.cpp Engine-local caps / Graph + process execution / draining
+cpp/native_process.cpp standalone native workers / framed IPC / hard stop
+cpp/shared_memory.cpp  native RAII shared regions
           ↓
-cpp/bindings.cpp
-    dtype / ndim / stride validation
-          ↓
-cpp/include/calmetrics_engine/
-    ArrayView / threading / numeric / calendar contracts
-          ↓
-cpp/finance/
-    pure C++ finance kernels
+cpp/graph.cpp          numerical graph + fusion + reusable arenas
+cpp/operators/         canonical kernels + SIMD
+cpp/finance/           existing financial calculation contracts
 ```
 
-The Python package contains one native extension:
+The Python package contains one native extension and a standalone worker executable:
 
 ```text
 calmetrics_engine._native
+calmetrics_engine/calmetrics_worker       # calmetrics_worker.exe on Windows
 ```
 
-The target architecture adds the compiler/runtime layers without creating a
-second DSL:
-
-```text
-FundInvestmentResearchPlatform
-        │
-        │ current production Typed DSL / DAG contracts
-        ▼
-CalMetricsEngine
-├── compiler       DSL / AST / types / Typed DAG
-├── operators      versioned operator contracts
-├── runtime        lowering / liveness / memory plan
-└── native         C++ operator execution
-```
+`graph.py`, `planner.py` and `shared.py` retain compatibility aliases only. `runtime.py`
+retains the asyncio adapter and compatibility names. The production business Typed DSL still
+belongs to the research platform; its semantic/causality migration is separate from this native
+execution architecture.
 
 See [docs/architecture.md](docs/architecture.md).
 
@@ -246,9 +363,20 @@ Configured CI targets:
 
 CPython 3.10–3.14 and NumPy 1.26–2.x are covered by the configured matrix.
 
-Published wheels must not use `-march=native`, mandatory `-mavx*`, or
-host-only CPU assumptions. Architecture-specific optimization may be added later
-only through tested runtime dispatch or separate safe wheel policy.
+Published wheels must not globally use `-march=native`, mandatory `-mavx*`, or
+host-only CPU assumptions. AVX2 flags apply only to a separate translation unit,
+reached after CPU/OS capability checks. Baseline initialization stays portable.
+
+Eighteen canonical operators have explicit SIMD paths: 17 elementwise/mask
+operators plus register-blocked matrix multiplication. ARM64 uses NEON; x86_64
+provides SSE2 and separately compiled AVX2. No AVX-512 implementation is claimed.
+Strided inputs and order-sensitive reductions/recurrences retain safe C++ scalar
+paths. `op.available_simd()` reports usable compiled paths on the current machine.
+
+Configuration is not platform acceptance: see the verification record for actual
+runs. SIMD improves the measured native baselines, but the current matrix kernel
+is still slower than system BLAS; it is not a claim to outperform every NumPy or
+Numba operation.
 
 ## Development
 
@@ -282,10 +410,10 @@ cmake -S . -B .build-sanitized \
 
 ## Design rules
 
-1. Python decides **what to calculate**; C++ performs **how it is calculated**.
+1. Python is the interface adapter; C++ compiles, plans, schedules and calculates.
 2. Reusable mathematics belongs in CalMetricsEngine, not duplicated across business centers.
 3. Primitive DAG execution should cross Python/C++ once per plan, not once per node.
-4. Native kernels accept views and explicit strides; contiguity is an optimization, not a prerequisite.
+4. Direct operators support strided views; the graph batch contract requires contiguous product-major inputs.
 5. No runtime Numba/JIT dependency in CalMetricsEngine.
 6. Business-specific orchestration remains in the research platform.
 7. Coupled black-box kernels are allowed only for genuinely inseparable recursive,

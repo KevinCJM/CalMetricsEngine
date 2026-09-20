@@ -1,221 +1,172 @@
-# CalMetricsEngine Architecture
+# CalMetricsEngine architecture — C++ first
 
-## 1. 定位
-
-CalMetricsEngine 是基金投研平台的独立计算引擎。长期目标是统一承载：
+## 1. Current execution boundary
 
 ```text
-DSL / AST
-    ↓
-Typed DAG
-    ↓
-Type & Shape Inference
-    ↓
-Operator Lowering
-    ↓
-Native Execution Plan
-    ↓
-PyBind11 / C++ AOT Runtime
+Python public names / NumPy pins / exception conversion / asyncio await adapter
+    |
+    | one binding transition per synchronous request
+    v
+C++ restricted expression compiler (compiler.cpp)
+    AST -> value classes -> lowering -> structural CSE
+    -> borrowed-view-aware liveness -> immutable graph program
+    v
+C++ planner (planner.cpp)
+    actual interval lengths -> product/interval cost -> storage estimate
+    -> CPU budget -> single/thread/process policy
+    v
+Process-wide C++ NativeScheduler (scheduler.cpp)
+    shared CPU admission + one persistent native ThreadPool
+    v
+C++ Engine (native_runtime.cpp)
+    per-Engine local CPU cap + persistent/disposable native ProcessPool
+    v
+C++ graph executor (graph.cpp)
+    shared reductions / sorting / regression state
+    -> reusable arenas and Workspace
+    -> canonical operators and existing SIMD dispatch
 ```
 
-基金投研平台负责业务页面、数据来源、业务模板与领域编排；CalMetricsEngine 负责可复用的计算语义、执行计划和原生数值执行。
+The production research-platform Typed DSL, semantic axes, price basis and causality/knowledge-time
+contracts have not been migrated. This repository's mathematical expression grammar is narrower.
+Matrix-growing operators remain available directly in the 118-entry registry; interval DAG roots are
+scalar. The migration does not expand that supported domain or silently reinterpret financial formulas.
 
-当前生产级 DSL / AST / Typed DAG 的事实来源仍在 FundInvestmentResearchPlatform。迁移时应抽取并保持契约一致，不能在本仓库重新设计一套不兼容的 DSL。
+## 2. Module responsibilities
 
-## 2. 架构边界
+| Native module | Responsibility |
+| --- | --- |
+| `compiler.cpp` | Restricted parsing, precedence, value-class checks, lowering, CSE, alias-aware liveness, native plan encoding |
+| `planner.cpp` | Exact interval geometry, weighted product partitioning, physical cost/storage estimates and strategy |
+| `scheduler.cpp` | Process-wide C++ CPU admission and lazily grown persistent ThreadPool shared by all numerical entry points |
+| `native_runtime.cpp` | Engine-local CPU cap, Graph/process execution, task draining and shutdown on top of the shared scheduler |
+| `native_process.cpp` | Framed/versioned native IPC, persistent worker reuse, disposable hard-stop workers |
+| `native_worker_main.cpp` | Standalone executable entry, no Python interpreter |
+| `shared_memory.cpp` | POSIX/Windows shared regions with native RAII ownership |
+| `graph.cpp` | Numerical graph execution, fusion, arenas and scratch reuse |
+| `graph_bindings.cpp`, `native_api_bindings.cpp` | Python type adaptation, pinned arrays, exception/result conversion |
 
-### Python 层
+Python `graph.py`, `planner.py`, and `shared.py` export compatibility aliases. `runtime.py` only bridges
+blocking native requests into `asyncio` and exports compatibility names. No Python CSE, liveness, cost
+algorithm, numerical chunking, CPU-token loop, or numerical process/thread pool remains.
 
-未来负责：
+All public numerical entry points participate in process-wide native CPU admission: Graph Engine calls,
+legacy finance compatibility APIs, direct canonical-operator calls and low-level Python
+`Program.execute()`. Direct single-thread APIs consume one token; legacy `n_threads` is only a
+request ceiling and uses the shared persistent pool.
 
-- DSL 解析与受限 AST。
-- Typed DAG 构建。
-- operator contract、dtype、axis、shape、NaN、causality 元数据。
-- DAG 校验、cost model、execution-plan lowering。
-- 调用一次 native plan，而不是每个节点反复跨 Python/C++ 边界。
+`asyncio.to_thread` is an await adapter, not the engine's numerical worker pool. Cancelling an awaiter
+does not forcibly kill a running native calculation; isolated processes and execution deadlines provide
+that hard-stop boundary.
 
-Python 不负责大规模数值循环，不做节点内部数据复制，也不生成运行时 JIT 代码。
+## 3. Compiler and plan
 
-### C++ 层
+Accepted expressions are numeric constants, declared scalar/series variables, canonical calls,
+arithmetic, unary signs and one comparison. Arbitrary Python calls, attributes, subscripts, imports,
+lambdas and comprehensions are rejected. Source bytes, nesting, node counts and arities are bounded.
 
-负责：
+Operator names/opcodes and mathematics still come from the canonical registry. Lowering shares
+`linear_fit` results and total-return results without changing evaluation order. Borrowed `lag` views
+extend the lifetime of their backing arena transitively. Plans sent to workers contain no pointers or
+Python objects; the versioned decoder bounds counts and validates topology/opcodes.
 
-- AOT 编译的 primitive / statistics / rolling / matrix / finance kernels。
-- strided readonly ArrayView。
-- NativeExecutionPlan 执行。
-- workspace 生命周期与 buffer 复用。
-- 有边界的 CPU 并行。
-- GIL 释放期间的完整数值路径。
+A native graph fingerprint is a cache label, not an authentication hash. Graph compatibility also
+checks the encoded program. Supplied plans validate input sizes and interval/product geometry before
+execution; changing intervals requires replanning.
 
-当前仓库已有 finance kernels，后续 primitive operator 迁移时必须复用同一 ArrayView、线程和内存契约。
+## 4. Arrays and memory
 
-## 3. 零拷贝契约
+Graph input storage is exact native `float64`, one-dimensional, aligned and contiguous within each
+product. Interval arrays are exact `int64` and half-open `[start, end)`. No implicit data coercion or
+compaction occurs. Generic direct operator APIs retain their strided/readonly support.
 
-计算输入必须在平台数据边界完成 dtype 规范化。进入 CalMetricsEngine 后：
+The binding layer pins Python owners until every native task settles. Prepared calls reject a changed
+pointer, dtype, shape, stride or output geometry. Callers must not resize/retype or concurrently mutate
+arrays while a native call uses them. Parameters can change through an unchanged parameter array;
+ordinary mapping parameters are rebound when values/keys change.
 
-- 只接受 NumPy ndarray。
-- dtype 必须精确匹配 native contract。
-- 不使用 `np.asarray(..., dtype=...)`、`np.require`、`np.ascontiguousarray` 做隐式修复。
-- C/F contiguous、普通 slice、负 stride、列视图均通过 `data + shape + strides` 直接读取。
-- readonly 输入合法。
-- 输入生命周期由 Python owner 保持到 native 调用结束。
-- 输入复制目标为 0。
-- 输出数组和必要 workspace 可以分配。
-- workspace 应由执行计划基于 liveness 复用，避免每个 DAG node 独立分配长期中间数组。
+Outputs and algorithm workspace may be allocated. Zero-copy input binding is not a claim of zero
+allocation or zero algorithm scratch initialization. Quantile/median sorting and solvers report their
+necessary algorithm copies separately. Native graph audit includes order-stat scratch as well as the
+main arenas and operator workspace.
 
-无法满足 dtype/alignment 的输入直接失败，由调用方在统一数据入口显式转换一次。
+Memory budgets constrain estimated execution storage, not exact resident memory. Allocator high-water
+retention, interpreter memory, operating-system page accounting and unrelated requests are not a hard
+RSS guarantee. Current native estimates are conservative, including legacy copied-output capacity even
+when the Python binding returns the new zero-copy shared output view.
 
-### SIMD 高性能输入布局
+## 5. Scheduling
 
-通用 API 继续支持 strided zero-copy view；重型 SIMD batch 的首选布局更严格：
+Work depends on each interval's actual observations and on the **physical execution DAG after
+lowering/CSE/fusion**, not row count times the longest window and not a blind logical-node sum.
+Compiled graphs expose both logical and physical work estimates.
 
-```text
-values  = [product_0][product_1]...[product_n]
-dates   = [product_0][product_1]...[product_n]
-offsets = [0, p0_end, p1_end, ..., total_observations]
-```
+Many products use physical-work-weighted product blocks; a few products with many intervals use
+physical-work-weighted interval blocks. Metrics remain roots in the same shared DAG rather than
+separate jobs that duplicate their inputs.
 
-C++ 通过 `data + offsets[product] + interval_start` 直接定位数据。不同区间通过
-`product_id/start/end` 元数据描述，不复制窗口数组。多字段采用 SoA。
+When row/product/interval parallelism cannot fill the CPU budget, Compiler-provided independent root
+components may be scheduled as dependency-closed DAG branches. Shared operation prefixes and
+summary/order fusion groups are collapsed before branches are formed, so branch fork/join does not
+duplicate shared computation. Branch tasks are coarse-grained and execute precompiled sub-programs,
+not individual DAG nodes.
 
-NaN 不因性能原因被删除或填零。执行层按 operator missing policy 选择 dense SIMD、
-masked SIMD、valid-span 或 scalar fallback。
+Small requests execute on the caller's native thread. Larger in-process requests use a persistent C++
+thread pool; one caller can participate while other chunks run on native workers. Very large or isolated
+requests can use persistent native processes. Default policy is thread-first; large work alone does not
+prove processes faster. Thresholds are tunable and must be supported by workload benchmarks.
 
-## 4. 目录结构
+One process-wide native C++ Scheduler owns the shared CPU-admission budget and persistent ThreadPool.
+Each Engine keeps a local CPU cap, but Graph jobs and legacy finance APIs also acquire from the same
+process-wide budget, preventing multiple Engine instances or compatibility calls from silently
+oversubscribing one another. Legacy `n_threads` is a request ceiling and never creates private
+threads.
 
-```text
-CalMetricsEngine/
-├── src/calmetrics_engine/
-│   ├── __init__.py
-│   ├── _api.py
-│   └── _native.*            # 唯一 PyBind11 扩展
-├── cpp/
-│   ├── bindings.cpp
-│   ├── include/calmetrics_engine/
-│   │   ├── array_view.hpp   # strided zero-copy views
-│   │   ├── parallel.hpp
-│   │   ├── numeric.hpp
-│   │   ├── calendar.hpp
-│   │   └── finance.hpp
-│   └── finance/
-│       ├── statistics.cpp
-│       ├── drawdown.cpp
-│       ├── streaks.cpp
-│       └── rolling.cpp
-├── tests/
-├── tools/
-└── docs/
-```
+Process workers run one numerical thread each; nested process × thread hybrid execution is not enabled.
+Exceptions drain submitted work before returning or releasing leases. Thread timeouts are cooperative at
+chunk boundaries; an in-flight kernel is not forcibly stopped. Hard-stop requests use disposable native
+workers and terminate-and-wait before releasing shared storage.
 
-后续抽取 Typed DAG 后再增加 `compiler/`、`operators/`、`runtime/`，不提前创建空壳模块。
+## 6. Native processes and shared regions
 
-## 5. NativeExecutionPlan 目标
+On POSIX, workers use `posix_spawn`; on Windows the implementation uses `CreateProcess`. Workers are
+packaged beside the extension as `calmetrics_worker` (or `.exe`) and link only the native core and system
+runtime. They neither import Numba nor start a Python interpreter. Runtime code is AOT; dynamic formulas
+compile to native IR, not machine code via JIT.
 
-不采用：
+Large inputs use shared region descriptors, while small-input inline IPC is explicit and counted.
+Existing `SharedInputBundle` regions can be reused across requests. Creating a shared region from an
+ordinary NumPy array is one explicit boundary copy, not falsely described as zero-copy ingestion.
 
-```text
-Python node → PyBind → C++ → Python node → PyBind → C++
-```
+Workers write disjoint result rows into a parent-owned mapping. The Python result is a NumPy view of
+that region, pinned by a C++ `shared_ptr` owner: **no final shared-output-to-NumPy copy**. Every normal
+request owns distinct output storage. Closing the engine/owner does not unmap an exported live view.
+`PreparedGraphExecution.run()` is intentionally different: it reuses output and overwrites the previous
+contents on the next run.
 
-也不采用：
+Creator regions unlink on final lifetime release; attached workers only unmap/close. Shared input
+regions are sealed read-only after their one-time ingestion copy. Their public descriptors retain that
+readonly contract, so even an explicit writable attach request cannot reopen an input mapping for writes.
+Physical read-only mappings export read-only buffers, so `setflags(write=True)` cannot enable writes to
+protected pages. Parent cleanup is required even when a child is killed; RAII inside a terminated worker
+cannot run.
 
-```text
-AST → generated Python source → exec → numba.njit
-```
+## 7. Public API and validation
 
-目标：
+Existing names remain: `GraphCompiler`, `CompiledGraph`, `AdaptivePlanner`, `PlannerConfig`,
+`ExecutionPlan`, `AdaptiveScheduler`, `PreparedGraphExecution`, `GraphExecutionResult` and shared owners.
+The object implementation is native; Python dataclass internals are not an execution contract.
 
-```text
-Typed DAG
-    ↓ lower once
-NativeExecutionPlan
-    ↓ one native call
-C++ DAG executor
-    ├── operator dispatch
-    ├── readonly input views
-    ├── workspace reuse
-    └── output materialization
-```
+Regression covers canonical parity, parser restrictions/precedence, alias liveness, rebinds, stale plans,
+ordinary output independence, shared output lifetime, worker failures, timeouts, engine reuse/close,
+concurrent CPU admission, and proof that synchronous requests do not use Python parsing or numerical
+pools. Native compiler/planner/process tests build with Python disabled.
 
-执行计划应包含稳定 opcode、输入槽位、参数槽位、输出槽位、shape/dtype contract 和 workspace layout，不包含 Python callback。
+Performance acceptance compares the complete workload to the real BetterSaaTaa NJIT baseline using
+paired alternating order. Prepared/batch ratio must be <= 0.90; ordinary scheduler micro ratio <= 1.00.
+This is a runnable gate, not a guarantee about every formula or machine. Cross-platform results must
+be labelled actually executed vs configured only.
 
-## 6. Operator 分层
-
-- Primitive：add/subtract/multiply/divide、comparison、logical、where。
-- Reduction：sum/mean/std/variance/min/max/quantile。
-- Time series：lag/difference/rolling/scan/drawdown。
-- Matrix：dot/matmul/matvec/solve/covariance/correlation。
-- Finance：portfolio、risk、drawdown、fund analytics。
-- Coupled kernel：只有不可拆的递推、拟合、联合约束才允许成为黑盒 native kernel。
-
-通用算子只有一份数值实现，业务中心不得复制。
-
-## 7. SIMD 与统一执行调度
-
-SIMD 采用 portable baseline + runtime dispatch，不用全局 host-specific ISA：
-
-```text
-x86_64: baseline → AVX2 → AVX-512
-arm64:  NEON baseline
-fallback: scalar
-```
-
-是否增加某个 ISA 路径必须由 benchmark 和数值等价测试证明。
-
-重型任务由一个 ExecutionScheduler 决定并行层级，业务模块不能独立创建互相竞争的
-process/thread pools。Scheduler 至少基于：
-
-- 产品数
-- 区间数
-- DAG cost
-- 时间长度
-- scenario 数
-- 输入与 workspace bytes
-- CPU / 内存预算
-- hard-stop / 隔离要求
-
-调度层级：
-
-```text
-small:
-    single thread + SIMD
-
-medium:
-    one process + native thread pool + SIMD
-
-large shared dataset:
-    process pool + shared memory/mmap
-        ↓
-    per-process native thread budget
-        ↓
-    SIMD
-```
-
-产品块通常优先于指标维度并行，因为多个指标会共享 DAG 上游。单产品大量区间时，
-区间块可以成为线程调度维度。
-
-ProcessPool 场景下，多 worker 共同读取的大数组必须优先使用 SharedMemory/mmap，
-worker 只接收描述符、offsets 和任务区间，禁止 pickle 整块行情数组。
-
-`process_count × threads_per_process` 受统一 CPU budget 约束，禁止过度订阅。
-
-## 8. 构建与平台
-
-- C++17 + pybind11 + scikit-build-core + CMake。
-- AOT wheel，不允许运行时编译。
-- CPython 3.10–3.14。
-- Linux x86_64/aarch64、macOS x86_64/arm64、Windows AMD64。
-- 发布 wheel 不使用 `-march=native` 或强制 AVX。
-- ISA 优化只能通过安全 baseline 或经过测试的 runtime dispatch 增加。
-
-## 9. 当前版本边界
-
-0.3.0 完成计算引擎身份和 native runtime 基础：
-
-- 项目、distribution、Python package、C++ namespace 统一为 CalMetricsEngine。
-- 原 `my_ctools` import 不再作为当前 API。
-- native extension 改为 `calmetrics_engine._native`。
-- 输入从“规范化后再计算”升级为 exact-dtype strided zero-copy。
-- 现有 finance kernels 保持原金融计算口径。
-
-0.3.0 不复制 FundInvestmentResearchPlatform 的 AST/DAG 实现。后续迁移必须先做契约映射与等价测试，再把生产事实来源逐步下沉到本引擎。
+Detailed design: `cpp-first-design.md`. Current verification: `cpp-first-acceptance.md`.
+Historical Phase-1/2 reports are retained as measurements of earlier implementations, not the current
+Python/C++ division of responsibility.

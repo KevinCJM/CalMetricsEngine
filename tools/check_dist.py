@@ -16,6 +16,11 @@ DISTRIBUTION = "calmetrics-engine"
 PYTHON_FILES = {
     f"{PACKAGE}/__init__.py",
     f"{PACKAGE}/_api.py",
+    f"{PACKAGE}/operators.py",
+    f"{PACKAGE}/graph.py",
+    f"{PACKAGE}/planner.py",
+    f"{PACKAGE}/runtime.py",
+    f"{PACKAGE}/shared.py",
     f"{PACKAGE}/py.typed",
     f"{PACKAGE}/cal_std_mean.py",
     f"{PACKAGE}/cal_cpr.py",
@@ -38,8 +43,17 @@ def check_wheel(path: Path, version: str) -> None:
         if len(extensions) != 1 or not extensions[0].startswith(f"{PACKAGE}/_native."):
             raise ValueError(f"{path.name}: expected exactly one _native extension")
 
+        worker = f"{PACKAGE}/calmetrics_worker" + (".exe" if "-win" in path.name else "")
+        if worker not in names:
+            raise ValueError(f"{path.name}: missing standalone native worker")
+        if (
+            not worker.endswith(".exe")
+            and not (archive.getinfo(worker).external_attr >> 16) & 0o111
+        ):
+            raise ValueError(f"{path.name}: native worker is not executable")
+
         if any(
-            name.endswith((".cpp", ".hpp")) or name.startswith(("tests/", "tools/"))
+            name.endswith((".cpp", ".hpp", ".def")) or name.startswith(("tests/", "tools/"))
             for name in names
         ):
             raise ValueError(f"{path.name}: development sources leaked into wheel")
@@ -66,11 +80,41 @@ def check_sdist(path: Path, version: str) -> None:
         "CMakeLists.txt",
         "README.md",
         "cpp/bindings.cpp",
+        "cpp/operator_bindings.cpp",
+        "cpp/graph_bindings.cpp",
+        "cpp/graph.cpp",
+        "cpp/compiler.cpp",
+        "cpp/planner.cpp",
+        "cpp/native_runtime.cpp",
+        "cpp/native_process.cpp",
+        "cpp/native_worker_main.cpp",
+        "cpp/native_api_bindings.cpp",
+        "cpp/graph_binding_utils.hpp",
+        "cpp/shared_memory.cpp",
+        "cpp/scheduler.cpp",
+        "cpp/include/calmetrics_engine/compiler.hpp",
+        "cpp/include/calmetrics_engine/planner.hpp",
+        "cpp/include/calmetrics_engine/native_runtime.hpp",
+        "cpp/include/calmetrics_engine/native_process.hpp",
+        "cpp/include/calmetrics_engine/shared_memory.hpp",
+        "cpp/include/calmetrics_engine/graph.hpp",
+        "cpp/include/calmetrics_engine/operators.hpp",
+        "cpp/include/calmetrics_engine/operators.def",
+        "cpp/operators/registry.cpp",
+        "cpp/operators/elementwise.cpp",
+        "cpp/operators/reduction.cpp",
+        "cpp/operators/sequence.cpp",
+        "cpp/operators/matrix.cpp",
+        "cpp/operators/state.cpp",
+        "cpp/operators/simd.cpp",
+        "cpp/operators/simd_avx2.cpp",
+        "cpp/operators/simd_loop.hpp",
         "cpp/include/calmetrics_engine/array_view.hpp",
         "cpp/include/calmetrics_engine/calendar.hpp",
         "cpp/include/calmetrics_engine/finance.hpp",
         "cpp/include/calmetrics_engine/numeric.hpp",
         "cpp/include/calmetrics_engine/parallel.hpp",
+        "cpp/include/calmetrics_engine/scheduler.hpp",
         "cpp/finance/statistics.cpp",
         "cpp/finance/drawdown.cpp",
         "cpp/finance/streaks.cpp",
@@ -78,16 +122,52 @@ def check_sdist(path: Path, version: str) -> None:
         "tests/test_api.py",
         "tests/test_regression.py",
         "tests/native_tests.cpp",
+        "tests/operator_native_tests.cpp",
+        "tests/graph_native_tests.cpp",
+        "tests/compiler_native_tests.cpp",
+        "tests/runtime_native_tests.cpp",
+        "tests/test_cpp_first_runtime.py",
+        "tests/test_planner_physical_dag.py",
+        "tests/test_operator_reference.py",
+        "tests/test_phase2_graph_runtime.py",
+        "tests/test_operator_independent_parity.py",
+        "tests/test_operator_contracts.py",
+        "tests/data/canonical_reference.json",
         "tests/data/legacy_reference.json",
         "tools/check_dist.py",
+        "tools/capture_canonical_reference.py",
+        "tools/benchmark_operators.py",
+        "tools/benchmark_operator_memory.py",
+        "tools/benchmark_multiworkload.py",
+        "tools/benchmark_multiworkload.cpp",
+        "tools/benchmark_phase2_graph.py",
+        "tools/benchmark_phase2_micro.py",
+        "tools/benchmark_cpp_first_control.py",
+        "tools/benchmark_cpp_vs_njit_matrix.py",
+        "tools/check_phase2_performance.py",
         "docs/architecture.md",
+        "docs/cpp-first-design.md",
+        "docs/cpp-first-acceptance.md",
+        "docs/cpp-vs-njit-benchmark-matrix-2026-09-20.md",
+        "docs/planner-physical-dag-optimization-design-2026-09-20.md",
+        "docs/planner-physical-dag-optimization-acceptance-2026-09-20.md",
+        "docs/phase2-execution-graph-design.md",
+        "docs/phase2-execution-graph-acceptance.md",
+        "docs/canonical-operators-design.md",
+        "docs/canonical-operators.md",
+        "docs/canonical-operators-acceptance.md",
     }
     required |= {f"src/{name}" for name in PYTHON_FILES}
     if missing := required - names:
         raise ValueError(f"{path.name}: missing source files {sorted(missing)}")
 
     forbidden = (".venv", ".build", "docs/.ai-hermes-user-memory", "dist/", ".git/")
-    if any(name.startswith(forbidden) for name in names):
+    if any(
+        name.startswith(forbidden)
+        or "__pycache__" in Path(name).parts
+        or name.endswith((".pyc", ".pyo"))
+        for name in names
+    ):
         raise ValueError(f"{path.name}: local/private files leaked into sdist")
 
 

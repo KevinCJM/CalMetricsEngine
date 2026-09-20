@@ -78,6 +78,20 @@ def test_installed_metadata_and_one_native_extension():
     assert info["cpu_policy"] == "baseline"
     assert info["cxx_standard"] == 17
     assert info["execution_backend"] == "pybind11_aot"
+    assert info["graph_execution_backend"] == "native_graph_interpreter"
+    assert info["scheduler_backend"] == "bounded_thread_process_pool"
+    assert info["thread_backend"] == "persistent_cpp_native_scheduler"
+    assert info["scheduler_scope"] == "process_wide_cpp_cpu_admission"
+    assert info["legacy_finance_scheduler"] == "shared_native_scheduler"
+    assert info["coroutine_backend"] == "asyncio_orchestration_only"
+    assert info["process_transport"] == "shared_memory_or_serialized_small_input"
+    assert info["graph_input_memory_policy"] == "product_major_contiguous_zero_copy"
+    assert info["runtime_jit"] == 0
+    assert info["compiler_backend"] == "cpp_restricted_ast"
+    assert info["planner_backend"] == "cpp"
+    assert info["native_scheduler_backend"] == "persistent_cpp_threads_processes"
+    assert info["native_worker_runtime"] == "standalone_no_python"
+    assert info["python_role"] == "numpy_binding_async_adapter"
     assert info["input_memory_policy"] == "exact_dtype_strided_zero_copy"
 
 
@@ -134,6 +148,17 @@ def test_strided_zero_copy_layouts_match_contiguous_reference(name, layout):
     assert _api._values(values) is values
     expected = invoke(name, np.array(values, dtype=np.float64, order="C", copy=True))
     assert_same(invoke(name, values), expected)
+
+
+def test_legacy_finance_rejects_out_of_owner_bounds_view():
+    owner = np.ones(1, dtype=np.float64)
+    bad = np.lib.stride_tricks.as_strided(
+        owner,
+        shape=(4, 2),
+        strides=(8, 8),
+    )
+    with pytest.raises(engine.operators.OperatorError, match="INPUT_OUT_OF_BOUNDS"):
+        engine.cal_std_mean(bad)
 
 
 def test_strided_integer_and_date_views_are_borrowed():

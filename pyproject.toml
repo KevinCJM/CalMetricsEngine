@@ -45,18 +45,27 @@ minimum-version = "build-system.requires"
 cmake.version = ">=3.20"
 cmake.build-type = "Release"
 wheel.packages = ["src/calmetrics_engine"]
+# include overrides exclude in scikit-build-core's classic/default modes.
+# Force-include only build/test sources, never whole trees containing local caches.
 sdist.include = [
-  "cpp/**",
-  "src/**",
-  "tests/**",
-  "tools/**",
-  "docs/**",
+  "cpp/**/*.cpp",
+  "cpp/**/*.hpp",
+  "cpp/**/*.def",
+  "src/calmetrics_engine/*.py",
+  "src/calmetrics_engine/py.typed",
+  "tests/*.py",
+  "tests/*.cpp",
+  "tests/data/*.json",
+  "tools/*.py",
+  "tools/*.cpp",
+  "docs/*.md",
   "CMakeLists.txt",
   "README.md",
   ".github/workflows/*.yml",
 ]
 sdist.exclude = [
   ".venv*/**",
+  ".build*",
   ".build*/**",
   "build/**",
   "dist/**",
