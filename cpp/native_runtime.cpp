@@ -28,6 +28,16 @@ Deadline deadline_from(std::optional<double> seconds) {
 double milliseconds(Deadline from, Deadline to) {
   return std::chrono::duration<double, std::milli>(to - from).count();
 }
+std::size_t output_row_offset(const graph::Program &program, const Batch &batch,
+                              std::size_t row) {
+  if (program.output_kind == graph::OutputKind::scalar)
+    return row;
+  std::size_t offset = 0;
+  for (std::size_t i = 0; i < row; ++i)
+    offset = planner::checked_add(
+        offset, static_cast<std::size_t>(batch.ends[i] - batch.starts[i]));
+  return offset;
+}
 } // namespace
 std::vector<std::size_t> Batch::input_sizes() const {
   std::vector<std::size_t> result;
@@ -188,8 +198,9 @@ ExecutionAudit Engine::execute(const planner::Plan &p, const Batch &batch,
         return graph::execute(p.graph->program, batch.inputs, batch.parameters,
                               batch.parameter_count, batch.starts + chunk.begin,
                               batch.ends + chunk.begin, chunk.end - chunk.begin,
-                              output +
-                                  chunk.begin * p.graph->program.roots.size(),
+                              output + output_row_offset(
+                                           p.graph->program, batch, chunk.begin) *
+                                           p.graph->program.roots.size(),
                               p.graph->program.roots.size());
       });
     }

@@ -14,7 +14,16 @@ enum class NodeKind : std::uint8_t {
   input = 0,
   parameter = 1,
   constant = 2,
-  operation = 3
+  operation = 3,
+  rolling_scope = 4
+};
+
+enum class OutputKind : std::uint8_t { scalar = 0, series = 1 };
+enum class RollingParameterKind : std::uint8_t {
+  outer_node = 0,
+  observation_count = 1,
+  window_elapsed_days = 2,
+  risk_free_return_window = 3
 };
 enum class StorageKind : std::uint8_t {
   inline_value = 0,
@@ -27,10 +36,35 @@ struct Node {
   std::uint16_t opcode = 0;
   std::uint16_t input_index = 0;
   double constant = 0.0;
-  std::array<std::uint32_t, 4> parents{};
+  std::array<std::uint32_t, 32> parents{};
   std::uint8_t parent_count = 0;
   StorageKind storage = StorageKind::inline_value;
   std::uint32_t slot = 0;
+};
+
+struct Program;
+
+struct RollingParameterBinding {
+  RollingParameterKind kind = RollingParameterKind::outer_node;
+  std::uint32_t node = 0;
+};
+
+struct RollingScope {
+  std::shared_ptr<Program> body;
+  std::vector<std::uint32_t> input_nodes;
+  std::vector<std::uint8_t> input_preceding;
+  std::vector<RollingParameterBinding> parameter_bindings;
+  std::uint32_t width_node = 0;
+  std::uint32_t min_periods_node = 0;
+  std::uint32_t dates_node = 0;
+  std::uint32_t annual_rate_node = 0;
+  bool has_min_periods = false;
+  bool has_date_context = false;
+  bool has_returns = false;
+  bool needs_preceding_observation = false;
+  std::int32_t returns_input = -1;
+  std::size_t body_node_count = 0;
+  std::size_t array_count = 0;
 };
 
 struct ExecutionMetadata {
@@ -46,6 +80,8 @@ struct Program {
   std::size_t parameter_count = 0;
   std::size_t numeric_slots = 0;
   std::size_t mask_slots = 0;
+  OutputKind output_kind = OutputKind::scalar;
+  std::vector<RollingScope> rolling_scopes;
   std::shared_ptr<const ExecutionMetadata> execution_metadata;
 
   void validate() const;

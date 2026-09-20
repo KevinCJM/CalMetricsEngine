@@ -17,17 +17,18 @@ Native Execution Plan
 PyBind11 / C++17
 ```
 
-The current 0.3.0 code line is **C++ first**: restricted AST parsing, shared-DAG
-compilation, CSE, alias-aware liveness, cost planning, CPU admission, thread/process
-pools, shared-memory ownership and all 118 canonical operators execute in C++.
-Python retains public import names, NumPy ownership adaptation and an asyncio await
-bridge. A complete synchronous request crosses PyBind once, not once per worker.
-The eight existing finance APIs retain their numerical contracts.
+The current 0.3.0 code line is **C++ first**: restricted AST parsing, native Typed IR for
+scalar/time-series indicator execution, shared-DAG compilation, CSE, alias-aware liveness,
+rolling scopes, cost planning, CPU admission, thread/process pools, shared-memory ownership
+and all 118 canonical operators execute in C++. Python retains public import names, NumPy
+ownership adaptation and an asyncio await bridge. A complete synchronous request crosses
+PyBind once, not once per worker. The eight existing finance APIs retain their numerical contracts.
 
-The production semantic Typed DSL / causality contracts currently living in the
-research platform have **not** been migrated. Phase 2 intentionally provides a
-narrow mathematical graph compiler so the execution runtime can mature without
-creating a second incompatible business DSL. No PyPI publication is implied by local builds.
+The native Typed IR now owns dtype, named time axes, symbolic shape, semantic dimension,
+price basis, alias canonicalization, `rolling_window` lowering, compiler-owned `rolling_apply`
+and aligned time-series roots. Research-platform business contracts that are not execution
+semantics—especially causality/knowledge-time governance and broader matrix/portfolio graph
+integration—remain upstream. No PyPI publication is implied by local builds.
 
 ## Install
 
@@ -132,6 +133,30 @@ with AdaptiveScheduler(cpu_budget=4) as scheduler:
 print(plan.metadata())
 print(result.values)
 ```
+
+Typed declarations can be supplied directly to the same C++ compiler. A time-series root returns
+one contiguous value matrix plus interval offsets instead of Python ragged objects:
+
+```python
+graph = GraphCompiler({
+    "returns": {
+        "kind": "series",
+        "dtype": "float64",
+        "axes": ["time"],
+        "shape": ["T"],
+        "semantic_dimension": "return_decimal",
+    }
+}).compile(["rolling_apply(mean(returns), 20)"])
+
+result = scheduler.execute(graph, {"returns": returns}, starts, ends)
+# result.values.shape == (sum(ends - starts), 1)
+# result.offsets[i]:result.offsets[i + 1] selects interval i.
+```
+
+`rolling_window` is a compiler-only logical window and is never materialized as a `T×W` matrix.
+`rolling_apply` compiles its scalar body into a native sub-program and reruns that body on trailing
+read-only window views with state reset at each window start. Historical aliases are canonicalized
+inside C++ before DAG construction; they are not separate numerical implementations.
 
 The planner chooses single/thread/process execution from the **post-fusion physical DAG cost**,
 product/interval shape, input bytes and resource budgets. Product/interval chunks are balanced by
@@ -344,9 +369,9 @@ calmetrics_engine/calmetrics_worker       # calmetrics_worker.exe on Windows
 ```
 
 `graph.py`, `planner.py` and `shared.py` retain compatibility aliases only. `runtime.py`
-retains the asyncio adapter and compatibility names. The production business Typed DSL still
-belongs to the research platform; its semantic/causality migration is separate from this native
-execution architecture.
+retains the asyncio adapter and compatibility names. Execution-side Typed IR and rolling scope
+semantics are native C++; business causality/knowledge-time governance and research workflow
+contracts remain in the research platform and lower into this native boundary.
 
 See [docs/architecture.md](docs/architecture.md).
 

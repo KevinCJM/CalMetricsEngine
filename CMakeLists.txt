@@ -45,6 +45,7 @@ add_library(calmetrics_engine_operators STATIC
     cpp/operators/simd.cpp
     cpp/graph.cpp
     cpp/compiler.cpp
+    cpp/typed_ir.cpp
     cpp/planner.cpp
     cpp/shared_memory.cpp
     cpp/native_runtime.cpp

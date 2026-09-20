@@ -8,6 +8,7 @@
 namespace c = calmetrics_engine::compiler;
 namespace g = calmetrics_engine::graph;
 namespace o = calmetrics_engine::ops;
+namespace t = calmetrics_engine::typed;
 
 void require(bool ok, const char *message) {
   if (!ok)
@@ -83,6 +84,46 @@ int main() {
       limited = true;
     }
     require(limited, "depth limit");
+    std::vector<t::Variable> typed_variables{
+        {"x", t::ValueType::series("T", "return_decimal")}};
+    auto alias_graph = c::compile({"mean(sub(x,0))"}, typed_variables);
+    auto canonical_graph = c::compile({"mean(subtract(x,0))"}, typed_variables);
+    require(alias_graph->fingerprint == canonical_graph->fingerprint,
+            "typed alias canonicalization");
+
+    auto rolling =
+        c::compile({"rolling_apply(mean(x),3)"}, typed_variables);
+    require(rolling->program.output_kind == g::OutputKind::series &&
+                rolling->program.rolling_scopes.size() == 1,
+            "rolling scope compile");
+    std::vector<double> input{1, 2, 3, 4, 5, 6};
+    o::Value input_view;
+    input_view.shape = o::vector_shape(input.size());
+    input_view.data = input.data();
+    input_view.stride[0] = 1;
+    std::int64_t rolling_start = 0,
+                 rolling_end = static_cast<std::int64_t>(input.size());
+    std::vector<double> rolling_result(input.size());
+    auto rolling_decoded = c::decode_program(c::encode_program(rolling->program));
+    g::execute(rolling_decoded, {input_view}, nullptr, 0, &rolling_start,
+               &rolling_end, 1, rolling_result.data(), 1);
+    require(std::isnan(rolling_result[0]) && std::isnan(rolling_result[1]) &&
+                rolling_result[2] == 2 && rolling_result[3] == 3 &&
+                rolling_result[4] == 4 && rolling_result[5] == 5,
+            "rolling scope execution");
+
+    bool semantic_rejected = false;
+    try {
+      c::compile(
+          {"add(a,b)"},
+          std::vector<t::Variable>{
+              {"a", t::ValueType::series("T", "adjusted_nav", "hfq")},
+              {"b", t::ValueType::series("T", "adjusted_nav", "qfq")}});
+    } catch (const c::CompileError &) {
+      semantic_rejected = true;
+    }
+    require(semantic_rejected, "typed price-basis mismatch");
+
     auto truncated = c::encode_program(graph->program);
     truncated.pop_back();
     bool rejected = false;

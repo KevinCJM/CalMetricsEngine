@@ -104,6 +104,12 @@ The current repository already provides:
 - Exact-shape output/workspace contracts and reusable native `Workspace`.
 - Explicit NEON/SSE2/optional AVX2 runtime dispatch for eligible kernels.
 - A pure-C++ restricted mathematical parser/compiler.
+- Native C++ Typed IR for scalar/time-series indicator execution, including dtype, named time axis,
+  symbolic shape, semantic dimension, optional price basis and record/window intermediates.
+- C++ historical-alias canonicalization into the single 118-entry operator registry.
+- Compiler-owned `rolling_window` lowering with no materialized T×W production array.
+- Compiler-owned `rolling_apply` sub-programs with trailing window views and state reset at each window start.
+- Aligned time-series root outputs as contiguous values plus interval prefix offsets.
 - A shared multi-root logical DAG with operator lowering and structural CSE.
 - Borrow-aware C++ liveness analysis, including backing buffers of borrowed views such as `lag`.
 - Reusable numeric/mask arenas with slot reuse driven by DAG lifetime.
@@ -131,9 +137,9 @@ The current repository already provides:
 The following remain architectural targets and must not be claimed as already implemented until
 code and tests exist:
 
-- Migration of the production Typed DSL / semantic-axis / causality contracts from the research
-  platform; the current mathematical compiler is intentionally narrower.
-- Full matrix-growing and portfolio-matrix nodes inside the interval DAG executor.
+- Broader production business DSL governance that is intentionally above the generic engine boundary,
+  especially causality/knowledge-time/research-workflow contracts.
+- Full vector/matrix variable binding, matrix-growing and portfolio-matrix nodes inside the interval DAG executor.
 - Additional masked/path/matrix fusion beyond the current summary/order-stat graph fusion.
 - Broader SIMD coverage and benchmark-justified ISA extensions beyond current kernels.
 - BLAS/backend dispatch where matrix workloads justify it.
@@ -896,7 +902,8 @@ zero-copy claims.
 - Planner/scheduler/CPU-memory admission/partitioning implementation: CalMetricsEngine native C++ code.
 - Process/SharedMemory/worker lifecycle implementation: CalMetricsEngine native C++ code.
 - Python package responsibility: interface adaptation only; Python must not become a second runtime source of truth.
-- Production DSL/Typed-DAG business semantics until migration: FundInvestmentResearchPlatform.
+- Execution-side Typed IR, alias lowering and rolling-scope semantics: CalMetricsEngine native C++ code.
+- Business causality/knowledge-time and research-workflow semantics: FundInvestmentResearchPlatform.
 - Historical behavior is preserved by tests and Git history, not duplicate current implementations.
 - README describes public/user-facing contracts.
 - `docs/architecture.md` describes architecture.

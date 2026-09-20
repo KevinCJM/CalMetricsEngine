@@ -9,6 +9,7 @@ namespace c = calmetrics_engine::compiler;
 namespace g = calmetrics_engine::graph;
 namespace p = calmetrics_engine::planner;
 namespace b = calmetrics_engine::binding;
+namespace t = calmetrics_engine::typed;
 
 namespace calmetrics_engine::binding {
 py::dict graph_audit(const g::Audit &a) {
@@ -73,6 +74,101 @@ py::dict plan_metadata(const p::Plan &x) {
 }
 } // namespace calmetrics_engine::binding
 namespace {
+py::dict value_type_dict(const t::ValueType &value) {
+  py::dict d;
+  d["kind"] = t::kind_name(value.kind);
+  d["dtype"] = t::dtype_name(value.dtype);
+  d["axes"] = value.axes;
+  d["shape"] = value.shape;
+  d["semantic_dimension"] = value.semantic_dimension;
+  d["price_basis"] = value.price_basis.empty() ? py::none() : py::cast(value.price_basis);
+  if (value.kind == t::ValueKind::record) {
+    d["record_tag"] = value.record_tag;
+    d["fields"] = value.fields;
+  }
+  d["display"] = t::display(value);
+  return d;
+}
+
+t::ValueType parse_value_type(py::handle item) {
+  if (py::isinstance<py::str>(item)) {
+    const auto kind = py::cast<std::string>(item);
+    if (kind == "series")
+      return t::ValueType::series();
+    if (kind == "scalar")
+      return t::ValueType::scalar();
+    throw c::CompileError("legacy variable type must be series or scalar");
+  }
+  if (!py::isinstance<py::dict>(item))
+    throw c::CompileError("typed variable declaration must be a string or mapping");
+  auto d = py::reinterpret_borrow<py::dict>(item);
+  if (!d.contains("kind"))
+    throw c::CompileError("typed variable declaration requires kind");
+  t::ValueType value;
+  const auto kind = py::cast<std::string>(d["kind"]);
+  if (kind == "scalar")
+    value.kind = t::ValueKind::scalar;
+  else if (kind == "series")
+    value.kind = t::ValueKind::series;
+  else if (kind == "vector")
+    value.kind = t::ValueKind::vector;
+  else if (kind == "matrix")
+    value.kind = t::ValueKind::matrix;
+  else if (kind == "window")
+    value.kind = t::ValueKind::window;
+  else if (kind == "record")
+    value.kind = t::ValueKind::record;
+  else
+    throw c::CompileError("unsupported typed variable kind: " + kind);
+  const auto dtype = d.contains("dtype") ? py::cast<std::string>(d["dtype"])
+                                         : std::string("float64");
+  if (dtype == "float64")
+    value.dtype = t::DType::float64;
+  else if (dtype == "bool")
+    value.dtype = t::DType::boolean;
+  else
+    throw c::CompileError("unsupported typed variable dtype: " + dtype);
+  if (d.contains("axes"))
+    value.axes = py::cast<std::vector<std::string>>(d["axes"]);
+  else if (value.kind == t::ValueKind::series)
+    value.axes = {"time"};
+  else if (value.kind == t::ValueKind::vector)
+    value.axes = {"asset"};
+  else if (value.kind == t::ValueKind::matrix)
+    value.axes = {"time", "asset"};
+  else if (value.kind == t::ValueKind::window)
+    value.axes = {"time", "window"};
+  if (d.contains("shape")) {
+    for (auto shape : py::reinterpret_borrow<py::sequence>(d["shape"]))
+      value.shape.push_back(py::cast<std::string>(py::str(shape)));
+  } else if (value.kind == t::ValueKind::series)
+    value.shape = {"T"};
+  else if (value.kind == t::ValueKind::vector)
+    value.shape = {"N"};
+  else if (value.kind == t::ValueKind::matrix)
+    value.shape = {"T", "N"};
+  else if (value.kind == t::ValueKind::window)
+    value.shape = {"T", "W"};
+  value.semantic_dimension =
+      d.contains("semantic_dimension")
+          ? py::cast<std::string>(d["semantic_dimension"])
+          : std::string(value.dtype == t::DType::boolean ? "mask" : "dimensionless");
+  if (d.contains("price_basis") && !d["price_basis"].is_none())
+    value.price_basis = py::cast<std::string>(d["price_basis"]);
+  if (value.kind == t::ValueKind::record) {
+    if (d.contains("record_tag"))
+      value.record_tag = py::cast<std::string>(d["record_tag"]);
+    if (d.contains("fields"))
+      value.fields = py::cast<std::vector<std::string>>(d["fields"]);
+  }
+  try {
+    value.validate();
+  } catch (const t::Error &error) {
+    throw c::CompileError(error.what());
+  }
+  return value;
+}
+
 template <class T> py::tuple tuple(const std::vector<T> &v) {
   py::tuple t(v.size());
   for (std::size_t i = 0; i < v.size(); ++i)
@@ -86,8 +182,12 @@ py::list raw_nodes(const c::CompiledGraph &graph) {
     d["kind"] = c::kind_name(n.kind);
     d["storage"] = c::storage_name(n.storage);
     d["slot"] = n.slot;
-    if (n.kind == g::NodeKind::operation) {
-      d["opcode"] = n.opcode;
+    if (n.kind == g::NodeKind::operation ||
+        n.kind == g::NodeKind::rolling_scope) {
+      if (n.kind == g::NodeKind::operation)
+        d["opcode"] = n.opcode;
+      else
+        d["scope_index"] = n.input_index;
       d["parents"] = std::vector<std::uint32_t>(
           n.parents.begin(), n.parents.begin() + n.parent_count);
     } else if (n.kind == g::NodeKind::constant)
@@ -110,6 +210,17 @@ py::dict graph_metadata(const c::CompiledGraph &graph) {
   d["parameter_names"] = graph.parameter_names;
   d["numeric_slots"] = graph.program.numeric_slots;
   d["mask_slots"] = graph.program.mask_slots;
+  d["typed_ir_version"] = "cpp-typed-ir-1";
+  d["output_kind"] = graph.program.output_kind == g::OutputKind::series ? "series" : "scalar";
+  d["rolling_scope_count"] = graph.program.rolling_scopes.size();
+  py::dict variable_types;
+  for (const auto &variable : graph.variable_types)
+    variable_types[py::str(variable.name)] = value_type_dict(variable.type);
+  d["variable_types"] = std::move(variable_types);
+  py::list root_types;
+  for (auto root : graph.program.roots)
+    root_types.append(value_type_dict(graph.nodes[root].inferred_type));
+  d["root_types"] = std::move(root_types);
   std::size_t count = 0;
   for (const auto &n : graph.nodes)
     count += n.simd_eligible;
@@ -146,22 +257,18 @@ py::dict graph_metadata(const c::CompiledGraph &graph) {
 }
 class CompilerAPI {
 public:
-  std::vector<std::pair<std::string, std::string>> variables;
+  std::vector<t::Variable> variables;
   explicit CompilerAPI(const py::dict &mapping) {
     for (auto item : mapping) {
-      if (!py::isinstance<py::str>(item.first) ||
-          !py::isinstance<py::str>(item.second))
-        throw c::CompileError("variable declarations must be strings");
+      if (!py::isinstance<py::str>(item.first))
+        throw c::CompileError("variable names must be strings");
       if (!PyUnicode_IsIdentifier(item.first.ptr()))
         throw c::CompileError("invalid variable name");
-      variables.emplace_back(py::cast<std::string>(item.first),
-                             py::cast<std::string>(item.second));
+      variables.push_back(
+          {py::cast<std::string>(item.first), parse_value_type(item.second)});
     }
     if (variables.empty())
       throw c::CompileError("at least one variable is required");
-    for (const auto &v : variables)
-      if (v.second != "series" && v.second != "scalar")
-        throw c::CompileError("variable type must be series or scalar");
   }
   std::shared_ptr<c::CompiledGraph>
   compile(const py::object &expressions) const {
@@ -245,7 +352,23 @@ py::dict raw_execute(const g::Program &program, const py::tuple &input_arrays,
   b::exact<std::int64_t>(starts, 1, "starts");
   b::exact<std::int64_t>(ends, 1, "ends");
   b::exact<double>(output, 2, "out", true);
-  if (starts.size() != ends.size() || output.shape(0) != starts.size() ||
+  if (starts.size() != ends.size())
+    throw py::value_error("batch shape mismatch");
+  py::ssize_t expected_output_rows = starts.size();
+  if (program.output_kind == g::OutputKind::series) {
+    expected_output_rows = 0;
+    const auto *begin_ptr = static_cast<const std::int64_t *>(starts.data());
+    const auto *end_ptr = static_cast<const std::int64_t *>(ends.data());
+    for (py::ssize_t row = 0; row < starts.size(); ++row) {
+      if (begin_ptr[row] < 0 || end_ptr[row] < begin_ptr[row])
+        throw py::value_error("invalid interval bounds");
+      const auto length = end_ptr[row] - begin_ptr[row];
+      if (length > PY_SSIZE_T_MAX - expected_output_rows)
+        throw py::value_error("series output shape overflow");
+      expected_output_rows += static_cast<py::ssize_t>(length);
+    }
+  }
+  if (output.shape(0) != expected_output_rows ||
       output.shape(1) != static_cast<py::ssize_t>(program.roots.size()))
     throw py::value_error("batch shape mismatch");
   const auto output_bounds = b::bounds(output);
@@ -317,6 +440,8 @@ void register_graph(py::module_ &parent) {
         d["parameter_count"] = p.parameter_count;
         d["numeric_slots"] = p.numeric_slots;
         d["mask_slots"] = p.mask_slots;
+        d["output_kind"] =
+            p.output_kind == g::OutputKind::series ? "series" : "scalar";
         d["python_operator_calls"] = 0;
         d["execution_backend"] = "native_graph_interpreter";
         return d;
@@ -363,6 +488,9 @@ void register_graph(py::module_ &parent) {
                                       n.value_class ==
                                           c::ValueClass::mask_series;
                              })
+      .def_property_readonly(
+          "inferred_type",
+          [](const c::NodeInfo &n) { return value_type_dict(n.inferred_type); })
       .def_readonly("last_use", &c::NodeInfo::last_use)
       .def_readonly("cost_model", &c::NodeInfo::cost_model)
       .def_readonly("simd_eligible", &c::NodeInfo::simd_eligible);

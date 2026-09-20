@@ -50,6 +50,11 @@ std::size_t scratch_estimate(const graph::Program &program,
       estimate, checked_mul(checked_mul(order_sources.size(), window), 8));
   if (operator_scratch)
     estimate = checked_add(estimate, checked_mul(window, 8));
+  if (!program.rolling_scopes.empty())
+    estimate = checked_add(estimate, checked_mul(window + 1, sizeof(std::size_t)));
+  for (const auto &scope : program.rolling_scopes)
+    if (scope.body)
+      estimate = checked_add(estimate, scratch_estimate(*scope.body, window));
   return estimate;
 }
 std::size_t total_memory(const Plan &p, std::size_t workers) {
@@ -252,8 +257,12 @@ make_plan(std::shared_ptr<compiler::CompiledGraph> graph, const Config &config,
   for (auto size : sizes)
     p->estimated_input_bytes =
         checked_add(p->estimated_input_bytes, checked_mul(size, 8));
-  p->estimated_output_bytes =
-      checked_mul(checked_mul(rows, p->graph->program.roots.size()), 8);
+  const auto output_rows =
+      p->graph->program.output_kind == graph::OutputKind::series
+          ? geometry.observations
+          : rows;
+  p->estimated_output_bytes = checked_mul(
+      checked_mul(output_rows, p->graph->program.roots.size()), 8);
   p->estimated_worker_scratch_bytes =
       scratch_estimate(p->graph->program, geometry.max_window);
   for (const auto &node : p->graph->nodes) {
@@ -295,7 +304,8 @@ make_plan(std::shared_ptr<compiler::CompiledGraph> graph, const Config &config,
         geometry_work(branch.cost, geometry) >= config.thread_work_units;
   const auto branch_task_count = checked_mul(rows, p->graph->branches.size());
   const bool dag_branch =
-      !process && cpu > 1 && rows > 0 && rows < cpu &&
+      p->graph->program.output_kind == graph::OutputKind::scalar && !process &&
+      cpu > 1 && rows > 0 && rows < cpu &&
       p->graph->branches.size() > 1 && heavy_branches >= 2 &&
       p->estimated_work_units >= config.dag_branch_work_units &&
       branch_task_count > rows;

@@ -7,9 +7,10 @@ Python public names / NumPy pins / exception conversion / asyncio await adapter
     |
     | one binding transition per synchronous request
     v
-C++ restricted expression compiler (compiler.cpp)
-    AST -> value classes -> lowering -> structural CSE
+C++ restricted expression compiler (compiler.cpp + typed_ir.cpp)
+    AST -> Typed IR -> alias canonicalization -> lowering -> structural CSE
     -> borrowed-view-aware liveness -> immutable graph program
+    -> compiler-owned rolling scopes
     v
 C++ planner (planner.cpp)
     actual interval lengths -> product/interval cost -> storage estimate
@@ -23,27 +24,32 @@ C++ Engine (native_runtime.cpp)
     v
 C++ graph executor (graph.cpp)
     shared reductions / sorting / regression state
+    -> rolling-window sub-program execution with state reset
+    -> scalar or aligned time-series roots
     -> reusable arenas and Workspace
     -> canonical operators and existing SIMD dispatch
 ```
 
-The production research-platform Typed DSL, semantic axes, price basis and causality/knowledge-time
-contracts have not been migrated. This repository's mathematical expression grammar is narrower.
-Matrix-growing operators remain available directly in the 118-entry registry; interval DAG roots are
-scalar. The migration does not expand that supported domain or silently reinterpret financial formulas.
+Execution-side Typed IR for scalar/time-series indicators is now native C++: dtype, time-axis identity,
+symbolic shape, semantic dimension, price basis, historical alias canonicalization, logical
+`rolling_window`, compiler-owned `rolling_apply`, and aligned time-series roots all live below the
+PyBind boundary. Business causality/knowledge-time governance remains in the research platform.
+Matrix-growing operators remain available directly in the 118-entry registry, but full matrix/portfolio
+nodes inside the interval DAG are still a separate target.
 
 ## 2. Module responsibilities
 
 | Native module | Responsibility |
 | --- | --- |
-| `compiler.cpp` | Restricted parsing, precedence, value-class checks, lowering, CSE, alias-aware liveness, native plan encoding |
+| `compiler.cpp` | Restricted parsing, precedence, Typed Logical IR construction, alias/rolling lowering, CSE, liveness, native plan encoding |
+| `typed_ir.cpp` | ValueType validation and operator type/axis/semantic/price-basis inference |
 | `planner.cpp` | Exact interval geometry, weighted product partitioning, physical cost/storage estimates and strategy |
 | `scheduler.cpp` | Process-wide C++ CPU admission and lazily grown persistent ThreadPool shared by all numerical entry points |
 | `native_runtime.cpp` | Engine-local CPU cap, Graph/process execution, task draining and shutdown on top of the shared scheduler |
 | `native_process.cpp` | Framed/versioned native IPC, persistent worker reuse, disposable hard-stop workers |
 | `native_worker_main.cpp` | Standalone executable entry, no Python interpreter |
 | `shared_memory.cpp` | POSIX/Windows shared regions with native RAII ownership |
-| `graph.cpp` | Numerical graph execution, fusion, arenas and scratch reuse |
+| `graph.cpp` | Scalar/series numerical graph execution, fusion, rolling-scope sub-programs, arenas and scratch reuse |
 | `graph_bindings.cpp`, `native_api_bindings.cpp` | Python type adaptation, pinned arrays, exception/result conversion |
 
 Python `graph.py`, `planner.py`, and `shared.py` export compatibility aliases. `runtime.py` only bridges
@@ -61,12 +67,16 @@ that hard-stop boundary.
 
 ## 3. Compiler and plan
 
-Accepted expressions are numeric constants, declared scalar/series variables, canonical calls,
-arithmetic, unary signs and one comparison. Arbitrary Python calls, attributes, subscripts, imports,
+Accepted expressions are numeric constants, declared scalar/time-series variables, canonical or
+historical-alias calls, arithmetic, unary signs and one comparison. Typed declarations additionally
+carry dtype, named axes, symbolic shape, semantic dimension and optional price basis. Arbitrary Python calls, attributes, subscripts, imports,
 lambdas and comprehensions are rejected. Source bytes, nesting, node counts and arities are bounded.
 
-Operator names/opcodes and mathematics still come from the canonical registry. Lowering shares
-`linear_fit` results and total-return results without changing evaluation order. Borrowed `lag` views
+Operator names/opcodes and mathematics still come from the canonical registry. Alias names are
+canonicalized in C++ before the physical DAG is built; they do not add numerical kernels. Logical
+`rolling_window` nodes lower without materializing a `T×W` matrix. `rolling_apply` owns a compiled
+scalar body sub-program and executes it on trailing window views with independent state reset.
+Lowering also shares `linear_fit` results and total-return results without changing evaluation order. Borrowed `lag` views
 extend the lifetime of their backing arena transitively. Plans sent to workers contain no pointers or
 Python objects; the versioned decoder bounds counts and validates topology/opcodes.
 
@@ -76,8 +86,10 @@ execution; changing intervals requires replanning.
 
 ## 4. Arrays and memory
 
-Graph input storage is exact native `float64`, one-dimensional, aligned and contiguous within each
-product. Interval arrays are exact `int64` and half-open `[start, end)`. No implicit data coercion or
+Current interval-DAG input storage is exact native `float64`, one-dimensional time-series data,
+aligned and contiguous within each product; the Typed IR can describe broader vector/matrix types,
+but full matrix graph binding remains out of this execution path. Interval arrays are exact `int64`
+and half-open `[start, end)`. No implicit data coercion or
 compaction occurs. Generic direct operator APIs retain their strided/readonly support.
 
 The binding layer pins Python owners until every native task settles. Prepared calls reject a changed
@@ -85,7 +97,9 @@ pointer, dtype, shape, stride or output geometry. Callers must not resize/retype
 arrays while a native call uses them. Parameters can change through an unchanged parameter array;
 ordinary mapping parameters are rebound when values/keys change.
 
-Outputs and algorithm workspace may be allocated. Zero-copy input binding is not a claim of zero
+Scalar graphs return `(interval_rows, roots)`. Aligned time-series graphs return one contiguous
+`(sum(end-start), roots)` matrix plus `int64` prefix offsets so each interval is a zero-object-overhead
+slice. Outputs and algorithm workspace may be allocated. Zero-copy input binding is not a claim of zero
 allocation or zero algorithm scratch initialization. Quantile/median sorting and solvers report their
 necessary algorithm copies separately. Native graph audit includes order-stat scratch as well as the
 main arenas and operator workspace.

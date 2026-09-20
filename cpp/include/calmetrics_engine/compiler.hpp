@@ -1,6 +1,7 @@
 #pragma once
 
 #include "calmetrics_engine/graph.hpp"
+#include "calmetrics_engine/typed_ir.hpp"
 #include <memory>
 #include <string>
 #include <utility>
@@ -24,6 +25,7 @@ struct NodeInfo {
   std::uint32_t node_id = 0;
   graph::Node node;
   ValueClass value_class = ValueClass::scalar;
+  typed::ValueType inferred_type = typed::ValueType::scalar();
   std::uint32_t last_use = 0;
   std::string cost_model = "constant";
   bool simd_eligible = false;
@@ -47,9 +49,11 @@ struct CompiledGraph {
   std::vector<NodeInfo> nodes;
   std::vector<std::string> expressions;
   std::vector<std::pair<std::string, std::string>> variables;
+  std::vector<typed::Variable> variable_types;
   std::vector<std::string> input_names;
   std::vector<std::string> parameter_names;
   std::string fingerprint;
+  graph::OutputKind output_kind = graph::OutputKind::scalar;
   std::size_t raw_node_count = 0;
   PhysicalCost physical_cost;
   std::vector<BranchInfo> branches;
@@ -64,6 +68,10 @@ const char *storage_name(graph::StorageKind storage) noexcept;
 std::shared_ptr<CompiledGraph>
 compile(const std::vector<std::string> &expressions,
         const std::vector<std::pair<std::string, std::string>> &variables);
+
+std::shared_ptr<CompiledGraph>
+compile(const std::vector<std::string> &expressions,
+        const std::vector<typed::Variable> &variables);
 
 // Versioned, pointer-free plan representation shared by bindings and native
 // workers.

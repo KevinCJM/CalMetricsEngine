@@ -328,6 +328,7 @@ public:
 
 struct Result {
   py::array values;
+  py::object offsets;
   std::shared_ptr<p::Plan> plan;
   n::ExecutionAudit native;
   bool prepared = false, cache_hit = false;
@@ -361,6 +362,10 @@ struct Result {
     d["python_native_transitions"] = 1;
     d["output_ownership"] =
         native.output_owner ? "native_shared_region" : "numpy_owned";
+    d["output_kind"] =
+        plan->graph->program.output_kind == calmetrics_engine::graph::OutputKind::series
+            ? "series"
+            : "scalar";
     py::list chunks;
     for (const auto &a : native.chunks)
       chunks.append(b::graph_audit(a));
@@ -372,6 +377,28 @@ py::array new_output(std::size_t rows, std::size_t columns) {
   p::checked_mul(p::checked_mul(rows, columns), 8);
   return py::array_t<double>(
       {static_cast<py::ssize_t>(rows), static_cast<py::ssize_t>(columns)});
+}
+std::size_t output_rows(const c::CompiledGraph &graph, const n::Batch &batch) {
+  if (graph.program.output_kind == calmetrics_engine::graph::OutputKind::scalar)
+    return batch.rows;
+  std::size_t rows = 0;
+  for (std::size_t i = 0; i < batch.rows; ++i) {
+    if (batch.starts[i] < 0 || batch.ends[i] < batch.starts[i])
+      throw py::value_error("invalid interval bounds");
+    rows = p::checked_add(
+        rows, static_cast<std::size_t>(batch.ends[i] - batch.starts[i]));
+  }
+  return rows;
+}
+py::object output_offsets(const c::CompiledGraph &graph, const n::Batch &batch) {
+  if (graph.program.output_kind != calmetrics_engine::graph::OutputKind::series)
+    return py::none();
+  py::array_t<std::int64_t> offsets(batch.rows + 1);
+  auto *data = offsets.mutable_data();
+  data[0] = 0;
+  for (std::size_t i = 0; i < batch.rows; ++i)
+    data[i + 1] = data[i] + (batch.ends[i] - batch.starts[i]);
+  return offsets;
 }
 void same_graph(const std::shared_ptr<c::CompiledGraph> &g,
                 const std::shared_ptr<p::Plan> &plan) {
@@ -387,20 +414,23 @@ public:
   std::shared_ptr<BoundData> bound;
   std::shared_ptr<p::Plan> plan;
   py::array output;
+  py::object offsets;
   const void *output_address;
   std::mutex mutex;
   PreparedExecution(std::shared_ptr<n::Engine> e, std::shared_ptr<BoundData> b,
                     std::shared_ptr<p::Plan> p)
       : engine(std::move(e)), bound(std::move(b)), plan(std::move(p)),
-        output(
-            new_output(bound->native.rows, plan->graph->program.roots.size())),
+        output(new_output(output_rows(*plan->graph, bound->native),
+                          plan->graph->program.roots.size())),
+        offsets(output_offsets(*plan->graph, bound->native)),
         output_address(output.data()) {}
   n::ExecutionAudit execute() {
     if (!bound->unchanged())
       throw py::value_error(
           "PREPARED_INPUT_CHANGED: rebind resized or retyped arrays");
     if (output.ndim() != 2 ||
-        output.shape(0) != static_cast<py::ssize_t>(bound->native.rows) ||
+        output.shape(0) != static_cast<py::ssize_t>(
+                               output_rows(*plan->graph, bound->native)) ||
         output.shape(1) !=
             static_cast<py::ssize_t>(plan->graph->program.roots.size()) ||
         output.data() != output_address || !output.writeable() ||
@@ -420,7 +450,7 @@ public:
   }
   Result run_audit() {
     auto a = execute();
-    return {output, plan, std::move(a), true, true};
+    return {output, offsets, plan, std::move(a), true, true};
   }
 };
 std::string worker_path(const py::object &path) {
@@ -504,7 +534,8 @@ public:
     py::array output;
     double *data = nullptr;
     if (!shared_output) {
-      output = new_output(bound->native.rows, graph->program.roots.size());
+      output = new_output(output_rows(*graph, bound->native),
+                          graph->program.roots.size());
       data = static_cast<double *>(output.mutable_data());
     }
     n::ExecutionAudit audit;
@@ -517,13 +548,14 @@ public:
       if (!audit.output_owner)
         throw std::runtime_error("native shared output owner missing");
       const std::vector<py::ssize_t> shape{
-          static_cast<py::ssize_t>(bound->native.rows),
+          static_cast<py::ssize_t>(output_rows(*graph, bound->native)),
           static_cast<py::ssize_t>(graph->program.roots.size())};
       output =
           py::array(py::dtype::of<double>(), shape, {},
                     audit.output_owner->data(), py::cast(audit.output_owner));
     }
-    return {std::move(output), std::move(plan), std::move(audit), false, hit};
+    return {std::move(output), output_offsets(*graph, bound->native),
+            std::move(plan), std::move(audit), false, hit};
   }
   std::shared_ptr<PreparedExecution>
   prepare(std::shared_ptr<c::CompiledGraph> graph, const py::object &inputs,
@@ -659,12 +691,22 @@ void register_native_api(py::module_ &module) {
       py::arg("descriptor"), py::kw_only(), py::arg("readonly") = true);
   py::class_<Result>(module, "GraphExecutionResult")
       .def_readonly("values", &Result::values)
+      .def_readonly("offsets", &Result::offsets)
+      .def_property_readonly(
+          "output_kind",
+          [](const Result &r) {
+            return r.plan->graph->program.output_kind ==
+                           calmetrics_engine::graph::OutputKind::series
+                       ? "series"
+                       : "scalar";
+          })
       .def_readonly("plan", &Result::plan)
       .def_property_readonly("audit", &Result::audit);
   py::class_<PreparedExecution, std::shared_ptr<PreparedExecution>>(
       module, "PreparedGraphExecution")
       .def_readonly("plan", &PreparedExecution::plan)
       .def_readonly("output", &PreparedExecution::output)
+      .def_readonly("offsets", &PreparedExecution::offsets)
       .def("run", &PreparedExecution::run)
       .def("run_audit", &PreparedExecution::run_audit);
   py::class_<PlannerAPI>(module, "AdaptivePlanner")

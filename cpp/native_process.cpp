@@ -461,28 +461,61 @@ Bytes execute_request(const Bytes &bytes, Bytes &cached_bytes,
            c = get_descriptor(in);
       require(a.offset == 0 && b.offset == 0 && c.offset == 0,
               "native interval mapping offset must be zero");
-      require(
-          planner::checked_mul(total_rows, 8) <= a.bytes &&
-              planner::checked_mul(total_rows, 8) <= b.bytes &&
-              planner::checked_mul(
-                  planner::checked_mul(total_rows, cached_program.roots.size()),
-                  8) <= c.bytes,
-          "native interval/output mapping bounds");
+      require(planner::checked_mul(total_rows, 8) <= a.bytes &&
+                  planner::checked_mul(total_rows, 8) <= b.bytes,
+              "native interval mapping bounds");
       auto sa = SharedRegion::attach(a.name, a.bytes),
-           sb = SharedRegion::attach(b.name, b.bytes),
-           so = SharedRegion::attach(c.name, c.bytes, true);
-      starts = static_cast<const std::int64_t *>(sa->data()) + begin;
-      ends = static_cast<const std::int64_t *>(sb->data()) + begin;
+           sb = SharedRegion::attach(b.name, b.bytes);
+      const auto *all_starts = static_cast<const std::int64_t *>(sa->data());
+      const auto *all_ends = static_cast<const std::int64_t *>(sb->data());
+      std::size_t total_output_rows = total_rows;
+      std::size_t output_row_begin = begin;
+      if (cached_program.output_kind == graph::OutputKind::series) {
+        total_output_rows = 0;
+        output_row_begin = 0;
+        for (std::size_t row = 0; row < total_rows; ++row) {
+          require(all_starts[row] >= 0 && all_ends[row] >= all_starts[row],
+                  "native interval mapping bounds");
+          const auto length =
+              static_cast<std::size_t>(all_ends[row] - all_starts[row]);
+          total_output_rows =
+              planner::checked_add(total_output_rows, length);
+          if (row < begin)
+            output_row_begin =
+                planner::checked_add(output_row_begin, length);
+        }
+      }
+      require(planner::checked_mul(
+                  planner::checked_mul(total_output_rows,
+                                       cached_program.roots.size()),
+                  8) <= c.bytes,
+              "native output mapping bounds");
+      auto so = SharedRegion::attach(c.name, c.bytes, true);
+      starts = all_starts + begin;
+      ends = all_ends + begin;
       output = static_cast<double *>(so->data()) +
-               begin * cached_program.roots.size();
+               output_row_begin * cached_program.roots.size();
       mappings.push_back(sa);
       mappings.push_back(sb);
       mappings.push_back(so);
     } else {
       starts_storage = in.array<std::int64_t>(end - begin);
       ends_storage = in.array<std::int64_t>(end - begin);
+      std::size_t output_rows = end - begin;
+      if (cached_program.output_kind == graph::OutputKind::series) {
+        output_rows = 0;
+        for (std::size_t row = 0; row < starts_storage.size(); ++row) {
+          require(starts_storage[row] >= 0 &&
+                      ends_storage[row] >= starts_storage[row],
+                  "native interval mapping bounds");
+          output_rows = planner::checked_add(
+              output_rows,
+              static_cast<std::size_t>(ends_storage[row] -
+                                       starts_storage[row]));
+        }
+      }
       output_storage.resize(
-          planner::checked_mul(end - begin, cached_program.roots.size()));
+          planner::checked_mul(output_rows, cached_program.roots.size()));
       starts = starts_storage.data();
       ends = ends_storage.data();
       output = output_storage.data();
@@ -648,16 +681,31 @@ graph::Audit ProcessTransport::response(const Bytes &bytes,
   if (in.number())
     throw std::runtime_error("native worker: " + in.string());
   auto audit = read_audit(in);
+  std::size_t output_row_begin = chunk.begin;
+  std::size_t output_rows = chunk.end - chunk.begin;
+  if (plan_.graph->program.output_kind == graph::OutputKind::series) {
+    output_row_begin = 0;
+    output_rows = 0;
+    for (std::size_t row = 0; row < chunk.end; ++row) {
+      const auto length =
+          static_cast<std::size_t>(batch_.ends[row] - batch_.starts[row]);
+      if (row < chunk.begin)
+        output_row_begin = planner::checked_add(output_row_begin, length);
+      else
+        output_rows = planner::checked_add(output_rows, length);
+    }
+  }
   const auto count =
       plan_.use_shared_memory
           ? 0
-          : (chunk.end - chunk.begin) * plan_.graph->program.roots.size();
+          : planner::checked_mul(output_rows,
+                                 plan_.graph->program.roots.size());
   auto values = in.array<double>(count);
   in.end();
   require(audit.rows == chunk.end - chunk.begin,
           "native worker result shape mismatch");
   if (count)
-    std::memcpy(output + chunk.begin * plan_.graph->program.roots.size(),
+    std::memcpy(output + output_row_begin * plan_.graph->program.roots.size(),
                 values.data(), count * 8);
   return audit;
 }
