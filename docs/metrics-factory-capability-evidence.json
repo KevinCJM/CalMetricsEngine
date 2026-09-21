@@ -1,0 +1,1375 @@
+{
+  "as_of": "2026-09-21",
+  "scope": "capability audit, not implementation or full parity acceptance",
+  "counts": {
+    "period": {
+      "C": 64,
+      "D": 17,
+      "B": 5
+    },
+    "rolling": {
+      "C": 71,
+      "S": 13,
+      "G": 12
+    },
+    "fear": {
+      "G": 30,
+      "C": 17,
+      "D": 5,
+      "B": 4
+    },
+    "crowding": {
+      "G": 34,
+      "C": 26,
+      "D": 9
+    },
+    "unwired": {
+      "U": 26
+    }
+  },
+  "catalog_counts": {
+    "executable_period_metrics": 86,
+    "executable_rolling_metrics": 96,
+    "not_executable_config_entries": 26
+  },
+  "skill_snapshot_counts": {
+    "executable_period_metrics": 85,
+    "executable_rolling_metrics": 96,
+    "not_executable_config_entries": 26
+  },
+  "engine_canonical_operators": 118,
+  "engine_build_id": "5d16b88015d839eddaaa3aaddec8e59d931d5c55dc8cb203f5c2209d134bc34b",
+  "build_identity_matches_live_cpp_tree": true,
+  "build_identity_prefix": "0.3.0;AppleClang;17.0.0.17000603;arm64;Release;;-O3 -DNDEBUG",
+  "engine_head": "f952f37ebe173c3279996cc9354b66e5f5cf382b",
+  "metricsfactory_head": "421ba3da7c97977b5d0b36202130d5fe4e0c05d6",
+  "sources": {
+    "/Users/chenjunming/Desktop/KevinGit/PyFinance/MetricsFactory/metrics_factory.py": "1d48920b2822a10b472a43b03f27eec82a1926e3a59fc465c249ee0032eb55ab",
+    "/Users/chenjunming/Desktop/KevinGit/PyFinance/MetricsFactory/metrics_cal_config.py": "378f26396bdf161209619d995abcf3a10ac6cbbd43d3f2df3cc3862a91472a35",
+    "/Users/chenjunming/Desktop/KevinGit/PyFinance/MetricsFactory/period_metrics_cal.py": "51ac74a1567b8401abd41606c9695a4fa067669c1ecfb339eddc229dbfea2ef4",
+    "/Users/chenjunming/Desktop/KevinGit/PyFinance/MetricsFactory/rolling_metrics_cal.py": "831d04250765ae3fd91045bd8b07412f5e447432eed1a80e4d33e3fbc20b9314",
+    "/Users/chenjunming/.codex/skills/metrics-factory/SKILL.md": "f64c1f7ed57ad770ff466a43438c03c2e1882d589a67e9c884d6e4539f3c11be",
+    "/Users/chenjunming/.codex/skills/metrics-factory/scripts/run_a_share_fear_indicators.py": "109c491a1a9b11c1f5d0e23f94d8c495a2b55e938912dfcd3ca8bdde77495039",
+    "/Users/chenjunming/.codex/skills/metrics-factory/scripts/run_a_share_crowding_indicators.py": "0fabf3919d9ced83bdd46c99bdc2f5083d8d8d439b0219e5bd99282624348857",
+    "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/cpp/include/calmetrics_engine/operators.def": "c4723e53841d7026c619cba27bdc85baf9bd9dd0269712f3d22f9927cf697851",
+    "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/cpp/compiler.cpp": "8338f6c9dffe0f60e0d2c5bbcb96ebc8728ca03c9e82e740b08d397ea9ee2594",
+    "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/cpp/typed_ir.cpp": "5175cc4f2055d7a6a7e0f01f196bb93439ea251eafef192c7eb185f06e97e3d9",
+    "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/cpp/graph.cpp": "5e083ceada99945af78e861e0fc1b6392f344ea000ffe2f488e42adda5cf2b32",
+    "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/cpp/operators/sequence.cpp": "e3d34e99f8f0a91e2e8004755f8f3f593e8074630f7049baa21709774e5a1f75",
+    "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/cpp/operators/reduction.cpp": "00ac4ef4616e21b3dda6b6d2b2ccb07edf055508cc3215c2c0199b19e42a23e1",
+    "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/cpp/operators/state.cpp": "c2805d3adcb1df7f048a27fdae8df0aae87036d08330657e4170dbda105b7f24",
+    "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/cpp/operators/registry.cpp": "33462747bfa516785f65766c394a5a8e9c0f92358a95c1c70ef8e51d895af20d",
+    "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/cpp/operators/elementwise.cpp": "6f81283827536917406c24513bf18f05cb6f3f8d3f51ef19e8c4ad60133b974d",
+    "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/cpp/finance/statistics.cpp": "5c3b538e48ac290f2af9a4bbf16f36fb934027a18e2293742ed6ff018b27f4a1"
+  },
+  "runtime_check": {
+    "python": "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+    "NUMBA_CACHE_DIR": "/private/tmp/metrics-factory-analysis-numba-cache",
+    "can_run": true
+  },
+  "probes": [
+    {
+      "name": "lag_unaligned",
+      "expression": "lag(x)",
+      "inputs": {
+        "x": [
+          1.0,
+          2.0,
+          3.0,
+          4.0,
+          5.0
+        ]
+      },
+      "variables": {
+        "x": "series"
+      },
+      "rtol": 1e-09,
+      "atol": 1e-10,
+      "executed": false,
+      "error": "SERIES_ROOT_ALIGNMENT: public series roots must preserve the interval time axis"
+    },
+    {
+      "name": "lag_difference_shape",
+      "expression": "x-lag(x)",
+      "inputs": {
+        "x": [
+          1.0,
+          2.0,
+          3.0,
+          4.0,
+          5.0
+        ]
+      },
+      "variables": {
+        "x": "series"
+      },
+      "rtol": 1e-09,
+      "atol": 1e-10,
+      "executed": false,
+      "error": "SHAPE_MISMATCH: subtract symbolic shapes do not match"
+    },
+    {
+      "name": "aligned_difference_composed",
+      "expression": "rolling_apply(sum(difference(x,2)),3,1)",
+      "inputs": {
+        "x": [
+          1.0,
+          2.0,
+          "NaN",
+          4.0,
+          5.0
+        ]
+      },
+      "variables": {
+        "x": "series"
+      },
+      "rtol": 1e-09,
+      "atol": 1e-10,
+      "executed": true,
+      "value": [
+        "NaN",
+        "NaN",
+        "NaN",
+        2.0,
+        "NaN"
+      ],
+      "expected": [
+        "NaN",
+        "NaN",
+        "NaN",
+        2.0,
+        "NaN"
+      ],
+      "matches": true
+    },
+    {
+      "name": "aligned_shift_raw_composed",
+      "expression": "rolling_apply(mean(lag(x,2)),3,1)",
+      "inputs": {
+        "x": [
+          1.0,
+          2.0,
+          "NaN",
+          4.0,
+          5.0
+        ]
+      },
+      "variables": {
+        "x": "series"
+      },
+      "rtol": 1e-09,
+      "atol": 1e-10,
+      "executed": true,
+      "value": [
+        "NaN",
+        "NaN",
+        1.0,
+        2.0,
+        "NaN"
+      ],
+      "expected": [
+        "NaN",
+        "NaN",
+        1.0,
+        2.0,
+        "NaN"
+      ],
+      "matches": true
+    },
+    {
+      "name": "rolling_sum_composed",
+      "expression": "rolling_apply(sum_where(x,finite_mask(x)),3,1)",
+      "inputs": {
+        "x": [
+          1.0,
+          2.0,
+          "NaN",
+          4.0,
+          5.0
+        ]
+      },
+      "variables": {
+        "x": "series"
+      },
+      "rtol": 1e-09,
+      "atol": 1e-10,
+      "executed": true,
+      "value": [
+        1.0,
+        3.0,
+        3.0,
+        6.0,
+        9.0
+      ],
+      "expected": [
+        1,
+        3,
+        3,
+        6,
+        9
+      ],
+      "matches": true
+    },
+    {
+      "name": "rolling_rank_including_last_nan",
+      "expression": "rolling_apply(count_true(logical_and(finite_mask(x),x<=value_at(x,max_value(where(finite_mask(x),cumulative_sum(where(finite_mask(x),1,1))-1,-1)))))/count_true(finite_mask(x)),3,1)",
+      "inputs": {
+        "x": [
+          1.0,
+          2.0,
+          "NaN",
+          4.0,
+          5.0
+        ]
+      },
+      "variables": {
+        "x": "series"
+      },
+      "rtol": 1e-09,
+      "atol": 1e-10,
+      "executed": true,
+      "value": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "expected": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "matches": true
+    },
+    {
+      "name": "rolling_rank_nontrivial",
+      "expression": "rolling_apply(count_true(logical_and(finite_mask(x),x<=value_at(x,max_value(where(finite_mask(x),cumulative_sum(where(finite_mask(x),1,1))-1,-1)))))/count_true(finite_mask(x)),3,1)",
+      "inputs": {
+        "x": [
+          3.0,
+          1.0,
+          2.0,
+          "NaN",
+          1.0
+        ]
+      },
+      "variables": {
+        "x": "series"
+      },
+      "rtol": 1e-09,
+      "atol": 1e-10,
+      "executed": true,
+      "value": [
+        1.0,
+        0.5,
+        0.6666666666666666,
+        1.0,
+        0.5
+      ],
+      "expected": [
+        1.0,
+        0.5,
+        0.6666666666666666,
+        1.0,
+        0.5
+      ],
+      "matches": true
+    },
+    {
+      "name": "current_streak_composed",
+      "expression": "cumulative_sum(where(finite_mask(x),1,1))-cumulative_max(where(x<0,0,cumulative_sum(where(finite_mask(x),1,1))))",
+      "inputs": {
+        "x": [
+          -1.0,
+          -2.0,
+          1.0,
+          -3.0,
+          "NaN",
+          -4.0
+        ]
+      },
+      "variables": {
+        "x": "series"
+      },
+      "rtol": 1e-09,
+      "atol": 1e-10,
+      "executed": true,
+      "value": [
+        1.0,
+        2.0,
+        0.0,
+        1.0,
+        0.0,
+        1.0
+      ],
+      "expected": [
+        1,
+        2,
+        0,
+        1,
+        0,
+        1
+      ],
+      "matches": true
+    },
+    {
+      "name": "ema_even_span_half_integer",
+      "expression": "recursive_smooth(x,2.5,first(x))",
+      "inputs": {
+        "x": [
+          1.0,
+          2.0,
+          3.0,
+          4.0,
+          5.0
+        ]
+      },
+      "variables": {
+        "x": "series"
+      },
+      "rtol": 1e-09,
+      "atol": 1e-10,
+      "executed": false,
+      "error": "INVALID_PARAMETER"
+    },
+    {
+      "name": "ema_odd_span_dense",
+      "expression": "recursive_smooth(x,3,first(x))",
+      "inputs": {
+        "x": [
+          1.0,
+          2.0,
+          3.0,
+          4.0,
+          5.0
+        ]
+      },
+      "variables": {
+        "x": "series"
+      },
+      "rtol": 1e-09,
+      "atol": 1e-10,
+      "executed": true,
+      "value": [
+        1.0,
+        1.3333333333333333,
+        1.8888888888888886,
+        2.592592592592592,
+        3.3950617283950613
+      ],
+      "expected": [
+        1.0,
+        1.3333333333333335,
+        1.888888888888889,
+        2.5925925925925926,
+        3.3950617283950617
+      ],
+      "matches": true
+    },
+    {
+      "name": "ema_odd_span_nan",
+      "expression": "recursive_smooth(x,3,first(x))",
+      "inputs": {
+        "x": [
+          1.0,
+          2.0,
+          "NaN",
+          4.0,
+          5.0
+        ]
+      },
+      "variables": {
+        "x": "series"
+      },
+      "rtol": 1e-09,
+      "atol": 1e-10,
+      "executed": true,
+      "value": [
+        1.0,
+        1.3333333333333333,
+        "NaN",
+        2.222222222222222,
+        3.1481481481481475
+      ],
+      "expected": [
+        1.0,
+        1.3333333333333335,
+        1.3333333333333335,
+        2.2222222222222223,
+        3.148148148148148
+      ],
+      "matches": false
+    },
+    {
+      "name": "kdj_naive_first_row",
+      "expression": "recursive_smooth(x,3,50)",
+      "inputs": {
+        "x": [
+          80.0,
+          80.0,
+          80.0
+        ]
+      },
+      "variables": {
+        "x": "series"
+      },
+      "rtol": 1e-09,
+      "atol": 1e-10,
+      "executed": true,
+      "value": [
+        60.0,
+        66.66666666666667,
+        71.11111111111111
+      ],
+      "expected": [
+        50.0,
+        60.0,
+        66.66666666666667
+      ],
+      "matches": false
+    },
+    {
+      "name": "nested_rolling_scope",
+      "expression": "rolling_apply(mean(rolling_mean(x,2)),3)",
+      "inputs": {
+        "x": [
+          1.0,
+          2.0,
+          3.0,
+          4.0,
+          5.0
+        ]
+      },
+      "variables": {
+        "x": "series"
+      },
+      "rtol": 1e-09,
+      "atol": 1e-10,
+      "executed": false,
+      "error": "ROLLING_NESTED_SCOPE_UNSUPPORTED: rolling body cannot contain rolling operators"
+    },
+    {
+      "name": "matrix_dag_binding",
+      "expression": "sum_asset(x)",
+      "inputs": {
+        "x": [
+          1.0,
+          2.0,
+          3.0,
+          4.0,
+          5.0
+        ]
+      },
+      "variables": {
+        "x": {
+          "kind": "matrix",
+          "dtype": "float64",
+          "axes": [
+            "time",
+            "asset"
+          ],
+          "shape": [
+            "T",
+            "N"
+          ],
+          "semantic_dimension": "dimensionless"
+        }
+      },
+      "rtol": 1e-09,
+      "atol": 1e-10,
+      "executed": false,
+      "error": "typed interval graph currently binds scalar or time-series variables"
+    },
+    {
+      "name": "empty_where_not_short_circuit",
+      "expression": "where(count_true(x>0)>0,mean_where(x,x>0),0)",
+      "inputs": {
+        "x": [
+          -1.0,
+          -2.0
+        ]
+      },
+      "variables": {
+        "x": "series"
+      },
+      "rtol": 1e-09,
+      "atol": 1e-10,
+      "executed": false,
+      "error": "INSUFFICIENT_SAMPLE"
+    },
+    {
+      "name": "nan_mean_naive",
+      "expression": "mean(x)",
+      "inputs": {
+        "x": [
+          1.0,
+          2.0,
+          "NaN",
+          4.0,
+          5.0
+        ]
+      },
+      "variables": {
+        "x": "series"
+      },
+      "rtol": 1e-09,
+      "atol": 1e-10,
+      "executed": true,
+      "value": [
+        "NaN"
+      ],
+      "expected": [
+        3.0
+      ],
+      "matches": false
+    },
+    {
+      "name": "nan_mean_composed",
+      "expression": "mean_where(x,finite_mask(x))",
+      "inputs": {
+        "x": [
+          1.0,
+          2.0,
+          "NaN",
+          4.0,
+          5.0
+        ]
+      },
+      "variables": {
+        "x": "series"
+      },
+      "rtol": 1e-09,
+      "atol": 1e-10,
+      "executed": true,
+      "value": [
+        3.0
+      ],
+      "expected": [
+        3.0
+      ],
+      "matches": true
+    },
+    {
+      "name": "drawdown_tie_last",
+      "expression": "interval_trough(last_drawdown_interval(drawdown_series(x)))-interval_start(last_drawdown_interval(drawdown_series(x)))",
+      "inputs": {
+        "x": [
+          100.0,
+          80.0,
+          100.0,
+          90.0,
+          80.0
+        ]
+      },
+      "variables": {
+        "x": "series"
+      },
+      "rtol": 1e-09,
+      "atol": 1e-10,
+      "executed": true,
+      "value": [
+        2.0
+      ],
+      "expected": [
+        2.0
+      ],
+      "matches": true
+    },
+    {
+      "name": "registry_normal_cdf",
+      "exists": false,
+      "error": "UNKNOWN_OPERATOR"
+    },
+    {
+      "name": "registry_sort",
+      "exists": false,
+      "error": "UNKNOWN_OPERATOR"
+    },
+    {
+      "name": "registry_take",
+      "exists": false,
+      "error": "UNKNOWN_OPERATOR"
+    },
+    {
+      "name": "registry_block_reduce",
+      "exists": false,
+      "error": "UNKNOWN_OPERATOR"
+    },
+    {
+      "name": "registry_ema",
+      "exists": false,
+      "error": "UNKNOWN_OPERATOR"
+    },
+    {
+      "name": "registry_forward_fill",
+      "exists": false,
+      "error": "UNKNOWN_OPERATOR"
+    },
+    {
+      "name": "top2_tie_safe_composed_with_ties",
+      "expression": "sum(where(logical_and(finite_mask(x),x>quantile_where(x,finite_mask(x),(count_true(finite_mask(x))-2)/(count_true(finite_mask(x))-1))),x,0))+(2-count_true(logical_and(finite_mask(x),x>quantile_where(x,finite_mask(x),(count_true(finite_mask(x))-2)/(count_true(finite_mask(x))-1)))))*quantile_where(x,finite_mask(x),(count_true(finite_mask(x))-2)/(count_true(finite_mask(x))-1))",
+      "inputs": {
+        "x": [
+          9.0,
+          7.0,
+          7.0,
+          1.0,
+          0.0
+        ]
+      },
+      "variables": {
+        "x": "series"
+      },
+      "rtol": 1e-09,
+      "atol": 1e-10,
+      "executed": true,
+      "value": [
+        16.0
+      ],
+      "expected": [
+        16.0
+      ],
+      "matches": true
+    },
+    {
+      "name": "top2_tie_safe_composed_without_ties",
+      "expression": "sum(where(logical_and(finite_mask(x),x>quantile_where(x,finite_mask(x),(count_true(finite_mask(x))-2)/(count_true(finite_mask(x))-1))),x,0))+(2-count_true(logical_and(finite_mask(x),x>quantile_where(x,finite_mask(x),(count_true(finite_mask(x))-2)/(count_true(finite_mask(x))-1)))))*quantile_where(x,finite_mask(x),(count_true(finite_mask(x))-2)/(count_true(finite_mask(x))-1))",
+      "inputs": {
+        "x": [
+          9.0,
+          8.0,
+          7.0,
+          1.0,
+          0.0
+        ]
+      },
+      "variables": {
+        "x": "series"
+      },
+      "rtol": 1e-09,
+      "atol": 1e-10,
+      "executed": true,
+      "value": [
+        17.0
+      ],
+      "expected": [
+        17.0
+      ],
+      "matches": true
+    },
+    {
+      "name": "period_TotalReturn",
+      "expression": "sum(x)",
+      "inputs": {
+        "x": [
+          0.03,
+          -0.01,
+          0.02,
+          -0.025,
+          0.001,
+          0.04
+        ]
+      },
+      "variables": {
+        "x": "series"
+      },
+      "rtol": 1e-09,
+      "atol": 1e-10,
+      "executed": true,
+      "value": [
+        0.055999999999999994
+      ],
+      "expected": [
+        0.055999999999999994
+      ],
+      "matches": true
+    },
+    {
+      "name": "period_AvgPositiveReturn",
+      "expression": "mean(where(x>0,x,0))",
+      "inputs": {
+        "x": [
+          0.03,
+          -0.01,
+          0.02,
+          -0.025,
+          0.001,
+          0.04
+        ]
+      },
+      "variables": {
+        "x": "series"
+      },
+      "rtol": 1e-09,
+      "atol": 1e-10,
+      "executed": true,
+      "value": [
+        0.015166666666666669
+      ],
+      "expected": [
+        0.015166666666666667
+      ],
+      "matches": true
+    },
+    {
+      "name": "period_DownsideVolatility",
+      "expression": "std(where(x<4.07907191608869e-05,x-4.07907191608869e-05,0),1)",
+      "inputs": {
+        "x": [
+          0.03,
+          -0.01,
+          0.02,
+          -0.025,
+          0.001,
+          0.04
+        ]
+      },
+      "variables": {
+        "x": "series"
+      },
+      "rtol": 1e-09,
+      "atol": 1e-10,
+      "executed": true,
+      "value": [
+        0.010224863018523697
+      ],
+      "expected": [
+        0.010224863018523697
+      ],
+      "matches": true
+    },
+    {
+      "name": "period_ReturnSkewness",
+      "expression": "skewness(x)",
+      "inputs": {
+        "x": [
+          0.03,
+          -0.01,
+          0.02,
+          -0.025,
+          0.001,
+          0.04
+        ]
+      },
+      "variables": {
+        "x": "series"
+      },
+      "rtol": 1e-09,
+      "atol": 1e-10,
+      "executed": true,
+      "value": [
+        -0.1822871633282522
+      ],
+      "expected": [
+        -0.18228716332825215
+      ],
+      "matches": true
+    },
+    {
+      "name": "period_ReturnKurtosis",
+      "expression": "excess_kurtosis(x)",
+      "inputs": {
+        "x": [
+          0.03,
+          -0.01,
+          0.02,
+          -0.025,
+          0.001,
+          0.04
+        ]
+      },
+      "variables": {
+        "x": "series"
+      },
+      "rtol": 1e-09,
+      "atol": 1e-10,
+      "executed": true,
+      "value": [
+        -1.5003391938492836
+      ],
+      "expected": [
+        -1.5003391938492865
+      ],
+      "matches": true
+    },
+    {
+      "name": "period_VaR-95",
+      "expression": "maximum(-(mean(x)+normal_ppf(0.05)*std(x,1)),0)",
+      "inputs": {
+        "x": [
+          0.03,
+          -0.01,
+          0.02,
+          -0.025,
+          0.001,
+          0.04
+        ]
+      },
+      "variables": {
+        "x": "series"
+      },
+      "rtol": 1e-09,
+      "atol": 1e-10,
+      "executed": true,
+      "value": [
+        0.03164520536027595
+      ],
+      "expected": [
+        0.031645205405562905
+      ],
+      "matches": true
+    },
+    {
+      "name": "period_KRatio",
+      "expression": "linear_slope(cumulative_sum(x))/regression_standard_error(cumulative_sum(x))*sqrt(length(x)*(length(x)**2-1)/12)",
+      "inputs": {
+        "x": [
+          0.03,
+          -0.01,
+          0.02,
+          -0.025,
+          0.001,
+          0.04
+        ]
+      },
+      "variables": {
+        "x": "series"
+      },
+      "rtol": 1e-09,
+      "atol": 1e-10,
+      "executed": true,
+      "value": [
+        0.6493976400066178
+      ],
+      "expected": [
+        0.6493976400066179
+      ],
+      "matches": true
+    },
+    {
+      "name": "PriceSigma_naive",
+      "expression": "rolling_std(x,3,1,1)",
+      "inputs": {
+        "x": [
+          1.0,
+          2.0,
+          3.0,
+          4.0,
+          5.0
+        ]
+      },
+      "variables": {
+        "x": "series"
+      },
+      "rtol": 1e-09,
+      "atol": 1e-10,
+      "executed": true,
+      "value": [
+        "NaN",
+        0.7071067811865476,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "expected": [
+        0.0,
+        0.7071067811865476,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "matches": false
+    },
+    {
+      "name": "CloseMA_dense",
+      "expression": "rolling_mean(x,3)",
+      "inputs": {
+        "x": [
+          1.0,
+          2.0,
+          3.0,
+          4.0,
+          5.0
+        ]
+      },
+      "variables": {
+        "x": "series"
+      },
+      "rtol": 1e-09,
+      "atol": 1e-10,
+      "executed": true,
+      "value": [
+        "NaN",
+        "NaN",
+        2.0,
+        3.0,
+        4.0
+      ],
+      "expected": [
+        "NaN",
+        "NaN",
+        2.0,
+        3.0,
+        4.0
+      ],
+      "matches": true
+    },
+    {
+      "name": "CloseMA_nan_default",
+      "expression": "rolling_mean(x,3)",
+      "inputs": {
+        "x": [
+          1.0,
+          2.0,
+          "NaN",
+          4.0,
+          5.0
+        ]
+      },
+      "variables": {
+        "x": "series"
+      },
+      "rtol": 1e-09,
+      "atol": 1e-10,
+      "executed": true,
+      "value": [
+        "NaN",
+        "NaN",
+        "NaN",
+        "NaN",
+        "NaN"
+      ],
+      "expected": [
+        "NaN",
+        "NaN",
+        1.5,
+        3.0,
+        4.5
+      ],
+      "matches": false
+    },
+    {
+      "name": "CloseMA_nan_min1",
+      "expression": "rolling_mean(x,3,1)",
+      "inputs": {
+        "x": [
+          1.0,
+          2.0,
+          "NaN",
+          4.0,
+          5.0
+        ]
+      },
+      "variables": {
+        "x": "series"
+      },
+      "rtol": 1e-09,
+      "atol": 1e-10,
+      "executed": true,
+      "value": [
+        1.0,
+        1.5,
+        1.5,
+        3.0,
+        4.5
+      ],
+      "expected": [
+        "NaN",
+        "NaN",
+        1.5,
+        3.0,
+        4.5
+      ],
+      "matches": false
+    },
+    {
+      "name": "CloseMA_nan_corrected_template",
+      "expression": "rolling_mean(x,3,1)*rolling_mean(where(finite_mask(x),1,1),3)",
+      "inputs": {
+        "x": [
+          1.0,
+          2.0,
+          "NaN",
+          4.0,
+          5.0
+        ]
+      },
+      "variables": {
+        "x": "series"
+      },
+      "rtol": 1e-09,
+      "atol": 1e-10,
+      "executed": true,
+      "value": [
+        "NaN",
+        "NaN",
+        1.5,
+        3.0,
+        4.5
+      ],
+      "expected": [
+        "NaN",
+        "NaN",
+        1.5,
+        3.0,
+        4.5
+      ],
+      "matches": true
+    },
+    {
+      "name": "PriceSigma_singleton_corrected_template",
+      "expression": "rolling_std(x,3,0,1)*sqrt((rolling_mean(where(finite_mask(x),1,0),3,1)*minimum(cumulative_sum(where(finite_mask(x),1,1)),3))/maximum((rolling_mean(where(finite_mask(x),1,0),3,1)*minimum(cumulative_sum(where(finite_mask(x),1,1)),3))-1,1))",
+      "inputs": {
+        "x": [
+          1.0,
+          2.0,
+          3.0,
+          4.0,
+          5.0
+        ]
+      },
+      "variables": {
+        "x": "series"
+      },
+      "rtol": 1e-09,
+      "atol": 1e-10,
+      "executed": true,
+      "value": [
+        0.0,
+        0.7071067811865476,
+        0.9999999999999999,
+        0.9999999999999999,
+        0.9999999999999999
+      ],
+      "expected": [
+        0.0,
+        0.7071067811865476,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "matches": true
+    },
+    {
+      "name": "derived_shift_requires_nested_scope",
+      "expression": "rolling_apply(mean(lag(rolling_mean(x,3),2)),3,1)",
+      "inputs": {
+        "x": [
+          1.0,
+          2.0,
+          3.0,
+          4.0,
+          5.0
+        ]
+      },
+      "variables": {
+        "x": "series"
+      },
+      "rtol": 1e-09,
+      "atol": 1e-10,
+      "executed": false,
+      "error": "ROLLING_NESTED_SCOPE_UNSUPPORTED: rolling body cannot contain rolling operators"
+    },
+    {
+      "name": "DKX_fixed20_weighted_composed",
+      "expression": "rolling_apply(sum(((3*x+h+l+o)/6)*cumulative_sum(where(finite_mask(x),1,1)))/210,20)",
+      "inputs": {
+        "x": [
+          100.0,
+          101.0,
+          102.0,
+          103.0,
+          104.0,
+          105.0,
+          106.0,
+          107.0,
+          108.0,
+          109.0,
+          110.0,
+          111.0,
+          112.0,
+          113.0,
+          114.0,
+          115.0,
+          116.0,
+          117.0,
+          118.0,
+          119.0,
+          120.0,
+          121.0,
+          122.0,
+          123.0,
+          124.0,
+          125.0,
+          126.0,
+          127.0,
+          128.0,
+          129.0,
+          130.0,
+          131.0,
+          132.0,
+          133.0,
+          134.0,
+          135.0,
+          136.0,
+          137.0,
+          138.0,
+          139.0,
+          140.0,
+          141.0,
+          142.0,
+          143.0,
+          144.0
+        ],
+        "h": [
+          101.0,
+          102.0,
+          103.0,
+          104.0,
+          105.0,
+          106.0,
+          107.0,
+          108.0,
+          109.0,
+          110.0,
+          111.0,
+          112.0,
+          113.0,
+          114.0,
+          115.0,
+          116.0,
+          117.0,
+          118.0,
+          119.0,
+          120.0,
+          121.0,
+          122.0,
+          123.0,
+          124.0,
+          125.0,
+          126.0,
+          127.0,
+          128.0,
+          129.0,
+          130.0,
+          131.0,
+          132.0,
+          133.0,
+          134.0,
+          135.0,
+          136.0,
+          137.0,
+          138.0,
+          139.0,
+          140.0,
+          141.0,
+          142.0,
+          143.0,
+          144.0,
+          145.0
+        ],
+        "l": [
+          99.5,
+          100.5,
+          101.5,
+          102.5,
+          103.5,
+          104.5,
+          105.5,
+          106.5,
+          107.5,
+          108.5,
+          109.5,
+          110.5,
+          111.5,
+          112.5,
+          113.5,
+          114.5,
+          115.5,
+          116.5,
+          117.5,
+          118.5,
+          119.5,
+          120.5,
+          121.5,
+          122.5,
+          123.5,
+          124.5,
+          125.5,
+          126.5,
+          127.5,
+          128.5,
+          129.5,
+          130.5,
+          131.5,
+          132.5,
+          133.5,
+          134.5,
+          135.5,
+          136.5,
+          137.5,
+          138.5,
+          139.5,
+          140.5,
+          141.5,
+          142.5,
+          143.5
+        ],
+        "o": [
+          100.2,
+          101.2,
+          102.2,
+          103.2,
+          104.2,
+          105.2,
+          106.2,
+          107.2,
+          108.2,
+          109.2,
+          110.2,
+          111.2,
+          112.2,
+          113.2,
+          114.2,
+          115.2,
+          116.2,
+          117.2,
+          118.2,
+          119.2,
+          120.2,
+          121.2,
+          122.2,
+          123.2,
+          124.2,
+          125.2,
+          126.2,
+          127.2,
+          128.2,
+          129.2,
+          130.2,
+          131.2,
+          132.2,
+          133.2,
+          134.2,
+          135.2,
+          136.2,
+          137.2,
+          138.2,
+          139.2,
+          140.2,
+          141.2,
+          142.2,
+          143.2,
+          144.2
+        ]
+      },
+      "variables": {
+        "x": "series",
+        "h": "series",
+        "l": "series",
+        "o": "series"
+      },
+      "rtol": 1e-09,
+      "atol": 1e-10,
+      "executed": true,
+      "value": [
+        "NaN",
+        "NaN",
+        "NaN",
+        "NaN",
+        "NaN",
+        "NaN",
+        "NaN",
+        "NaN",
+        "NaN",
+        "NaN",
+        "NaN",
+        "NaN",
+        "NaN",
+        "NaN",
+        "NaN",
+        "NaN",
+        "NaN",
+        "NaN",
+        "NaN",
+        112.78333333333332,
+        113.78333333333332,
+        114.78333333333332,
+        115.78333333333332,
+        116.78333333333332,
+        117.78333333333332,
+        118.78333333333332,
+        119.78333333333332,
+        120.78333333333332,
+        121.78333333333332,
+        122.78333333333332,
+        123.78333333333335,
+        124.78333333333335,
+        125.78333333333335,
+        126.78333333333335,
+        127.78333333333335,
+        128.78333333333336,
+        129.78333333333336,
+        130.78333333333336,
+        131.78333333333336,
+        132.78333333333336,
+        133.78333333333336,
+        134.78333333333336,
+        135.78333333333336,
+        136.78333333333336,
+        137.78333333333336
+      ],
+      "expected": [
+        "NaN",
+        "NaN",
+        "NaN",
+        "NaN",
+        "NaN",
+        "NaN",
+        "NaN",
+        "NaN",
+        "NaN",
+        "NaN",
+        "NaN",
+        "NaN",
+        "NaN",
+        "NaN",
+        "NaN",
+        "NaN",
+        "NaN",
+        "NaN",
+        "NaN",
+        112.78333333333333,
+        113.78333333333333,
+        114.78333333333333,
+        115.78333333333333,
+        116.78333333333333,
+        117.78333333333333,
+        118.78333333333333,
+        119.78333333333333,
+        120.78333333333333,
+        121.78333333333333,
+        122.78333333333333,
+        123.78333333333333,
+        124.78333333333333,
+        125.78333333333333,
+        126.78333333333333,
+        127.78333333333333,
+        128.78333333333333,
+        129.78333333333333,
+        130.78333333333333,
+        131.78333333333333,
+        132.78333333333333,
+        133.78333333333333,
+        134.78333333333333,
+        135.78333333333333,
+        136.78333333333333,
+        137.78333333333333
+      ],
+      "matches": true
+    }
+  ]
+}

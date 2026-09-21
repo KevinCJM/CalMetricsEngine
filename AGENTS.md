@@ -100,15 +100,18 @@ The current repository already provides:
   `calmetrics_engine._native`.
 - C++17 AOT finance/numerical kernels; runtime JIT is not part of the architecture.
 - Exact-dtype zero-copy NumPy input binding, strided `ArrayView` support and explicit owner pinning.
-- A 118-entry canonical **C++** operator registry with stable native opcodes.
+- A 125-entry canonical **C++** operator registry with stable native opcodes; original IDs 1–118 remain unchanged.
 - Exact-shape output/workspace contracts and reusable native `Workspace`.
 - Explicit NEON/SSE2/optional AVX2 runtime dispatch for eligible kernels.
 - A pure-C++ restricted mathematical parser/compiler.
 - Native C++ Typed IR for scalar/time-series indicator execution, including dtype, named time axis,
   symbolic shape, semantic dimension, optional price basis and record/window intermediates.
-- C++ historical-alias canonicalization into the single 118-entry operator registry.
+- C++ historical-alias canonicalization into the single native operator registry.
 - Compiler-owned `rolling_window` lowering with no materialized T×W production array.
 - Compiler-owned `rolling_apply` sub-programs with trailing window views and state reset at each window start.
+- Native `block_apply`, `filter_apply`, `group_apply` and bounded `bisect` sub-programs, using the same compiler and executor rather than Python numerical callbacks.
+- Exact int64 category/index intermediates and typed matrix/vector inputs, including native worker transport and geometry validation.
+- Generic real-alpha masked recurrence, aligned shift, Gaussian CDF, stable index sorting, gather, integer distinct counts and floor primitives. Financial indicators remain explicit compositions.
 - Aligned time-series root outputs as contiguous values plus interval prefix offsets.
 - A shared multi-root logical DAG with operator lowering and structural CSE.
 - Borrow-aware C++ liveness analysis, including backing buffers of borrowed views such as `lag`.
@@ -139,7 +142,7 @@ code and tests exist:
 
 - Broader production business DSL governance that is intentionally above the generic engine boundary,
   especially causality/knowledge-time/research-workflow contracts.
-- Full vector/matrix variable binding, matrix-growing and portfolio-matrix nodes inside the interval DAG executor.
+- Broader public matrix-output contracts and portfolio business semantics beyond the current scalar/aligned-series root boundary.
 - Additional masked/path/matrix fusion beyond the current summary/order-stat graph fusion.
 - Broader SIMD coverage and benchmark-justified ISA extensions beyond current kernels.
 - BLAS/backend dispatch where matrix workloads justify it.
@@ -381,6 +384,35 @@ Before changing code, answer these four questions:
 Do not refactor unrelated code merely for elegance, technical-debt cleanup, or speculative future
 needs. Do not fix unrelated bugs unless the current task requires it.
 
+### Authorization boundary
+
+- Do not remove, replace, disable or change existing capabilities, workflows, models, algorithms or
+  behavior contracts without an explicit user requirement or authorization covering that change.
+- Refactoring, optimization, deduplication and compliance with these guidelines do not independently
+  authorize a behavior change. Explain effects outside the authorized scope and obtain permission
+  before making them; do not ask again for work already authorized in the conversation.
+- The cleanup and operator-design rules below apply within the authorized scope. Updating these
+  guidelines does not itself authorize a migration, service switch or removal of existing APIs.
+
+### Source history and replacement discipline
+
+- Use Git commits, tags and branches to preserve source history. Do not retain historical source
+  copies, commented-out implementations or unreachable version-selection branches merely for
+  comparison or rollback.
+- Within an authorized replacement, remove the superseded implementation together with obsolete
+  imports, exports, registrations, configuration, tests, documentation and dependencies. Preserve
+  still-relevant behavioral tests by directing them at the current implementation.
+- Roll back through Git, not through dormant old functions, files or runtime switches embedded in
+  the current source tree.
+- Retain compatibility entry points only for an explicit, still-supported public contract with
+  tests; they must delegate to the single current native implementation. Remove them when that
+  compatibility contract is explicitly retired within the authorized scope.
+- External API/data-format versions, immutable definitions, snapshots and model artifacts may be
+  retained for compatibility or audit. They do not justify parallel historical numerical runtimes.
+- Portable scalar/SIMD variants implementing the same current contract are active execution paths,
+  not historical copies. Controlled test references and benchmark baselines are permitted evidence,
+  but must never become production fallbacks or a dependency of standalone engine execution.
+
 ## 4. Canonical Data Layout
 
 High-performance batch execution should use **product-major contiguous storage**.
@@ -432,6 +464,24 @@ end_offset[k]
 C++ computes the effective pointer/range from the product base offset and interval offsets.
 
 Do not materialize a new NumPy array for every product, interval, window, group, or DAG node.
+
+### Stable numeric and categorical boundaries
+
+- Keep `object` arrays and mixed Python containers outside native numerical execution. Numeric
+  values stored as objects must be converted according to their numeric meaning at ingestion;
+  do not reinterpret them as category codes or silently turn invalid/missing values into zero.
+- For finite categories, enums or identifiers, the ingestion/schema owner must define a stable,
+  reversible mapping into an explicitly supported fixed-width integer dtype. Preserve the mapping
+  and its version with persistent results and use the same meaning across nodes, batches and workers.
+  Never independently re-encode each batch or process.
+- Missing and unknown categories need distinct, documented reserved codes or validity masks that
+  cannot collide with valid values. Integer category codes do not imply order or numeric distance.
+- Respect each public API's existing dtype contract. Unsupported categorical inputs must fail closed;
+  this policy does not add integer/category bindings to a float64-only execution entry point or
+  permit disguising unsupported types as floating-point values.
+- For affected category interfaces, test consistent mappings, decoding, missing/unknown values,
+  integer-range boundaries and cross-worker transport. Pure presentation and I/O metadata are not
+  numerical inputs and need not be encoded merely to pass through an interface.
 
 ## 5. Zero-Copy Contract
 
@@ -782,19 +832,98 @@ inherit full-graph arena capacity when their dependency closure can use fewer sl
 
 ## 15. Operator Design
 
-Operators are divided by smallest independent numerical semantics:
+### Choose the smallest independent calculation semantics
 
-- primitive elementwise
-- reductions/statistics
-- time-series/rolling
-- matrix/linear algebra
-- finance
-- coupled state/model kernels
+Divide operators by **smallest independent calculation semantics**, not by function count, code
+length, formula length, output count or execution cost. Each operator must have a one-sentence
+responsibility, explicit inputs/outputs and independent tests. This does not require exposing every
+arithmetic instruction or internal loop as a logical node.
 
-Do not create one black-box C++ operator merely because a business algorithm is complex.
+Distinguish these granularity classes from domain families such as elementwise math, statistics,
+time series, linear algebra and finance:
 
-A coupled kernel is justified only when splitting it would break recursive state, joint
-optimization, model fitting, or exact temporal semantics.
+- **Primitive operator**: one independently meaningful, reusable calculation.
+- **Composite template**: an explicit logical graph of existing operators whose intermediate
+  calculations can be independently used or replaced. Complete business algorithms belong in
+  upstream templates, lowered into the native graph, rather than new opaque C++ operators.
+- **Coupled kernel**: an inseparable recurrence, joint constrained iteration or model fit whose
+  decomposition into ordinary one-way edges would change numerical, state or temporal semantics.
+  Document the justification, state initialization/reset, termination conditions and independently
+  separable surrounding calculations. Complexity or speed alone does not justify this class.
+
+Independently replaceable feature calculation, condition evaluation, classification, confirmation
+and interval statistics must remain separable. Presentation belongs to the calling application.
+
+For every new or changed operator, answer in the task's design and acceptance document:
+
+1. What single problem does it solve?
+2. Can an intermediate result be independently used or replaced?
+3. Can existing canonical operators express the same calculation?
+4. Would further splitting change numerical, state or temporal semantics?
+
+### Keep logical granularity separate from physical execution
+
+Multiple outputs may share one coupled kernel when they describe the same inseparable solve.
+Expose separately addressable projections of the shared result where supported. Independent
+business metrics must remain independent logical roots even when one native request computes them.
+
+Lowering or template expansion must create real dependencies and preserve every used output and
+downstream reference. Do not substitute a single primary output for a multi-output contract or
+expose decorative child nodes that do not participate in execution. Preserve parameter bindings,
+defaults, required inputs and meaningful diagnostics so callers can inspect or edit supported
+graphs. Authoring, preview UI and undo remain responsibilities of the upstream application.
+
+The native compiler and Planner may perform CSE, fusion, shared-state reuse and coarse parallelism
+without changing public operator granularity. Preserve logical output provenance and the ability
+to evaluate supported selected roots independently; do not force all independent results to be
+computed or retained. A faster fused kernel or ISA variant does not by itself justify a new public
+operator. Equivalence and reproducible performance evidence are required for such optimizations.
+
+### Keep one explicit operator contract
+
+Reuse the canonical C++ registry and kernels for common mathematical, statistical and sequence
+semantics. Do not duplicate numerical implementations in Python, adapters or separate business
+modules. New domain state/event/interval capabilities require explicit contracts.
+
+For new or changed operators, the registry and its associated contract documentation must declare
+responsibility, granularity class, input/output types, dtype/shape/axes, parameter defaults and
+constraints, missing-value behavior, equality boundaries, window initialization/reset and output
+semantics. Parser validation, Typed IR inference, lowering, public metadata and execution must agree
+with that contract; display formulas or descriptions are not an alternative calculation authority.
+
+Numeric values, conditions, states, events and interval boundaries require distinct declared types.
+Missing data, false conditions, no new candidate, unclassified and neutral states must not be
+silently interchanged or filled with zero merely to connect nodes.
+
+Declare each operator's temporal dependency behavior. Preserve all actual dependencies and the
+upstream semantic context through lowering and optimization. A future-dependent or full-sample
+result remains retrospective after downstream comparisons; splitting, renaming or adding a lag
+does not by itself prove causality. Business knowledge-time policy and research/backtest/release
+gates remain upstream; the engine must not claim to certify them.
+
+### Preserve compatibility and prove equivalence
+
+Splitting must preserve data axes and lengths, dtype, NaN/Inf, window warmup/reset, endpoint
+inclusion, state codes, threshold equality, confirmation counts, parameter bindings and all outputs.
+It must also preserve the selected error policy, per-root result/status behavior and borrowed versus
+independent output ownership. A mathematical-policy change requires an explicit algorithm/contract
+version rather than being presented as a structural refactor.
+
+Do not automatically rewrite saved definitions before equivalence is established. Historical
+definitions, run snapshots, published versions and downstream references remain immutable; an
+authorized definition transformation produces a new definition with explicit output mappings.
+Historical aliases must use explicit version mappings into the current native implementation,
+with compatibility tests, rather than guessed names or duplicate historical numerical runtimes.
+
+Acceptance for affected paths must cover original-versus-composed values and statuses, boundary and
+missing-data cases, temporal dependencies, historical contracts, expanded dependencies and output
+references, and independently selected supported roots. Verify formula/graph round trips where the
+public API supports them, and execution through the actual AOT package, not merely the presence of
+C++ source. Run affected native and binding regressions; consuming-application UI and gate acceptance
+belongs to an integration change. Apply the memory/performance checks in Sections 16–17 as relevant.
+
+These rules govern authorized changes; they do not authorize redesigning existing operators or
+claim that every future operator type, template or authoring capability is already implemented.
 
 ## 16. Performance Evidence
 
@@ -893,6 +1022,33 @@ zero-copy claims.
 - No mandatory OpenMP dependency unless separately justified and benchmarked.
 - Avoid global fast-math when IEEE/NaN behavior is part of a financial contract.
 - SIMD runtime dispatch must retain portable baseline behavior.
+
+### AOT execution admission and evidence
+
+- Build native machine code before deployment, not during package import, service startup or formal
+  requests. Parsing formulas and constructing native IR/DAGs or execution plans is permitted runtime
+  work; it is not machine-code JIT compilation.
+- Missing or incompatible native packages must fail closed. Never compile on demand, invoke a
+  Python/Numba numerical fallback or fabricate NJIT signatures to satisfy a consuming application's
+  execution gate.
+- Graph execution evidence must identify the actual native backend, engine version, build identity,
+  operator-registry and Typed IR contracts, plan fingerprint, CPU budget/usage and result ownership.
+  Report request-time compilation, Python numerical callbacks and fallback counts explicitly; these
+  must remain zero. Invalid or incomplete evidence required by an integration contract must be
+  rejected by that integration, not inferred from a backend label.
+- Admission must honor the input/output dtype and axis contracts, per-metric parameters, historical
+  source versions and selected error policy. Numerical failure isolation must preserve unaffected
+  roots where promised; malformed inputs, unsafe geometry and resource/worker failures must not be
+  concealed as successful partial computation. Preserve strict-mode behavior where selected.
+- Distinguish reusable borrowed output from independently owned results. Retained results must use
+  the supported independent-output contract; an ndarray wrapper or read-only flag alone does not
+  establish independence from a buffer reused by a later call.
+- Validate the actual installed wheel and native execution path, including missing-package failure,
+  zero Python numerical callbacks/fallbacks, result lifetime and applicable execution evidence.
+  C++ source, a successful build or a declared backend string alone is not runtime acceptance.
+- Keep standalone wheel execution independent of the research platform's source tree and runtime.
+  Platform-side gates and business acceptance are separate integration checks; passing native tests
+  does not certify those checks or prove that a platform service has stopped NJIT prewarming.
 
 ## 19. Source of Truth
 
