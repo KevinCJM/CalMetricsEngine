@@ -76,6 +76,72 @@ int main() {
     scheduler.budget().release(scheduler_capacity);
     blocked.get();
 
+    // Contended admission must unlock while waiting on both clock paths.
+    // manylinux2014 used to deadlock on the default infinite deadline.
+    for (bool finite : {false, true}) {
+      mc::native::CpuBudget budget(1);
+      require(budget.acquire(1), "reserve CPU token for contention");
+      std::promise<void> started;
+      auto entering = started.get_future();
+      auto waiter = std::async(std::launch::async, [&] {
+        const auto deadline = finite
+            ? mc::native::SchedulerClock::now() + std::chrono::seconds(5)
+            : mc::native::SchedulerDeadline::max();
+        started.set_value();
+        const bool acquired = budget.acquire(1, deadline);
+        if (acquired)
+          budget.release(1);
+        return acquired;
+      });
+      entering.get();
+      require(waiter.wait_for(std::chrono::milliseconds(20)) ==
+                  std::future_status::timeout,
+              "contended admission must wait for a token");
+      budget.release(1);
+      require(waiter.get(), "token release must wake the waiting caller");
+      budget.wait_idle();
+      require(budget.peak_active() == 1, "contention preserves CPU limit");
+    }
+    {
+      mc::native::CpuBudget budget(1);
+      require(budget.acquire(1), "reserve CPU token for timed admission");
+      require(!budget.acquire(1, mc::native::SchedulerClock::now() +
+                                    std::chrono::milliseconds(20)),
+              "finite admission deadline must still expire");
+      budget.release(1);
+      budget.wait_idle();
+      require(budget.acquire(1), "timed-out admission must not leak tokens");
+      budget.release(1);
+    }
+    for (bool closing : {false, true}) {
+      mc::native::CpuBudget budget(1);
+      require(budget.acquire(1), "reserve CPU token before grow or close");
+      std::promise<void> started;
+      auto entering = started.get_future();
+      auto waiter = std::async(std::launch::async, [&] {
+        started.set_value();
+        try {
+          const bool acquired = budget.acquire(1);
+          if (acquired)
+            budget.release(1);
+          return acquired && !closing;
+        } catch (const std::runtime_error &error) {
+          return closing && std::string(error.what()) == "native scheduler is closed";
+        }
+      });
+      entering.get();
+      require(waiter.wait_for(std::chrono::milliseconds(20)) ==
+                  std::future_status::timeout,
+              "grow/close test must begin with a blocked caller");
+      if (closing)
+        budget.close_admission();
+      else
+        budget.grow(2);
+      require(waiter.get(), "grow/close must wake infinite admission");
+      budget.release(1);
+      budget.wait_idle();
+    }
+
     std::int64_t starts[] = {0, 0}, ends[] = {-1, -1}, day[] = {0};
     double storage[9][4];
     std::array<double *, 9> outputs{};

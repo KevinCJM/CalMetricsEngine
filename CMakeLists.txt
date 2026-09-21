@@ -130,6 +130,8 @@ if(CALMETRICS_ENGINE_BUILD_TESTS)
     add_executable(calmetrics_engine_native_tests tests/native_tests.cpp)
     target_link_libraries(calmetrics_engine_native_tests PRIVATE calmetrics_engine_finance)
     add_test(NAME calmetrics_engine_native_tests COMMAND calmetrics_engine_native_tests)
+    # Fail a blocked admission regression instead of hanging CI indefinitely.
+    set_tests_properties(calmetrics_engine_native_tests PROPERTIES TIMEOUT 60)
     add_executable(calmetrics_engine_operator_tests tests/operator_native_tests.cpp)
     target_link_libraries(calmetrics_engine_operator_tests PRIVATE calmetrics_engine_operators)
     add_test(NAME calmetrics_engine_operator_tests COMMAND calmetrics_engine_operator_tests)

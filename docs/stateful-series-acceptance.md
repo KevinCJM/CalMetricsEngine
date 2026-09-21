@@ -211,6 +211,45 @@ Linux sanitizer 的原生 7/7 通过，Python 在首个原生异常边界测试�
 C++ 源码没有因这组兼容性修订改变；上文性能和原生 sanitizer 数字来自明确记录的功能验收构建，
 不是声称对每次仅测试/CI 配置变更重复测量了性能。
 
+## PR 阶段的 manylinux CPU 准入死锁修复（2026-09-21）
+
+Linux wheel 长时间运行不是编译慢。历史主线与旧 PR 的 manylinux2014 CPython 3.10
+测试在约 3% 后停止；用当前 PR 源码和 CI 固定的 ARM64 镜像
+`sha256:f4cd164263e4ec2b7da7ee40b319bb5e30f0d7a2abd7ad4730e716a512dfb529`
+独立复现，停在 `test_concurrent_requests_share_native_cpu_admission`。
+
+纯 C++ 最小复现同样停在 CPU token 的释放：默认 `steady_clock::time_point::max()`
+被传给 `condition_variable::wait_until`，旧 libstdc++ 转换到系统时钟时溢出，
+在持锁情况下重复等待，使释放配额的一方无法进入。无限期限现在使用带谓词的
+`wait`；有限期限仍使用原 `wait_until`，保留关闭检查、CPU 上限和资源所有权。
+回归覆盖有限/无限竞争、有限超时后的配额复用、扩容唤醒和关闭唤醒。
+
+同一 manylinux 环境中，原最小程序超时，修复后正常唤醒退出；原生 **7/7**，
+已修复并安装的 CPython 3.10 wheel 全量 **4528 passed（6.87 秒）**。
+本机新 Release wheel 全量 **4528 passed（4.40 秒）**，原生与 ASan/UBSan 各 **7/7**。
+
+- 本机 wheel SHA-256：`5ebe5fd9afa7acfad0b771386ade14fe29ef294107f489f379940ea005d3dc8e`。
+- engine_build_id：`7e914bdeabdc45998d63fdbbdf7f2de81db63ccf16d4721bdba2ed5ce96a16c3`，已独立核对源码身份。
+- 复现与修复日志：`/private/tmp/calmetrics-linux-repro.log`、`/private/tmp/calmetrics-linux-fixed.log`。
+- 本机日志与 wheel：`/private/tmp/calmetrics-cpuwait-*.log`、`/private/tmp/calmetrics-cpuwait-wheels/`。
+
+修复后的 wheel 按上一轮相同 10 CPU 预算复跑原四组门禁，全部通过：
+
+| 工作负载 | prepared/batch C++/NJIT | 普通 Scheduler C++/NJIT |
+| --- | ---: | ---: |
+| 500 产品 × 2520 点 × 12 区间 × 16 指标 | 0.632 | — |
+| 1000 产品 × 2520 点 × 12 区间 × 16 指标 | 0.644 | — |
+| 1 产品 × 63 点 × 1 区间 × 5 指标 | 0.598 | 0.929 |
+| 1 产品 × 252 点 × 1 区间 × 5 指标 | 0.710 | 0.869 |
+
+阈值仍为 prepared/batch <=0.90、普通入口 <=1.00；记录在
+`/private/tmp/calmetrics-cpuwait-performance-cpu10/`。另一次 8 CPU 预算的四组门禁也通过，
+保存在 `/private/tmp/calmetrics-cpuwait-performance/`；不把两个 CPU 预算的耗时混为直接对照。
+
+wheel CI 改为打印测试名称，60 秒无响应时输出 Python 堆栈，单个 wheel 矩阵任务
+最多执行 45 分钟；原生 CPU 准入回归设置 60 秒 CTest 超时。超时仍属于失败，
+没有跳过任何测试或平台。旧卡住任务已停止，远端通过条件仍以修复提交的全量 CI 和 Bot 结论为准。
+
 ## 证据边界
 
 - 本机验证不代替 Linux/Windows、其他 Python 版本或 x86 SIMD CI。

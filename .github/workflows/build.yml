@@ -50,6 +50,7 @@ jobs:
   wheels:
     name: Wheels (${{ matrix.arch }} / ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
