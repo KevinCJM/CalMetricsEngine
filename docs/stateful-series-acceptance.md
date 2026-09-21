@@ -250,6 +250,42 @@ wheel CI 改为打印测试名称，60 秒无响应时输出 Python 堆栈，单
 最多执行 45 分钟；原生 CPU 准入回归设置 60 秒 CTest 超时。超时仍属于失败，
 没有跳过任何测试或平台。旧卡住任务已停止，远端通过条件仍以修复提交的全量 CI 和 Bot 结论为准。
 
+## PR 阶段的 NumPy / manylinux2014 测试环境修复（2026-09-21）
+
+CPU 准入修复提交 `6fde7adaa2c3541df327cf85a0006f29069a3a0a` 的远端两种 Linux
+架构已分别通过 CPython 3.10、3.11 全量 4528 项测试，证明原卡点已消除。
+随后 CPython 3.12 安装 NumPy 2.5.3 失败：上游二进制包最低为 glibc 2.27，
+pip 在 glibc 2.17 的 manylinux2014 中改为源码构建，而源码要求 GCC >=10.3，
+镜像只有 GCC 10.2。该次 CI 仍按失败处理，没有合并。
+
+保留 manylinux2014 构建与全部 wheel 测试，仅在其测试虚拟环境预装
+`numpy>=1.26,<2.5`。运行依赖仍为 `numpy>=1.26,<3`，没有降低引擎的 Linux
+兼容范围，也没有跳过 Python 3.14、musllinux 或其他平台。
+glibc 2.17 用户使用新版 NumPy 仍须满足上游编译要求；引擎 wheel 的兼容标签
+不代表所有第三方依赖都有同范围的预编译包。
+
+两个必需 Linux 检查还在 Ubuntu 24.04 上，为 CPython 3.10–3.14 各建独立环境，
+安装刚构建的同一个 repaired manylinux wheel 与该 Python 支持的最新 NumPy，
+再次执行全量测试。每个 ABI 必须恰好对应一个 wheel；缺失/重复、依赖冲突、
+安装错误或测试失败都使检查失败，不上传未经验证的产物。
+这样同时验证旧 glibc 与最新 NumPy；旧环境的编译器约束不能掩盖新版依赖回归。
+
+本地使用 cibuildwheel 4.2.1 和同一固定 manylinux2014 ARM64 镜像，实际构建、
+repair、安装并测试 CPython 3.12 / 3.13 / 3.14；NumPy 均为 2.4.6，
+分别 **4528 passed（5.73 / 6.56 / 6.10 秒）**。
+完整日志 `/private/tmp/calmetrics-numpy-compat-cibw.log`，三个 wheel 保存在
+`/private/tmp/calmetrics-numpy-compat-wheels/`。
+工作流的 YAML、TOML、Bash 语法和缺少 wheel 时的失败退出也已验证。
+同一 CPython 3.14 wheel 在官方现代 Linux Python 3.14.7 镜像、NumPy 2.5.3 下，
+使用新增 CI 脚本的对应分支和完整项目 pytest 配置（含 warnings-as-errors），
+再次 **4528 passed（6.99 秒）**；日志为
+`/private/tmp/calmetrics-numpy-modern-config-cp314.log`。
+完整双架构、多 Python、musllinux 与新 Linux 路径仍由最新提交的远端 CI 验收。
+
+本次仅调整 CI / 测试环境，C++、Python 数值接口与测试断言均未改变。
+上述 CPU 准入修复的性能结果继续作为相同 C++ 源码的证据；没有把仅 CI 配置
+变化后的构建身份或性能写成重新测量的结果。
+
 ## 证据边界
 
 - 本机验证不代替 Linux/Windows、其他 Python 版本或 x86 SIMD CI。
