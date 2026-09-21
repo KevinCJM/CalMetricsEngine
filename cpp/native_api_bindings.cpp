@@ -148,18 +148,97 @@ struct ArrayPin {
   py::dtype dtype;
   const void *data = nullptr;
   py::ssize_t size = 0, stride = 0;
+  std::vector<py::ssize_t> shape, strides;
+  py::object allocation_owner = py::none();
+  const void *allocation_data = nullptr;
+  py::ssize_t allocation_bytes = 0;
+  static ArrayPin capture(const py::array &a) {
+    ArrayPin pin{a, a.dtype(), a.data(), a.size(), a.ndim() ? a.strides(0) : 0,
+                 {a.shape(), a.shape() + a.ndim()},
+                 {a.strides(), a.strides() + a.ndim()}};
+    py::object current = a;
+    for (unsigned depth = 0; depth < 32; ++depth) {
+      if (py::isinstance<py::array>(current)) {
+        auto array = py::reinterpret_borrow<py::array>(current);
+        if (array.owndata()) {
+          pin.allocation_owner = current;
+          pin.allocation_data = array.data();
+          pin.allocation_bytes = array.nbytes();
+          break;
+        }
+      }
+      auto base = py::getattr(current, "base", py::none());
+      if (base.is_none()) break;
+      current = base;
+    }
+    return pin;
+  }
   template <class T> static ArrayPin bind(py::handle item, const char *name) {
     auto a = b::require_array(item);
     b::exact<T>(a, 1, name);
-    return {a, a.dtype(), a.data(), a.size(), a.strides(0)};
+    return capture(a);
   }
   bool unchanged() const {
-    return owner.ndim() == 1 && owner.data() == data && owner.size() == size &&
-           owner.strides(0) == stride && (owner.flags() & py::array::c_style) &&
+    if (!allocation_owner.is_none()) {
+      const auto allocation = py::reinterpret_borrow<py::array>(allocation_owner);
+      if (allocation.data() != allocation_data || allocation.nbytes() != allocation_bytes)
+        return false;
+    }
+    return owner.data() == data && owner.size() == size &&
+           owner.ndim() == static_cast<py::ssize_t>(shape.size()) &&
+           std::equal(shape.begin(), shape.end(), owner.shape()) &&
+           std::equal(strides.begin(), strides.end(), owner.strides()) &&
            owner.dtype().equal(dtype);
   }
   bool same(py::handle item) const { return item.is(owner) && unchanged(); }
 };
+
+// Typed binding is an exact-dtype view. Shape/owner checks run before any GIL
+// release; native workers retain only the resulting pointers and descriptors.
+o::Value bind_graph_array(const py::array &a, const calmetrics_engine::typed::ValueType &type,
+                          std::map<std::string, std::size_t> &dimensions) {
+  namespace t = calmetrics_engine::typed;
+  const bool dtype_ok = type.dtype == t::DType::float64
+      ? a.dtype().equal(py::dtype::of<double>())
+      : type.dtype == t::DType::int64
+          ? a.dtype().equal(py::dtype::of<std::int64_t>())
+          : (a.dtype().equal(py::dtype::of<bool>()) ||
+             a.dtype().equal(py::dtype::of<std::uint8_t>()));
+  if (!dtype_ok) throw py::type_error("graph input must use its declared exact native dtype");
+  if (a.ndim() != static_cast<py::ssize_t>(type.rank()) || a.ndim() < 1 || a.ndim() > 2)
+    throw py::value_error("graph input rank does not match typed declaration");
+  // Existing temporal float64 batches retain the documented contiguous
+  // contract. Newly typed vector/matrix/category bindings carry explicit strides.
+  if (type.kind == t::ValueKind::series && type.dtype == t::DType::float64 &&
+      !(a.flags() & py::array::c_style))
+    throw py::value_error("graph float64 series must be C-contiguous");
+  const auto itemsize = type.dtype == t::DType::boolean ? 1u : 8u;
+  if (reinterpret_cast<std::uintptr_t>(a.data()) % itemsize)
+    throw py::value_error("graph input must be aligned");
+  b::bounds(a);
+  b::validate_owner(a);
+  o::Value value;
+  value.kind = type.dtype == t::DType::float64 ? o::Kind::number
+      : (type.dtype == t::DType::int64 ? o::Kind::integer : o::Kind::mask);
+  value.shape.rank = static_cast<int>(a.ndim());
+  value.data = a.data();
+  for (int axis = 0; axis < value.shape.rank; ++axis) {
+    if (a.strides(axis) % itemsize)
+      throw py::value_error("graph input has unsupported byte stride");
+    const auto size = static_cast<std::size_t>(a.shape(axis));
+    value.shape.dim[axis] = size;
+    value.stride[axis] = a.strides(axis) / static_cast<py::ssize_t>(itemsize);
+    const auto &symbol = type.shape[axis];
+    if (!symbol.empty() && std::all_of(symbol.begin(), symbol.end(), [](char c) { return c >= '0' && c <= '9'; })) {
+      if (std::stoull(symbol) != size) throw py::value_error("graph input fixed dimension mismatch");
+    } else {
+      const auto found = dimensions.emplace(symbol, size);
+      if (!found.second && found.first->second != size)
+        throw py::value_error("graph inputs must share declared symbolic dimensions");
+    }
+  }
+  return value;
+}
 py::dict mapping(py::handle item, const char *name) {
   if (!PyMapping_Check(item.ptr()))
     throw py::type_error(std::string(name) + " must be a mapping");
@@ -201,6 +280,12 @@ public:
         throw py::value_error("product_ids must match interval rows");
       native.product_ids = static_cast<const std::int64_t *>(product_ids->data);
     }
+    std::map<std::string, std::size_t> dimensions;
+    const auto input_type = [&](const std::string &name) -> const calmetrics_engine::typed::ValueType & {
+      for (const auto &variable : graph->variable_types)
+        if (variable.name == name) return variable.type;
+      throw py::value_error("missing graph input type: " + name);
+    };
     if (py::isinstance<SharedInputBundle>(inputs)) {
       bundle = py::cast<std::shared_ptr<SharedInputBundle>>(inputs);
       bundle->ensure();
@@ -212,14 +297,8 @@ public:
           throw py::value_error("missing graph input: " + name);
         const auto &owner = found->second;
         owner->ensure();
-        if (!owner->dtype.equal(py::dtype::of<double>()) ||
-            owner->shape.size() != 1)
-          throw py::type_error(
-              "graph shared inputs require one-dimensional float64");
-        o::Value value;
-        value.shape = o::vector_shape(owner->shape[0]);
-        value.data = owner->region->data();
-        native.inputs.push_back(value);
+        auto array = owner->array();
+        native.inputs.push_back(bind_graph_array(array, input_type(name), dimensions));
         native.shared_owners.push_back(owner->region);
         native.shared_inputs.push_back(
             {owner->region->name(), owner->region->size(), 0});
@@ -231,17 +310,11 @@ public:
       for (const auto &name : graph->input_names) {
         if (!d.contains(py::str(name)))
           throw py::value_error("missing graph input: " + name);
-        auto pin = ArrayPin::bind<double>(d[py::str(name)], name.c_str());
-        o::Value value;
-        value.shape = o::vector_shape(pin.size);
-        value.data = pin.data;
-        native.inputs.push_back(value);
-        pins.push_back(std::move(pin));
+        auto array = b::require_array(d[py::str(name)]);
+        native.inputs.push_back(bind_graph_array(array, input_type(name), dimensions));
+        pins.push_back(ArrayPin::capture(array));
       }
     }
-    for (const auto &v : native.inputs)
-      if (v.size() != native.inputs[0].size())
-        throw py::value_error("graph inputs must share one observation axis");
     if (bind_parameters) {
       if (py::isinstance<py::array>(parameters)) {
         parameter_pin = ArrayPin::bind<double>(parameters, "parameters");
@@ -332,8 +405,70 @@ struct Result {
   std::shared_ptr<p::Plan> plan;
   n::ExecutionAudit native;
   bool prepared = false, cache_hit = false;
+  bool snapshot = false;
+  py::object statuses() const {
+    if (!plan->graph->program.isolate_errors) return py::none();
+    py::array_t<std::int16_t> result({values.shape(0), values.shape(1)});
+    auto *dst = result.mutable_data();
+    const auto columns = static_cast<std::size_t>(values.shape(1));
+    if (plan->parallel_dimension == "dag_branch") {
+      for (std::size_t i = 0; i < native.chunks.size(); ++i) {
+        const auto task = plan->branch_tasks.at(i);
+        const auto &roots = plan->graph->branches.at(task.branch_index).root_indices;
+        const auto &source = native.chunks[i].statuses;
+        if (source.size() != roots.size()) throw std::runtime_error("invalid native statuses");
+        for (std::size_t j = 0; j < roots.size(); ++j)
+          dst[task.row * columns + roots[j]] = source[j];
+      }
+    } else {
+      std::size_t written = 0;
+      for (const auto &chunk : native.chunks) {
+        if (chunk.statuses.size() > static_cast<std::size_t>(result.size()) - written)
+          throw std::runtime_error("invalid native statuses");
+        std::copy(chunk.statuses.begin(), chunk.statuses.end(), dst + written);
+        written += chunk.statuses.size();
+      }
+      if (written != static_cast<std::size_t>(result.size()))
+        throw std::runtime_error("incomplete native statuses");
+    }
+    result.attr("setflags")(false);
+    return result;
+  }
   py::dict audit() const {
     py::dict d;
+    d["execution_backend"] = "cpp_aot";
+    d["audit_schema"] = "cpp-aot-execution-1";
+    d["engine"] = "calmetrics_engine";
+    d["engine_version"] = CALMETRICS_ENGINE_VERSION;
+    d["engine_build_id"] = CALMETRICS_ENGINE_BUILD_ID;
+    d["operator_registry_version"] = o::registry_version;
+    d["typed_ir_version"] = "cpp-typed-ir-1";
+    d["plan_fingerprint"] = plan->graph->fingerprint;
+    d["source_contracts"] = plan->graph->source_contracts;
+    std::size_t status_bytes = 0;
+    for (const auto &chunk : native.chunks) status_bytes += chunk.statuses.size() * 2;
+    d["status_result_copy_bytes"] = status_bytes;
+    d["status_transport_bytes"] = plan->lane == "process" ? status_bytes : 0;
+    d["native_aot"] = true;
+    d["python_fallback"] = 0;
+    d["python_operator_calls"] = 0;
+    d["request_time_compilation"] = 0;
+    py::dict input_dtypes;
+    std::string common_dtype;
+    for (const auto &name : plan->graph->input_names) {
+      for (const auto &variable : plan->graph->variable_types) {
+        if (variable.name != name) continue;
+        const std::string dtype = calmetrics_engine::typed::dtype_name(variable.type.dtype);
+        input_dtypes[py::str(name)] = dtype;
+        common_dtype = common_dtype.empty() ? dtype : (common_dtype == dtype ? dtype : "mixed");
+      }
+    }
+    d["input_dtype"] = common_dtype.empty() ? "float64" : common_dtype;
+    d["input_dtypes"] = std::move(input_dtypes);
+    d["output_dtype"] = "float64";
+    d["error_policy"] = plan->graph->program.isolate_errors ? "isolate" : "raise";
+    d["status_contract"] = "indicator-status-1";
+    d["result_lifetime"] = prepared && !snapshot ? "borrowed_until_next_run" : "independent";
     d["lane"] = plan->lane;
     d["elapsed_ms"] = native.elapsed_ms;
     d["queue_wait_ms"] = native.queue_wait_ms;
@@ -424,7 +559,7 @@ public:
                           plan->graph->program.roots.size())),
         offsets(output_offsets(*plan->graph, bound->native)),
         output_address(output.data()) {}
-  n::ExecutionAudit execute() {
+  n::ExecutionAudit execute(double *destination = nullptr) {
     if (!bound->unchanged())
       throw py::value_error(
           "PREPARED_INPUT_CHANGED: rebind resized or retyped arrays");
@@ -442,7 +577,7 @@ public:
     std::unique_lock<std::mutex> guard(mutex, std::try_to_lock);
     if (!guard.owns_lock())
       throw std::runtime_error("PREPARED_BATCH_BUSY");
-    return engine->execute(*plan, bound->native, data);
+    return engine->execute(*plan, bound->native, destination ? destination : data);
   }
   py::array run() {
     execute();
@@ -451,6 +586,16 @@ public:
   Result run_audit() {
     auto a = execute();
     return {output, offsets, plan, std::move(a), true, true};
+  }
+  Result run_snapshot() {
+    // Write directly into independent output while holding the execution lock.
+    // Copying the borrowed output after releasing that lock would race another run.
+    auto owned = new_output(output_rows(*plan->graph, bound->native),
+                            plan->graph->program.roots.size());
+    auto a = execute(static_cast<double *>(owned.mutable_data()));
+    owned.attr("setflags")(false);
+    return {owned, output_offsets(*plan->graph, bound->native), plan,
+            std::move(a), true, true, true};
   }
 };
 std::string worker_path(const py::object &path) {
@@ -580,7 +725,7 @@ public:
       py::gil_scoped_release release;
       p::validate_plan(*plan, bound->native.input_sizes(), bound->native.starts,
                        bound->native.ends, bound->native.rows,
-                       bound->native.product_ids, engine->cpu());
+                       bound->native.product_ids, engine->cpu(), &bound->native.inputs);
     }
     return std::make_shared<PreparedExecution>(engine, bound, plan);
   }
@@ -612,7 +757,7 @@ public:
                         bound.native.starts, bound.native.ends,
                         bound.native.rows, bound.native.product_ids,
                         default_cpu(cpu), memory, hard_stop, async_io,
-                        shared || !bound.native.shared_inputs.empty());
+                        shared || !bound.native.shared_inputs.empty(), &bound.native.inputs);
   }
 };
 } // namespace
@@ -692,6 +837,7 @@ void register_native_api(py::module_ &module) {
   py::class_<Result>(module, "GraphExecutionResult")
       .def_readonly("values", &Result::values)
       .def_readonly("offsets", &Result::offsets)
+      .def_property_readonly("statuses", &Result::statuses)
       .def_property_readonly(
           "output_kind",
           [](const Result &r) {
@@ -708,7 +854,8 @@ void register_native_api(py::module_ &module) {
       .def_readonly("output", &PreparedExecution::output)
       .def_readonly("offsets", &PreparedExecution::offsets)
       .def("run", &PreparedExecution::run)
-      .def("run_audit", &PreparedExecution::run_audit);
+      .def("run_audit", &PreparedExecution::run_audit)
+      .def("run_snapshot", &PreparedExecution::run_snapshot);
   py::class_<PlannerAPI>(module, "AdaptivePlanner")
       .def(py::init<std::optional<p::Config>>(), py::arg("config") = py::none())
       .def_readonly("config", &PlannerAPI::config)

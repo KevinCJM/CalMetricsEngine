@@ -26,13 +26,127 @@ double geometry_work(const compiler::PhysicalCost &cost, const Geometry &g) {
          cost.linear_per_observation * static_cast<double>(g.observations) +
          cost.sort_nlogn * g.sort_work;
 }
+// Add only work omitted by the original interval-length model. The same
+// native shape walk owns both arena capacity and these materialized extents;
+// coefficients and scheduler thresholds remain unchanged. This is an operation
+// count estimate, not a hardware performance claim.
+double typed_array_extra_work(const graph::Program &program,
+                              const std::vector<ops::Value> &inputs,
+                              std::size_t observations, bool full_work = false) {
+  std::vector<ops::Shape> shapes;
+  graph::required_array_capacity(program, inputs, observations, &shapes);
+  const auto baseline = full_work ? 0.0 : static_cast<double>(observations);
+  const auto sorting = [](double n) { return n * std::log2(std::max(2.0, n)); };
+  std::unordered_set<std::uint32_t> summaries, orders;
+  double extra = 0;
+  for (std::size_t index = 0; index < program.nodes.size(); ++index) {
+    const auto &node = program.nodes[index];
+    if (node.kind == graph::NodeKind::apply_scope || node.kind == graph::NodeKind::rolling_scope) {
+      const bool rolling = node.kind == graph::NodeKind::rolling_scope;
+      const auto &captures = rolling ? program.rolling_scopes[node.input_index].input_nodes
+                                     : program.apply_scopes[node.input_index].input_nodes;
+      const auto &body = rolling ? *program.rolling_scopes[node.input_index].body
+                                : *program.apply_scopes[node.input_index].body;
+      std::size_t length = 0;
+      std::vector<ops::Value> captured;
+      for (auto source : captures) {
+        ops::Value value;
+        value.shape = shapes[source];
+        length = std::max(length, value.shape.size());
+        captured.push_back(value);
+      }
+      double repeats = 1.0;
+      if (rolling) {
+        const auto &scope = program.rolling_scopes[node.input_index];
+        const auto &width = program.nodes[scope.width_node];
+        const auto maximum_width = width.kind == graph::NodeKind::constant &&
+            std::isfinite(width.constant) && width.constant >= 1 && width.constant <= 5000
+            ? static_cast<std::size_t>(width.constant) : 5000;
+        const auto window = std::min(length, maximum_width);
+        for (std::size_t i = 0; i < captured.size(); ++i)
+          captured[i].shape.dim[0] = window + (i < scope.input_preceding.size() && scope.input_preceding[i] ? 1 : 0);
+        repeats = static_cast<double>(length);
+        length = window + (scope.needs_preceding_observation ? 1 : 0);
+      } else if (program.apply_scopes[node.input_index].kind == graph::ApplyKind::bisect) {
+        const auto &scope = program.apply_scopes[node.input_index];
+        const auto &iterations = program.nodes[scope.argument_nodes[3]];
+        repeats = 2.0 + (iterations.kind == graph::NodeKind::constant &&
+            std::isfinite(iterations.constant) && iterations.constant >= 1 && iterations.constant <= 10000
+            ? iterations.constant : 10000.0);
+      }
+      // A full-group/full-block body bounds sums of linear, sorting and dense
+      // matrix work over disjoint subsets. Per-group scalar overhead is bounded
+      // separately by N * body_nodes. This deliberately remains conservative.
+      extra += repeats * (typed_array_extra_work(body, captured, length, true) +
+          static_cast<double>(std::max<std::size_t>(length, 1)) * body.nodes.size());
+      continue;
+    }
+    if (node.kind != graph::NodeKind::operation || !node.parent_count) continue;
+    const auto &spec = ops::lookup(node.opcode);
+    const auto op = spec.op;
+    const auto &lhs = shapes[node.parents[0]];
+    const auto rhs = node.parent_count > 1 ? shapes[node.parents[1]] : ops::Shape{};
+    double extent = static_cast<double>(shapes[index].size());
+    for (std::size_t i = 0; i < node.parent_count; ++i)
+      extent = std::max(extent, static_cast<double>(shapes[node.parents[i]].size()));
+    if (spec.family == ops::Family::state && op != ops::Op::last_drawdown_interval)
+      continue;
+    if (op == ops::Op::transpose || (op == ops::Op::diag && lhs.rank == 2))
+      continue; // Borrowed views have no materialized array traversal.
+    const bool sort = op == ops::Op::median || op == ops::Op::quantile ||
+        op == ops::Op::median_where || op == ops::Op::quantile_where ||
+        op == ops::Op::argsort || op == ops::Op::distinct_count;
+    if (sort) {
+      if (lhs.rank == 1 && graph::order_fusion_eligible(op) &&
+          !orders.insert(node.parents[0]).second) continue;
+      extra += 2.0 * std::max(0.0, sorting(extent) - sorting(baseline));
+      continue;
+    }
+    if (lhs.rank == 1 && graph::summary_fusion_eligible(op) &&
+        program.execution_metadata &&
+        program.execution_metadata->summary_consumers[node.parents[0]] > 1 &&
+        !summaries.insert(node.parents[0]).second) continue;
+    double factor = 1.0;
+    if (spec.family == ops::Family::elementwise)
+      factor = ops::simd_eligible(op) ? 0.65 : 1.0;
+    else if (spec.family == ops::Family::sequence) factor = 1.2;
+    else if (spec.family == ops::Family::reduction || spec.family == ops::Family::composite)
+      factor = 1.5;
+    else if (spec.family == ops::Family::matrix || spec.family == ops::Family::rolling)
+      factor = 2.0;
+    else if (spec.family == ops::Family::regression) factor = 3.5;
+    if (op == ops::Op::matmul)
+      extent = static_cast<double>(lhs.dim[0]) * lhs.dim[1] * rhs.dim[1];
+    else if ((op == ops::Op::covariance || op == ops::Op::correlation) && lhs.rank == 2)
+      extent = static_cast<double>(lhs.dim[0]) * lhs.dim[1] * lhs.dim[1];
+    else if (op == ops::Op::solve)
+      extent = static_cast<double>(lhs.dim[0]) * lhs.dim[0] * lhs.dim[0];
+    else if (op == ops::Op::trace)
+      extent = static_cast<double>(std::min(lhs.dim[0], lhs.dim[1]));
+    extra += factor * std::max(0.0, extent - baseline);
+  }
+  if (!std::isfinite(extra)) throw std::overflow_error("typed array work estimate overflow");
+  return extra;
+}
+bool requires_typed_work(const graph::Program &program) {
+  if (program.execution_metadata && program.execution_metadata->requires_shape_planning) return true;
+  for (const auto &scope : program.rolling_scopes)
+    if (scope.body && requires_typed_work(*scope.body)) return true;
+  for (const auto &scope : program.apply_scopes)
+    if (scope.body && requires_typed_work(*scope.body)) return true;
+  return false;
+}
 std::size_t scratch_estimate(const graph::Program &program,
-                             std::size_t window) {
+                             std::size_t window,
+                             const std::vector<ops::Value> *inputs = nullptr,
+                             std::size_t logical_window = 0) {
   std::size_t estimate =
-      checked_mul(window, checked_add(checked_mul(program.numeric_slots, 8),
+      checked_mul(window, checked_add(checked_mul(checked_add(program.numeric_slots, program.integer_slots), 8),
                                       program.mask_slots));
   estimate = checked_add(
       estimate, checked_mul(program.nodes.size(), sizeof(ops::Value) + 160));
+  if (program.isolate_errors)
+    estimate = checked_add(estimate, checked_mul(program.nodes.size(), sizeof(std::int16_t)));
   std::unordered_set<std::uint32_t> order_sources;
   bool operator_scratch = false;
   for (const auto &node : program.nodes) {
@@ -43,22 +157,94 @@ std::size_t scratch_estimate(const graph::Program &program,
       order_sources.insert(node.parents[0]);
     if (op == ops::Op::median || op == ops::Op::quantile ||
         op == ops::Op::median_where || op == ops::Op::quantile_where ||
-        op == ops::Op::rolling_min || op == ops::Op::rolling_max)
+        op == ops::Op::rolling_min || op == ops::Op::rolling_max ||
+        op == ops::Op::argsort || op == ops::Op::distinct_count ||
+        op == ops::Op::solve || op == ops::Op::covariance ||
+        op == ops::Op::correlation || op == ops::Op::quadratic_form)
       operator_scratch = true;
   }
   estimate = checked_add(
       estimate, checked_mul(checked_mul(order_sources.size(), window), 8));
   if (operator_scratch)
-    estimate = checked_add(estimate, checked_mul(window, 8));
+    estimate = checked_add(estimate, checked_mul(window, 24));
   if (!program.rolling_scopes.empty())
     estimate = checked_add(estimate, checked_mul(window + 1, sizeof(std::size_t)));
+  std::vector<ops::Shape> shapes;
+  if (inputs && (!program.rolling_scopes.empty() || !program.apply_scopes.empty()))
+    graph::required_array_capacity(program, *inputs, logical_window, &shapes);
+  const auto scope_scratch = [&](const graph::Program &body,
+                                 const std::vector<std::uint32_t> &captures,
+                                 const std::vector<std::uint8_t> *preceding,
+                                 bool selected) {
+    std::vector<ops::Value> captured;
+    captured.reserve(captures.size());
+    std::size_t length = 0;
+    for (std::size_t i = 0; i < captures.size(); ++i) {
+      ops::Value value;
+      value.shape = shapes.empty() ? ops::vector_shape(window) : shapes.at(captures[i]);
+      if (preceding && i < preceding->size() && preceding->at(i))
+        value.shape.dim[0] = checked_add(value.shape.dim[0], 1);
+      length = std::max(length, value.shape.size());
+      captured.push_back(value);
+    }
+    const auto capacity = graph::required_array_capacity(body, captured, length);
+    auto bytes = scratch_estimate(body, capacity, &captured, length);
+    if (selected)
+      bytes = checked_add(bytes, checked_mul(length,
+          checked_add(checked_mul(captures.size(), 8), 24)));
+    return bytes;
+  };
   for (const auto &scope : program.rolling_scopes)
     if (scope.body)
-      estimate = checked_add(estimate, scratch_estimate(*scope.body, window));
+      estimate = checked_add(estimate,
+          scope_scratch(*scope.body, scope.input_nodes, &scope.input_preceding, false));
+  for (const auto &scope : program.apply_scopes)
+    if (scope.body)
+      estimate = checked_add(estimate, scope_scratch(*scope.body, scope.input_nodes,
+          nullptr, scope.kind != graph::ApplyKind::bisect));
   return estimate;
+}
+Geometry typed_geometry(const graph::Program &program,
+                        const std::vector<std::size_t> &sizes,
+                        const std::vector<ops::Value> *inputs,
+                        const std::int64_t *starts, const std::int64_t *ends,
+                        std::size_t rows, const std::int64_t *products,
+                        bool build_groups = true) {
+  if (!inputs) return inspect(sizes, starts, ends, rows, products, build_groups);
+  require(inputs->size() == program.input_count, "graph input count mismatch");
+  std::vector<std::size_t> temporal;
+  for (std::size_t i = 0; i < inputs->size(); ++i) {
+    const auto &value = inputs->at(i);
+    const auto axis = program.input_axes.empty() ? 0 : program.input_axes.at(i);
+    require((axis != 0 || value.shape.rank == 1) &&
+            (axis != 2 || value.shape.rank == 2) &&
+            value.shape.rank >= 1 && value.shape.rank <= 2,
+            "graph input rank mismatch");
+    if (axis != 1) temporal.push_back(value.shape.dim[0]);
+  }
+  if (temporal.empty()) {
+    std::size_t available = 0;
+    for (std::size_t i = 0; i < rows; ++i) {
+      require(starts && ends && starts[i] >= 0 && ends[i] >= starts[i], "invalid interval bounds");
+      available = std::max(available, static_cast<std::size_t>(ends[i]));
+    }
+    temporal.push_back(available);
+  }
+  auto geometry = inspect(temporal, starts, ends, rows, products, build_groups);
+  for (const auto &value : *inputs) {
+    mix(geometry.signature, static_cast<std::uint64_t>(value.kind));
+    mix(geometry.signature, static_cast<std::uint64_t>(value.shape.rank));
+    for (int axis = 0; axis < value.shape.rank; ++axis) {
+      mix(geometry.signature, value.shape.dim[axis]);
+      mix(geometry.signature, static_cast<std::uint64_t>(value.stride[axis]));
+    }
+  }
+  return geometry;
 }
 std::size_t total_memory(const Plan &p, std::size_t workers) {
   auto bytes = checked_add(p.estimated_input_bytes, p.estimated_output_bytes);
+  // Native status chunks + result array + worst-case IPC serialization buffers.
+  bytes = checked_add(bytes, checked_mul(p.estimated_status_bytes, p.lane == "process" ? 6 : 2));
   bytes = checked_add(bytes, checked_mul(p.row_count, 16));
   bytes = checked_add(bytes,
                       checked_mul(workers, p.estimated_worker_scratch_bytes));
@@ -174,14 +360,16 @@ std::vector<Chunk> partition(const Geometry &g, std::size_t workers,
       const auto chunk = g.groups[group];
       for (std::size_t row = chunk.begin; row < chunk.end; ++row)
         weights[group] +=
-            physical_cost ? static_cast<long double>(
+            !g.row_work_units.empty() ? static_cast<long double>(g.row_work_units[row])
+            : physical_cost ? static_cast<long double>(
                                 row_work(*physical_cost, g.row_lengths[row]))
                           : static_cast<long double>(
                                 g.row_lengths[row] ? g.row_lengths[row] : 1);
     }
   } else {
     for (std::size_t row = 0; row < g.rows; ++row)
-      weights[row] = physical_cost
+      weights[row] = !g.row_work_units.empty() ? static_cast<long double>(g.row_work_units[row])
+                     : physical_cost
                          ? static_cast<long double>(
                                row_work(*physical_cost, g.row_lengths[row]))
                          : static_cast<long double>(
@@ -227,14 +415,16 @@ make_plan(std::shared_ptr<compiler::CompiledGraph> graph, const Config &config,
           const std::int64_t *ends, std::size_t rows,
           const std::int64_t *product_ids, std::size_t cpu,
           std::optional<std::size_t> memory_budget, bool hard_stop,
-          bool async_io, bool already_shared) {
+          bool async_io, bool already_shared,
+          const std::vector<ops::Value> *inputs) {
   config.validate();
   require(cpu > 0 && cpu <= 1024, "cpu_budget must be in 1..1024");
   require(!memory_budget || *memory_budget > 0,
           "memory budget must be positive");
   require(graph && sizes.size() == graph->program.input_count,
           "graph input count mismatch");
-  const auto geometry = inspect(sizes, starts, ends, rows, product_ids);
+  auto geometry = typed_geometry(graph->program, sizes, inputs, starts, ends, rows, product_ids);
+  const auto array_capacity = inputs ? graph::required_array_capacity(graph->program, *inputs, geometry.max_window) : geometry.max_window;
   auto p = std::make_shared<Plan>();
   p->graph = std::move(graph);
   p->cpu_budget = cpu;
@@ -254,17 +444,20 @@ make_plan(std::shared_ptr<compiler::CompiledGraph> graph, const Config &config,
               geometry.products >= std::min(cpu, std::max<std::size_t>(1, rows))
           ? "product"
           : "interval";
-  for (auto size : sizes)
-    p->estimated_input_bytes =
-        checked_add(p->estimated_input_bytes, checked_mul(size, 8));
+  for (std::size_t i = 0; i < sizes.size(); ++i) {
+    const auto item = inputs && inputs->at(i).kind == ops::Kind::mask ? 1u : 8u;
+    p->estimated_input_bytes = checked_add(p->estimated_input_bytes, checked_mul(sizes[i], item));
+  }
   const auto output_rows =
       p->graph->program.output_kind == graph::OutputKind::series
           ? geometry.observations
           : rows;
   p->estimated_output_bytes = checked_mul(
       checked_mul(output_rows, p->graph->program.roots.size()), 8);
+  p->estimated_status_bytes = p->graph->program.isolate_errors
+      ? checked_mul(checked_mul(output_rows, p->graph->program.roots.size()), 2) : 0;
   p->estimated_worker_scratch_bytes =
-      scratch_estimate(p->graph->program, geometry.max_window);
+      scratch_estimate(p->graph->program, array_capacity, inputs, geometry.max_window);
   for (const auto &node : p->graph->nodes) {
     if (node.node.kind != graph::NodeKind::operation)
       continue;
@@ -292,6 +485,34 @@ make_plan(std::shared_ptr<compiler::CompiledGraph> graph, const Config &config,
       p->simd_nodes.push_back(node.node_id);
   }
   p->estimated_work_units = geometry_work(p->graph->physical_cost, geometry);
+  const bool typed_arrays = inputs && requires_typed_work(p->graph->program);
+  std::map<std::size_t, double> extra_by_length;
+  if (typed_arrays) {
+    geometry.row_work_units.reserve(rows);
+    for (auto length : geometry.row_lengths) {
+      auto found = extra_by_length.find(length);
+      if (found == extra_by_length.end())
+        found = extra_by_length.emplace(length,
+            typed_array_extra_work(p->graph->program, *inputs, length)).first;
+      p->estimated_typed_array_work_units += found->second;
+      geometry.row_work_units.push_back(row_work(p->graph->physical_cost, length) + found->second);
+    }
+    p->estimated_work_units += p->estimated_typed_array_work_units;
+    p->estimated_logical_work_units += p->estimated_typed_array_work_units;
+    if (p->estimated_typed_array_work_units > 0)
+      p->reason_codes.push_back("typed_array_shape_work_accounted");
+  }
+  std::vector<std::map<std::size_t, double>> branch_extra(p->graph->branches.size());
+  const auto branch_work = [&](std::size_t branch, std::size_t length) {
+    const auto &info = p->graph->branches[branch];
+    const double base = row_work(info.cost, length);
+    if (!typed_arrays) return base;
+    auto &cache = branch_extra[branch];
+    auto found = cache.find(length);
+    if (found == cache.end()) found = cache.emplace(length,
+        typed_array_extra_work(info.program, *inputs, length)).first;
+    return base + found->second;
+  };
   const bool process =
       hard_stop ||
       (rows >= std::max<std::size_t>(2, config.min_rows_per_worker) &&
@@ -299,9 +520,14 @@ make_plan(std::shared_ptr<compiler::CompiledGraph> graph, const Config &config,
         p->estimated_input_bytes >= config.process_input_threshold_bytes));
 
   std::size_t heavy_branches = 0;
-  for (const auto &branch : p->graph->branches)
-    heavy_branches +=
-        geometry_work(branch.cost, geometry) >= config.thread_work_units;
+  for (std::size_t branch = 0; branch < p->graph->branches.size(); ++branch) {
+    double work = geometry_work(p->graph->branches[branch].cost, geometry);
+    if (typed_arrays) {
+      work = 0;
+      for (auto length : geometry.row_lengths) work += branch_work(branch, length);
+    }
+    heavy_branches += work >= config.thread_work_units;
+  }
   const auto branch_task_count = checked_mul(rows, p->graph->branches.size());
   const bool dag_branch =
       p->graph->program.output_kind == graph::OutputKind::scalar && !process &&
@@ -330,7 +556,7 @@ make_plan(std::shared_ptr<compiler::CompiledGraph> graph, const Config &config,
           checked_mul(branch.root_indices.size(), sizeof(double));
       p->estimated_worker_scratch_bytes = std::max(
           p->estimated_worker_scratch_bytes,
-          checked_add(scratch_estimate(branch.program, geometry.max_window),
+          checked_add(scratch_estimate(branch.program, array_capacity, inputs, geometry.max_window),
                       branch_output));
     }
     p->reason_codes.push_back("heavy_independent_dag_branches");
@@ -387,8 +613,7 @@ make_plan(std::shared_ptr<compiler::CompiledGraph> graph, const Config &config,
       for (std::uint32_t branch = 0; branch < p->graph->branches.size();
            ++branch)
         tasks.push_back({{row, branch},
-                         row_work(p->graph->branches[branch].cost,
-                                  geometry.row_lengths[row])});
+                         branch_work(branch, geometry.row_lengths[row])});
     std::stable_sort(tasks.begin(), tasks.end(),
                      [](const WeightedTask &a, const WeightedTask &b) {
                        return a.work > b.work;
@@ -404,12 +629,12 @@ make_plan(std::shared_ptr<compiler::CompiledGraph> graph, const Config &config,
 void validate_plan(const Plan &p, const std::vector<std::size_t> &sizes,
                    const std::int64_t *starts, const std::int64_t *ends,
                    std::size_t rows, const std::int64_t *product_ids,
-                   std::size_t engine_cpu) {
+                   std::size_t engine_cpu, const std::vector<ops::Value> *inputs) {
   require(p.cpu_budget <= engine_cpu,
           "execution plan exceeds this engine CPU budget");
   require(p.input_sizes == sizes && p.row_count == rows,
           "stale execution plan input shape");
-  const auto geometry = inspect(sizes, starts, ends, rows, product_ids, false);
+  const auto geometry = typed_geometry(p.graph->program, sizes, inputs, starts, ends, rows, product_ids, false);
   require(geometry.signature == p.geometry_signature,
           "stale execution plan interval/product geometry");
 }

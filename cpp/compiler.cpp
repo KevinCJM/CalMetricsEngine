@@ -24,10 +24,12 @@ void check(bool ok, const std::string &message) {
   if (!ok)
     throw CompileError(message);
 }
-bool array(V v) { return v == V::series || v == V::mask_series; }
+bool array(V v) { return v == V::series || v == V::mask_series || v == V::integer_series; }
 V execution_class(const typed::ValueType &value) {
   if (value.kind == typed::ValueKind::record)
     return value.record_tag == "fit" ? V::fit : V::interval;
+  if (value.dtype == typed::DType::int64 && !value.is_scalar())
+    return V::integer_series;
   if (value.is_mask())
     return value.is_scalar() ? V::mask_scalar : V::mask_series;
   return value.is_scalar() ? V::scalar : V::series;
@@ -40,7 +42,8 @@ bool ident_rest(unsigned char c) { return ident_start(c) || std::isdigit(c); }
 
 std::string cost(const ops::Spec &spec, V type) {
   if (spec.op == O::median || spec.op == O::quantile ||
-      spec.op == O::median_where || spec.op == O::quantile_where)
+      spec.op == O::median_where || spec.op == O::quantile_where ||
+      spec.op == O::argsort || spec.op == O::distinct_count)
     return "sort";
   if ((spec.family == ops::Family::state &&
        spec.op != O::last_drawdown_interval) ||
@@ -61,6 +64,55 @@ double linear_factor(const NodeInfo &node) {
   if (node.cost_model == "regression")
     return 3.5;
   return 1.0;
+}
+
+struct ScopeWork { double linear = 0.0, sort = 0.0; };
+ScopeWork scope_work_factor(const graph::Program &program) {
+  ScopeWork work;
+  std::vector<std::uint8_t> summary_charged(program.nodes.size()), order_charged(program.nodes.size());
+  for (const auto &node : program.nodes) {
+    if (node.kind == graph::NodeKind::operation) {
+      const auto op = static_cast<O>(node.opcode);
+      const auto source = node.parent_count ? node.parents[0] : 0;
+      const auto *metadata = program.execution_metadata.get();
+      if (metadata && node.parent_count && graph::summary_fusion_eligible(op) &&
+          metadata->summary_consumers[source] > 1) {
+        if (!summary_charged[source]) { work.linear += 1.5; summary_charged[source] = 1; }
+        if (op == O::mean_absolute_deviation) work.linear += 1.0;
+        continue;
+      }
+      const bool sort = op == O::median || op == O::quantile || op == O::median_where ||
+          op == O::quantile_where || op == O::argsort || op == O::distinct_count;
+      if (sort) {
+        if (metadata && node.parent_count && graph::order_fusion_eligible(op) &&
+            metadata->order_consumers[source] > 1) {
+          if (!order_charged[source]) { work.sort += 2.0; order_charged[source] = 1; }
+        } else work.sort += 2.0;
+      } else work.linear += 1.0;
+    } else if (node.kind == graph::NodeKind::rolling_scope) {
+      const auto &scope = program.rolling_scopes[node.input_index];
+      const auto &width = program.nodes[scope.width_node];
+      const double extent = width.kind == graph::NodeKind::constant && width.constant >= 1
+          ? std::min(5000.0, width.constant) : 5000.0;
+      const auto child = scope_work_factor(*scope.body);
+      work.linear += extent * child.linear;
+      work.sort += extent * child.sort;
+    } else if (node.kind == graph::NodeKind::apply_scope) {
+      const auto &scope = program.apply_scopes[node.input_index];
+      double repeats = 1.0;
+      if (scope.kind == graph::ApplyKind::bisect) {
+        const auto &iterations = program.nodes[scope.argument_nodes[3]];
+        repeats = 2.0 + (iterations.kind == graph::NodeKind::constant && iterations.constant >= 1
+            ? std::min(10000.0, iterations.constant) : 10000.0);
+      }
+      const auto child = scope_work_factor(*scope.body);
+      work.linear += repeats * child.linear;
+      work.sort += repeats * child.sort + (scope.kind == graph::ApplyKind::group ? 2.0 : 0.0);
+    }
+  }
+  work.linear = std::min(1e12, std::max(1.0, work.linear));
+  work.sort = std::min(1e12, work.sort);
+  return work;
 }
 
 PhysicalCost physical_cost(const CompiledGraph &graph,
@@ -95,6 +147,22 @@ PhysicalCost physical_cost(const CompiledGraph &graph,
         result.linear_per_observation +=
             4.0 * std::max<std::size_t>(
                       1, graph.program.rolling_scopes[scope_index].body_node_count);
+      continue;
+    }
+    if (node.node.kind == graph::NodeKind::apply_scope) {
+      const auto &scope = graph.program.apply_scopes[node.node.input_index];
+      const auto factor = scope_work_factor(*scope.body);
+      double repeats = 4.0;
+      if (scope.kind == graph::ApplyKind::bisect) {
+        const auto &iterations = graph.program.nodes[scope.argument_nodes[3]];
+        repeats = 2.0 + (iterations.kind == graph::NodeKind::constant && iterations.constant >= 1
+            ? std::min(10000.0, iterations.constant) : 10000.0);
+      }
+      if (scope.input_nodes.empty() && scope.kind == graph::ApplyKind::bisect)
+        result.constant_per_row += factor.linear * repeats;
+      else result.linear_per_observation += factor.linear * repeats;
+      result.sort_nlogn += factor.sort * repeats;
+      if (scope.kind == graph::ApplyKind::group) result.sort_nlogn += 2.0;
       continue;
     }
     if (node.node.kind != graph::NodeKind::operation)
@@ -158,7 +226,7 @@ struct Dsu {
 
 void build_physical_metadata(CompiledGraph &graph) {
   const auto node_count = graph.nodes.size();
-  if (!graph.program.rolling_scopes.empty()) {
+  if (!graph.program.rolling_scopes.empty() || !graph.program.apply_scopes.empty()) {
     std::vector<std::uint8_t> active(node_count, 1);
     BranchInfo branch;
     branch.root_indices.resize(graph.program.roots.size());
@@ -255,7 +323,9 @@ void build_physical_metadata(CompiledGraph &graph) {
         graph.program.numeric_slots, std::numeric_limits<std::uint32_t>::max());
     std::vector<std::uint32_t> mask_slots(
         graph.program.mask_slots, std::numeric_limits<std::uint32_t>::max());
-    std::uint32_t next_numeric_slot = 0, next_mask_slot = 0;
+    std::vector<std::uint32_t> integer_slots(
+        graph.program.integer_slots, std::numeric_limits<std::uint32_t>::max());
+    std::uint32_t next_numeric_slot = 0, next_mask_slot = 0, next_integer_slot = 0;
     for (std::size_t old_id = 0; old_id < node_count; ++old_id) {
       if (!active[old_id])
         continue;
@@ -279,12 +349,22 @@ void build_physical_metadata(CompiledGraph &graph) {
           slot = next_mask_slot++;
         node.slot = slot;
       }
+      if (node.storage == graph::StorageKind::integer) {
+        auto &slot = integer_slots[node.slot];
+        if (slot == std::numeric_limits<std::uint32_t>::max()) slot = next_integer_slot++;
+        node.slot = slot;
+      }
       branch.program.nodes.push_back(node);
     }
+    branch.program.isolate_errors = graph.program.isolate_errors;
+    branch.program.minimum_observations = graph.program.minimum_observations;
+    branch.program.scope_work_budget = graph.program.scope_work_budget;
     branch.program.input_count = graph.program.input_count;
     branch.program.parameter_count = graph.program.parameter_count;
     branch.program.numeric_slots = next_numeric_slot;
     branch.program.mask_slots = next_mask_slot;
+    branch.program.integer_slots = next_integer_slot;
+    branch.program.input_axes = graph.program.input_axes;
     for (auto root_index : roots)
       branch.program.roots.push_back(remap[graph.program.roots[root_index]]);
     branch.program.finalize();
@@ -317,8 +397,18 @@ public:
   };
   std::unordered_map<std::string, Binding> bindings;
   std::unordered_map<std::string, std::uint32_t> seen;
+  std::unordered_map<std::string, std::uint32_t> seen_scopes;
   std::unordered_map<std::uint32_t, LogicalWindow> logical_windows;
   bool rolling_body = false;
+  bool local_solver = false;
+  std::size_t scope_depth = 0;
+  Builder *capture_outer = nullptr;
+  std::unordered_map<std::string, std::uint32_t> captures;
+  std::map<std::string, std::string> expression_bindings;
+  std::vector<std::string> active_bindings;
+  std::string semantic_context;
+  std::size_t binding_expansions = 0;
+  std::uint32_t bound_variable(const std::string &name);
 
   std::uint32_t append(NodeInfo info) {
     ++result->raw_node_count;
@@ -332,6 +422,11 @@ public:
   std::uint32_t intern(NodeInfo info) {
     ++result->raw_node_count;
     std::string key;
+    if (info.node.kind == graph::NodeKind::operation ||
+        info.node.kind == graph::NodeKind::rolling_scope) {
+      key_append(key, semantic_context.size());
+      key.append(semantic_context);
+    }
     key_append(key, static_cast<std::uint8_t>(info.node.kind));
     key_append(key, info.node.opcode);
     key_append(key, info.node.input_index);
@@ -358,6 +453,21 @@ public:
   }
 
   std::uint32_t variable(const std::string &name) {
+    if (capture_outer && !(local_solver && name == "solve_x") && !captures.count(name) &&
+        (!bindings.count(name) || capture_outer->expression_bindings.count(name))) {
+      const auto outer = capture_outer->variable(name);
+      Binding captured;
+      captured.type = capture_outer->result->nodes[outer].inferred_type;
+      captured.input = !captured.type.is_scalar();
+      if (captured.input && captured.type.shape.size() == 1) {
+        captured.type.shape = {"T"}; captured.type.axes = {"time"};
+        captured.type.kind = typed::ValueKind::series;
+      }
+      captured.index = std::numeric_limits<std::uint16_t>::max();
+      bindings[name] = captured;
+      captures.emplace(name, outer);
+    }
+    if (expression_bindings.count(name)) return bound_variable(name);
     auto entry = bindings.find(name);
     check(entry != bindings.end(), "unknown variable: " + name);
     if (entry->second.index == std::numeric_limits<std::uint16_t>::max()) {
@@ -495,11 +605,28 @@ public:
     return id;
   }
 
+  std::uint32_t apply_scope(const std::string &name, const std::string &body_source,
+                            const std::vector<std::uint32_t> &arguments);
+
   std::uint32_t rolling_apply(const std::string &body_source,
                               const std::vector<std::uint32_t> &arguments);
 
   std::uint32_t call(const std::string &name,
                      const std::vector<std::uint32_t> &parents) {
+    if (name == "interval_tail") {
+      check(!active_bindings.empty() && parents.size() == 1,
+            "interval_tail is an interval-binding view, not a public operator");
+      const auto &source = result->nodes[parents[0]];
+      check(source.inferred_type.kind == typed::ValueKind::series && source.inferred_type.is_numeric(),
+            "interval_tail requires a numeric series");
+      NodeInfo info;
+      info.node.kind = graph::NodeKind::interval_tail;
+      info.node.parent_count = 1;
+      info.node.parents[0] = parents[0];
+      info.inferred_type = typed::infer(ops::lookup("lag"), {source.inferred_type});
+      info.value_class = V::series;
+      return intern(info);
+    }
     if (name == "rolling_window")
       return rolling_window(parents);
     try {
@@ -518,10 +645,16 @@ public:
     for (auto root : result->program.roots)
       nodes[root].last_use = static_cast<std::uint32_t>(nodes.size());
     // A borrowed view extends the lifetime of its backing slot, transitively.
+    auto borrowed = [&](const NodeInfo &info) {
+      if (info.node.kind == graph::NodeKind::interval_tail) return true;
+      if (info.node.kind != graph::NodeKind::operation) return false;
+      const auto op = static_cast<O>(info.node.opcode);
+      return op == O::lag || op == O::transpose ||
+             (op == O::diag && nodes[info.node.parents[0]].inferred_type.rank() == 2);
+    };
     for (std::size_t i = nodes.size(); i-- > 0;) {
       const auto &info = nodes[i];
-      if (info.node.kind == graph::NodeKind::operation &&
-          info.node.opcode == static_cast<std::uint16_t>(O::lag)) {
+      if (borrowed(info)) {
         auto &source = nodes[info.node.parents[0]];
         source.last_use = std::max(source.last_use, info.last_use);
       }
@@ -530,9 +663,10 @@ public:
       std::vector<std::uint32_t> deaths;
       for (auto &info : nodes) {
         if ((info.node.kind != graph::NodeKind::operation &&
-             info.node.kind != graph::NodeKind::rolling_scope) ||
+             info.node.kind != graph::NodeKind::rolling_scope &&
+             info.node.kind != graph::NodeKind::apply_scope) ||
             info.value_class != type ||
-            info.node.opcode == static_cast<std::uint16_t>(O::lag))
+            borrowed(info))
           continue;
         std::size_t slot = 0;
         while (slot < deaths.size() && deaths[slot] >= info.node_id)
@@ -550,6 +684,13 @@ public:
         allocate(V::series, graph::StorageKind::numeric);
     result->program.mask_slots =
         allocate(V::mask_series, graph::StorageKind::mask);
+    result->program.integer_slots = allocate(V::integer_series, graph::StorageKind::integer);
+    result->program.input_axes.clear();
+    for (const auto &name : result->input_names) {
+      const auto &type = bindings.at(name).type;
+      const bool time = !type.axes.empty() && type.axes.front() == "time";
+      result->program.input_axes.push_back(time ? (type.kind == typed::ValueKind::matrix ? 2 : 0) : 1);
+    }
     result->program.input_count = result->input_names.size();
     result->program.parameter_count = result->parameter_names.size();
     result->program.output_kind = result->output_kind;
@@ -572,6 +713,7 @@ public:
         update(x);
       update(0);
     };
+    for (const auto &contract : result->source_contracts) update_text(contract);
     for (const auto &v : result->variables) {
       update_text(v.first);
       update_text(v.second);
@@ -590,7 +732,7 @@ public:
       update(0xfe);
     }
     std::ostringstream out;
-    out << "native-2-" << std::hex << std::setfill('0') << std::setw(16) << a
+    out << "native-3-" << std::hex << std::setfill('0') << std::setw(16) << a
         << std::setw(16) << b;
     result->fingerprint = out.str();
   }
@@ -683,8 +825,9 @@ class Parser {
           "only numeric constants are allowed");
     if (!take("("))
       return builder.variable(name);
-    if (name == "rolling_apply") {
-      check(!builder.rolling_body,
+    if (name == "rolling_apply" || name == "block_apply" || name == "filter_apply" ||
+        name == "group_apply" || name == "bisect") {
+      check(name != "rolling_apply" || !builder.rolling_body,
             "ROLLING_NESTED_SCOPE_UNSUPPORTED: nested rolling_apply");
       space();
       const auto body_start = position;
@@ -708,16 +851,17 @@ class Parser {
       position = comma + 1;
       std::vector<std::uint32_t> args;
       do {
-        check(args.size() < 4, "rolling_apply has too many scope arguments");
+        check(args.size() < 4, "apply scope has too many arguments");
         args.push_back(expression());
       } while (take(","));
       check(take(")"), "expected ')' after rolling_apply");
-      return builder.rolling_apply(body_source, args);
+      return name == "rolling_apply" ? builder.rolling_apply(body_source, args)
+                                     : builder.apply_scope(name, body_source, args);
     }
     std::vector<std::uint32_t> args;
     if (!take(")")) {
       do {
-        check(args.size() < 4, "too many operator arguments");
+        check(args.size() < 8, "too many operator arguments");
         args.push_back(expression());
       } while (take(","));
       check(take(")"), "expected ')' after canonical call");
@@ -791,6 +935,17 @@ public:
   }
 };
 
+std::uint32_t Builder::bound_variable(const std::string &name) {
+  check(active_bindings.size() < 64 &&
+        std::find(active_bindings.begin(), active_bindings.end(), name) == active_bindings.end(),
+        "cyclic or excessively deep expression binding");
+  check(++binding_expansions <= max_nodes, "expression binding expansion limit exceeded");
+  active_bindings.push_back(name);
+  const auto result = Parser(*this, expression_bindings.at(name)).parse();
+  active_bindings.pop_back();
+  return result;
+}
+
 std::uint32_t Builder::rolling_apply(
     const std::string &body_source,
     const std::vector<std::uint32_t> &arguments) {
@@ -853,7 +1008,10 @@ std::uint32_t Builder::rolling_apply(
           "TYPE_MISMATCH: rolling_apply annual rate must be numeric scalar");
   }
 
+  check(scope_depth < 8, "SCOPE_NESTING_LIMIT");
   Builder body;
+  body.scope_depth = scope_depth + 1;
+  body.capture_outer = this;
   body.rolling_body = true;
   body.result->variables = result->variables;
   body.result->variable_types = result->variable_types;
@@ -909,15 +1067,16 @@ std::uint32_t Builder::rolling_apply(
   scope.has_date_context = date_context;
   scope.body_node_count = body.result->nodes.size();
 
-  std::vector<const typed::ValueType *> body_input_types;
+  std::vector<typed::ValueType> body_input_types;
   for (const auto &name : body.result->input_names) {
-    const auto outer = variable(name);
+    const auto capture = body.captures.find(name);
+    const auto outer = capture == body.captures.end() ? variable(name) : capture->second;
     const auto &type = result->nodes[outer].inferred_type;
     if (type.kind != typed::ValueKind::series || !type.is_numeric())
       throw CompileError(
           "ROLLING_BODY_ARRAY_TYPE: rolling_apply body arrays must be numeric time series");
     scope.input_nodes.push_back(outer);
-    body_input_types.push_back(&type);
+    body_input_types.push_back(type);
     if (name == "returns") {
       scope.has_returns = true;
       scope.returns_input =
@@ -933,9 +1092,9 @@ std::uint32_t Builder::rolling_apply(
   if (scope.input_nodes.empty())
     throw CompileError(
         "ROLLING_BODY_NO_SERIES: rolling_apply body must depend on a time series");
-  for (const auto *type : body_input_types) {
+  for (const auto &type : body_input_types) {
     const bool preceding =
-        scope.has_returns && !type->shape.empty() && type->shape[0] == "L";
+        scope.has_returns && !type.shape.empty() && type.shape[0] == "L";
     scope.input_preceding.push_back(preceding ? 1 : 0);
     scope.needs_preceding_observation =
         scope.needs_preceding_observation || preceding;
@@ -995,6 +1154,124 @@ std::uint32_t Builder::rolling_apply(
   return append(std::move(info));
 }
 
+std::uint32_t Builder::apply_scope(const std::string &name,
+    const std::string &body_source, const std::vector<std::uint32_t> &arguments) {
+  check(scope_depth < 8, "SCOPE_NESTING_LIMIT");
+  const auto kind = name == "block_apply" ? graph::ApplyKind::block
+      : name == "filter_apply" ? graph::ApplyKind::filter
+      : name == "group_apply" ? graph::ApplyKind::group : graph::ApplyKind::bisect;
+  check((kind == graph::ApplyKind::filter && arguments.size() >= 1 && arguments.size() <= 2) ||
+        (kind == graph::ApplyKind::bisect && arguments.size() == 4) ||
+        ((kind == graph::ApplyKind::block || kind == graph::ApplyKind::group) && arguments.size() == 1),
+        name + ": incorrect argument count");
+  for (std::size_t i = 0; i < arguments.size(); ++i) {
+    const auto &type = result->nodes[arguments[i]].inferred_type;
+    if (i == 0 && kind == graph::ApplyKind::filter)
+      check(type.is_mask() && type.shape.size() == 1, "filter_apply requires a one-dimensional mask");
+    else if (i == 0 && kind == graph::ApplyKind::group)
+      check(type.dtype == typed::DType::int64 && type.shape.size() == 1,
+            "group_apply requires exact int64 keys");
+    else
+      check(type.is_scalar() && type.dtype == typed::DType::float64,
+            name + " requires numeric scalar parameters");
+  }
+  Builder body;
+  body.scope_depth = scope_depth + 1;
+  body.capture_outer = this;
+  body.result->variables = result->variables;
+  body.result->variable_types = result->variable_types;
+  for (const auto &item : bindings) {
+    auto binding = item.second;
+    binding.index = std::numeric_limits<std::uint16_t>::max();
+    if (binding.input && binding.type.shape.size() == 1) {
+      binding.type.shape = {"T"};
+      binding.type.axes = {"time"};
+      binding.type.kind = typed::ValueKind::series;
+    }
+    body.bindings.emplace(item.first, std::move(binding));
+  }
+  if (kind == graph::ApplyKind::bisect) {
+    body.local_solver = true;
+    Binding solver;
+    solver.index = std::numeric_limits<std::uint16_t>::max();
+    body.bindings["solve_x"] = solver;
+  }
+  const auto root = Parser(body, body_source).parse();
+  const auto body_type = body.result->nodes[root].inferred_type;
+  check(body_type.is_scalar() && body_type.is_numeric(),
+        name + " body must return a numeric scalar");
+  body.result->program.roots.push_back(root);
+  body.result->output_kind = graph::OutputKind::scalar;
+  body.finish();
+  graph::ApplyScope scope;
+  scope.kind = kind;
+  scope.body = std::make_shared<graph::Program>(body.result->program);
+  scope.body_node_count = body.result->nodes.size();
+  scope.argument_nodes = arguments;
+  for (const auto &input : body.result->input_names) {
+    const auto capture = body.captures.find(input);
+    const auto outer = capture == body.captures.end() ? variable(input) : capture->second;
+    check(result->nodes[outer].inferred_type.shape.size() == 1,
+          "apply scope currently accepts only one-dimensional captured arrays");
+    scope.input_nodes.push_back(outer);
+  }
+  for (const auto &parameter : body.result->parameter_names) {
+    if (kind == graph::ApplyKind::bisect && parameter == "solve_x")
+      scope.parameter_nodes.push_back(std::numeric_limits<std::uint32_t>::max());
+    else {
+      const auto capture = body.captures.find(parameter);
+      scope.parameter_nodes.push_back(capture == body.captures.end() ? variable(parameter) : capture->second);
+    }
+  }
+  std::vector<std::uint32_t> dependencies;
+  auto add = [&](std::uint32_t value) {
+    if (value != std::numeric_limits<std::uint32_t>::max() &&
+        std::find(dependencies.begin(), dependencies.end(), value) == dependencies.end())
+      dependencies.push_back(value);
+  };
+  for (auto id : scope.input_nodes) add(id);
+  for (auto id : scope.parameter_nodes) add(id);
+  for (auto id : scope.argument_nodes) add(id);
+  check(dependencies.size() <= graph::Node{}.parents.size(), "too many scope captures");
+  std::string scope_key = name + ":" + body.result->fingerprint;
+  key_append(scope_key, semantic_context.size());
+  scope_key.append(semantic_context);
+  for (auto id : scope.input_nodes) key_append(scope_key, id);
+  key_append(scope_key, std::uint32_t(0xfffffffe));
+  for (auto id : scope.parameter_nodes) key_append(scope_key, id);
+  key_append(scope_key, std::uint32_t(0xfffffffd));
+  for (auto id : scope.argument_nodes) key_append(scope_key, id);
+  if (const auto it = seen_scopes.find(scope_key); it != seen_scopes.end()) {
+    ++result->raw_node_count;
+    return it->second;
+  }
+  check(result->program.apply_scopes.size() < 4096, "too many apply scopes");
+  NodeInfo info;
+  info.node.kind = graph::NodeKind::apply_scope;
+  info.node.input_index = static_cast<std::uint16_t>(result->program.apply_scopes.size());
+  info.node.parent_count = static_cast<std::uint8_t>(dependencies.size());
+  std::copy(dependencies.begin(), dependencies.end(), info.node.parents.begin());
+  info.inferred_type = body_type;
+  info.value_class = V::scalar;
+  if (kind == graph::ApplyKind::group) {
+    info.inferred_type = result->nodes[arguments[0]].inferred_type;
+    info.inferred_type.dtype = typed::DType::float64;
+    info.inferred_type.semantic_dimension = body_type.semantic_dimension;
+    info.inferred_type.price_basis = body_type.price_basis;
+    info.value_class = V::series;
+  } else if (kind == graph::ApplyKind::block) {
+    info.inferred_type = typed::ValueType::series(
+        "blocks(" + std::to_string(result->nodes.size()) + ")",
+        body_type.semantic_dimension, body_type.price_basis);
+    info.value_class = V::series;
+  }
+  info.cost_model = "apply_scope";
+  result->program.apply_scopes.push_back(std::move(scope));
+  const auto id = append(std::move(info));
+  seen_scopes.emplace(std::move(scope_key), id);
+  return id;
+}
+
 void put(std::vector<std::uint8_t> &out, std::uint64_t value,
          std::size_t bytes) {
   for (std::size_t i = 0; i < bytes; ++i)
@@ -1032,6 +1309,8 @@ const char *class_name(V v) noexcept {
     return "mask_scalar";
   case V::mask_series:
     return "mask_series";
+  case V::integer_series:
+    return "integer_series";
   case V::fit:
     return "fit";
   case V::interval:
@@ -1049,8 +1328,12 @@ const char *kind_name(graph::NodeKind k) noexcept {
     return "constant";
   case graph::NodeKind::operation:
     return "operation";
+  case graph::NodeKind::interval_tail:
+    return "interval_tail";
   case graph::NodeKind::rolling_scope:
     return "rolling_scope";
+  case graph::NodeKind::apply_scope:
+    return "apply_scope";
   }
   return "invalid";
 }
@@ -1062,6 +1345,8 @@ const char *storage_name(graph::StorageKind s) noexcept {
     return "numeric";
   case graph::StorageKind::mask:
     return "mask";
+  case graph::StorageKind::integer:
+    return "integer";
   }
   return "invalid";
 }
@@ -1086,12 +1371,26 @@ compile(const std::vector<std::string> &expressions,
 
 std::shared_ptr<CompiledGraph>
 compile(const std::vector<std::string> &expressions,
-        const std::vector<typed::Variable> &variables) {
+        const std::vector<typed::Variable> &variables, bool isolate_errors,
+        const std::vector<std::map<std::string, std::string>> &root_bindings,
+        const std::vector<std::string> &source_contracts, std::uint32_t minimum_observations,
+        std::uint64_t scope_work_budget) {
   check(!variables.empty() && variables.size() < 65536,
         "invalid variable count");
   check(!expressions.empty() && expressions.size() <= 4096,
         "invalid expression count");
+  check(root_bindings.empty() || root_bindings.size() == expressions.size(),
+        "root binding count mismatch");
+  check(source_contracts.empty() || source_contracts.size() == expressions.size(),
+        "source contract count mismatch");
   Builder builder;
+  builder.result->source_contracts = source_contracts;
+  builder.result->root_bindings = root_bindings;
+  check(minimum_observations <= 1000000, "minimum observations out of range");
+  builder.result->program.minimum_observations = minimum_observations;
+  check(scope_work_budget >= 1 && scope_work_budget <= 1000000000000ULL, "scope work budget out of range");
+  builder.result->program.scope_work_budget = scope_work_budget;
+  builder.result->program.isolate_errors = isolate_errors;
   builder.result->expressions = expressions;
   builder.result->variable_types = variables;
   for (const auto &item : variables) {
@@ -1105,12 +1404,12 @@ compile(const std::vector<std::string> &expressions,
     } catch (const typed::Error &error) {
       throw CompileError(error.what());
     }
-    if (item.type.is_mask())
-      throw CompileError("typed graph input variables must be numeric");
     const bool input = !item.type.is_scalar();
-    if (input && item.type.kind != typed::ValueKind::series)
-      throw CompileError(
-          "typed interval graph currently binds scalar or time-series variables");
+    check(input || item.type.dtype == typed::DType::float64,
+          "scalar parameters must be float64");
+    check(!input || item.type.kind == typed::ValueKind::series ||
+              item.type.kind == typed::ValueKind::vector || item.type.kind == typed::ValueKind::matrix,
+          "input variables must be scalar, series, vector or matrix");
     auto &names = input ? builder.result->input_names
                         : builder.result->parameter_names;
     check(names.size() < std::numeric_limits<std::uint16_t>::max(),
@@ -1134,7 +1433,20 @@ compile(const std::vector<std::string> &expressions,
   }
   std::size_t source_bytes = 0;
   std::optional<graph::OutputKind> output_kind;
-  for (const auto &source : expressions) {
+  for (std::size_t root_index = 0; root_index < expressions.size(); ++root_index) {
+    const auto &source = expressions[root_index];
+    builder.expression_bindings = root_bindings.empty()
+        ? std::map<std::string, std::string>{} : root_bindings[root_index];
+    builder.semantic_context = source_contracts.empty() ? "" : source_contracts[root_index];
+    check(builder.semantic_context.size() <= 4096, "source contract too large");
+    check(builder.expression_bindings.size() <= 1024, "too many expression bindings");
+    for (const auto &entry : builder.expression_bindings) {
+      check(!entry.first.empty() && ident_start(static_cast<unsigned char>(entry.first[0])) &&
+            std::all_of(entry.first.begin() + 1, entry.first.end(), [](unsigned char c) { return ident_rest(c); }),
+            "invalid expression binding name");
+      check(entry.second.size() <= max_source_bytes - source_bytes, "expression byte limit exceeded");
+      source_bytes += entry.second.size();
+    }
     check(source.size() <= max_source_bytes - source_bytes,
           "expression byte limit exceeded");
     source_bytes += source.size();
@@ -1148,7 +1460,7 @@ compile(const std::vector<std::string> &expressions,
     if (type.is_scalar() &&
         (type.is_numeric() || type.is_mask()))
       current = graph::OutputKind::scalar;
-    else if (type.kind == typed::ValueKind::series && type.is_numeric()) {
+    else if (type.kind == typed::ValueKind::series && type.dtype == typed::DType::float64) {
       check(type.shape.size() == 1 && type.shape[0] == "T",
             "SERIES_ROOT_ALIGNMENT: public series roots must preserve the interval time axis");
       current = graph::OutputKind::series;
@@ -1158,6 +1470,7 @@ compile(const std::vector<std::string> &expressions,
     if (output_kind && *output_kind != current)
       throw CompileError(
           "MIXED_ROOT_TYPES: scalar and series roots cannot share one execution graph");
+
     output_kind = current;
     builder.result->program.roots.push_back(root);
   }
@@ -1169,12 +1482,12 @@ compile(const std::vector<std::string> &expressions,
 std::vector<std::uint8_t> encode_program(const graph::Program &p) {
   p.validate();
   check(p.nodes.size() <= max_nodes && p.roots.size() <= 4096 &&
-            p.rolling_scopes.size() <= 4096,
+            p.rolling_scopes.size() <= 4096 && p.apply_scopes.size() <= 4096,
         "plan size limit exceeded");
   std::vector<std::uint8_t> bytes;
   bytes.reserve(48 + p.nodes.size() * 48);
   put(bytes, 0x434d4547, 4);
-  put(bytes, 2, 4);
+  put(bytes, 4, 4);
   put(bytes, p.nodes.size(), 4);
   put(bytes, p.roots.size(), 4);
   put(bytes, p.input_count, 4);
@@ -1183,6 +1496,13 @@ std::vector<std::uint8_t> encode_program(const graph::Program &p) {
   put(bytes, p.mask_slots, 4);
   put(bytes, static_cast<std::uint8_t>(p.output_kind), 1);
   put(bytes, p.rolling_scopes.size(), 4);
+  put(bytes, p.isolate_errors, 1);
+  put(bytes, p.minimum_observations, 4);
+  put(bytes, p.scope_work_budget, 8);
+  put(bytes, p.integer_slots, 4);
+  put(bytes, p.input_axes.size(), 4);
+  for (auto axis : p.input_axes) put(bytes, axis, 1);
+  put(bytes, p.apply_scopes.size(), 4);
   for (const auto &n : p.nodes) {
     put(bytes, static_cast<std::uint8_t>(n.kind), 1);
     put(bytes, n.opcode, 2);
@@ -1223,16 +1543,35 @@ std::vector<std::uint8_t> encode_program(const graph::Program &p) {
     put(bytes, scope.body_node_count, 8);
     put(bytes, scope.array_count, 8);
   }
+  for (const auto &scope : p.apply_scopes) {
+    put(bytes, static_cast<std::uint8_t>(scope.kind), 1);
+    const auto body = encode_program(*scope.body);
+    put(bytes, body.size(), 8);
+    bytes.insert(bytes.end(), body.begin(), body.end());
+    for (const auto *bindings : {&scope.input_nodes, &scope.parameter_nodes, &scope.argument_nodes}) {
+      put(bytes, bindings->size(), 4);
+      for (auto id : *bindings) put(bytes, id, 4);
+    }
+    put(bytes, scope.body_node_count, 8);
+  }
   for (auto root : p.roots)
     put(bytes, root, 4);
   return bytes;
 }
 
 graph::Program decode_program(const std::vector<std::uint8_t> &bytes) {
+  thread_local std::size_t decode_depth = 0;
+  struct Guard {
+    std::size_t &depth;
+    explicit Guard(std::size_t &d) : depth(d) {
+      check(depth < 16, "native plan nesting limit"); ++depth;
+    }
+    ~Guard() { --depth; }
+  } guard(decode_depth);
   Reader in{bytes};
   check(in.get(4) == 0x434d4547, "unsupported native plan magic");
   const auto version = in.get(4);
-  check(version == 1 || version == 2, "unsupported native plan version");
+  check(version >= 1 && version <= 4, "unsupported native plan version");
   const auto count = in.get(4), roots = in.get(4);
   check(count > 0 && count <= max_nodes && roots > 0 && roots <= 4096,
         "invalid native plan counts");
@@ -1241,7 +1580,7 @@ graph::Program decode_program(const std::vector<std::uint8_t> &bytes) {
   p.parameter_count = in.get(4);
   p.numeric_slots = in.get(4);
   p.mask_slots = in.get(4);
-  std::size_t scope_count = 0;
+  std::size_t scope_count = 0, apply_count = 0;
   if (version >= 2) {
     const auto output_kind = in.get(1);
     check(output_kind <= 1, "invalid native output kind");
@@ -1249,13 +1588,30 @@ graph::Program decode_program(const std::vector<std::uint8_t> &bytes) {
     scope_count = static_cast<std::size_t>(in.get(4));
     check(scope_count <= 4096, "invalid rolling scope count");
   }
+  if (version >= 3) {
+    const auto isolate = in.get(1);
+    check(isolate <= 1, "invalid native error policy");
+    p.isolate_errors = isolate != 0;
+    p.minimum_observations = static_cast<std::uint32_t>(in.get(4));
+    check(p.minimum_observations <= 1000000, "minimum observations out of range");
+  }
+  if (version >= 4) {
+    p.scope_work_budget = in.get(8);
+    p.integer_slots = static_cast<std::size_t>(in.get(4));
+    const auto axes = static_cast<std::size_t>(in.get(4));
+    check(axes == 0 || axes == p.input_count, "invalid input axis count");
+    for (std::size_t i = 0; i < axes; ++i) p.input_axes.push_back(static_cast<std::uint8_t>(in.get(1)));
+    apply_count = static_cast<std::size_t>(in.get(4));
+    check(apply_count <= 4096, "invalid apply scope count");
+  }
+  check(p.integer_slots <= count, "native integer allocation limit");
   check(p.input_count < 65536 && p.parameter_count < 65536 &&
             p.numeric_slots <= count && p.mask_slots <= count,
         "native plan allocation limit");
   p.nodes.resize(static_cast<std::size_t>(count));
   for (auto &n : p.nodes) {
     const auto kind = in.get(1);
-    check(kind <= (version == 1 ? 3 : 4), "invalid native node kind");
+    check(kind <= (version == 1 ? 3 : version == 2 ? 4 : version == 3 ? 5 : 6), "invalid native node kind");
     n.kind = static_cast<graph::NodeKind>(kind);
     n.opcode = static_cast<std::uint16_t>(in.get(2));
     n.input_index = static_cast<std::uint16_t>(in.get(2));
@@ -1264,7 +1620,7 @@ graph::Program decode_program(const std::vector<std::uint8_t> &bytes) {
     n.parent_count = static_cast<std::uint8_t>(in.get(1));
     check(n.parent_count <= n.parents.size(), "invalid native arity");
     const auto storage = in.get(1);
-    check(storage <= 2, "invalid native storage");
+    check(storage <= (version >= 4 ? 3 : 2), "invalid native storage");
     n.storage = static_cast<graph::StorageKind>(storage);
     n.slot = static_cast<std::uint32_t>(in.get(4));
     const auto parent_slots = version == 1 ? 4u : n.parent_count;
@@ -1307,6 +1663,21 @@ graph::Program decode_program(const std::vector<std::uint8_t> &bytes) {
     scope.body_node_count = static_cast<std::size_t>(in.get(8));
     scope.array_count = static_cast<std::size_t>(in.get(8));
     p.rolling_scopes.push_back(std::move(scope));
+  }
+  for (std::size_t i = 0; i < apply_count; ++i) {
+    graph::ApplyScope scope;
+    const auto kind = in.get(1);
+    check(kind <= 3, "invalid apply kind");
+    scope.kind = static_cast<graph::ApplyKind>(kind);
+    scope.body = std::make_shared<graph::Program>(decode_program(in.blob()));
+    for (auto *bindings : {&scope.input_nodes, &scope.parameter_nodes, &scope.argument_nodes}) {
+      const auto count = static_cast<std::size_t>(in.get(4));
+      check(count <= 32, "too many apply bindings");
+      for (std::size_t j = 0; j < count; ++j) bindings->push_back(static_cast<std::uint32_t>(in.get(4)));
+    }
+    scope.body_node_count = static_cast<std::size_t>(in.get(8));
+    check(scope.body_node_count == scope.body->nodes.size(), "invalid apply cost metadata");
+    p.apply_scopes.push_back(std::move(scope));
   }
   for (std::size_t i = 0; i < roots; ++i)
     p.roots.push_back(static_cast<std::uint32_t>(in.get(4)));

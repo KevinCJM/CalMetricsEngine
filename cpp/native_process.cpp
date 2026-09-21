@@ -24,8 +24,8 @@ extern char **environ;
 namespace calmetrics_engine::native {
 namespace {
 constexpr std::size_t max_frame = 256 * 1024 * 1024;
-constexpr std::uint64_t request_magic = 0x434d453300000001ull;
-constexpr std::uint64_t response_magic = 0x434d455300000001ull;
+constexpr std::uint64_t request_magic = 0x434d453300000003ull;
+constexpr std::uint64_t response_magic = 0x434d455300000003ull;
 using Bytes = std::vector<std::uint8_t>;
 void require(bool ok, const char *message) {
   if (!ok)
@@ -107,6 +107,34 @@ SharedDescriptor get_descriptor(Reader &in) {
 SharedDescriptor descriptor(const std::shared_ptr<SharedRegion> &region) {
   return {region->name(), region->size(), 0};
 }
+std::size_t input_itemsize(const ops::Value &value) {
+  require(value.kind == ops::Kind::number || value.kind == ops::Kind::integer ||
+          value.kind == ops::Kind::mask, "unsupported native input dtype");
+  return value.kind == ops::Kind::mask ? 1 : 8;
+}
+bool contiguous_input(const ops::Value &value) {
+  return value.shape.rank == 1 ? value.stride[0] == 1
+      : value.shape.rank == 2 && value.stride[1] == 1 &&
+          value.stride[0] == static_cast<std::ptrdiff_t>(value.shape.dim[1]);
+}
+void pack_input(const ops::Value &value, void *destination) {
+  const auto width = input_itemsize(value);
+  const auto bytes = planner::checked_mul(value.size(), width);
+  if (contiguous_input(value)) {
+    if (bytes) std::memcpy(destination, value.data, bytes);
+    return;
+  }
+  auto *target = static_cast<std::uint8_t *>(destination);
+  for (std::size_t i = 0; i < value.size(); ++i) {
+    if (value.kind == ops::Kind::integer) {
+      const auto item = value.i(i); std::memcpy(target + i * width, &item, width);
+    } else if (value.kind == ops::Kind::mask) {
+      target[i] = value.u(i);
+    } else {
+      const auto item = value.f(i); std::memcpy(target + i * width, &item, width);
+    }
+  }
+}
 std::size_t graph::Audit::*const audit_fields[] = {
     &graph::Audit::rows,
     &graph::Audit::nodes,
@@ -123,11 +151,14 @@ std::size_t graph::Audit::*const audit_fields[] = {
 void write_audit(Writer &out, const graph::Audit &a) {
   for (auto member : audit_fields)
     out.number(a.*member);
+  out.number(a.statuses.size());
+  out.blob(a.statuses.data(), a.statuses.size() * sizeof(std::int16_t));
 }
 graph::Audit read_audit(Reader &in) {
   graph::Audit a;
   for (auto member : audit_fields)
     a.*member = static_cast<std::size_t>(in.number());
+  a.statuses = in.array<std::int16_t>(static_cast<std::size_t>(in.number()));
   return a;
 }
 
@@ -425,23 +456,46 @@ Bytes execute_request(const Bytes &bytes, Bytes &cached_bytes,
             "native worker input count mismatch");
     std::vector<ops::Value> inputs;
     std::vector<std::vector<double>> storage;
+    std::vector<std::vector<std::int64_t>> integer_storage;
+    std::vector<std::vector<std::uint8_t>> mask_storage;
     std::vector<std::shared_ptr<SharedRegion>> mappings;
     storage.reserve(static_cast<std::size_t>(input_count));
+    integer_storage.reserve(static_cast<std::size_t>(input_count));
+    mask_storage.reserve(static_cast<std::size_t>(input_count));
     for (std::size_t i = 0; i < input_count; ++i) {
-      const auto count = static_cast<std::size_t>(in.number());
       ops::Value value;
-      value.kind = ops::Kind::number;
-      value.shape = ops::vector_shape(count);
-      value.stride[0] = 1;
+      const auto kind = in.number();
+      require(kind == static_cast<std::uint64_t>(ops::Kind::number) ||
+              kind == static_cast<std::uint64_t>(ops::Kind::integer) ||
+              kind == static_cast<std::uint64_t>(ops::Kind::mask),
+              "invalid native input dtype");
+      value.kind = static_cast<ops::Kind>(kind);
+      const auto rank = in.number();
+      require(rank == 1 || rank == 2, "invalid native input rank");
+      value.shape.rank = static_cast<int>(rank);
+      std::size_t count = 1;
+      for (int axis = 0; axis < value.shape.rank; ++axis) {
+        value.shape.dim[axis] = static_cast<std::size_t>(in.number());
+        count = planner::checked_mul(count, value.shape.dim[axis]);
+      }
+      value.stride[0] = value.shape.rank == 2 ? value.shape.dim[1] : 1;
+      value.stride[1] = 1;
+      const auto width = input_itemsize(value);
       if (shared) {
         const auto d = get_descriptor(in);
-        require(d.offset % alignof(double) == 0 &&
-                    planner::checked_mul(count, 8) <= d.bytes - d.offset,
+        require(d.offset % width == 0 &&
+                    planner::checked_mul(count, width) <= d.bytes - d.offset,
                 "native input descriptor bounds");
         auto mapping = SharedRegion::attach(d.name, d.bytes);
         value.data =
             static_cast<const std::uint8_t *>(mapping->data()) + d.offset;
         mappings.push_back(std::move(mapping));
+      } else if (value.kind == ops::Kind::integer) {
+        integer_storage.push_back(in.array<std::int64_t>(count));
+        value.data = integer_storage.back().data();
+      } else if (value.kind == ops::Kind::mask) {
+        mask_storage.push_back(in.array<std::uint8_t>(count));
+        value.data = mask_storage.back().data();
       } else {
         storage.push_back(in.array<double>(count));
         value.data = storage.back().data();
@@ -614,14 +668,20 @@ ProcessTransport::ProcessTransport(const planner::Plan &plan,
       require(batch.shared_inputs.size() == batch.inputs.size(),
               "incomplete shared input descriptors");
       input_descriptors_ = batch.shared_inputs;
-      for (const auto &d : input_descriptors_)
+      for (std::size_t i = 0; i < input_descriptors_.size(); ++i) {
+        const auto &d = input_descriptors_[i];
+        const auto &value = batch.inputs[i];
+        const auto width = input_itemsize(value);
+        require(contiguous_input(value) && d.offset <= d.bytes && d.offset % width == 0 &&
+                    planner::checked_mul(value.size(), width) <= d.bytes - d.offset,
+                "invalid pre-shared typed input geometry");
         shared_memory_bytes += d.bytes;
+      }
     } else
       for (const auto &input : batch.inputs) {
-        const auto bytes = planner::checked_mul(input.size(), 8);
+        const auto bytes = planner::checked_mul(input.size(), input_itemsize(input));
         auto region = SharedRegion::create(bytes);
-        if (bytes)
-          std::memcpy(region->data(), input.data, bytes);
+        pack_input(input, region->data());
         region->make_readonly();
         input_descriptors_.push_back(descriptor(region));
         owners_.push_back(region);
@@ -654,11 +714,21 @@ Bytes ProcessTransport::request(planner::Chunk chunk) const {
   out.blob(batch_.parameters, batch_.parameter_count * sizeof(double));
   out.number(batch_.inputs.size());
   for (std::size_t i = 0; i < batch_.inputs.size(); ++i) {
-    out.number(batch_.inputs[i].size());
+    const auto &input = batch_.inputs[i];
+    out.number(static_cast<std::uint64_t>(input.kind));
+    out.number(static_cast<std::uint64_t>(input.shape.rank));
+    for (int axis = 0; axis < input.shape.rank; ++axis) out.number(input.shape.dim[axis]);
     if (plan_.use_shared_memory)
       put_descriptor(out, input_descriptors_[i]);
-    else
-      out.blob(batch_.inputs[i].data, batch_.inputs[i].size() * 8);
+    else {
+      const auto bytes = planner::checked_mul(input.size(), input_itemsize(input));
+      if (contiguous_input(input)) out.blob(input.data, bytes);
+      else {
+        Bytes packed(bytes);
+        pack_input(input, packed.data());
+        out.blob(packed);
+      }
+    }
   }
   out.number(batch_.rows);
   out.number(chunk.begin);
@@ -704,6 +774,9 @@ graph::Audit ProcessTransport::response(const Bytes &bytes,
   in.end();
   require(audit.rows == chunk.end - chunk.begin,
           "native worker result shape mismatch");
+  const auto status_count = plan_.graph->program.isolate_errors
+      ? planner::checked_mul(output_rows, plan_.graph->program.roots.size()) : 0;
+  require(audit.statuses.size() == status_count, "native worker status shape mismatch");
   if (count)
     std::memcpy(output + output_row_begin * plan_.graph->program.roots.size(),
                 values.data(), count * 8);

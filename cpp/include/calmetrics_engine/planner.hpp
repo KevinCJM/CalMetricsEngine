@@ -26,6 +26,7 @@ struct Geometry {
   std::vector<Chunk> groups;
   std::vector<std::size_t> weights;
   std::vector<std::size_t> row_lengths;
+  std::vector<double> row_work_units;
 };
 
 struct BranchTask {
@@ -41,7 +42,9 @@ struct Plan {
   bool inputs_already_shared = false;
   double estimated_work_units = 0;
   double estimated_logical_work_units = 0;
+  double estimated_typed_array_work_units = 0;
   std::size_t estimated_input_bytes = 0, estimated_output_bytes = 0;
+  std::size_t estimated_status_bytes = 0;
   std::size_t estimated_worker_scratch_bytes = 0,
               estimated_total_memory_bytes = 0;
   std::size_t row_count = 0, interval_observations = 0, product_count = 0;
@@ -70,9 +73,11 @@ make_plan(std::shared_ptr<compiler::CompiledGraph> graph, const Config &config,
           const std::int64_t *ends, std::size_t rows,
           const std::int64_t *product_ids, std::size_t cpu,
           std::optional<std::size_t> memory_budget = {}, bool hard_stop = false,
-          bool async_io = false, bool already_shared = false);
+          bool async_io = false, bool already_shared = false,
+          const std::vector<ops::Value> *inputs = nullptr);
 void validate_plan(const Plan &plan, const std::vector<std::size_t> &sizes,
                    const std::int64_t *starts, const std::int64_t *ends,
                    std::size_t rows, const std::int64_t *product_ids,
-                   std::size_t engine_cpu);
+                   std::size_t engine_cpu,
+                   const std::vector<ops::Value> *inputs = nullptr);
 } // namespace calmetrics_engine::planner

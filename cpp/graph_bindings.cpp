@@ -43,8 +43,10 @@ py::dict plan_metadata(const p::Plan &x) {
   FIELD(hard_stop);
   FIELD(estimated_work_units);
   FIELD(estimated_logical_work_units);
+  FIELD(estimated_typed_array_work_units);
   FIELD(estimated_input_bytes);
   FIELD(estimated_output_bytes);
+  FIELD(estimated_status_bytes);
   FIELD(estimated_worker_scratch_bytes);
   FIELD(estimated_total_memory_bytes);
   FIELD(row_count);
@@ -124,6 +126,8 @@ t::ValueType parse_value_type(py::handle item) {
                                          : std::string("float64");
   if (dtype == "float64")
     value.dtype = t::DType::float64;
+  else if (dtype == "int64")
+    value.dtype = t::DType::int64;
   else if (dtype == "bool")
     value.dtype = t::DType::boolean;
   else
@@ -183,10 +187,11 @@ py::list raw_nodes(const c::CompiledGraph &graph) {
     d["storage"] = c::storage_name(n.storage);
     d["slot"] = n.slot;
     if (n.kind == g::NodeKind::operation ||
-        n.kind == g::NodeKind::rolling_scope) {
+        n.kind == g::NodeKind::rolling_scope || n.kind == g::NodeKind::apply_scope ||
+        n.kind == g::NodeKind::interval_tail) {
       if (n.kind == g::NodeKind::operation)
         d["opcode"] = n.opcode;
-      else
+      else if (n.kind == g::NodeKind::rolling_scope || n.kind == g::NodeKind::apply_scope)
         d["scope_index"] = n.input_index;
       d["parents"] = std::vector<std::uint32_t>(
           n.parents.begin(), n.parents.begin() + n.parent_count);
@@ -201,6 +206,11 @@ py::list raw_nodes(const c::CompiledGraph &graph) {
 py::dict graph_metadata(const c::CompiledGraph &graph) {
   py::dict d;
   d["fingerprint"] = graph.fingerprint;
+  d["error_policy"] = graph.program.isolate_errors ? "isolate" : "raise";
+  d["status_contract"] = "indicator-status-1";
+  d["source_contracts"] = graph.source_contracts;
+  d["minimum_observations"] = graph.program.minimum_observations;
+  d["scope_work_budget"] = graph.program.scope_work_budget;
   d["expression_count"] = graph.expressions.size();
   d["node_count"] = graph.nodes.size();
   d["raw_node_count"] = graph.raw_node_count;
@@ -210,9 +220,11 @@ py::dict graph_metadata(const c::CompiledGraph &graph) {
   d["parameter_names"] = graph.parameter_names;
   d["numeric_slots"] = graph.program.numeric_slots;
   d["mask_slots"] = graph.program.mask_slots;
+  d["integer_slots"] = graph.program.integer_slots;
   d["typed_ir_version"] = "cpp-typed-ir-1";
   d["output_kind"] = graph.program.output_kind == g::OutputKind::series ? "series" : "scalar";
   d["rolling_scope_count"] = graph.program.rolling_scopes.size();
+  d["apply_scope_count"] = graph.program.apply_scopes.size();
   py::dict variable_types;
   for (const auto &variable : graph.variable_types)
     variable_types[py::str(variable.name)] = value_type_dict(variable.type);
@@ -241,6 +253,7 @@ py::dict graph_metadata(const c::CompiledGraph &graph) {
     detail["node_count"] = branch.program.nodes.size();
     detail["numeric_slots"] = branch.program.numeric_slots;
     detail["mask_slots"] = branch.program.mask_slots;
+    detail["integer_slots"] = branch.program.integer_slots;
     detail["source_nodes"] = branch.source_nodes;
     py::dict cost;
     cost["constant_per_row"] = branch.cost.constant_per_row;
@@ -271,7 +284,12 @@ public:
       throw c::CompileError("at least one variable is required");
   }
   std::shared_ptr<c::CompiledGraph>
-  compile(const py::object &expressions) const {
+  compile(const py::object &expressions, const std::string &error_policy,
+          const std::vector<std::map<std::string, std::string>> &root_bindings,
+          const std::vector<std::string> &source_contracts, std::uint32_t minimum_observations,
+          std::uint64_t scope_work_budget) const {
+    if (error_policy != "raise" && error_policy != "isolate")
+      throw c::CompileError("error_policy must be raise or isolate");
     std::vector<std::string> sources;
     if (py::isinstance<py::str>(expressions))
       sources.push_back(py::cast<std::string>(expressions));
@@ -285,13 +303,14 @@ public:
       }
     }
     py::gil_scoped_release release;
-    return c::compile(sources, variables);
+    return c::compile(sources, variables, error_policy == "isolate", root_bindings, source_contracts, minimum_observations, scope_work_budget);
   }
 };
 g::Program raw_program(const py::list &raw,
                        const std::vector<std::uint32_t> &roots,
                        std::size_t inputs, std::size_t parameters,
-                       std::size_t numeric_slots, std::size_t mask_slots) {
+                       std::size_t numeric_slots, std::size_t mask_slots,
+                       std::size_t integer_slots, const std::vector<std::uint8_t> &input_axes) {
   if (raw.size() > 65536)
     throw py::value_error("native graph node limit exceeded");
   g::Program program;
@@ -300,6 +319,8 @@ g::Program raw_program(const py::list &raw,
   program.parameter_count = parameters;
   program.numeric_slots = numeric_slots;
   program.mask_slots = mask_slots;
+  program.integer_slots = integer_slots;
+  program.input_axes = input_axes;
   for (auto item : raw) {
     auto d = py::cast<py::dict>(item);
     g::Node n;
@@ -322,7 +343,7 @@ g::Program raw_program(const py::list &raw,
       n.constant = py::cast<double>(d["constant"]);
     if (d.contains("parents")) {
       auto parents = py::cast<std::vector<std::uint32_t>>(d["parents"]);
-      if (parents.size() > 4)
+      if (parents.size() > 8)
         throw py::value_error("too many parents");
       n.parent_count = static_cast<std::uint8_t>(parents.size());
       std::copy(parents.begin(), parents.end(), n.parents.begin());
@@ -333,6 +354,8 @@ g::Program raw_program(const py::list &raw,
         n.storage = g::StorageKind::numeric;
       else if (storage == "mask")
         n.storage = g::StorageKind::mask;
+      else if (storage == "integer")
+        n.storage = g::StorageKind::integer;
       else if (storage != "inline")
         throw py::value_error("invalid storage kind");
     }
@@ -374,12 +397,30 @@ py::dict raw_execute(const g::Program &program, const py::tuple &input_arrays,
   const auto output_bounds = b::bounds(output);
   for (auto item : input_arrays) {
     auto a = b::require_array(item);
-    b::exact<double>(a, 1, "input");
+    if (a.ndim() < 1 || a.ndim() > 2) throw py::value_error("input must be rank 1 or 2");
+    const bool integer = a.dtype().equal(py::dtype::of<std::int64_t>());
+    const bool mask = a.dtype().equal(py::dtype::of<bool>()) || a.dtype().equal(py::dtype::of<std::uint8_t>());
+    if (!integer && !mask && !a.dtype().equal(py::dtype::of<double>()))
+      throw py::type_error("input requires exact float64, int64 or bool/uint8 dtype");
+    const auto input_index = inputs.size();
+    const bool temporal = program.input_axes.empty() || program.input_axes.at(input_index) == 0;
+    if (!integer && !mask && temporal) b::exact<double>(a, 1, "input");
+    const auto itemsize = mask ? 1u : 8u;
+    if (reinterpret_cast<std::uintptr_t>(a.data()) % itemsize)
+      throw py::value_error("input must be aligned");
+    b::validate_owner(a);
     if (b::overlaps(output_bounds, b::bounds(a)))
       throw py::value_error("output aliases an input");
     calmetrics_engine::ops::Value value;
-    value.shape = calmetrics_engine::ops::vector_shape(a.size());
+    value.kind = integer ? calmetrics_engine::ops::Kind::integer :
+        (mask ? calmetrics_engine::ops::Kind::mask : calmetrics_engine::ops::Kind::number);
+    value.shape.rank = static_cast<int>(a.ndim());
     value.data = a.data();
+    for (int axis = 0; axis < value.shape.rank; ++axis) {
+      if (a.strides(axis) % itemsize) throw py::value_error("unsupported byte stride");
+      value.shape.dim[axis] = a.shape(axis);
+      value.stride[axis] = a.strides(axis) / static_cast<py::ssize_t>(itemsize);
+    }
     inputs.push_back(value);
   }
   if (b::overlaps(output_bounds, b::bounds(starts)) ||
@@ -427,7 +468,8 @@ void register_graph(py::module_ &parent) {
   py::class_<g::Program>(module, "Program")
       .def(py::init(&raw_program), py::arg("nodes"), py::arg("roots"),
            py::arg("input_count"), py::arg("parameter_count") = 0,
-           py::arg("numeric_slots") = 0, py::arg("mask_slots") = 0)
+           py::arg("numeric_slots") = 0, py::arg("mask_slots") = 0,
+           py::arg("integer_slots") = 0, py::arg("input_axes") = std::vector<std::uint8_t>{})
       .def("execute", &raw_execute, py::arg("inputs"),
            py::arg("starts").noconvert(), py::arg("ends").noconvert(),
            py::arg("out").noconvert(), py::kw_only(),
@@ -440,6 +482,8 @@ void register_graph(py::module_ &parent) {
         d["parameter_count"] = p.parameter_count;
         d["numeric_slots"] = p.numeric_slots;
         d["mask_slots"] = p.mask_slots;
+        d["integer_slots"] = p.integer_slots;
+        d["input_axes"] = p.input_axes;
         d["output_kind"] =
             p.output_kind == g::OutputKind::series ? "series" : "scalar";
         d["python_operator_calls"] = 0;
@@ -485,8 +529,8 @@ void register_graph(py::module_ &parent) {
       .def_property_readonly("is_array",
                              [](const c::NodeInfo &n) {
                                return n.value_class == c::ValueClass::series ||
-                                      n.value_class ==
-                                          c::ValueClass::mask_series;
+                                      n.value_class == c::ValueClass::mask_series ||
+                                      n.value_class == c::ValueClass::integer_series;
                              })
       .def_property_readonly(
           "inferred_type",
@@ -536,19 +580,39 @@ void register_graph(py::module_ &parent) {
       .def_readonly("raw_node_count", &c::CompiledGraph::raw_node_count)
       .def(py::pickle(
           [](const c::CompiledGraph &g) {
-            return py::make_tuple(g.expressions, g.variables);
+            py::dict variables;
+            for (const auto &variable : g.variable_types)
+              variables[py::str(variable.name)] = value_type_dict(variable.type);
+            return py::make_tuple(2, g.expressions, variables,
+                g.program.isolate_errors, g.root_bindings, g.source_contracts,
+                g.program.minimum_observations, g.program.scope_work_budget);
           },
           [](py::tuple state) {
-            if (state.size() != 2)
+            // Saved legacy definitions retain their original scalar/series
+            // admission; all new states preserve explicit typed contracts.
+            if (state.size() == 2)
+              return c::compile(
+                  py::cast<std::vector<std::string>>(state[0]),
+                  py::cast<std::vector<std::pair<std::string, std::string>>>(state[1]));
+            if (state.size() != 8 || py::cast<int>(state[0]) != 2)
               throw py::value_error("invalid compiled graph state");
-            return c::compile(
-                py::cast<std::vector<std::string>>(state[0]),
-                py::cast<std::vector<std::pair<std::string, std::string>>>(
-                    state[1]));
+            std::vector<t::Variable> variables;
+            for (auto item : py::cast<py::dict>(state[2]))
+              variables.push_back({py::cast<std::string>(item.first), parse_value_type(item.second)});
+            return c::compile(py::cast<std::vector<std::string>>(state[1]), variables,
+                py::cast<bool>(state[3]),
+                py::cast<std::vector<std::map<std::string, std::string>>>(state[4]),
+                py::cast<std::vector<std::string>>(state[5]),
+                py::cast<std::uint32_t>(state[6]), py::cast<std::uint64_t>(state[7]));
           }));
   py::class_<CompilerAPI>(module, "GraphCompiler")
       .def(py::init<const py::dict &>(), py::arg("variables"))
-      .def("compile", &CompilerAPI::compile, py::arg("expressions"));
+      .def("compile", &CompilerAPI::compile, py::arg("expressions"),
+           py::kw_only(), py::arg("error_policy") = "raise",
+           py::arg("root_bindings") = std::vector<std::map<std::string, std::string>>{},
+           py::arg("source_contracts") = std::vector<std::string>{},
+           py::arg("minimum_observations") = 0,
+           py::arg("scope_work_budget") = 100000000ull);
   py::class_<p::Config>(module, "PlannerConfig")
       .def(py::init([](double thread, double process, std::size_t input,
                        std::size_t shared, std::size_t rows, std::size_t simd,
@@ -590,7 +654,7 @@ void register_graph(py::module_ &parent) {
           FIELD(lane) FIELD(process_count) FIELD(thread_count)
               FIELD(threads_per_process) FIELD(use_shared_memory)
                   FIELD(async_orchestration) FIELD(hard_stop) FIELD(
-                      estimated_work_units) FIELD(estimated_logical_work_units)
+                      estimated_work_units) FIELD(estimated_logical_work_units) FIELD(estimated_typed_array_work_units)
                       FIELD(estimated_input_bytes) FIELD(estimated_output_bytes)
                           FIELD(estimated_worker_scratch_bytes) FIELD(
                               estimated_total_memory_bytes) FIELD(row_count)

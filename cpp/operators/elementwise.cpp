@@ -91,6 +91,10 @@ double scalar_math(Op op, double x, double y, double z) {
         return x > 0.0 ? 1.0 : (x < 0.0 ? -1.0 : 0.0);
     case Op::normal_pdf:
         return std::exp(-0.5 * x * x) / std::sqrt(2.0 * pi);
+    case Op::normal_cdf:
+        return 0.5 * std::erfc(-x / std::sqrt(2.0));
+    case Op::floor:
+        return std::floor(x);
     case Op::normal_ppf:
         return normal_ppf(x);
     default:

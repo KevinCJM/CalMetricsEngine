@@ -24,7 +24,7 @@ enum class ValueKind : std::uint8_t {
   record
 };
 
-enum class DType : std::uint8_t { float64, boolean };
+enum class DType : std::uint8_t { float64, boolean, int64 };
 
 struct ValueType {
   ValueKind kind = ValueKind::scalar;
@@ -57,6 +57,7 @@ struct ValueType {
   static ValueType record(std::string tag, std::vector<std::string> fields);
 
   bool is_scalar() const noexcept { return kind == ValueKind::scalar; }
+  bool is_integer() const noexcept { return dtype == DType::int64; }
   bool is_mask() const noexcept { return dtype == DType::boolean; }
   bool is_numeric() const noexcept {
     return dtype == DType::float64 && kind != ValueKind::window &&

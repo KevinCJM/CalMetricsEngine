@@ -50,9 +50,11 @@ def assert_reference(actual, expected):
 
 def test_registry_matches_pinned_source_and_stable_opcodes():
     specs = op.catalog()
-    assert len(specs) == 118
-    assert [item["id"] for item in specs] == REFERENCE["canonical_names"]
-    assert [item["opcode"] for item in specs] == list(range(1, 119))
+    # Frozen external-source evidence remains immutable. New native capabilities
+    # have independent cases in test_operator_extensions.py.
+    assert len(specs) == 125
+    assert [item["id"] for item in specs[:118]] == REFERENCE["canonical_names"]
+    assert [item["opcode"] for item in specs] == list(range(1, 126))
     assert len({case["id"] for case in CASES}) == len(CASES)
     successful = {case["operator"] for case in CASES if "expected" in case}
     assert successful == set(REFERENCE["canonical_names"])
@@ -66,6 +68,8 @@ def test_registry_matches_pinned_source_and_stable_opcodes():
         assert op.get_by_opcode(spec["opcode"]).spec == spec
         assert spec["input_policy"] == "exact_native_dtype_readonly_strided_no_copy"
         assert spec["execution_backend"] == "pybind11_aot"
+        if spec["opcode"] > 118:
+            continue
         for signature in spec["signatures"]:
             assert (
                 signature["parameters"]

@@ -2,9 +2,9 @@
 
 ## 当前能力
 
-`calmetrics_engine.operators` 提供 118 个可执行 canonical 算子。全部经由同一 `_native` 扩展进入 C++，不依赖 Numba，不在首次调用时编译，也不回退到 Python 数值实现。
+`calmetrics_engine.operators` 提供 125 个可执行 canonical 算子。全部经由同一 `_native` 扩展进入 C++，不依赖 Numba，不在首次调用时编译，也不回退到 Python 数值实现。
 
-本阶段是算子层，不是公式/DAG 引擎：尚不接受 DSL 字符串或整图执行计划，不自动创建线程池、进程池或安排产品批次。调用方负责名义轴、计量单位、价格基准、时点可得性和整图验证。
+本页描述直接算子接口；公式/DAG 和整图执行由原生 GraphCompiler、Planner 与 Scheduler 提供，单个算子不自行创建线程池或进程池。调用方提供名义轴、计量单位、价格基准和时点可得性；Typed IR 校验已声明的类型与轴契约。
 
 ## 基本调用
 
@@ -20,17 +20,21 @@ portfolio_gain = op.total_return(values)
 
 operator = op.get("std")                    # 名称解析一次，重复使用 handle
 assert operator(values) == volatility
-assert len(op.catalog()) == 118
+assert len(op.catalog()) == 125
 assert op.get_by_opcode(operator.spec["opcode"]).name == "std"
 ```
 
 `op.call("std", values)`、`op.std(values)` 和 `op.get("std")(values)` 使用同一 C++ 注册项。`catalog()` 返回新建的元数据对象，修改返回的字典不会修改注册表。
 
-注册表版本为 `canonical-native-1`。显式 opcode 1–118 在该版本体系内稳定，**不等于旧 Numba 的 BASIC_OPCODES 或旧计划二进制编码**。名称和参数名称继承冻结的源契约；旧计划迁移仍需后续 lowering/适配，不允许直接重用其 opcode。
+注册表版本为 `canonical-native-1`。显式 opcode 1–118 保持不变，119–125 是增量扩展，**不等于旧 Numba 的 BASIC_OPCODES 或旧计划二进制编码**。能力发现使用 catalog，不通过猜测外部 opcode 映射。旧参考值保留为固定回归。
+
+新增 119–125 依次是 `normal_cdf`、`aligned_shift`、`recursive_filter`、`argsort`、`gather`、`distinct_count`、`floor`。逐项类型、初始化、缺失值和颗粒度说明见[数学组合设计](mathematical-composition-design.md)；运行时 `spec` 元数据与原生 registry 是参数入口。分块/筛选/分组/求根是编译器作用域，不额外伪装成金融指标算子。
 
 ## 输入类型与数据准备
 
 数值数组必须是本机字节序、元素对齐的 `float64 ndarray`。掩码接受 `uint8` 0/1 或 NumPy bool。按各算子契约接受标量、一维或二维，只有明确的标量广播，不隐式进行矩阵与向量的轴广播。
+
+`argsort/gather/distinct_count` 另接受其契约声明的本机 `int64` 数组；排序索引与类别比较保持精确，不能转为 float64。普通浮点数学仍拒绝 int64 数组。`distinct_count` 返回 float64 数量，并检查数量可精确表示；负类别 ID 只有在显式 mask 排除时才被忽略。
 
 Python 数值标量可使用 float 或可精确表示为 float64 的整数；也支持 NumPy float64 和范围内的整数标量。NumPy bool/uint8 标量按 mask 解释。拒绝 Python list、float32/object/complex 数组、非本机字节序和不支持的 rank，不偷偷转换。
 

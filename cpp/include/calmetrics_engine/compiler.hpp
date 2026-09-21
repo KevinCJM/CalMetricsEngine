@@ -3,6 +3,7 @@
 #include "calmetrics_engine/graph.hpp"
 #include "calmetrics_engine/typed_ir.hpp"
 #include <memory>
+#include <map>
 #include <string>
 #include <utility>
 #include <vector>
@@ -14,6 +15,7 @@ enum class ValueClass : std::uint8_t {
   series,
   mask_scalar,
   mask_series,
+  integer_series,
   fit,
   interval
 };
@@ -48,6 +50,8 @@ struct CompiledGraph {
   graph::Program program;
   std::vector<NodeInfo> nodes;
   std::vector<std::string> expressions;
+  std::vector<std::string> source_contracts;
+  std::vector<std::map<std::string, std::string>> root_bindings;
   std::vector<std::pair<std::string, std::string>> variables;
   std::vector<typed::Variable> variable_types;
   std::vector<std::string> input_names;
@@ -71,7 +75,12 @@ compile(const std::vector<std::string> &expressions,
 
 std::shared_ptr<CompiledGraph>
 compile(const std::vector<std::string> &expressions,
-        const std::vector<typed::Variable> &variables);
+        const std::vector<typed::Variable> &variables,
+        bool isolate_errors = false,
+        const std::vector<std::map<std::string, std::string>> &root_bindings = {},
+        const std::vector<std::string> &source_contracts = {},
+        std::uint32_t minimum_observations = 0,
+        std::uint64_t scope_work_budget = 100000000);
 
 // Versioned, pointer-free plan representation shared by bindings and native
 // workers.

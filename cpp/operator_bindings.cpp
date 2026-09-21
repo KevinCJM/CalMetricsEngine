@@ -20,15 +20,17 @@ op::Value array_value(const py::array &a) {
   op::Value v;
   if (a.dtype().equal(py::dtype::of<double>()))
     v.kind = op::Kind::number;
+  else if (a.dtype().equal(py::dtype::of<std::int64_t>()))
+    v.kind = op::Kind::integer;
   else if (a.dtype().equal(py::dtype::of<std::uint8_t>()) ||
            a.dtype().equal(py::dtype::of<bool>()))
     v.kind = op::Kind::mask;
   else
-    throw py::type_error("Exact native float64 or bool/uint8 ndarray required; "
+    throw py::type_error("Exact native float64, int64 or bool/uint8 ndarray required; "
                          "no implicit conversion");
   op::require(a.ndim() >= 0 && a.ndim() <= 2, "RANK_MISMATCH");
   const auto item =
-      v.kind == op::Kind::number ? sizeof(double) : sizeof(std::uint8_t);
+      v.kind == op::Kind::mask ? sizeof(std::uint8_t) : sizeof(double);
   op::require(reinterpret_cast<std::uintptr_t>(a.data()) % item == 0,
               "UNALIGNED_INPUT");
   v.shape.rank = static_cast<int>(a.ndim());
@@ -41,7 +43,9 @@ op::Value array_value(const py::array &a) {
   }
   binding::bounds(a); // Check arithmetic before constructing native views.
   binding::validate_owner(a);
-  if (v.shape.rank == 0)
+  if (v.shape.rank == 0 && v.kind == op::Kind::integer)
+    v.integer = *static_cast<const std::int64_t *>(a.data());
+  else if (v.shape.rank == 0)
     v.scalar = v.kind == op::Kind::number
                    ? *static_cast<const double *>(a.data())
                    : *static_cast<const std::uint8_t *>(a.data());
@@ -100,9 +104,9 @@ op::Value parse_value(py::handle object) {
 }
 
 struct Bound {
-  std::array<py::object, 4> owners;
-  std::array<op::Value, 4> args;
-  std::array<bool, 4> provided{};
+  std::array<py::object, 8> owners;
+  std::array<op::Value, 8> args;
+  std::array<bool, 8> provided{};
   std::size_t count = 0;
   py::object out = py::none(), workspace = py::none();
   op::Isa isa = op::Isa::automatic;
@@ -154,12 +158,18 @@ Bound bind_args(const op::Spec &spec, py::args args, py::kwargs kwargs) {
   }
   for (std::size_t i = 0; i < b.count; ++i) {
     if (!b.provided[i]) {
-      if (spec.op == op::Op::rolling_std && i == 2)
+      if ((spec.op == op::Op::rolling_std && i == 2) ||
+          (spec.op == op::Op::recursive_filter && i == 4))
         b.owners[i] = py::float_(0.0);
+      else if (spec.op == op::Op::aligned_shift && i == 1)
+        b.owners[i] = py::float_(1.0);
       else
         throw py::type_error("Missing operator parameter: " + names[i]);
     }
     b.args[i] = parse_value(b.owners[i]);
+    if (b.args[i].kind == op::Kind::integer && spec.op != op::Op::argsort &&
+        spec.op != op::Op::gather && spec.op != op::Op::distinct_count)
+      throw py::type_error("operator requires exact float64; int64 is reserved for declared index/category inputs");
   }
   return b;
 }
@@ -171,6 +181,7 @@ std::vector<py::ssize_t> dimensions(const op::Shape &shape) {
   return result;
 }
 py::dtype dtype(op::Kind k) {
+  if (k == op::Kind::integer) return py::dtype::of<std::int64_t>();
   return k == op::Kind::mask ? py::dtype::of<std::uint8_t>()
                              : py::dtype::of<double>();
 }
@@ -280,6 +291,8 @@ py::object invoke(const op::Spec &spec, py::args args, py::kwargs kwargs) {
       result = std::move(storage);
     else if (out.kind == op::Kind::mask)
       result = py::bool_(out.scalar != 0);
+    else if (out.kind == op::Kind::integer)
+      result = py::int_(out.integer);
     else
       result = py::float_(out.scalar);
   }
@@ -312,6 +325,7 @@ py::dict metadata(const op::Spec &spec) {
   d["composition"] = op::composition(spec);
   d["granularity"] = *op::composition(spec)          ? "composition"
                      : spec.op == op::Op::linear_fit ? "coupled_fit"
+                     : spec.op == op::Op::recursive_filter ? "coupled_recurrence"
                                                      : "primitive";
   d["simd_eligible"] = op::simd_eligible(spec.op);
   d["parallel_policy"] = "caller_scheduled_no_internal_threads";
@@ -330,6 +344,7 @@ py::dict requirements(const op::Spec &spec, py::args args, py::kwargs kwargs) {
   d["kind"] = p.output_kind == op::Kind::fit        ? "fit"
               : p.output_kind == op::Kind::interval ? "interval"
               : p.output_kind == op::Kind::mask     ? "uint8"
+              : p.output_kind == op::Kind::integer  ? "int64"
                                                     : "float64";
   d["scratch_doubles"] = p.scratch_doubles;
   d["scratch_indices"] = p.scratch_indices;

@@ -1,6 +1,7 @@
 #include "calmetrics_engine/operators.hpp"
 #include <algorithm>
 #include <cmath>
+#include <numeric>
 
 namespace calmetrics_engine::ops {
 namespace {
@@ -93,6 +94,33 @@ void smooth(const Prepared &p, Output &out) {
         out.set(i, previous);
     }
 }
+void recursive_filter(const Prepared &p, Output &out) {
+    const auto &x = p.args[0];
+    const double alpha = p.args[1].scalar;
+    const int seed = static_cast<int>(p.args[4].scalar);
+    const bool emit_nan = p.args[5].scalar == 1;
+    bool initialized = seed != 2;
+    double previous = p.args[2].scalar;
+    for (std::size_t i = 0; i < x.size(); ++i) {
+        // Explicit first-row seeding is independent of the update predicate.
+        if (seed == 1 && i == 0) {
+            out.set(i, previous);
+            continue;
+        }
+        const double current = x.f(i);
+        if (!p.args[3].u(i) || !std::isfinite(current)) {
+            out.set(i, initialized && !emit_nan ? previous : qnan);
+            continue;
+        }
+        if (!initialized) {
+            previous = current;
+            initialized = true;
+        } else {
+            previous = (1.0 - alpha) * previous + alpha * current;
+        }
+        out.set(i, previous);
+    }
+}
 } // namespace
 
 // Shared product primitive: an optional add-one input transform and prefix output.
@@ -112,6 +140,53 @@ void sequence(const Prepared &p, Output &out, Workspace &work, Audit &) {
     const auto op = p.spec->op;
     const auto &x = p.args[0];
     const auto n = x.size();
+    if (op == Op::aligned_shift) {
+        const auto periods = static_cast<std::size_t>(p.args[1].scalar);
+        for (std::size_t i = 0; i < n; ++i)
+            out.set(i, i < periods ? p.args[2].scalar : x.f(i - periods));
+        return;
+    }
+    if (op == Op::recursive_filter) {
+        recursive_filter(p, out);
+        return;
+    }
+    if (op == Op::argsort) {
+        auto &indices = work.indices;
+        std::iota(indices.begin(), indices.end(), std::size_t{0});
+        std::sort(indices.begin(), indices.end(), [&](std::size_t left, std::size_t right) {
+            if (x.kind == Kind::integer) {
+                const auto lhs = x.i(left), rhs = x.i(right);
+                return lhs == rhs ? left < right : lhs < rhs;
+            }
+            const double lhs = x.f(left), rhs = x.f(right);
+            const bool left_nan = std::isnan(lhs), right_nan = std::isnan(rhs);
+            if (left_nan != right_nan)
+                return !left_nan;
+            if (left_nan || lhs == rhs)
+                return left < right;
+            return lhs < rhs;
+        });
+        for (std::size_t i = 0; i < n; ++i)
+            out.set_integer(i, static_cast<std::int64_t>(indices[i]));
+        return;
+    }
+    if (op == Op::gather) {
+        const auto &indices = p.args[1];
+        // Validate every index before writing any output.
+        for (std::size_t i = 0; i < indices.size(); ++i)
+            require(indices.i(i) >= 0 && static_cast<std::uint64_t>(indices.i(i)) < n,
+                    "INDEX_OUT_OF_BOUNDS");
+        for (std::size_t i = 0; i < indices.size(); ++i) {
+            const auto index = static_cast<std::size_t>(indices.i(i));
+            if (x.kind == Kind::integer)
+                out.set_integer(i, x.i(index));
+            else if (x.kind == Kind::mask)
+                out.set_mask(i, x.u(index));
+            else
+                out.set(i, x.f(index));
+        }
+        return;
+    }
     if (op == Op::rolling_mean || op == Op::rolling_std) {
         rolling_moments(p, out);
         return;

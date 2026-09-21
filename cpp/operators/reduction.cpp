@@ -162,6 +162,22 @@ double reduce_value(Op raw_op, const Value &x, const Value *mask,
 void reduction(const Prepared &p, Output &out, Workspace &work, Audit &audit) {
   const auto op = p.spec->op;
   const auto &x = p.args[0];
+  if (op == Op::distinct_count) {
+    auto &indices = work.indices;
+    std::size_t count = 0;
+    for (std::size_t i = 0; i < x.size(); ++i)
+      if (p.args[1].u(i))
+        indices[count++] = i;
+    std::sort(indices.begin(), indices.begin() + count,
+              [&](std::size_t left, std::size_t right) { return x.i(left) < x.i(right); });
+    std::int64_t distinct = count > 0 ? 1 : 0;
+    for (std::size_t i = 1; i < count; ++i)
+      distinct += x.i(indices[i]) != x.i(indices[i - 1]);
+    // Counts are numeric quantities, like count_true, rather than category IDs.
+    require(distinct <= 9007199254740992LL, "INEXACT_CARDINALITY");
+    out.set(0, static_cast<double>(distinct));
+    return;
+  }
   if (op == Op::count_true || op == Op::max_consecutive_true) {
     std::size_t count = 0, longest = 0;
     for (std::size_t i = 0; i < x.size(); ++i) {

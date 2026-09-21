@@ -7,18 +7,30 @@ namespace calmetrics_engine::ops {
 Value Value::row(std::size_t i) const {
   Value v = *this;
   v.shape = vector_shape(shape.dim[1]);
-  if (v.size())
-    v.data = static_cast<const double *>(data) +
-             static_cast<std::ptrdiff_t>(i) * stride[0];
+  if (v.size()) {
+    const auto offset = static_cast<std::ptrdiff_t>(i) * stride[0];
+    if (kind == Kind::integer)
+      v.data = static_cast<const std::int64_t *>(data) + offset;
+    else if (kind == Kind::mask)
+      v.data = static_cast<const std::uint8_t *>(data) + offset;
+    else
+      v.data = static_cast<const double *>(data) + offset;
+  }
   v.stride = {stride[1], 1};
   return v;
 }
 Value Value::column(std::size_t i) const {
   Value v = *this;
   v.shape = vector_shape(shape.dim[0]);
-  if (v.size())
-    v.data = static_cast<const double *>(data) +
-             static_cast<std::ptrdiff_t>(i) * stride[1];
+  if (v.size()) {
+    const auto offset = static_cast<std::ptrdiff_t>(i) * stride[1];
+    if (kind == Kind::integer)
+      v.data = static_cast<const std::int64_t *>(data) + offset;
+    else if (kind == Kind::mask)
+      v.data = static_cast<const std::uint8_t *>(data) + offset;
+    else
+      v.data = static_cast<const double *>(data) + offset;
+  }
   v.stride = {stride[0], 1};
   return v;
 }
@@ -67,6 +79,11 @@ void numeric(const Value &v, int min_rank = 0, int max_rank = 2) {
 }
 void mask(const Value &v, int min_rank = 0, int max_rank = 2) {
   require(v.kind == Kind::mask, "DTYPE_MISMATCH");
+  require(v.shape.rank >= min_rank && v.shape.rank <= max_rank,
+          "RANK_MISMATCH");
+}
+void integer_values(const Value &v, int min_rank = 1, int max_rank = 1) {
+  require(v.kind == Kind::integer, "DTYPE_MISMATCH");
   require(v.shape.rank >= min_rank && v.shape.rank <= max_rank,
           "RANK_MISMATCH");
 }
@@ -137,6 +154,18 @@ void elementwise_shape(Prepared &p) {
 void reduction_shape(Prepared &p) {
   const auto o = p.spec->op;
   auto &a = p.args;
+  if (o == Op::distinct_count) {
+    integer_values(a[0]);
+    if (p.count == 1) {
+      a[1] = Value::number(1);
+      a[1].kind = Kind::mask;
+    } else {
+      mask(a[1], 1, 1);
+      require(a[0].shape == a[1].shape, "SHAPE_MISMATCH");
+    }
+    p.scratch_indices = a[0].size();
+    return;
+  }
   if (o == Op::count_true || o == Op::max_consecutive_true) {
     mask(a[0], 1, o == Op::count_true ? 2 : 1);
     return;
@@ -170,10 +199,56 @@ void reduction_shape(Prepared &p) {
 void sequence_shape(Prepared &p) {
   auto &a = p.args;
   const auto o = p.spec->op;
+  if (o == Op::argsort) {
+    require(a[0].kind == Kind::number || a[0].kind == Kind::integer,
+            "DTYPE_MISMATCH");
+    require(a[0].shape.rank == 1, "RANK_MISMATCH");
+    p.output_shape = a[0].shape;
+    p.output_kind = Kind::integer;
+    p.scratch_indices = a[0].size();
+    return;
+  }
+  if (o == Op::gather) {
+    require(a[0].kind == Kind::number || a[0].kind == Kind::mask ||
+                a[0].kind == Kind::integer,
+            "DTYPE_MISMATCH");
+    require(a[0].shape.rank == 1, "RANK_MISMATCH");
+    integer_values(a[1]);
+    p.output_shape = a[1].shape;
+    p.output_kind = a[0].kind;
+    return;
+  }
   numeric(a[0], 1, 1);
   if (o == Op::first || o == Op::last || o == Op::length)
     return;
   p.output_shape = a[0].shape;
+  if (o == Op::aligned_shift) {
+    if (p.count < 2)
+      a[1] = Value::number(1);
+    if (p.count < 3)
+      a[2] = Value::number(std::numeric_limits<double>::quiet_NaN());
+    integer(a[1], true);
+    numeric(a[2], 0, 0);
+    require(std::isfinite(a[2].scalar) || std::isnan(a[2].scalar),
+            "INVALID_PARAMETER");
+    return;
+  }
+  if (o == Op::recursive_filter) {
+    numeric(a[1], 0, 0);
+    numeric(a[2], 0, 0);
+    mask(a[3], 1, 1);
+    require(a[3].shape == a[0].shape, "SHAPE_MISMATCH");
+    require(std::isfinite(a[1].scalar) && a[1].scalar >= 0 &&
+                a[1].scalar <= 1 && std::isfinite(a[2].scalar),
+            "INVALID_PARAMETER");
+    if (p.count < 5)
+      a[4] = Value::number(0);
+    if (p.count < 6)
+      a[5] = Value::number(0);
+    require(integer(a[4], true) <= 2 && integer(a[5], true) <= 1,
+            "INVALID_PARAMETER");
+    return;
+  }
   if (o == Op::new_high_mask)
     p.output_kind = Kind::mask;
   if (o == Op::lag || o == Op::difference) {
@@ -355,7 +430,7 @@ void composite_shape(Prepared &p) {
 } // namespace
 
 Prepared prepare(const Spec &spec, const Value *args, std::size_t count) {
-  require(count >= spec.min_args && count <= spec.max_args && count <= 4,
+  require(count >= spec.min_args && count <= spec.max_args && count <= 8,
           "ARITY_MISMATCH");
   Prepared p;
   p.spec = &spec;
@@ -453,6 +528,20 @@ void execute(const Prepared &p, Output &out, Workspace &work, Isa isa,
 }
 
 const char *shape_rule(const Spec &s) {
+  switch (s.op) {
+  case Op::aligned_shift:
+    return "float64 rank 1 -> same length; nonnegative integer periods; prefix fill";
+  case Op::recursive_filter:
+    return "float64 rank 1 and equal-shaped mask -> same length; scalar alpha/initial/policies";
+  case Op::argsort:
+    return "float64/int64 rank 1 -> equal-length int64 indices; ascending stable order";
+  case Op::gather:
+    return "float64/int64/mask rank 1 plus int64 rank 1 indices -> source dtype, indices length";
+  case Op::distinct_count:
+    return "int64 rank 1, optional equal-shaped mask -> float64 exact-cardinality scalar";
+  default:
+    break;
+  }
   switch (s.family) {
   case Family::elementwise:
     return "numeric/mask rank 0..2; equal shapes or explicit scalar broadcast; "
@@ -487,6 +576,24 @@ const char *shape_rule(const Spec &s) {
   return "invalid";
 }
 const char *missing_policy(const Spec &s) {
+  switch (s.op) {
+  case Op::normal_cdf:
+    return "NaN -> NaN; -Inf -> 0; +Inf -> 1; erfc stable tail evaluation";
+  case Op::floor:
+    return "IEEE floor; NaN/+Inf/-Inf preserved; output remains float64";
+  case Op::aligned_shift:
+    return "prefix uses explicit fill (default NaN); remaining values copied unchanged";
+  case Op::recursive_filter:
+    return "update only mask=true and finite input; hold state across gaps; emit_policy=0 holds, 1 emits NaN; before first-valid seed emit NaN";
+  case Op::argsort:
+    return "NaN last; infinities ordered; equal values including signed zero keep original order";
+  case Op::gather:
+    return "selected values preserved exactly; negative or out-of-range indices fail before writes";
+  case Op::distinct_count:
+    return "mask=false excluded; every int64 code otherwise valid including negative codes; empty selection returns 0";
+  default:
+    break;
+  }
   if (s.family == Family::rolling)
     return "skip nonfinite observations, preserve positions; recursive state "
            "carries across "
@@ -563,6 +670,12 @@ std::vector<std::string> parameter_names(const Spec &spec, std::size_t arity) {
 
 const char *default_rule(const Spec &s) {
   switch (s.op) {
+  case Op::aligned_shift:
+    return "periods=1, fill=NaN; periods>=0 may exceed length; fill finite or NaN";
+  case Op::recursive_filter:
+    return "seed_mode=0 consume first with initial, 1 seed row0 without consumption, 2 seed first eligible; emit_policy=0 hold, 1 NaN; alpha in [0,1], initial finite";
+  case Op::distinct_count:
+    return "mask omitted selects every identifier; no implicit missing category code";
   case Op::variance:
   case Op::std:
     return "ddof=1; finite integer 0<=ddof<n";

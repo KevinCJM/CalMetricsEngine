@@ -13,7 +13,7 @@
 namespace calmetrics_engine::ops {
 
 inline constexpr const char *registry_version = "canonical-native-1";
-inline constexpr std::size_t operator_count = 118;
+inline constexpr std::size_t operator_count = 125;
 
 enum class Op : std::uint16_t {
 #define OP(id, name, family, lo, hi, params) name = id,
@@ -30,7 +30,7 @@ enum class Family {
     state,
     composite
 };
-enum class Kind { number, mask, fit, interval };
+enum class Kind { number, mask, fit, interval, integer };
 enum class Isa { automatic, scalar, sse2, avx2, neon };
 
 struct Error : std::runtime_error {
@@ -69,6 +69,7 @@ struct Value {
     const void *data = nullptr;
     std::array<std::ptrdiff_t, 2> stride{1, 1};
     double scalar = 0.0;
+    std::int64_t integer = 0;
     std::array<double, 5> record{};
 
     static Value number(double x) {
@@ -91,6 +92,10 @@ struct Value {
     std::uint8_t u(std::size_t i) const noexcept {
         return shape.rank == 0 ? static_cast<std::uint8_t>(scalar)
                                : static_cast<const std::uint8_t *>(data)[offset(i)];
+    }
+    std::int64_t i(std::size_t index) const noexcept {
+        return shape.rank == 0 ? integer
+                               : static_cast<const std::int64_t *>(data)[offset(index)];
     }
     double at(std::size_t row, std::size_t col) const noexcept {
         return static_cast<const double *>(data)[static_cast<std::ptrdiff_t>(row) * stride[0] +
@@ -126,7 +131,7 @@ std::vector<std::string> parameter_names(const Spec &spec, std::size_t arity);
 
 struct Prepared {
     const Spec *spec = nullptr;
-    std::array<Value, 4> args{};
+    std::array<Value, 8> args{};
     std::size_t count = 0;
     Kind output_kind = Kind::number;
     Shape output_shape{};
@@ -142,6 +147,7 @@ struct Output {
     Shape shape{};
     void *data = nullptr; // caller-owned contiguous output, null for inline scalar/record
     double scalar = 0.0;
+    std::int64_t integer = 0;
     std::array<double, 5> record{};
     void set(std::size_t i, double x) noexcept {
         if (shape.rank == 0) {
@@ -158,6 +164,14 @@ struct Output {
                 *static_cast<std::uint8_t *>(data) = x;
         } else
             static_cast<std::uint8_t *>(data)[i] = x;
+    }
+    void set_integer(std::size_t i, std::int64_t x) noexcept {
+        if (shape.rank == 0) {
+            integer = x;
+            if (data)
+                *static_cast<std::int64_t *>(data) = x;
+        } else
+            static_cast<std::int64_t *>(data)[i] = x;
     }
 };
 

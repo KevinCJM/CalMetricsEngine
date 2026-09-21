@@ -1,0 +1,444 @@
+{
+  "date": "2026-09-21",
+  "scope": "CalMetricsEngine generic mathematical composition; not a certification of all 333 business metrics",
+  "source_head": "f952f37ebe173c3279996cc9354b66e5f5cf382b",
+  "source_worktree": "uncommitted; exact native sources identified by engine_build_id",
+  "build": {
+    "engine_version": "0.3.0",
+    "engine_build_id": "b4392aed8bbff8c1f12eb63c5c46947e10f8ede8d0e4c73641ce82d980979b91",
+    "operator_registry_version": "canonical-native-1",
+    "typed_ir_version": "cpp-typed-ir-1",
+    "execution_backend": "cpp_aot",
+    "native_aot": true,
+    "python_fallback": 0,
+    "python_operator_calls": 0,
+    "request_time_compilation": 0,
+    "expected_source_build_id": "b4392aed8bbff8c1f12eb63c5c46947e10f8ede8d0e4c73641ce82d980979b91",
+    "source_identity_matches": true,
+    "platform": "macOS-15.6.1-arm64-arm-64bit",
+    "python": "3.12.11",
+    "wheel_sha256": "71fc2cb781ce18db79c704f5ae25033e9e39b5d2d6b14dc79dc623300d056706"
+  },
+  "baseline": {
+    "repository": "BetterSaaTaa",
+    "head": "c105eb10b2013abf5f670953ea2bf162b865f03b",
+    "tracked_cal_indicators_changes": false
+  },
+  "commands": {
+    "python": "PYTHONPATH=<installed-wheel> python -m pytest tests -q --tb=short -p no:cacheprovider",
+    "native_release": "ctest --test-dir <release-build> --output-on-failure",
+    "native_sanitized": "ctest --test-dir <debug-sanitized-build> --output-on-failure",
+    "performance": "PYTHONPATH=<installed-wheel> NUMBA_CACHE_DIR=<temporary-cache> python tools/check_phase2_performance.py --better-root <BetterSaaTaa-checkout> --products 500 1000 --history 2520 --intervals 12 --micro-histories 63 252 --cpu-budget 8 --repeats 5 --output-dir <temporary-output>"
+  },
+  "verification": {
+    "pytest": {
+      "passed": 4210,
+      "failed": 0,
+      "elapsed_seconds": 5.08
+    },
+    "native_release": {
+      "suites_passed": 6,
+      "failed": 0
+    },
+    "native_asan_ubsan": {
+      "suites_passed": 6,
+      "failed": 0
+    },
+    "ruff_new_test_files": "passed",
+    "git_diff_check": "passed",
+    "canonical_118_reference_fixture": "unchanged"
+  },
+  "performance_gate": [
+    {
+      "products": 500,
+      "njit_ms": 47.472958,
+      "native_ms": 30.400208,
+      "ratio": 0.6403689443577542,
+      "max_ratio": 0.9,
+      "passed": true
+    },
+    {
+      "products": 1000,
+      "njit_ms": 96.197792,
+      "native_ms": 57.304167,
+      "ratio": 0.5956910840531557,
+      "max_ratio": 0.9,
+      "passed": true
+    },
+    {
+      "products": 1,
+      "intervals": 1,
+      "metrics": 5,
+      "history": 63,
+      "njit_us": 5.041,
+      "native_us": 3.041,
+      "ratio": 0.6032533227534219,
+      "max_ratio": 0.9,
+      "scheduler_us": 4.708,
+      "scheduler_ratio": 0.9337564458548195,
+      "max_scheduler_ratio": 1.0,
+      "passed": true
+    },
+    {
+      "products": 1,
+      "intervals": 1,
+      "metrics": 5,
+      "history": 252,
+      "njit_us": 9.791,
+      "native_us": 7.041,
+      "ratio": 0.7191298130936574,
+      "max_ratio": 0.9,
+      "scheduler_us": 8.667,
+      "scheduler_ratio": 0.873953816678431,
+      "max_scheduler_ratio": 1.0,
+      "passed": true
+    }
+  ],
+  "performance_details": {
+    "500x12x16.json": {
+      "workload": {
+        "products": 500,
+        "history_per_product": 2520,
+        "intervals_per_product": 12,
+        "interval_rows": 6000,
+        "metrics": 16,
+        "result_cells": 96000,
+        "input_bytes": 10080000,
+        "product_major": true
+      },
+      "environment": {
+        "python": "3.12.11",
+        "numpy": "1.26.4",
+        "numba": "0.60.0",
+        "machine": "arm64",
+        "cpu_budget": 8
+      },
+      "paired": {
+        "left_median_ms": 47.472958,
+        "right_median_ms": 30.400208,
+        "right_over_left": 0.6403689443577542,
+        "rounds": 5,
+        "alternating_first_runner": true
+      },
+      "lanes": {
+        "native_single": {
+          "timing": {
+            "median_ms": 182.142333,
+            "minimum_ms": 180.157166,
+            "median_cpu_ms": 180.467
+          },
+          "max_absolute_error": 0.0,
+          "execution": {
+            "lane": "single",
+            "cpu_budget": 8,
+            "python_fallback": 0,
+            "python_operator_calls": 0,
+            "python_worker_callbacks": 0,
+            "python_native_transitions": 1,
+            "boundary_copy_bytes": 0,
+            "output_copy_bytes": 0,
+            "shared_memory_bytes": 0,
+            "engine_build_id": "b4392aed8bbff8c1f12eb63c5c46947e10f8ede8d0e4c73641ce82d980979b91"
+          },
+          "arena_bytes_sum": {
+            "numeric_arena_bytes": 24192,
+            "mask_arena_bytes": 1512,
+            "operator_workspace_capacity_bytes": 0,
+            "order_scratch_capacity_bytes": 16096,
+            "input_copy_bytes": 0,
+            "algorithm_copy_bytes": 25656000
+          }
+        },
+        "native_thread": {
+          "timing": {
+            "median_ms": 30.791958,
+            "minimum_ms": 29.629083,
+            "median_cpu_ms": 194.253
+          },
+          "max_absolute_error": 0.0,
+          "execution": {
+            "lane": "thread",
+            "cpu_budget": 8,
+            "python_fallback": 0,
+            "python_operator_calls": 0,
+            "python_worker_callbacks": 0,
+            "python_native_transitions": 1,
+            "boundary_copy_bytes": 0,
+            "output_copy_bytes": 0,
+            "shared_memory_bytes": 0,
+            "engine_build_id": "b4392aed8bbff8c1f12eb63c5c46947e10f8ede8d0e4c73641ce82d980979b91"
+          },
+          "arena_bytes_sum": {
+            "numeric_arena_bytes": 193536,
+            "mask_arena_bytes": 12096,
+            "operator_workspace_capacity_bytes": 0,
+            "order_scratch_capacity_bytes": 128768,
+            "input_copy_bytes": 0,
+            "algorithm_copy_bytes": 25656000
+          }
+        },
+        "native_process": {
+          "timing": {
+            "median_ms": 30.616625,
+            "minimum_ms": 28.726458,
+            "median_cpu_ms": 0.719
+          },
+          "max_absolute_error": 0.0,
+          "execution": {
+            "lane": "process",
+            "cpu_budget": 8,
+            "python_fallback": 0,
+            "python_operator_calls": 0,
+            "python_worker_callbacks": 0,
+            "python_native_transitions": 1,
+            "boundary_copy_bytes": 96000,
+            "output_copy_bytes": 0,
+            "shared_memory_bytes": 10944000,
+            "engine_build_id": "b4392aed8bbff8c1f12eb63c5c46947e10f8ede8d0e4c73641ce82d980979b91"
+          },
+          "arena_bytes_sum": {
+            "numeric_arena_bytes": 193536,
+            "mask_arena_bytes": 12096,
+            "operator_workspace_capacity_bytes": 0,
+            "order_scratch_capacity_bytes": 128768,
+            "input_copy_bytes": 0,
+            "algorithm_copy_bytes": 25656000
+          }
+        },
+        "native_auto": {
+          "timing": {
+            "median_ms": 29.236667,
+            "minimum_ms": 28.673291,
+            "median_cpu_ms": 191.547
+          },
+          "max_absolute_error": 0.0,
+          "execution": {
+            "lane": "thread",
+            "cpu_budget": 8,
+            "python_fallback": 0,
+            "python_operator_calls": 0,
+            "python_worker_callbacks": 0,
+            "python_native_transitions": 1,
+            "boundary_copy_bytes": 0,
+            "output_copy_bytes": 0,
+            "shared_memory_bytes": 0,
+            "engine_build_id": "b4392aed8bbff8c1f12eb63c5c46947e10f8ede8d0e4c73641ce82d980979b91"
+          },
+          "arena_bytes_sum": {
+            "numeric_arena_bytes": 193536,
+            "mask_arena_bytes": 12096,
+            "operator_workspace_capacity_bytes": 0,
+            "order_scratch_capacity_bytes": 128768,
+            "input_copy_bytes": 0,
+            "algorithm_copy_bytes": 25656000
+          }
+        }
+      },
+      "baseline_rss_before_compile_bytes": 193921024,
+      "baseline_rss_after_warm_bytes": 791855104,
+      "notes": [
+        "BetterSaaTaa and CalMetricsEngine compile the same mathematical formulas.",
+        "CalMetricsEngine auto process lane reuses a pre-created SharedInputBundle so the one-time input copy is outside repeated timings.",
+        "Starts/ends and process output shared segments are created per execution and remain inside measured scheduler latency."
+      ]
+    },
+    "1000x12x16.json": {
+      "workload": {
+        "products": 1000,
+        "history_per_product": 2520,
+        "intervals_per_product": 12,
+        "interval_rows": 12000,
+        "metrics": 16,
+        "result_cells": 192000,
+        "input_bytes": 20160000,
+        "product_major": true
+      },
+      "environment": {
+        "python": "3.12.11",
+        "numpy": "1.26.4",
+        "numba": "0.60.0",
+        "machine": "arm64",
+        "cpu_budget": 8
+      },
+      "paired": {
+        "left_median_ms": 96.197792,
+        "right_median_ms": 57.304167,
+        "right_over_left": 0.5956910840531557,
+        "rounds": 5,
+        "alternating_first_runner": true
+      },
+      "lanes": {
+        "native_single": {
+          "timing": {
+            "median_ms": 369.820791,
+            "minimum_ms": 361.440958,
+            "median_cpu_ms": 363.128
+          },
+          "max_absolute_error": 0.0,
+          "execution": {
+            "lane": "single",
+            "cpu_budget": 8,
+            "python_fallback": 0,
+            "python_operator_calls": 0,
+            "python_worker_callbacks": 0,
+            "python_native_transitions": 1,
+            "boundary_copy_bytes": 0,
+            "output_copy_bytes": 0,
+            "shared_memory_bytes": 0,
+            "engine_build_id": "b4392aed8bbff8c1f12eb63c5c46947e10f8ede8d0e4c73641ce82d980979b91"
+          },
+          "arena_bytes_sum": {
+            "numeric_arena_bytes": 24192,
+            "mask_arena_bytes": 1512,
+            "operator_workspace_capacity_bytes": 0,
+            "order_scratch_capacity_bytes": 16096,
+            "input_copy_bytes": 0,
+            "algorithm_copy_bytes": 51312000
+          }
+        },
+        "native_thread": {
+          "timing": {
+            "median_ms": 59.570292,
+            "minimum_ms": 56.335917,
+            "median_cpu_ms": 388.264
+          },
+          "max_absolute_error": 0.0,
+          "execution": {
+            "lane": "thread",
+            "cpu_budget": 8,
+            "python_fallback": 0,
+            "python_operator_calls": 0,
+            "python_worker_callbacks": 0,
+            "python_native_transitions": 1,
+            "boundary_copy_bytes": 0,
+            "output_copy_bytes": 0,
+            "shared_memory_bytes": 0,
+            "engine_build_id": "b4392aed8bbff8c1f12eb63c5c46947e10f8ede8d0e4c73641ce82d980979b91"
+          },
+          "arena_bytes_sum": {
+            "numeric_arena_bytes": 193536,
+            "mask_arena_bytes": 12096,
+            "operator_workspace_capacity_bytes": 0,
+            "order_scratch_capacity_bytes": 128768,
+            "input_copy_bytes": 0,
+            "algorithm_copy_bytes": 51312000
+          }
+        },
+        "native_process": {
+          "timing": {
+            "median_ms": 63.805292,
+            "minimum_ms": 61.147917,
+            "median_cpu_ms": 0.87
+          },
+          "max_absolute_error": 0.0,
+          "execution": {
+            "lane": "process",
+            "cpu_budget": 8,
+            "python_fallback": 0,
+            "python_operator_calls": 0,
+            "python_worker_callbacks": 0,
+            "python_native_transitions": 1,
+            "boundary_copy_bytes": 192000,
+            "output_copy_bytes": 0,
+            "shared_memory_bytes": 21888000,
+            "engine_build_id": "b4392aed8bbff8c1f12eb63c5c46947e10f8ede8d0e4c73641ce82d980979b91"
+          },
+          "arena_bytes_sum": {
+            "numeric_arena_bytes": 193536,
+            "mask_arena_bytes": 12096,
+            "operator_workspace_capacity_bytes": 0,
+            "order_scratch_capacity_bytes": 128768,
+            "input_copy_bytes": 0,
+            "algorithm_copy_bytes": 51312000
+          }
+        },
+        "native_auto": {
+          "timing": {
+            "median_ms": 60.954083,
+            "minimum_ms": 57.042916,
+            "median_cpu_ms": 381.513
+          },
+          "max_absolute_error": 0.0,
+          "execution": {
+            "lane": "thread",
+            "cpu_budget": 8,
+            "python_fallback": 0,
+            "python_operator_calls": 0,
+            "python_worker_callbacks": 0,
+            "python_native_transitions": 1,
+            "boundary_copy_bytes": 0,
+            "output_copy_bytes": 0,
+            "shared_memory_bytes": 0,
+            "engine_build_id": "b4392aed8bbff8c1f12eb63c5c46947e10f8ede8d0e4c73641ce82d980979b91"
+          },
+          "arena_bytes_sum": {
+            "numeric_arena_bytes": 193536,
+            "mask_arena_bytes": 12096,
+            "operator_workspace_capacity_bytes": 0,
+            "order_scratch_capacity_bytes": 128768,
+            "input_copy_bytes": 0,
+            "algorithm_copy_bytes": 51312000
+          }
+        }
+      },
+      "baseline_rss_before_compile_bytes": 231063552,
+      "baseline_rss_after_warm_bytes": 755761152,
+      "notes": [
+        "BetterSaaTaa and CalMetricsEngine compile the same mathematical formulas.",
+        "CalMetricsEngine auto process lane reuses a pre-created SharedInputBundle so the one-time input copy is outside repeated timings.",
+        "Starts/ends and process output shared segments are created per execution and remain inside measured scheduler latency."
+      ]
+    },
+    "micro": [
+      {
+        "history": 63,
+        "products": 1,
+        "intervals": 1,
+        "metrics": 5,
+        "lane": "single",
+        "max_absolute_error": 0.0,
+        "njit_median_us": 5.041,
+        "native_median_us": 3.041,
+        "native_over_njit": 0.6032533227534219,
+        "rounds": 201,
+        "scheduler_median_us": 4.708,
+        "scheduler_over_njit": 0.9337564458548195
+      },
+      {
+        "history": 252,
+        "products": 1,
+        "intervals": 1,
+        "metrics": 5,
+        "lane": "single",
+        "max_absolute_error": 0.0,
+        "njit_median_us": 9.791,
+        "native_median_us": 7.041,
+        "native_over_njit": 0.7191298130936574,
+        "rounds": 201,
+        "scheduler_median_us": 8.667,
+        "scheduler_over_njit": 0.873953816678431
+      }
+    ]
+  },
+  "evidence_sha256": {
+    "tests/data/canonical_reference.json": "7cd28c50ae7b8f5489c95c6738f7851367d83400daa16df4f5a323a265468f6e",
+    "tools/check_phase2_performance.py": "6064e869b250eae759b51b2f2fd25130b222bf8f791403b1c5790f158a8fec2e",
+    "tools/benchmark_phase2_graph.py": "c408f60ad4248dd2ed7f4756cd13a3600e23c8db005d161edec1721e02c560fb",
+    "tools/benchmark_phase2_micro.py": "0539692c6363f5ca7041ab48ef97b2ebdec68df9638027e93fb150c948f46ed7",
+    "tests/test_api.py": "bdc6f6631540395202965b4b296364923b47ea3e2e13f7bbe00f374d399214d6",
+    "tests/test_cpp_first_runtime.py": "8be3ab278593b2654c096b2bbe92f9c3deec3524ccd513f15dfcb994ec9a032c",
+    "tests/test_execution_contracts.py": "6852cb7ec650ecf0efb631ffdcd86f0e0763136fc97330ca05cd9e33c1e0bcb7",
+    "tests/test_math_boundary_review.py": "a0699718629eec7f8336180a059545d89547b2ea8bbda43a7b29f4a25824a5db",
+    "tests/test_metric_compositions.py": "5a64f56f688212aca545f968c406c7cd613b82dc8d007097ba2c0e5e28b673bc",
+    "tests/test_native_apply_scopes.py": "c720802d0149ade708433ca33050dd652ae98b1d22ecf34d5a1c13df692d0b45",
+    "tests/test_operator_contracts.py": "5f82c4738796601b504552df33f51f97fd69f8d08819c00f9e376d007a9b2107",
+    "tests/test_operator_extensions.py": "afa1914e4cab6a8ebb3646c8fb3eb07d9d075f0edb2988300ca05d036871bc6c",
+    "tests/test_operator_independent_parity.py": "e9cdb27584dab951b7f230b6d500edf15df37f47683eda63c090345f6b2a95a3",
+    "tests/test_operator_reference.py": "27c0e6224cf1f944a8e1b8889f087b1362666190fdc42c3fabccd5f194958299",
+    "tests/test_phase2_graph_runtime.py": "56310db3c6a79eaa643ddbac445b6c20b5e4a6dba065f69c696972f91e31e335",
+    "tests/test_planner_physical_dag.py": "bf38f4a3d730ce4054cba65174501a451aa07766f1134f9952243e1dd6df9874",
+    "tests/test_regression.py": "1543425cb6ab7a8ed081963a80adacb443afe1de858b2969adf2f5bc0de31287",
+    "tests/test_typed_array_execution.py": "756e35d4565dbf5727becb0e517d4a085c664b0d04fdb7bb8a9852c2e8067c57",
+    "tests/test_typed_cpp_runtime.py": "587c4dadd87930d19a69cd69c7c486230d4b8bf825564f6a50570cfd68c0891f"
+  }
+}

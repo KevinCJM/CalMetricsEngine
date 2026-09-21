@@ -10,7 +10,7 @@ Python public names / NumPy pins / exception conversion / asyncio await adapter
 C++ restricted expression compiler (compiler.cpp + typed_ir.cpp)
     AST -> Typed IR -> alias canonicalization -> lowering -> structural CSE
     -> borrowed-view-aware liveness -> immutable graph program
-    -> compiler-owned rolling scopes
+    -> compiler-owned rolling/block/filter/group/root-solve scopes
     v
 C++ planner (planner.cpp)
     actual interval lengths -> product/interval cost -> storage estimate
@@ -34,8 +34,11 @@ Execution-side Typed IR for scalar/time-series indicators is now native C++: dty
 symbolic shape, semantic dimension, price basis, historical alias canonicalization, logical
 `rolling_window`, compiler-owned `rolling_apply`, and aligned time-series roots all live below the
 PyBind boundary. Business causality/knowledge-time governance remains in the research platform.
-Matrix-growing operators remain available directly in the 118-entry registry, but full matrix/portfolio
-nodes inside the interval DAG are still a separate target.
+The same 125-entry registry now supports typed matrix/vector bindings and matrix intermediates
+inside the interval DAG, together with exact int64 category/index storage. Public graph roots remain
+scalar or aligned float64 series; a general public matrix-output API is a separate contract.
+Native block/filter/group/bisection sub-programs make segmented statistics and iterative scalar solves
+composable without Python callbacks. See [the mathematical composition design](mathematical-composition-design.md).
 
 ## 2. Module responsibilities
 
@@ -67,7 +70,7 @@ that hard-stop boundary.
 
 ## 3. Compiler and plan
 
-Accepted expressions are numeric constants, declared scalar/time-series variables, canonical or
+Accepted expressions are numeric constants, declared scalar/time-series/vector/matrix variables, canonical or
 historical-alias calls, arithmetic, unary signs and one comparison. Typed declarations additionally
 carry dtype, named axes, symbolic shape, semantic dimension and optional price basis. Arbitrary Python calls, attributes, subscripts, imports,
 lambdas and comprehensions are rejected. Source bytes, nesting, node counts and arities are bounded.
@@ -76,7 +79,7 @@ Operator names/opcodes and mathematics still come from the canonical registry. A
 canonicalized in C++ before the physical DAG is built; they do not add numerical kernels. Logical
 `rolling_window` nodes lower without materializing a `T×W` matrix. `rolling_apply` owns a compiled
 scalar body sub-program and executes it on trailing window views with independent state reset.
-Lowering also shares `linear_fit` results and total-return results without changing evaluation order. Borrowed `lag` views
+Lowering also shares `linear_fit` results and total-return results without changing evaluation order. Borrowed `lag`, `transpose` and matrix `diag` views
 extend the lifetime of their backing arena transitively. Plans sent to workers contain no pointers or
 Python objects; the versioned decoder bounds counts and validates topology/opcodes.
 

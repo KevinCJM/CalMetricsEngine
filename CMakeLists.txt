@@ -90,7 +90,20 @@ if(CALMETRICS_ENGINE_BUILD_PYTHON)
         message(FATAL_ERROR "Build Python via python -m build or pip install . to use package metadata")
     endif()
 
+    # Identity includes the actual source tree (including uncommitted edits), toolchain and flags.
+    file(GLOB_RECURSE calmetrics_identity_files CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/cpp/*")
+    list(APPEND calmetrics_identity_files "${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt" "${CMAKE_CURRENT_SOURCE_DIR}/pyproject.toml")
+    list(SORT calmetrics_identity_files)
+    set(calmetrics_identity "${SKBUILD_PROJECT_VERSION};${CMAKE_CXX_COMPILER_ID};${CMAKE_CXX_COMPILER_VERSION};${calmetrics_engine_arch};${CMAKE_BUILD_TYPE};${CMAKE_CXX_FLAGS};${CMAKE_CXX_FLAGS_RELEASE}")
+    foreach(source IN LISTS calmetrics_identity_files)
+        file(SHA256 "${source}" source_hash)
+        file(RELATIVE_PATH source_name "${CMAKE_CURRENT_SOURCE_DIR}" "${source}")
+        string(APPEND calmetrics_identity ";${source_name}:${source_hash}")
+        set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${source}")
+    endforeach()
+    string(SHA256 calmetrics_build_id "${calmetrics_identity}")
     target_compile_definitions(_native PRIVATE
+        CALMETRICS_ENGINE_BUILD_ID="${calmetrics_build_id}"
         CALMETRICS_ENGINE_VERSION="${SKBUILD_PROJECT_VERSION}"
         CALMETRICS_ENGINE_COMPILER="${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}"
         CALMETRICS_ENGINE_ARCH="${calmetrics_engine_arch}"
@@ -127,7 +140,11 @@ if(CALMETRICS_ENGINE_BUILD_TESTS)
     add_executable(calmetrics_engine_runtime_tests tests/runtime_native_tests.cpp)
     target_link_libraries(calmetrics_engine_runtime_tests PRIVATE calmetrics_engine_operators)
     add_test(NAME calmetrics_engine_runtime_tests COMMAND calmetrics_engine_runtime_tests $<TARGET_FILE:calmetrics_worker>)
+    add_executable(calmetrics_engine_math_tests tests/math_native_tests.cpp)
+    target_link_libraries(calmetrics_engine_math_tests PRIVATE calmetrics_engine_operators)
+    add_test(NAME calmetrics_engine_math_tests COMMAND calmetrics_engine_math_tests)
     list(APPEND calmetrics_engine_targets
+        calmetrics_engine_math_tests
         calmetrics_engine_runtime_tests
         calmetrics_engine_compiler_tests
         calmetrics_engine_native_tests

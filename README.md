@@ -20,15 +20,16 @@ PyBind11 / C++17
 The current 0.3.0 code line is **C++ first**: restricted AST parsing, native Typed IR for
 scalar/time-series indicator execution, shared-DAG compilation, CSE, alias-aware liveness,
 rolling scopes, cost planning, CPU admission, thread/process pools, shared-memory ownership
-and all 118 canonical operators execute in C++. Python retains public import names, NumPy
+and all 125 canonical operators execute in C++. Python retains public import names, NumPy
 ownership adaptation and an asyncio await bridge. A complete synchronous request crosses
 PyBind once, not once per worker. The eight existing finance APIs retain their numerical contracts.
 
 The native Typed IR now owns dtype, named time axes, symbolic shape, semantic dimension,
 price basis, alias canonicalization, `rolling_window` lowering, compiler-owned `rolling_apply`
-and aligned time-series roots. Research-platform business contracts that are not execution
-semantics—especially causality/knowledge-time governance and broader matrix/portfolio graph
-integration—remain upstream. No PyPI publication is implied by local builds.
+and aligned time-series roots. Typed matrix/vector and exact int64 category/index inputs,
+native block/filter/group scopes and bounded scalar root finding extend the same execution
+chain. Research-platform causality/knowledge-time and business governance remain upstream.
+No PyPI publication is implied by local builds.
 
 ## Install
 
@@ -72,7 +73,7 @@ import numpy as np
 from calmetrics_engine import operators as op
 
 values = np.array([0.01, -0.02, 0.03, 0.005], dtype=np.float64)
-assert len(op.catalog()) == 118
+assert len(op.catalog()) == 125
 volatility = op.std(values, ddof=1)
 
 output = np.empty_like(values)
@@ -438,10 +439,66 @@ cmake -S . -B .build-sanitized \
 1. Python is the interface adapter; C++ compiles, plans, schedules and calculates.
 2. Reusable mathematics belongs in CalMetricsEngine, not duplicated across business centers.
 3. Primitive DAG execution should cross Python/C++ once per plan, not once per node.
-4. Direct operators support strided views; the graph batch contract requires contiguous product-major inputs.
+4. Direct operators support strided views. Graph float64 time-series inputs retain the contiguous product-major contract; newly supported typed matrices, vectors, integer and mask inputs preserve validated strides.
 5. No runtime Numba/JIT dependency in CalMetricsEngine.
 6. Business-specific orchestration remains in the research platform.
 7. Coupled black-box kernels are allowed only for genuinely inseparable recursive,
    fitting or jointly constrained algorithms.
 
 Build and release details: [docs/publishing.md](docs/publishing.md).
+
+## Platform execution contracts
+
+Graphs can opt into per-root numerical error isolation with `error_policy="isolate"`.
+Use `result.statuses` alongside `result.values`; structural errors still raise.
+Prepared calls reuse output, while `prepared.run_snapshot()` produces independent
+read-only output for retained results. Native interval bindings preserve N NAV
+versus N−1 returns and per-root parameters. See [execution contracts](docs/platform-execution-contracts.md).
+
+## Mathematical composition
+
+The original 118 operator IDs retain their behavior. IDs 119–125 add `normal_cdf`,
+`aligned_shift`, `recursive_filter`, `argsort`, `gather`, `distinct_count` and `floor`.
+`lag` still returns a shorter view; `aligned_shift` instead preserves length and fills
+the prefix. `recursive_filter` exposes real-valued alpha, seeding, update masks and
+gap emission policies; it does not change `recursive_smooth`.
+
+```python
+from calmetrics_engine import GraphCompiler
+
+# Even-span EMA with first-valid initialization and held output across missing rows.
+ema = GraphCompiler({"x": "series"}).compile([
+    "recursive_filter(x,2/(12+1),0,finite_mask(x),2,0)"
+])
+
+# Disjoint complete blocks, then a visible reduction of their statistics.
+blocks = GraphCompiler({"x": "series"}).compile([
+    "mean(block_apply(std(x,0),20))"
+])
+
+# Exact int64 group identity, native group reduction and aligned broadcast.
+groups = GraphCompiler({"x": "series", "key": {"kind": "series", "dtype": "int64"}}).compile([
+    "group_apply(mean(x),key)"
+])
+
+# solve_x is local to the bounded native solver, never a Python callback.
+root = GraphCompiler({"x": "series"}).compile([
+    "bisect(solve_x*solve_x-mean(x),0,10,1e-12,100)"
+])
+```
+
+`filter_apply(body,mask[,empty_default])` preserves selected order and returns a scalar;
+an empty selection defaults to NaN. `block_apply` drops incomplete tails and produces
+a compact intermediate, which cannot masquerade as an aligned public series root.
+`group_apply` uses complete groups and is retrospective within each group. Sorting
+indices likewise do not establish chronological or causal order.
+
+Integer indices/categories stay int64 through the DAG and worker transport. `distinct_count`
+compares IDs exactly and returns an exactly representable float64 count, consistent with
+other count reductions. Missing/unknown IDs require an explicit validity mask; negative
+codes are not silently discarded. Sorting, discrete selection and gather use necessary
+native workspace/output allocations, not a blanket zero-allocation promise.
+
+See the [detailed design and contracts](docs/mathematical-composition-design.md) and
+[validation record](docs/mathematical-composition-acceptance.md). These generic capabilities
+do not mean every MetricsFactory definition has been migrated or certified.

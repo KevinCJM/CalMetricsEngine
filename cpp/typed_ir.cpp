@@ -20,7 +20,7 @@ const std::unordered_set<std::string> &supported_semantics() {
       "adjusted_nav",           "adjusted_market_price",
       "reported_nav",           "raw_market_price",
       "volume",                 "currency_amount", "count",
-      "calendar_days",          "date",            "mask"};
+      "calendar_days",          "date",            "mask", "category", "index"};
   return values;
 }
 bool derived_semantic(const std::string &value) {
@@ -307,7 +307,7 @@ const char *kind_name(ValueKind kind) noexcept {
   return "invalid";
 }
 const char *dtype_name(DType dtype) noexcept {
-  return dtype == DType::float64 ? "float64" : "bool";
+  return dtype == DType::float64 ? "float64" : (dtype == DType::int64 ? "int64" : "bool");
 }
 std::string display(const ValueType &value) {
   if (value.kind == ValueKind::record)
@@ -402,6 +402,59 @@ ValueType infer(const ops::Spec &spec, const std::vector<ValueType> &v) {
   if (v.size() < spec.min_args || v.size() > spec.max_args)
     fail("ARITY_MISMATCH", std::string(spec.name) + " has invalid arity");
 
+  // Index/category operations preserve int64 exactly and never enter float
+  // arithmetic implicitly. A reordered series is an asset-like selection vector;
+  // it no longer promises alignment to the original time axis.
+  if (op == O::argsort) {
+    if (!one_dimensional(v[0]) || (!v[0].is_numeric() && !v[0].is_integer()))
+      fail("TYPE_MISMATCH", "argsort requires float64 or int64 1D input");
+    auto out = ValueType::vector(v[0].shape[0], "count");
+    out.dtype = DType::int64;
+    return out;
+  }
+  if (op == O::gather) {
+    if (!one_dimensional(v[0]) || !one_dimensional(v[1]) ||
+        !v[1].is_integer() || v[0].kind == ValueKind::record)
+      fail("TYPE_MISMATCH", "gather requires 1D values and int64 indices");
+    auto out = ValueType::vector(v[1].shape[0]);
+    out.dtype = v[0].dtype;
+    out.semantic_dimension = v[0].semantic_dimension;
+    out.price_basis = v[0].price_basis;
+    return out;
+  }
+  if (op == O::distinct_count) {
+    if (!one_dimensional(v[0]) || !v[0].is_integer())
+      fail("TYPE_MISMATCH", "distinct_count requires int64 IDs");
+    if (v.size() == 2 && (!v[1].is_mask() || v[1].axes != v[0].axes ||
+                           v[1].shape != v[0].shape))
+      fail("TYPE_MISMATCH", "distinct_count mask must match IDs");
+    return ValueType::scalar("count");
+  }
+  if (op == O::recursive_filter) {
+    if (v[0].kind != ValueKind::series || !v[0].is_numeric())
+      fail("TYPE_MISMATCH", "recursive_filter requires float64 time series");
+    require_scalar_parameter(v[1], "alpha", false);
+    if (!v[2].is_numeric() || !v[2].is_scalar())
+      fail("TYPE_MISMATCH", "initial must be float64 scalar");
+    compatible_semantics("recursive_filter", v[0], v[2]);
+    if (!v[3].is_mask() || v[3].axes != v[0].axes || v[3].shape != v[0].shape)
+      fail("TYPE_MISMATCH", "recursive_filter update mask must match series");
+    for (std::size_t i = 4; i < v.size(); ++i)
+      require_scalar_parameter(v[i], "recursive filter policy");
+    return v[0];
+  }
+  if (op == O::aligned_shift) {
+    if (v[0].kind != ValueKind::series || !v[0].is_numeric())
+      fail("TYPE_MISMATCH", "aligned_shift requires float64 time series");
+    if (v.size() > 1) require_scalar_parameter(v[1], "periods");
+    if (v.size() > 2) {
+      if (!v[2].is_numeric() || !v[2].is_scalar())
+        fail("TYPE_MISMATCH", "aligned_shift fill must be float64 scalar");
+      compatible_semantics("aligned_shift", v[0], v[2]);
+    }
+    return v[0];
+  }
+
   if (spec.family == ops::Family::elementwise) {
     if (op == O::logical_and || op == O::logical_or) {
       if (!v[0].is_mask() || !same_type(v[0], v[1]))
@@ -493,10 +546,10 @@ ValueType infer(const ops::Spec &spec, const std::vector<ValueType> &v) {
       fail("TYPE_MISMATCH", std::string(spec.name) + " requires numeric input");
     if (op == O::sign)
       return v[0].with_semantics("dimensionless");
-    if (op == O::normal_pdf || op == O::normal_ppf) {
+    if (op == O::normal_pdf || op == O::normal_ppf || op == O::normal_cdf) {
       if (v[0].semantic_dimension != "dimensionless")
         fail("SEMANTIC_DIMENSION_MISMATCH",
-             "normal_pdf/normal_ppf require dimensionless input");
+             "normal_pdf/normal_ppf/normal_cdf require dimensionless input");
       return v[0].with_semantics("dimensionless");
     }
     if (op == O::log || op == O::exp) {
@@ -541,7 +594,7 @@ ValueType infer(const ops::Spec &spec, const std::vector<ValueType> &v) {
     if (op == O::sum_time || op == O::mean_time ||
         op == O::product_time || op == O::variance_time ||
         op == O::std_time || op == O::min_time || op == O::max_time) {
-      if (v[0].kind != ValueKind::matrix ||
+      if (!v[0].is_numeric() || v[0].kind != ValueKind::matrix ||
           v[0].axes != std::vector<std::string>{"time", "asset"})
         fail("TYPE_MISMATCH", "time reduction requires time/asset matrix");
       auto out = ValueType::vector(v[0].shape[1], v[0].semantic_dimension,
@@ -553,7 +606,7 @@ ValueType infer(const ops::Spec &spec, const std::vector<ValueType> &v) {
     if (op == O::sum_asset || op == O::mean_asset ||
         op == O::product_asset || op == O::variance_asset ||
         op == O::std_asset || op == O::min_asset || op == O::max_asset) {
-      if (v[0].kind != ValueKind::matrix ||
+      if (!v[0].is_numeric() || v[0].kind != ValueKind::matrix ||
           v[0].axes != std::vector<std::string>{"time", "asset"})
         fail("TYPE_MISMATCH", "asset reduction requires time/asset matrix");
       auto out = ValueType::series(v[0].shape[0], v[0].semantic_dimension,
@@ -625,6 +678,9 @@ ValueType infer(const ops::Spec &spec, const std::vector<ValueType> &v) {
   }
 
   if (spec.family == ops::Family::matrix) {
+    for (const auto &input : v)
+      if (!input.is_numeric())
+        fail("TYPE_MISMATCH", "matrix arithmetic requires float64 inputs");
     if (op == O::dot) {
       require_same_one_dimensional("dot", v[0], v[1]);
       auto semantics = product_semantics(v[0], v[1]);
@@ -687,7 +743,7 @@ ValueType infer(const ops::Spec &spec, const std::vector<ValueType> &v) {
       return ValueType::scalar(v[0].semantic_dimension, v[0].price_basis);
     }
     if (op == O::solve) {
-      if (v[0].kind != ValueKind::matrix ||
+      if (!v[0].is_numeric() || v[0].kind != ValueKind::matrix ||
           v[0].axes != std::vector<std::string>{"asset", "asset"} ||
           v[1].kind != ValueKind::vector ||
           v[0].shape[0] != v[0].shape[1] ||
@@ -771,7 +827,7 @@ ValueType infer(const ops::Spec &spec, const std::vector<ValueType> &v) {
     if (op == O::active_returns)
       return additive("active_returns", v[0], v[1]);
     if (op == O::portfolio_returns) {
-      if (v[0].kind != ValueKind::matrix ||
+      if (!v[0].is_numeric() || v[0].kind != ValueKind::matrix ||
           v[0].axes != std::vector<std::string>{"time", "asset"} ||
           v[1].kind != ValueKind::vector ||
           v[0].shape[1] != v[1].shape[0])

@@ -15,7 +15,9 @@ enum class NodeKind : std::uint8_t {
   parameter = 1,
   constant = 2,
   operation = 3,
-  rolling_scope = 4
+  rolling_scope = 4,
+  interval_tail = 5,
+  apply_scope = 6
 };
 
 enum class OutputKind : std::uint8_t { scalar = 0, series = 1 };
@@ -28,7 +30,8 @@ enum class RollingParameterKind : std::uint8_t {
 enum class StorageKind : std::uint8_t {
   inline_value = 0,
   numeric = 1,
-  mask = 2
+  mask = 2,
+  integer = 3
 };
 
 struct Node {
@@ -67,7 +70,19 @@ struct RollingScope {
   std::size_t array_count = 0;
 };
 
+enum class ApplyKind : std::uint8_t { block = 0, filter = 1, group = 2, bisect = 3 };
+struct ApplyScope {
+  ApplyKind kind = ApplyKind::block;
+  std::shared_ptr<Program> body;
+  std::vector<std::uint32_t> input_nodes;
+  // UINT32_MAX binds the local solver variable rather than an outer node.
+  std::vector<std::uint32_t> parameter_nodes;
+  std::vector<std::uint32_t> argument_nodes;
+  std::size_t body_node_count = 0;
+};
+
 struct ExecutionMetadata {
+  bool requires_shape_planning = false;
   std::vector<const ops::Spec *> specs;
   std::vector<std::uint8_t> summary_consumers;
   std::vector<std::uint8_t> order_consumers;
@@ -80,8 +95,15 @@ struct Program {
   std::size_t parameter_count = 0;
   std::size_t numeric_slots = 0;
   std::size_t mask_slots = 0;
+  std::size_t integer_slots = 0;
+  // 0: temporal vector, 1: static vector/matrix, 2: time x asset matrix.
+  std::vector<std::uint8_t> input_axes;
   OutputKind output_kind = OutputKind::scalar;
+  bool isolate_errors = false;
+  std::uint32_t minimum_observations = 0;
+  std::uint64_t scope_work_budget = 100000000;
   std::vector<RollingScope> rolling_scopes;
+  std::vector<ApplyScope> apply_scopes;
   std::shared_ptr<const ExecutionMetadata> execution_metadata;
 
   void validate() const;
@@ -91,7 +113,14 @@ struct Program {
 bool summary_fusion_eligible(ops::Op op) noexcept;
 bool order_fusion_eligible(ops::Op op) noexcept;
 
+std::size_t required_array_capacity(const Program &program,
+                                   const std::vector<ops::Value> &inputs,
+                                   std::size_t max_window,
+                                   std::vector<ops::Shape> *node_shapes = nullptr);
+
 struct Audit {
+  // Present only for isolate mode; row-major, with the same shape as values.
+  std::vector<std::int16_t> statuses;
   std::size_t rows = 0;
   std::size_t nodes = 0;
   std::size_t max_window = 0;

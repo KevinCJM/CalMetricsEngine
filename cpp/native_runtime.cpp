@@ -68,7 +68,7 @@ Engine::plan(std::shared_ptr<compiler::CompiledGraph> graph, const Batch &batch,
   return planner::make_plan(std::move(graph), config_, batch.input_sizes(),
                             batch.starts, batch.ends, batch.rows,
                             batch.product_ids, budget_.total(), memory_budget,
-                            hard_stop, async_io, !batch.shared_inputs.empty());
+                            hard_stop, async_io, !batch.shared_inputs.empty(), &batch.inputs);
 }
 ExecutionAudit Engine::execute(const planner::Plan &p, const Batch &batch,
                                double *output,
@@ -79,7 +79,7 @@ ExecutionAudit Engine::execute(const planner::Plan &p, const Batch &batch,
   if (closed())
     throw std::runtime_error("native engine is closed");
   planner::validate_plan(p, batch.input_sizes(), batch.starts, batch.ends,
-                         batch.rows, batch.product_ids, cpu());
+                         batch.rows, batch.product_ids, cpu(), &batch.inputs);
   if (batch.parameter_count != p.graph->program.parameter_count)
     throw std::invalid_argument("parameter count does not match graph");
   if (return_shared_output && (p.lane != "process" || !p.use_shared_memory))
