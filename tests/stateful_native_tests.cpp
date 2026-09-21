@@ -247,6 +247,30 @@ int main() {
                   classified[row * 2 + 1] == (row == 3 ? -1 : 7),
                   "independent integer root remains valid including explicit unknown");
 
+        // Rolling/group failures originate provenance even without any segment
+        // scope. Serialization must reconstruct the same tracing metadata.
+        const std::vector<double> ordinary_values{2, 2, 3, 4};
+        const std::vector<std::int64_t> ordinary_keys{0, 0, 1, 1};
+        const std::vector<t::Variable> ordinary_variables{
+            {"x", t::ValueType::series()}, {"key", integer_series("category")}};
+        const std::int64_t ordinary_end = 4;
+        for (const bool rolling : {true, false}) {
+            const auto expression = rolling ? "rolling_apply(1/std(x,0),2)>0"
+                                            : "group_apply(1/std(x,0),key)>0";
+            const auto compiled = c::compile({expression, "x>0"}, ordinary_variables, true);
+            const auto decoded = c::decode_program(c::encode_program(compiled->program));
+            std::vector<std::uint8_t> output(8);
+            const auto audit = g::execute(decoded, {numbers(ordinary_values), integers(ordinary_keys)},
+                nullptr, 0, &start, &ordinary_end, 1, output.data(), 2);
+            for (std::size_t row = 0; row < 4; ++row) {
+                const bool failed = rolling ? row == 1 : row < 2;
+                check((audit.statuses[row * 2] != 0) == failed,
+                      "ordinary window/group failure retains exact membership");
+                check(audit.statuses[row * 2 + 1] == 0 && output[row * 2 + 1] == 1,
+                      "ordinary scope failure preserves independent root");
+            }
+        }
+
         // Structural contracts remain fatal even when an upstream numerical
         // failure prevents evaluation. Use one interval so a later healthy
         // interval cannot accidentally be the one that discovers the error.

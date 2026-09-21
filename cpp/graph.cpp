@@ -42,6 +42,7 @@ struct Scratch {
   std::size_t *remaining_work = nullptr;
   std::vector<ops::Value> values;
   bool isolate_errors = false;
+  bool propagate_scope_errors = false;
   bool interval_known = true;
   std::vector<std::int16_t> statuses;
   std::vector<std::vector<std::int16_t>> position_statuses;
@@ -519,12 +520,16 @@ void Program::finalize() {
     if (node.kind == NodeKind::apply_scope) {
       const auto &scope = apply_scopes[node.input_index];
       if (!scope.body->execution_metadata) scope.body->finalize();
-      positions = scope.kind == ApplyKind::segment ||
+      positions = scope.kind == ApplyKind::segment || scope.kind == ApplyKind::group ||
           scope.body->execution_metadata->position_status_nodes != 0;
+      metadata->contains_segment_scope = metadata->contains_segment_scope ||
+          scope.kind == ApplyKind::segment || scope.body->execution_metadata->contains_segment_scope;
     } else if (node.kind == NodeKind::rolling_scope) {
       const auto &scope = rolling_scopes[node.input_index];
       if (!scope.body->execution_metadata) scope.body->finalize();
-      positions = scope.body->execution_metadata->position_status_nodes != 0;
+      positions = true; // Every rolling body can originate a local numerical failure.
+      metadata->contains_segment_scope = metadata->contains_segment_scope ||
+          scope.body->execution_metadata->contains_segment_scope;
     }
     for (std::size_t parent = 0; parent < node.parent_count; ++parent)
       positions = positions || metadata->position_status_reachable[node.parents[parent]];
@@ -634,7 +639,8 @@ static Audit execute_impl(const Program &program,
                           std::size_t output_columns, Scratch &scratch,
                           bool prebound_inputs = false,
                           const std::vector<std::int16_t> *input_failures = nullptr,
-                          bool interval_known = true);
+                          bool interval_known = true,
+                          bool propagate_scope_errors = false);
 
 static std::size_t positive_integer(double value, const char *code,
                                     std::size_t maximum = 5000) {
@@ -870,7 +876,8 @@ static void validate_unresolved_scope(const Program &program, const Node &node,
     }
     double ignored = NAN;
     const auto audit = execute_impl(body, inputs, parameters.data(), parameters.size(),
-        &start, &end, 1, &ignored, 1, child, true, &failures, body_interval_known);
+        &start, &end, 1, &ignored, 1, child, true, &failures, body_interval_known,
+        scratch.isolate_errors || scratch.propagate_scope_errors);
     scratch.algorithm_copy_bytes += audit.algorithm_copy_bytes;
   }
 }
@@ -1192,14 +1199,18 @@ static ops::Value execute_rolling_scope(
       execute_impl(*scope.body, body_inputs,
                    body_parameters.empty() ? nullptr : body_parameters.data(),
                    body_parameters.size(), &local_start, &local_end, 1, &value,
-                   1, child, true, inherited ? &failures : nullptr);
+                   1, child, true, inherited ? &failures : nullptr, true,
+                   scratch.isolate_errors || scratch.propagate_scope_errors);
       if (!inherited && std::isfinite(value))
         destination[right] = value;
     } catch (const ops::Error &error) {
       if (!numerical_error(error)) throw;
-      if (!scratch.isolate_errors && scope.body->execution_metadata->position_status_nodes) throw;
+      // Preserve the existing standalone strict rolling NaN policy, but never
+      // swallow a nested failure before an isolating outer scope can record it.
+      if (!scratch.isolate_errors && (scratch.propagate_scope_errors ||
+          scope.body->execution_metadata->contains_segment_scope)) throw;
       destination[right] = nan;
-      if (scratch.isolate_errors && program.execution_metadata->position_status_reachable[node_index])
+      if (scratch.isolate_errors)
         mark_positions(scratch, node_index, interval_length, right, right + 1, 4);
     }
   }
@@ -1258,7 +1269,8 @@ static ops::Value execute_apply_scope(const Program &program, const ApplyScope &
     }
     const auto audit = execute_impl(*scope.body, inputs, parameters.data(), parameters.size(),
         &begin, &end, 1, &value, 1, child, true, failures,
-        scope.kind != ApplyKind::bisect || std::all_of(inputs.begin(), inputs.end(), known_geometry));
+        scope.kind != ApplyKind::bisect || std::all_of(inputs.begin(), inputs.end(), known_geometry),
+        scratch.isolate_errors || scratch.propagate_scope_errors);
     scratch.algorithm_copy_bytes += audit.algorithm_copy_bytes;
     return value;
   };
@@ -1481,7 +1493,7 @@ static ops::Value execute_apply_scope(const Program &program, const ApplyScope &
       }
     } catch (const ops::Error &error) {
       if (!scratch.isolate_errors || !numerical_error(error)) throw;
-      if (trace) failure = 4;
+      failure = 4;
     }
     for (std::size_t i = first; i < last; ++i) {
       destination[indices[i]] = value;
@@ -1902,15 +1914,18 @@ static Audit execute_impl(const Program &program, const std::vector<ops::Value> 
     const double *parameters, std::size_t parameter_count, const std::int64_t *starts,
     const std::int64_t *ends, std::size_t rows, void *output, std::size_t output_columns,
     Scratch &scratch, bool prebound_inputs,
-    const std::vector<std::int16_t> *input_failures, bool interval_known) {
+    const std::vector<std::int16_t> *input_failures, bool interval_known,
+    bool propagate_scope_errors) {
   if (!program.execution_metadata) {
     Program finalized = program;
     finalized.finalize();
     return execute_impl(finalized, inputs, parameters, parameter_count, starts,
-                        ends, rows, output, output_columns, scratch, prebound_inputs, input_failures, interval_known);
+                        ends, rows, output, output_columns, scratch, prebound_inputs,
+                        input_failures, interval_known, propagate_scope_errors);
   }
+  scratch.propagate_scope_errors = propagate_scope_errors;
   // Choose once per native execution. AOT specialization removes optional
-  // per-node provenance branches from graphs that cannot produce segment errors.
+  // per-node provenance branches from graphs that cannot produce local scope errors.
   ops::require(!input_failures || input_failures->size() == program.input_count, "GRAPH_INPUT_STATUS_COUNT");
   if ((program.isolate_errors || input_failures) && program.execution_metadata->position_status_nodes)
     return execute_impl_body<true>(program, inputs, parameters, parameter_count,

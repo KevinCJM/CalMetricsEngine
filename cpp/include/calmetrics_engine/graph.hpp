@@ -108,6 +108,7 @@ struct ExecutionMetadata {
   // Keep optional provenance after the existing hot execution metadata.
   std::size_t position_status_nodes = 0;
   std::vector<std::uint8_t> position_status_reachable;
+  bool contains_segment_scope = false;
 };
 
 struct Program {

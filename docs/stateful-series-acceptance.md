@@ -321,6 +321,43 @@ wheel SHA-256：`7a729994794f2c6bad8f0b13c9ce70c256c5c22d27ca2a1b7a8531004aa2e08
 `9a0742b` 的 Linux ARM job 106313372063 已真实执行五版本 setup 并通过完整检查。
 其日志 47958–47962 行记录五个解释器成功安装，不能据此跳过新提交的 CI 或 Bot 复审。
 
+## PR 普通滚动与分组异常溯源修复（2026-09-21）
+
+Bot 对 `1750723` 提出的两条 P2 均已复现：没有分段作用域时，
+`rolling_apply(1/std(x,0),2)>0` 与 `group_apply(1/std(x,0),key)>0`
+会将常量窗口/组的除零转为 False，同时返回 status=0。
+原因是原位置状态可达性只由分段作用域产生，两个已有 catch 分支没有记录普通局部失败。
+
+编译元数据现在将普通 rolling/group 也作为位置故障源；窗口只标记该右端输出，
+分组标记原始成员。现有下游传播、worker 状态传输、独立根隔离与 Planner 最坏内存
+准入共用同一套元数据。组 catch 必须保留 failure，滚动 catch 在 isolate 下必须标记。
+block/filter/bisect 的普通异常原本可向外抛出，没有用 NaN 吞错；但其中的嵌套 rolling
+会提前吞错，已独立复现四种外层作用域。因此子程序显式继承异常传播上下文，让异常
+到达能够记录成员范围的隔离作用域，根请求每次重置该上下文。
+
+追踪覆盖范围不再兼任严格 rolling 的历史策略开关；单独的分段存在标记保持该兼容规则。
+正常返回的 NaN、预热、严格 rolling 的原数值异常转 NaN 行为，以及严格 group 抛错规则
+均保留。没有通过把所有子程序切到 isolate 模式来改变普通缺失语义。
+
+新增 37 项 Python 回归覆盖 bool/int64、finite_mask、四执行通道、非连续组、独立根、
+跨区间、序列化、prepared 状态恢复/快照、四类嵌套作用域和故障前内存准入。
+新增原生序列化回归验证普通窗口/组的精确失败位置。旧 wheel 的直接及四类嵌套用例均失败；
+严格和普通缺失对照在旧 wheel 通过。新 wheel 全量 **4619 passed（5.92 秒）**；
+原生与 ASan/UBSan **各 7/7**，Ruff 0.16.8 全量通过；补强同一 Scheduler 从 isolate
+切回 strict 的测试后，三个兼容专项再次通过。
+
+wheel SHA-256：`4caf1a2a53aa71d5311927e75f4cd5cc2466911479897d340e7a3d043bbf2731`；
+独立复核源码一致的 engine_build_id：
+`c5dfec2ad6bde5290db2cb10718154db2824d2a7279177ddd5b6065d21808dce`。
+产物与日志前缀 `/private/tmp/calmetrics-scope-provenance-`。
+相同 10 CPU / 7 次配对的原性能门禁全部通过：batch **0.734 / 0.639**，
+63/252 点 prepared **0.658 / 0.733**、普通入口 **0.931 / 0.868**。
+原始记录 `/private/tmp/calmetrics-scope-provenance-performance/`，阈值没有改变。
+这些基准不代表所有窗口/分组故障路径的性能。
+
+前一提交 `1750723` 的远端 10 项 CI 已全部通过；本次 C++ 修复仍须重新构建并由
+最新提交的完整 CI 和真实 Bot 结论验收，旧提交的成功不作为合并依据。
+
 ## 证据边界
 
 - 本机验证不代替 Linux/Windows、其他 Python 版本或 x86 SIMD CI。
