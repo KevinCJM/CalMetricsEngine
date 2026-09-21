@@ -113,6 +113,26 @@ int main() {
         try { call("phase_direction", {selected.view(), malformed_view}); }
         catch (const o::Error &error) { rejected = std::string(error.what()) == "INVALID_SEGMENT_BOUNDARY"; }
         check(rejected, "segment geometry rejects unsafe endpoint");
+        for (const auto *name : {"segment_starts", "segment_ends"}) {
+            const auto &spec = o::lookup(name);
+            for (const bool structure_only : {false, true}) {
+                rejected = false;
+                try {
+                    if (structure_only) o::validate_structure(spec, &malformed_view, 1, 1, 1);
+                    else o::prepare(spec, &malformed_view, 1);
+                } catch (const o::Error &error) {
+                    rejected = std::string(error.what()) == "INVALID_SEGMENT_BOUNDARY";
+                }
+                check(rejected, "segment projections validate available boundary payload");
+            }
+            auto unavailable = malformed_view;
+            unavailable.data = nullptr;
+            const auto known = o::validate_structure(spec, &unavailable, 1, 1, 0);
+            check(known.geometry_known && known.output_shape == o::vector_shape(8),
+                  "unavailable boundary payload retains known output geometry without access");
+            const auto unknown = o::validate_structure(spec, &unavailable, 1, 0, 0);
+            check(!unknown.geometry_known, "unknown boundary geometry is not invented");
+        }
 
         const std::vector<double> filter_values{1, 3, 5, 7};
         const std::vector<double> alpha{.5, .5, .25, 1};

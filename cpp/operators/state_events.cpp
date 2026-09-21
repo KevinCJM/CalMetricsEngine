@@ -420,6 +420,7 @@ void prepare_state_events(Prepared &p) {
             require(a[0].shape.rank == 2 && a[0].shape.dim[1] == (segment ? 2u : 3u), "SHAPE_MISMATCH");
             p.output_shape = vector_shape(a[0].shape.dim[0]);
             if (p.payload(0)) {
+                if (segment) segment_geometry(a[0], a[0].shape.dim[0]);
                 std::size_t column = 0;
                 if (op == Op::continuous_state_evidence || op == Op::segment_ends) column = 1;
                 else if (op == Op::continuous_state_pending) column = 2;

@@ -106,9 +106,9 @@ double typed_array_extra_work(const graph::Program &program,
       continue;
     if (op == ops::Op::state_estimate || op == ops::Op::state_variance ||
         op == ops::Op::continuous_state_values || op == ops::Op::continuous_state_evidence ||
-        op == ops::Op::continuous_state_pending || op == ops::Op::segment_starts ||
-        op == ops::Op::segment_ends)
+        op == ops::Op::continuous_state_pending)
       continue; // Field projections borrow storage without scanning it.
+    // Segment projections borrow too, but first scan both boundary columns.
     if (op == ops::Op::transpose || (op == ops::Op::diag && lhs.rank == 2))
       continue; // Borrowed views have no materialized array traversal.
     const bool sort = op == ops::Op::median || op == ops::Op::quantile ||

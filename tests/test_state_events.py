@@ -232,6 +232,54 @@ def test_segment_geometry_is_validated_before_phase_or_reference_access():
         op.drawdown_cycle_reference(ints([1, 1, -1]), np.array([-.2, -.2, np.nan]), broken, .12)
 
 
+@pytest.mark.parametrize("name", ["segment_starts", "segment_ends"])
+@pytest.mark.parametrize("access", ["borrow", "out", "requirements"])
+@pytest.mark.parametrize("boundaries", [
+    [[0, 3], [0, 3], [-1, -1]],  # Endpoint outside the observation axis.
+    [[0, 0], [-1, -1], [-1, -1]],  # Nonpositive segment length.
+    [[-1, 2], [-1, -1], [-1, -1]],  # Only one unknown boundary.
+    [[0, 2], [-1, -1], [-1, -1]],  # Missing interior membership.
+    [[1, 2], [1, 2], [-1, -1]],  # Left boundary differs from its first row.
+    [[-2, -2], [-1, -1], [-1, -1]],  # Unsupported negative sentinel.
+])
+def test_segment_projections_reject_invalid_payload_before_output(name, access, boundaries):
+    segments = ints(boundaries)
+    segments.flags.writeable = False
+    out = np.full(segments.shape[0], 123, dtype=np.int64)
+    with pytest.raises(ValueError, match="INVALID_SEGMENT_BOUNDARY"):
+        if access == "requirements":
+            op.get(name).requirements(segments)
+        elif access == "out":
+            op.call(name, segments, out=out)
+        else:
+            op.call(name, segments)
+    np.testing.assert_array_equal(out, 123)
+    np.testing.assert_array_equal(segments, boundaries)
+
+
+@pytest.mark.parametrize("name,column", [("segment_starts", 0), ("segment_ends", 1)])
+@pytest.mark.parametrize("stride", [1, 2, -2])
+@pytest.mark.parametrize("boundaries", [
+    [], [[-1, -1]], [[0, 2], [0, 2], [2, 4], [2, 4], [-1, -1]],
+])
+def test_segment_projections_preserve_valid_strided_readonly_views(name, column, stride, boundaries):
+    expected = ints(boundaries).reshape(-1, 2)
+    storage = np.empty((expected.shape[0] * abs(stride), 2 * abs(stride)), dtype=np.int64)
+    segments = storage[::stride, ::stride]
+    segments[:] = expected
+    segments.flags.writeable = False
+    result, audit = op.call(name, segments, audit=True)
+    np.testing.assert_array_equal(result, expected[:, column])
+    assert result.dtype == np.int64
+    assert audit["input_copy_bytes"] == 0
+    if segments.size:
+        assert np.shares_memory(result, segments)
+    out = np.full(expected.shape[0], 123, dtype=np.int64)
+    assert op.call(name, segments, out=out) is out
+    np.testing.assert_array_equal(out, expected[:, column])
+    np.testing.assert_array_equal(segments, expected)
+
+
 # Pinned from current platform PS kernels, independent of the installed platform.
 _PS_PLATFORM_ORACLE = [
     ([90.69, 98.48, 89.92, 92.56, 122.07, 120.26, 102.95, 83.21, 76.59, 76.68, 63.4, 50.85, 54.56, 72.77, 77.41, 80.76, 72.06, 86.0], [0, 1, -1, 0, 1, 0, 0, 0, -1, 1, 0, -1, 0, 0, 0, 1, -1, 0], 2, 4, 0.1, [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 1, -1, 0]),

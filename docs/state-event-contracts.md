@@ -39,6 +39,11 @@ Bundle projections borrow strided columns and retain the owner. Explicit `out=`
 materializes only the requested column into caller-owned int64 output. Shared
 bundles are computed once through ordinary DAG CSE, not independently per field.
 The executor must extend the source lifetime through every borrowed projection.
+Both segment projections validate the complete boundary payload before exposing
+a view or writing `out`, including the unselected column and interior membership.
+This requires an O(T) read-only scan, but no input copy. When failed upstream data
+is unavailable, structural validation checks only its known type/shape without
+reading the absent payload.
 
 ## Operators
 
