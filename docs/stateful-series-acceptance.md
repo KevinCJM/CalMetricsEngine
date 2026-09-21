@@ -1,0 +1,197 @@
+# 时序递推与状态能力验收
+
+验收日期：2026-09-21。本记录针对 `codex/stateful-series` 的本地改动，基线为
+`359e8e288d385cdf932772a2680dad6f19e5b51a`。范围仅为 CalMetricsEngine；
+没有切换 FundInvestmentResearchPlatform 的执行后端或启动流程。
+
+## 实现与契约
+
+- 原有 1–125 号算子保留；126–146 提供自适应递推、二阶滤波、cos、标量 Kalman、
+  状态选择/滞回/连续确认、回撤状态、峰谷、PS、完整分段和共享字段投影。
+- KAMA、Super Smoother 与分段收益使用真实 C++ 计算图组合。没有新增专用指标黑盒、
+  Python 数值回调、运行期机器码构建或平台运行依赖。
+- 布尔信号、int64 状态可穿过单线程、线程、进程、共享内存及 Hard Stop 路径。
+  同图根输出必须同 dtype；失败占位值与业务状态通过 statuses 区分。
+- 共享状态只求解一次，投影借用其内存；C++ liveness 保留底层所有者。
+  prepared 输出复用与独立 snapshot 的所有权分别验证。
+- `state`、`event`、`phase`、`index` 不隐式混用。峰谷修订、PS 与完整波段均为事后结果，
+  本轮没有把引擎局部时序声明当作平台实时/回测发布资格。
+
+详细定义见[设计](stateful-series-design.md)和[状态事件契约](state-event-contracts.md)。
+
+## 可重复检查
+
+实际环境：macOS 15.6.1、arm64、CPython 3.12.11；原生算子执行 scalar / NEON 检查。
+通过本地 wheel 构建并安装到全新目录，检查 Python 包及 `_native` 都来自该目录后运行测试。
+不以源码导入代替 wheel 验证。
+
+```sh
+CMAKE_GENERATOR='Unix Makefiles' python -m pip wheel \
+  --no-build-isolation --no-deps . --wheel-dir /tmp/cme-wheels
+python -m pip install --no-deps --target /tmp/cme-installed /tmp/cme-wheels/*.whl
+PYTHONPATH=/tmp/cme-installed python -m pytest tests -q
+
+cmake -S . -B /tmp/cme-native -DCMAKE_BUILD_TYPE=Release \
+  -DCALMETRICS_ENGINE_BUILD_PYTHON=OFF -DCALMETRICS_ENGINE_BUILD_TESTS=ON
+cmake --build /tmp/cme-native --parallel 4
+ctest --test-dir /tmp/cme-native --output-on-failure
+
+cmake -S . -B /tmp/cme-asan -DCMAKE_BUILD_TYPE=Debug \
+  -DCALMETRICS_ENGINE_BUILD_PYTHON=OFF -DCALMETRICS_ENGINE_BUILD_TESTS=ON \
+  -DCALMETRICS_ENGINE_SANITIZE=ON
+cmake --build /tmp/cme-asan --parallel 4
+ctest --test-dir /tmp/cme-asan --output-on-failure
+
+PYTHONPATH=/tmp/cme-installed python tools/check_phase2_performance.py \
+  --better-root /path/to/BetterSaaTaa --output-dir /tmp/cme-performance
+```
+
+wheel 构建需要项目声明的 CMake/pybind11/scikit-build-core 构建依赖。
+性能参考代码只用于验收；独立安装及正式计算不导入 BetterSaaTaa 或 Numba。
+
+## 覆盖内容
+
+| 检查 | 关键证据 |
+| --- | --- |
+| `test_recursive_state.py` | KAMA / Super Smoother 独立参考、Kalman 闭式后验、初始化、缺失保留和显式重置、只读负 stride、精确大整数 |
+| `test_state_events.py` | 阈值等号、保持期、确认时点、缺失/无候选区别、回撤重置、固定平台 PS 对照、事件分段几何 |
+| `test_stateful_graph.py` | 真正的 AST/DAG 组合、记录名义类型、量纲、CSE 与借用寿命、分段端点、逐段隔离、嵌套作用域预算 |
+| `test_series_output_types.py` | bool/int64 精确输出、inline/shared worker、序列化、Hard Stop、statuses、prepared/snapshot 所有权、Planner 资源估计 |
+| `test_segment_error_status.py` | 176 项故障回归：前轮 129 项及本轮 47 项；覆盖失败标量、未知 capture/成员、嵌套子图、真实消费边界、四执行通道及 prepared 恢复 |
+| `test_cpp_first_runtime.py` / `runtime_native_tests.cpp` | 缓存命中后的输入/参数/区间变更拒绝、独立结果所有权、公开规划统计及复核溢出检查 |
+| `operator_native_tests.cpp` | 全部 146 个算子的 scalar / 自动 ISA 结果校验，共 60,411 项检查 |
+| `stateful_native_tests.cpp` | 原生共享记录、事件边界、序列化、完整波段执行及 sanitizer 回归 |
+
+## 最终结果
+
+最终 wheel：`calmetrics_engine-0.3.0-cp312-cp312-macosx_15_0_arm64.whl`。
+
+- wheel SHA-256：`4354ec42a9e420f557baa94620f0d052b99639bb3d6c61db6fd00d6756eefd80`。
+- 原生 `engine_build_id`：`157c5d54eb75ab6c6240dd0fdc6bacc066787ddd26d7fff20544b9e7462fae06`。
+- 编译器：AppleClang 17.0.0.17000603；`runtime_jit=0`，真实图审计 `python_fallback=0`。
+- 全量 Python：**4528 passed，0 failed，0 skipped**（4.14 秒），本轮新增 47 项故障回归及 5 项入口/计划回归。
+- Release 原生 CTest：**7/7 通过**。
+- ASan/UBSan 原生 CTest：**7/7 通过**。
+- `git diff --check`、本轮 README/设计/契约/验收文档的本地链接检查通过。
+- 本轮原性能门禁 **4/4 通过**：63 点普通 Scheduler 配对比值为 **0.947**，满足 <=1.00；
+  四组 prepared/batch 比值均满足 <=0.90。前轮 1.018 的失败记录保留在下方。
+
+早期审查修复了两个回归点：普通状态码冒充波段方向，以及零捕获嵌套分段子图的容量不足。
+后者先以独立原生复现触发 ASan `heap-buffer-overflow`，修复后同一复现退出0，正式原生回归也通过。
+Planner 同步计入零捕获子图按实际区间生成的数组和工作量；资源不足仍报错，不被 isolate 转为缺失。
+
+### P1：分段异常经过信号计算丢失状态
+
+复审发现旧 4347 项测试遗漏了 `segment_apply(1/std(x,0),…) > 0` 的下游故障状态：
+原实现只写 NaN，比较输出 False 后 statuses 错误地变成0。旧测试通过不能覆盖这项契约，
+原先完整验收结论因此不足。
+
+修复使用独立的逐位置故障状态，沿受影响依赖传播，并纳入 Planner 内存预算和实际工作区审计。
+异常位置不再参加后续逐元素数值计算，但仍执行完整结构校验。未完成段等普通 NaN 不冒充执行异常。
+对于没有精确位置映射的非局部节点，保守让整个依赖节点失效；不宣称已支持递推状态的精确故障恢复。
+
+复现价格 `[7,2,2,2,3,4,5,6,7]`、事件 `[0,-1,0,1,0,-1,0,1,0]`：
+修复后比较结果仍为 `[False,False,False,True,True,True,True,False,False]`，
+statuses 为 **`[0,4,4,0,0,0,0,0,0]`**。坏段保留错误，健康段、独立根及未完成边界保持各自契约。
+新回归在旧 wheel 上为 **24 失败 / 8 通过**；最终修复 wheel 上 **32/32 通过**。
+
+### P2：故障提前传播跳过结构校验
+
+P1 后的复审发现：非局部节点收到故障后提前 `continue`，会掩盖独立输入中的非法 mask、
+状态码、索引及长度错误。已用同一输入的健康/故障源对照复现；4379 项测试通过不足以覆盖此契约。
+
+修复保留失败值的类型与可推导的精确几何，未知长度显式标记不可知。
+故障路径与正常路径共用 canonical 结构校验，既不执行失败数值，也不读取不可用 payload。
+作用域按真实成员把 capture 故障传入同一子图执行器，继续检查健康分支；未消费的坏 mask 不误报。
+递归子图的隔离工作区及暂存状态进入 Planner，实际保留容量进入审计。
+
+测试覆盖直接和多跳递推、规约、状态参数、gather 边界、scope selector/body、四执行通道、
+prepared 反复坏/好切换、未知窗口，以及 `returns` 滚动计数对失败数据的安全处理。
+旧 wheel 已复现 **25 个新增失败用例**；该轮专项 **99/99 通过**，原 P1 回归全部保留。
+进程原有错误运输契约仍是 `RuntimeError("native worker: INVALID_MASK")`，
+线程是 `ValueError("INVALID_MASK")`，均由同通道健康源对照锁定。
+原本可隔离的 `INVALID_PARAMETER` 未升级为批次结构错误。
+
+### P2 补充：bisect 子作用域结构校验
+
+再次复审发现 `scope_maps_status` 显式排除了 `bisect`，导致捕获值失败时整个子图被跳过。
+上一轮 **4446 项通过**没有覆盖该路径，不能作为此项已关闭的证据。
+在上一轮 wheel 上，新增本机回归复现 **12 失败 / 12 通过**；失败源掩盖了非法 mask、
+长度不匹配及非法状态码，健康源仍正确抛错。
+
+修复让 `bisect` 复用现有子图故障传入机制：每个 capture 按自身完整长度汇总故障，
+在上下界两个实际端点检查可判定的子图结构；失败 payload 不参与数值运算，随后保留故障结果，
+不执行求根迭代。正常求根、独立指标、线程/进程异常运输和 prepared 复用契约保持原样。
+没有新算子或数值算法；子图状态所需内存已在上一轮 Planner 预算中计入。
+
+新增 30 项 Python 用例覆盖局部/整体捕获故障、嵌套 filter、两个端点、不同捕获长度、
+四个执行通道、prepared 坏/好切换及独立快照。原生回归还覆盖计划序列化和复用。
+该轮全量 **4476/4476**、Release **7/7**、ASan/UBSan **7/7** 通过；
+实际安装路径和原生审计构建身份与该轮源码哈希一致。
+
+首次本机检查受到沙箱 `shm_open` 限制，允许本地 IPC 后完成全量验证；
+同时修正新测试把正常缺失值误认为健康数值的夹具：显式排除未完成段 NaN，
+独立原生根使用有效值计数。没有更改生产缺失值契约。
+
+### P2 补充：失败标量与未知长度仍须校验子图
+
+后续复审指出，失败的 body 标量或未知 capture 长度仍会触发提前返回。
+在上一轮 wheel 上，首批新增对照复现 **15 失败 / 15 通过**，覆盖 bisect、block、filter、group、segment 和 rolling。
+这说明上一轮 4476 项通过仍不足以关闭全部子作用域路径。
+
+本轮把成员关系与失败 body 参数分开；成员已知时继续按真实范围传递故障和验证健康输入。
+成员未知时复用同一子图执行器，保留未知几何与不可用 payload，只检查不依赖失败值的约束。
+bisect 仍保留各 capture 自身的长度，未知长度不阻止其他健康 capture 的 INVALID_MASK 等错误抛出。
+未知成员不会被伪装成全选或空选，未消费的坏数据不误报；独立结果与数值隔离规则保持原样。
+
+新增 47 项故障测试覆盖失败标量、未知长度/控制参数、嵌套、prepared 坏/好恢复、原生运输以及未消费数据边界。
+另有 5 项 Python 测试验证缓存命中后输入和参数的变更检查、结果独立所有权与计划几何复核。
+原生回归覆盖计划序列化、公开 inspect 统计保留，以及仅复核身份时的观测总量溢出检查。
+最终 wheel 全量 **4528/4528**、Release **7/7**、ASan/UBSan **7/7** 通过，构建身份与冻结源码一致。
+
+### 性能记录
+
+P1 修复的首次性能复核中，63 点普通 Scheduler 比值为 **1.018**，超过 <=1.00 门槛；
+其他三组及全部 prepared 比值通过。这次失败保留为实测证据，不能沿用旧版本的通过结论。
+随后移除未启用位置追踪时的无用缓冲重置，并将同一执行实现按是否需要追踪进行 AOT 模板实例化，
+由图的依赖元数据选择，避免普通图逐节点承担新增分支。没有运行期编译，也没有另存历史计算实现。
+该轮重新构建后四组通过；前轮 P2（4446 项测试对应构建）也曾四组通过。
+前轮 `bisect` 修复后的冻结 wheel 重跑四组门禁，63 点普通 Scheduler 比值再次为 **1.018**，
+超过 <=1.00，因此该轮性能验收 **未通过**。其余三组及全部 prepared 比值通过。
+没有降低阈值、替换工作负载或反复重跑直至通过；前轮通过结果不替代本轮失败记录。
+
+本轮按顺序完成 prepared 所有权用法说明、普通入口键/dtype 构造精简，以及计划复核统计和临时数组移除。
+公开普通入口仍独立分配结果，输入变更与原有几何/计划身份检查保留。
+冻结新 wheel 后运行一次原门禁，四组全部通过；没有更改门槛、基准脚本或基准工作负载。
+
+以下为上述最终 wheel 的性能实测：
+
+| 工作负载 | NJIT 中位数 | C++ prepared 中位数 | 配对 C++/NJIT |
+| --- | ---: | ---: | ---: |
+| 500 产品 × 2520 历史点 × 12 区间 × 16 指标 | 50.656 ms | 34.514 ms | 0.681 |
+| 1000 产品 × 2520 历史点 × 12 区间 × 16 指标 | 102.005 ms | 78.487 ms | 0.769 |
+| 1 产品 × 63 历史点 × 1 区间 × 5 指标 | 4.583 µs | 3.083 µs | 0.673 |
+| 1 产品 × 252 历史点 × 1 区间 × 5 指标 | 9.625 µs | 7.084 µs | 0.736 |
+
+prepared 门槛保持 C++/NJIT <=0.90。两组微工作负载的普通 `Scheduler.execute`
+中位数分别为 4.458 µs、8.416 µs，配对比值分别为 **0.947**、**0.874**；原门槛仍为 <=1.00，每种路径独立配对测量，
+不能把另一组 NJIT 中位数当成其分母。未降低阈值或改变工作负载以通过验收。
+
+本机最终原始记录位于 `/private/tmp/calmetrics-scope-final-{pytest,ctest,sanitized}.log`
+及 `/private/tmp/calmetrics-scope-final-performance/`；旧 wheel 的本轮复现为
+`/private/tmp/calmetrics-partial-scope-old.log`。前轮 bisect 失败门禁保留在
+`/private/tmp/calmetrics-bisect-performance/`，更早证据保留在
+`/private/tmp/calmetrics-structural-final-*`；P1 首次性能失败保存在
+`/private/tmp/calmetrics-segment-status-performance/`。最终 wheel 及独立安装目录分别为
+`/private/tmp/calmetrics-scope-final-wheels/`、`/private/tmp/calmetrics-scope-final-install/`。
+这些是本次实测产物，
+复现应使用上面的命令重新生成，不能依赖临时目录长期存在。
+
+## 证据边界
+
+- 本机验证不代替 Linux/Windows、其他 Python 版本或 x86 SIMD CI。
+- 本轮性能门禁衡量原有 16 指标及 5 指标工作负载，不能推出每个新增算子均快于 NJIT。
+- 测试证明支持路径上的输入视图/投影共享，以及 shared 输出无最终拷贝；
+  独立输出、必要工作区和 inline IPC 仍有明确分配或传输，不宣称整个计算零分配。
+- Kalman 限于一维随机游走估计；多维 Kalman、公共同图混合 dtype 输出、公开矩阵根均未实现。
+- 引擎能力补齐不等于 MetricsFactory 所有定义已迁移，也不等于平台时序适配、前后端门禁已验收。

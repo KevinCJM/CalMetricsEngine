@@ -80,6 +80,8 @@ def main():
                 lambda: scheduler.execute(graph, inputs, starts, ends), args.rounds
             ),
             "prepared_run": measure(prepared.run, args.rounds),
+            "prepared_run_audit": measure(prepared.run_audit, args.rounds),
+            "prepared_run_snapshot": measure(prepared.run_snapshot, args.rounds),
         }
     payload = {
         "python": platform.python_version(),

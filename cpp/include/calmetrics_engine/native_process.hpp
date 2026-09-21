@@ -20,8 +20,8 @@ public:
   ProcessTransport(const planner::Plan &plan, const Batch &batch);
   std::vector<std::uint8_t> request(planner::Chunk chunk) const;
   graph::Audit response(const std::vector<std::uint8_t> &bytes,
-                        planner::Chunk chunk, double *out);
-  void finish(double *out);
+                        planner::Chunk chunk, void *out);
+  void finish(void *out);
   std::shared_ptr<SharedRegion> output_owner() const { return output_; }
   std::size_t shared_memory_bytes = 0, boundary_copy_bytes = 0,
               output_copy_bytes = 0;

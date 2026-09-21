@@ -21,6 +21,25 @@ enum class NodeKind : std::uint8_t {
 };
 
 enum class OutputKind : std::uint8_t { scalar = 0, series = 1 };
+// Public scalar results retain float64. Aligned series preserve one exact
+// dtype for every root in the graph, including across native worker transport.
+enum class OutputDType : std::uint8_t { float64 = 0, boolean = 1, int64 = 2 };
+inline std::size_t output_itemsize(OutputDType dtype) noexcept {
+  return dtype == OutputDType::boolean ? 1 : 8;
+}
+inline const char *output_dtype_name(OutputDType dtype) noexcept {
+  switch (dtype) {
+  case OutputDType::float64: return "float64";
+  case OutputDType::boolean: return "bool";
+  case OutputDType::int64: return "int64";
+  }
+  return "invalid";
+}
+inline void *output_offset(void *data, std::size_t elements,
+                           OutputDType dtype) noexcept {
+  return data ? static_cast<std::uint8_t *>(data) + elements * output_itemsize(dtype)
+              : nullptr;
+}
 enum class RollingParameterKind : std::uint8_t {
   outer_node = 0,
   observation_count = 1,
@@ -70,7 +89,7 @@ struct RollingScope {
   std::size_t array_count = 0;
 };
 
-enum class ApplyKind : std::uint8_t { block = 0, filter = 1, group = 2, bisect = 3 };
+enum class ApplyKind : std::uint8_t { block = 0, filter = 1, group = 2, bisect = 3, segment = 4 };
 struct ApplyScope {
   ApplyKind kind = ApplyKind::block;
   std::shared_ptr<Program> body;
@@ -86,6 +105,9 @@ struct ExecutionMetadata {
   std::vector<const ops::Spec *> specs;
   std::vector<std::uint8_t> summary_consumers;
   std::vector<std::uint8_t> order_consumers;
+  // Keep optional provenance after the existing hot execution metadata.
+  std::size_t position_status_nodes = 0;
+  std::vector<std::uint8_t> position_status_reachable;
 };
 
 struct Program {
@@ -99,6 +121,7 @@ struct Program {
   // 0: temporal vector, 1: static vector/matrix, 2: time x asset matrix.
   std::vector<std::uint8_t> input_axes;
   OutputKind output_kind = OutputKind::scalar;
+  OutputDType output_dtype = OutputDType::float64;
   bool isolate_errors = false;
   std::uint32_t minimum_observations = 0;
   std::uint64_t scope_work_budget = 100000000;
@@ -138,6 +161,6 @@ struct Audit {
 Audit execute(const Program &program, const std::vector<ops::Value> &inputs,
               const double *parameters, std::size_t parameter_count,
               const std::int64_t *starts, const std::int64_t *ends,
-              std::size_t rows, double *output, std::size_t output_columns);
+              std::size_t rows, void *output, std::size_t output_columns);
 
 } // namespace calmetrics_engine::graph

@@ -50,7 +50,7 @@ public:
        std::optional<std::size_t> memory_budget = {}, bool hard_stop = false,
        bool async_io = false) const;
   ExecutionAudit execute(const planner::Plan &plan, const Batch &batch,
-                         double *output,
+                         void *output,
                          std::optional<double> timeout_seconds = {},
                          bool return_shared_output = false);
   void close();

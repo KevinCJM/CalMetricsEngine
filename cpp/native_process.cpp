@@ -24,8 +24,8 @@ extern char **environ;
 namespace calmetrics_engine::native {
 namespace {
 constexpr std::size_t max_frame = 256 * 1024 * 1024;
-constexpr std::uint64_t request_magic = 0x434d453300000003ull;
-constexpr std::uint64_t response_magic = 0x434d455300000003ull;
+constexpr std::uint64_t request_magic = 0x434d453300000004ull;
+constexpr std::uint64_t response_magic = 0x434d455300000004ull;
 using Bytes = std::vector<std::uint8_t>;
 void require(bool ok, const char *message) {
   if (!ok)
@@ -508,8 +508,12 @@ Bytes execute_request(const Bytes &bytes, Bytes &cached_bytes,
     require(begin <= end && end <= total_rows, "native worker chunk bounds");
     std::vector<std::int64_t> starts_storage, ends_storage;
     std::vector<double> output_storage;
+    std::vector<std::int64_t> integer_output_storage;
+    std::vector<std::uint8_t> mask_output_storage;
+    std::size_t output_bytes = 0;
     const std::int64_t *starts = nullptr, *ends = nullptr;
-    double *output = nullptr;
+    void *output = nullptr;
+    const auto output_width = graph::output_itemsize(cached_program.output_dtype);
     if (shared) {
       auto a = get_descriptor(in), b = get_descriptor(in),
            c = get_descriptor(in);
@@ -542,13 +546,13 @@ Bytes execute_request(const Bytes &bytes, Bytes &cached_bytes,
       require(planner::checked_mul(
                   planner::checked_mul(total_output_rows,
                                        cached_program.roots.size()),
-                  8) <= c.bytes,
+                  output_width) <= c.bytes,
               "native output mapping bounds");
       auto so = SharedRegion::attach(c.name, c.bytes, true);
       starts = all_starts + begin;
       ends = all_ends + begin;
-      output = static_cast<double *>(so->data()) +
-               output_row_begin * cached_program.roots.size();
+      output = graph::output_offset(so->data(),
+          output_row_begin * cached_program.roots.size(), cached_program.output_dtype);
       mappings.push_back(sa);
       mappings.push_back(sb);
       mappings.push_back(so);
@@ -568,11 +572,20 @@ Bytes execute_request(const Bytes &bytes, Bytes &cached_bytes,
                                        starts_storage[row]));
         }
       }
-      output_storage.resize(
-          planner::checked_mul(output_rows, cached_program.roots.size()));
+      const auto elements = planner::checked_mul(output_rows, cached_program.roots.size());
+      output_bytes = planner::checked_mul(elements, output_width);
       starts = starts_storage.data();
       ends = ends_storage.data();
-      output = output_storage.data();
+      if (cached_program.output_dtype == graph::OutputDType::int64) {
+        integer_output_storage.resize(std::max<std::size_t>(elements, 1));
+        output = integer_output_storage.data();
+      } else if (cached_program.output_dtype == graph::OutputDType::boolean) {
+        mask_output_storage.resize(std::max<std::size_t>(elements, 1));
+        output = mask_output_storage.data();
+      } else {
+        output_storage.resize(std::max<std::size_t>(elements, 1));
+        output = output_storage.data();
+      }
     }
     in.end();
     auto audit = graph::execute(cached_program, inputs, params.data(),
@@ -580,8 +593,8 @@ Bytes execute_request(const Bytes &bytes, Bytes &cached_bytes,
                                 output, cached_program.roots.size());
     response.number(0);
     write_audit(response, audit);
-    response.blob(output_storage.data(),
-                  output_storage.size() * sizeof(double));
+    response.number(static_cast<std::uint8_t>(cached_program.output_dtype));
+    response.blob(output, output_bytes);
   } catch (const std::exception &error) {
     response.bytes.resize(8);
     response.number(1);
@@ -744,7 +757,7 @@ Bytes ProcessTransport::request(planner::Chunk chunk) const {
   return out.bytes;
 }
 graph::Audit ProcessTransport::response(const Bytes &bytes,
-                                        planner::Chunk chunk, double *output) {
+                                        planner::Chunk chunk, void *output) {
   Reader in{bytes};
   require(in.number() == response_magic,
           "unsupported native worker response version");
@@ -770,7 +783,11 @@ graph::Audit ProcessTransport::response(const Bytes &bytes,
           ? 0
           : planner::checked_mul(output_rows,
                                  plan_.graph->program.roots.size());
-  auto values = in.array<double>(count);
+  require(in.number() == static_cast<std::uint8_t>(plan_.graph->program.output_dtype),
+          "native worker result dtype mismatch");
+  const auto output_bytes = planner::checked_mul(
+      count, graph::output_itemsize(plan_.graph->program.output_dtype));
+  auto values = in.array<std::uint8_t>(output_bytes);
   in.end();
   require(audit.rows == chunk.end - chunk.begin,
           "native worker result shape mismatch");
@@ -778,11 +795,13 @@ graph::Audit ProcessTransport::response(const Bytes &bytes,
       ? planner::checked_mul(output_rows, plan_.graph->program.roots.size()) : 0;
   require(audit.statuses.size() == status_count, "native worker status shape mismatch");
   if (count)
-    std::memcpy(output + output_row_begin * plan_.graph->program.roots.size(),
-                values.data(), count * 8);
+    std::memcpy(graph::output_offset(output,
+                    output_row_begin * plan_.graph->program.roots.size(),
+                    plan_.graph->program.output_dtype),
+                values.data(), output_bytes);
   return audit;
 }
-void ProcessTransport::finish(double *output) {
+void ProcessTransport::finish(void *output) {
   if (plan_.use_shared_memory && plan_.estimated_output_bytes)
     std::memcpy(output, output_->data(), plan_.estimated_output_bytes);
 }

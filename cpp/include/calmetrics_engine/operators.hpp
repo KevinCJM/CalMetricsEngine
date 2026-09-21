@@ -13,7 +13,7 @@
 namespace calmetrics_engine::ops {
 
 inline constexpr const char *registry_version = "canonical-native-1";
-inline constexpr std::size_t operator_count = 125;
+inline constexpr std::size_t operator_count = 146;
 
 enum class Op : std::uint16_t {
 #define OP(id, name, family, lo, hi, params) name = id,
@@ -127,6 +127,9 @@ const char *shape_rule(const Spec &spec);
 const char *missing_policy(const Spec &spec);
 const char *composition(const Spec &spec);
 const char *default_rule(const Spec &spec);
+const char *granularity(const Spec &spec);
+const char *temporal_dependency(const Spec &spec);
+bool series_record_projection(Op op) noexcept;
 std::vector<std::string> parameter_names(const Spec &spec, std::size_t arity);
 
 struct Prepared {
@@ -136,10 +139,26 @@ struct Prepared {
     Kind output_kind = Kind::number;
     Shape output_shape{};
     bool borrowed = false;
+    // Partial validation never reads an unavailable payload or unknown shape.
+    // These flags share the existing alignment padding before the borrowed view.
+    std::uint8_t geometry_known_mask = 0xff;
+    std::uint8_t payload_available_mask = 0xff;
+    bool structure_only = false;
+    bool output_geometry_known = true;
     Value view{};
     std::size_t scratch_doubles = 0;
     std::size_t scratch_indices = 0;
+    bool geometry(std::size_t i) const noexcept { return (geometry_known_mask & (1u << i)) != 0; }
+    bool payload(std::size_t i) const noexcept { return (payload_available_mask & (1u << i)) != 0; }
 };
+struct StructureResult {
+    Kind output_kind = Kind::number;
+    Shape output_shape{};
+    bool geometry_known = false;
+};
+StructureResult validate_structure(const Spec &spec, const Value *args, std::size_t count,
+                                  std::uint8_t geometry_known,
+                                  std::uint8_t payload_available);
 Prepared prepare(const Spec &spec, const Value *args, std::size_t count);
 
 struct Output {
@@ -200,6 +219,9 @@ void execute(const Prepared &plan, Output &output, Workspace &work, Isa isa, Aud
 void elementwise(const Prepared &, Output &, Workspace &, Isa, Audit &);
 void reduction(const Prepared &, Output &, Workspace &, Audit &);
 void sequence(const Prepared &, Output &, Workspace &, Audit &);
+void recurrence(const Prepared &, Output &, Workspace &, Audit &);
+void prepare_state_events(Prepared &);
+void state_events(const Prepared &, Output &, Workspace &, Audit &);
 void matrix(const Prepared &, Output &, Workspace &, Isa, Audit &);
 void regression(const Prepared &, Output &, Workspace &, Audit &);
 void state(const Prepared &, Output &, Workspace &, Audit &);

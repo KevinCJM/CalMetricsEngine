@@ -34,11 +34,20 @@ Execution-side Typed IR for scalar/time-series indicators is now native C++: dty
 symbolic shape, semantic dimension, price basis, historical alias canonicalization, logical
 `rolling_window`, compiler-owned `rolling_apply`, and aligned time-series roots all live below the
 PyBind boundary. Business causality/knowledge-time governance remains in the research platform.
-The same 125-entry registry now supports typed matrix/vector bindings and matrix intermediates
+The same 146-entry registry now supports typed matrix/vector bindings and matrix intermediates
 inside the interval DAG, together with exact int64 category/index storage. Public graph roots remain
-scalar or aligned float64 series; a general public matrix-output API is a separate contract.
-Native block/filter/group/bisection sub-programs make segmented statistics and iterative scalar solves
+float64 scalars or aligned homogeneous float64/bool/int64 series; a general public matrix-output API is a separate contract.
+Native block/filter/group/segment/bisection sub-programs make segmented statistics and iterative scalar solves
 composable without Python callbacks. See [the mathematical composition design](mathematical-composition-design.md).
+
+Stateful native records retain nominal tags and named field axes while sharing ordinary
+numeric/integer matrix storage. Projection views extend their backing arena lifetime;
+matrix widths are included in memory admission. Adaptive/second-order recurrence and
+scalar Kalman filters retain explicit seed, gap and warmup contracts. State, event and
+complete-wave semantics are described in [the stateful series design](stateful-series-design.md).
+Program serialization is v5 (old v1–v4 remain float64); worker IPC v4 carries exact output
+dtype/byte width and rejects incompatible peers. Typed failure placeholders require the
+parallel status array, never implicit numeric conversion or False/0 success.
 
 ## 2. Module responsibilities
 

@@ -95,6 +95,8 @@ double scalar_math(Op op, double x, double y, double z) {
         return 0.5 * std::erfc(-x / std::sqrt(2.0));
     case Op::floor:
         return std::floor(x);
+    case Op::cos:
+        return std::cos(x);
     case Op::normal_ppf:
         return normal_ppf(x);
     default:
@@ -106,6 +108,17 @@ void elementwise(const Prepared &p, Output &out, Workspace &, Isa requested, Aud
     const auto op = p.spec->op;
     const auto &a = p.args;
     const auto n = out.shape.size();
+    if ((op == Op::equal || op == Op::not_equal) &&
+        (a[0].kind == Kind::integer || a[1].kind == Kind::integer)) {
+        for (std::size_t i = 0; i < n; ++i) {
+            const auto lhs = a[0].kind == Kind::integer
+                ? a[0].i(i) : static_cast<std::int64_t>(a[0].scalar);
+            const auto rhs = a[1].kind == Kind::integer
+                ? a[1].i(i) : static_cast<std::int64_t>(a[1].scalar);
+            out.set_mask(i, op == Op::equal ? lhs == rhs : lhs != rhs);
+        }
+        return;
+    }
     if (op == Op::clip)
         require(!(a[1].scalar > a[2].scalar), "INVALID_PARAMETER");
     std::size_t first = 0;

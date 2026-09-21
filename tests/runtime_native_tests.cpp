@@ -49,6 +49,22 @@ int main(int argc, char **argv) {
     single.process_work_units = 1e100;
     n::Engine serial(4, single, argv[1]);
     auto serial_plan = serial.plan(graph, batch);
+    const auto geometry = p::inspect(batch.input_sizes(), batch.starts, batch.ends,
+        batch.rows, batch.product_ids, false);
+    require(geometry.row_lengths.size() == batch.rows && geometry.groups.empty() &&
+        geometry.observations > 0 && geometry.sort_work > 0,
+        "public geometry inspection retains statistics without group materialization");
+    p::Plan overflow_plan;
+    overflow_plan.graph = graph;
+    overflow_plan.cpu_budget = 1;
+    overflow_plan.row_count = 2;
+    overflow_plan.input_sizes = {static_cast<std::size_t>(PTRDIFF_MAX)};
+    const std::int64_t overflow_starts[]{0, 0}, overflow_ends[]{PTRDIFF_MAX, PTRDIFF_MAX};
+    bool overflow_rejected = false;
+    try {
+      p::validate_plan(overflow_plan, overflow_plan.input_sizes, overflow_starts, overflow_ends, 2, nullptr, 1);
+    } catch (const std::overflow_error &) { overflow_rejected = true; }
+    require(overflow_rejected, "signature-only validation preserves observation overflow checks");
     std::vector<double> reference(starts.size() * 4), actual(reference.size());
     serial.execute(*serial_plan, batch, reference.data());
     require(reference[0] == 50.5, "serial mean");

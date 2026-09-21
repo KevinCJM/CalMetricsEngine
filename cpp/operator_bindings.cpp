@@ -163,12 +163,24 @@ Bound bind_args(const op::Spec &spec, py::args args, py::kwargs kwargs) {
         b.owners[i] = py::float_(0.0);
       else if (spec.op == op::Op::aligned_shift && i == 1)
         b.owners[i] = py::float_(1.0);
+      else if (spec.op == op::Op::recursive_filter_adaptive && i >= 4)
+        b.owners[i] = py::float_(i == 4 ? 0.0 : 1.0);
+      else if ((spec.op == op::Op::linear_filter2 && i >= 6) ||
+               (spec.op == op::Op::scalar_kalman && i == 3))
+        b.owners[i] = py::float_(1.0);
       else
         throw py::type_error("Missing operator parameter: " + names[i]);
     }
     b.args[i] = parse_value(b.owners[i]);
     if (b.args[i].kind == op::Kind::integer && spec.op != op::Op::argsort &&
-        spec.op != op::Op::gather && spec.op != op::Op::distinct_count)
+        spec.op != op::Op::gather && spec.op != op::Op::distinct_count &&
+        spec.op != op::Op::equal && spec.op != op::Op::not_equal &&
+        spec.op != op::Op::state_confirm && spec.op != op::Op::state_continuous &&
+        spec.op != op::Op::continuous_state_values && spec.op != op::Op::continuous_state_evidence &&
+        spec.op != op::Op::continuous_state_pending && spec.op != op::Op::ps_filter &&
+        spec.op != op::Op::between_events && spec.op != op::Op::segment_starts &&
+        spec.op != op::Op::segment_ends && spec.op != op::Op::phase_direction &&
+        spec.op != op::Op::drawdown_cycle_reference && spec.op != op::Op::state_select)
       throw py::type_error("operator requires exact float64; int64 is reserved for declared index/category inputs");
   }
   return b;
@@ -327,6 +339,9 @@ py::dict metadata(const op::Spec &spec) {
                      : spec.op == op::Op::linear_fit ? "coupled_fit"
                      : spec.op == op::Op::recursive_filter ? "coupled_recurrence"
                                                      : "primitive";
+  if (static_cast<std::uint16_t>(spec.op) >= 126)
+    d["granularity"] = op::granularity(spec);
+  d["temporal_dependency"] = op::temporal_dependency(spec);
   d["simd_eligible"] = op::simd_eligible(spec.op);
   d["parallel_policy"] = "caller_scheduled_no_internal_threads";
   d["input_policy"] = "exact_native_dtype_readonly_strided_no_copy";

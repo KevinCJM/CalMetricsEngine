@@ -52,9 +52,9 @@ def test_registry_matches_pinned_source_and_stable_opcodes():
     specs = op.catalog()
     # Frozen external-source evidence remains immutable. New native capabilities
     # have independent cases in test_operator_extensions.py.
-    assert len(specs) == 125
+    assert len(specs) == 146
     assert [item["id"] for item in specs[:118]] == REFERENCE["canonical_names"]
-    assert [item["opcode"] for item in specs] == list(range(1, 126))
+    assert [item["opcode"] for item in specs] == list(range(1, 147))
     assert len({case["id"] for case in CASES}) == len(CASES)
     successful = {case["operator"] for case in CASES if "expected" in case}
     assert successful == set(REFERENCE["canonical_names"])

@@ -396,3 +396,45 @@ def test_supplied_plan_cannot_bypass_cpu_or_hard_stop_contract():
     with AdaptiveScheduler(cpu_budget=4) as scheduler:
         with pytest.raises(ValueError, match="hard_stop"):
             scheduler.execute(compiled, {"x": values}, starts, ends, plan=plan, hard_stop=True)
+
+
+@pytest.mark.parametrize('dictionary_type', [dict, type('InputDict', (dict,), {})])
+def test_cached_entry_preserves_mapping_checks_and_independent_results(dictionary_type):
+    compiled = GraphCompiler({'x': 'series', 'k': 'scalar'}).compile('mean(x)+k')
+    x = np.arange(8.)
+    inputs, parameters = dictionary_type(x=x), dictionary_type(k=1.)
+    starts, ends = np.array([0], np.int64), np.array([8], np.int64)
+    with AdaptiveScheduler(cpu_budget=1) as scheduler:
+        plan = scheduler.plan(compiled, inputs, starts, ends)
+        first = scheduler.execute(compiled, inputs, starts, ends, parameters=parameters, plan=plan)
+        cached = scheduler.execute(compiled, inputs, starts, ends, parameters=parameters, plan=plan)
+        assert cached.audit['prepared_cached']
+        parameters['k'] = 2.
+        updated = scheduler.execute(compiled, inputs, starts, ends, parameters=parameters, plan=plan)
+        assert first.values[0, 0] == cached.values[0, 0] == 4.5
+        assert updated.values[0, 0] == 5.5
+        assert not np.shares_memory(first.values, cached.values)
+        inputs['wrong'] = inputs.pop('x')
+        with pytest.raises(ValueError, match='missing graph input'):
+            scheduler.execute(compiled, inputs, starts, ends, parameters=parameters, plan=plan)
+        inputs['x'] = inputs.pop('wrong')
+        parameters['wrong'] = parameters.pop('k')
+        with pytest.raises(ValueError, match='missing graph parameter'):
+            scheduler.execute(compiled, inputs, starts, ends, parameters=parameters, plan=plan)
+
+
+@pytest.mark.parametrize('field', ['start', 'end', 'product'])
+def test_plan_recheck_rejects_in_place_descriptor_changes(field):
+    compiled = GraphCompiler({'x': 'series'}).compile('mean(x)')
+    x = np.arange(8.)
+    starts, ends, products = np.array([0], np.int64), np.array([8], np.int64), np.array([0], np.int64)
+    with AdaptiveScheduler(cpu_budget=1) as scheduler:
+        prepared = scheduler.prepare_execution(compiled, {'x': x}, starts, ends, product_ids=products)
+        before = prepared.run_snapshot()
+        target = {'start': starts, 'end': ends, 'product': products}[field]
+        original = target[0]
+        target[0] = original + (1 if field != 'end' else -1)
+        with pytest.raises(ValueError, match='stale execution plan'):
+            prepared.run_snapshot()
+        target[0] = original
+        np.testing.assert_allclose(prepared.run_snapshot().values, before.values)

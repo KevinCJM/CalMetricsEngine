@@ -71,7 +71,7 @@ Engine::plan(std::shared_ptr<compiler::CompiledGraph> graph, const Batch &batch,
                             hard_stop, async_io, !batch.shared_inputs.empty(), &batch.inputs);
 }
 ExecutionAudit Engine::execute(const planner::Plan &p, const Batch &batch,
-                               double *output,
+                               void *output,
                                std::optional<double> timeout_seconds,
                                bool return_shared_output) {
   const auto started = Clock::now();
@@ -182,7 +182,7 @@ ExecutionAudit Engine::execute(const planner::Plan &p, const Batch &batch,
             batch.ends + task.row, 1, local.data(), local.size());
         const auto columns = p.graph->program.roots.size();
         for (std::size_t root = 0; root < branch.root_indices.size(); ++root)
-          output[task.row * columns + branch.root_indices[root]] = local[root];
+          static_cast<double *>(output)[task.row * columns + branch.root_indices[root]] = local[root];
         return result;
       });
     } else {
@@ -198,9 +198,9 @@ ExecutionAudit Engine::execute(const planner::Plan &p, const Batch &batch,
         return graph::execute(p.graph->program, batch.inputs, batch.parameters,
                               batch.parameter_count, batch.starts + chunk.begin,
                               batch.ends + chunk.begin, chunk.end - chunk.begin,
-                              output + output_row_offset(
+                              graph::output_offset(output, output_row_offset(
                                            p.graph->program, batch, chunk.begin) *
-                                           p.graph->program.roots.size(),
+                                           p.graph->program.roots.size(), p.graph->program.output_dtype),
                               p.graph->program.roots.size());
       });
     }

@@ -61,7 +61,7 @@ struct ValueType {
   bool is_mask() const noexcept { return dtype == DType::boolean; }
   bool is_numeric() const noexcept {
     return dtype == DType::float64 && kind != ValueKind::window &&
-           kind != ValueKind::record;
+           kind != ValueKind::record && record_tag.empty();
   }
   std::size_t rank() const noexcept { return axes.size(); }
   void validate() const;

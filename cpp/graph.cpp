@@ -41,7 +41,12 @@ struct Scratch {
   std::size_t work_budget = 100000000;
   std::size_t *remaining_work = nullptr;
   std::vector<ops::Value> values;
+  bool isolate_errors = false;
+  bool interval_known = true;
   std::vector<std::int16_t> statuses;
+  std::vector<std::vector<std::int16_t>> position_statuses;
+  std::shared_ptr<const ExecutionMetadata> position_owner;
+  std::size_t position_window = 0;
   std::vector<SummaryCache> summaries;
   std::vector<OrderedCache> ordered;
   ops::Workspace workspace;
@@ -53,7 +58,8 @@ struct Scratch {
   std::vector<std::size_t> rolling_invalid;
   std::vector<std::unique_ptr<Scratch>> children;
 
-  void ensure(const Program &program, std::size_t max_window) {
+  void ensure(const Program &program, std::size_t max_window, bool isolate) {
+    isolate_errors = isolate;
     if (program.numeric_slots &&
         max_window >
             std::numeric_limits<std::size_t>::max() / program.numeric_slots)
@@ -68,8 +74,22 @@ struct Scratch {
     numeric.resize(program.numeric_slots * max_window);
     masks.resize(program.mask_slots * max_window);
     values.resize(program.nodes.size());
-    if (program.isolate_errors)
+    if (isolate_errors)
       statuses.resize(program.nodes.size());
+    else if (statuses.capacity())
+      std::vector<std::int16_t>().swap(statuses);
+    const bool positions = isolate_errors &&
+        program.execution_metadata->position_status_nodes != 0;
+    const auto *position_identity = positions ? program.execution_metadata.get() : nullptr;
+    const auto position_capacity = positions ? max_window : 0;
+    if (position_owner.get() != position_identity || position_window != position_capacity) {
+      // Retain buffers only for the same graph/geometry. An old, larger graph
+      // must not leave hidden provenance allocations outside the current budget.
+      std::vector<std::vector<std::int16_t>> fresh(positions ? program.nodes.size() : 0);
+      position_statuses.swap(fresh);
+      position_owner = positions ? program.execution_metadata : nullptr;
+      position_window = positions ? max_window : 0;
+    }
     summaries.resize(program.nodes.size());
     ordered.resize(program.nodes.size());
     const auto scope_count = program.rolling_scopes.size() + program.apply_scopes.size();
@@ -93,6 +113,56 @@ struct Scratch {
 
 thread_local Scratch root_scratch;
 
+std::int16_t position_error(const Scratch &scratch, std::size_t node,
+                            std::size_t begin, std::size_t end) {
+  if (scratch.position_statuses.empty()) return 0;
+  const auto &errors = scratch.position_statuses[node];
+  if (errors.empty()) return 0;
+  ops::require(begin <= end && end <= errors.size(), "GRAPH_STATUS_GEOMETRY");
+  return begin == end ? 0 : *std::max_element(errors.begin() + begin, errors.begin() + end);
+}
+
+std::int16_t position_error(const Scratch &scratch, std::size_t node) {
+  if (scratch.position_statuses.empty()) return 0;
+  return position_error(scratch, node, 0, scratch.position_statuses[node].size());
+}
+
+void mark_positions(Scratch &scratch, std::size_t node, std::size_t size,
+                    std::size_t begin, std::size_t end, std::int16_t status) {
+  if (!status || begin == end) return;
+  if (scratch.position_statuses.empty() || !scratch.position_owner->position_status_reachable[node]) {
+    // An injected whole-input fault in a strict child has no partial-row map.
+    // Its output remains wholly failed while the child checks healthy inputs.
+    scratch.statuses[node] = std::max(scratch.statuses[node], status);
+    return;
+  }
+  ops::require(!scratch.position_statuses.empty() &&
+      scratch.position_owner->position_status_reachable[node] &&
+      begin <= end && end <= size && size <= scratch.position_window,
+      "GRAPH_STATUS_GEOMETRY");
+  auto &errors = scratch.position_statuses[node];
+  if (errors.empty()) {
+    // Reserve the planned upper bound once; geometric vector growth between
+    // differently sized intervals must not exceed the admitted workspace.
+    errors.reserve(scratch.position_window);
+    errors.assign(size, 0);
+  }
+  ops::require(errors.size() == size, "GRAPH_STATUS_GEOMETRY");
+  for (auto i = begin; i < end; ++i) errors[i] = std::max(errors[i], status);
+}
+
+std::int16_t capture_error(const Scratch &scratch,
+                           const std::vector<std::uint32_t> &nodes,
+                           std::size_t begin, std::size_t end) {
+  if (!scratch.isolate_errors) return 0;
+  std::int16_t status = 0;
+  for (auto node : nodes) {
+    status = std::max(status, scratch.statuses[node]);
+    if (!scratch.statuses[node]) status = std::max(status, position_error(scratch, node, begin, end));
+  }
+  return status;
+}
+
 ops::Value interval_view(const ops::Value &base, std::size_t start,
                          std::size_t length) {
   ops::require((base.kind == ops::Kind::number || base.kind == ops::Kind::integer ||
@@ -102,7 +172,7 @@ ops::Value interval_view(const ops::Value &base, std::size_t start,
                "GRAPH_INTERVAL_BOUNDS");
   ops::Value view = base;
   view.shape.dim[0] = length;
-  if (length) {
+  if (length && base.data) {
     const auto element_bytes = base.kind == ops::Kind::mask ? 1 : 8;
     view.data = static_cast<const char *>(base.data) +
                 static_cast<std::ptrdiff_t>(start) * base.stride[0] * element_bytes;
@@ -314,6 +384,11 @@ bool order_fusion_eligible(ops::Op op) noexcept {
 void Program::validate() const {
   ops::require(!nodes.empty(), "GRAPH_EMPTY");
   ops::require(!roots.empty(), "GRAPH_NO_ROOTS");
+  ops::require(static_cast<unsigned>(output_kind) <= 1 &&
+                   static_cast<unsigned>(output_dtype) <= 2,
+               "GRAPH_OUTPUT_TYPE");
+  ops::require(output_kind == OutputKind::series || output_dtype == OutputDType::float64,
+               "GRAPH_SCALAR_OUTPUT_DTYPE");
   ops::require(scope_work_budget >= 1 && scope_work_budget <= 1000000000000ULL, "GRAPH_SCOPE_WORK_BUDGET");
   ops::require(input_axes.empty() || input_axes.size() == input_count, "GRAPH_INPUT_AXES");
   for (auto axis : input_axes) ops::require(axis <= 2, "GRAPH_INPUT_AXES");
@@ -397,9 +472,11 @@ void Program::validate() const {
       const auto argc = scope.argument_nodes.size();
       ops::require((scope.kind == ApplyKind::bisect && argc == 4) ||
                    (scope.kind == ApplyKind::filter && (argc == 1 || argc == 2)) ||
-                   ((scope.kind == ApplyKind::block || scope.kind == ApplyKind::group) && argc == 1),
+                   ((scope.kind == ApplyKind::block || scope.kind == ApplyKind::group ||
+                     scope.kind == ApplyKind::segment) && argc == 1),
                    "GRAPH_APPLY_ARGUMENTS");
-      const bool array = scope.kind == ApplyKind::block || scope.kind == ApplyKind::group;
+      const bool array = scope.kind == ApplyKind::block || scope.kind == ApplyKind::group ||
+                         scope.kind == ApplyKind::segment;
       ops::require(array ? node.storage == StorageKind::numeric && node.slot < numeric_slots
                          : node.storage == StorageKind::inline_value, "GRAPH_SLOT");
       auto dependency = [&](std::uint32_t id) {
@@ -435,13 +512,31 @@ void Program::finalize() {
   metadata->specs.resize(nodes.size(), nullptr);
   metadata->summary_consumers.resize(nodes.size(), 0);
   metadata->order_consumers.resize(nodes.size(), 0);
+  metadata->position_status_reachable.resize(nodes.size(), 0);
   for (std::size_t i = 0; i < nodes.size(); ++i) {
     const auto &node = nodes[i];
+    bool positions = false;
+    if (node.kind == NodeKind::apply_scope) {
+      const auto &scope = apply_scopes[node.input_index];
+      if (!scope.body->execution_metadata) scope.body->finalize();
+      positions = scope.kind == ApplyKind::segment ||
+          scope.body->execution_metadata->position_status_nodes != 0;
+    } else if (node.kind == NodeKind::rolling_scope) {
+      const auto &scope = rolling_scopes[node.input_index];
+      if (!scope.body->execution_metadata) scope.body->finalize();
+      positions = scope.body->execution_metadata->position_status_nodes != 0;
+    }
+    for (std::size_t parent = 0; parent < node.parent_count; ++parent)
+      positions = positions || metadata->position_status_reachable[node.parents[parent]];
+    metadata->position_status_reachable[i] = positions;
+    metadata->position_status_nodes += positions;
     if (node.kind != NodeKind::operation)
       continue;
     const auto &spec = ops::lookup(node.opcode);
     metadata->specs[i] = &spec;
-    metadata->requires_shape_planning = metadata->requires_shape_planning || spec.family == ops::Family::matrix;
+    metadata->requires_shape_planning = metadata->requires_shape_planning || spec.family == ops::Family::matrix ||
+        spec.op == ops::Op::scalar_kalman ||
+        (static_cast<std::uint16_t>(spec.op) >= 127 && spec.family == ops::Family::state);
     if (!node.parent_count)
       continue;
     const auto source = node.parents[0];
@@ -471,19 +566,29 @@ std::size_t required_array_capacity(const Program &program,
     auto &shape = shapes[i];
     if (node.kind == NodeKind::input) {
       shape = inputs[node.input_index].shape;
+      // Unavailable geometry cannot produce numerical arrays. This is only a
+      // capacity bound; the executor retains the unknown descriptor unchanged.
+      if (shape.rank < 0) shape = ops::vector_shape(0);
       const auto axis = program.input_axes.empty() ? 0 : program.input_axes[node.input_index];
       if (axis != 1 && shape.rank) shape.dim[0] = std::min(shape.dim[0], max_window);
     } else if (node.kind == NodeKind::interval_tail) shape = shapes[node.parents[0]];
     else if (node.kind == NodeKind::operation) {
       const auto op = static_cast<ops::Op>(node.opcode);
       if (node.storage != StorageKind::inline_value || op == ops::Op::lag || op == ops::Op::transpose ||
+          ops::series_record_projection(op) ||
           (op == ops::Op::diag && shapes[node.parents[0]].rank == 2)) {
         for (std::size_t j = 0; j < node.parent_count; ++j)
           if (shapes[node.parents[j]].rank > shape.rank ||
               shapes[node.parents[j]].size() > shape.size()) shape = shapes[node.parents[j]];
         const auto lhs = shapes[node.parents[0]];
         const auto rhs = node.parent_count > 1 ? shapes[node.parents[1]] : ops::Shape{};
-        if (op >= ops::Op::sum_time && op <= ops::Op::max_time && lhs.rank == 2)
+        if (op == ops::Op::scalar_kalman || op == ops::Op::between_events)
+          shape = ops::matrix_shape(lhs.dim[0], 2);
+        else if (op == ops::Op::state_continuous)
+          shape = ops::matrix_shape(lhs.dim[0], 3);
+        else if (ops::series_record_projection(op))
+          shape = ops::vector_shape(lhs.dim[0]);
+        else if (op >= ops::Op::sum_time && op <= ops::Op::max_time && lhs.rank == 2)
           shape = ops::vector_shape(lhs.dim[1]);
         else if (op >= ops::Op::sum_asset && op <= ops::Op::max_asset && lhs.rank == 2)
           shape = ops::vector_shape(lhs.dim[0]);
@@ -500,11 +605,14 @@ std::size_t required_array_capacity(const Program &program,
         else if ((op == ops::Op::covariance || op == ops::Op::correlation) && lhs.rank == 2)
           shape = ops::matrix_shape(lhs.dim[1], lhs.dim[1]);
         else if (op == ops::Op::gather) shape = rhs;
+        else if (static_cast<std::uint16_t>(op) >= 127) shape = lhs;
       }
     } else if (node.kind == NodeKind::rolling_scope) shape = ops::vector_shape(max_window);
     else if (node.kind == NodeKind::apply_scope && node.storage != StorageKind::inline_value) {
       const auto &scope = program.apply_scopes[node.input_index];
       if (scope.kind == ApplyKind::block && scope.input_nodes.empty()) shape = ops::vector_shape(max_window);
+      else if (scope.kind == ApplyKind::segment)
+        shape = ops::vector_shape(shapes[scope.argument_nodes[0]].dim[0]);
       else {
         const auto source = scope.kind == ApplyKind::group ? scope.argument_nodes[0] : scope.input_nodes[0];
         shape = ops::vector_shape(shapes[source].size());
@@ -522,9 +630,11 @@ static Audit execute_impl(const Program &program,
                           std::size_t parameter_count,
                           const std::int64_t *starts,
                           const std::int64_t *ends,
-                          std::size_t rows, double *output,
+                          std::size_t rows, void *output,
                           std::size_t output_columns, Scratch &scratch,
-                          bool prebound_inputs = false);
+                          bool prebound_inputs = false,
+                          const std::vector<std::int16_t> *input_failures = nullptr,
+                          bool interval_known = true);
 
 static std::size_t positive_integer(double value, const char *code,
                                     std::size_t maximum = 5000) {
@@ -544,12 +654,367 @@ static bool numerical_error(const ops::Error &error) {
       code == "NON_CONVERGENCE";
 }
 
+// Failed values retain their type and, when derivable, their exact geometry.
+// rank=-1 is internal unknown geometry, never an executable array or a length
+// estimate. Payload availability is carried separately by Scratch statuses.
+static bool known_geometry(const ops::Value &value) { return value.shape.rank >= 0; }
+static bool available_payload(const Scratch &scratch, std::uint32_t id) {
+  return (!scratch.isolate_errors || scratch.statuses[id] == 0) &&
+      position_error(scratch, id) == 0;
+}
+
+static std::int16_t node_failure(const Scratch &scratch, std::uint32_t id) {
+  return scratch.isolate_errors ? std::max(scratch.statuses[id], position_error(scratch, id)) : 0;
+}
+
+static ops::Value scope_view(const ops::Value &value, std::size_t start, std::size_t length) {
+  return known_geometry(value) ? interval_view(value, start, length) : value;
+}
+
+static ops::Value validate_apply_structure(const ApplyScope &scope,
+    std::size_t interval_length, const Scratch &scratch, bool isolate) {
+  const auto available = [&](std::uint32_t id) {
+    return !isolate || available_payload(scratch, id);
+  };
+  std::size_t count = 0;
+  bool count_known = false;
+  for (auto id : scope.input_nodes) {
+    const auto &value = scratch.values[id];
+    if (!known_geometry(value)) continue;
+    ops::require(value.shape.rank == 1, "SCOPE_CAPTURE_RANK");
+    if (count_known && scope.kind != ApplyKind::bisect)
+      ops::require(value.size() == count, "SCOPE_ALIGNMENT_MISMATCH");
+    count = std::max(count, value.size());
+    count_known = true;
+  }
+  const auto scalar = [&](std::uint32_t id) {
+    const auto &value = scratch.values[id];
+    ops::require(value.kind == ops::Kind::number &&
+        (!known_geometry(value) || value.shape.rank == 0), "SCOPE_PARAMETER_TYPE");
+  };
+  for (auto id : scope.parameter_nodes)
+    if (id != std::numeric_limits<std::uint32_t>::max()) scalar(id);
+  for (std::size_t i = 0; i < scope.argument_nodes.size(); ++i)
+    if (scope.kind == ApplyKind::bisect || scope.kind == ApplyKind::block || i != 0)
+      scalar(scope.argument_nodes[i]);
+
+  if (scope.kind == ApplyKind::filter || scope.kind == ApplyKind::group ||
+      scope.kind == ApplyKind::segment) {
+    const auto id = scope.argument_nodes[0];
+    const auto &selector = scratch.values[id];
+    const bool segment = scope.kind == ApplyKind::segment;
+    const auto kind = scope.kind == ApplyKind::filter ? ops::Kind::mask : ops::Kind::integer;
+    const auto code = segment ? "SCOPE_SEGMENT_GEOMETRY" : "SCOPE_ALIGNMENT_MISMATCH";
+    ops::require(selector.kind == kind, code);
+    if (known_geometry(selector)) {
+      ops::require(selector.shape.rank == (segment ? 2 : 1), code);
+      if (segment) ops::require(selector.shape.dim[1] == 2, code);
+      const auto size = selector.shape.dim[0];
+      if (count_known) ops::require(size == count, code);
+      count = size;
+      count_known = true;
+      if (available(id)) {
+        if (scope.kind == ApplyKind::filter) {
+          for (std::size_t i = 0; i < size; ++i)
+            ops::require(selector.u(i) <= 1, "INVALID_MASK");
+        } else if (segment) {
+          for (std::size_t left = 0; left < size;) {
+            const auto start = selector.i(2 * left), end = selector.i(2 * left + 1);
+            if (start == -1 && end == -1) { ++left; continue; }
+            ops::require(start == static_cast<std::int64_t>(left) && end > start &&
+                static_cast<std::uint64_t>(end) < size, "SCOPE_SEGMENT_BOUNDS");
+            const auto right = static_cast<std::size_t>(end);
+            for (auto row = left; row < right; ++row)
+              ops::require(selector.i(2 * row) == start && selector.i(2 * row + 1) == end,
+                           "SCOPE_SEGMENT_GEOMETRY");
+            left = right;
+          }
+        }
+      }
+    }
+  }
+  auto result = ops::Value::number(NAN);
+  if (scope.kind == ApplyKind::filter || scope.kind == ApplyKind::bisect) return result;
+  if (scope.kind == ApplyKind::block) {
+    if (scope.input_nodes.empty()) { count = interval_length; count_known = true; }
+    const auto id = scope.argument_nodes[0];
+    const auto width = scratch.values[id].scalar;
+    if (available(id) && std::isfinite(width) && width >= 1 &&
+        width <= 1000000 && std::floor(width) == width) count /= static_cast<std::size_t>(width);
+    else count_known = false;
+  }
+  result.shape = ops::vector_shape(count);
+  if (!count_known) result.shape.rank = -1;
+  return result;
+}
+
+static ops::Value validate_rolling_structure(const Program &program,
+    const std::vector<ops::Value> &raw_inputs, const RollingScope &scope,
+    std::size_t start, std::size_t length, const Scratch &scratch) {
+  ops::require(scope.body && scope.body->output_kind == OutputKind::scalar, "GRAPH_ROLLING_BODY");
+  const auto available = [&](std::uint32_t id) {
+    return !scratch.isolate_errors || available_payload(scratch, id);
+  };
+  const auto aligned = [&](std::uint32_t id) {
+    const auto &value = scratch.values[id];
+    ops::require(value.kind == ops::Kind::number && (!known_geometry(value) ||
+        (value.shape.rank == 1 && (!scratch.interval_known || value.size() == length))),
+        "ROLLING_ALIGNMENT_MISMATCH");
+  };
+  const auto scalar = [&](std::uint32_t id) {
+    const auto &value = scratch.values[id];
+    ops::require(value.kind == ops::Kind::number &&
+        (!known_geometry(value) || value.shape.rank == 0), "SCOPE_PARAMETER_TYPE");
+  };
+  for (auto id : scope.input_nodes) aligned(id);
+  scalar(scope.width_node);
+  if (scope.has_min_periods) {
+    scalar(scope.min_periods_node);
+    if (available(scope.min_periods_node)) {
+      const auto minimum = positive_integer(scratch.values[scope.min_periods_node].scalar,
+                                           "INVALID_MIN_PERIODS");
+      const auto width = scratch.values[scope.width_node].scalar;
+      if (available(scope.width_node) && std::isfinite(width) && width >= 1 && width <= 5000 &&
+          std::floor(width) == width)
+        ops::require(minimum <= width, "INVALID_MIN_PERIODS");
+    }
+  }
+  for (const auto &binding : scope.parameter_bindings)
+    if (binding.kind == RollingParameterKind::outer_node) scalar(binding.node);
+  if (scope.has_date_context) {
+    aligned(scope.dates_node);
+    scalar(scope.annual_rate_node);
+    const auto &dates = scratch.values[scope.dates_node];
+    if (scratch.interval_known && available(scope.dates_node)) {
+      for (std::size_t i = 0; i < length; ++i)
+        ops::require(std::isfinite(dates.f(i)) && (i == 0 || dates.f(i) > dates.f(i - 1)),
+                     "ROLLING_DATE_AXIS_INVALID");
+      if (scope.needs_preceding_observation) {
+        const auto &date_node = program.nodes[scope.dates_node];
+        ops::require(date_node.kind == NodeKind::input, "ROLLING_DATE_CONTEXT_MUST_BE_INPUT");
+        const auto &raw_dates = raw_inputs[date_node.input_index];
+        if (start > 0 && length)
+          ops::require(std::isfinite(raw_dates.f(start - 1)) && raw_dates.f(start - 1) < dates.f(0),
+                       "ROLLING_DATE_AXIS_INVALID");
+      }
+    }
+  }
+  auto result = ops::Value::number(NAN);
+  result.shape = ops::vector_shape(length);
+  return result;
+}
+
+static void validate_unresolved_scope(const Program &program, const Node &node,
+    std::size_t length, Scratch &scratch) {
+  const bool rolling = node.kind == NodeKind::rolling_scope;
+  const auto &captures = rolling ? program.rolling_scopes[node.input_index].input_nodes
+                                : program.apply_scopes[node.input_index].input_nodes;
+  const auto &body = rolling ? *program.rolling_scopes[node.input_index].body
+                            : *program.apply_scopes[node.input_index].body;
+  const bool bisect = !rolling && program.apply_scopes[node.input_index].kind == ApplyKind::bisect;
+  bool body_interval_known = bisect;
+  if (bisect) {
+    length = 0;
+    for (auto id : captures) {
+      if (known_geometry(scratch.values[id])) length = std::max(length, scratch.values[id].size());
+      else body_interval_known = false;
+    }
+  }
+  std::vector<ops::Value> inputs;
+  std::vector<std::int16_t> failures;
+  inputs.reserve(captures.size());
+  failures.reserve(captures.size());
+  for (auto id : captures) {
+    auto value = scratch.values[id];
+    auto failure = node_failure(scratch, id);
+    if (!bisect) {
+      // Unknown membership makes selected payload and shape unavailable. Do
+      // not validate arbitrary full-input rows as if they had been selected.
+      value.data = nullptr;
+      value.shape.rank = -1;
+      failure = 4;
+    }
+    inputs.push_back(value);
+    failures.push_back(failure);
+  }
+  std::vector<double> parameters(body.parameter_count, NAN);
+  const auto scalar = [&](std::uint32_t id) {
+    return available_payload(scratch, id) ? scratch.values[id].scalar : NAN;
+  };
+  if (rolling) {
+    const auto &scope = program.rolling_scopes[node.input_index];
+    for (std::size_t i = 0; i < parameters.size(); ++i)
+      if (scope.parameter_bindings[i].kind == RollingParameterKind::outer_node)
+        parameters[i] = scalar(scope.parameter_bindings[i].node);
+  } else {
+    const auto &scope = program.apply_scopes[node.input_index];
+    for (std::size_t i = 0; i < parameters.size(); ++i)
+      if (scope.parameter_nodes[i] != std::numeric_limits<std::uint32_t>::max())
+        parameters[i] = scalar(scope.parameter_nodes[i]);
+  }
+  auto &child = *scratch.children[(rolling ? 0 : program.rolling_scopes.size()) + node.input_index];
+  child.remaining_work = scratch.remaining_work;
+  const std::int64_t start = 0, end = static_cast<std::int64_t>(length);
+  for (std::size_t endpoint = 0; endpoint < (bisect ? 2u : 1u); ++endpoint) {
+    if (bisect) {
+      const auto &scope = program.apply_scopes[node.input_index];
+      for (std::size_t i = 0; i < parameters.size(); ++i)
+        if (scope.parameter_nodes[i] == std::numeric_limits<std::uint32_t>::max())
+          parameters[i] = scalar(scope.argument_nodes[endpoint]);
+    }
+    if (child.remaining_work) {
+      const auto rows = std::max<std::size_t>(length, 1);
+      const auto nodes = std::max<std::size_t>(body.nodes.size(), 1);
+      ops::require(rows <= *child.remaining_work / nodes, "SCOPE_COMPUTE_BUDGET_EXCEEDED");
+      *child.remaining_work -= rows * nodes;
+    }
+    double ignored = NAN;
+    const auto audit = execute_impl(body, inputs, parameters.data(), parameters.size(),
+        &start, &end, 1, &ignored, 1, child, true, &failures, body_interval_known);
+    scratch.algorithm_copy_bytes += audit.algorithm_copy_bytes;
+  }
+}
+
+static ops::Value validate_failed_node(const Program &program,
+    const std::vector<ops::Value> &inputs, const Node &node,
+    std::size_t start, std::size_t length, Scratch &scratch) {
+  if (node.kind == NodeKind::apply_scope || node.kind == NodeKind::rolling_scope) {
+    auto result = node.kind == NodeKind::apply_scope
+        ? validate_apply_structure(program.apply_scopes[node.input_index], length, scratch, true)
+        : validate_rolling_structure(program, inputs, program.rolling_scopes[node.input_index],
+                                     start, length, scratch);
+    validate_unresolved_scope(program, node, length, scratch);
+    if (!scratch.interval_known && result.shape.rank != 0) result.shape.rank = -1;
+    return result;
+  }
+  if (node.kind == NodeKind::interval_tail) {
+    auto value = scratch.values[node.parents[0]];
+    if (known_geometry(value)) {
+      ops::require(value.shape.rank == 1, "GRAPH_INPUT_TYPE");
+      value.shape = ops::vector_shape(value.size() ? value.size() - 1 : 0);
+    }
+    value.data = nullptr;
+    return value;
+  }
+  ops::require(node.kind == NodeKind::operation, "GRAPH_FAILED_NODE_KIND");
+  std::array<ops::Value, 8> args{};
+  std::uint8_t geometry = 0, payload = 0;
+  for (std::size_t i = 0; i < node.parent_count; ++i) {
+    const auto id = node.parents[i];
+    args[i] = scratch.values[id];
+    if (known_geometry(args[i])) geometry |= static_cast<std::uint8_t>(1u << i);
+    if (available_payload(scratch, id)) payload |= static_cast<std::uint8_t>(1u << i);
+  }
+  const auto structure = ops::validate_structure(ops::lookup(node.opcode), args.data(),
+                                                node.parent_count, geometry, payload);
+  auto value = ops::Value::number(NAN);
+  value.kind = structure.output_kind;
+  value.shape = structure.output_shape;
+  if (!structure.geometry_known) value.shape.rank = -1;
+  return value;
+}
+
+static bool pointwise_status(const ops::Spec &spec) {
+  return spec.family == ops::Family::elementwise || spec.op == ops::Op::state_select;
+}
+
+static bool mapped_status(ops::Op op) {
+  return op == ops::Op::lag || op == ops::Op::difference || op == ops::Op::aligned_shift ||
+      op == ops::Op::first || op == ops::Op::last || op == ops::Op::length;
+}
+
+// Only membership controls decide whether real slices can be visited. A failed
+// body parameter or an unavailable capture does not prevent child validation.
+static bool scope_maps_status(const Program &program, const Node &node,
+                               const Scratch &scratch) {
+  const auto failed = [&](auto id) { return !available_payload(scratch, id); };
+  if (node.kind == NodeKind::apply_scope) {
+    const auto &scope = program.apply_scopes[node.input_index];
+    if (scope.kind == ApplyKind::bisect)
+      return std::none_of(scope.argument_nodes.begin(), scope.argument_nodes.end(), failed);
+    if (failed(scope.argument_nodes[0])) return false;
+    if (scope.kind != ApplyKind::block) return known_geometry(scratch.values[scope.argument_nodes[0]]);
+    return (scope.input_nodes.empty() && scratch.interval_known) || std::any_of(scope.input_nodes.begin(), scope.input_nodes.end(),
+        [&](auto id) { return known_geometry(scratch.values[id]); });
+  }
+  if (node.kind != NodeKind::rolling_scope) return false;
+  const auto &scope = program.rolling_scopes[node.input_index];
+  return scratch.interval_known && !failed(scope.width_node) && (!scope.has_min_periods || !failed(scope.min_periods_node)) &&
+      (!scope.has_date_context || (!failed(scope.dates_node) && !failed(scope.annual_rate_node)));
+}
+
+static void map_position_status(Scratch &scratch, std::size_t node_index,
+                                 const Node &node, const ops::Prepared &prepared) {
+  const auto op = prepared.spec->op;
+  const auto source = node.parents[0];
+  const auto count = prepared.output_shape.size();
+  if (op == ops::Op::length) return; // Shape, not failed numerical observations.
+  if (op == ops::Op::first || op == ops::Op::last) {
+    const auto i = op == ops::Op::first ? 0 : prepared.args[0].size() - 1;
+    scratch.statuses[node_index] = position_error(scratch, source, i, i + 1);
+    return;
+  }
+  const auto periods = static_cast<std::size_t>(prepared.args[1].scalar);
+  for (std::size_t i = 0; i < count; ++i) {
+    std::int16_t status = 0;
+    if (op == ops::Op::aligned_shift) {
+      if (i >= periods) status = position_error(scratch, source, i - periods, i - periods + 1);
+    } else {
+      status = position_error(scratch, source, i, i + 1);
+      if (op == ops::Op::difference)
+        status = std::max(status, position_error(scratch, source, i + periods, i + periods + 1));
+    }
+    if (status) mark_positions(scratch, node_index, count, i, i + 1, status);
+  }
+}
+
+static void execute_pointwise_with_status(const Node &node, std::size_t node_index,
+    const ops::Prepared &prepared, ops::Output &output, Scratch &scratch) {
+  const auto size = output.shape.size();
+  // Structural mask validation still covers failed rows. Skipping their
+  // numerical evaluation must not turn an invalid bool payload into success.
+  for (std::size_t parent = 0; parent < prepared.count; ++parent)
+    if (prepared.args[parent].kind == ops::Kind::mask)
+      for (std::size_t i = 0; i < prepared.args[parent].size(); ++i)
+        ops::require(prepared.args[parent].u(i) <= 1, "INVALID_MASK");
+  for (std::size_t i = 0; i < size; ++i) {
+    std::int16_t status = 0;
+    for (std::size_t parent = 0; parent < node.parent_count; ++parent)
+      status = std::max(status, position_error(scratch, node.parents[parent], i, i + 1));
+    ops::Output cell = output;
+    cell.shape = ops::vector_shape(1);
+    const auto width = output.kind == ops::Kind::mask ? 1u : 8u;
+    cell.data = static_cast<char *>(output.data) + i * width;
+    if (!status) {
+      // Kernels validate numerical domains. Never feed failed placeholders into
+      // them: log/sqrt/etc. could otherwise turn one bad row into a whole-root failure.
+      auto args = prepared.args;
+      for (std::size_t parent = 0; parent < prepared.count; ++parent)
+        if (args[parent].shape.rank) args[parent] = interval_view(args[parent], i, 1);
+      try {
+        const auto item = ops::prepare(*prepared.spec, args.data(), prepared.count);
+        ops::Audit audit;
+        ops::execute(item, cell, scratch.workspace, ops::Isa::automatic, audit);
+        scratch.algorithm_copy_bytes += audit.algorithm_copy_bytes;
+      } catch (const ops::Error &error) {
+        if (!numerical_error(error)) throw;
+        status = 4;
+      }
+    }
+    if (status) {
+      mark_positions(scratch, node_index, size, i, i + 1, status);
+      if (output.kind == ops::Kind::mask) cell.set_mask(0, 0);
+      else if (output.kind == ops::Kind::integer) cell.set_integer(0, 0);
+      else cell.set(0, NAN);
+    }
+  }
+}
+
 static ops::Value execute_rolling_scope(
     const Program &program, const std::vector<ops::Value> &raw_inputs,
-    const RollingScope &scope, const Node &node, std::size_t interval_start,
+    const RollingScope &scope, const Node &node, std::size_t node_index, std::size_t interval_start,
     std::size_t interval_length, std::size_t max_window, Scratch &scratch) {
-  ops::require(scope.body && scope.body->output_kind == OutputKind::scalar,
-               "GRAPH_ROLLING_BODY");
+  validate_rolling_structure(program, raw_inputs, scope, interval_start, interval_length, scratch);
   const auto width =
       positive_integer(scratch.values[scope.width_node].scalar,
                        "INVALID_PARAMETER");
@@ -577,9 +1042,6 @@ static ops::Value execute_rolling_scope(
   captured.reserve(scope.input_nodes.size());
   for (auto source_node : scope.input_nodes) {
     const auto &value = scratch.values[source_node];
-    ops::require(value.kind == ops::Kind::number && value.shape.rank == 1 &&
-                     value.size() == interval_length,
-                 "ROLLING_ALIGNMENT_MISMATCH");
     captured.push_back(value);
   }
 
@@ -588,32 +1050,20 @@ static ops::Value execute_rolling_scope(
   double annual = 0.0;
   if (scope.has_date_context) {
     dates = &scratch.values[scope.dates_node];
-    ops::require(dates->kind == ops::Kind::number && dates->shape.rank == 1 &&
-                     dates->size() == interval_length,
-                 "ROLLING_ALIGNMENT_MISMATCH");
     annual = scratch.values[scope.annual_rate_node].scalar;
     ops::require(std::isfinite(annual), "INVALID_PARAMETER");
-    for (std::size_t i = 0; i < interval_length; ++i)
-      ops::require(std::isfinite(dates->f(i)) &&
-                       (i == 0 || dates->f(i) > dates->f(i - 1)),
-                   "ROLLING_DATE_AXIS_INVALID");
     if (scope.needs_preceding_observation) {
       const auto &date_node = program.nodes[scope.dates_node];
-      ops::require(date_node.kind == NodeKind::input,
-                   "ROLLING_DATE_CONTEXT_MUST_BE_INPUT");
       raw_dates = &raw_inputs[date_node.input_index];
-      if (interval_start > 0)
-        ops::require(std::isfinite(raw_dates->f(interval_start - 1)) &&
-                         raw_dates->f(interval_start - 1) < dates->f(0),
-                     "ROLLING_DATE_AXIS_INVALID");
     }
   }
 
   scratch.rolling_invalid.assign(interval_length + 1, 0);
   for (std::size_t i = 0; i < interval_length; ++i) {
     bool invalid = false;
-    for (const auto &value : captured)
-      invalid = invalid || !std::isfinite(value.f(i));
+    for (std::size_t j = 0; j < captured.size(); ++j)
+      invalid = invalid || (scratch.isolate_errors && scratch.statuses[scope.input_nodes[j]]) ||
+          !std::isfinite(captured[j].f(i));
     scratch.rolling_invalid[i + 1] =
         scratch.rolling_invalid[i] + (invalid ? 1u : 0u);
   }
@@ -632,6 +1082,10 @@ static ops::Value execute_rolling_scope(
   child.remaining_work = scratch.remaining_work;
   std::vector<ops::Value> body_inputs(scope.input_nodes.size());
   std::vector<double> body_parameters(scope.parameter_bindings.size());
+  std::int16_t parameter_failure = 0;
+  for (const auto &binding : scope.parameter_bindings)
+    if (binding.kind == RollingParameterKind::outer_node)
+      parameter_failure = std::max(parameter_failure, node_failure(scratch, binding.node));
 
   for (std::size_t right = 0; right < interval_length; ++right) {
     std::size_t left = right + 1 > width ? right + 1 - width : 0;
@@ -641,9 +1095,14 @@ static ops::Value execute_rolling_scope(
     const auto count = right + 1 - left;
     const auto invalid =
         scratch.rolling_invalid[right + 1] - scratch.rolling_invalid[left];
-    if (count - invalid < minimum)
-      continue;
     if (!scope.has_min_periods && count != width)
+      continue;
+    const auto inherited = std::max(parameter_failure,
+        capture_error(scratch, scope.input_nodes, left, right + 1));
+    if (inherited) {
+      mark_positions(scratch, node_index, interval_length, right, right + 1, inherited);
+    }
+    if (!inherited && count - invalid < minimum)
       continue;
 
     const auto global_left = interval_start + left;
@@ -664,7 +1123,7 @@ static ops::Value execute_rolling_scope(
         }
         body_inputs[i] = interval_view(raw, global_left - 1, count + 1);
       } else {
-        body_inputs[i] = interval_view(captured[i], left, count);
+        body_inputs[i] = scope_view(captured[i], left, count);
       }
     }
     if (!preceding_valid)
@@ -684,19 +1143,25 @@ static ops::Value execute_rolling_scope(
                           : static_cast<double>(count > 0 ? count - 1 : 0);
     if (scope.has_returns && scope.has_min_periods &&
         scope.returns_input >= 0) {
-      observation_count = 0.0;
-      const auto &returns =
-          captured[static_cast<std::size_t>(scope.returns_input)];
-      for (std::size_t i = left; i <= right; ++i)
-        if (std::isfinite(returns.f(i)))
-          observation_count += 1.0;
+      const auto index = static_cast<std::size_t>(scope.returns_input);
+      const auto id = scope.input_nodes[index];
+      if (scratch.isolate_errors && (scratch.statuses[id] ||
+          position_error(scratch, id, left, right + 1))) {
+        // This derived parameter depends on failed observations. NaN marks it
+        // unavailable at the child's parameter boundary; never invent a count.
+        observation_count = NAN;
+      } else {
+        observation_count = 0.0;
+        for (std::size_t i = left; i <= right; ++i)
+          if (std::isfinite(captured[index].f(i))) observation_count += 1.0;
+      }
     }
 
     for (std::size_t i = 0; i < scope.parameter_bindings.size(); ++i) {
       const auto &binding = scope.parameter_bindings[i];
       switch (binding.kind) {
       case RollingParameterKind::outer_node:
-        body_parameters[i] = scratch.values[binding.node].scalar;
+        body_parameters[i] = available_payload(scratch, binding.node) ? scratch.values[binding.node].scalar : NAN;
         break;
       case RollingParameterKind::observation_count:
         body_parameters[i] = observation_count;
@@ -714,23 +1179,39 @@ static ops::Value execute_rolling_scope(
     const std::int64_t local_start = 0;
     const auto local_end = static_cast<std::int64_t>(count);
     double value = nan;
+    std::vector<std::int16_t> failures;
+    if (inherited) {
+      failures.resize(captured.size());
+      for (std::size_t i = 0; i < captured.size(); ++i) {
+        const auto id = scope.input_nodes[i];
+        failures[i] = scratch.statuses[id];
+        if (!failures[i]) failures[i] = position_error(scratch, id, left, right + 1);
+      }
+    }
     try {
       execute_impl(*scope.body, body_inputs,
                    body_parameters.empty() ? nullptr : body_parameters.data(),
                    body_parameters.size(), &local_start, &local_end, 1, &value,
-                   1, child, true);
-      if (std::isfinite(value))
+                   1, child, true, inherited ? &failures : nullptr);
+      if (!inherited && std::isfinite(value))
         destination[right] = value;
     } catch (const ops::Error &error) {
       if (!numerical_error(error)) throw;
+      if (!scratch.isolate_errors && scope.body->execution_metadata->position_status_nodes) throw;
       destination[right] = nan;
+      if (scratch.isolate_errors && program.execution_metadata->position_status_reachable[node_index])
+        mark_positions(scratch, node_index, interval_length, right, right + 1, 4);
     }
   }
   return result;
 }
 
 static ops::Value execute_apply_scope(const Program &program, const ApplyScope &scope,
-    const Node &node, std::size_t interval_length, std::size_t max_window, Scratch &scratch) {
+    const Node &node, std::size_t node_index, std::size_t interval_length,
+    std::size_t max_window, Scratch &scratch) {
+  const bool trace = scratch.isolate_errors &&
+      program.execution_metadata->position_status_reachable[node_index];
+  const auto structure = validate_apply_structure(scope, interval_length, scratch, scratch.isolate_errors);
   auto &child = *scratch.children[program.rolling_scopes.size() + node.input_index];
   child.remaining_work = scratch.remaining_work;
   std::vector<ops::Value> captured;
@@ -738,25 +1219,28 @@ static ops::Value execute_apply_scope(const Program &program, const ApplyScope &
   std::size_t count = 0;
   for (auto id : scope.input_nodes) {
     const auto &value = scratch.values[id];
-    ops::require(value.shape.rank == 1, "SCOPE_CAPTURE_RANK");
-    if (!captured.empty() && scope.kind != ApplyKind::bisect)
-      ops::require(value.size() == count, "SCOPE_ALIGNMENT_MISMATCH");
-    count = std::max(count, value.size());
+    if (known_geometry(value)) count = std::max(count, value.size());
     captured.push_back(value);
   }
   if (captured.empty() && scope.kind != ApplyKind::bisect) {
     count = scope.kind == ApplyKind::block ? interval_length
-        : scratch.values[scope.argument_nodes[0]].size();
+        : scope.kind == ApplyKind::segment
+            ? scratch.values[scope.argument_nodes[0]].shape.dim[0]
+            : scratch.values[scope.argument_nodes[0]].size();
   }
+  if (scope.kind == ApplyKind::filter || scope.kind == ApplyKind::group || scope.kind == ApplyKind::segment)
+    count = scratch.values[scope.argument_nodes[0]].shape.dim[0];
   std::vector<double> parameters(scope.parameter_nodes.size());
+  std::int16_t parameter_failure = 0;
   for (std::size_t i = 0; i < parameters.size(); ++i)
     if (scope.parameter_nodes[i] != std::numeric_limits<std::uint32_t>::max()) {
-      const auto &value = scratch.values[scope.parameter_nodes[i]];
-      ops::require(value.shape.rank == 0 && value.kind == ops::Kind::number, "SCOPE_PARAMETER_TYPE");
-      parameters[i] = value.scalar;
+      const auto id = scope.parameter_nodes[i];
+      parameter_failure = std::max(parameter_failure, node_failure(scratch, id));
+      parameters[i] = available_payload(scratch, id) ? scratch.values[id].scalar : NAN;
     }
   auto evaluate = [&](const std::vector<ops::Value> &inputs, std::size_t length,
-                      double solve_x = 0.0) {
+                      double solve_x = 0.0,
+                      const std::vector<std::int16_t> *failures = nullptr) {
     if (child.remaining_work) {
       const auto rows = std::max<std::size_t>(length, 1);
       const auto nodes = std::max<std::size_t>(scope.body_node_count, 1);
@@ -767,14 +1251,19 @@ static ops::Value execute_apply_scope(const Program &program, const ApplyScope &
       if (scope.parameter_nodes[i] == std::numeric_limits<std::uint32_t>::max()) parameters[i] = solve_x;
     const std::int64_t begin = 0, end = static_cast<std::int64_t>(length);
     double value = NAN;
+    std::vector<std::int16_t> parameter_only_failures;
+    if (parameter_failure && !failures) {
+      parameter_only_failures.resize(inputs.size());
+      failures = &parameter_only_failures;
+    }
     const auto audit = execute_impl(*scope.body, inputs, parameters.data(), parameters.size(),
-                                   &begin, &end, 1, &value, 1, child, true);
+        &begin, &end, 1, &value, 1, child, true, failures,
+        scope.kind != ApplyKind::bisect || std::all_of(inputs.begin(), inputs.end(), known_geometry));
     scratch.algorithm_copy_bytes += audit.algorithm_copy_bytes;
     return value;
   };
   auto scalar_arg = [&](std::size_t i) {
     const auto &value = scratch.values[scope.argument_nodes[i]];
-    ops::require(value.shape.rank == 0 && value.kind == ops::Kind::number, "SCOPE_PARAMETER_TYPE");
     return value.scalar;
   };
   if (scope.kind == ApplyKind::bisect) {
@@ -782,6 +1271,24 @@ static ops::Value execute_apply_scope(const Program &program, const ApplyScope &
     const auto iterations = positive_integer(scalar_arg(3), "INVALID_PARAMETER", 10000);
     ops::require(std::isfinite(low) && std::isfinite(high) && low < high &&
                  std::isfinite(tolerance) && tolerance > 0.0, "INVALID_PARAMETER");
+    std::int16_t inherited = parameter_failure;
+    if (scratch.isolate_errors)
+      for (auto id : scope.input_nodes)
+        inherited = std::max(inherited, std::max(scratch.statuses[id], position_error(scratch, id)));
+    if (inherited) {
+      // Bisect consumes each complete capture, which may have a different
+      // length. Keep failed payloads unavailable while validating both actual
+      // endpoint evaluations; no numerical root iteration can use them.
+      std::vector<std::int16_t> failures(captured.size());
+      for (std::size_t i = 0; i < captured.size(); ++i) {
+        const auto id = scope.input_nodes[i];
+        failures[i] = std::max(scratch.statuses[id], position_error(scratch, id));
+      }
+      evaluate(captured, count, low, &failures);
+      evaluate(captured, count, high, &failures);
+      scratch.statuses[node_index] = inherited;
+      return ops::Value::number(NAN);
+    }
     double fl = evaluate(captured, count, low), fh = evaluate(captured, count, high);
     ops::require(std::isfinite(fl) && std::isfinite(fh), "NONFINITE_RESULT");
     if (fl == 0.0) return ops::Value::number(low);
@@ -811,6 +1318,10 @@ static ops::Value execute_apply_scope(const Program &program, const ApplyScope &
                  (8ull * captured.size()), "SCOPE_MEMORY_BUDGET_EXCEEDED");
     for (std::size_t i = 0; i < captured.size(); ++i) {
       const auto &source = captured[i];
+      if (!known_geometry(source)) {
+        inputs.push_back(source);
+        continue;
+      }
       if (contiguous) {
         inputs.push_back(interval_view(source, length ? indices[first] : 0, length));
         continue;
@@ -818,6 +1329,12 @@ static ops::Value execute_apply_scope(const Program &program, const ApplyScope &
       ops::Value view = source;
       view.shape = ops::vector_shape(length);
       view.stride[0] = 1;
+      if (!available_payload(scratch, scope.input_nodes[i]) &&
+          scratch.statuses[scope.input_nodes[i]]) {
+        view.data = nullptr;
+        inputs.push_back(view);
+        continue;
+      }
       if (source.kind == ops::Kind::number) {
         auto &buffer = child.selected_numeric[i]; buffer.resize(length);
         for (std::size_t j = 0; j < length; ++j) buffer[j] = source.f(indices[first + j]);
@@ -837,24 +1354,89 @@ static ops::Value execute_apply_scope(const Program &program, const ApplyScope &
     }
     return inputs;
   };
+  const auto selected_error = [&](const std::vector<std::size_t> &indices,
+                                   std::size_t first, std::size_t last) {
+    std::int16_t status = 0;
+    if (!scratch.isolate_errors || std::none_of(scope.input_nodes.begin(), scope.input_nodes.end(),
+          [&](auto id) { return !available_payload(scratch, id); })) return status;
+    for (auto i = first; i < last; ++i)
+      status = std::max(status, capture_error(scratch, scope.input_nodes, indices[i], indices[i] + 1));
+    return status;
+  };
+  const auto slice_failures = [&](std::size_t first, std::size_t last) {
+    std::vector<std::int16_t> failures(captured.size());
+    for (std::size_t i = 0; i < captured.size(); ++i) {
+      const auto id = scope.input_nodes[i];
+      failures[i] = scratch.statuses[id];
+      if (!failures[i]) failures[i] = position_error(scratch, id, first, last);
+    }
+    return failures;
+  };
+  const auto selected_failures = [&](const std::vector<std::size_t> &indices,
+                                     std::size_t first, std::size_t last) {
+    std::vector<std::int16_t> failures(captured.size());
+    for (std::size_t i = 0; i < captured.size(); ++i) {
+      const auto id = scope.input_nodes[i];
+      failures[i] = scratch.statuses[id];
+      if (!failures[i])
+        for (auto row = first; row < last; ++row)
+          failures[i] = std::max(failures[i], position_error(scratch, id, indices[row], indices[row] + 1));
+    }
+    return failures;
+  };
   if (scope.kind == ApplyKind::filter) {
     const auto &mask = scratch.values[scope.argument_nodes[0]];
-    ops::require(mask.kind == ops::Kind::mask && mask.shape.rank == 1 && mask.size() == count,
-                 "SCOPE_ALIGNMENT_MISMATCH");
     auto &indices = child.selection; indices.clear();
     for (std::size_t i = 0; i < count; ++i) {
       const auto selected = mask.u(i);
-      ops::require(selected <= 1, "INVALID_MASK");
       if (selected) indices.push_back(i);
     }
     if (indices.empty()) return ops::Value::number(scope.argument_nodes.size() == 2 ? scalar_arg(1) : NAN);
+    if (const auto status = selected_error(indices, 0, indices.size())) {
+      const auto failures = selected_failures(indices, 0, indices.size());
+      evaluate(selected(indices, 0, indices.size()), indices.size(), 0, &failures);
+      scratch.statuses[node_index] = status;
+      return ops::Value::number(NAN);
+    }
     return ops::Value::number(evaluate(selected(indices, 0, indices.size()), indices.size()));
   }
   ops::Value result;
   result.kind = ops::Kind::number;
   result.stride[0] = 1;
+  ops::require(count <= max_window, "SCOPE_OUTPUT_TOO_LARGE");
   auto *destination = scratch.numeric.data() + static_cast<std::size_t>(node.slot) * max_window;
   result.data = destination;
+  if (scope.kind == ApplyKind::segment) {
+    const auto &segments = scratch.values[scope.argument_nodes[0]];
+    result.shape = structure.shape;
+    std::fill(destination, destination + count, NAN);
+    std::vector<ops::Value> inputs(captured.size());
+    // Geometry was validated before any body runs. Endpoints are inclusive in
+    // the body, but ownership of output rows is [left,right).
+    for (std::size_t left = 0; left < count;) {
+      if (segments.i(2 * left) == -1) { ++left; continue; }
+      const auto right = static_cast<std::size_t>(segments.i(2 * left + 1));
+      const auto length = right - left + 1;
+      for (std::size_t i = 0; i < captured.size(); ++i)
+        inputs[i] = scope_view(captured[i], left, length);
+      double value = NAN;
+      auto failure = capture_error(scratch, scope.input_nodes, left, right + 1);
+      try {
+        if (!failure) value = evaluate(inputs, length);
+        else {
+          const auto failures = slice_failures(left, right + 1);
+          evaluate(inputs, length, 0, &failures);
+        }
+      } catch (const ops::Error &error) {
+        if (!scratch.isolate_errors || !numerical_error(error)) throw;
+        failure = 4;
+      }
+      if (failure) mark_positions(scratch, node_index, count, left, right, failure);
+      std::fill(destination + left, destination + right, value);
+      left = right;
+    }
+    return result;
+  }
   if (scope.kind == ApplyKind::block) {
     const auto width = positive_integer(scalar_arg(0), "INVALID_PARAMETER", 1000000);
     const auto blocks = count / width;
@@ -862,14 +1444,24 @@ static ops::Value execute_apply_scope(const Program &program, const ApplyScope &
     std::vector<ops::Value> inputs(captured.size());
     for (std::size_t block = 0; block < blocks; ++block) {
       for (std::size_t i = 0; i < captured.size(); ++i)
-        inputs[i] = interval_view(captured[i], block * width, width);
-      destination[block] = evaluate(inputs, width);
+        inputs[i] = scope_view(captured[i], block * width, width);
+      auto failure = capture_error(scratch, scope.input_nodes, block * width, (block + 1) * width);
+      destination[block] = NAN;
+      try {
+        if (!failure) destination[block] = evaluate(inputs, width);
+        else {
+          const auto failures = slice_failures(block * width, (block + 1) * width);
+          evaluate(inputs, width, 0, &failures);
+        }
+      } catch (const ops::Error &error) {
+        if (!trace || !numerical_error(error)) throw;
+        failure = 4;
+      }
+      if (failure) mark_positions(scratch, node_index, blocks, block, block + 1, failure);
     }
     return result;
   }
   const auto &keys = scratch.values[scope.argument_nodes[0]];
-  ops::require(keys.kind == ops::Kind::integer && keys.shape.rank == 1 && keys.size() == count,
-               "SCOPE_ALIGNMENT_MISMATCH");
   result.shape = ops::vector_shape(count);
   auto &indices = child.selection; indices.resize(count);
   std::iota(indices.begin(), indices.end(), 0);
@@ -880,44 +1472,63 @@ static ops::Value execute_apply_scope(const Program &program, const ApplyScope &
     std::size_t last = first + 1;
     while (last < count && keys.i(indices[last]) == keys.i(indices[first])) ++last;
     double value = NAN;
+    auto failure = selected_error(indices, first, last);
     try {
-      value = evaluate(selected(indices, first, last), last - first);
+      if (!failure) value = evaluate(selected(indices, first, last), last - first);
+      else {
+        const auto failures = selected_failures(indices, first, last);
+        evaluate(selected(indices, first, last), last - first, 0, &failures);
+      }
     } catch (const ops::Error &error) {
-      if (!program.isolate_errors || !numerical_error(error)) throw;
+      if (!scratch.isolate_errors || !numerical_error(error)) throw;
+      if (trace) failure = 4;
     }
-    for (std::size_t i = first; i < last; ++i) destination[indices[i]] = value;
+    for (std::size_t i = first; i < last; ++i) {
+      destination[indices[i]] = value;
+      if (failure) mark_positions(scratch, node_index, count, indices[i], indices[i] + 1, failure);
+    }
     first = last;
   }
   return result;
 }
 
-static Audit execute_impl(const Program &program,
+template <bool TrackPositions>
+static Audit execute_impl_body(const Program &program,
                           const std::vector<ops::Value> &inputs,
                           const double *parameters,
                           std::size_t parameter_count,
                           const std::int64_t *starts,
                           const std::int64_t *ends,
-                          std::size_t rows, double *output,
+                          std::size_t rows, void *output,
                           std::size_t output_columns, Scratch &scratch,
-                          bool prebound_inputs) {
-  if (!program.execution_metadata) {
-    Program finalized = program;
-    finalized.finalize();
-    return execute_impl(finalized, inputs, parameters, parameter_count, starts,
-                        ends, rows, output, output_columns, scratch,
-                        prebound_inputs);
-  }
+                          bool prebound_inputs,
+                          const std::vector<std::int16_t> *input_failures,
+                          bool interval_known) {
   ops::require(inputs.size() == program.input_count, "GRAPH_INPUT_COUNT");
   ops::require(parameter_count == program.parameter_count,
                "GRAPH_PARAMETER_COUNT");
   ops::require(output_columns == program.roots.size(), "GRAPH_OUTPUT_COLUMNS");
   ops::require(rows == 0 || (starts && ends && output), "GRAPH_NULL_BATCH");
+  const auto clear_invalid = [&](std::size_t index) {
+    // Integer and bool have no NaN. Their deterministic placeholder is usable
+    // only when the matching status is zero; isolate results retain statuses.
+    if (program.output_dtype == OutputDType::float64)
+      static_cast<double *>(output)[index] = NAN;
+    else if (program.output_dtype == OutputDType::int64)
+      static_cast<std::int64_t *>(output)[index] = 0;
+    else
+      static_cast<std::uint8_t *>(output)[index] = 0;
+  };
 
   std::size_t max_window = 0;
   if (prebound_inputs) {
     ops::require(rows == 1, "GRAPH_PREBOUND_ROWS");
+    ops::require(starts[0] >= 0 && ends[0] >= starts[0], "GRAPH_INTERVAL_BOUNDS");
+    // Constant-body scopes have no captured arrays, but nested operations still
+    // materialize arrays on the explicit scope interval (e.g. block_apply(1,1)).
+    max_window = static_cast<std::size_t>(ends[0] - starts[0]);
     for (const auto &input : inputs)
-      max_window = std::max(max_window, input.size());
+      if (known_geometry(input)) max_window = std::max(max_window, input.size());
   } else {
     for (std::size_t row = 0; row < rows; ++row) {
       ops::require(starts[row] >= 0 && ends[row] >= starts[row],
@@ -935,7 +1546,8 @@ static Audit execute_impl(const Program &program,
 
   const auto logical_window = max_window;
   max_window = required_array_capacity(program, inputs, max_window);
-  scratch.ensure(program, max_window);
+  scratch.ensure(program, max_window, program.isolate_errors || input_failures != nullptr);
+  scratch.interval_known = interval_known;
   if (!prebound_inputs) {
     scratch.work_budget = static_cast<std::size_t>(program.scope_work_budget);
     scratch.remaining_work = &scratch.work_budget;
@@ -948,7 +1560,7 @@ static Audit execute_impl(const Program &program,
   const auto &order_consumers = program.execution_metadata->order_consumers;
   std::size_t series_base = 0;
   Audit audit;
-  if (program.isolate_errors) {
+  if (scratch.isolate_errors) {
     std::size_t output_rows = rows;
     if (program.output_kind == OutputKind::series) {
       output_rows = 0;
@@ -970,12 +1582,12 @@ static Audit execute_impl(const Program &program,
     const auto start = static_cast<std::size_t>(starts[row]);
     const auto end = static_cast<std::size_t>(ends[row]);
     const auto length = end - start;
-    if (length < program.minimum_observations) {
-      ops::require(program.isolate_errors, "INSUFFICIENT_OBSERVATIONS");
+    if (interval_known && length < program.minimum_observations) {
+      ops::require(scratch.isolate_errors, "INSUFFICIENT_OBSERVATIONS");
       const auto begin = program.output_kind == OutputKind::scalar ? row : series_base;
       const auto count = program.output_kind == OutputKind::scalar ? 1 : length;
       for (std::size_t i = 0; i < count * output_columns; ++i) {
-        output[begin * output_columns + i] = NAN;
+        clear_invalid(begin * output_columns + i);
         audit.statuses[begin * output_columns + i] = 1;
       }
       if (program.output_kind == OutputKind::series) series_base += length;
@@ -985,13 +1597,31 @@ static Audit execute_impl(const Program &program,
     for (std::size_t node_index = 0; node_index < program.nodes.size();
          ++node_index) {
       const auto &node = program.nodes[node_index];
-      if (program.isolate_errors) {
+      std::int16_t inherited_positions = 0;
+      if (scratch.isolate_errors) {
+        if constexpr (TrackPositions) scratch.position_statuses[node_index].clear();
         auto &status = scratch.statuses[node_index];
         status = 0;
-        for (std::size_t parent = 0; parent < node.parent_count; ++parent)
+        if (!interval_known && (node.kind == NodeKind::apply_scope || node.kind == NodeKind::rolling_scope) &&
+            !scope_maps_status(program, node, scratch))
+          status = 4;
+        for (std::size_t parent = 0; parent < node.parent_count; ++parent) {
           status = std::max(status, scratch.statuses[node.parents[parent]]);
-        if (status) {
-          scratch.values[node_index] = ops::Value::number(NAN);
+          if constexpr (TrackPositions)
+            inherited_positions = std::max(inherited_positions, position_error(scratch, node.parents[parent]));
+        }
+        if (inherited_positions) {
+          const bool mapped = node.kind == NodeKind::interval_tail ||
+              (node.kind == NodeKind::operation &&
+               (pointwise_status(*program.execution_metadata->specs[node_index]) ||
+                mapped_status(static_cast<ops::Op>(node.opcode)))) ||
+              scope_maps_status(program, node, scratch);
+          // A same-shaped result is not proof of pointwise independence. Shared
+          // fits, recurrences, sorting and other nonlocal kernels fail closed.
+          if (!mapped) status = std::max(status, inherited_positions);
+        }
+        if (status && !scope_maps_status(program, node, scratch)) {
+          scratch.values[node_index] = validate_failed_node(program, inputs, node, start, length, scratch);
           continue;
         }
       }
@@ -1001,12 +1631,13 @@ static Audit execute_impl(const Program &program,
               (prebound_inputs || (!program.input_axes.empty() && program.input_axes[node.input_index] == 1))
                   ? inputs[node.input_index] : interval_view(inputs[node.input_index], start,
                                               length);
+          if (input_failures) scratch.statuses[node_index] = (*input_failures)[node.input_index];
           continue;
         }
         if (node.kind == NodeKind::parameter) {
           scratch.values[node_index] =
               ops::Value::number(parameters[node.input_index]);
-          if (program.isolate_errors && !std::isfinite(parameters[node.input_index]))
+          if (scratch.isolate_errors && !std::isfinite(parameters[node.input_index]))
             scratch.statuses[node_index] = 4;
           continue;
         }
@@ -1018,22 +1649,26 @@ static Audit execute_impl(const Program &program,
           const auto &source = scratch.values[node.parents[0]];
           const auto skip = source.size() ? 1u : 0u;
           scratch.values[node_index] = interval_view(source, skip, source.size() - skip);
+          if (inherited_positions)
+            for (std::size_t i = skip; i < source.size(); ++i)
+              mark_positions(scratch, node_index, source.size() - skip, i - skip, i - skip + 1,
+                             position_error(scratch, node.parents[0], i, i + 1));
           continue;
         }
         if (node.kind == NodeKind::rolling_scope) {
           scratch.values[node_index] = execute_rolling_scope(
               program, inputs, program.rolling_scopes[node.input_index], node,
-              start, length, max_window, scratch);
+              node_index, start, length, max_window, scratch);
           continue;
         }
 
         if (node.kind == NodeKind::apply_scope) {
           scratch.values[node_index] = execute_apply_scope(program,
-              program.apply_scopes[node.input_index], node, length, max_window, scratch);
+              program.apply_scopes[node.input_index], node, node_index, length, max_window, scratch);
           // Explicit empty/NaN filter results are missing data, not execution
           // failures. Preserve them for ordinary where selection; public roots
           // still report non-finite results as unavailable.
-          if (program.isolate_errors && program.apply_scopes[node.input_index].kind != ApplyKind::filter &&
+          if (scratch.isolate_errors && program.apply_scopes[node.input_index].kind != ApplyKind::filter &&
               scratch.values[node_index].shape.rank == 0 &&
               !std::isfinite(scratch.values[node_index].scalar)) scratch.statuses[node_index] = 4;
           continue;
@@ -1046,6 +1681,13 @@ static Audit execute_impl(const Program &program,
         const auto &spec = *program.execution_metadata->specs[node_index];
         const auto prepared =
             ops::prepare(spec, arguments.data(), node.parent_count);
+        if (inherited_positions && pointwise_status(spec) && prepared.output_shape.rank != 1) {
+          scratch.statuses[node_index] = inherited_positions;
+          scratch.values[node_index] = validate_failed_node(program, inputs, node, start, length, scratch);
+          continue;
+        }
+        if (inherited_positions && mapped_status(spec.op))
+          map_position_status(scratch, node_index, node, prepared);
 
         if (prepared.borrowed) {
           scratch.values[node_index] = prepared.view;
@@ -1096,7 +1738,9 @@ static Audit execute_impl(const Program &program,
             ++scratch.fused_scalar_calls;
         }
 
-        if (!fused) {
+        if (inherited_positions && pointwise_status(spec)) {
+          execute_pointwise_with_status(node, node_index, prepared, native_output, scratch);
+        } else if (!fused) {
           ops::Audit operator_audit;
           ops::execute(prepared, native_output, scratch.workspace,
                        ops::Isa::automatic, operator_audit);
@@ -1104,7 +1748,7 @@ static Audit execute_impl(const Program &program,
         }
         scratch.values[node_index] =
             output_value(scratch, prepared, native_output, node, max_window);
-        if (program.isolate_errors) {
+        if (scratch.isolate_errors) {
           const auto &value = scratch.values[node_index];
           auto &status = scratch.statuses[node_index];
           if (value.kind == ops::Kind::fit)
@@ -1120,7 +1764,7 @@ static Audit execute_impl(const Program &program,
           }
         }
       } catch (const ops::Error &error) {
-        if (!program.isolate_errors)
+        if (!scratch.isolate_errors)
           throw;
         const std::string_view code(error.what());
         // Batch numeric exceptions use the platform's unavailable-result status.
@@ -1151,21 +1795,21 @@ static Audit execute_impl(const Program &program,
                  code == "NON_CONVERGENCE") status = 4;
         else throw;
         scratch.statuses[node_index] = status;
-        scratch.values[node_index] = ops::Value::number(NAN);
+        scratch.values[node_index] = validate_failed_node(program, inputs, node, start, length, scratch);
       }
     }
 
     for (std::size_t root_index = 0; root_index < program.roots.size();
          ++root_index) {
       const auto &value = scratch.values[program.roots[root_index]];
-      const auto status = program.isolate_errors
+      const auto status = scratch.isolate_errors
                               ? scratch.statuses[program.roots[root_index]] : 0;
       if (status) {
         const auto begin = program.output_kind == OutputKind::scalar ? row : series_base;
         const auto count = program.output_kind == OutputKind::scalar ? 1 : length;
         for (std::size_t offset = 0; offset < count; ++offset) {
           const auto index = (begin + offset) * output_columns + root_index;
-          output[index] = NAN;
+          clear_invalid(index);
           audit.statuses[index] = static_cast<std::int16_t>(status);
         }
         continue;
@@ -1178,19 +1822,38 @@ static Audit execute_impl(const Program &program,
         if (value.kind == ops::Kind::integer)
           ops::require(value.integer >= -9007199254740992LL && value.integer <= 9007199254740992LL,
                        "GRAPH_INTEGER_RESULT_PRECISION");
-        output[row * output_columns + root_index] = value.kind == ops::Kind::integer ?
+        auto *numeric_output = static_cast<double *>(output);
+        numeric_output[row * output_columns + root_index] = value.kind == ops::Kind::integer ?
             static_cast<double>(value.integer) : value.scalar;
-        if (program.isolate_errors && !std::isfinite(output[row * output_columns + root_index]))
+        if (scratch.isolate_errors && !std::isfinite(numeric_output[row * output_columns + root_index]))
           audit.statuses[row * output_columns + root_index] = 4;
       } else {
-        ops::require(value.kind == ops::Kind::number && value.shape.rank == 1 &&
+        const auto expected_kind = program.output_dtype == OutputDType::boolean ? ops::Kind::mask
+            : program.output_dtype == OutputDType::int64 ? ops::Kind::integer : ops::Kind::number;
+        ops::require(value.kind == expected_kind && value.shape.rank == 1 &&
                          value.size() == length,
                      "GRAPH_ROOT_NOT_ALIGNED_SERIES");
         for (std::size_t offset = 0; offset < length; ++offset) {
           const auto index = (series_base + offset) * output_columns + root_index;
-          output[index] = value.f(offset);
-          if (program.isolate_errors && !std::isfinite(output[index]))
-            audit.statuses[index] = 4;
+          const auto position = TrackPositions
+              ? position_error(scratch, program.roots[root_index], offset, offset + 1) : 0;
+          if (position) {
+            clear_invalid(index);
+            audit.statuses[index] = position;
+            continue;
+          }
+          if (program.output_dtype == OutputDType::int64)
+            static_cast<std::int64_t *>(output)[index] = value.i(offset);
+          else if (program.output_dtype == OutputDType::boolean) {
+            const auto mask = value.u(offset);
+            ops::require(mask <= 1, "INVALID_MASK");
+            static_cast<std::uint8_t *>(output)[index] = mask;
+          } else {
+            const auto numeric = value.f(offset);
+            static_cast<double *>(output)[index] = numeric;
+            if (scratch.isolate_errors && !std::isfinite(numeric))
+              audit.statuses[index] = 4;
+          }
         }
       }
     }
@@ -1204,8 +1867,16 @@ static Audit execute_impl(const Program &program,
   audit.numeric_arena_bytes = scratch.numeric.capacity() * sizeof(double) + scratch.integers.capacity() * sizeof(std::int64_t);
   audit.mask_arena_bytes = scratch.masks.capacity() * sizeof(std::uint8_t);
   audit.operator_workspace_capacity_bytes = scratch.workspace.capacity_bytes();
+  const auto position_bytes = [](const Scratch &state) {
+    auto bytes = state.position_statuses.capacity() * sizeof(std::vector<std::int16_t>);
+    for (const auto &errors : state.position_statuses) bytes += errors.capacity() * sizeof(std::int16_t);
+    return bytes;
+  };
+  if constexpr (TrackPositions) audit.operator_workspace_capacity_bytes += position_bytes(scratch);
   const auto scratch_bytes = [&](const auto &self, const Scratch &state) -> std::size_t {
     std::size_t bytes = state.numeric.capacity() * 8 + state.integers.capacity() * 8 + state.masks.capacity();
+    bytes += state.statuses.capacity() * sizeof(std::int16_t);
+    bytes += position_bytes(state);
     bytes += state.workspace.capacity_bytes() + state.selection.capacity() * sizeof(std::size_t);
     for (const auto &v : state.selected_numeric) bytes += v.capacity() * 8;
     for (const auto &v : state.selected_integer) bytes += v.capacity() * 8;
@@ -1227,10 +1898,31 @@ static Audit execute_impl(const Program &program,
   return audit;
 }
 
+static Audit execute_impl(const Program &program, const std::vector<ops::Value> &inputs,
+    const double *parameters, std::size_t parameter_count, const std::int64_t *starts,
+    const std::int64_t *ends, std::size_t rows, void *output, std::size_t output_columns,
+    Scratch &scratch, bool prebound_inputs,
+    const std::vector<std::int16_t> *input_failures, bool interval_known) {
+  if (!program.execution_metadata) {
+    Program finalized = program;
+    finalized.finalize();
+    return execute_impl(finalized, inputs, parameters, parameter_count, starts,
+                        ends, rows, output, output_columns, scratch, prebound_inputs, input_failures, interval_known);
+  }
+  // Choose once per native execution. AOT specialization removes optional
+  // per-node provenance branches from graphs that cannot produce segment errors.
+  ops::require(!input_failures || input_failures->size() == program.input_count, "GRAPH_INPUT_STATUS_COUNT");
+  if ((program.isolate_errors || input_failures) && program.execution_metadata->position_status_nodes)
+    return execute_impl_body<true>(program, inputs, parameters, parameter_count,
+        starts, ends, rows, output, output_columns, scratch, prebound_inputs, input_failures, interval_known);
+  return execute_impl_body<false>(program, inputs, parameters, parameter_count,
+      starts, ends, rows, output, output_columns, scratch, prebound_inputs, input_failures, interval_known);
+}
+
 Audit execute(const Program &program, const std::vector<ops::Value> &inputs,
               const double *parameters, std::size_t parameter_count,
               const std::int64_t *starts, const std::int64_t *ends,
-              std::size_t rows, double *output, std::size_t output_columns) {
+              std::size_t rows, void *output, std::size_t output_columns) {
   return execute_impl(program, inputs, parameters, parameter_count, starts, ends,
                       rows, output, output_columns, root_scratch, false);
 }

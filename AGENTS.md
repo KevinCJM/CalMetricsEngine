@@ -100,7 +100,7 @@ The current repository already provides:
   `calmetrics_engine._native`.
 - C++17 AOT finance/numerical kernels; runtime JIT is not part of the architecture.
 - Exact-dtype zero-copy NumPy input binding, strided `ArrayView` support and explicit owner pinning.
-- A 125-entry canonical **C++** operator registry with stable native opcodes; original IDs 1–118 remain unchanged.
+- A 146-entry canonical **C++** operator registry with stable native opcodes; original IDs 1–125 retain their contracts.
 - Exact-shape output/workspace contracts and reusable native `Workspace`.
 - Explicit NEON/SSE2/optional AVX2 runtime dispatch for eligible kernels.
 - A pure-C++ restricted mathematical parser/compiler.
@@ -112,7 +112,8 @@ The current repository already provides:
 - Native `block_apply`, `filter_apply`, `group_apply` and bounded `bisect` sub-programs, using the same compiler and executor rather than Python numerical callbacks.
 - Exact int64 category/index intermediates and typed matrix/vector inputs, including native worker transport and geometry validation.
 - Generic real-alpha masked recurrence, aligned shift, Gaussian CDF, stable index sorting, gather, integer distinct counts and floor primitives. Financial indicators remain explicit compositions.
-- Aligned time-series root outputs as contiguous values plus interval prefix offsets.
+- Homogeneous float64/bool/int64 aligned time-series root outputs as contiguous values plus interval prefix offsets and explicit failure statuses.
+- Adaptive/second-order recurrence, scalar Kalman shared state, separate condition/state/confirmation, turning events, PS filtering and complete-segment scopes. See `docs/stateful-series-design.md` for exact contracts and retrospective boundaries.
 - A shared multi-root logical DAG with operator lowering and structural CSE.
 - Borrow-aware C++ liveness analysis, including backing buffers of borrowed views such as `lag`.
 - Reusable numeric/mask arenas with slot reuse driven by DAG lifetime.

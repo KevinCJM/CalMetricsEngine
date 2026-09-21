@@ -32,6 +32,19 @@ ops::Value mask(const std::uint8_t *data, std::size_t n) {
     v.shape = ops::vector_shape(n);
     return v;
 }
+ops::Value integer_vector(const std::int64_t *data, std::size_t n) {
+    ops::Value v;
+    v.kind = ops::Kind::integer;
+    v.data = data;
+    v.shape = ops::vector_shape(n);
+    return v;
+}
+ops::Value integer_matrix(const std::int64_t *data, std::size_t rows, std::size_t cols) {
+    auto v = integer_vector(data, rows * cols);
+    v.shape = ops::matrix_shape(rows, cols);
+    v.stride = {static_cast<std::ptrdiff_t>(cols), 1};
+    return v;
+}
 struct Computed {
     ops::Kind kind;
     ops::Shape shape;
@@ -103,6 +116,27 @@ int main() {
         vi.kind = ops::Kind::integer;
         vi.shape = ops::vector_shape(8);
         vi.data = ids;
+        const double prices[]{100, 120, 105, 130, 90, 125, 110, 115};
+        const double changes[]{0.2, -0.125, 130.0 / 105 - 1, 90.0 / 130 - 1,
+                               125.0 / 90 - 1, 110.0 / 125 - 1, 0, 0};
+        const std::int64_t events[]{-1, 1, -1, 1, -1, 1, -1, 0};
+        const std::uint8_t no_reset[]{0, 0, 0, 0, 0, 0, 0, 0};
+        const std::uint8_t all_valid[]{1, 1, 1, 1, 1, 1, 1, 1};
+        const auto vp = vector(prices, 8), ve = integer_vector(events, 8),
+                   vr = mask(no_reset, 8), valid = mask(all_valid, 8);
+
+        // Projection inputs are real typed outputs, held alive for the full registry sweep.
+        const auto kalman_fixture = run(ops::lookup("scalar_kalman"),
+            {vx, ops::Value::number(0.01), ops::Value::number(0.1)}, 3, ops::Isa::scalar);
+        const auto vk = matrix(kalman_fixture.values.data(), 8, 2);
+        const auto continuous_fixture = run(ops::lookup("state_continuous"),
+            {vi, vi, vp, ops::Value::number(2), ops::Value::number(6)}, 5, ops::Isa::scalar);
+        const auto vc = integer_matrix(continuous_fixture.integers.data(), 8, 3);
+        const auto segments_fixture = run(ops::lookup("between_events"), {ve}, 1, ops::Isa::scalar);
+        const auto segments = integer_matrix(segments_fixture.integers.data(), 8, 2);
+        const auto phases_fixture = run(ops::lookup("phase_direction"), {ve, segments},
+                                       2, ops::Isa::scalar);
+        const auto phases = integer_vector(phases_fixture.integers.data(), 8);
         std::size_t covered = 0;
         for (const auto &spec : ops::registry()) {
             check(static_cast<unsigned>(spec.op) == covered + 1, "stable opcode order");
@@ -182,6 +216,45 @@ int main() {
                 a[1] = ops::Value::number(0.4);
                 a[2] = ops::Value::number(0.0);
                 a[3] = vf;
+            } else if (op == ops::Op::recursive_filter_adaptive) {
+                a = {vx, vy, vf, vr};
+            } else if (op == ops::Op::linear_filter2) {
+                a = {vx, ops::Value::number(0.2), ops::Value::number(0.2),
+                     ops::Value::number(0.7), ops::Value::number(-0.1), vr};
+            } else if (op == ops::Op::scalar_kalman) {
+                a = {vx, ops::Value::number(0.01), ops::Value::number(0.1)};
+            } else if (op == ops::Op::state_estimate || op == ops::Op::state_variance) {
+                a = {vk};
+            } else if (op == ops::Op::state_hysteresis) {
+                a = {vx, ops::Value::number(0.6), ops::Value::number(0.4),
+                     ops::Value::number(0.2), ops::Value::number(0.3)};
+            } else if (op == ops::Op::state_confirm) {
+                a = {vi, ops::Value::number(2), ops::Value::number(2)};
+            } else if (op == ops::Op::state_continuous) {
+                a = {vi, vi, vp, ops::Value::number(2), ops::Value::number(6)};
+            } else if (op == ops::Op::continuous_state_values ||
+                       op == ops::Op::continuous_state_evidence ||
+                       op == ops::Op::continuous_state_pending) {
+                a = {vc};
+            } else if (op == ops::Op::drawdown_cycle_state) {
+                a = {vp, vector(draws, 8), vf, ops::Value::number(0.15),
+                     ops::Value::number(0.1), ops::Value::number(0.05)};
+            } else if (op == ops::Op::local_extrema) {
+                a = {vp, ops::Value::number(1), ops::Value::number(1),
+                     ops::Value::number(0), ops::Value::number(0)};
+            } else if (op == ops::Op::ps_filter) {
+                a = {vp, ve, ops::Value::number(1), ops::Value::number(2),
+                     ops::Value::number(0.05)};
+            } else if (op == ops::Op::between_events) {
+                a = {ve};
+            } else if (op == ops::Op::segment_starts || op == ops::Op::segment_ends) {
+                a = {segments};
+            } else if (op == ops::Op::phase_direction) {
+                a = {ve, segments};
+            } else if (op == ops::Op::drawdown_cycle_reference) {
+                a = {phases, vector(changes, 8), segments, ops::Value::number(0.2)};
+            } else if (op == ops::Op::state_select) {
+                a = {vf, vi, ops::Value::number(0), valid};
             }
             try {
                 const auto scalar = run(spec, a, spec.min_args, ops::Isa::scalar);

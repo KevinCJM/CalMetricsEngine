@@ -41,6 +41,9 @@ bool ident_rest(unsigned char c) { return ident_start(c) || std::isdigit(c); }
 
 
 std::string cost(const ops::Spec &spec, V type) {
+  if (ops::series_record_projection(spec.op)) return "constant";
+  if (static_cast<std::uint16_t>(spec.op) >= 127 && spec.family == ops::Family::state && array(type))
+    return "sequence";
   if (spec.op == O::median || spec.op == O::quantile ||
       spec.op == O::median_where || spec.op == O::quantile_where ||
       spec.op == O::argsort || spec.op == O::distinct_count)
@@ -357,6 +360,8 @@ void build_physical_metadata(CompiledGraph &graph) {
       branch.program.nodes.push_back(node);
     }
     branch.program.isolate_errors = graph.program.isolate_errors;
+    branch.program.output_kind = graph.program.output_kind;
+    branch.program.output_dtype = graph.program.output_dtype;
     branch.program.minimum_observations = graph.program.minimum_observations;
     branch.program.scope_work_budget = graph.program.scope_work_budget;
     branch.program.input_count = graph.program.input_count;
@@ -649,7 +654,7 @@ public:
       if (info.node.kind == graph::NodeKind::interval_tail) return true;
       if (info.node.kind != graph::NodeKind::operation) return false;
       const auto op = static_cast<O>(info.node.opcode);
-      return op == O::lag || op == O::transpose ||
+      return op == O::lag || op == O::transpose || ops::series_record_projection(op) ||
              (op == O::diag && nodes[info.node.parents[0]].inferred_type.rank() == 2);
     };
     for (std::size_t i = nodes.size(); i-- > 0;) {
@@ -826,7 +831,7 @@ class Parser {
     if (!take("("))
       return builder.variable(name);
     if (name == "rolling_apply" || name == "block_apply" || name == "filter_apply" ||
-        name == "group_apply" || name == "bisect") {
+        name == "group_apply" || name == "segment_apply" || name == "bisect") {
       check(name != "rolling_apply" || !builder.rolling_body,
             "ROLLING_NESTED_SCOPE_UNSUPPORTED: nested rolling_apply");
       space();
@@ -1159,10 +1164,12 @@ std::uint32_t Builder::apply_scope(const std::string &name,
   check(scope_depth < 8, "SCOPE_NESTING_LIMIT");
   const auto kind = name == "block_apply" ? graph::ApplyKind::block
       : name == "filter_apply" ? graph::ApplyKind::filter
-      : name == "group_apply" ? graph::ApplyKind::group : graph::ApplyKind::bisect;
+      : name == "group_apply" ? graph::ApplyKind::group
+      : name == "segment_apply" ? graph::ApplyKind::segment : graph::ApplyKind::bisect;
   check((kind == graph::ApplyKind::filter && arguments.size() >= 1 && arguments.size() <= 2) ||
         (kind == graph::ApplyKind::bisect && arguments.size() == 4) ||
-        ((kind == graph::ApplyKind::block || kind == graph::ApplyKind::group) && arguments.size() == 1),
+        ((kind == graph::ApplyKind::block || kind == graph::ApplyKind::group ||
+          kind == graph::ApplyKind::segment) && arguments.size() == 1),
         name + ": incorrect argument count");
   for (std::size_t i = 0; i < arguments.size(); ++i) {
     const auto &type = result->nodes[arguments[i]].inferred_type;
@@ -1171,6 +1178,11 @@ std::uint32_t Builder::apply_scope(const std::string &name,
     else if (i == 0 && kind == graph::ApplyKind::group)
       check(type.dtype == typed::DType::int64 && type.shape.size() == 1,
             "group_apply requires exact int64 keys");
+    else if (i == 0 && kind == graph::ApplyKind::segment)
+      check(type.dtype == typed::DType::int64 && type.record_tag == "event_segments" &&
+            type.axes == std::vector<std::string>{"time", "segment_field"} &&
+            type.shape.size() == 2 && type.shape[1] == "2",
+            "segment_apply requires a between_events segment record");
     else
       check(type.is_scalar() && type.dtype == typed::DType::float64,
             name + " requires numeric scalar parameters");
@@ -1213,6 +1225,13 @@ std::uint32_t Builder::apply_scope(const std::string &name,
     const auto outer = capture == body.captures.end() ? variable(input) : capture->second;
     check(result->nodes[outer].inferred_type.shape.size() == 1,
           "apply scope currently accepts only one-dimensional captured arrays");
+    if (kind == graph::ApplyKind::segment) {
+      const auto &capture_type = result->nodes[outer].inferred_type;
+      const auto &segments_type = result->nodes[arguments[0]].inferred_type;
+      check(capture_type.kind == typed::ValueKind::series &&
+            capture_type.shape[0] == segments_type.shape[0],
+            "segment_apply requires captures aligned with the segment time axis");
+    }
     scope.input_nodes.push_back(outer);
   }
   for (const auto &parameter : body.result->parameter_names) {
@@ -1258,6 +1277,11 @@ std::uint32_t Builder::apply_scope(const std::string &name,
     info.inferred_type.dtype = typed::DType::float64;
     info.inferred_type.semantic_dimension = body_type.semantic_dimension;
     info.inferred_type.price_basis = body_type.price_basis;
+    info.value_class = V::series;
+  } else if (kind == graph::ApplyKind::segment) {
+    info.inferred_type = typed::ValueType::series(
+        result->nodes[arguments[0]].inferred_type.shape[0],
+        body_type.semantic_dimension, body_type.price_basis);
     info.value_class = V::series;
   } else if (kind == graph::ApplyKind::block) {
     info.inferred_type = typed::ValueType::series(
@@ -1433,6 +1457,7 @@ compile(const std::vector<std::string> &expressions,
   }
   std::size_t source_bytes = 0;
   std::optional<graph::OutputKind> output_kind;
+  std::optional<graph::OutputDType> output_dtype;
   for (std::size_t root_index = 0; root_index < expressions.size(); ++root_index) {
     const auto &source = expressions[root_index];
     builder.expression_bindings = root_bindings.empty()
@@ -1457,24 +1482,33 @@ compile(const std::vector<std::string> &expressions,
           "PUBLIC_ROOT_TYPE: rolling_window is a compiler-only intermediate");
     const auto &type = builder.result->nodes[root].inferred_type;
     graph::OutputKind current;
+    auto dtype = graph::OutputDType::float64;
     if (type.is_scalar() &&
         (type.is_numeric() || type.is_mask()))
       current = graph::OutputKind::scalar;
-    else if (type.kind == typed::ValueKind::series && type.dtype == typed::DType::float64) {
-      check(type.shape.size() == 1 && type.shape[0] == "T",
+    else if (type.kind == typed::ValueKind::series) {
+      check(type.axes == std::vector<std::string>{"time"} &&
+                type.shape.size() == 1 && type.shape[0] == "T",
             "SERIES_ROOT_ALIGNMENT: public series roots must preserve the interval time axis");
       current = graph::OutputKind::series;
+      dtype = type.dtype == typed::DType::boolean ? graph::OutputDType::boolean
+          : type.dtype == typed::DType::int64 ? graph::OutputDType::int64
+          : graph::OutputDType::float64;
     } else
       throw CompileError(
-          "PUBLIC_ROOT_TYPE: roots must be numeric scalar/mask or aligned numeric series");
+          "PUBLIC_ROOT_TYPE: roots must be numeric scalar/mask or aligned float64/bool/int64 series");
     if (output_kind && *output_kind != current)
       throw CompileError(
           "MIXED_ROOT_TYPES: scalar and series roots cannot share one execution graph");
+    if (output_dtype && *output_dtype != dtype)
+      throw CompileError("MIXED_ROOT_DTYPES: all series roots must have the same dtype");
 
     output_kind = current;
+    output_dtype = dtype;
     builder.result->program.roots.push_back(root);
   }
   builder.result->output_kind = *output_kind;
+  builder.result->program.output_dtype = *output_dtype;
   builder.finish();
   return builder.result;
 }
@@ -1487,7 +1521,7 @@ std::vector<std::uint8_t> encode_program(const graph::Program &p) {
   std::vector<std::uint8_t> bytes;
   bytes.reserve(48 + p.nodes.size() * 48);
   put(bytes, 0x434d4547, 4);
-  put(bytes, 4, 4);
+  put(bytes, 5, 4);
   put(bytes, p.nodes.size(), 4);
   put(bytes, p.roots.size(), 4);
   put(bytes, p.input_count, 4);
@@ -1495,6 +1529,7 @@ std::vector<std::uint8_t> encode_program(const graph::Program &p) {
   put(bytes, p.numeric_slots, 4);
   put(bytes, p.mask_slots, 4);
   put(bytes, static_cast<std::uint8_t>(p.output_kind), 1);
+  put(bytes, static_cast<std::uint8_t>(p.output_dtype), 1);
   put(bytes, p.rolling_scopes.size(), 4);
   put(bytes, p.isolate_errors, 1);
   put(bytes, p.minimum_observations, 4);
@@ -1571,7 +1606,7 @@ graph::Program decode_program(const std::vector<std::uint8_t> &bytes) {
   Reader in{bytes};
   check(in.get(4) == 0x434d4547, "unsupported native plan magic");
   const auto version = in.get(4);
-  check(version >= 1 && version <= 4, "unsupported native plan version");
+  check(version >= 1 && version <= 5, "unsupported native plan version");
   const auto count = in.get(4), roots = in.get(4);
   check(count > 0 && count <= max_nodes && roots > 0 && roots <= 4096,
         "invalid native plan counts");
@@ -1585,6 +1620,11 @@ graph::Program decode_program(const std::vector<std::uint8_t> &bytes) {
     const auto output_kind = in.get(1);
     check(output_kind <= 1, "invalid native output kind");
     p.output_kind = static_cast<graph::OutputKind>(output_kind);
+    if (version >= 5) {
+      const auto dtype = in.get(1);
+      check(dtype <= 2, "invalid native output dtype");
+      p.output_dtype = static_cast<graph::OutputDType>(dtype);
+    }
     scope_count = static_cast<std::size_t>(in.get(4));
     check(scope_count <= 4096, "invalid rolling scope count");
   }
@@ -1667,7 +1707,7 @@ graph::Program decode_program(const std::vector<std::uint8_t> &bytes) {
   for (std::size_t i = 0; i < apply_count; ++i) {
     graph::ApplyScope scope;
     const auto kind = in.get(1);
-    check(kind <= 3, "invalid apply kind");
+    check(kind <= (version >= 5 ? 4 : 3), "invalid apply kind");
     scope.kind = static_cast<graph::ApplyKind>(kind);
     scope.body = std::make_shared<graph::Program>(decode_program(in.blob()));
     for (auto *bindings : {&scope.input_nodes, &scope.parameter_nodes, &scope.argument_nodes}) {

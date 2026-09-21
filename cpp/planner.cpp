@@ -26,6 +26,16 @@ double geometry_work(const compiler::PhysicalCost &cost, const Geometry &g) {
          cost.linear_per_observation * static_cast<double>(g.observations) +
          cost.sort_nlogn * g.sort_work;
 }
+// A scope can have a constant body with no array captures. Its selector or
+// containing interval still determines the extent of nested materialized work.
+std::size_t apply_observation_bound(const graph::ApplyScope &scope,
+                                    const std::vector<ops::Shape> &shapes,
+                                    std::size_t containing_extent) {
+  if (scope.kind == graph::ApplyKind::bisect) return 0;
+  if (scope.kind == graph::ApplyKind::block || shapes.empty()) return containing_extent;
+  const auto &selector = shapes.at(scope.argument_nodes.at(0));
+  return scope.kind == graph::ApplyKind::segment ? selector.dim[0] : selector.size();
+}
 // Add only work omitted by the original interval-length model. The same
 // native shape walk owns both arena capacity and these materialized extents;
 // coefficients and scheduler thresholds remain unchanged. This is an operation
@@ -47,7 +57,9 @@ double typed_array_extra_work(const graph::Program &program,
                                      : program.apply_scopes[node.input_index].input_nodes;
       const auto &body = rolling ? *program.rolling_scopes[node.input_index].body
                                 : *program.apply_scopes[node.input_index].body;
-      std::size_t length = 0;
+      std::size_t length = captures.empty()
+          ? (rolling ? observations : apply_observation_bound(
+              program.apply_scopes[node.input_index], shapes, observations)) : 0;
       std::vector<ops::Value> captured;
       for (auto source : captures) {
         ops::Value value;
@@ -89,8 +101,14 @@ double typed_array_extra_work(const graph::Program &program,
     double extent = static_cast<double>(shapes[index].size());
     for (std::size_t i = 0; i < node.parent_count; ++i)
       extent = std::max(extent, static_cast<double>(shapes[node.parents[i]].size()));
-    if (spec.family == ops::Family::state && op != ops::Op::last_drawdown_interval)
+    if (spec.family == ops::Family::state && op != ops::Op::last_drawdown_interval &&
+        static_cast<std::uint16_t>(op) < 132)
       continue;
+    if (op == ops::Op::state_estimate || op == ops::Op::state_variance ||
+        op == ops::Op::continuous_state_values || op == ops::Op::continuous_state_evidence ||
+        op == ops::Op::continuous_state_pending || op == ops::Op::segment_starts ||
+        op == ops::Op::segment_ends)
+      continue; // Field projections borrow storage without scanning it.
     if (op == ops::Op::transpose || (op == ops::Op::diag && lhs.rank == 2))
       continue; // Borrowed views have no materialized array traversal.
     const bool sort = op == ops::Op::median || op == ops::Op::quantile ||
@@ -110,6 +128,8 @@ double typed_array_extra_work(const graph::Program &program,
     if (spec.family == ops::Family::elementwise)
       factor = ops::simd_eligible(op) ? 0.65 : 1.0;
     else if (spec.family == ops::Family::sequence) factor = 1.2;
+    else if (spec.family == ops::Family::state && static_cast<std::uint16_t>(op) >= 132)
+      factor = 1.2;
     else if (spec.family == ops::Family::reduction || spec.family == ops::Family::composite)
       factor = 1.5;
     else if (spec.family == ops::Family::matrix || spec.family == ops::Family::rolling)
@@ -123,6 +143,18 @@ double typed_array_extra_work(const graph::Program &program,
       extent = static_cast<double>(lhs.dim[0]) * lhs.dim[0] * lhs.dim[0];
     else if (op == ops::Op::trace)
       extent = static_cast<double>(std::min(lhs.dim[0], lhs.dim[1]));
+    else if (op == ops::Op::ps_filter)
+      extent = static_cast<double>(lhs.dim[0]) * lhs.dim[0];
+    else if (op == ops::Op::local_extrema) {
+      const auto window = [&](std::size_t parameter) {
+        const auto &value = program.nodes[node.parents[parameter]];
+        const auto width = value.kind == graph::NodeKind::constant &&
+            std::isfinite(value.constant) && value.constant >= 1 && value.constant <= 5000
+            ? value.constant : 5000.0;
+        return std::min(static_cast<double>(lhs.dim[0]), width);
+      };
+      extent = static_cast<double>(lhs.dim[0]) * (window(1) + window(2));
+    }
     extra += factor * std::max(0.0, extent - baseline);
   }
   if (!std::isfinite(extra)) throw std::overflow_error("typed array work estimate overflow");
@@ -139,14 +171,28 @@ bool requires_typed_work(const graph::Program &program) {
 std::size_t scratch_estimate(const graph::Program &program,
                              std::size_t window,
                              const std::vector<ops::Value> *inputs = nullptr,
-                             std::size_t logical_window = 0) {
+                             std::size_t logical_window = 0,
+                             bool inherited_isolation = false) {
+  const bool isolate_errors = program.isolate_errors || inherited_isolation;
   std::size_t estimate =
       checked_mul(window, checked_add(checked_mul(checked_add(program.numeric_slots, program.integer_slots), 8),
                                       program.mask_slots));
   estimate = checked_add(
       estimate, checked_mul(program.nodes.size(), sizeof(ops::Value) + 160));
-  if (program.isolate_errors)
+  if (isolate_errors) {
     estimate = checked_add(estimate, checked_mul(program.nodes.size(), sizeof(std::int16_t)));
+    const auto positional = program.execution_metadata
+        ? program.execution_metadata->position_status_nodes : 0;
+    if (positional) {
+      // Failure provenance is lazy at execution time, but admission must cover
+      // its worst case before any fault occurs. `window` is the native element
+      // capacity, including multicolumn records, not just the logical time axis.
+      estimate = checked_add(estimate, checked_mul(
+          checked_mul(positional, window), sizeof(std::int16_t)));
+      estimate = checked_add(estimate, checked_mul(
+          program.nodes.size(), sizeof(std::vector<std::int16_t>)));
+    }
+  }
   std::unordered_set<std::uint32_t> order_sources;
   bool operator_scratch = false;
   for (const auto &node : program.nodes) {
@@ -158,7 +204,7 @@ std::size_t scratch_estimate(const graph::Program &program,
     if (op == ops::Op::median || op == ops::Op::quantile ||
         op == ops::Op::median_where || op == ops::Op::quantile_where ||
         op == ops::Op::rolling_min || op == ops::Op::rolling_max ||
-        op == ops::Op::argsort || op == ops::Op::distinct_count ||
+        op == ops::Op::argsort || op == ops::Op::distinct_count || op == ops::Op::ps_filter ||
         op == ops::Op::solve || op == ops::Op::covariance ||
         op == ops::Op::correlation || op == ops::Op::quadratic_form)
       operator_scratch = true;
@@ -175,10 +221,10 @@ std::size_t scratch_estimate(const graph::Program &program,
   const auto scope_scratch = [&](const graph::Program &body,
                                  const std::vector<std::uint32_t> &captures,
                                  const std::vector<std::uint8_t> *preceding,
-                                 bool selected) {
+                                 bool selected, std::size_t uncaptured_extent) {
     std::vector<ops::Value> captured;
     captured.reserve(captures.size());
-    std::size_t length = 0;
+    std::size_t length = captures.empty() ? uncaptured_extent : 0;
     for (std::size_t i = 0; i < captures.size(); ++i) {
       ops::Value value;
       value.shape = shapes.empty() ? ops::vector_shape(window) : shapes.at(captures[i]);
@@ -187,8 +233,21 @@ std::size_t scratch_estimate(const graph::Program &program,
       length = std::max(length, value.shape.size());
       captured.push_back(value);
     }
+    // An unresolved selection validates its child without inventing a slice.
+    // Its logical interval is only a capacity bound, up to the enclosing frame.
+    if (isolate_errors) length = std::max(length, logical_window ? logical_window : window);
     const auto capacity = graph::required_array_capacity(body, captured, length);
-    auto bytes = scratch_estimate(body, capacity, &captured, length);
+    // A failed capture enables child isolation even when its compiled body is
+    // strict. Admission must include the resulting node/position statuses at
+    // every nesting depth before a numerical failure occurs.
+    auto bytes = scratch_estimate(body, capacity, &captured, length, isolate_errors);
+    if (isolate_errors) {
+      bytes = checked_add(bytes, checked_mul(captures.size(), sizeof(std::int16_t)));
+      bytes = checked_add(bytes, checked_mul(captures.size(), sizeof(ops::Value)));
+      bytes = checked_add(bytes, checked_mul(body.parameter_count, sizeof(double)));
+    }
+    if (isolate_errors || body.isolate_errors)
+      bytes = checked_add(bytes, sizeof(std::int16_t)); // One scalar child audit status.
     if (selected)
       bytes = checked_add(bytes, checked_mul(length,
           checked_add(checked_mul(captures.size(), 8), 24)));
@@ -197,22 +256,92 @@ std::size_t scratch_estimate(const graph::Program &program,
   for (const auto &scope : program.rolling_scopes)
     if (scope.body)
       estimate = checked_add(estimate,
-          scope_scratch(*scope.body, scope.input_nodes, &scope.input_preceding, false));
+          scope_scratch(*scope.body, scope.input_nodes, &scope.input_preceding, false,
+                        logical_window ? logical_window : window));
   for (const auto &scope : program.apply_scopes)
     if (scope.body)
       estimate = checked_add(estimate, scope_scratch(*scope.body, scope.input_nodes,
-          nullptr, scope.kind != graph::ApplyKind::bisect));
+          nullptr, scope.kind != graph::ApplyKind::bisect,
+          apply_observation_bound(scope, shapes, logical_window ? logical_window : window)));
   return estimate;
 }
+template <bool CollectMetrics, class SizeAt>
+Geometry inspect_geometry(std::size_t size_count, SizeAt size_at,
+                 const std::int64_t *starts, const std::int64_t *ends,
+                 std::size_t rows, const std::int64_t *product_ids,
+                 bool build_groups) {
+  require(rows == 0 || (starts && ends), "missing interval arrays");
+  for (std::size_t i = 0; i < size_count; ++i)
+    require(size_at(i) == size_at(0),
+            "graph inputs must share an aligned observation axis");
+  Geometry g;
+  g.rows = rows;
+  g.signature = 0x434d454e41544956ull;
+  mix(g.signature, rows);
+  mix(g.signature, size_count);
+  mix(g.signature, product_ids != nullptr);
+  for (std::size_t i = 0; i < size_count; ++i)
+    mix(g.signature, size_at(i));
+  const auto available = size_count ? size_at(0) : 0;
+  std::size_t group_start = 0, group_weight = 0;
+  for (std::size_t row = 0; row < rows; ++row) {
+    require(starts[row] >= 0 && ends[row] >= starts[row] &&
+                static_cast<std::size_t>(ends[row]) <= available,
+            "intervals must satisfy 0 <= start <= end <= input length");
+    if (product_ids)
+      require(product_ids[row] >= 0 &&
+                  (row == 0 || product_ids[row] >= product_ids[row - 1]),
+              "product_ids must be nonnegative and nondecreasing");
+    const auto n = static_cast<std::size_t>(ends[row] - starts[row]);
+    // Preserve overflow validation even when only the signature is needed.
+    g.observations = checked_add(g.observations, n);
+    if constexpr (CollectMetrics) {
+      g.row_lengths.push_back(n);
+      g.max_window = std::max(g.max_window, n);
+      g.sort_work += static_cast<double>(n) *
+                     std::log2(static_cast<double>(std::max<std::size_t>(n, 2)));
+    }
+    mix(g.signature, static_cast<std::uint64_t>(starts[row]));
+    mix(g.signature, static_cast<std::uint64_t>(ends[row]));
+    if (product_ids)
+      mix(g.signature, static_cast<std::uint64_t>(product_ids[row]));
+    if constexpr (CollectMetrics) {
+      const bool new_group =
+          row > 0 && (!product_ids || product_ids[row] != product_ids[row - 1]);
+      if (new_group) {
+        ++g.products;
+        g.max_intervals = std::max(g.max_intervals, row - group_start);
+        if (build_groups) {
+          g.groups.push_back({group_start, row});
+          g.weights.push_back(group_weight);
+        }
+        group_start = row;
+        group_weight = 0;
+      }
+      group_weight = checked_add(group_weight, n);
+    }
+  }
+  if (CollectMetrics && rows) {
+    ++g.products;
+    g.max_intervals = std::max(g.max_intervals, rows - group_start);
+    if (build_groups) {
+      g.groups.push_back({group_start, rows});
+      g.weights.push_back(group_weight);
+    }
+  }
+  return g;
+}
+template <bool CollectMetrics = true>
 Geometry typed_geometry(const graph::Program &program,
                         const std::vector<std::size_t> &sizes,
                         const std::vector<ops::Value> *inputs,
                         const std::int64_t *starts, const std::int64_t *ends,
                         std::size_t rows, const std::int64_t *products,
                         bool build_groups = true) {
-  if (!inputs) return inspect(sizes, starts, ends, rows, products, build_groups);
+  if (!inputs) return inspect_geometry<CollectMetrics>(sizes.size(),
+      [&](std::size_t i) { return sizes[i]; }, starts, ends, rows, products, build_groups);
   require(inputs->size() == program.input_count, "graph input count mismatch");
-  std::vector<std::size_t> temporal;
+  std::size_t temporal_count = 0, available = 0;
   for (std::size_t i = 0; i < inputs->size(); ++i) {
     const auto &value = inputs->at(i);
     const auto axis = program.input_axes.empty() ? 0 : program.input_axes.at(i);
@@ -220,17 +349,22 @@ Geometry typed_geometry(const graph::Program &program,
             (axis != 2 || value.shape.rank == 2) &&
             value.shape.rank >= 1 && value.shape.rank <= 2,
             "graph input rank mismatch");
-    if (axis != 1) temporal.push_back(value.shape.dim[0]);
+    if (axis != 1) {
+      if (temporal_count) require(available == value.shape.dim[0],
+          "graph inputs must share an aligned observation axis");
+      available = value.shape.dim[0];
+      ++temporal_count;
+    }
   }
-  if (temporal.empty()) {
-    std::size_t available = 0;
+  if (!temporal_count) {
     for (std::size_t i = 0; i < rows; ++i) {
       require(starts && ends && starts[i] >= 0 && ends[i] >= starts[i], "invalid interval bounds");
       available = std::max(available, static_cast<std::size_t>(ends[i]));
     }
-    temporal.push_back(available);
+    temporal_count = 1;
   }
-  auto geometry = inspect(temporal, starts, ends, rows, products, build_groups);
+  auto geometry = inspect_geometry<CollectMetrics>(temporal_count,
+      [&](std::size_t) { return available; }, starts, ends, rows, products, build_groups);
   for (const auto &value : *inputs) {
     mix(geometry.signature, static_cast<std::uint64_t>(value.kind));
     mix(geometry.signature, static_cast<std::uint64_t>(value.shape.rank));
@@ -290,61 +424,8 @@ Geometry inspect(const std::vector<std::size_t> &sizes,
                  const std::int64_t *starts, const std::int64_t *ends,
                  std::size_t rows, const std::int64_t *product_ids,
                  bool build_groups) {
-  require(rows == 0 || (starts && ends), "missing interval arrays");
-  for (auto size : sizes)
-    require(size == sizes[0],
-            "graph inputs must share an aligned observation axis");
-  Geometry g;
-  g.rows = rows;
-  g.signature = 0x434d454e41544956ull;
-  mix(g.signature, rows);
-  mix(g.signature, sizes.size());
-  mix(g.signature, product_ids != nullptr);
-  for (auto size : sizes)
-    mix(g.signature, size);
-  const auto available = sizes.empty() ? 0 : sizes[0];
-  std::size_t group_start = 0, group_weight = 0;
-  for (std::size_t row = 0; row < rows; ++row) {
-    require(starts[row] >= 0 && ends[row] >= starts[row] &&
-                static_cast<std::size_t>(ends[row]) <= available,
-            "intervals must satisfy 0 <= start <= end <= input length");
-    if (product_ids)
-      require(product_ids[row] >= 0 &&
-                  (row == 0 || product_ids[row] >= product_ids[row - 1]),
-              "product_ids must be nonnegative and nondecreasing");
-    const auto n = static_cast<std::size_t>(ends[row] - starts[row]);
-    g.row_lengths.push_back(n);
-    g.observations = checked_add(g.observations, n);
-    g.max_window = std::max(g.max_window, n);
-    g.sort_work += static_cast<double>(n) *
-                   std::log2(static_cast<double>(std::max<std::size_t>(n, 2)));
-    mix(g.signature, static_cast<std::uint64_t>(starts[row]));
-    mix(g.signature, static_cast<std::uint64_t>(ends[row]));
-    if (product_ids)
-      mix(g.signature, static_cast<std::uint64_t>(product_ids[row]));
-    const bool new_group =
-        row > 0 && (!product_ids || product_ids[row] != product_ids[row - 1]);
-    if (new_group) {
-      ++g.products;
-      g.max_intervals = std::max(g.max_intervals, row - group_start);
-      if (build_groups) {
-        g.groups.push_back({group_start, row});
-        g.weights.push_back(group_weight);
-      }
-      group_start = row;
-      group_weight = 0;
-    }
-    group_weight = checked_add(group_weight, n);
-  }
-  if (rows) {
-    ++g.products;
-    g.max_intervals = std::max(g.max_intervals, rows - group_start);
-    if (build_groups) {
-      g.groups.push_back({group_start, rows});
-      g.weights.push_back(group_weight);
-    }
-  }
-  return g;
+  return inspect_geometry<true>(sizes.size(), [&](std::size_t i) { return sizes[i]; },
+      starts, ends, rows, product_ids, build_groups);
 }
 std::vector<Chunk> partition(const Geometry &g, std::size_t workers,
                              bool by_product,
@@ -453,7 +534,8 @@ make_plan(std::shared_ptr<compiler::CompiledGraph> graph, const Config &config,
           ? geometry.observations
           : rows;
   p->estimated_output_bytes = checked_mul(
-      checked_mul(output_rows, p->graph->program.roots.size()), 8);
+      checked_mul(output_rows, p->graph->program.roots.size()),
+      graph::output_itemsize(p->graph->program.output_dtype));
   p->estimated_status_bytes = p->graph->program.isolate_errors
       ? checked_mul(checked_mul(output_rows, p->graph->program.roots.size()), 2) : 0;
   p->estimated_worker_scratch_bytes =
@@ -501,6 +583,21 @@ make_plan(std::shared_ptr<compiler::CompiledGraph> graph, const Config &config,
     p->estimated_logical_work_units += p->estimated_typed_array_work_units;
     if (p->estimated_typed_array_work_units > 0)
       p->reason_codes.push_back("typed_array_shape_work_accounted");
+  }
+  if (p->graph->program.output_dtype != graph::OutputDType::float64) {
+    // New typed series must be written even for an identity graph. Charge one
+    // structural work unit per output element; this is not benchmark tuning
+    // and leaves the established float64 cost model unchanged.
+    const auto roots = static_cast<double>(p->graph->program.roots.size());
+    p->estimated_work_units += roots * static_cast<double>(geometry.observations);
+    if (geometry.row_work_units.empty()) {
+      geometry.row_work_units.reserve(rows);
+      for (auto length : geometry.row_lengths)
+        geometry.row_work_units.push_back(row_work(p->graph->physical_cost, length));
+    }
+    for (std::size_t row = 0; row < rows; ++row)
+      geometry.row_work_units[row] += roots * static_cast<double>(geometry.row_lengths[row]);
+    p->reason_codes.push_back("typed_output_write_work_accounted");
   }
   std::vector<std::map<std::size_t, double>> branch_extra(p->graph->branches.size());
   const auto branch_work = [&](std::size_t branch, std::size_t length) {
@@ -634,7 +731,7 @@ void validate_plan(const Plan &p, const std::vector<std::size_t> &sizes,
           "execution plan exceeds this engine CPU budget");
   require(p.input_sizes == sizes && p.row_count == rows,
           "stale execution plan input shape");
-  const auto geometry = typed_geometry(p.graph->program, sizes, inputs, starts, ends, rows, product_ids, false);
+  const auto geometry = typed_geometry<false>(p.graph->program, sizes, inputs, starts, ends, rows, product_ids, false);
   require(geometry.signature == p.geometry_signature,
           "stale execution plan interval/product geometry");
 }
