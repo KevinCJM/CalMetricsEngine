@@ -20,7 +20,8 @@ const std::unordered_set<std::string> &supported_semantics() {
       "adjusted_nav",           "adjusted_market_price",
       "reported_nav",           "raw_market_price",
       "volume",                 "currency_amount", "count",
-      "calendar_days",          "date",            "mask", "category", "index"};
+      "calendar_days",          "date",            "mask", "category", "index",
+      "state", "event", "phase"};
   return values;
 }
 bool derived_semantic(const std::string &value) {
@@ -242,8 +243,8 @@ ValueType ValueType::record(std::string tag, std::vector<std::string> names) {
   return out;
 }
 void ValueType::validate() const {
-  static const std::unordered_set<std::string> axes_allowed{"time", "asset",
-                                                             "window"};
+  static const std::unordered_set<std::string> axes_allowed{
+      "time", "asset", "window", "kalman_field", "state_field", "segment_field"};
   if (axes.size() != shape.size())
     fail("TYPE_MISMATCH", "axes and symbolic shape ranks differ");
   for (const auto &axis : axes)
@@ -402,6 +403,180 @@ ValueType infer(const ops::Spec &spec, const std::vector<ValueType> &v) {
   if (v.size() < spec.min_args || v.size() > spec.max_args)
     fail("ARITY_MISMATCH", std::string(spec.name) + " has invalid arity");
 
+  const auto series = [&](const ValueType &x, DType dtype) {
+    if (x.kind != ValueKind::series || x.dtype != dtype)
+      fail("TYPE_MISMATCH", std::string(spec.name) + " requires a typed time series");
+  };
+  const auto aligned = [&](const ValueType &x, const ValueType &anchor, DType dtype) {
+    series(x, dtype);
+    if (x.axes != anchor.axes || x.shape != anchor.shape)
+      fail("AXIS_MISMATCH", std::string(spec.name) + " requires aligned time series");
+  };
+  const auto integer_series = [&](const ValueType &anchor, const std::string &semantic) {
+    auto out = ValueType::series(anchor.shape[0], semantic);
+    out.dtype = DType::int64;
+    return out;
+  };
+  const auto bundle = [&](const ValueType &anchor, const std::string &tag,
+                          const std::string &axis, std::vector<std::string> fields, DType dtype) {
+    auto out = ValueType::matrix({"time", axis}, {anchor.shape[0], std::to_string(fields.size())},
+                                anchor.semantic_dimension, anchor.price_basis);
+    out.dtype = dtype;
+    out.record_tag = tag;
+    out.fields = std::move(fields);
+    out.validate();
+    return out;
+  };
+  const auto require_bundle = [&](const ValueType &x, const std::string &tag,
+                                  const std::string &axis, std::size_t width, DType dtype) {
+    if (x.kind != ValueKind::matrix || x.dtype != dtype || x.record_tag != tag ||
+        x.axes != std::vector<std::string>{"time", axis} || x.shape.size() != 2 ||
+        x.shape[1] != std::to_string(width) || x.fields.size() != width)
+      fail("TYPE_MISMATCH", std::string(spec.name) + " requires its nominal state record");
+  };
+  if (op == O::state_select) {
+    series(v[0], DType::boolean);
+    aligned(v[3], v[0], DType::boolean);
+    for (std::size_t i = 1; i < 3; ++i) {
+      if (v[i].is_integer()) {
+        aligned(v[i], v[0], DType::int64);
+        if (v[i].semantic_dimension != "state" && v[i].semantic_dimension != "category")
+          fail("TYPE_MISMATCH", "state_select requires category/state branches");
+      } else require_scalar_parameter(v[i], "state code");
+    }
+    return integer_series(v[0], "state");
+  }
+  if (op == O::recursive_filter_adaptive) {
+    series(v[0], DType::float64);
+    if (!v[1].is_numeric() || v[1].semantic_dimension != "dimensionless")
+      fail("TYPE_MISMATCH", "adaptive alpha must be dimensionless float64");
+    if (!v[1].is_scalar()) aligned(v[1], v[0], DType::float64);
+    aligned(v[2], v[0], DType::boolean);
+    aligned(v[3], v[0], DType::boolean);
+    if (v.size() > 4) {
+      if (!v[4].is_scalar() || !v[4].is_numeric())
+        fail("TYPE_MISMATCH", "adaptive initial must be a numeric scalar");
+      compatible_semantics(spec.name, v[0], v[4]);
+    }
+    for (std::size_t i = 5; i < v.size(); ++i) require_scalar_parameter(v[i], "recurrence policy");
+    return v[0];
+  }
+  if (op == O::linear_filter2) {
+    series(v[0], DType::float64);
+    for (std::size_t i = 1; i < 5; ++i) require_scalar_parameter(v[i], "coefficient", false);
+    aligned(v[5], v[0], DType::boolean);
+    for (std::size_t i = 6; i < v.size(); ++i) require_scalar_parameter(v[i], "recurrence policy");
+    return v[0];
+  }
+  if (op == O::scalar_kalman) {
+    series(v[0], DType::float64);
+    for (std::size_t i = 1; i < v.size(); ++i) {
+      if (!v[i].is_numeric() || !v[i].is_scalar() ||
+          (v[i].semantic_dimension != "dimensionless" &&
+           v[i].semantic_dimension != "squared:" + v[0].semantic_dimension))
+        fail("TYPE_MISMATCH", "Kalman variance must be scalar in squared observation units");
+    }
+    return bundle(v[0], "kalman_series", "kalman_field", {"estimate", "variance"}, DType::float64);
+  }
+  if (op == O::state_estimate || op == O::state_variance) {
+    require_bundle(v[0], "kalman_series", "kalman_field", 2, DType::float64);
+    return ValueType::series(v[0].shape[0],
+        op == O::state_estimate ? v[0].semantic_dimension : "squared:" + v[0].semantic_dimension,
+        op == O::state_estimate ? v[0].price_basis : "");
+  }
+  if (op == O::state_hysteresis) {
+    series(v[0], DType::float64);
+    for (std::size_t i = 1; i < v.size(); ++i) {
+      if (!v[i].is_scalar() || !v[i].is_numeric()) fail("TYPE_MISMATCH", "threshold must be scalar");
+      compatible_semantics(spec.name, v[0], v[i]);
+    }
+    return integer_series(v[0], "state");
+  }
+  if (op == O::state_confirm || op == O::state_continuous) {
+    series(v[0], DType::int64);
+    if (v[0].semantic_dimension != "state" && v[0].semantic_dimension != "category")
+      fail("TYPE_MISMATCH", "state recurrence requires category/state codes");
+    if (op == O::state_confirm) {
+      require_scalar_parameter(v[1], "confirmation");
+      require_scalar_parameter(v[2], "minimum hold");
+      return integer_series(v[0], "state");
+    }
+    aligned(v[1], v[0], DType::int64);
+    if (v[1].semantic_dimension != "state" && v[1].semantic_dimension != "category")
+      fail("TYPE_MISMATCH", "initial state requires category/state codes");
+    aligned(v[2], v[0], DType::float64);
+    require_scalar_parameter(v[3], "confirmation");
+    require_scalar_parameter(v[4], "state count");
+    return bundle(v[0], "continuous_state_bundle", "state_field",
+                  {"state", "evidence", "pending_count"}, DType::int64);
+  }
+  if (op == O::continuous_state_values || op == O::continuous_state_evidence ||
+      op == O::continuous_state_pending) {
+    require_bundle(v[0], "continuous_state_bundle", "state_field", 3, DType::int64);
+    return integer_series(v[0], op == O::continuous_state_values ? "state" :
+        op == O::continuous_state_evidence ? "category" : "count");
+  }
+  if (op == O::drawdown_cycle_state) {
+    series(v[0], DType::float64);
+    aligned(v[1], v[0], DType::float64);
+    if (v[1].semantic_dimension != "dimensionless" && v[1].semantic_dimension != "return_decimal")
+      fail("SEMANTIC_DIMENSION_MISMATCH", "drawdown must be a dimensionless decimal fraction");
+    aligned(v[2], v[0], DType::boolean);
+    for (std::size_t i = 3; i < v.size(); ++i) require_scalar_parameter(v[i], "threshold", false);
+    return integer_series(v[0], "state");
+  }
+  if (op == O::local_extrema || op == O::ps_filter) {
+    series(v[0], DType::float64);
+    std::size_t parameters = 1;
+    if (op == O::ps_filter) {
+      aligned(v[1], v[0], DType::int64);
+      if (v[1].semantic_dimension != "event") fail("TYPE_MISMATCH", "PS requires turning events");
+      parameters = 2;
+    }
+    for (std::size_t i = parameters; i < v.size(); ++i) require_scalar_parameter(v[i], "event parameter");
+    return integer_series(v[0], "event");
+  }
+  if (op == O::between_events) {
+    series(v[0], DType::int64);
+    if (v[0].semantic_dimension != "event") fail("TYPE_MISMATCH", "between_events requires turning events");
+    return bundle(v[0], "event_segments", "segment_field", {"start", "end"}, DType::int64);
+  }
+  if (op == O::segment_starts || op == O::segment_ends) {
+    require_bundle(v[0], "event_segments", "segment_field", 2, DType::int64);
+    return integer_series(v[0], "index");
+  }
+  if (op == O::phase_direction) {
+    series(v[0], DType::int64);
+    if (v[0].semantic_dimension != "event") fail("TYPE_MISMATCH", "phase_direction requires turning events");
+    require_bundle(v[1], "event_segments", "segment_field", 2, DType::int64);
+    if (v[0].shape[0] != v[1].shape[0]) fail("AXIS_MISMATCH", "phase event/segment alignment");
+    return integer_series(v[0], "phase");
+  }
+  if (op == O::drawdown_cycle_reference) {
+    series(v[0], DType::int64);
+    if (v[0].semantic_dimension != "phase") fail("TYPE_MISMATCH", "reference cycle requires phase direction codes");
+    aligned(v[1], v[0], DType::float64);
+    if (v[1].semantic_dimension != "dimensionless" && v[1].semantic_dimension != "return_decimal")
+      fail("SEMANTIC_DIMENSION_MISMATCH", "phase changes must be decimal returns");
+    require_bundle(v[2], "event_segments", "segment_field", 2, DType::int64);
+    if (v[0].shape[0] != v[2].shape[0]) fail("AXIS_MISMATCH", "phase/segment alignment");
+    require_scalar_parameter(v[3], "stress", false);
+    return integer_series(v[0], "state");
+  }
+
+  if ((op == O::equal || op == O::not_equal) && (v[0].is_integer() || v[1].is_integer())) {
+    const auto &anchor = v[0].is_integer() ? v[0] : v[1];
+    if (!one_dimensional(anchor)) fail("TYPE_MISMATCH", "integer comparison requires codes, not records");
+    for (const auto &value : v) {
+      if (value.is_integer()) {
+        if (value.axes != anchor.axes || value.shape != anchor.shape ||
+            value.semantic_dimension != anchor.semantic_dimension)
+          fail("TYPE_MISMATCH", "integer comparison requires matching nominal codes");
+      } else require_scalar_parameter(value, "exact integer comparison code");
+    }
+    return anchor.as_mask();
+  }
+
   // Index/category operations preserve int64 exactly and never enter float
   // arithmetic implicitly. A reordered series is an asset-like selection vector;
   // it no longer promises alignment to the original time axis.
@@ -546,10 +721,10 @@ ValueType infer(const ops::Spec &spec, const std::vector<ValueType> &v) {
       fail("TYPE_MISMATCH", std::string(spec.name) + " requires numeric input");
     if (op == O::sign)
       return v[0].with_semantics("dimensionless");
-    if (op == O::normal_pdf || op == O::normal_ppf || op == O::normal_cdf) {
+    if (op == O::normal_pdf || op == O::normal_ppf || op == O::normal_cdf || op == O::cos) {
       if (v[0].semantic_dimension != "dimensionless")
         fail("SEMANTIC_DIMENSION_MISMATCH",
-             "normal_pdf/normal_ppf/normal_cdf require dimensionless input");
+             "distribution/trigonometric input must be dimensionless");
       return v[0].with_semantics("dimensionless");
     }
     if (op == O::log || op == O::exp) {

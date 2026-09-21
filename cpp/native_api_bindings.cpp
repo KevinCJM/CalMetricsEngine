@@ -256,6 +256,7 @@ bool same_double(double a, double b) {
 class BoundData {
 public:
   std::shared_ptr<c::CompiledGraph> graph;
+  std::vector<py::str> input_keys, parameter_keys;
   std::vector<ArrayPin> pins;
   ArrayPin starts, ends;
   std::optional<ArrayPin> product_ids, parameter_pin;
@@ -269,6 +270,8 @@ public:
             bool bind_parameters)
       : graph(std::move(g)), starts(ArrayPin::bind<std::int64_t>(a, "starts")),
         ends(ArrayPin::bind<std::int64_t>(z, "ends")) {
+    for (const auto &name : graph->input_names) input_keys.emplace_back(name);
+    for (const auto &name : graph->parameter_names) parameter_keys.emplace_back(name);
     if (starts.size != ends.size)
       throw py::value_error("starts and ends lengths must match");
     native.starts = static_cast<const std::int64_t *>(starts.data);
@@ -374,9 +377,12 @@ public:
       if (d.size() != pins.size())
         return false;
       for (std::size_t i = 0; i < pins.size(); ++i) {
-        py::str key(graph->input_names[i]);
-        if (!d.contains(key) || !pins[i].same(d[key]))
-          return false;
+        const auto &key = input_keys[i];
+        if (PyDict_CheckExact(d.ptr())) {
+          auto *value = PyDict_GetItemWithError(d.ptr(), key.ptr());
+          if (!value && PyErr_Occurred()) throw py::error_already_set();
+          if (!value || !pins[i].same(py::handle(value))) return false;
+        } else if (!d.contains(key) || !pins[i].same(d[key])) return false;
       }
     }
     if (parameter_pin)
@@ -390,10 +396,12 @@ public:
     if (d.size() != parameter_values.size())
       return false;
     for (std::size_t i = 0; i < parameter_values.size(); ++i) {
-      py::str key(graph->parameter_names[i]);
-      if (!d.contains(key) ||
-          !same_double(parameter_values[i], py::cast<double>(d[key])))
-        return false;
+      const auto &key = parameter_keys[i];
+      if (PyDict_CheckExact(d.ptr())) {
+        auto *value = PyDict_GetItemWithError(d.ptr(), key.ptr());
+        if (!value && PyErr_Occurred()) throw py::error_already_set();
+        if (!value || !same_double(parameter_values[i], py::cast<double>(py::handle(value)))) return false;
+      } else if (!d.contains(key) || !same_double(parameter_values[i], py::cast<double>(d[key]))) return false;
     }
     return true;
   }
@@ -465,7 +473,7 @@ struct Result {
     }
     d["input_dtype"] = common_dtype.empty() ? "float64" : common_dtype;
     d["input_dtypes"] = std::move(input_dtypes);
-    d["output_dtype"] = "float64";
+    d["output_dtype"] = calmetrics_engine::graph::output_dtype_name(plan->graph->program.output_dtype);
     d["error_policy"] = plan->graph->program.isolate_errors ? "isolate" : "raise";
     d["status_contract"] = "indicator-status-1";
     d["result_lifetime"] = prepared && !snapshot ? "borrowed_until_next_run" : "independent";
@@ -508,9 +516,19 @@ struct Result {
     return d;
   }
 };
-py::array new_output(std::size_t rows, std::size_t columns) {
-  p::checked_mul(p::checked_mul(rows, columns), 8);
-  return py::array_t<double>(
+py::dtype output_dtype(const calmetrics_engine::graph::Program &program) {
+  switch (program.output_dtype) {
+  case calmetrics_engine::graph::OutputDType::float64: return py::dtype::of<double>();
+  case calmetrics_engine::graph::OutputDType::boolean: return py::dtype::of<bool>();
+  case calmetrics_engine::graph::OutputDType::int64: return py::dtype::of<std::int64_t>();
+  }
+  throw py::value_error("GRAPH_OUTPUT_DTYPE");
+}
+py::array new_output(std::size_t rows, std::size_t columns,
+                     const calmetrics_engine::graph::Program &program) {
+  p::checked_mul(p::checked_mul(rows, columns),
+                 calmetrics_engine::graph::output_itemsize(program.output_dtype));
+  return py::array(output_dtype(program),
       {static_cast<py::ssize_t>(rows), static_cast<py::ssize_t>(columns)});
 }
 std::size_t output_rows(const c::CompiledGraph &graph, const n::Batch &batch) {
@@ -556,10 +574,10 @@ public:
                     std::shared_ptr<p::Plan> p)
       : engine(std::move(e)), bound(std::move(b)), plan(std::move(p)),
         output(new_output(output_rows(*plan->graph, bound->native),
-                          plan->graph->program.roots.size())),
+                          plan->graph->program.roots.size(), plan->graph->program)),
         offsets(output_offsets(*plan->graph, bound->native)),
         output_address(output.data()) {}
-  n::ExecutionAudit execute(double *destination = nullptr) {
+  n::ExecutionAudit execute(void *destination = nullptr) {
     if (!bound->unchanged())
       throw py::value_error(
           "PREPARED_INPUT_CHANGED: rebind resized or retyped arrays");
@@ -569,10 +587,10 @@ public:
         output.shape(1) !=
             static_cast<py::ssize_t>(plan->graph->program.roots.size()) ||
         output.data() != output_address || !output.writeable() ||
-        !output.dtype().equal(py::dtype::of<double>()) ||
+        !output.dtype().equal(output_dtype(plan->graph->program)) ||
         !(output.flags() & py::array::c_style))
       throw py::value_error("PREPARED_OUTPUT_CHANGED");
-    auto *data = static_cast<double *>(output.mutable_data());
+    auto *data = output.mutable_data();
     py::gil_scoped_release release;
     std::unique_lock<std::mutex> guard(mutex, std::try_to_lock);
     if (!guard.owns_lock())
@@ -580,7 +598,13 @@ public:
     return engine->execute(*plan, bound->native, destination ? destination : data);
   }
   py::array run() {
-    execute();
+    const auto audit = execute();
+    if (plan->graph->program.output_dtype != calmetrics_engine::graph::OutputDType::float64)
+      for (const auto &chunk : audit.chunks)
+        if (std::any_of(chunk.statuses.begin(), chunk.statuses.end(),
+                        [](auto status) { return status != 0; }))
+          throw py::value_error(
+              "TYPED_OUTPUT_STATUS_REQUIRED: use run_audit or run_snapshot to retain validity statuses");
     return output;
   }
   Result run_audit() {
@@ -591,8 +615,8 @@ public:
     // Write directly into independent output while holding the execution lock.
     // Copying the borrowed output after releasing that lock would race another run.
     auto owned = new_output(output_rows(*plan->graph, bound->native),
-                            plan->graph->program.roots.size());
-    auto a = execute(static_cast<double *>(owned.mutable_data()));
+                            plan->graph->program.roots.size(), plan->graph->program);
+    auto a = execute(owned.mutable_data());
     owned.attr("setflags")(false);
     return {owned, output_offsets(*plan->graph, bound->native), plan,
             std::move(a), true, true, true};
@@ -677,11 +701,11 @@ public:
     const bool shared_output =
         plan->lane == "process" && plan->use_shared_memory;
     py::array output;
-    double *data = nullptr;
+    void *data = nullptr;
     if (!shared_output) {
       output = new_output(output_rows(*graph, bound->native),
-                          graph->program.roots.size());
-      data = static_cast<double *>(output.mutable_data());
+                          graph->program.roots.size(), graph->program);
+      data = output.mutable_data();
     }
     n::ExecutionAudit audit;
     {
@@ -696,7 +720,7 @@ public:
           static_cast<py::ssize_t>(output_rows(*graph, bound->native)),
           static_cast<py::ssize_t>(graph->program.roots.size())};
       output =
-          py::array(py::dtype::of<double>(), shape, {},
+          py::array(output_dtype(graph->program), shape, {},
                     audit.output_owner->data(), py::cast(audit.output_owner));
     }
     return {std::move(output), output_offsets(*graph, bound->native),

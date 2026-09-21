@@ -84,7 +84,7 @@ py::dict value_type_dict(const t::ValueType &value) {
   d["shape"] = value.shape;
   d["semantic_dimension"] = value.semantic_dimension;
   d["price_basis"] = value.price_basis.empty() ? py::none() : py::cast(value.price_basis);
-  if (value.kind == t::ValueKind::record) {
+  if (!value.record_tag.empty()) {
     d["record_tag"] = value.record_tag;
     d["fields"] = value.fields;
   }
@@ -223,6 +223,7 @@ py::dict graph_metadata(const c::CompiledGraph &graph) {
   d["integer_slots"] = graph.program.integer_slots;
   d["typed_ir_version"] = "cpp-typed-ir-1";
   d["output_kind"] = graph.program.output_kind == g::OutputKind::series ? "series" : "scalar";
+  d["output_dtype"] = g::output_dtype_name(graph.program.output_dtype);
   d["rolling_scope_count"] = graph.program.rolling_scopes.size();
   d["apply_scope_count"] = graph.program.apply_scopes.size();
   py::dict variable_types;
@@ -374,7 +375,11 @@ py::dict raw_execute(const g::Program &program, const py::tuple &input_arrays,
   std::vector<calmetrics_engine::ops::Value> inputs;
   b::exact<std::int64_t>(starts, 1, "starts");
   b::exact<std::int64_t>(ends, 1, "ends");
-  b::exact<double>(output, 2, "out", true);
+  switch (program.output_dtype) {
+  case g::OutputDType::float64: b::exact<double>(output, 2, "out", true); break;
+  case g::OutputDType::boolean: b::exact<bool>(output, 2, "out", true); break;
+  case g::OutputDType::int64: b::exact<std::int64_t>(output, 2, "out", true); break;
+  }
   if (starts.size() != ends.size())
     throw py::value_error("batch shape mismatch");
   py::ssize_t expected_output_rows = starts.size();
@@ -437,7 +442,7 @@ py::dict raw_execute(const g::Program &program, const py::tuple &input_arrays,
     if (b::overlaps(output_bounds, b::bounds(param)))
       throw py::value_error("output aliases parameters");
   }
-  auto *out = static_cast<double *>(output.mutable_data());
+  auto *out = output.mutable_data();
   g::Audit audit;
   {
     py::gil_scoped_release release;
@@ -454,6 +459,15 @@ py::dict raw_execute(const g::Program &program, const py::tuple &input_arrays,
                        starts.size(), out, program.roots.size());
   }
   auto result = b::graph_audit(audit);
+  result["output_dtype"] = g::output_dtype_name(program.output_dtype);
+  if (program.isolate_errors) {
+    if (audit.statuses.size() != static_cast<std::size_t>(output.size()))
+      throw std::runtime_error("invalid native statuses");
+    py::array_t<std::int16_t> statuses({output.shape(0), output.shape(1)});
+    std::copy(audit.statuses.begin(), audit.statuses.end(), statuses.mutable_data());
+    statuses.attr("setflags")(false);
+    result["statuses"] = std::move(statuses);
+  }
   result["scheduler_backend"] = "process_wide_cpp_cpu_admission";
   result["cpu_tokens"] = 1;
   return result;
@@ -486,6 +500,7 @@ void register_graph(py::module_ &parent) {
         d["input_axes"] = p.input_axes;
         d["output_kind"] =
             p.output_kind == g::OutputKind::series ? "series" : "scalar";
+        d["output_dtype"] = g::output_dtype_name(p.output_dtype);
         d["python_operator_calls"] = 0;
         d["execution_backend"] = "native_graph_interpreter";
         return d;

@@ -21,8 +21,13 @@ bool CpuBudget::acquire(std::size_t count, SchedulerDeadline deadline) {
   std::unique_lock<std::mutex> lock(mutex_);
   if (count > total_)
     throw std::invalid_argument("CPU request exceeds scheduler capacity");
-  if (!cv_.wait_until(lock, deadline,
-                      [&] { return closing_ || available_ >= count; }))
+  const auto ready = [&] { return closing_ || available_ >= count; };
+  // A maximum steady-clock deadline can overflow when older libstdc++
+  // converts it to the realtime clock, spinning while holding this mutex.
+  // Infinite admission must use the untimed wait so releases can acquire it.
+  if (deadline == SchedulerDeadline::max())
+    cv_.wait(lock, ready);
+  else if (!cv_.wait_until(lock, deadline, ready))
     return false;
   if (closing_)
     throw std::runtime_error("native scheduler is closed");

@@ -172,10 +172,6 @@ void sequence(const Prepared &p, Output &out, Workspace &work, Audit &) {
     }
     if (op == Op::gather) {
         const auto &indices = p.args[1];
-        // Validate every index before writing any output.
-        for (std::size_t i = 0; i < indices.size(); ++i)
-            require(indices.i(i) >= 0 && static_cast<std::uint64_t>(indices.i(i)) < n,
-                    "INDEX_OUT_OF_BOUNDS");
         for (std::size_t i = 0; i < indices.size(); ++i) {
             const auto index = static_cast<std::size_t>(indices.i(i));
             if (x.kind == Kind::integer)

@@ -20,7 +20,7 @@ PyBind11 / C++17
 The current 0.3.0 code line is **C++ first**: restricted AST parsing, native Typed IR for
 scalar/time-series indicator execution, shared-DAG compilation, CSE, alias-aware liveness,
 rolling scopes, cost planning, CPU admission, thread/process pools, shared-memory ownership
-and all 125 canonical operators execute in C++. Python retains public import names, NumPy
+and all 146 canonical operators execute in C++. Python retains public import names, NumPy
 ownership adaptation and an asyncio await bridge. A complete synchronous request crosses
 PyBind once, not once per worker. The eight existing finance APIs retain their numerical contracts.
 
@@ -73,7 +73,7 @@ import numpy as np
 from calmetrics_engine import operators as op
 
 values = np.array([0.01, -0.02, 0.03, 0.005], dtype=np.float64)
-assert len(op.catalog()) == 125
+assert len(op.catalog()) == 146
 volatility = op.std(values, ddof=1)
 
 output = np.empty_like(values)
@@ -168,9 +168,23 @@ loops remain in C++.
 
 The native graph executor fuses compatible reductions across roots so one source is not rescanned
 for every statistic. Ordinary `scheduler.execute()` reuses compatible bound inputs while returning
-independent results. For the lowest hot-loop overhead, call `scheduler.prepare_execution(...)` once
-and then `PreparedGraphExecution.run()`. Prepared output is deliberately reused and overwritten on
-the next run. Changing bound dtype, pointer, shape or interval geometry requires rebinding/replanning;
+independent results. For repeated tasks with the same graph and input geometry, prepare once:
+
+```python
+with AdaptiveScheduler(cpu_budget=4) as scheduler:
+    prepared = scheduler.prepare_execution(graph, {"returns": returns}, starts, ends)
+    retained = prepared.run_snapshot()  # Independent values, statuses and audit; safe to keep.
+    current = prepared.run_audit()      # Reuses values; consume before the next run.
+    values, statuses, evidence = current.values, current.statuses, current.audit
+    # Input contents may be updated between completed runs; keep the same owners and geometry.
+    next_result = prepared.run_snapshot()
+    # retained remains unchanged; current.values may have been overwritten.
+```
+
+Use `run_snapshot()` for stored/history results and `run_audit()` for immediate consumption with
+statuses and execution evidence. `run()` is the minimal values-only API when its validity contract
+is sufficient. Prepared output from `run()`/`run_audit()` is overwritten on the next run; a readonly
+view is not an independent snapshot. Changing bound dtype, pointer, shape or interval geometry requires rebinding/replanning;
 do not mutate buffers concurrently with execution.
 
 Performance is tested against the real BetterSaaTaa compiled NJIT batch on the same data/formulas,
@@ -502,3 +516,49 @@ native workspace/output allocations, not a blanket zero-allocation promise.
 See the [detailed design and contracts](docs/mathematical-composition-design.md) and
 [validation record](docs/mathematical-composition-acceptance.md). These generic capabilities
 do not mean every MetricsFactory definition has been migrated or certified.
+
+## Stateful and typed time series
+
+IDs 126–146 add reusable adaptive and second-order recurrences, cosine, shared scalar
+Kalman state, separate classification/confirmation, drawdown state, turning events,
+joint PS filtering and complete-segment boundaries. KAMA and Super Smoother remain
+visible compositions of these mathematical steps. Existing `recursive_filter` still
+uses its original fixed-alpha and gap-hold contract.
+
+```python
+# One Kalman solve, two borrowed intermediate projections, independent public output.
+kalman = GraphCompiler({"x": "series"}).compile([
+    "state_estimate(scalar_kalman(x,0.01,0.1))",
+    "state_variance(scalar_kalman(x,0.01,0.1))",
+])
+
+# Conditions, classification and consecutive confirmation remain separate nodes.
+states = GraphCompiler({"x": "series"}).compile([
+    "state_confirm(state_select(x>=0,0,1,finite_mask(x)),2,3)"
+])
+```
+
+Public aligned series roots now support **float64, bool and exact int64**, with one dtype
+per graph. `values` remains a contiguous two-dimensional array with interval `offsets`.
+Mixed root dtypes and direct matrix/record roots are rejected. Under error isolation,
+always read `statuses`: invalid bool/int64 entries use False/0 placeholders, which are
+distinct from valid False/0 and from an operator's documented unknown-state code.
+Typed `prepared.run()` rejects failed results without statuses; use `run_audit()` or
+`run_snapshot()`. Snapshot results remain independent of later prepared calls.
+
+`segment_apply(body,between_events(events))` evaluates a scalar body on both complete
+segment endpoints `[left,right]` and broadcasts to `[left,right)`. Open tails and missing
+gaps stay missing. For example, `last(price)/first(price)-1` remains a visible body.
+Peak/trough revisions, PS filtering and complete waves are retrospective; adding an
+ordinary comparison does not make their dependent outputs causal.
+
+In isolate mode, actual segment exceptions retain per-position failure statuses through
+comparisons, masks and state selection; a resulting False/0 is still invalid. Unaffected
+segments and independent roots remain available. Nonlocal operators without an exact
+position-dependency mapping conservatively invalidate their dependent root; ordinary
+missing/warmup values keep their existing numerical semantics.
+
+See [stateful series design](docs/stateful-series-design.md),
+[state/event contracts](docs/state-event-contracts.md) and
+[validation evidence](docs/stateful-series-acceptance.md). These changes extend the engine;
+they do not switch research-platform services or remove platform NJIT warmup.

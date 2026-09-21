@@ -86,6 +86,18 @@ std::array<double, 5> drawdown_interval(const Value &x) {
 void state(const Prepared &p, Output &out, Workspace &, Audit &) {
     const auto op = p.spec->op;
     const auto &a = p.args;
+    if (op == Op::state_select) {
+        for (std::size_t i = 0; i < a[0].size(); ++i) {
+            if (!a[3].u(i)) {
+                out.set_integer(i, -1);
+                continue;
+            }
+            const auto &branch = a[a[0].u(i) ? 1 : 2];
+            out.set_integer(i, branch.kind == Kind::integer
+                ? branch.i(i) : static_cast<std::int64_t>(branch.scalar));
+        }
+        return;
+    }
     if (op == Op::last_drawdown_interval) {
         out.record = drawdown_interval(a[0]);
         return;

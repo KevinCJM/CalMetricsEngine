@@ -16,7 +16,7 @@ EXTENSIONS = [
 
 
 def test_append_only_registry_contract():
-    assert [(s["opcode"], s["id"]) for s in op.catalog()[118:]] == list(
+    assert [(s["opcode"], s["id"]) for s in op.catalog()[118:125]] == list(
         enumerate(EXTENSIONS, start=119)
     )
     for name in EXTENSIONS:

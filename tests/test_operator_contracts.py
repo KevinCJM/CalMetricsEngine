@@ -21,7 +21,7 @@ def test_registry_is_an_immutable_source_of_truth():
     assert op.catalog()[0]["id"] == "add"
     with pytest.raises((ValueError, TypeError)):
         op.get("__import__")
-    for code in (0, 126, -1, 65536):
+    for code in (0, 147, -1, 65536):
         with pytest.raises((ValueError, TypeError)):
             op.get_by_opcode(code)
     assert "rolling_apply" not in {item["id"] for item in op.catalog()}

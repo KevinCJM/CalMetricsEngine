@@ -91,9 +91,10 @@ ignore = ["E501"]
 [tool.cibuildwheel]
 build = "cp3{10,11,12,13,14}-*"
 skip = "*-win32 *-win_arm64 *-manylinux_i686 *-musllinux_i686"
-test-requires = ["pytest>=8,<10"]
+# Reuse the declared test dependency without passing < / > through Windows cmd.
+test-extras = ["test"]
 test-sources = ["tests"]
-test-command = "python -m pytest tests -q --import-mode=importlib"
+test-command = "python -m pytest tests -v --import-mode=importlib -o faulthandler_timeout=60"
 
 [tool.cibuildwheel.linux]
 manylinux-x86_64-image = "manylinux2014"
@@ -103,3 +104,10 @@ musllinux-aarch64-image = "musllinux_1_2"
 
 [tool.cibuildwheel.macos]
 environment = { MACOSX_DEPLOYMENT_TARGET = "11.0" }
+
+[[tool.cibuildwheel.overrides]]
+select = "*-manylinux_*"
+# NumPy >=2.5 needs GCC >=10.3; manylinux2014 supplies GCC 10.2.
+# Keep the engine's glibc 2.17 baseline and test every wheel here, then test
+# these same wheels with unconstrained NumPy on modern Linux in build.yml.
+before-test = 'python -m pip install "numpy>=1.26,<2.5"'

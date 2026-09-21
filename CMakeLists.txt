@@ -40,6 +40,8 @@ add_library(calmetrics_engine_operators STATIC
     cpp/operators/elementwise.cpp
     cpp/operators/reduction.cpp
     cpp/operators/sequence.cpp
+    cpp/operators/recurrence.cpp
+    cpp/operators/state_events.cpp
     cpp/operators/matrix.cpp
     cpp/operators/state.cpp
     cpp/operators/simd.cpp
@@ -128,6 +130,8 @@ if(CALMETRICS_ENGINE_BUILD_TESTS)
     add_executable(calmetrics_engine_native_tests tests/native_tests.cpp)
     target_link_libraries(calmetrics_engine_native_tests PRIVATE calmetrics_engine_finance)
     add_test(NAME calmetrics_engine_native_tests COMMAND calmetrics_engine_native_tests)
+    # Fail a blocked admission regression instead of hanging CI indefinitely.
+    set_tests_properties(calmetrics_engine_native_tests PROPERTIES TIMEOUT 60)
     add_executable(calmetrics_engine_operator_tests tests/operator_native_tests.cpp)
     target_link_libraries(calmetrics_engine_operator_tests PRIVATE calmetrics_engine_operators)
     add_test(NAME calmetrics_engine_operator_tests COMMAND calmetrics_engine_operator_tests)
@@ -143,7 +147,11 @@ if(CALMETRICS_ENGINE_BUILD_TESTS)
     add_executable(calmetrics_engine_math_tests tests/math_native_tests.cpp)
     target_link_libraries(calmetrics_engine_math_tests PRIVATE calmetrics_engine_operators)
     add_test(NAME calmetrics_engine_math_tests COMMAND calmetrics_engine_math_tests)
+    add_executable(calmetrics_engine_stateful_tests tests/stateful_native_tests.cpp)
+    target_link_libraries(calmetrics_engine_stateful_tests PRIVATE calmetrics_engine_operators)
+    add_test(NAME calmetrics_engine_stateful_tests COMMAND calmetrics_engine_stateful_tests)
     list(APPEND calmetrics_engine_targets
+        calmetrics_engine_stateful_tests
         calmetrics_engine_math_tests
         calmetrics_engine_runtime_tests
         calmetrics_engine_compiler_tests

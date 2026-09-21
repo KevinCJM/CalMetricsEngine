@@ -50,6 +50,7 @@ jobs:
   wheels:
     name: Wheels (${{ matrix.arch }} / ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
@@ -83,6 +84,38 @@ jobs:
         env:
           CIBW_ARCHS: ${{ matrix.arch }}
       - run: python tools/check_dist.py wheelhouse
+      - name: Set up Python versions for latest NumPy wheel tests
+        if: runner.os == 'Linux'
+        uses: actions/setup-python@v5
+        with:
+          python-version: |
+            3.10
+            3.11
+            3.12
+            3.13
+            3.14
+      - name: Test the same manylinux wheels with latest compatible NumPy
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          # manylinux2014 tests compiler-compatible NumPy inside the old image.
+          # Each required Linux check also tests the exact repaired artifacts
+          # against the latest NumPy supported by each Python on the new host.
+          cd "$RUNNER_TEMP"
+          for version in 3.10 3.11 3.12 3.13 3.14; do
+            abi="cp${version/./}"
+            wheels=("$GITHUB_WORKSPACE"/wheelhouse/*-"$abi"-"$abi"-manylinux*.whl)
+            if [[ ${#wheels[@]} != 1 || ! -f "${wheels[0]}" ]]; then
+              echo "Expected exactly one repaired manylinux wheel for $abi" >&2
+              exit 1
+            fi
+            "python$version" -m venv "$RUNNER_TEMP/latest-numpy-$version"
+            py="$RUNNER_TEMP/latest-numpy-$version/bin/python"
+            "$py" -m pip install --upgrade --only-binary=numpy "${wheels[0]}[test]"
+            "$py" -m pip check
+            "$py" -I -c 'import sys, numpy; print(sys.version, "NumPy", numpy.__version__)'
+            "$py" -I -m pytest "$GITHUB_WORKSPACE/tests" -v --import-mode=importlib -o faulthandler_timeout=60
+          done
       - uses: actions/upload-artifact@v4
         with:
           name: dist-wheels-${{ matrix.os }}-${{ matrix.arch }}
@@ -126,8 +159,11 @@ jobs:
       - name: Exercise bindings and kernels under sanitizers
         shell: bash
         run: |
-          export LD_PRELOAD="$(gcc -print-file-name=libasan.so)"
-          python -I -m pytest tests -q --import-mode=importlib
+          # Python does not load libstdc++ at startup. Make C++ exception symbols
+          # available when ASan initializes its interceptors, before dlopen(_native).
+          export LD_PRELOAD="$(gcc -print-file-name=libasan.so):$(g++ -print-file-name=libstdc++.so)"
+          # Keep native diagnostics visible if a sanitizer terminates Python.
+          python -I -m pytest tests -q -s --import-mode=importlib
         env:
           ASAN_OPTIONS: detect_leaks=0:halt_on_error=1
           UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
