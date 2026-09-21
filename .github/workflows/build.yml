@@ -126,8 +126,11 @@ jobs:
       - name: Exercise bindings and kernels under sanitizers
         shell: bash
         run: |
-          export LD_PRELOAD="$(gcc -print-file-name=libasan.so)"
-          python -I -m pytest tests -q --import-mode=importlib
+          # Python does not load libstdc++ at startup. Make C++ exception symbols
+          # available when ASan initializes its interceptors, before dlopen(_native).
+          export LD_PRELOAD="$(gcc -print-file-name=libasan.so):$(g++ -print-file-name=libstdc++.so)"
+          # Keep native diagnostics visible if a sanitizer terminates Python.
+          python -I -m pytest tests -q -s --import-mode=importlib
         env:
           ASAN_OPTIONS: detect_leaks=0:halt_on_error=1
           UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1

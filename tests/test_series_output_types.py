@@ -107,6 +107,9 @@ def test_typed_minimum_sample_status_survives_transport(dtype, lane):
 
 
 @pytest.mark.parametrize("dtype", ["bool", "int64"])
+@pytest.mark.filterwarnings(
+    "ignore:Setting the dtype on a NumPy array has been deprecated:DeprecationWarning"
+)
 def test_prepared_typed_output_reuse_snapshot_and_dtype_guard(dtype):
     values = sample(dtype)
     original = values.copy()
@@ -127,6 +130,8 @@ def test_prepared_typed_output_reuse_snapshot_and_dtype_guard(dtype):
         np.testing.assert_array_equal(retained.values[:, 0], original)
         assert prepared.run_audit().audit["result_lifetime"] == "borrowed_until_next_run"
         assert retained.audit["result_lifetime"] == "independent"
+        # Mutate the bound ndarray itself to exercise the native guard. A new
+        # view would not test this hazard; NumPy 2.5 warns about this setter.
         prepared.output.dtype = np.uint8 if dtype == "bool" else np.uint64
         with pytest.raises(ValueError, match="PREPARED_OUTPUT_CHANGED"):
             prepared.run()

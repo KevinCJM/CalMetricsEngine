@@ -126,6 +126,9 @@ def test_shared_typed_bundle_results_outlive_all_input_owners():
     assert result.audit["boundary_copy_bytes"] == starts.nbytes + ends.nbytes
 
 
+@pytest.mark.filterwarnings(
+    "ignore:Setting the shape on a NumPy array has been deprecated:DeprecationWarning"
+)
 def test_prepared_matrix_shape_and_stride_changes_fail_closed():
     graph = GraphCompiler({"x": declaration("matrix")}).compile("mean(sum_asset(x))")
     x = np.arange(12.0).reshape(4, 3)
@@ -137,6 +140,8 @@ def test_prepared_matrix_shape_and_stride_changes_fail_closed():
         x[:] += 10
         prepared.run()
         np.testing.assert_array_equal(retained.values, expected)
+        # Keep the same owner/pointer: reshape() would create a different view
+        # and no longer test mutation of the already-bound descriptor.
         x.shape = (6, 2)
         with pytest.raises(ValueError, match="PREPARED_INPUT_CHANGED"):
             prepared.run()

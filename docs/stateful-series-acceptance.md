@@ -62,7 +62,7 @@ wheel 构建需要项目声明的 CMake/pybind11/scikit-build-core 构建依赖�
 | `operator_native_tests.cpp` | 全部 146 个算子的 scalar / 自动 ISA 结果校验，共 60,411 项检查 |
 | `stateful_native_tests.cpp` | 原生共享记录、事件边界、序列化、完整波段执行及 sanitizer 回归 |
 
-## 最终结果
+## 功能与性能验收结果
 
 最终 wheel：`calmetrics_engine-0.3.0-cp312-cp312-macosx_15_0_arm64.whl`。
 
@@ -186,6 +186,30 @@ prepared 门槛保持 C++/NJIT <=0.90。两组微工作负载的普通 `Schedule
 `/private/tmp/calmetrics-scope-final-wheels/`、`/private/tmp/calmetrics-scope-final-install/`。
 这些是本次实测产物，
 复现应使用上面的命令重新生成，不能依赖临时目录长期存在。
+
+## PR 阶段的依赖与 CI 兼容性
+
+首次 PR CI 在 NumPy 2.5.3 下复现 3 项失败：测试故意修改已绑定 ndarray 的 dtype/shape，
+被新增的弃用警告提前中断。只在这两项测试中局部匹配预期警告；保留原数组、原生拒绝断言及全局 warnings-as-errors。
+修正后 NumPy 2.5.3 全量 **4528/4528 通过**。没有用新 view 代替原地变更来绕开所有权检查。
+
+Windows wheel 的构建和原生测试通过，但 cibuildwheel 4.2.1 用 `shell=True` 执行
+`pip install pytest>=8,<10`，版本约束进入 cmd 重定向解析，依赖安装失败。
+改用既有 `test` extra 安装相同 pytest 约束，避免独立 shell 参数，也避免重复维护测试依赖。
+
+Linux sanitizer 的原生 7/7 通过，Python 在首个原生异常边界测试处退出且原诊断被 fd 捕获隐藏。
+工作流改为同时预加载 ASan 和 libstdc++，让 C++ 异常拦截符号在初始化时可用；pytest 增加 `-s` 保留原生诊断。
+全部原有测试、平台、sanitizer 和 CI 必需检查保持启用；实际远端结果以 PR 当前 HEAD 为准。
+
+调整 pyproject 测试依赖配置后重新构建并独立安装 wheel：
+
+- wheel SHA-256：`816b93092a20684a5a052fb7217c10b0232803985d1dc375ffb3b49eec30c7cb`。
+- engine_build_id：`1a81843ccb1f0b244f782edaf28a15976a9ce13ca2047e1b8d8bb50cc8900ea5`，已按当前源码及构建配置独立复核。
+- NumPy 2.5.3 全量：**4528 passed**（4.04 秒）；Ruff 0.16.8 的 `src tests tools` 检查通过。
+- 产物、安装及日志分别在 `/private/tmp/calmetrics-pr1-wheels/`、`/private/tmp/calmetrics-pr1-install/`、`/private/tmp/calmetrics-pr1-pytest.log`。
+
+C++ 源码没有因这组兼容性修订改变；上文性能和原生 sanitizer 数字来自明确记录的功能验收构建，
+不是声称对每次仅测试/CI 配置变更重复测量了性能。
 
 ## 证据边界
 
