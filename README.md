@@ -31,6 +31,20 @@ native block/filter/group scopes and bounded scalar root finding extend the same
 chain. Research-platform causality/knowledge-time and business governance remain upstream.
 No PyPI publication is implied by local builds.
 
+## 使用文档
+
+首次接入从 [用户使用手册](docs/user-guide.md) 开始；完整导航见 [docs/README.md](docs/README.md)。
+
+| 内容 | 文档 |
+| --- | --- |
+| 标量、时序、向量、矩阵、输入输出、DAG 和可运行例子 | [用户使用手册](docs/user-guide.md) |
+| 全部 146 个算子的签名、形状、数学逻辑及边界 | [数学算子参考](docs/operator-reference.md) |
+| SIMD、线程、进程、协程、共享内存的实际选择条件 | [执行与性能指南](docs/execution-guide.md) |
+| out、Workspace、借用视图及直接调用约束 | [算子接口与内存契约](docs/canonical-operators.md) |
+
+金融数据选择与业务解释由调用方负责；当前 Typed IR 已有的语义校验仍按代码执行，
+具体边界见使用手册。阶段设计与验收记录保留当时范围，不作为最新能力目录。
+
 ## Install
 
 After publication:
@@ -56,7 +70,7 @@ import calmetrics_engine as engine
 - No runtime JIT compilation or service-start warmup.
 - PyBind11/C++ AOT backend.
 - Exact-dtype, strided, zero-copy NumPy inputs.
-- C-contiguous, Fortran-order, sliced and readonly arrays are supported directly.
+- Direct operators support compatible C/F-order, sliced and readonly arrays; graph float64 series require C-contiguous inputs.
 - GIL released during native numerical work.
 - Portable baseline wheels instead of mandatory AVX.
 - One numerical implementation per reusable operator.

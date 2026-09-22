@@ -1,5 +1,8 @@
 # C++ Typed DSL / Rolling Scope 详细设计（2026-09-20）
 
+> 本文保留该阶段的设计与验收范围，其中早期 dtype、输出与协议说明不是最新完整能力表。
+> 当前 scalar/series/vector/matrix 与 int64、状态记录及公开输出契约以[使用手册](user-guide.md)和[算子参考](operator-reference.md)为入口；本页窗口设计仍供实现追溯。
+
 ## 1. 目标
 
 本次仅完成两个明确需求：

@@ -2,7 +2,9 @@
 
 ## 当前能力
 
-`calmetrics_engine.operators` 提供 125 个可执行 canonical 算子。全部经由同一 `_native` 扩展进入 C++，不依赖 Numba，不在首次调用时编译，也不回退到 Python 数值实现。
+`calmetrics_engine.operators` 提供 146 个可执行 canonical 算子。全部经由同一 `_native` 扩展进入 C++，不依赖 Numba，不在首次调用时编译，也不回退到 Python 数值实现。
+
+完整名称、签名、形状与数学逻辑见[数学算子参考](operator-reference.md)；整图类型和示例见[使用手册](user-guide.md)，调度条件见[执行指南](execution-guide.md)。本文集中说明直接调用、内存和工作区契约。
 
 本页描述直接算子接口；公式/DAG 和整图执行由原生 GraphCompiler、Planner 与 Scheduler 提供，单个算子不自行创建线程池或进程池。调用方提供名义轴、计量单位、价格基准和时点可得性；Typed IR 校验已声明的类型与轴契约。
 
@@ -20,21 +22,21 @@ portfolio_gain = op.total_return(values)
 
 operator = op.get("std")                    # 名称解析一次，重复使用 handle
 assert operator(values) == volatility
-assert len(op.catalog()) == 125
+assert len(op.catalog()) == 146
 assert op.get_by_opcode(operator.spec["opcode"]).name == "std"
 ```
 
 `op.call("std", values)`、`op.std(values)` 和 `op.get("std")(values)` 使用同一 C++ 注册项。`catalog()` 返回新建的元数据对象，修改返回的字典不会修改注册表。
 
-注册表版本为 `canonical-native-1`。显式 opcode 1–118 保持不变，119–125 是增量扩展，**不等于旧 Numba 的 BASIC_OPCODES 或旧计划二进制编码**。能力发现使用 catalog，不通过猜测外部 opcode 映射。旧参考值保留为固定回归。
+注册表版本为 `canonical-native-1`。显式 opcode 1–125 保持既有契约，126–146 是递推、状态与 typed 时序扩展，**不等于旧 Numba 的 BASIC_OPCODES 或旧计划二进制编码**。能力发现使用 catalog，不通过猜测外部 opcode 映射。旧参考值保留为固定回归。
 
-新增 119–125 依次是 `normal_cdf`、`aligned_shift`、`recursive_filter`、`argsort`、`gather`、`distinct_count`、`floor`。逐项类型、初始化、缺失值和颗粒度说明见[数学组合设计](mathematical-composition-design.md)；运行时 `spec` 元数据与原生 registry 是参数入口。分块/筛选/分组/求根是编译器作用域，不额外伪装成金融指标算子。
+119–125 依次是 `normal_cdf`、`aligned_shift`、`recursive_filter`、`argsort`、`gather`、`distinct_count`、`floor`，详见[数学组合设计](mathematical-composition-design.md)。126–146 详见[递推与状态设计](stateful-series-design.md)及[状态事件契约](state-event-contracts.md)；运行时 `spec` 元数据与原生 registry 是参数入口。分块/筛选/分组/求根/分段是编译器作用域，不另计为 canonical 算子。
 
 ## 输入类型与数据准备
 
 数值数组必须是本机字节序、元素对齐的 `float64 ndarray`。掩码接受 `uint8` 0/1 或 NumPy bool。按各算子契约接受标量、一维或二维，只有明确的标量广播，不隐式进行矩阵与向量的轴广播。
 
-`argsort/gather/distinct_count` 另接受其契约声明的本机 `int64` 数组；排序索引与类别比较保持精确，不能转为 float64。普通浮点数学仍拒绝 int64 数组。`distinct_count` 返回 float64 数量，并检查数量可精确表示；负类别 ID 只有在显式 mask 排除时才被忽略。
+`argsort/gather/distinct_count`、整数 `equal/not_equal` 重载和状态/事件接口另接受其契约声明的本机 `int64` 数组；排序索引与类别比较保持精确，不能转为 float64。普通浮点数学仍拒绝 int64 数组。`distinct_count` 返回 float64 数量，并检查数量可精确表示；负类别 ID 只有在显式 mask 排除时才被忽略。
 
 Python 数值标量可使用 float 或可精确表示为 float64 的整数；也支持 NumPy float64 和范围内的整数标量。NumPy bool/uint8 标量按 mask 解释。拒绝 Python list、float32/object/complex 数组、非本机字节序和不支持的 rank，不偷偷转换。
 
@@ -198,4 +200,4 @@ C++ 直接使用 `operators.hpp` 的调用者还必须保证输入指针有效�
 - 开发设计：`canonical-operators-design.md`。
 - 对照、平台与性能证据：`canonical-operators-acceptance.md`。
 
-Phase 2 的 native graph executor 已直接复用同一套 C++ `lookup/prepare/execute` 和 canonical kernels；生产平台的 Typed DSL/semantic/causality 契约仍未复制进来，当前只新增受限数学 AST 与执行侧 shared DAG。
+当前 native graph executor 直接复用同一套 C++ `lookup/prepare/execute` 和 canonical kernels，并已具备原生 Typed IR、名义轴、部分声明语义校验、编译器作用域和 typed 时序根。业务字段选择、完整金融口径、因果性和知识时点认证仍由调用方负责，不能从直接算子运行成功推断这些业务条件已成立。

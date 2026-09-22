@@ -1,5 +1,8 @@
 # CalMetricsEngine architecture — C++ first
 
+User-facing entry points: [user guide](user-guide.md), [operator reference](operator-reference.md),
+and [execution guide](execution-guide.md). This page focuses on implementation responsibilities.
+
 ## 1. Current execution boundary
 
 ```text
