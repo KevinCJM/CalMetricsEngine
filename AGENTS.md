@@ -1,5 +1,17 @@
 # CalMetricsEngine Repository Guidelines
 
+## User documentation maintenance
+
+- Before changing public types, operators, scopes, scheduling, result ownership or examples, read
+  [the documentation index](docs/README.md) and the relevant current user guide/reference.
+- Keep the [user guide](docs/user-guide.md), [operator reference](docs/operator-reference.md) and
+  [execution guide](docs/execution-guide.md) synchronized with affected public contracts.
+- Verify documented names, signatures, defaults and scheduling conditions against the canonical
+  registry/current native code. Run changed executable examples and check links.
+- Preserve historical design/acceptance evidence with explicit scope/date labels; do not present
+  historical counts or test results as current capability. Do not change runtime behavior solely
+  to make documentation claims true. See [documentation design](docs/documentation-design.md).
+
 ## 1. Project Mission
 
 CalMetricsEngine is the reusable **C++-first, AOT, high-performance calculation engine** for the
@@ -1063,6 +1075,7 @@ zero-copy claims.
 - Business causality/knowledge-time and research-workflow semantics: FundInvestmentResearchPlatform.
 - Historical behavior is preserved by tests and Git history, not duplicate current implementations.
 - README describes public/user-facing contracts.
+- `docs/README.md` routes users to current guides, complete operator reference and historical evidence.
 - `docs/architecture.md` describes architecture.
 - This `AGENTS.md` describes implementation discipline for future AI/code changes.
 

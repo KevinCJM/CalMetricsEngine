@@ -1,5 +1,8 @@
 # Platform execution contracts
 
+For an end-to-end introduction, see the [user guide](user-guide.md); for strategy selection,
+see the [execution guide](execution-guide.md). This page describes the current integration boundary.
+
 The native graph compiler accepts optional `error_policy="isolate"`, one
 `root_bindings` mapping and one opaque `source_contracts` string per root, and
 `minimum_observations`. The default error policy remains `raise`.
@@ -7,13 +10,20 @@ The native graph compiler accepts optional `error_policy="isolate"`, one
 ## Isolation
 
 An isolated result exposes read-only int16 `statuses`, shaped like `values`.
-Numerical errors set NaN and propagate through actual dependencies; independent
+Numerical errors set NaN for float64, or False/0 placeholders for bool/int64, and propagate through actual dependencies; independent
 roots and subsequent intervals continue. Codes: 0 OK, 1 insufficient observations,
 2 guarded scalar division by zero, 3 guarded scalar domain error, 4 unavailable numeric result (including operator sample/parameter exceptions), 7 invalid positional lookup,
 9 missing interval, 10 unrecovered interval. Structural/input/resource/process
 failures remain request failures. Status collection works for single, thread,
-process/shared-memory and DAG-branch execution. Series isolation is per root and
-interval when an operator throws; individual nonfinite output points receive 4.
+process/shared-memory and DAG-branch execution. Actual rolling/group/segment exceptions retain per-position
+failure provenance through mapped downstream dependencies; operators without an exact positional
+dependency map conservatively invalidate their dependent node. Independent roots and healthy
+mapped segments continue. Nonfinite float64 output points receive 4. Normal missing/warmup values
+do not themselves become captured execution exceptions. See [stateful failure propagation](stateful-series-design.md#分段异常向下游传播).
+
+Strict mode preserves the ordinary `rolling_apply` compatibility rule: without a segment-failure
+context, a numerical body exception becomes NaN for that window; strict `group_apply` still raises.
+Choose `isolate` when downstream bool/int64 results must retain explicit window/group failure status.
 
 ## Native interval bindings
 
@@ -27,8 +37,8 @@ Per-root parameter names permit shared expressions with different parameter
 values. Source-contract namespaces prevent cross-version operation CSE and enter
 the graph fingerprint. The platform owns historical financial DSL validation.
 
-The binary program format is v4; decoding v1–v3 preserves their original contracts,
-including strict-error defaults for v1/v2. The worker request/response protocol is v3
+The binary program format is v5; decoding v1–v4 preserves their original float64 contracts,
+including strict-error defaults for v1/v2. The worker request/response protocol is v4
 and requires an exact version match. Use the worker shipped
 with the same native package; old workers are rejected. Status transport uses
 bounded IPC frames; large numeric inputs/outputs retain existing shared-memory
@@ -37,7 +47,8 @@ and IPC buffers. The 256 MiB frame limit remains enforced.
 
 ## Ownership and execution evidence
 
-`execute()` owns independent numeric output. Prepared `run()` and `run_audit()`
+`execute()` owns independent numeric output. Prepared execution currently requires a single-lane plan;
+thread/process plans are rejected. Prepared `run()` and `run_audit()`
 borrow reusable output until the next run. `run_snapshot()` executes directly into
 independent read-only output under the prepared execution lock; no post-unlock
 copy race. Snapshots and their status arrays remain valid after later runs and
