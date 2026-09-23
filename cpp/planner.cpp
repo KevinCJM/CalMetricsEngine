@@ -1,4 +1,5 @@
 #include "calmetrics_engine/planner.hpp"
+#include "calmetrics_engine/native_process.hpp"
 #include <algorithm>
 #include <cmath>
 #include <limits>
@@ -379,6 +380,7 @@ std::size_t total_memory(const Plan &p, std::size_t workers) {
   auto bytes = checked_add(p.estimated_input_bytes, p.estimated_output_bytes);
   // Native status chunks + result array + worst-case IPC serialization buffers.
   bytes = checked_add(bytes, checked_mul(p.estimated_status_bytes, p.lane == "process" ? 6 : 2));
+  bytes = checked_add(bytes, checked_mul(p.estimated_result_metadata_bytes, p.lane == "process" ? checked_add(workers, 6) : 2));
   bytes = checked_add(bytes, checked_mul(p.row_count, 16));
   bytes = checked_add(bytes,
                       checked_mul(workers, p.estimated_worker_scratch_bytes));
@@ -391,6 +393,10 @@ std::size_t total_memory(const Plan &p, std::size_t workers) {
     } else {
       bytes = checked_add(
           bytes, checked_mul(p.estimated_input_bytes, checked_mul(workers, 2)));
+      // Typed matrices can dwarf inputs: parent output, worker output, worker
+      // frame, received frame and decoded payload may coexist during inline IPC.
+      if (p.result_layout)
+        bytes = checked_add(bytes, checked_mul(p.estimated_output_bytes, 3));
     }
   }
   return bytes;
@@ -538,6 +544,21 @@ make_plan(std::shared_ptr<compiler::CompiledGraph> graph, const Config &config,
       graph::output_itemsize(p->graph->program.output_dtype));
   p->estimated_status_bytes = p->graph->program.isolate_errors
       ? checked_mul(checked_mul(output_rows, p->graph->program.roots.size()), 2) : 0;
+  if (p->graph->program.output_kind == graph::OutputKind::typed) {
+    require(inputs != nullptr, "typed results require bound input geometry");
+    p->estimated_result_metadata_bytes = checked_add(
+        checked_mul(checked_mul(rows, p->graph->program.roots.size()),
+                    sizeof(graph::ResultSlot) + sizeof(ops::Shape) + 2),
+        checked_mul(checked_add(rows, 1), 2 * sizeof(std::size_t)));
+    // Reject an impossible metadata budget before reserving rows * roots slots.
+    if (memory_budget && p->estimated_result_metadata_bytes > *memory_budget)
+      throw std::bad_alloc();
+    p->result_layout = std::make_shared<graph::ResultLayout>(
+        graph::result_layout(p->graph->program, *inputs, starts, ends, rows));
+    p->estimated_output_bytes = p->result_layout->bytes();
+    p->estimated_status_bytes = p->graph->program.isolate_errors
+        ? checked_mul(p->result_layout->status_count(), 2) : 0;
+  }
   p->estimated_worker_scratch_bytes =
       scratch_estimate(p->graph->program, array_capacity, inputs, geometry.max_window);
   for (const auto &node : p->graph->nodes) {
@@ -584,7 +605,17 @@ make_plan(std::shared_ptr<compiler::CompiledGraph> graph, const Config &config,
     if (p->estimated_typed_array_work_units > 0)
       p->reason_codes.push_back("typed_array_shape_work_accounted");
   }
-  if (p->graph->program.output_dtype != graph::OutputDType::float64) {
+  if (p->result_layout) {
+    if (geometry.row_work_units.empty())
+      for (auto length : geometry.row_lengths)
+        geometry.row_work_units.push_back(row_work(p->graph->physical_cost, length));
+    for (std::size_t row = 0; row < rows; ++row) {
+      const auto work = static_cast<double>(p->result_layout->row_statuses[row + 1] - p->result_layout->row_statuses[row]);
+      p->estimated_work_units += work;
+      geometry.row_work_units[row] += work;
+    }
+    p->reason_codes.push_back("typed_result_capacity_write_work_accounted");
+  } else if (p->graph->program.output_dtype != graph::OutputDType::float64) {
     // New typed series must be written even for an identity graph. Charge one
     // structural work unit per output element; this is not benchmark tuning
     // and leaves the established float64 cost model unchanged.
@@ -677,12 +708,48 @@ make_plan(std::shared_ptr<compiler::CompiledGraph> graph, const Config &config,
                          : "process_input_exceeds_shared_memory_threshold");
 
   auto workers = process ? p->process_count : p->thread_count;
+  const auto check_transport = [&] {
+    if (!process) return;
+    p->chunks = partition(geometry, workers, p->parallel_dimension == "product",
+                          &p->graph->physical_cost);
+    for (const auto chunk : p->chunks) {
+      std::size_t output_bytes = 0, status_bytes = 0, slots = 0;
+      if (p->result_layout) {
+        const auto &layout = *p->result_layout;
+        output_bytes = layout.row_bytes[chunk.end] - layout.row_bytes[chunk.begin];
+        if (p->graph->program.isolate_errors)
+          status_bytes = checked_mul(layout.row_statuses[chunk.end] - layout.row_statuses[chunk.begin], 2);
+        slots = checked_mul(chunk.end - chunk.begin, p->graph->program.roots.size());
+      } else {
+        auto output_rows = chunk.end - chunk.begin;
+        if (p->graph->program.output_kind == graph::OutputKind::series) {
+          output_rows = 0;
+          for (auto row = chunk.begin; row < chunk.end; ++row)
+            output_rows = checked_add(output_rows, geometry.row_lengths[row]);
+        }
+        const auto count = checked_mul(output_rows, p->graph->program.roots.size());
+        output_bytes = checked_mul(count, graph::output_itemsize(p->graph->program.output_dtype));
+        if (p->graph->program.isolate_errors) status_bytes = checked_mul(count, 2);
+      }
+      // Statuses and actual shapes still travel in IPC on the shared path.
+      require(native::process_response_bytes(0, status_bytes, slots) <= native::max_process_frame_bytes,
+              "process result status/shape metadata exceeds IPC frame limit; reduce the interval batch");
+      if (!p->use_shared_memory &&
+          native::process_response_bytes(output_bytes, status_bytes, slots) > native::max_process_frame_bytes) {
+        p->use_shared_memory = true;
+        p->reason_codes.push_back("process_result_exceeds_ipc_frame_limit");
+      }
+    }
+  };
+  check_transport();
   p->estimated_total_memory_bytes = total_memory(*p, workers);
   bool reduced = false;
   while (memory_budget && p->estimated_total_memory_bytes > *memory_budget &&
          workers > 1) {
     --workers;
     reduced = true;
+    // Fewer workers enlarge each response; recheck before memory admission.
+    check_transport();
     p->estimated_total_memory_bytes = total_memory(*p, workers);
   }
   if (memory_budget && p->estimated_total_memory_bytes > *memory_budget)
@@ -717,7 +784,7 @@ make_plan(std::shared_ptr<compiler::CompiledGraph> graph, const Config &config,
                      });
     for (const auto &task : tasks)
       p->branch_tasks.push_back(task.task);
-  } else {
+  } else if (!process) {
     p->chunks = partition(geometry, workers, p->parallel_dimension == "product",
                           &p->graph->physical_cost);
   }

@@ -370,8 +370,11 @@ void build_physical_metadata(CompiledGraph &graph) {
     branch.program.mask_slots = next_mask_slot;
     branch.program.integer_slots = next_integer_slot;
     branch.program.input_axes = graph.program.input_axes;
-    for (auto root_index : roots)
+    for (auto root_index : roots) {
       branch.program.roots.push_back(remap[graph.program.roots[root_index]]);
+      if (!graph.program.root_outputs.empty())
+        branch.program.root_outputs.push_back(graph.program.root_outputs[root_index]);
+    }
     branch.program.finalize();
 
     graph.physical_cost.constant_per_row += branch.cost.constant_per_row;
@@ -1398,7 +1401,7 @@ compile(const std::vector<std::string> &expressions,
         const std::vector<typed::Variable> &variables, bool isolate_errors,
         const std::vector<std::map<std::string, std::string>> &root_bindings,
         const std::vector<std::string> &source_contracts, std::uint32_t minimum_observations,
-        std::uint64_t scope_work_budget) {
+        std::uint64_t scope_work_budget, bool typed_results) {
   check(!variables.empty() && variables.size() < 65536,
         "invalid variable count");
   check(!expressions.empty() && expressions.size() <= 4096,
@@ -1458,6 +1461,7 @@ compile(const std::vector<std::string> &expressions,
   std::size_t source_bytes = 0;
   std::optional<graph::OutputKind> output_kind;
   std::optional<graph::OutputDType> output_dtype;
+  bool compatible = !typed_results;
   for (std::size_t root_index = 0; root_index < expressions.size(); ++root_index) {
     const auto &source = expressions[root_index];
     builder.expression_bindings = root_bindings.empty()
@@ -1481,33 +1485,27 @@ compile(const std::vector<std::string> &expressions,
       throw CompileError(
           "PUBLIC_ROOT_TYPE: rolling_window is a compiler-only intermediate");
     const auto &type = builder.result->nodes[root].inferred_type;
-    graph::OutputKind current;
-    auto dtype = graph::OutputDType::float64;
-    if (type.is_scalar() &&
-        (type.is_numeric() || type.is_mask()))
-      current = graph::OutputKind::scalar;
-    else if (type.kind == typed::ValueKind::series) {
-      check(type.axes == std::vector<std::string>{"time"} &&
-                type.shape.size() == 1 && type.shape[0] == "T",
-            "SERIES_ROOT_ALIGNMENT: public series roots must preserve the interval time axis");
-      current = graph::OutputKind::series;
-      dtype = type.dtype == typed::DType::boolean ? graph::OutputDType::boolean
-          : type.dtype == typed::DType::int64 ? graph::OutputDType::int64
-          : graph::OutputDType::float64;
-    } else
-      throw CompileError(
-          "PUBLIC_ROOT_TYPE: roots must be numeric scalar/mask or aligned float64/bool/int64 series");
-    if (output_kind && *output_kind != current)
-      throw CompileError(
-          "MIXED_ROOT_TYPES: scalar and series roots cannot share one execution graph");
-    if (output_dtype && *output_dtype != dtype)
-      throw CompileError("MIXED_ROOT_DTYPES: all series roots must have the same dtype");
-
+    check((type.is_scalar() || type.kind == typed::ValueKind::series ||
+           type.kind == typed::ValueKind::vector || type.kind == typed::ValueKind::matrix) &&
+              (type.is_numeric() || type.is_integer() || type.is_mask()) &&
+              (type.kind != typed::ValueKind::matrix || type.record_tag.empty()),
+          "PUBLIC_ROOT_TYPE: roots must be scalar, series, vector or matrix; project internal records first");
+    const auto exact_dtype = type.dtype == typed::DType::boolean ? graph::OutputDType::boolean
+        : type.dtype == typed::DType::int64 ? graph::OutputDType::int64 : graph::OutputDType::float64;
+    builder.result->program.root_outputs.push_back({exact_dtype, static_cast<std::uint8_t>(type.rank())});
+    const auto current = type.is_scalar() ? graph::OutputKind::scalar : graph::OutputKind::series;
+    const auto dtype = type.is_scalar() ? graph::OutputDType::float64 : exact_dtype;
+    if (!type.is_scalar() && !(type.kind == typed::ValueKind::series &&
+          type.axes == std::vector<std::string>{"time"} && type.shape == std::vector<std::string>{"T"}))
+      compatible = false;
+    if ((output_kind && *output_kind != current) || (output_dtype && *output_dtype != dtype))
+      compatible = false;
     output_kind = current;
     output_dtype = dtype;
     builder.result->program.roots.push_back(root);
   }
-  builder.result->output_kind = *output_kind;
+  builder.result->output_kind = compatible ? *output_kind : graph::OutputKind::typed;
+  if (compatible) builder.result->program.root_outputs.clear();
   builder.result->program.output_dtype = *output_dtype;
   builder.finish();
   return builder.result;
@@ -1521,7 +1519,7 @@ std::vector<std::uint8_t> encode_program(const graph::Program &p) {
   std::vector<std::uint8_t> bytes;
   bytes.reserve(48 + p.nodes.size() * 48);
   put(bytes, 0x434d4547, 4);
-  put(bytes, 5, 4);
+  put(bytes, 6, 4);
   put(bytes, p.nodes.size(), 4);
   put(bytes, p.roots.size(), 4);
   put(bytes, p.input_count, 4);
@@ -1530,6 +1528,11 @@ std::vector<std::uint8_t> encode_program(const graph::Program &p) {
   put(bytes, p.mask_slots, 4);
   put(bytes, static_cast<std::uint8_t>(p.output_kind), 1);
   put(bytes, static_cast<std::uint8_t>(p.output_dtype), 1);
+  put(bytes, p.root_outputs.size(), 4);
+  for (const auto &root : p.root_outputs) {
+    put(bytes, static_cast<std::uint8_t>(root.dtype), 1);
+    put(bytes, root.rank, 1);
+  }
   put(bytes, p.rolling_scopes.size(), 4);
   put(bytes, p.isolate_errors, 1);
   put(bytes, p.minimum_observations, 4);
@@ -1606,7 +1609,7 @@ graph::Program decode_program(const std::vector<std::uint8_t> &bytes) {
   Reader in{bytes};
   check(in.get(4) == 0x434d4547, "unsupported native plan magic");
   const auto version = in.get(4);
-  check(version >= 1 && version <= 5, "unsupported native plan version");
+  check(version >= 1 && version <= 6, "unsupported native plan version");
   const auto count = in.get(4), roots = in.get(4);
   check(count > 0 && count <= max_nodes && roots > 0 && roots <= 4096,
         "invalid native plan counts");
@@ -1618,12 +1621,21 @@ graph::Program decode_program(const std::vector<std::uint8_t> &bytes) {
   std::size_t scope_count = 0, apply_count = 0;
   if (version >= 2) {
     const auto output_kind = in.get(1);
-    check(output_kind <= 1, "invalid native output kind");
+    check(output_kind <= (version >= 6 ? 2 : 1), "invalid native output kind");
     p.output_kind = static_cast<graph::OutputKind>(output_kind);
     if (version >= 5) {
       const auto dtype = in.get(1);
       check(dtype <= 2, "invalid native output dtype");
       p.output_dtype = static_cast<graph::OutputDType>(dtype);
+    }
+    if (version >= 6) {
+      const auto count = in.get(4);
+      check(count == (p.output_kind == graph::OutputKind::typed ? roots : 0), "invalid result schema count");
+      for (std::size_t i = 0; i < count; ++i) {
+        const auto dtype = in.get(1), rank = in.get(1);
+        check(dtype <= 2 && rank <= 2, "invalid result schema");
+        p.root_outputs.push_back({static_cast<graph::OutputDType>(dtype), static_cast<std::uint8_t>(rank)});
+      }
     }
     scope_count = static_cast<std::size_t>(in.get(4));
     check(scope_count <= 4096, "invalid rolling scope count");

@@ -9,6 +9,7 @@
 - S：float64 标量；L：一维 float64 数组；M：二维 float64；A：L 或 M；F：S/L/M；B：bool 或合法 uint8 0/1 mask；I：int64 数组。n/T/N 是长度符号，不是自动推断金融含义。
 - 下表描述直接算子的物理输入输出；进入图后还必须满足名义轴、形状、语义和公开根约束。L 在图中可能是 time series 或 asset vector，不能任意互换。
 - 签名中的方括号是可选尾部参数，不是要输入的 Python 语法。回归和协方差等真正重载逐一列出。直接接口还接受 out、workspace、simd、audit 等公共关键字；图公式不能把这些运行参数当数学参数。
+- 图的向量、矩阵及异形多输出使用 `outputs[根].values[区间]`，保持各算子的 dtype；内部记录仍须字段投影。结果接口不改变以下数学口径。
 - 大多数结果数值是 float64。直接掩码结果默认 uint8；可提供兼容 bool out。图的 bool 时序输出为 NumPy bool。int64 不能任意传给浮点算子；equal/not_equal、排序、选择和状态能力只开放明确的整数重载。
 - “SIMD 可选”只表示存在某个重载的显式向量化路径；实际 ISA、布局、长度及重载仍决定是否使用。空白/“—”不表示 Python 回退。
 

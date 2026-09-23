@@ -45,6 +45,8 @@ struct Plan {
   double estimated_typed_array_work_units = 0;
   std::size_t estimated_input_bytes = 0, estimated_output_bytes = 0;
   std::size_t estimated_status_bytes = 0;
+  std::size_t estimated_result_metadata_bytes = 0;
+  std::shared_ptr<const graph::ResultLayout> result_layout;
   std::size_t estimated_worker_scratch_bytes = 0,
               estimated_total_memory_bytes = 0;
   std::size_t row_count = 0, interval_observations = 0, product_count = 0;

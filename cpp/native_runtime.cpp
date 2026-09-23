@@ -105,7 +105,7 @@ ExecutionAudit Engine::execute(const planner::Plan &p, const Batch &batch,
     audit.chunks.push_back(
         graph::execute(p.graph->program, batch.inputs, batch.parameters,
                        batch.parameter_count, batch.starts, batch.ends,
-                       batch.rows, output, p.graph->program.roots.size()));
+                       batch.rows, output, p.graph->program.roots.size(), p.result_layout.get()));
     check_deadline(deadline);
     audit.native_threads = 1;
   } else {
@@ -198,10 +198,10 @@ ExecutionAudit Engine::execute(const planner::Plan &p, const Batch &batch,
         return graph::execute(p.graph->program, batch.inputs, batch.parameters,
                               batch.parameter_count, batch.starts + chunk.begin,
                               batch.ends + chunk.begin, chunk.end - chunk.begin,
-                              graph::output_offset(output, output_row_offset(
+                              p.result_layout ? output : graph::output_offset(output, output_row_offset(
                                            p.graph->program, batch, chunk.begin) *
                                            p.graph->program.roots.size(), p.graph->program.output_dtype),
-                              p.graph->program.roots.size());
+                              p.graph->program.roots.size(), p.result_layout.get(), chunk.begin);
       });
     }
     if (transport) {

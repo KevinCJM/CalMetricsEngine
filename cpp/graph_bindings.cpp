@@ -47,6 +47,7 @@ py::dict plan_metadata(const p::Plan &x) {
   FIELD(estimated_input_bytes);
   FIELD(estimated_output_bytes);
   FIELD(estimated_status_bytes);
+  FIELD(estimated_result_metadata_bytes);
   FIELD(estimated_worker_scratch_bytes);
   FIELD(estimated_total_memory_bytes);
   FIELD(row_count);
@@ -222,8 +223,9 @@ py::dict graph_metadata(const c::CompiledGraph &graph) {
   d["mask_slots"] = graph.program.mask_slots;
   d["integer_slots"] = graph.program.integer_slots;
   d["typed_ir_version"] = "cpp-typed-ir-1";
-  d["output_kind"] = graph.program.output_kind == g::OutputKind::series ? "series" : "scalar";
-  d["output_dtype"] = g::output_dtype_name(graph.program.output_dtype);
+  d["output_kind"] = g::output_kind_name(graph.program.output_kind);
+  d["output_dtype"] = graph.program.output_kind == g::OutputKind::typed
+      ? "per_output" : g::output_dtype_name(graph.program.output_dtype);
   d["rolling_scope_count"] = graph.program.rolling_scopes.size();
   d["apply_scope_count"] = graph.program.apply_scopes.size();
   py::dict variable_types;
@@ -288,7 +290,9 @@ public:
   compile(const py::object &expressions, const std::string &error_policy,
           const std::vector<std::map<std::string, std::string>> &root_bindings,
           const std::vector<std::string> &source_contracts, std::uint32_t minimum_observations,
-          std::uint64_t scope_work_budget) const {
+          std::uint64_t scope_work_budget, const std::string &result_format) const {
+    if (result_format != "auto" && result_format != "typed")
+      throw c::CompileError("result_format must be auto or typed");
     if (error_policy != "raise" && error_policy != "isolate")
       throw c::CompileError("error_policy must be raise or isolate");
     std::vector<std::string> sources;
@@ -304,7 +308,7 @@ public:
       }
     }
     py::gil_scoped_release release;
-    return c::compile(sources, variables, error_policy == "isolate", root_bindings, source_contracts, minimum_observations, scope_work_budget);
+    return c::compile(sources, variables, error_policy == "isolate", root_bindings, source_contracts, minimum_observations, scope_work_budget, result_format == "typed");
   }
 };
 g::Program raw_program(const py::list &raw,
@@ -375,6 +379,8 @@ py::dict raw_execute(const g::Program &program, const py::tuple &input_arrays,
   std::vector<calmetrics_engine::ops::Value> inputs;
   b::exact<std::int64_t>(starts, 1, "starts");
   b::exact<std::int64_t>(ends, 1, "ends");
+  if (program.output_kind == g::OutputKind::typed)
+    throw py::value_error("typed results require AdaptiveScheduler.execute");
   switch (program.output_dtype) {
   case g::OutputDType::float64: b::exact<double>(output, 2, "out", true); break;
   case g::OutputDType::boolean: b::exact<bool>(output, 2, "out", true); break;
@@ -499,8 +505,9 @@ void register_graph(py::module_ &parent) {
         d["integer_slots"] = p.integer_slots;
         d["input_axes"] = p.input_axes;
         d["output_kind"] =
-            p.output_kind == g::OutputKind::series ? "series" : "scalar";
-        d["output_dtype"] = g::output_dtype_name(p.output_dtype);
+            g::output_kind_name(p.output_kind);
+        d["output_dtype"] = p.output_kind == g::OutputKind::typed
+            ? "per_output" : g::output_dtype_name(p.output_dtype);
         d["python_operator_calls"] = 0;
         d["execution_backend"] = "native_graph_interpreter";
         return d;
@@ -598,9 +605,10 @@ void register_graph(py::module_ &parent) {
             py::dict variables;
             for (const auto &variable : g.variable_types)
               variables[py::str(variable.name)] = value_type_dict(variable.type);
-            return py::make_tuple(2, g.expressions, variables,
+            return py::make_tuple(3, g.expressions, variables,
                 g.program.isolate_errors, g.root_bindings, g.source_contracts,
-                g.program.minimum_observations, g.program.scope_work_budget);
+                g.program.minimum_observations, g.program.scope_work_budget,
+                g.program.output_kind == g::OutputKind::typed);
           },
           [](py::tuple state) {
             // Saved legacy definitions retain their original scalar/series
@@ -609,7 +617,8 @@ void register_graph(py::module_ &parent) {
               return c::compile(
                   py::cast<std::vector<std::string>>(state[0]),
                   py::cast<std::vector<std::pair<std::string, std::string>>>(state[1]));
-            if (state.size() != 8 || py::cast<int>(state[0]) != 2)
+            if (!((state.size() == 8 && py::cast<int>(state[0]) == 2) ||
+                  (state.size() == 9 && py::cast<int>(state[0]) == 3)))
               throw py::value_error("invalid compiled graph state");
             std::vector<t::Variable> variables;
             for (auto item : py::cast<py::dict>(state[2]))
@@ -618,7 +627,8 @@ void register_graph(py::module_ &parent) {
                 py::cast<bool>(state[3]),
                 py::cast<std::vector<std::map<std::string, std::string>>>(state[4]),
                 py::cast<std::vector<std::string>>(state[5]),
-                py::cast<std::uint32_t>(state[6]), py::cast<std::uint64_t>(state[7]));
+                py::cast<std::uint32_t>(state[6]), py::cast<std::uint64_t>(state[7]),
+                state.size() == 9 && py::cast<bool>(state[8]));
           }));
   py::class_<CompilerAPI>(module, "GraphCompiler")
       .def(py::init<const py::dict &>(), py::arg("variables"))
@@ -627,7 +637,7 @@ void register_graph(py::module_ &parent) {
            py::arg("root_bindings") = std::vector<std::map<std::string, std::string>>{},
            py::arg("source_contracts") = std::vector<std::string>{},
            py::arg("minimum_observations") = 0,
-           py::arg("scope_work_budget") = 100000000ull);
+           py::arg("scope_work_budget") = 100000000ull, py::arg("result_format") = "auto");
   py::class_<p::Config>(module, "PlannerConfig")
       .def(py::init([](double thread, double process, std::size_t input,
                        std::size_t shared, std::size_t rows, std::size_t simd,

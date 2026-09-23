@@ -2,6 +2,11 @@
 #include "calmetrics_engine/native_runtime.hpp"
 
 namespace calmetrics_engine::native {
+inline constexpr std::size_t max_process_frame_bytes = 256 * 1024 * 1024;
+// Complete successful response, including audit fields and all blob headers.
+std::size_t process_response_bytes(std::size_t output_bytes,
+                                   std::size_t status_bytes,
+                                   std::size_t result_slots);
 class ProcessPool {
 public:
   ProcessPool(std::string executable, std::size_t capacity);

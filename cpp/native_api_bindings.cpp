@@ -407,6 +407,13 @@ public:
   }
 };
 
+struct TypedOutput {
+  std::string kind, dtype;
+  std::vector<std::string> axes;
+  py::tuple values, statuses, shape_known;
+  py::array root_statuses, byte_offsets;
+};
+
 struct Result {
   py::array values;
   py::object offsets;
@@ -414,7 +421,67 @@ struct Result {
   n::ExecutionAudit native;
   bool prepared = false, cache_hit = false;
   bool snapshot = false;
+  bool typed() const { return plan->graph->program.output_kind == calmetrics_engine::graph::OutputKind::typed; }
+  py::tuple outputs() const {
+    if (!typed()) throw py::value_error("outputs requires result_format='typed' or a heterogeneous graph");
+    const auto &layout = *plan->result_layout;
+    const auto rows = plan->row_count, columns = layout.columns;
+    std::vector<o::Shape> shapes;
+    std::vector<std::int16_t> roots;
+    py::array_t<std::int16_t> status_owner(plan->graph->program.isolate_errors ? layout.status_count() : 0);
+    std::size_t written = 0;
+    for (const auto &chunk : native.chunks) {
+      shapes.insert(shapes.end(), chunk.result_shapes.begin(), chunk.result_shapes.end());
+      roots.insert(roots.end(), chunk.root_statuses.begin(), chunk.root_statuses.end());
+      if (written > static_cast<std::size_t>(status_owner.size()) || chunk.statuses.size() > static_cast<std::size_t>(status_owner.size()) - written)
+        throw std::runtime_error("invalid typed statuses");
+      if (!chunk.statuses.empty()) std::copy(chunk.statuses.begin(), chunk.statuses.end(), status_owner.mutable_data() + written);
+      written += chunk.statuses.size();
+    }
+    if (shapes.size() != rows * columns || roots.size() != shapes.size() || written != static_cast<std::size_t>(status_owner.size()))
+      throw std::runtime_error("incomplete typed result metadata");
+    status_owner.attr("setflags")(false);
+    py::tuple result(columns);
+    for (std::size_t root = 0; root < columns; ++root) {
+      const auto &type = plan->graph->nodes[plan->graph->program.roots[root]].inferred_type;
+      const auto dtype = type.dtype == calmetrics_engine::typed::DType::boolean ? py::dtype::of<bool>()
+          : type.dtype == calmetrics_engine::typed::DType::int64 ? py::dtype::of<std::int64_t>() : py::dtype::of<double>();
+      TypedOutput column;
+      column.kind = calmetrics_engine::typed::kind_name(type.kind);
+      column.dtype = calmetrics_engine::typed::dtype_name(type.dtype);
+      column.axes = type.axes;
+      column.values = py::tuple(rows); column.statuses = py::tuple(rows); column.shape_known = py::tuple(rows);
+      py::array_t<std::int16_t> root_status(rows);
+      py::array_t<std::int64_t> offsets(rows);
+      for (std::size_t row = 0; row < rows; ++row) {
+        const auto index = row * columns + root;
+        const auto &slot = layout.slots[index];
+        const auto &shape = shapes[index];
+        std::vector<py::ssize_t> dimensions;
+        if (shape.rank < 0) dimensions.push_back(0);
+        else for (int axis = 0; axis < shape.rank; ++axis) dimensions.push_back(static_cast<py::ssize_t>(shape.dim[axis]));
+        if (shape.rank >= 0 && (shape.rank != static_cast<int>(type.rank()) || shape.size() > slot.capacity))
+          throw std::runtime_error("invalid typed result shape");
+        auto *data = static_cast<const std::uint8_t *>(values.data()) + slot.byte_offset;
+        py::array view(dtype, dimensions, {}, data, values);
+        view.attr("setflags")(false);
+        column.values[row] = std::move(view);
+        column.shape_known[row] = py::bool_(shape.rank >= 0);
+        root_status.mutable_data()[row] = roots[index];
+        offsets.mutable_data()[row] = static_cast<std::int64_t>(slot.byte_offset);
+        if (plan->graph->program.isolate_errors) {
+          py::array status(py::dtype::of<std::int16_t>(), dimensions, {}, status_owner.data() + slot.status_offset, status_owner);
+          status.attr("setflags")(false); column.statuses[row] = std::move(status);
+        } else column.statuses[row] = py::none();
+      }
+      root_status.attr("setflags")(false); offsets.attr("setflags")(false);
+      column.root_statuses = std::move(root_status); column.byte_offsets = std::move(offsets);
+      result[root] = py::cast(std::move(column));
+    }
+    return result;
+  }
   py::object statuses() const {
+    if (typed()) throw py::value_error("typed results expose statuses per output");
     if (!plan->graph->program.isolate_errors) return py::none();
     py::array_t<std::int16_t> result({values.shape(0), values.shape(1)});
     auto *dst = result.mutable_data();
@@ -445,7 +512,8 @@ struct Result {
   py::dict audit() const {
     py::dict d;
     d["execution_backend"] = "cpp_aot";
-    d["audit_schema"] = "cpp-aot-execution-1";
+    d["audit_schema"] = typed() ? "cpp-aot-execution-2" : "cpp-aot-execution-1";
+    d["result_protocol"] = typed() ? "typed-results-1" : "homogeneous-results-1";
     d["engine"] = "calmetrics_engine";
     d["engine_version"] = CALMETRICS_ENGINE_VERSION;
     d["engine_build_id"] = CALMETRICS_ENGINE_BUILD_ID;
@@ -473,7 +541,21 @@ struct Result {
     }
     d["input_dtype"] = common_dtype.empty() ? "float64" : common_dtype;
     d["input_dtypes"] = std::move(input_dtypes);
-    d["output_dtype"] = calmetrics_engine::graph::output_dtype_name(plan->graph->program.output_dtype);
+    d["output_dtype"] = typed() ? "per_output" : calmetrics_engine::graph::output_dtype_name(plan->graph->program.output_dtype);
+    if (typed()) {
+      py::list schemas;
+      for (auto root : plan->graph->program.roots) {
+        const auto &type = plan->graph->nodes[root].inferred_type;
+        py::dict schema;
+        schema["dtype"] = calmetrics_engine::typed::dtype_name(type.dtype);
+        schema["kind"] = calmetrics_engine::typed::kind_name(type.kind);
+        schema["axes"] = type.axes; schema["shape"] = type.shape;
+        schemas.append(schema);
+      }
+      d["outputs"] = std::move(schemas);
+      d["result_layout"] = "interval_root_aligned_8";
+      d["result_capacity_bytes"] = plan->estimated_output_bytes;
+    }
     d["error_policy"] = plan->graph->program.isolate_errors ? "isolate" : "raise";
     d["status_contract"] = "indicator-status-1";
     d["result_lifetime"] = prepared && !snapshot ? "borrowed_until_next_run" : "independent";
@@ -505,10 +587,7 @@ struct Result {
     d["python_native_transitions"] = 1;
     d["output_ownership"] =
         native.output_owner ? "native_shared_region" : "numpy_owned";
-    d["output_kind"] =
-        plan->graph->program.output_kind == calmetrics_engine::graph::OutputKind::series
-            ? "series"
-            : "scalar";
+    d["output_kind"] = calmetrics_engine::graph::output_kind_name(plan->graph->program.output_kind);
     py::list chunks;
     for (const auto &a : native.chunks)
       chunks.append(b::graph_audit(a));
@@ -530,6 +609,13 @@ py::array new_output(std::size_t rows, std::size_t columns,
                  calmetrics_engine::graph::output_itemsize(program.output_dtype));
   return py::array(output_dtype(program),
       {static_cast<py::ssize_t>(rows), static_cast<py::ssize_t>(columns)});
+}
+py::array new_result_output(const p::Plan &plan) {
+  if (plan.result_layout)
+    return py::array_t<std::uint64_t>(std::max<std::size_t>(1, plan.estimated_output_bytes / 8));
+  const auto rows = plan.graph->program.output_kind == calmetrics_engine::graph::OutputKind::series
+      ? plan.interval_observations : plan.row_count;
+  return new_output(rows, plan.graph->program.roots.size(), plan.graph->program);
 }
 std::size_t output_rows(const c::CompiledGraph &graph, const n::Batch &batch) {
   if (graph.program.output_kind == calmetrics_engine::graph::OutputKind::scalar)
@@ -573,22 +659,27 @@ public:
   PreparedExecution(std::shared_ptr<n::Engine> e, std::shared_ptr<BoundData> b,
                     std::shared_ptr<p::Plan> p)
       : engine(std::move(e)), bound(std::move(b)), plan(std::move(p)),
-        output(new_output(output_rows(*plan->graph, bound->native),
-                          plan->graph->program.roots.size(), plan->graph->program)),
+        output(new_result_output(*plan)),
         offsets(output_offsets(*plan->graph, bound->native)),
         output_address(output.data()) {}
   n::ExecutionAudit execute(void *destination = nullptr) {
     if (!bound->unchanged())
       throw py::value_error(
           "PREPARED_INPUT_CHANGED: rebind resized or retyped arrays");
-    if (output.ndim() != 2 ||
+    if (plan->result_layout && (output.ndim() != 1 ||
+        static_cast<std::size_t>(output.size()) != std::max<std::size_t>(1, plan->estimated_output_bytes / 8) ||
+        output.data() != output_address || !output.writeable() ||
+        !output.dtype().equal(py::dtype::of<std::uint64_t>()) ||
+        !(output.flags() & py::array::c_style)))
+      throw py::value_error("PREPARED_OUTPUT_CHANGED");
+    if (!plan->result_layout && (output.ndim() != 2 ||
         output.shape(0) != static_cast<py::ssize_t>(
                                output_rows(*plan->graph, bound->native)) ||
         output.shape(1) !=
             static_cast<py::ssize_t>(plan->graph->program.roots.size()) ||
         output.data() != output_address || !output.writeable() ||
         !output.dtype().equal(output_dtype(plan->graph->program)) ||
-        !(output.flags() & py::array::c_style))
+        !(output.flags() & py::array::c_style)))
       throw py::value_error("PREPARED_OUTPUT_CHANGED");
     auto *data = output.mutable_data();
     py::gil_scoped_release release;
@@ -597,8 +688,9 @@ public:
       throw std::runtime_error("PREPARED_BATCH_BUSY");
     return engine->execute(*plan, bound->native, destination ? destination : data);
   }
-  py::array run() {
-    const auto audit = execute();
+  py::object run() {
+    auto audit = execute();
+    if (plan->result_layout) return py::cast(Result{output, py::none(), plan, std::move(audit), true, true});
     if (plan->graph->program.output_dtype != calmetrics_engine::graph::OutputDType::float64)
       for (const auto &chunk : audit.chunks)
         if (std::any_of(chunk.statuses.begin(), chunk.statuses.end(),
@@ -614,8 +706,7 @@ public:
   Result run_snapshot() {
     // Write directly into independent output while holding the execution lock.
     // Copying the borrowed output after releasing that lock would race another run.
-    auto owned = new_output(output_rows(*plan->graph, bound->native),
-                            plan->graph->program.roots.size(), plan->graph->program);
+    auto owned = new_result_output(*plan);
     auto a = execute(owned.mutable_data());
     owned.attr("setflags")(false);
     return {owned, output_offsets(*plan->graph, bound->native), plan,
@@ -703,8 +794,7 @@ public:
     py::array output;
     void *data = nullptr;
     if (!shared_output) {
-      output = new_output(output_rows(*graph, bound->native),
-                          graph->program.roots.size(), graph->program);
+      output = new_result_output(*plan);
       data = output.mutable_data();
     }
     n::ExecutionAudit audit;
@@ -716,11 +806,12 @@ public:
     if (shared_output) {
       if (!audit.output_owner)
         throw std::runtime_error("native shared output owner missing");
-      const std::vector<py::ssize_t> shape{
-          static_cast<py::ssize_t>(output_rows(*graph, bound->native)),
-          static_cast<py::ssize_t>(graph->program.roots.size())};
+      const std::vector<py::ssize_t> shape = plan->result_layout
+          ? std::vector<py::ssize_t>{static_cast<py::ssize_t>(plan->estimated_output_bytes / 8)}
+          : std::vector<py::ssize_t>{static_cast<py::ssize_t>(output_rows(*graph, bound->native)),
+                                   static_cast<py::ssize_t>(graph->program.roots.size())};
       output =
-          py::array(output_dtype(graph->program), shape, {},
+          py::array(plan->result_layout ? py::dtype::of<std::uint64_t>() : output_dtype(graph->program), shape, {},
                     audit.output_owner->data(), py::cast(audit.output_owner));
     }
     return {std::move(output), output_offsets(*graph, bound->native),
@@ -858,24 +949,37 @@ void register_native_api(py::module_ &module) {
         return py::make_tuple(owner, owner->array());
       },
       py::arg("descriptor"), py::kw_only(), py::arg("readonly") = true);
+  py::class_<TypedOutput>(module, "TypedGraphOutput")
+      .def_readonly("kind", &TypedOutput::kind)
+      .def_readonly("dtype", &TypedOutput::dtype)
+      .def_readonly("axes", &TypedOutput::axes)
+      .def_readonly("values", &TypedOutput::values)
+      .def_readonly("statuses", &TypedOutput::statuses)
+      .def_readonly("root_statuses", &TypedOutput::root_statuses)
+      .def_readonly("shape_known", &TypedOutput::shape_known)
+      .def_readonly("byte_offsets", &TypedOutput::byte_offsets);
   py::class_<Result>(module, "GraphExecutionResult")
-      .def_readonly("values", &Result::values)
+      .def_property_readonly("values", [](const Result &r) {
+        if (r.typed()) throw py::value_error("typed result: use outputs[index].values[interval]");
+        return r.values;
+      })
+      .def_property_readonly("outputs", &Result::outputs)
       .def_readonly("offsets", &Result::offsets)
       .def_property_readonly("statuses", &Result::statuses)
       .def_property_readonly(
           "output_kind",
           [](const Result &r) {
-            return r.plan->graph->program.output_kind ==
-                           calmetrics_engine::graph::OutputKind::series
-                       ? "series"
-                       : "scalar";
+            return calmetrics_engine::graph::output_kind_name(r.plan->graph->program.output_kind);
           })
       .def_readonly("plan", &Result::plan)
       .def_property_readonly("audit", &Result::audit);
   py::class_<PreparedExecution, std::shared_ptr<PreparedExecution>>(
       module, "PreparedGraphExecution")
       .def_readonly("plan", &PreparedExecution::plan)
-      .def_readonly("output", &PreparedExecution::output)
+      .def_property_readonly("output", [](const PreparedExecution &p) {
+        if (p.plan->result_layout) throw py::value_error("typed prepared output is available through run().outputs");
+        return p.output;
+      })
       .def_readonly("offsets", &PreparedExecution::offsets)
       .def("run", &PreparedExecution::run)
       .def("run_audit", &PreparedExecution::run_audit)

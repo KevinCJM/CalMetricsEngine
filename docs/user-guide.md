@@ -9,7 +9,7 @@
 | 入口 | 用途 | 输入和输出特点 |
 | --- | --- | --- |
 | operators | 单次数学运算、直接矩阵输出、out/Workspace 复用 | 按每个算子的 rank/dtype 契约；不自行创建计算线程池 |
-| GraphCompiler + AdaptiveScheduler | 多输出共享 DAG、多产品/区间、自动计划与执行 | 显式类型/轴，标量或对齐时序根，统一调度和结果凭据 |
+| GraphCompiler + AdaptiveScheduler | 多输出共享 DAG、多产品/区间、自动计划与执行 | 显式类型/轴，支持标量、时序、向量、矩阵及异形多输出，统一调度和结果凭据 |
 | cal_* | 已有财务接口的兼容调用 | 独立的二维数值、int32 分组、日期及窗口契约；不要套用图接口规则 |
 
 调用方决定输入是净值、成交量还是某种价格，负责数据来源、口径、日期对齐、指标定义及结果解释。引擎负责其公开数学、类型、执行和内存契约。
@@ -105,7 +105,36 @@ np.testing.assert_array_equal(result.offsets, [0, 3, 6])
 | 标量根 | `(区间数, 根数)`，float64（包括标量比较的数值输出） | None |
 | 时序根 | `(所有区间长度之和, 根数)`，连续数组 | int64 前缀和，长度为区间数+1 |
 
-时序根必须保留 time/T 轴。同一图根须全为标量或全为时序；时序根必须统一 float64、bool 或 int64，不能混合。公开根不支持一般矩阵、静态向量或未投影记录。`lag(x)`/`difference(x)` 会裁短，不能直接充当对齐时序根；需要等长移位时用 aligned_shift。
+默认 `result_format="auto"` 对纯标量和同 dtype、同 time/T 轴的时序保留上表接口；向量、矩阵、裁短序列，以及混合 rank/dtype 的根自动返回 `output_kind="typed"`。可显式指定 `result_format="typed"`，统一使用下面的输出接口。记录、逻辑窗口和带内部状态标签的矩阵仍须先投影字段；本轮没有改变数学算子的返回 dtype（例如 distinct_count 仍返回 float64）。
+
+### 不同形状和 dtype 的多输出
+
+```python
+import numpy as np
+from calmetrics_engine import GraphCompiler, AdaptiveScheduler
+
+x = np.arange(12., dtype=np.float64).reshape(4, 3)
+graph = GraphCompiler({"x": {"kind": "matrix"}}).compile(
+    ["mean(sum_asset(x))", "mean_time(x)", "covariance(x)",
+     "sum_asset(x)>0", "argsort(sum_asset(x))"], error_policy="isolate")
+with AdaptiveScheduler(cpu_budget=1) as scheduler:
+    result = scheduler.execute(graph, {"x": x},
+        np.array([0, 1], np.int64), np.array([4, 3], np.int64))
+assert result.output_kind == "typed"
+outputs = result.outputs
+assert [o.values[0].shape for o in outputs] == [(), (3,), (3, 3), (4,), (4,)]
+assert outputs[3].values[0].dtype == np.bool_
+assert outputs[4].values[0].dtype == np.int64
+assert outputs[3].values[1].shape == (2,)
+assert all(np.all(o.root_statuses == 0) for o in outputs)
+```
+
+`outputs[根序号].values[区间序号]` 是该根的只读 ndarray；标量为零维数组，实际形状由 C++ 执行产生。各根保留 `kind`、`dtype`、`axes`；`byte_offsets` 是底层缓冲区中的字节位置，不是日期或索引映射。时序/向量的轴标签也不等于提供了真实日期/资产标签，标签由调用方维护。
+
+- isolate 下 `statuses[区间]` 与对应值同形，`root_statuses[区间]` 汇总该根的状态（取最大错误码，0 表示全部成功）；严格模式的逐元素 statuses 为 None，普通 NaN 仍按算子契约处理。
+- `shape_known[区间] == False` 表示上游失败使实际形状不可知：值和状态以空数组占位，必须读取非零 root_status。已知空数组则保留真实 rank/shape 和成功状态，二者不能混淆。
+- typed 结果不提供统一 `values/statuses` 数组，`offsets` 为 None。一次执行仍共用一个 DAG；不要为不同输出拆图重复计算。
+- `lag(x,k)`、`block_apply` 等动态输出可以公开返回，形状在每次执行中确定。需要保持输入时间长度时仍使用 aligned_shift。
 
 ### 矩阵与静态向量
 
@@ -124,7 +153,7 @@ with AdaptiveScheduler(cpu_budget=1) as scheduler:
 np.testing.assert_allclose(result.values, [[1.75, 3.], [3.75, 7.], [5.75, 11.]])
 ```
 
-直接 `op.matmul(A,B)` 可以返回矩阵；图中矩阵可作为中间结果继续 matvec/归约，但不能直接公开为根。这是两个入口的输出契约差别。
+直接 `op.matmul(A,B)` 和图中的矩阵根均可返回矩阵。图的矩阵/静态向量根使用 typed 多输出接口，按输入名义轴决定是否随区间切片。
 
 ## 6. 窗口、分组和求根作用域
 
@@ -187,7 +216,7 @@ assert b.values.dtype == np.int64
 
 默认 error_policy="raise"：未被作用域兼容规则处理的异常使请求失败；普通 NaN 是否产生异常取决于算子，不等于全局禁止 NaN。普通 rolling_apply（无分段故障上下文）仍保留历史行为：窗口 body 的数值异常转为该窗口的 NaN，因此不能把 raise 理解为任何窗口错误都会抛出；严格 group_apply 的数值异常则继续抛出。需要逐位置故障状态时，应显式选择 isolate。
 
-可在 compile 时选 isolate，保留健康根/区间，并返回与 values 同形的只读 int16 statuses。0 表示成功；非零原因见[平台执行契约](platform-execution-contracts.md#isolation)。dtype、非法几何、资源与进程故障不能变成成功的部分结果。
+可在 compile 时选 isolate，保留健康根/区间，并返回与值同形的只读 int16 statuses；typed 结果在各 output 下提供状态及根状态。0 表示成功；非零原因见[平台执行契约](platform-execution-contracts.md#isolation)。dtype、非法几何、资源与进程故障不能变成成功的部分结果。
 
 ```python
 import numpy as np
@@ -212,7 +241,7 @@ isolate 下非有限 float64 输出位置会被标记为不可用。bool/int64 �
 | 方法 | 结果寿命 | 使用场景 |
 | --- | --- | --- |
 | scheduler.execute | 独立结果 | 普通请求，可保留 |
-| prepared.run | 借用复用输出，下一次运行覆盖 | 即时消费，仅返回 values；typed 失败要求改用带状态接口 |
+| prepared.run | 借用复用输出，下一次运行覆盖 | 旧格式返回 ndarray；typed 格式返回包含 outputs/statuses 的 Result |
 | prepared.run_audit | values 借用至下一次运行，附 statuses/audit | 即时消费并审计 |
 | prepared.run_snapshot | 独立只读结果与状态 | 缓存、历史结果、跨后续调用保存 |
 
@@ -233,6 +262,8 @@ assert retained.values[0, 0] == 2.0
 assert not retained.values.flags.writeable
 ```
 
+同 dtype 的 bool/int64 旧格式在 prepared.run 遇到失败时要求改用 run_audit/run_snapshot，避免裸数组隐藏状态。typed 的借用值、实际形状和状态只对应本轮执行；下次运行后不得继续把旧描述与已覆盖的值配对使用。NumPy 的只读标记防止误写，不是安全隔离；禁止修改底层 base 的 dtype/shape/存储。
+
 数据、区间或计划身份不兼容时重新绑定/规划；不要绕过 stale/prepared 检查。共享输出即使底层来自原生映射也会保活 owner；只读标志本身不能证明结果独立。
 
 ## 10. 常见问题
@@ -241,8 +272,9 @@ assert not retained.values.flags.writeable
 | --- | --- |
 | exact native dtype / C-contiguous | 是否误传 float32、list 或图 float64 的非连续 series |
 | AXIS/SHAPE_MISMATCH | series 与 vector 是否混用、T/N 是否一致、是否误用任意广播 |
-| PUBLIC_ROOT / SERIES_ROOT_ALIGNMENT | 是否直接输出矩阵/记录/裁短或紧凑序列 |
-| MIXED_ROOT_TYPES / MIXED_ROOT_DTYPES | 将标量/时序或不同输出 dtype 分成不同图 |
+| PUBLIC_ROOT_TYPE | 记录、逻辑窗口、内部状态矩阵须投影为公开类型 |
+| typed result: use outputs | 用 outputs[根].values[区间]；不要强转统一数组 |
+| RESULT_CAPACITY_MISMATCH | 实际结果超出计划容量；保留图与输入几何报告问题，禁止绕过校验 |
 | SEMANTIC_DIMENSION / PRICE_BASIS_MISMATCH | 检查实际声明和数据口径；不要为消除报错伪造标签 |
 | 结果被下一次调用改写 | 是否使用了 prepared 借用输出；需要留存用 run_snapshot |
 | 没有多线程或 SIMD | 先查看计划与实际审计，不以数组大/节点多直接推断，见执行指南 |

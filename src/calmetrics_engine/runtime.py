@@ -12,7 +12,7 @@ from collections.abc import Mapping, Sequence
 from typing import Any
 
 from ._native import graph as _native_graph
-from ._native.graph import GraphExecutionResult, PreparedGraphExecution
+from ._native.graph import GraphExecutionResult, PreparedGraphExecution, TypedGraphOutput
 
 
 class AdaptiveScheduler(_native_graph.AdaptiveScheduler):
@@ -45,4 +45,4 @@ def _product_chunks(product_ids, starts, ends, workers):
     return _native_graph.product_chunks(product_ids, starts, ends, workers)
 
 
-__all__ = ["AdaptiveScheduler", "GraphExecutionResult", "PreparedGraphExecution"]
+__all__ = ["AdaptiveScheduler", "GraphExecutionResult", "PreparedGraphExecution", "TypedGraphOutput"]
