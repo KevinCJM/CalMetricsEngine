@@ -100,3 +100,5 @@ PYTHONPATH=/tmp/cme-typed-installed python tools/benchmark_typed_results.py --la
 - 当前 wheel SHA-256：`3c934f3fda76f68f38b9ad45656384465323aad46bf4d39360ce50f21d75a7f1`。
 
 四组原性能门禁重新执行通过：500产品 0.724、1000产品 0.654；63点 prepared 0.634 / Scheduler 0.973；252点 prepared 0.717 / Scheduler 0.887。均为 C++/NJIT 耗时比，阈值仍为 prepared/batch ≤0.90、Scheduler ≤1.00。日志和结构化结果在 `/private/tmp/calmetrics-typed-fix-performance/`。初验中的新 typed 负载测量为当时快照，本节不把它重标成此次复测。
+
+PR CI 首轮发现 NumPy 2.5 新增的原地 shape/dtype 修改弃用警告，使两项故意篡改 owner 的回归在触及原生校验前中断。仅在故障注入语句内捕获并核对该预期警告；保留真实 owner 修改、`PREPARED_OUTPUT_CHANGED` 断言及全局警告门禁。相同 wheel 在本机 NumPy 2.5.0 下全量 **4705 passed**，原 NumPy 下 typed **86 passed**；C++ 源码、构建身份和性能路径未变。

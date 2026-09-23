@@ -1,6 +1,7 @@
 """Real AOT typed-result contracts, including native thread/process transport."""
 import gc
 import pickle
+import warnings
 
 import numpy as np
 import pytest
@@ -247,12 +248,21 @@ def test_prepared_payload_tampering_fails_closed(mutation):
         output = p.run().outputs[0].values[0]
         owner = output.base
         assert isinstance(owner, np.ndarray)
-        if mutation == "shape":
-            owner.shape = (1, owner.size)
-        elif mutation == "dtype":
-            owner.dtype = np.float64
-        else:
-            owner.flags.writeable = False
+        # Deliberately mutate the SAME owner: reshape/view would leave the
+        # prepared buffer unchanged and would not test its admission guard.
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.filterwarnings("always", category=DeprecationWarning,
+                                    message="Setting the (shape|dtype) on a NumPy array has been deprecated")
+            if mutation == "shape":
+                owner.shape = (1, owner.size)
+            elif mutation == "dtype":
+                owner.dtype = np.float64
+            else:
+                owner.flags.writeable = False
+        assert len(caught) <= 1
+        for warning in caught:
+            assert warning.category is DeprecationWarning
+            assert str(warning.message).startswith(f"Setting the {mutation} on a NumPy array has been deprecated")
         with pytest.raises(ValueError, match="PREPARED_OUTPUT_CHANGED"):
             p.run()
 
