@@ -94,9 +94,9 @@ np.testing.assert_allclose(result.values[:, 0], [7.5, 23.5])
 
 ## 4. 进程、共享内存和复制边界
 
-**自动共享运输条件**：已经选择 process，且满足 hard_stop、输入已是 SharedInputBundle、输入字节数达到共享阈值三者之一。单独超过 8 MiB 不会强制多进程，也不保证普通单线程请求新建共享内存。
+**自动共享运输条件**：已经选择 process，且满足 hard_stop、输入已是 SharedInputBundle、输入字节数达到共享阈值，或任一分块的完整结果响应超过 256 MiB IPC 单帧上限。结果检查包含容量、逐元素状态、实际形状、根状态和协议头；不能只看输入大小。降低进程数后重新检查分块与内存预算。共享路径的状态/形状响应仍须在单帧上限内，否则规划阶段报错，调用方应缩小区间批次。单独超过 8 MiB 不会强制多进程，也不保证普通单线程请求新建共享内存。
 
-小型 process 请求可使用显式计量的 inline IPC。大输入或 Hard Stop 路径由父进程持有共享映射、worker 只读附加；worker 将不同结果块写入不重叠区域。共享输出返回的 NumPy 视图持有原生 owner，无最终整块结果复制。
+小型 process 请求可使用显式计量的 inline IPC。大输入或 Hard Stop 路径由父进程持有共享映射、worker 只读附加；worker 将不同结果块写入不重叠区域。共享输出返回的 NumPy 视图持有原生 owner，无最终整块结果复制。typed 多输出按“区间→根”使用 8 字节对齐的容量槽，每个 worker 写互不重叠的区间块；每根实际形状和错误状态另行回传。Planner 计入容量、状态和描述信息，不能只用所有根的统一 dtype/长度估算。
 
 | 环节 | 复制含义 |
 | --- | --- |
@@ -170,6 +170,8 @@ with AdaptiveScheduler(cpu_budget=1) as scheduler:
     assert result.audit["hard_stop"] and result.audit["use_shared_memory"]
 assert result.values[0, 0] == 2.0
 ```
+
+typed 的输出形状可随参数/数值变化，但必须落在计划容量内；prepared 复用时不缓存旧实际形状。typed run 返回带状态的 Result，取值见[使用手册](user-guide.md)。
 
 prepared 当前只接受 single-lane 计划，是稳定输入/几何的重复执行入口，不是并行 execute 的通用替代或流式状态容器。需留存结果用 run_snapshot；借用输出会被覆盖，参见[使用手册](user-guide.md#9-重复执行与结果所有权)。
 

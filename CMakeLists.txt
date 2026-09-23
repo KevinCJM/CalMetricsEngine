@@ -45,6 +45,7 @@ add_library(calmetrics_engine_operators STATIC
     cpp/operators/matrix.cpp
     cpp/operators/state.cpp
     cpp/operators/simd.cpp
+    cpp/result_layout.cpp
     cpp/graph.cpp
     cpp/compiler.cpp
     cpp/typed_ir.cpp
@@ -150,7 +151,12 @@ if(CALMETRICS_ENGINE_BUILD_TESTS)
     add_executable(calmetrics_engine_stateful_tests tests/stateful_native_tests.cpp)
     target_link_libraries(calmetrics_engine_stateful_tests PRIVATE calmetrics_engine_operators)
     add_test(NAME calmetrics_engine_stateful_tests COMMAND calmetrics_engine_stateful_tests)
+    add_executable(calmetrics_engine_result_tests tests/result_native_tests.cpp)
+    target_link_libraries(calmetrics_engine_result_tests PRIVATE calmetrics_engine_operators)
+    add_test(NAME calmetrics_engine_result_tests COMMAND calmetrics_engine_result_tests $<TARGET_FILE:calmetrics_worker>)
+    set_tests_properties(calmetrics_engine_result_tests PROPERTIES TIMEOUT 60)
     list(APPEND calmetrics_engine_targets
+        calmetrics_engine_result_tests
         calmetrics_engine_stateful_tests
         calmetrics_engine_math_tests
         calmetrics_engine_runtime_tests

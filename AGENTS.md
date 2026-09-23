@@ -125,6 +125,7 @@ The current repository already provides:
 - Exact int64 category/index intermediates and typed matrix/vector inputs, including native worker transport and geometry validation.
 - Generic real-alpha masked recurrence, aligned shift, Gaussian CDF, stable index sorting, gather, integer distinct counts and floor primitives. Financial indicators remain explicit compositions.
 - Homogeneous float64/bool/int64 aligned time-series root outputs as contiguous values plus interval prefix offsets and explicit failure statuses.
+- Typed scalar/series/vector/matrix multi-output results with per-root dtype, actual shape, status and owner pinning across single/thread/process execution; see `docs/typed-results-design.md`.
 - Adaptive/second-order recurrence, scalar Kalman shared state, separate condition/state/confirmation, turning events, PS filtering and complete-segment scopes. See `docs/stateful-series-design.md` for exact contracts and retrospective boundaries.
 - A shared multi-root logical DAG with operator lowering and structural CSE.
 - Borrow-aware C++ liveness analysis, including backing buffers of borrowed views such as `lag`.
@@ -155,7 +156,7 @@ code and tests exist:
 
 - Broader production business DSL governance that is intentionally above the generic engine boundary,
   especially causality/knowledge-time/research-workflow contracts.
-- Broader public matrix-output contracts and portfolio business semantics beyond the current scalar/aligned-series root boundary.
+- Portfolio business semantics and higher-rank tensor results beyond the current rank-0/1/2 mathematical result contract.
 - Additional masked/path/matrix fusion beyond the current summary/order-stat graph fusion.
 - Broader SIMD coverage and benchmark-justified ISA extensions beyond current kernels.
 - BLAS/backend dispatch where matrix workloads justify it.

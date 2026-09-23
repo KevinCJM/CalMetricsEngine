@@ -385,11 +385,14 @@ bool order_fusion_eligible(ops::Op op) noexcept {
 void Program::validate() const {
   ops::require(!nodes.empty(), "GRAPH_EMPTY");
   ops::require(!roots.empty(), "GRAPH_NO_ROOTS");
-  ops::require(static_cast<unsigned>(output_kind) <= 1 &&
+  ops::require(static_cast<unsigned>(output_kind) <= 2 &&
                    static_cast<unsigned>(output_dtype) <= 2,
                "GRAPH_OUTPUT_TYPE");
-  ops::require(output_kind == OutputKind::series || output_dtype == OutputDType::float64,
+  ops::require(output_kind != OutputKind::scalar || output_dtype == OutputDType::float64,
                "GRAPH_SCALAR_OUTPUT_DTYPE");
+  ops::require(root_outputs.size() == (output_kind == OutputKind::typed ? roots.size() : 0), "RESULT_SCHEMA");
+  for (const auto &root : root_outputs)
+    ops::require(static_cast<unsigned>(root.dtype) <= 2 && root.rank <= 2, "RESULT_SCHEMA");
   ops::require(scope_work_budget >= 1 && scope_work_budget <= 1000000000000ULL, "GRAPH_SCOPE_WORK_BUDGET");
   ops::require(input_axes.empty() || input_axes.size() == input_count, "GRAPH_INPUT_AXES");
   for (auto axis : input_axes) ops::require(axis <= 2, "GRAPH_INPUT_AXES");
@@ -640,7 +643,8 @@ static Audit execute_impl(const Program &program,
                           bool prebound_inputs = false,
                           const std::vector<std::int16_t> *input_failures = nullptr,
                           bool interval_known = true,
-                          bool propagate_scope_errors = false);
+                          bool propagate_scope_errors = false,
+                          const ResultLayout *layout = nullptr, std::size_t result_row = 0);
 
 static std::size_t positive_integer(double value, const char *code,
                                     std::size_t maximum = 5000) {
@@ -1515,7 +1519,7 @@ static Audit execute_impl_body(const Program &program,
                           std::size_t output_columns, Scratch &scratch,
                           bool prebound_inputs,
                           const std::vector<std::int16_t> *input_failures,
-                          bool interval_known) {
+                          bool interval_known, const ResultLayout *layout, std::size_t result_row) {
   ops::require(inputs.size() == program.input_count, "GRAPH_INPUT_COUNT");
   ops::require(parameter_count == program.parameter_count,
                "GRAPH_PARAMETER_COUNT");
@@ -1572,7 +1576,22 @@ static Audit execute_impl_body(const Program &program,
   const auto &order_consumers = program.execution_metadata->order_consumers;
   std::size_t series_base = 0;
   Audit audit;
-  if (scratch.isolate_errors) {
+  const bool typed_output = program.output_kind == OutputKind::typed;
+  if (typed_output) {
+    ops::require(layout && !layout->row_bytes.empty() &&
+        layout->row_statuses.size() == layout->row_bytes.size() &&
+        layout->columns == output_columns &&
+        result_row <= layout->row_bytes.size() - 1 && rows <= layout->row_bytes.size() - 1 - result_row,
+        "RESULT_LAYOUT_BOUNDS");
+    ops::require(reinterpret_cast<std::uintptr_t>(output) % alignof(double) == 0,
+                 "RESULT_OUTPUT_ALIGNMENT");
+    audit.result_shapes.resize(rows * output_columns);
+    audit.root_statuses.resize(rows * output_columns);
+    const auto bytes = layout->row_bytes[result_row + rows] - layout->row_bytes[result_row];
+    if (bytes) std::memset(static_cast<std::uint8_t *>(output) + layout->row_bytes[result_row], 0, bytes);
+    if (scratch.isolate_errors)
+      audit.statuses.resize(layout->row_statuses[result_row + rows] - layout->row_statuses[result_row]);
+  } else if (scratch.isolate_errors) {
     std::size_t output_rows = rows;
     if (program.output_kind == OutputKind::series) {
       output_rows = 0;
@@ -1596,6 +1615,17 @@ static Audit execute_impl_body(const Program &program,
     const auto length = end - start;
     if (interval_known && length < program.minimum_observations) {
       ops::require(scratch.isolate_errors, "INSUFFICIENT_OBSERVATIONS");
+      if (typed_output) {
+        for (std::size_t root = 0; root < output_columns; ++root) {
+          const auto index = row * output_columns + root;
+          audit.result_shapes[index].rank = -1;
+          audit.root_statuses[index] = 1;
+          const auto &slot = layout->slots[(result_row + row) * output_columns + root];
+          const auto first = slot.status_offset - layout->row_statuses[result_row];
+          if (slot.capacity) std::fill_n(audit.statuses.data() + first, slot.capacity, 1);
+        }
+        continue;
+      }
       const auto begin = program.output_kind == OutputKind::scalar ? row : series_base;
       const auto count = program.output_kind == OutputKind::scalar ? 1 : length;
       for (std::size_t i = 0; i < count * output_columns; ++i) {
@@ -1816,6 +1846,44 @@ static Audit execute_impl_body(const Program &program,
       const auto &value = scratch.values[program.roots[root_index]];
       const auto status = scratch.isolate_errors
                               ? scratch.statuses[program.roots[root_index]] : 0;
+      if (typed_output) {
+        const auto root = row * output_columns + root_index;
+        const auto &schema = program.root_outputs[root_index];
+        const auto &slot = layout->slots[(result_row + row) * output_columns + root_index];
+        auto &shape = audit.result_shapes[root];
+        shape = value.shape;
+        audit.root_statuses[root] = static_cast<std::int16_t>(status);
+        if (shape.rank < 0) {
+          ops::require(status != 0, "RESULT_UNKNOWN_SUCCESS_SHAPE");
+          continue;
+        }
+        ops::require(shape.rank == schema.rank && shape.size() <= slot.capacity, "RESULT_CAPACITY_MISMATCH");
+        const auto expected = schema.dtype == OutputDType::boolean ? ops::Kind::mask
+            : schema.dtype == OutputDType::int64 ? ops::Kind::integer : ops::Kind::number;
+        ops::require(status || value.kind == expected, "RESULT_DTYPE_MISMATCH");
+        auto *destination = static_cast<std::uint8_t *>(output) + slot.byte_offset;
+        const auto status_base = slot.status_offset - layout->row_statuses[result_row];
+        for (std::size_t offset = 0; offset < shape.size(); ++offset) {
+          auto failure = static_cast<std::int16_t>(status);
+          if (!failure && TrackPositions)
+            failure = position_error(scratch, program.roots[root_index], offset, offset + 1);
+          if (schema.dtype == OutputDType::float64) {
+            const auto v = failure ? NAN : value.f(offset);
+            std::memcpy(destination + offset * sizeof(v), &v, sizeof(v));
+            if (!failure && scratch.isolate_errors && !std::isfinite(v)) failure = 4;
+          } else if (schema.dtype == OutputDType::int64) {
+            const std::int64_t v = failure ? 0 : value.i(offset);
+            std::memcpy(destination + offset * sizeof(v), &v, sizeof(v));
+          } else {
+            const auto v = failure ? 0 : value.u(offset);
+            ops::require(v <= 1, "INVALID_MASK");
+            destination[offset] = static_cast<std::uint8_t>(v);
+          }
+          if (scratch.isolate_errors) audit.statuses[status_base + offset] = failure;
+          audit.root_statuses[root] = std::max(audit.root_statuses[root], failure);
+        }
+        continue;
+      }
       if (status) {
         const auto begin = program.output_kind == OutputKind::scalar ? row : series_base;
         const auto count = program.output_kind == OutputKind::scalar ? 1 : length;
@@ -1915,13 +1983,13 @@ static Audit execute_impl(const Program &program, const std::vector<ops::Value> 
     const std::int64_t *ends, std::size_t rows, void *output, std::size_t output_columns,
     Scratch &scratch, bool prebound_inputs,
     const std::vector<std::int16_t> *input_failures, bool interval_known,
-    bool propagate_scope_errors) {
+    bool propagate_scope_errors, const ResultLayout *layout, std::size_t result_row) {
   if (!program.execution_metadata) {
     Program finalized = program;
     finalized.finalize();
     return execute_impl(finalized, inputs, parameters, parameter_count, starts,
                         ends, rows, output, output_columns, scratch, prebound_inputs,
-                        input_failures, interval_known, propagate_scope_errors);
+                        input_failures, interval_known, propagate_scope_errors, layout, result_row);
   }
   scratch.propagate_scope_errors = propagate_scope_errors;
   // Choose once per native execution. AOT specialization removes optional
@@ -1929,17 +1997,23 @@ static Audit execute_impl(const Program &program, const std::vector<ops::Value> 
   ops::require(!input_failures || input_failures->size() == program.input_count, "GRAPH_INPUT_STATUS_COUNT");
   if ((program.isolate_errors || input_failures) && program.execution_metadata->position_status_nodes)
     return execute_impl_body<true>(program, inputs, parameters, parameter_count,
-        starts, ends, rows, output, output_columns, scratch, prebound_inputs, input_failures, interval_known);
+        starts, ends, rows, output, output_columns, scratch, prebound_inputs, input_failures, interval_known, layout, result_row);
   return execute_impl_body<false>(program, inputs, parameters, parameter_count,
-      starts, ends, rows, output, output_columns, scratch, prebound_inputs, input_failures, interval_known);
+      starts, ends, rows, output, output_columns, scratch, prebound_inputs, input_failures, interval_known, layout, result_row);
 }
 
 Audit execute(const Program &program, const std::vector<ops::Value> &inputs,
               const double *parameters, std::size_t parameter_count,
               const std::int64_t *starts, const std::int64_t *ends,
-              std::size_t rows, void *output, std::size_t output_columns) {
+              std::size_t rows, void *output, std::size_t output_columns,
+              const ResultLayout *layout, std::size_t result_row) {
+  ResultLayout local;
+  if (program.output_kind == OutputKind::typed && !layout) {
+    local = result_layout(program, inputs, starts, ends, rows);
+    layout = &local;
+  }
   return execute_impl(program, inputs, parameters, parameter_count, starts, ends,
-                      rows, output, output_columns, root_scratch, false);
+                      rows, output, output_columns, root_scratch, false, nullptr, true, false, layout, result_row);
 }
 
 } // namespace calmetrics_engine::graph

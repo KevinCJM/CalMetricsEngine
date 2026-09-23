@@ -13,7 +13,12 @@ from .cal_rolling_gain_loss import cal_rolling_gain_loss
 from .cal_std_mean import cal_std_mean, cal_std_mean_simd
 from .graph import CompiledGraph, GraphCompileError, GraphCompiler
 from .planner import AdaptivePlanner, ExecutionPlan, PlannerConfig
-from .runtime import AdaptiveScheduler, GraphExecutionResult, PreparedGraphExecution
+from .runtime import (
+    AdaptiveScheduler,
+    GraphExecutionResult,
+    PreparedGraphExecution,
+    TypedGraphOutput,
+)
 from .shared import SharedArrayDescriptor, SharedArrayOwner, SharedInputBundle
 
 __all__ = [
@@ -37,6 +42,7 @@ __all__ = [
     "AdaptiveScheduler",
     "GraphExecutionResult",
     "PreparedGraphExecution",
+    "TypedGraphOutput",
     "SharedArrayDescriptor",
     "SharedArrayOwner",
     "SharedInputBundle",

@@ -8,7 +8,6 @@ import pytest
 
 from calmetrics_engine import (
     AdaptiveScheduler,
-    GraphCompileError,
     GraphCompiler,
     PlannerConfig,
     SharedInputBundle,
@@ -231,13 +230,10 @@ def test_hard_stop_worker_returns_exact_typed_series(dtype):
     np.testing.assert_array_equal(result.values[:, 0], values)
 
 
-def test_mixed_output_dtypes_and_unaligned_integer_vectors_fail_closed():
-    with pytest.raises(GraphCompileError, match="MIXED_ROOT_DTYPES"):
-        GraphCompiler({"x": "series"}).compile(["x", "greater_than(x,0)"])
-    with pytest.raises(GraphCompileError, match="PUBLIC_ROOT_TYPE"):
-        GraphCompiler({"x": "series"}).compile("argsort(x)")
-    with pytest.raises(GraphCompileError, match="PUBLIC_ROOT_TYPE"):
-        GraphCompiler({"x": {"kind": "vector", "dtype": "int64"}}).compile("x")
+def test_mixed_output_dtypes_and_integer_vectors_use_typed_results():
+    assert GraphCompiler({"x": "series"}).compile(["x", "greater_than(x,0)"]).metadata()["output_kind"] == "typed"
+    assert GraphCompiler({"x": "series"}).compile("argsort(x)").metadata()["output_kind"] == "typed"
+    assert GraphCompiler({"x": {"kind": "vector", "dtype": "int64"}}).compile("x").metadata()["output_kind"] == "typed"
 
 
 def test_state_event_planner_accounts_quadratic_and_window_work():

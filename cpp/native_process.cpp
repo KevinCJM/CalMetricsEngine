@@ -23,10 +23,13 @@ extern char **environ;
 
 namespace calmetrics_engine::native {
 namespace {
-constexpr std::size_t max_frame = 256 * 1024 * 1024;
-constexpr std::uint64_t request_magic = 0x434d453300000004ull;
-constexpr std::uint64_t response_magic = 0x434d455300000004ull;
+constexpr std::size_t max_frame = max_process_frame_bytes;
+constexpr std::uint64_t request_magic = 0x434d453300000005ull;
+constexpr std::uint64_t response_magic = 0x434d455300000005ull;
 using Bytes = std::vector<std::uint8_t>;
+bool valid_status(std::int16_t value) {
+  return (value >= 0 && value <= 4) || value == 7 || value == 9 || value == 10;
+}
 void require(bool ok, const char *message) {
   if (!ok)
     throw std::runtime_error(message);
@@ -34,6 +37,7 @@ void require(bool ok, const char *message) {
 struct Writer {
   Bytes bytes;
   void number(std::uint64_t x) {
+    require(bytes.size() <= max_frame - 8, "IPC frame too large; use shared-memory transport");
     for (unsigned i = 0; i < 8; ++i)
       bytes.push_back(static_cast<std::uint8_t>(x >> (8 * i)));
   }
@@ -153,12 +157,34 @@ void write_audit(Writer &out, const graph::Audit &a) {
     out.number(a.*member);
   out.number(a.statuses.size());
   out.blob(a.statuses.data(), a.statuses.size() * sizeof(std::int16_t));
+  out.number(a.result_shapes.size());
+  for (const auto &shape : a.result_shapes) {
+    out.number(static_cast<std::uint64_t>(shape.rank + 1));
+    out.number(shape.dim[0]); out.number(shape.dim[1]);
+  }
+  out.blob(a.root_statuses.data(), a.root_statuses.size() * sizeof(std::int16_t));
 }
 graph::Audit read_audit(Reader &in) {
   graph::Audit a;
   for (auto member : audit_fields)
     a.*member = static_cast<std::size_t>(in.number());
   a.statuses = in.array<std::int16_t>(static_cast<std::size_t>(in.number()));
+  const auto shapes = static_cast<std::size_t>(in.number());
+  require(shapes <= max_frame / 24 && shapes <= (in.bytes.size() - in.position) / 24,
+          "invalid result shape count");
+  a.result_shapes.reserve(shapes);
+  for (std::size_t i = 0; i < shapes; ++i) {
+    const auto rank = in.number();
+    require(rank <= 3, "invalid result rank");
+    ops::Shape shape;
+    shape.rank = static_cast<int>(rank) - 1;
+    shape.dim[0] = static_cast<std::size_t>(in.number());
+    shape.dim[1] = static_cast<std::size_t>(in.number());
+    require(shape.dim[0] <= static_cast<std::size_t>(PTRDIFF_MAX) &&
+            shape.dim[1] <= static_cast<std::size_t>(PTRDIFF_MAX), "invalid result dimension");
+    a.result_shapes.push_back(shape);
+  }
+  a.root_statuses = in.array<std::int16_t>(shapes);
   return a;
 }
 
@@ -514,6 +540,8 @@ Bytes execute_request(const Bytes &bytes, Bytes &cached_bytes,
     const std::int64_t *starts = nullptr, *ends = nullptr;
     void *output = nullptr;
     const auto output_width = graph::output_itemsize(cached_program.output_dtype);
+    const bool typed = cached_program.output_kind == graph::OutputKind::typed;
+    graph::ResultLayout typed_layout;
     if (shared) {
       auto a = get_descriptor(in), b = get_descriptor(in),
            c = get_descriptor(in);
@@ -543,15 +571,16 @@ Bytes execute_request(const Bytes &bytes, Bytes &cached_bytes,
                 planner::checked_add(output_row_begin, length);
         }
       }
-      require(planner::checked_mul(
+      if (typed) typed_layout = graph::result_layout(cached_program, inputs, all_starts, all_ends, total_rows);
+      require((typed ? typed_layout.bytes() : planner::checked_mul(
                   planner::checked_mul(total_output_rows,
                                        cached_program.roots.size()),
-                  output_width) <= c.bytes,
+                  output_width)) <= c.bytes,
               "native output mapping bounds");
       auto so = SharedRegion::attach(c.name, c.bytes, true);
       starts = all_starts + begin;
       ends = all_ends + begin;
-      output = graph::output_offset(so->data(),
+      output = typed ? so->data() : graph::output_offset(so->data(),
           output_row_begin * cached_program.roots.size(), cached_program.output_dtype);
       mappings.push_back(sa);
       mappings.push_back(sb);
@@ -572,14 +601,16 @@ Bytes execute_request(const Bytes &bytes, Bytes &cached_bytes,
                                        starts_storage[row]));
         }
       }
-      const auto elements = planner::checked_mul(output_rows, cached_program.roots.size());
-      output_bytes = planner::checked_mul(elements, output_width);
+      if (typed) typed_layout = graph::result_layout(cached_program, inputs,
+          starts_storage.data(), ends_storage.data(), end - begin);
+      const auto elements = typed ? typed_layout.bytes() / 8 : planner::checked_mul(output_rows, cached_program.roots.size());
+      output_bytes = typed ? typed_layout.bytes() : planner::checked_mul(elements, output_width);
       starts = starts_storage.data();
       ends = ends_storage.data();
-      if (cached_program.output_dtype == graph::OutputDType::int64) {
+      if (!typed && cached_program.output_dtype == graph::OutputDType::int64) {
         integer_output_storage.resize(std::max<std::size_t>(elements, 1));
         output = integer_output_storage.data();
-      } else if (cached_program.output_dtype == graph::OutputDType::boolean) {
+      } else if (!typed && cached_program.output_dtype == graph::OutputDType::boolean) {
         mask_output_storage.resize(std::max<std::size_t>(elements, 1));
         output = mask_output_storage.data();
       } else {
@@ -590,10 +621,11 @@ Bytes execute_request(const Bytes &bytes, Bytes &cached_bytes,
     in.end();
     auto audit = graph::execute(cached_program, inputs, params.data(),
                                 params.size(), starts, ends, end - begin,
-                                output, cached_program.roots.size());
+                                output, cached_program.roots.size(), typed ? &typed_layout : nullptr, shared && typed ? begin : 0);
     response.number(0);
     write_audit(response, audit);
     response.number(static_cast<std::uint8_t>(cached_program.output_dtype));
+    response.number(static_cast<std::uint8_t>(cached_program.output_kind));
     response.blob(output, output_bytes);
   } catch (const std::exception &error) {
     response.bytes.resize(8);
@@ -603,6 +635,16 @@ Bytes execute_request(const Bytes &bytes, Bytes &cached_bytes,
   return response.bytes;
 }
 } // namespace
+
+std::size_t process_response_bytes(std::size_t output_bytes,
+                                   std::size_t status_bytes,
+                                   std::size_t result_slots) {
+  // magic/error, audit counters, status count/blob, shape count, root-status
+  // blob, dtype/kind and output blob. Each shape has three uint64 fields.
+  const auto fixed = (sizeof(audit_fields) / sizeof(audit_fields[0]) + 9) * 8;
+  return planner::checked_add(planner::checked_add(fixed, output_bytes),
+      planner::checked_add(status_bytes, planner::checked_mul(result_slots, 26)));
+}
 
 struct ProcessPool::Impl {
   std::string executable;
@@ -785,17 +827,36 @@ graph::Audit ProcessTransport::response(const Bytes &bytes,
                                  plan_.graph->program.roots.size());
   require(in.number() == static_cast<std::uint8_t>(plan_.graph->program.output_dtype),
           "native worker result dtype mismatch");
-  const auto output_bytes = planner::checked_mul(
-      count, graph::output_itemsize(plan_.graph->program.output_dtype));
+  require(in.number() == static_cast<std::uint8_t>(plan_.graph->program.output_kind),
+          "native worker result kind mismatch");
+  const auto *layout = plan_.result_layout.get();
+  const auto output_bytes = layout ? (plan_.use_shared_memory ? 0 : layout->row_bytes[chunk.end] - layout->row_bytes[chunk.begin])
+      : planner::checked_mul(count, graph::output_itemsize(plan_.graph->program.output_dtype));
   auto values = in.array<std::uint8_t>(output_bytes);
   in.end();
   require(audit.rows == chunk.end - chunk.begin,
           "native worker result shape mismatch");
   const auto status_count = plan_.graph->program.isolate_errors
-      ? planner::checked_mul(output_rows, plan_.graph->program.roots.size()) : 0;
+      ? (layout ? layout->row_statuses[chunk.end] - layout->row_statuses[chunk.begin]
+                : planner::checked_mul(output_rows, plan_.graph->program.roots.size())) : 0;
   require(audit.statuses.size() == status_count, "native worker status shape mismatch");
-  if (count)
-    std::memcpy(graph::output_offset(output,
+  const auto roots = plan_.graph->program.roots.size();
+  require(audit.result_shapes.size() == (layout ? planner::checked_mul(chunk.end - chunk.begin, roots) : 0),
+          "native worker root metadata mismatch");
+  require(audit.root_statuses.size() == audit.result_shapes.size(), "native worker root status count");
+  for (std::size_t i = 0; i < audit.result_shapes.size(); ++i) {
+    const auto &shape = audit.result_shapes[i];
+    const auto status = audit.root_statuses[i];
+    require(valid_status(status), "native worker root status value");
+    require(shape.rank >= 0 || (shape.rank == -1 && status != 0), "native worker unknown result geometry");
+    if (shape.rank >= 0) {
+      require(shape.rank == plan_.graph->program.root_outputs[i % roots].rank &&
+          shape.size() <= layout->slots[chunk.begin * roots + i].capacity, "native worker result capacity");
+    }
+  }
+  for (auto status : audit.statuses) require(valid_status(status), "native worker status value");
+  if (output_bytes)
+    std::memcpy(layout ? static_cast<std::uint8_t *>(output) + layout->row_bytes[chunk.begin] : graph::output_offset(output,
                     output_row_begin * plan_.graph->program.roots.size(),
                     plan_.graph->program.output_dtype),
                 values.data(), output_bytes);

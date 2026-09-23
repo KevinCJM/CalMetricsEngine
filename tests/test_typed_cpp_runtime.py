@@ -382,6 +382,6 @@ def test_prepared_series_execution_reuses_output_and_exposes_offsets():
     np.testing.assert_allclose(second, snapshot, equal_nan=True)
 
 
-def test_mixed_scalar_and_series_roots_fail_closed():
-    with pytest.raises(GraphCompileError, match="MIXED_ROOT_TYPES"):
-        GraphCompiler({"x": "series"}).compile(["mean(x)", "rolling_mean(x,3)"])
+def test_mixed_scalar_and_series_roots_use_typed_results():
+    mixed = GraphCompiler({"x": "series"}).compile(["mean(x)", "rolling_mean(x,3)"])
+    assert mixed.metadata()["output_kind"] == "typed"

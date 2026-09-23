@@ -517,7 +517,7 @@ root = GraphCompiler({"x": "series"}).compile([
 
 `filter_apply(body,mask[,empty_default])` preserves selected order and returns a scalar;
 an empty selection defaults to NaN. `block_apply` drops incomplete tails and produces
-a compact intermediate, which cannot masquerade as an aligned public series root.
+a compact vector, returned through the typed result protocol when selected as a root.
 `group_apply` uses complete groups and is retrospective within each group. Sorting
 indices likewise do not establish chronological or causal order.
 
@@ -552,13 +552,16 @@ states = GraphCompiler({"x": "series"}).compile([
 ])
 ```
 
-Public aligned series roots now support **float64, bool and exact int64**, with one dtype
-per graph. `values` remains a contiguous two-dimensional array with interval `offsets`.
-Mixed root dtypes and direct matrix/record roots are rejected. Under error isolation,
-always read `statuses`: invalid bool/int64 entries use False/0 placeholders, which are
-distinct from valid False/0 and from an operator's documented unknown-state code.
-Typed `prepared.run()` rejects failed results without statuses; use `run_audit()` or
-`run_snapshot()`. Snapshot results remain independent of later prepared calls.
+Homogeneous aligned series preserve **float64, bool and exact int64** in the compatible
+`values`/`offsets` interface. Vectors, matrices, shortened sequences and mixed shapes/dtypes
+use `result.outputs[root].values[interval]`, with readonly typed arrays and per-output statuses.
+Use `compile(..., result_format="typed")` to select that interface explicitly. Records and
+internal state bundles still require field projections. See the [multi-output examples](docs/user-guide.md).
+
+Always read isolation statuses: invalid bool/int64 entries use False/0 placeholders.
+Typed `prepared.run()` returns a Result with statuses; compatible bool/int64 bare-array runs
+reject failed results. Prepared values are borrowed until the next run; `run_snapshot()`
+returns independent results.
 
 `segment_apply(body,between_events(events))` evaluates a scalar body on both complete
 segment endpoints `[left,right]` and broadcasts to `[left,right)`. Open tails and missing

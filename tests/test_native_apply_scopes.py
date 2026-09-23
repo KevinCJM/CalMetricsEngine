@@ -176,8 +176,7 @@ def test_group_static_asset_vector_preserves_axis_kind_and_body_semantics():
         "key": {**vector, "dtype": "int64"},
     })
     expression = "group_apply(mean(x),key)"
-    with pytest.raises(GraphCompileError, match="PUBLIC_ROOT_TYPE"):
-        compiler.compile([expression])
+    assert compiler.compile([expression]).metadata()["output_kind"] == "typed"
     graph = compiler.compile([f"sum({expression})"])
     scope = next(node for node in graph.nodes if node.kind == "apply_scope")
     inferred = scope.inferred_type

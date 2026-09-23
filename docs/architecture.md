@@ -28,7 +28,7 @@ C++ Engine (native_runtime.cpp)
 C++ graph executor (graph.cpp)
     shared reductions / sorting / regression state
     -> rolling-window sub-program execution with state reset
-    -> scalar or aligned time-series roots
+    -> scalar/aligned-series compatibility output or heterogeneous typed roots
     -> reusable arenas and Workspace
     -> canonical operators and existing SIMD dispatch
 ```
@@ -38,8 +38,7 @@ symbolic shape, semantic dimension, price basis, historical alias canonicalizati
 `rolling_window`, compiler-owned `rolling_apply`, and aligned time-series roots all live below the
 PyBind boundary. Business causality/knowledge-time governance remains in the research platform.
 The same 146-entry registry now supports typed matrix/vector bindings and matrix intermediates
-inside the interval DAG, together with exact int64 category/index storage. Public graph roots remain
-float64 scalars or aligned homogeneous float64/bool/int64 series; a general public matrix-output API is a separate contract.
+inside the interval DAG, together with exact int64 category/index storage. Public roots include scalar, series, vector and matrix. Heterogeneous typed results retain each root's dtype, named axes, actual per-interval shape and statuses; legacy scalar/aligned-series arrays remain compatible.
 Native block/filter/group/segment/bisection sub-programs make segmented statistics and iterative scalar solves
 composable without Python callbacks. See [the mathematical composition design](mathematical-composition-design.md).
 
@@ -114,7 +113,15 @@ ordinary mapping parameters are rebound when values/keys change.
 
 Scalar graphs return `(interval_rows, roots)`. Aligned time-series graphs return one contiguous
 `(sum(end-start), roots)` matrix plus `int64` prefix offsets so each interval is a zero-object-overhead
-slice. Outputs and algorithm workspace may be allocated. Zero-copy input binding is not a claim of zero
+slice. Other root combinations, or explicit `result_format="typed"`, use `ResultLayout`:
+interval/root-ordered capacity slots aligned to eight bytes, one numeric payload, per-root actual
+shapes/statuses, and readonly output views retaining the payload owner. Capacity is planned without
+reading numerical values; actual dynamic lengths are recorded during the same DAG execution.
+Metadata/status storage participates in memory admission. Native worker protocol v5 carries this
+geometry and validates capacity before exposing a result; program encoding v6 records root dtype/rank.
+See [typed result design](typed-results-design.md).
+
+Outputs and algorithm workspace may be allocated. Zero-copy input binding is not a claim of zero
 allocation or zero algorithm scratch initialization. Quantile/median sorting and solvers report their
 necessary algorithm copies separately. Native graph audit includes order-stat scratch as well as the
 main arenas and operator workspace.

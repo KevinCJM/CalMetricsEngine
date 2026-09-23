@@ -80,7 +80,8 @@ compile(const std::vector<std::string> &expressions,
         const std::vector<std::map<std::string, std::string>> &root_bindings = {},
         const std::vector<std::string> &source_contracts = {},
         std::uint32_t minimum_observations = 0,
-        std::uint64_t scope_work_budget = 100000000);
+        std::uint64_t scope_work_budget = 100000000,
+        bool typed_results = false);
 
 // Versioned, pointer-free plan representation shared by bindings and native
 // workers.
