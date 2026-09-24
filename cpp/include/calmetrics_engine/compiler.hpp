@@ -56,6 +56,7 @@ struct CompiledGraph {
   std::vector<typed::Variable> variable_types;
   std::vector<std::string> input_names;
   std::vector<std::string> parameter_names;
+  std::vector<std::string> output_names;
   std::string fingerprint;
   graph::OutputKind output_kind = graph::OutputKind::scalar;
   std::size_t raw_node_count = 0;
@@ -81,7 +82,8 @@ compile(const std::vector<std::string> &expressions,
         const std::vector<std::string> &source_contracts = {},
         std::uint32_t minimum_observations = 0,
         std::uint64_t scope_work_budget = 100000000,
-        bool typed_results = false);
+        bool typed_results = false,
+        const std::vector<std::string> &output_names = {});
 
 // Versioned, pointer-free plan representation shared by bindings and native
 // workers.

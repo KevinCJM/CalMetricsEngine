@@ -1,4 +1,6 @@
 #include "calmetrics_engine/graph.hpp"
+#include "calmetrics_engine/pointwise.hpp"
+#include "calmetrics_engine/native_runtime.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -6,6 +8,7 @@
 #include <numeric>
 #include <cstring>
 #include <stdexcept>
+#include <type_traits>
 
 namespace calmetrics_engine::graph {
 namespace {
@@ -31,6 +34,12 @@ struct OrderedCache {
 };
 
 struct Scratch {
+  std::shared_ptr<const ExecutionMetadata> arena_owner;
+  std::size_t arena_window = 0;
+  native::Deadline deadline = native::Deadline::max();
+  const std::atomic<bool> *cancelled = nullptr;
+  std::vector<std::array<double, 3>> iteration_info;
+  std::vector<double> iteration_state, iteration_next;
   std::vector<double> numeric;
   std::vector<std::uint8_t> masks;
   std::vector<std::int64_t> integers;
@@ -56,10 +65,39 @@ struct Scratch {
   std::size_t summary_source_scans = 0;
   std::size_t order_stat_sorts = 0;
   std::size_t algorithm_copy_bytes = 0;
+  std::size_t state_copy_bytes = 0, child_root_copy_bytes = 0, child_direct_output_bytes = 0;
+  std::size_t child_vector_elements = 0, child_pointwise_tiles = 0, child_fused_pointwise_calls = 0;
+  std::size_t child_pointwise_capacity = 0;
   std::vector<std::size_t> rolling_invalid;
   std::vector<std::unique_ptr<Scratch>> children;
 
+  void release_execution_buffers() {
+    const auto clear = [](auto &v) { std::decay_t<decltype(v)>().swap(v); };
+    clear(numeric); clear(masks); clear(integers); clear(values); clear(statuses);
+    clear(position_statuses); clear(summaries); clear(ordered); clear(rolling_invalid);
+    clear(workspace.doubles); clear(workspace.indices); clear(iteration_info);
+    clear(iteration_state); clear(iteration_next); clear(selected_numeric);
+    clear(selected_integer); clear(selected_masks); clear(selection); children.clear();
+    arena_owner.reset(); position_owner.reset(); arena_window = position_window = 0;
+  }
+
   void ensure(const Program &program, std::size_t max_window, bool isolate) {
+    if (arena_owner.get() != program.execution_metadata.get() || max_window < arena_window) {
+      // A previous graph or larger batch must not retain workspace outside the
+      // current plan's admission estimate. Parent-owned capture/state buffers
+      // below remain alive: this execution may currently be reading them.
+      std::vector<double>().swap(numeric);
+      std::vector<std::uint8_t>().swap(masks);
+      std::vector<std::int64_t>().swap(integers);
+      std::vector<ops::Value>().swap(values);
+      std::vector<SummaryCache>().swap(summaries);
+      std::vector<OrderedCache>().swap(ordered);
+      std::vector<double>().swap(workspace.doubles);
+      std::vector<std::size_t>().swap(workspace.indices);
+      children.clear();
+      arena_owner = program.execution_metadata;
+    }
+    arena_window = max_window;
     isolate_errors = isolate;
     if (program.numeric_slots &&
         max_window >
@@ -71,9 +109,13 @@ struct Scratch {
       throw ops::Error("GRAPH_ARENA_OVERFLOW");
     ops::require(program.integer_slots == 0 || max_window <=
                  static_cast<std::size_t>(PTRDIFF_MAX) / program.integer_slots, "GRAPH_ARENA_OVERFLOW");
-    integers.resize(program.integer_slots * max_window);
-    numeric.resize(program.numeric_slots * max_window);
-    masks.resize(program.mask_slots * max_window);
+    const auto resize_arena = [](auto &buffer, std::size_t count) {
+      if (count > buffer.capacity()) std::decay_t<decltype(buffer)>(count).swap(buffer);
+      else buffer.resize(count);
+    };
+    resize_arena(integers, program.integer_slots * max_window);
+    resize_arena(numeric, program.execution_metadata->numeric_roots_only ? 0 : program.numeric_slots * max_window);
+    resize_arena(masks, program.mask_slots * max_window);
     values.resize(program.nodes.size());
     if (isolate_errors)
       statuses.resize(program.nodes.size());
@@ -94,10 +136,19 @@ struct Scratch {
     summaries.resize(program.nodes.size());
     ordered.resize(program.nodes.size());
     const auto scope_count = program.rolling_scopes.size() + program.apply_scopes.size();
-    if (children.size() < scope_count) children.resize(scope_count);
-    for (std::size_t i = 0; i < scope_count; ++i)
+    if (iteration_info.capacity() > program.apply_scopes.size())
+      std::vector<std::array<double, 3>>(program.apply_scopes.size()).swap(iteration_info);
+    else iteration_info.resize(program.apply_scopes.size());
+    children.resize(scope_count);
+    for (std::size_t i = 0; i < scope_count; ++i) {
       if (!children[i])
         children[i] = std::make_unique<Scratch>();
+      const bool iterate = i >= program.rolling_scopes.size() &&
+          program.apply_scopes[i - program.rolling_scopes.size()].kind == ApplyKind::iterate;
+      const auto bound = iterate ? std::max<std::size_t>(max_window, 1) : 0;
+      for (auto *buffer : {&children[i]->iteration_state, &children[i]->iteration_next})
+        if (buffer->capacity() > bound) std::vector<double>().swap(*buffer);
+    }
   }
 
   void next_generation() {
@@ -167,7 +218,7 @@ std::int16_t capture_error(const Scratch &scratch,
 ops::Value interval_view(const ops::Value &base, std::size_t start,
                          std::size_t length) {
   ops::require((base.kind == ops::Kind::number || base.kind == ops::Kind::integer ||
-                base.kind == ops::Kind::mask) && base.shape.rank >= 1 && base.shape.rank <= 2,
+                base.kind == ops::Kind::mask) && base.shape.rank >= 1 && base.shape.rank <= 3,
                "GRAPH_INPUT_TYPE");
   ops::require(start <= base.shape.dim[0] && length <= base.shape.dim[0] - start,
                "GRAPH_INTERVAL_BOUNDS");
@@ -332,8 +383,8 @@ double ordered_result(Scratch &scratch, const Node &node,
   return ordered[lower] * (1.0 - fraction) + ordered[upper] * fraction;
 }
 
-ops::Value output_value(Scratch &scratch, const ops::Prepared &prepared,
-                        const ops::Output &output, const Node &node,
+ops::Value output_value(const ops::Prepared &prepared,
+                        const ops::Output &output,
                         std::size_t max_window) {
   ops::Value value;
   value.kind = prepared.output_kind;
@@ -350,26 +401,12 @@ ops::Value output_value(Scratch &scratch, const ops::Prepared &prepared,
     return value;
   }
 
-  ops::require(prepared.output_shape.rank <= 2, "GRAPH_OUTPUT_RANK");
+  ops::require(prepared.output_shape.rank <= 3, "GRAPH_OUTPUT_RANK");
   ops::require(prepared.output_shape.size() <= max_window,
                "GRAPH_OUTPUT_TOO_LARGE");
-  value.stride[0] = value.shape.rank == 2 ? value.shape.dim[1] : 1;
-  value.stride[1] = 1;
+  value.set_contiguous_strides();
 
-  if (prepared.output_kind == ops::Kind::mask) {
-    ops::require(node.storage == StorageKind::mask, "GRAPH_STORAGE_KIND");
-    value.data =
-        scratch.masks.data() + static_cast<std::size_t>(node.slot) * max_window;
-  } else if (prepared.output_kind == ops::Kind::integer) {
-    ops::require(node.storage == StorageKind::integer, "GRAPH_STORAGE_KIND");
-    value.data = scratch.integers.data() + static_cast<std::size_t>(node.slot) * max_window;
-  } else {
-    ops::require(prepared.output_kind == ops::Kind::number,
-                 "GRAPH_STORAGE_KIND");
-    ops::require(node.storage == StorageKind::numeric, "GRAPH_STORAGE_KIND");
-    value.data = scratch.numeric.data() +
-                 static_cast<std::size_t>(node.slot) * max_window;
-  }
+  value.data = output.data;
   return value;
 }
 
@@ -392,7 +429,7 @@ void Program::validate() const {
                "GRAPH_SCALAR_OUTPUT_DTYPE");
   ops::require(root_outputs.size() == (output_kind == OutputKind::typed ? roots.size() : 0), "RESULT_SCHEMA");
   for (const auto &root : root_outputs)
-    ops::require(static_cast<unsigned>(root.dtype) <= 2 && root.rank <= 2, "RESULT_SCHEMA");
+    ops::require(static_cast<unsigned>(root.dtype) <= 2 && root.rank <= 3, "RESULT_SCHEMA");
   ops::require(scope_work_budget >= 1 && scope_work_budget <= 1000000000000ULL, "GRAPH_SCOPE_WORK_BUDGET");
   ops::require(input_axes.empty() || input_axes.size() == input_count, "GRAPH_INPUT_AXES");
   for (auto axis : input_axes) ops::require(axis <= 2, "GRAPH_INPUT_AXES");
@@ -468,19 +505,26 @@ void Program::validate() const {
     case NodeKind::apply_scope: {
       ops::require(node.input_index < apply_scopes.size(), "GRAPH_APPLY_SCOPE_INDEX");
       const auto &scope = apply_scopes[node.input_index];
-      ops::require(scope.body && scope.body->output_kind == OutputKind::scalar &&
+      ops::require(scope.body && scope.body->output_kind ==
+                   (scope.kind == ApplyKind::iterate ? OutputKind::typed : OutputKind::scalar) &&
                    scope.body->roots.size() == 1 &&
                    scope.input_nodes.size() == scope.body->input_count &&
                    scope.parameter_nodes.size() == scope.body->parameter_count,
                    "GRAPH_APPLY_BINDINGS");
+      scope.body->validate();
       const auto argc = scope.argument_nodes.size();
       ops::require((scope.kind == ApplyKind::bisect && argc == 4) ||
+                   (scope.kind == ApplyKind::iterate && argc == 3) ||
                    (scope.kind == ApplyKind::filter && (argc == 1 || argc == 2)) ||
                    ((scope.kind == ApplyKind::block || scope.kind == ApplyKind::group ||
                      scope.kind == ApplyKind::segment) && argc == 1),
                    "GRAPH_APPLY_ARGUMENTS");
+      ops::require(scope.state_input_index >= -1 && (scope.state_input_index == -1 ||
+          (scope.kind == ApplyKind::iterate && static_cast<std::size_t>(scope.state_input_index) < scope.input_nodes.size() &&
+           scope.input_nodes[scope.state_input_index] == scope.argument_nodes[0])), "GRAPH_ITERATION_STATE_BINDING");
       const bool array = scope.kind == ApplyKind::block || scope.kind == ApplyKind::group ||
-                         scope.kind == ApplyKind::segment;
+                         scope.kind == ApplyKind::segment ||
+                         (scope.kind == ApplyKind::iterate && scope.body->root_outputs[0].rank != 0);
       ops::require(array ? node.storage == StorageKind::numeric && node.slot < numeric_slots
                          : node.storage == StorageKind::inline_value, "GRAPH_SLOT");
       auto dependency = [&](std::uint32_t id) {
@@ -499,6 +543,11 @@ void Program::validate() const {
       scope.body->validate();
       break;
     }
+    case NodeKind::iteration_projection:
+      ops::require(node.parent_count == 1 && node.parents[0] < index && node.opcode <= 2 &&
+          node.storage == StorageKind::inline_value && nodes[node.parents[0]].kind == NodeKind::apply_scope &&
+          apply_scopes[nodes[node.parents[0]].input_index].kind == ApplyKind::iterate, "GRAPH_ITERATION_PROJECTION");
+      break;
     default:
       throw ops::Error("GRAPH_NODE_KIND");
     }
@@ -511,6 +560,18 @@ void Program::validate() const {
 void Program::finalize() {
   validate();
   auto metadata = std::make_shared<ExecutionMetadata>();
+  metadata->pointwise = pointwise_eligible(*this);
+  metadata->root_destinations.assign(nodes.size(), -1);
+  for (std::size_t i = 0; i < roots.size(); ++i)
+    metadata->root_destinations[roots[i]] = static_cast<std::int32_t>(i);
+  metadata->numeric_roots_only = output_kind == OutputKind::typed;
+  for (std::size_t i = 0; i < nodes.size(); ++i) {
+    const auto &n = nodes[i];
+    if (n.storage != StorageKind::numeric) continue;
+    metadata->numeric_roots_only = metadata->numeric_roots_only &&
+        metadata->root_destinations[i] >= 0 && (n.kind == NodeKind::operation ||
+        (n.kind == NodeKind::apply_scope && apply_scopes[n.input_index].kind == ApplyKind::iterate));
+  }
   metadata->requires_shape_planning = std::any_of(input_axes.begin(), input_axes.end(),
       [](std::uint8_t axis) { return axis != 0; });
   metadata->specs.resize(nodes.size(), nullptr);
@@ -555,6 +616,7 @@ void Program::finalize() {
         metadata->order_consumers[source] < 255)
       ++metadata->order_consumers[source];
   }
+  if (metadata->pointwise) plan_pointwise_regions(*this, *metadata);
   execution_metadata = std::move(metadata);
 }
 
@@ -618,7 +680,8 @@ std::size_t required_array_capacity(const Program &program,
     } else if (node.kind == NodeKind::rolling_scope) shape = ops::vector_shape(max_window);
     else if (node.kind == NodeKind::apply_scope && node.storage != StorageKind::inline_value) {
       const auto &scope = program.apply_scopes[node.input_index];
-      if (scope.kind == ApplyKind::block && scope.input_nodes.empty()) shape = ops::vector_shape(max_window);
+      if (scope.kind == ApplyKind::iterate) shape = shapes[scope.argument_nodes[0]];
+      else if (scope.kind == ApplyKind::block && scope.input_nodes.empty()) shape = ops::vector_shape(max_window);
       else if (scope.kind == ApplyKind::segment)
         shape = ops::vector_shape(shapes[scope.argument_nodes[0]].dim[0]);
       else {
@@ -630,6 +693,22 @@ std::size_t required_array_capacity(const Program &program,
   }
   if (node_shapes) *node_shapes = std::move(shapes);
   return capacity;
+}
+
+static void accumulate_child(Scratch &scratch, const Audit &audit) {
+  scratch.algorithm_copy_bytes += audit.algorithm_copy_bytes;
+  scratch.state_copy_bytes += audit.state_copy_bytes;
+  scratch.child_root_copy_bytes += audit.root_copy_bytes;
+  scratch.child_direct_output_bytes += audit.direct_output_bytes;
+  scratch.child_vector_elements += audit.vector_elements;
+  scratch.child_pointwise_tiles += audit.pointwise_tiles;
+  scratch.child_fused_pointwise_calls += audit.fused_pointwise_calls;
+  scratch.child_pointwise_capacity = std::max(scratch.child_pointwise_capacity,
+      audit.pointwise_workspace_capacity_bytes);
+}
+static void accumulate_child(Scratch &scratch, const ops::Audit &audit) {
+  scratch.algorithm_copy_bytes += audit.algorithm_copy_bytes;
+  scratch.child_vector_elements += audit.vector_elements;
 }
 
 static Audit execute_impl(const Program &program,
@@ -691,8 +770,8 @@ static ops::Value validate_apply_structure(const ApplyScope &scope,
   for (auto id : scope.input_nodes) {
     const auto &value = scratch.values[id];
     if (!known_geometry(value)) continue;
-    ops::require(value.shape.rank == 1, "SCOPE_CAPTURE_RANK");
-    if (count_known && scope.kind != ApplyKind::bisect)
+    ops::require(scope.kind == ApplyKind::iterate || value.shape.rank == 1, "SCOPE_CAPTURE_RANK");
+    if (count_known && scope.kind != ApplyKind::bisect && scope.kind != ApplyKind::iterate)
       ops::require(value.size() == count, "SCOPE_ALIGNMENT_MISMATCH");
     count = std::max(count, value.size());
     count_known = true;
@@ -707,6 +786,17 @@ static ops::Value validate_apply_structure(const ApplyScope &scope,
   for (std::size_t i = 0; i < scope.argument_nodes.size(); ++i)
     if (scope.kind == ApplyKind::bisect || scope.kind == ApplyKind::block || i != 0)
       scalar(scope.argument_nodes[i]);
+
+  if (scope.kind == ApplyKind::iterate) {
+    const auto &initial = scratch.values[scope.argument_nodes[0]];
+    ops::require(initial.kind == ops::Kind::number, "ITERATION_STATE_TYPE");
+    const auto tol = scope.argument_nodes[1], limit = scope.argument_nodes[2];
+    if (available(tol)) ops::require(std::isfinite(scratch.values[tol].scalar) &&
+        scratch.values[tol].scalar >= 0, "INVALID_PARAMETER");
+    if (available(limit)) positive_integer(scratch.values[limit].scalar, "INVALID_PARAMETER", 10000);
+    auto result = initial; result.data = nullptr; result.scalar = NAN;
+    return result;
+  }
 
   if (scope.kind == ApplyKind::filter || scope.kind == ApplyKind::group ||
       scope.kind == ApplyKind::segment) {
@@ -822,8 +912,9 @@ static void validate_unresolved_scope(const Program &program, const Node &node,
   const auto &body = rolling ? *program.rolling_scopes[node.input_index].body
                             : *program.apply_scopes[node.input_index].body;
   const bool bisect = !rolling && program.apply_scopes[node.input_index].kind == ApplyKind::bisect;
-  bool body_interval_known = bisect;
-  if (bisect) {
+  const bool iterate = !rolling && program.apply_scopes[node.input_index].kind == ApplyKind::iterate;
+  bool body_interval_known = bisect || iterate;
+  if (bisect || iterate) {
     length = 0;
     for (auto id : captures) {
       if (known_geometry(scratch.values[id])) length = std::max(length, scratch.values[id].size());
@@ -837,7 +928,7 @@ static void validate_unresolved_scope(const Program &program, const Node &node,
   for (auto id : captures) {
     auto value = scratch.values[id];
     auto failure = node_failure(scratch, id);
-    if (!bisect) {
+    if (!bisect && !iterate) {
       // Unknown membership makes selected payload and shape unavailable. Do
       // not validate arbitrary full-input rows as if they had been selected.
       value.data = nullptr;
@@ -864,6 +955,7 @@ static void validate_unresolved_scope(const Program &program, const Node &node,
   }
   auto &child = *scratch.children[(rolling ? 0 : program.rolling_scopes.size()) + node.input_index];
   child.remaining_work = scratch.remaining_work;
+  child.deadline = scratch.deadline; child.cancelled = scratch.cancelled;
   const std::int64_t start = 0, end = static_cast<std::int64_t>(length);
   for (std::size_t endpoint = 0; endpoint < (bisect ? 2u : 1u); ++endpoint) {
     if (bisect) {
@@ -879,10 +971,21 @@ static void validate_unresolved_scope(const Program &program, const Node &node,
       *child.remaining_work -= rows * nodes;
     }
     double ignored = NAN;
+    std::vector<double> buffer;
+    ResultLayout layout;
+    if (iterate) {
+      std::vector<ops::Shape> shapes;
+      required_array_capacity(body, inputs, length, &shapes);
+      const auto capacity = shapes.at(body.roots[0]).size();
+      buffer.resize(std::max<std::size_t>(capacity, 1));
+      layout.columns = 1; layout.slots.push_back({0, 0, capacity});
+      layout.row_bytes = {0, capacity * sizeof(double)};
+      layout.row_statuses = {0, capacity};
+    }
     const auto audit = execute_impl(body, inputs, parameters.data(), parameters.size(),
-        &start, &end, 1, &ignored, 1, child, true, &failures, body_interval_known,
-        scratch.isolate_errors || scratch.propagate_scope_errors);
-    scratch.algorithm_copy_bytes += audit.algorithm_copy_bytes;
+        &start, &end, 1, iterate ? buffer.data() : &ignored, 1, child, true, &failures, body_interval_known,
+        scratch.isolate_errors || scratch.propagate_scope_errors, iterate ? &layout : nullptr);
+    accumulate_child(scratch, audit);
   }
 }
 
@@ -907,14 +1010,19 @@ static ops::Value validate_failed_node(const Program &program,
     value.data = nullptr;
     return value;
   }
+  if (node.kind == NodeKind::iteration_projection) {
+    auto value = ops::Value::number(NAN);
+    if (node.opcode != 2) value.kind = ops::Kind::integer;
+    return value;
+  }
   ops::require(node.kind == NodeKind::operation, "GRAPH_FAILED_NODE_KIND");
-  std::array<ops::Value, 8> args{};
-  std::uint8_t geometry = 0, payload = 0;
+  ops::Arguments<ops::Value> args(node.parent_count);
+  std::uint32_t geometry = 0, payload = 0;
   for (std::size_t i = 0; i < node.parent_count; ++i) {
     const auto id = node.parents[i];
     args[i] = scratch.values[id];
-    if (known_geometry(args[i])) geometry |= static_cast<std::uint8_t>(1u << i);
-    if (available_payload(scratch, id)) payload |= static_cast<std::uint8_t>(1u << i);
+    if (known_geometry(args[i])) geometry |= static_cast<std::uint32_t>(1u << i);
+    if (available_payload(scratch, id)) payload |= static_cast<std::uint32_t>(1u << i);
   }
   const auto structure = ops::validate_structure(ops::lookup(node.opcode), args.data(),
                                                 node.parent_count, geometry, payload);
@@ -941,6 +1049,7 @@ static bool scope_maps_status(const Program &program, const Node &node,
   const auto failed = [&](auto id) { return !available_payload(scratch, id); };
   if (node.kind == NodeKind::apply_scope) {
     const auto &scope = program.apply_scopes[node.input_index];
+    if (scope.kind == ApplyKind::iterate) return false;
     if (scope.kind == ApplyKind::bisect)
       return std::none_of(scope.argument_nodes.begin(), scope.argument_nodes.end(), failed);
     if (failed(scope.argument_nodes[0])) return false;
@@ -1006,7 +1115,7 @@ static void execute_pointwise_with_status(const Node &node, std::size_t node_ind
         const auto item = ops::prepare(*prepared.spec, args.data(), prepared.count);
         ops::Audit audit;
         ops::execute(item, cell, scratch.workspace, ops::Isa::automatic, audit);
-        scratch.algorithm_copy_bytes += audit.algorithm_copy_bytes;
+        accumulate_child(scratch, audit);
       } catch (const ops::Error &error) {
         if (!numerical_error(error)) throw;
         status = 4;
@@ -1091,6 +1200,7 @@ static ops::Value execute_rolling_scope(
 
   auto &child = *scratch.children[node.input_index];
   child.remaining_work = scratch.remaining_work;
+  child.deadline = scratch.deadline; child.cancelled = scratch.cancelled;
   std::vector<ops::Value> body_inputs(scope.input_nodes.size());
   std::vector<double> body_parameters(scope.parameter_bindings.size());
   std::int16_t parameter_failure = 0;
@@ -1221,14 +1331,157 @@ static ops::Value execute_rolling_scope(
   return result;
 }
 
+static ops::Value execute_iteration(const Program &program, const ApplyScope &scope,
+    const Node &node, std::size_t max_window, Scratch &scratch, void *root_destination) {
+  auto &child = *scratch.children[program.rolling_scopes.size() + node.input_index];
+  child.remaining_work = scratch.remaining_work;
+  child.deadline = scratch.deadline; child.cancelled = scratch.cancelled;
+  const auto &initial = scratch.values[scope.argument_nodes[0]];
+  const auto count = initial.size();
+  const auto storage = std::max<std::size_t>(count, 1);
+  auto &alternate = child.iteration_next;
+  double scalar_destination = 0;
+  auto *destination = initial.shape.rank ? (root_destination ? static_cast<double *>(root_destination)
+      : scratch.numeric.data() + node.slot * max_window) : &scalar_destination;
+  bool finite = true;
+  for (std::size_t i = 0; i < count; ++i) finite = finite && std::isfinite(initial.f(i));
+  auto state = initial;
+  state.set_contiguous_strides();
+  std::vector<ops::Value> inputs;
+  std::size_t extent = std::max<std::size_t>(count, 1);
+  for (auto id : scope.input_nodes) {
+    inputs.push_back(scratch.values[id]);
+    extent = std::max(extent, inputs.back().size());
+  }
+  std::vector<double> parameters;
+  for (auto id : scope.parameter_nodes) parameters.push_back(scratch.values[id].scalar);
+  if (scope.state_input_index >= 0) inputs[scope.state_input_index] = initial;
+  const bool inplace = finite && pointwise_iteration_inplace_safe(*scope.body,inputs,
+      parameters.data(),static_cast<std::size_t>(scope.state_input_index));
+  const double *current = static_cast<const double *>(initial.data);
+  if (inplace) {
+    // Finite input and the checked coefficient domain prove every update finite.
+    // Copy only into our independent result, then scan each old value before
+    // overwriting it in the register kernel. Generic solvers retain two states.
+    for (std::size_t i = 0; i < count; ++i) destination[i] = initial.f(i);
+    scratch.state_copy_bytes += count*sizeof(double);
+    current = destination;
+    if (alternate.capacity()) std::vector<double>().swap(alternate);
+    if (child.iteration_state.capacity()) std::vector<double>().swap(child.iteration_state);
+  } else {
+    alternate.resize(storage);
+    const bool copy_initial = !initial.shape.rank || !initial.contiguous() || current == destination;
+    if (copy_initial) {
+      child.iteration_state.resize(storage);
+      for (std::size_t i = 0; i < count; ++i) child.iteration_state[i] = initial.f(i);
+      current = child.iteration_state.data();
+      scratch.state_copy_bytes += count*sizeof(double);
+    } else if (child.iteration_state.capacity()) std::vector<double>().swap(child.iteration_state);
+  }
+  auto *next = destination;
+  const auto limit = positive_integer(scratch.values[scope.argument_nodes[2]].scalar, "INVALID_PARAMETER", 10000);
+  const auto tolerance = scratch.values[scope.argument_nodes[1]].scalar;
+  auto &diagnostics = scratch.iteration_info[node.input_index];
+  diagnostics = {static_cast<double>(finite ? SolverStatus::iteration_limit : SolverStatus::numerical_failure), 0, INFINITY};
+  ResultLayout layout;
+  layout.columns = 1; layout.slots.push_back({0, 0, count});
+  layout.row_bytes = {0, count * sizeof(double)}; layout.row_statuses = {0, count};
+  const std::int64_t begin = 0, end = static_cast<std::int64_t>(extent);
+  const auto charge_work = [&] {
+    native::check_deadline(scratch.deadline);
+    if (scratch.cancelled && scratch.cancelled->load()) throw native::Timeout("native iteration cancelled");
+    const auto nodes = std::max<std::size_t>(scope.body_node_count, 1);
+    if (child.remaining_work) {
+      ops::require(extent <= *child.remaining_work / nodes, "SCOPE_COMPUTE_BUDGET_EXCEEDED");
+      *child.remaining_work -= extent * nodes;
+    }
+  };
+  const auto validate_after_failure = [&](bool failed_initial) {
+    // A numerical stop must not hide an independent structural error in a
+    // later body node. Supplying the failure vector enables validation across
+    // numerical failures without publishing or accepting its candidate state.
+    charge_work();
+    std::vector<std::int16_t> failures(inputs.size(), 0);
+    if (failed_initial && scope.state_input_index >= 0)
+      failures[scope.state_input_index] = 4;
+    const auto audit = execute_impl(*scope.body, inputs, parameters.data(), parameters.size(),
+        &begin, &end, 1, next, 1, child, true, &failures, true, true, &layout);
+    accumulate_child(scratch, audit);
+  };
+  state.data = current;
+  if (!state.shape.rank) state.scalar = current[0];
+  if (scope.state_input_index >= 0) inputs[scope.state_input_index] = state;
+  if (!finite) validate_after_failure(true);
+  InplacePointwiseChain repeated_chain;
+  Audit iteration_audit;
+  for (std::size_t iteration = 0; finite && iteration < limit; ++iteration) {
+    charge_work();
+    state.data = current;
+    if (!state.shape.rank) state.scalar = current[0];
+    if (scope.state_input_index >= 0) inputs[scope.state_input_index] = state;
+    diagnostics[1] = static_cast<double>(iteration + 1);
+    double residual = 0;
+    bool scanned = false;
+    try {
+      if (repeated_chain.kernel) {
+        execute_inplace_pointwise_chain(repeated_chain,iteration_audit,residual,finite,scratch.deadline,scratch.cancelled);
+        scanned = true;
+      } else scanned = execute_pointwise(*scope.body, inputs, parameters.data(), parameters.size(),
+          &begin, &end, 1, next, &layout, 0, iteration_audit, scratch.deadline, scratch.cancelled,
+          true, 0, SIZE_MAX, current, &residual, &finite,inplace ? &repeated_chain : nullptr);
+      if (!scanned) iteration_audit = execute_impl(*scope.body, inputs, parameters.data(), parameters.size(),
+          &begin, &end, 1, next, 1, child, true, nullptr, true, true, &layout);
+      accumulate_child(scratch, iteration_audit);
+      ops::require(iteration_audit.result_shapes[0] == initial.shape, "ITERATION_STATE_SHAPE");
+      finite = finite && iteration_audit.root_statuses[0] == 0;
+    } catch (const ops::Error &error) {
+      if (!numerical_error(error)) throw;
+      validate_after_failure(false);
+      finite = false;
+    }
+    if (!scanned && finite)
+      scratch.child_vector_elements += ops::iteration_residual(current, next, count, residual, finite);
+    if (!finite) {
+      diagnostics[0] = static_cast<double>(SolverStatus::numerical_failure);
+      diagnostics[2] = INFINITY;
+      break; // Keep the last finite state; the invalid candidate is not published.
+    }
+    current = next;
+    if (!inplace) next = next == destination ? alternate.data() : destination;
+    diagnostics[2] = residual;
+    if (residual <= tolerance) {
+      diagnostics[0] = static_cast<double>(SolverStatus::converged);
+      break;
+    }
+  }
+  auto result = initial;
+  result.set_contiguous_strides();
+  if (!result.shape.rank) {
+    result.scalar = current[0];
+    // Computed scalars live inline. Retaining the initial array pointer would
+    // refresh a downstream captured input from the old value instead.
+    result.data = nullptr;
+  }
+  else {
+    if (current != destination && count) {
+      std::copy_n(current, count, destination);
+      scratch.state_copy_bytes += count * sizeof(double);
+    }
+    result.data = destination;
+  }
+  return result;
+}
+
 static ops::Value execute_apply_scope(const Program &program, const ApplyScope &scope,
     const Node &node, std::size_t node_index, std::size_t interval_length,
-    std::size_t max_window, Scratch &scratch) {
+    std::size_t max_window, Scratch &scratch, void *root_destination) {
   const bool trace = scratch.isolate_errors &&
       program.execution_metadata->position_status_reachable[node_index];
   const auto structure = validate_apply_structure(scope, interval_length, scratch, scratch.isolate_errors);
+  if (scope.kind == ApplyKind::iterate) return execute_iteration(program, scope, node, max_window, scratch, root_destination);
   auto &child = *scratch.children[program.rolling_scopes.size() + node.input_index];
   child.remaining_work = scratch.remaining_work;
+  child.deadline = scratch.deadline; child.cancelled = scratch.cancelled;
   std::vector<ops::Value> captured;
   captured.reserve(scope.input_nodes.size());
   std::size_t count = 0;
@@ -1275,7 +1528,7 @@ static ops::Value execute_apply_scope(const Program &program, const ApplyScope &
         &begin, &end, 1, &value, 1, child, true, failures,
         scope.kind != ApplyKind::bisect || std::all_of(inputs.begin(), inputs.end(), known_geometry),
         scratch.isolate_errors || scratch.propagate_scope_errors);
-    scratch.algorithm_copy_bytes += audit.algorithm_copy_bytes;
+    accumulate_child(scratch, audit);
     return value;
   };
   auto scalar_arg = [&](std::size_t i) {
@@ -1553,7 +1806,7 @@ static Audit execute_impl_body(const Program &program,
       const auto end = static_cast<std::size_t>(ends[row]);
       for (std::size_t i = 0; i < inputs.size(); ++i) {
         const auto axis = program.input_axes.empty() ? 0 : program.input_axes[i];
-        ops::require(inputs[i].shape.rank >= 1 && inputs[i].shape.rank <= 2, "GRAPH_INPUT_TYPE");
+        ops::require(inputs[i].shape.rank >= 0 && inputs[i].shape.rank <= 3, "GRAPH_INPUT_TYPE");
         if (axis != 1) ops::require(end <= inputs[i].shape.dim[0], "GRAPH_INTERVAL_BOUNDS");
       }
       max_window = std::max(max_window, end - start);
@@ -1572,6 +1825,9 @@ static Audit execute_impl_body(const Program &program,
   scratch.summary_source_scans = 0;
   scratch.order_stat_sorts = 0;
   scratch.algorithm_copy_bytes = 0;
+  scratch.state_copy_bytes = scratch.child_root_copy_bytes = scratch.child_direct_output_bytes = 0;
+  scratch.child_vector_elements = scratch.child_pointwise_tiles = scratch.child_fused_pointwise_calls = 0;
+  scratch.child_pointwise_capacity = 0;
   const auto &summary_consumers = program.execution_metadata->summary_consumers;
   const auto &order_consumers = program.execution_metadata->order_consumers;
   std::size_t series_base = 0;
@@ -1673,6 +1929,16 @@ static Audit execute_impl_body(const Program &program,
               (prebound_inputs || (!program.input_axes.empty() && program.input_axes[node.input_index] == 1))
                   ? inputs[node.input_index] : interval_view(inputs[node.input_index], start,
                                               length);
+          auto &input = scratch.values[node_index];
+          // Rank-zero arrays remain live views across prepared executions.
+          // Refresh the local descriptor, never mutate a shared bound batch.
+          if (input.shape.rank == 0 && input.data) {
+            if (input.kind == ops::Kind::integer)
+              input.integer = *static_cast<const std::int64_t *>(input.data);
+            else if (input.kind == ops::Kind::mask)
+              input.scalar = *static_cast<const std::uint8_t *>(input.data);
+            else input.scalar = *static_cast<const double *>(input.data);
+          }
           if (input_failures) scratch.statuses[node_index] = (*input_failures)[node.input_index];
           continue;
         }
@@ -1705,8 +1971,20 @@ static Audit execute_impl_body(const Program &program,
         }
 
         if (node.kind == NodeKind::apply_scope) {
+          void *root_destination = nullptr;
+          const auto root = program.execution_metadata->root_destinations[node_index];
+          if (typed_output && root >= 0 && program.apply_scopes[node.input_index].kind == ApplyKind::iterate) {
+            const auto &slot = layout->slots[(result_row + row) * output_columns + root];
+            const auto &initial = scratch.values[program.apply_scopes[node.input_index].argument_nodes[0]];
+            ops::require(program.root_outputs[root].dtype == OutputDType::float64,
+                "RESULT_DTYPE_MISMATCH");
+            ops::require(initial.shape.rank == program.root_outputs[root].rank,
+                "RESULT_CAPACITY_MISMATCH");
+            ops::require(initial.size() <= slot.capacity, "RESULT_CAPACITY_MISMATCH");
+            root_destination = static_cast<std::uint8_t *>(output) + slot.byte_offset;
+          }
           scratch.values[node_index] = execute_apply_scope(program,
-              program.apply_scopes[node.input_index], node, node_index, length, max_window, scratch);
+              program.apply_scopes[node.input_index], node, node_index, length, max_window, scratch, root_destination);
           // Explicit empty/NaN filter results are missing data, not execution
           // failures. Preserve them for ordinary where selection; public roots
           // still report non-finite results as unavailable.
@@ -1716,7 +1994,16 @@ static Audit execute_impl_body(const Program &program,
           continue;
         }
 
-        std::array<ops::Value, 8> arguments{};
+        if (node.kind == NodeKind::iteration_projection) {
+          const auto scope_index = program.nodes[node.parents[0]].input_index;
+          const auto diagnostic = scratch.iteration_info[scope_index][node.opcode];
+          auto result = ops::Value::number(diagnostic);
+          if (node.opcode != 2) { result.kind = ops::Kind::integer; result.integer = static_cast<std::int64_t>(diagnostic); }
+          scratch.values[node_index] = result;
+          continue;
+        }
+
+        ops::Arguments<ops::Value> arguments(node.parent_count);
         for (std::size_t parent = 0; parent < node.parent_count; ++parent)
           arguments[parent] = scratch.values[node.parents[parent]];
 
@@ -1755,7 +2042,7 @@ static Audit execute_impl_body(const Program &program,
                          "GRAPH_STORAGE_KIND");
             ops::require(node.storage == StorageKind::numeric,
                          "GRAPH_STORAGE_KIND");
-            native_output.data = scratch.numeric.data() +
+            native_output.data = scratch.numeric.empty() ? nullptr : scratch.numeric.data() +
                                  static_cast<std::size_t>(node.slot) * max_window;
           }
         } else {
@@ -1763,6 +2050,19 @@ static Audit execute_impl_body(const Program &program,
                        "GRAPH_STORAGE_KIND");
         }
 
+        // Root storage belongs to this call; downstream consumers borrow it.
+        const auto destination_root = program.execution_metadata->root_destinations[node_index];
+        if (typed_output && prepared.output_shape.rank > 0 && destination_root >= 0) {
+          const auto &schema = program.root_outputs[destination_root];
+          const auto &slot = layout->slots[(result_row + row) * output_columns + destination_root];
+          ops::require(prepared.output_shape.rank == schema.rank &&
+              prepared.output_shape.size() <= slot.capacity, "RESULT_CAPACITY_MISMATCH");
+          const auto expected = schema.dtype == OutputDType::boolean ? ops::Kind::mask
+              : schema.dtype == OutputDType::int64 ? ops::Kind::integer : ops::Kind::number;
+          ops::require(prepared.output_kind == expected, "RESULT_DTYPE_MISMATCH");
+          native_output.data = static_cast<std::uint8_t *>(output) + slot.byte_offset;
+          audit.direct_output_bytes += prepared.output_shape.size() * output_itemsize(schema.dtype);
+        }
         bool fused = false;
         if (prepared.output_shape.rank == 0 && node.parent_count &&
             prepared.args[0].kind == ops::Kind::number &&
@@ -1787,9 +2087,10 @@ static Audit execute_impl_body(const Program &program,
           ops::execute(prepared, native_output, scratch.workspace,
                        ops::Isa::automatic, operator_audit);
           scratch.algorithm_copy_bytes += operator_audit.algorithm_copy_bytes;
+          audit.vector_elements += operator_audit.vector_elements;
         }
         scratch.values[node_index] =
-            output_value(scratch, prepared, native_output, node, max_window);
+            output_value(prepared, native_output, max_window);
         if (scratch.isolate_errors) {
           const auto &value = scratch.values[node_index];
           auto &status = scratch.statuses[node_index];
@@ -1863,10 +2164,29 @@ static Audit execute_impl_body(const Program &program,
         ops::require(status || value.kind == expected, "RESULT_DTYPE_MISMATCH");
         auto *destination = static_cast<std::uint8_t *>(output) + slot.byte_offset;
         const auto status_base = slot.status_offset - layout->row_statuses[result_row];
-        for (std::size_t offset = 0; offset < shape.size(); ++offset) {
+        const auto elements = shape.size();
+        if (!scratch.isolate_errors && shape.rank > 0 && value.contiguous()) {
+          if (value.kind == ops::Kind::mask) {
+            // Inspect raw uint8 inputs too: a contiguous buffer is not proof
+            // that every byte satisfies the public boolean contract.
+            std::uint8_t bits = 0;
+            const auto *source = static_cast<const std::uint8_t *>(value.data);
+            for (std::size_t i = 0; i < elements; ++i) bits |= source[i];
+            ops::require(bits <= 1, "INVALID_MASK");
+          }
+          if (elements && destination != value.data) {
+            const auto bytes = elements * output_itemsize(schema.dtype);
+            std::memcpy(destination, value.data, bytes);
+            audit.root_copy_bytes += bytes;
+          }
+          continue;
+        }
+        for (std::size_t offset = 0; offset < elements; ++offset) {
           auto failure = static_cast<std::int16_t>(status);
           if (!failure && TrackPositions)
             failure = position_error(scratch, program.roots[root_index], offset, offset + 1);
+          if (!failure && (!value.shape.rank || value.data != destination))
+            audit.root_copy_bytes += output_itemsize(schema.dtype);
           if (schema.dtype == OutputDType::float64) {
             const auto v = failure ? NAN : value.f(offset);
             std::memcpy(destination + offset * sizeof(v), &v, sizeof(v));
@@ -1946,7 +2266,8 @@ static Audit execute_impl_body(const Program &program,
   audit.max_window = logical_window;
   audit.numeric_arena_bytes = scratch.numeric.capacity() * sizeof(double) + scratch.integers.capacity() * sizeof(std::int64_t);
   audit.mask_arena_bytes = scratch.masks.capacity() * sizeof(std::uint8_t);
-  audit.operator_workspace_capacity_bytes = scratch.workspace.capacity_bytes();
+  audit.operator_workspace_capacity_bytes = scratch.workspace.capacity_bytes() +
+      scratch.iteration_info.capacity() * sizeof(std::array<double, 3>);
   const auto position_bytes = [](const Scratch &state) {
     auto bytes = state.position_statuses.capacity() * sizeof(std::vector<std::int16_t>);
     for (const auto &errors : state.position_statuses) bytes += errors.capacity() * sizeof(std::int16_t);
@@ -1958,6 +2279,8 @@ static Audit execute_impl_body(const Program &program,
     bytes += state.statuses.capacity() * sizeof(std::int16_t);
     bytes += position_bytes(state);
     bytes += state.workspace.capacity_bytes() + state.selection.capacity() * sizeof(std::size_t);
+    bytes += (state.iteration_state.capacity() + state.iteration_next.capacity()) * sizeof(double);
+    bytes += state.iteration_info.capacity() * sizeof(std::array<double, 3>);
     for (const auto &v : state.selected_numeric) bytes += v.capacity() * 8;
     for (const auto &v : state.selected_integer) bytes += v.capacity() * 8;
     for (const auto &v : state.selected_masks) bytes += v.capacity();
@@ -1972,6 +2295,14 @@ static Audit execute_impl_body(const Program &program,
   audit.summary_source_scans = scratch.summary_source_scans;
   audit.order_stat_sorts = scratch.order_stat_sorts;
   audit.algorithm_copy_bytes = scratch.algorithm_copy_bytes;
+  audit.state_copy_bytes += scratch.state_copy_bytes;
+  audit.operator_workspace_capacity_bytes += scratch.child_pointwise_capacity;
+  audit.pointwise_workspace_capacity_bytes = scratch.child_pointwise_capacity;
+  audit.root_copy_bytes += scratch.child_root_copy_bytes;
+  audit.direct_output_bytes += scratch.child_direct_output_bytes;
+  audit.vector_elements += scratch.child_vector_elements;
+  audit.pointwise_tiles += scratch.child_pointwise_tiles;
+  audit.fused_pointwise_calls += scratch.child_fused_pointwise_calls;
   for (const auto &cache : scratch.ordered)
     audit.order_scratch_capacity_bytes +=
         cache.values.capacity() * sizeof(double);
@@ -1992,9 +2323,19 @@ static Audit execute_impl(const Program &program, const std::vector<ops::Value> 
                         input_failures, interval_known, propagate_scope_errors, layout, result_row);
   }
   scratch.propagate_scope_errors = propagate_scope_errors;
+  ops::require(output_columns == program.roots.size(), "GRAPH_OUTPUT_COLUMNS");
   // Choose once per native execution. AOT specialization removes optional
   // per-node provenance branches from graphs that cannot produce local scope errors.
   ops::require(!input_failures || input_failures->size() == program.input_count, "GRAPH_INPUT_STATUS_COUNT");
+  if (!input_failures && interval_known && program.execution_metadata->pointwise) {
+    if (!prebound_inputs && scratch.arena_owner) scratch.release_execution_buffers();
+    Audit fused;
+    if (execute_pointwise(program, inputs, parameters, parameter_count, starts, ends,
+        rows, output, layout, result_row, fused, scratch.deadline, scratch.cancelled, prebound_inputs))
+      return fused;
+  }
+  if (!prebound_inputs && scratch.arena_owner.get() != program.execution_metadata.get())
+    release_pointwise_workspace();
   if ((program.isolate_errors || input_failures) && program.execution_metadata->position_status_nodes)
     return execute_impl_body<true>(program, inputs, parameters, parameter_count,
         starts, ends, rows, output, output_columns, scratch, prebound_inputs, input_failures, interval_known, layout, result_row);
@@ -2002,11 +2343,17 @@ static Audit execute_impl(const Program &program, const std::vector<ops::Value> 
       starts, ends, rows, output, output_columns, scratch, prebound_inputs, input_failures, interval_known, layout, result_row);
 }
 
+void release_graph_workspace() {
+  if (root_scratch.arena_owner) root_scratch.release_execution_buffers();
+}
+
 Audit execute(const Program &program, const std::vector<ops::Value> &inputs,
               const double *parameters, std::size_t parameter_count,
               const std::int64_t *starts, const std::int64_t *ends,
               std::size_t rows, void *output, std::size_t output_columns,
-              const ResultLayout *layout, std::size_t result_row) {
+              const ResultLayout *layout, std::size_t result_row,
+              std::chrono::steady_clock::time_point deadline, const std::atomic<bool> *cancelled) {
+  root_scratch.deadline = deadline; root_scratch.cancelled = cancelled;
   ResultLayout local;
   if (program.output_kind == OutputKind::typed && !layout) {
     local = result_layout(program, inputs, starts, ends, rows);

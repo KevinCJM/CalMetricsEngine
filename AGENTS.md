@@ -11,6 +11,12 @@
 - Preserve historical design/acceptance evidence with explicit scope/date labels; do not present
   historical counts or test results as current capability. Do not change runtime behavior solely
   to make documentation claims true. See [documentation design](docs/documentation-design.md).
+- Before designing, implementing or reviewing numerical algorithms, graph optimizations, model/state
+  reuse or execution changes, read [computation design rules](docs/computation-design-rules.md).
+  Record the affected dependency/reuse conditions, mathematical equivalence, allocation/ownership
+  decisions and validation evidence in the task's existing design or review. Rules for future
+  capabilities are conditional requirements, not claims of implementation or authorization to
+  change existing contracts. Preserve the applicable NJIT time and memory acceptance gates.
 
 ## 1. Project Mission
 
@@ -125,7 +131,8 @@ The current repository already provides:
 - Exact int64 category/index intermediates and typed matrix/vector inputs, including native worker transport and geometry validation.
 - Generic real-alpha masked recurrence, aligned shift, Gaussian CDF, stable index sorting, gather, integer distinct counts and floor primitives. Financial indicators remain explicit compositions.
 - Homogeneous float64/bool/int64 aligned time-series root outputs as contiguous values plus interval prefix offsets and explicit failure statuses.
-- Typed scalar/series/vector/matrix multi-output results with per-root dtype, actual shape, status and owner pinning across single/thread/process execution; see `docs/typed-results-design.md`.
+- Typed scalar/series/vector/matrix/tensor multi-output results with per-root dtype, actual shape, status and owner pinning across single/thread/process execution; see `docs/typed-results-design.md` and `docs/platform-foundation-design.md`.
+- M0/M1 development adds named outputs, immutable native ModelPayload and bounded iterate subgraphs. Feature tests and performance acceptance are separate; consult the foundation acceptance status before treating these additions as migration-ready.
 - Adaptive/second-order recurrence, scalar Kalman shared state, separate condition/state/confirmation, turning events, PS filtering and complete-segment scopes. See `docs/stateful-series-design.md` for exact contracts and retrospective boundaries.
 - A shared multi-root logical DAG with operator lowering and structural CSE.
 - Borrow-aware C++ liveness analysis, including backing buffers of borrowed views such as `lag`.
@@ -156,7 +163,7 @@ code and tests exist:
 
 - Broader production business DSL governance that is intentionally above the generic engine boundary,
   especially causality/knowledge-time/research-workflow contracts.
-- Portfolio business semantics and higher-rank tensor results beyond the current rank-0/1/2 mathematical result contract.
+- Portfolio business semantics and higher-rank tensor results beyond the current rank-0/1/2/3 mathematical result contract.
 - Additional masked/path/matrix fusion beyond the current summary/order-stat graph fusion.
 - Broader SIMD coverage and benchmark-justified ISA extensions beyond current kernels.
 - BLAS/backend dispatch where matrix workloads justify it.
@@ -1078,6 +1085,8 @@ zero-copy claims.
 - README describes public/user-facing contracts.
 - `docs/README.md` routes users to current guides, complete operator reference and historical evidence.
 - `docs/architecture.md` describes architecture.
+- `docs/computation-design-rules.md` owns the detailed programming and mathematical discipline for
+  dependency analysis, reuse, structured computation, state and optimization evidence.
 - This `AGENTS.md` describes implementation discipline for future AI/code changes.
 
 Any change that introduces planner logic, numerical logic, execution scheduling, worker behavior,

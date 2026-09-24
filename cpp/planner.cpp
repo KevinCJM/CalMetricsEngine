@@ -1,4 +1,5 @@
 #include "calmetrics_engine/planner.hpp"
+#include "calmetrics_engine/pointwise.hpp"
 #include "calmetrics_engine/native_process.hpp"
 #include <algorithm>
 #include <cmath>
@@ -80,9 +81,10 @@ double typed_array_extra_work(const graph::Program &program,
           captured[i].shape.dim[0] = window + (i < scope.input_preceding.size() && scope.input_preceding[i] ? 1 : 0);
         repeats = static_cast<double>(length);
         length = window + (scope.needs_preceding_observation ? 1 : 0);
-      } else if (program.apply_scopes[node.input_index].kind == graph::ApplyKind::bisect) {
+      } else if (program.apply_scopes[node.input_index].kind == graph::ApplyKind::bisect ||
+                 program.apply_scopes[node.input_index].kind == graph::ApplyKind::iterate) {
         const auto &scope = program.apply_scopes[node.input_index];
-        const auto &iterations = program.nodes[scope.argument_nodes[3]];
+        const auto &iterations = program.nodes[scope.argument_nodes[scope.kind == graph::ApplyKind::iterate ? 2 : 3]];
         repeats = 2.0 + (iterations.kind == graph::NodeKind::constant &&
             std::isfinite(iterations.constant) && iterations.constant >= 1 && iterations.constant <= 10000
             ? iterations.constant : 10000.0);
@@ -175,11 +177,29 @@ std::size_t scratch_estimate(const graph::Program &program,
                              std::size_t logical_window = 0,
                              bool inherited_isolation = false) {
   const bool isolate_errors = program.isolate_errors || inherited_isolation;
+  if (!inherited_isolation && inputs && program.execution_metadata && program.execution_metadata->pointwise) {
+    bool compatible = true, found = false;
+    ops::Shape common;
+    for (std::size_t i = 0; i < inputs->size(); ++i) {
+      const auto &value = inputs->at(i);
+      compatible = compatible && value.kind == ops::Kind::number && value.shape.rank >= 0;
+      if (value.shape.rank <= 0) continue;
+      auto shape = value.shape;
+      if (program.input_axes.empty() || program.input_axes[i] != 1) shape.dim[0] = logical_window;
+      if (!found) { common = shape; found = true; }
+      else compatible = compatible && shape == common;
+    }
+    if (compatible && found) return graph::pointwise_workspace_bytes(program, common.size());
+  }
+  const auto numeric_slots = program.execution_metadata && program.execution_metadata->numeric_roots_only
+      ? 0 : program.numeric_slots;
   std::size_t estimate =
-      checked_mul(window, checked_add(checked_mul(checked_add(program.numeric_slots, program.integer_slots), 8),
+      checked_mul(window, checked_add(checked_mul(checked_add(numeric_slots, program.integer_slots), 8),
                                       program.mask_slots));
   estimate = checked_add(
       estimate, checked_mul(program.nodes.size(), sizeof(ops::Value) + 160));
+  if (program.execution_metadata && program.execution_metadata->pointwise)
+    estimate = checked_add(estimate, graph::pointwise_workspace_bytes(program, window));
   if (isolate_errors) {
     estimate = checked_add(estimate, checked_mul(program.nodes.size(), sizeof(std::int16_t)));
     const auto positional = program.execution_metadata
@@ -222,7 +242,9 @@ std::size_t scratch_estimate(const graph::Program &program,
   const auto scope_scratch = [&](const graph::Program &body,
                                  const std::vector<std::uint32_t> &captures,
                                  const std::vector<std::uint8_t> *preceding,
-                                 bool selected, std::size_t uncaptured_extent) {
+                                 bool selected, std::size_t uncaptured_extent,
+                                 bool validates_numerical_stop = false) {
+    const bool child_isolation = isolate_errors || validates_numerical_stop;
     std::vector<ops::Value> captured;
     captured.reserve(captures.size());
     std::size_t length = captures.empty() ? uncaptured_extent : 0;
@@ -236,19 +258,20 @@ std::size_t scratch_estimate(const graph::Program &program,
     }
     // An unresolved selection validates its child without inventing a slice.
     // Its logical interval is only a capacity bound, up to the enclosing frame.
-    if (isolate_errors) length = std::max(length, logical_window ? logical_window : window);
+    if (child_isolation) length = std::max(length, logical_window ? logical_window : window);
     const auto capacity = graph::required_array_capacity(body, captured, length);
     // A failed capture enables child isolation even when its compiled body is
     // strict. Admission must include the resulting node/position statuses at
     // every nesting depth before a numerical failure occurs.
-    auto bytes = scratch_estimate(body, capacity, &captured, length, isolate_errors);
-    if (isolate_errors) {
+    auto bytes = scratch_estimate(body, capacity, &captured, length, child_isolation);
+    if (child_isolation) {
       bytes = checked_add(bytes, checked_mul(captures.size(), sizeof(std::int16_t)));
       bytes = checked_add(bytes, checked_mul(captures.size(), sizeof(ops::Value)));
       bytes = checked_add(bytes, checked_mul(body.parameter_count, sizeof(double)));
     }
-    if (isolate_errors || body.isolate_errors)
-      bytes = checked_add(bytes, sizeof(std::int16_t)); // One scalar child audit status.
+    if (child_isolation || body.isolate_errors)
+      bytes = checked_add(bytes, checked_mul(body.output_kind == graph::OutputKind::typed ?
+          std::max<std::size_t>(capacity, 1) : 1, sizeof(std::int16_t)));
     if (selected)
       bytes = checked_add(bytes, checked_mul(length,
           checked_add(checked_mul(captures.size(), 8), 24)));
@@ -262,8 +285,18 @@ std::size_t scratch_estimate(const graph::Program &program,
   for (const auto &scope : program.apply_scopes)
     if (scope.body)
       estimate = checked_add(estimate, scope_scratch(*scope.body, scope.input_nodes,
-          nullptr, scope.kind != graph::ApplyKind::bisect,
-          apply_observation_bound(scope, shapes, logical_window ? logical_window : window)));
+          nullptr, scope.kind != graph::ApplyKind::bisect && scope.kind != graph::ApplyKind::iterate,
+          apply_observation_bound(scope, shapes, logical_window ? logical_window : window),
+          scope.kind == graph::ApplyKind::iterate));
+  for (const auto &scope : program.apply_scopes)
+    if (scope.kind == graph::ApplyKind::iterate) {
+      const auto count = shapes.empty() ? window : shapes.at(scope.argument_nodes[0]).size();
+      estimate = checked_add(estimate, checked_mul(std::max<std::size_t>(count, 1), 16));
+      estimate = checked_add(estimate, checked_mul(scope.input_nodes.size(), sizeof(ops::Value)));
+      estimate = checked_add(estimate, checked_mul(scope.parameter_nodes.size(), sizeof(double)));
+      estimate = checked_add(estimate, sizeof(graph::ResultLayout) + sizeof(graph::ResultSlot) + 128);
+    }
+  estimate = checked_add(estimate, checked_mul(program.apply_scopes.size(), sizeof(std::array<double, 3>)));
   return estimate;
 }
 template <bool CollectMetrics, class SizeAt>
@@ -347,8 +380,8 @@ Geometry typed_geometry(const graph::Program &program,
     const auto &value = inputs->at(i);
     const auto axis = program.input_axes.empty() ? 0 : program.input_axes.at(i);
     require((axis != 0 || value.shape.rank == 1) &&
-            (axis != 2 || value.shape.rank == 2) &&
-            value.shape.rank >= 1 && value.shape.rank <= 2,
+            (axis != 2 || value.shape.rank >= 2) &&
+            value.shape.rank >= 0 && value.shape.rank <= 3,
             "graph input rank mismatch");
     if (axis != 1) {
       if (temporal_count) require(available == value.shape.dim[0],
@@ -503,7 +536,7 @@ make_plan(std::shared_ptr<compiler::CompiledGraph> graph, const Config &config,
           const std::int64_t *product_ids, std::size_t cpu,
           std::optional<std::size_t> memory_budget, bool hard_stop,
           bool async_io, bool already_shared,
-          const std::vector<ops::Value> *inputs) {
+          const std::vector<ops::Value> *inputs, std::size_t owned_input_bytes) {
   config.validate();
   require(cpu > 0 && cpu <= 1024, "cpu_budget must be in 1..1024");
   require(!memory_budget || *memory_budget > 0,
@@ -535,6 +568,7 @@ make_plan(std::shared_ptr<compiler::CompiledGraph> graph, const Config &config,
     const auto item = inputs && inputs->at(i).kind == ops::Kind::mask ? 1u : 8u;
     p->estimated_input_bytes = checked_add(p->estimated_input_bytes, checked_mul(sizes[i], item));
   }
+  p->estimated_input_bytes = std::max(p->estimated_input_bytes, owned_input_bytes);
   const auto output_rows =
       p->graph->program.output_kind == graph::OutputKind::series
           ? geometry.observations
@@ -584,7 +618,7 @@ make_plan(std::shared_ptr<compiler::CompiledGraph> graph, const Config &config,
       work = factor * static_cast<double>(geometry.observations);
     }
     p->estimated_logical_work_units += work;
-    if (node.simd_eligible && geometry.max_window >= config.simd_min_elements)
+    if (node.simd_eligible && array_capacity >= config.simd_min_elements)
       p->simd_nodes.push_back(node.node_id);
   }
   p->estimated_work_units = geometry_work(p->graph->physical_cost, geometry);
@@ -664,6 +698,32 @@ make_plan(std::shared_ptr<compiler::CompiledGraph> graph, const Config &config,
       p->estimated_work_units >= config.dag_branch_work_units &&
       branch_task_count > rows;
 
+  // Only a complete pointwise region may partition one tensor. Cross-element
+  // kernels and recurrence states never inherit this capability by shape alone.
+  std::size_t tensor_elements = 0;
+  if (!process && rows == 1 && cpu > 1 && inputs && p->result_layout &&
+      p->graph->program.execution_metadata->pointwise) {
+    bool compatible = true, found = false;
+    ops::Shape common;
+    for (std::size_t i = 0; i < inputs->size(); ++i) {
+      const auto &value = inputs->at(i);
+      compatible = compatible && value.kind == ops::Kind::number && value.contiguous();
+      if (!value.shape.rank) continue;
+      auto shape = value.shape;
+      const auto &axes = p->graph->program.input_axes;
+      if (axes.empty() || axes[i] != 1) shape.dim[0] = geometry.max_window;
+      if (!found) { common = shape; found = true; }
+      else compatible = compatible && shape == common;
+    }
+    if (compatible && found) {
+      tensor_elements = common.size();
+      for (const auto &slot : p->result_layout->slots)
+        if (slot.capacity != tensor_elements) tensor_elements = 0;
+    }
+  }
+  const auto tensor_workers = std::min({cpu, tensor_elements / graph::pointwise_tile_elements,
+      static_cast<std::size_t>(std::min(static_cast<double>(cpu),
+          p->estimated_work_units / config.thread_work_units))});
   if (process) {
     p->lane = "process";
     p->reason_codes.push_back(hard_stop ? "hard_stop_requires_process_isolation"
@@ -688,6 +748,12 @@ make_plan(std::shared_ptr<compiler::CompiledGraph> graph, const Config &config,
                       branch_output));
     }
     p->reason_codes.push_back("heavy_independent_dag_branches");
+  } else if (tensor_workers >= 2) {
+    p->lane = "thread";
+    p->parallel_dimension = "tensor";
+    p->tensor_elements = tensor_elements;
+    p->thread_count = tensor_workers;
+    p->reason_codes.push_back("independent_pointwise_tensor_tiles");
   } else if (p->estimated_work_units >= config.thread_work_units && rows >= 2 &&
              cpu > 1) {
     p->lane = "thread";
@@ -784,6 +850,11 @@ make_plan(std::shared_ptr<compiler::CompiledGraph> graph, const Config &config,
                      });
     for (const auto &task : tasks)
       p->branch_tasks.push_back(task.task);
+  } else if (p->parallel_dimension == "tensor") {
+    const auto tiles = (p->tensor_elements + graph::pointwise_tile_elements - 1) / graph::pointwise_tile_elements;
+    for (std::size_t i = 0; i < workers; ++i)
+      p->chunks.push_back({(tiles * i / workers) * graph::pointwise_tile_elements,
+          std::min(p->tensor_elements, (tiles * (i + 1) / workers) * graph::pointwise_tile_elements)});
   } else if (!process) {
     p->chunks = partition(geometry, workers, p->parallel_dimension == "product",
                           &p->graph->physical_cost);

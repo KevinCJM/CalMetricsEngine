@@ -1,6 +1,7 @@
 // This translation unit alone is compiled with AVX2. No global constructors.
 // The baseline dispatcher calls it only after CPU and OS state checks.
 #include "simd_loop.hpp"
+#include "scalar_chain.hpp"
 #include <immintrin.h>
 
 namespace calmetrics_engine::ops {
@@ -14,6 +15,11 @@ struct AVX2 {
     static Vec add(Vec a, Vec b) { return _mm256_add_pd(a, b); }
     static Vec sub(Vec a, Vec b) { return _mm256_sub_pd(a, b); }
     static Vec mul(Vec a, Vec b) { return _mm256_mul_pd(a, b); }
+    static Vec reverse(Vec a) { return _mm256_permute4x64_pd(a,0x1b); }
+    static double horizontal_max(Vec a) {
+        const auto pair = _mm_max_pd(_mm256_castpd256_pd128(a),_mm256_extractf128_pd(a,1));
+        return _mm_cvtsd_f64(_mm_max_pd(pair,_mm_shuffle_pd(pair,pair,1)));
+    }
     static Vec div(Vec a, Vec b) { return _mm256_div_pd(a, b); }
     static Vec sqrt(Vec a) { return _mm256_sqrt_pd(a); }
     static Vec negate(Vec a) { return _mm256_xor_pd(a, _mm256_set1_pd(-0.0)); }
@@ -37,5 +43,11 @@ std::size_t avx2_transform(Op op, const Value &x, const Value &y, Output &out, s
 }
 std::size_t avx2_matmul(const Value &a, const Value &b, Output &out) {
     return detail::matrix_loop<AVX2>(a, b, out);
+}
+std::size_t avx2_residual(const double *a, const double *b, std::size_t n, double &residual, bool &finite) {
+    return detail::residual_loop<AVX2>(a, b, n, residual, finite);
+}
+ScalarChainKernel avx2_chain_kernel(Op first, Op second, Op predicate) {
+    return detail::chain_dispatch<AVX2>(first,second,predicate);
 }
 } // namespace calmetrics_engine::ops

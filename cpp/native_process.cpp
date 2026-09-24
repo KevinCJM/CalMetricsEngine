@@ -4,6 +4,7 @@
 #include <cstring>
 #include <iostream>
 #include <limits>
+#include <map>
 #include <random>
 #include <sstream>
 #ifdef _WIN32
@@ -24,8 +25,8 @@ extern char **environ;
 namespace calmetrics_engine::native {
 namespace {
 constexpr std::size_t max_frame = max_process_frame_bytes;
-constexpr std::uint64_t request_magic = 0x434d453300000005ull;
-constexpr std::uint64_t response_magic = 0x434d455300000005ull;
+constexpr std::uint64_t request_magic = 0x434d453300000007ull;
+constexpr std::uint64_t response_magic = 0x434d455300000007ull;
 using Bytes = std::vector<std::uint8_t>;
 bool valid_status(std::int16_t value) {
   return (value >= 0 && value <= 4) || value == 7 || value == 9 || value == 10;
@@ -117,9 +118,7 @@ std::size_t input_itemsize(const ops::Value &value) {
   return value.kind == ops::Kind::mask ? 1 : 8;
 }
 bool contiguous_input(const ops::Value &value) {
-  return value.shape.rank == 1 ? value.stride[0] == 1
-      : value.shape.rank == 2 && value.stride[1] == 1 &&
-          value.stride[0] == static_cast<std::ptrdiff_t>(value.shape.dim[1]);
+  return value.data && value.contiguous();
 }
 void pack_input(const ops::Value &value, void *destination) {
   const auto width = input_itemsize(value);
@@ -140,6 +139,13 @@ void pack_input(const ops::Value &value, void *destination) {
   }
 }
 std::size_t graph::Audit::*const audit_fields[] = {
+    &graph::Audit::fused_pointwise_calls,
+    &graph::Audit::pointwise_tiles,
+    &graph::Audit::vector_elements,
+    &graph::Audit::root_copy_bytes,
+    &graph::Audit::direct_output_bytes,
+    &graph::Audit::state_copy_bytes,
+    &graph::Audit::pointwise_workspace_capacity_bytes,
     &graph::Audit::rows,
     &graph::Audit::nodes,
     &graph::Audit::max_window,
@@ -160,7 +166,7 @@ void write_audit(Writer &out, const graph::Audit &a) {
   out.number(a.result_shapes.size());
   for (const auto &shape : a.result_shapes) {
     out.number(static_cast<std::uint64_t>(shape.rank + 1));
-    out.number(shape.dim[0]); out.number(shape.dim[1]);
+    for (auto extent : shape.dim) out.number(extent);
   }
   out.blob(a.root_statuses.data(), a.root_statuses.size() * sizeof(std::int16_t));
 }
@@ -170,18 +176,18 @@ graph::Audit read_audit(Reader &in) {
     a.*member = static_cast<std::size_t>(in.number());
   a.statuses = in.array<std::int16_t>(static_cast<std::size_t>(in.number()));
   const auto shapes = static_cast<std::size_t>(in.number());
-  require(shapes <= max_frame / 24 && shapes <= (in.bytes.size() - in.position) / 24,
+  require(shapes <= max_frame / 32 && shapes <= (in.bytes.size() - in.position) / 32,
           "invalid result shape count");
   a.result_shapes.reserve(shapes);
   for (std::size_t i = 0; i < shapes; ++i) {
     const auto rank = in.number();
-    require(rank <= 3, "invalid result rank");
+    require(rank <= 4, "invalid result rank");
     ops::Shape shape;
     shape.rank = static_cast<int>(rank) - 1;
-    shape.dim[0] = static_cast<std::size_t>(in.number());
-    shape.dim[1] = static_cast<std::size_t>(in.number());
-    require(shape.dim[0] <= static_cast<std::size_t>(PTRDIFF_MAX) &&
-            shape.dim[1] <= static_cast<std::size_t>(PTRDIFF_MAX), "invalid result dimension");
+    for (auto &extent : shape.dim) {
+      extent = static_cast<std::size_t>(in.number());
+      require(extent <= static_cast<std::size_t>(PTRDIFF_MAX), "invalid result dimension");
+    }
     a.result_shapes.push_back(shape);
   }
   a.root_statuses = in.array<std::int16_t>(shapes);
@@ -485,6 +491,7 @@ Bytes execute_request(const Bytes &bytes, Bytes &cached_bytes,
     std::vector<std::vector<std::int64_t>> integer_storage;
     std::vector<std::vector<std::uint8_t>> mask_storage;
     std::vector<std::shared_ptr<SharedRegion>> mappings;
+    std::map<std::pair<std::string, std::size_t>, std::shared_ptr<SharedRegion>> input_mappings;
     storage.reserve(static_cast<std::size_t>(input_count));
     integer_storage.reserve(static_cast<std::size_t>(input_count));
     mask_storage.reserve(static_cast<std::size_t>(input_count));
@@ -497,25 +504,24 @@ Bytes execute_request(const Bytes &bytes, Bytes &cached_bytes,
               "invalid native input dtype");
       value.kind = static_cast<ops::Kind>(kind);
       const auto rank = in.number();
-      require(rank == 1 || rank == 2, "invalid native input rank");
+      require(rank <= 3, "invalid native input rank");
       value.shape.rank = static_cast<int>(rank);
       std::size_t count = 1;
       for (int axis = 0; axis < value.shape.rank; ++axis) {
         value.shape.dim[axis] = static_cast<std::size_t>(in.number());
         count = planner::checked_mul(count, value.shape.dim[axis]);
       }
-      value.stride[0] = value.shape.rank == 2 ? value.shape.dim[1] : 1;
-      value.stride[1] = 1;
+      value.set_contiguous_strides();
       const auto width = input_itemsize(value);
       if (shared) {
         const auto d = get_descriptor(in);
         require(d.offset % width == 0 &&
                     planner::checked_mul(count, width) <= d.bytes - d.offset,
                 "native input descriptor bounds");
-        auto mapping = SharedRegion::attach(d.name, d.bytes);
+        auto &mapping = input_mappings[{d.name, d.bytes}];
+        if (!mapping) mapping = SharedRegion::attach(d.name, d.bytes);
         value.data =
             static_cast<const std::uint8_t *>(mapping->data()) + d.offset;
-        mappings.push_back(std::move(mapping));
       } else if (value.kind == ops::Kind::integer) {
         integer_storage.push_back(in.array<std::int64_t>(count));
         value.data = integer_storage.back().data();
@@ -525,6 +531,11 @@ Bytes execute_request(const Bytes &bytes, Bytes &cached_bytes,
       } else {
         storage.push_back(in.array<double>(count));
         value.data = storage.back().data();
+      }
+      if (value.shape.rank == 0) {
+        if (value.kind == ops::Kind::integer) value.integer = *static_cast<const std::int64_t *>(value.data);
+        else if (value.kind == ops::Kind::mask) value.scalar = *static_cast<const std::uint8_t *>(value.data);
+        else value.scalar = *static_cast<const double *>(value.data);
       }
       inputs.push_back(value);
     }
@@ -618,6 +629,8 @@ Bytes execute_request(const Bytes &bytes, Bytes &cached_bytes,
         output = output_storage.data();
       }
     }
+    const auto model_identity = in.string();
+    require(model_identity.size() == 40, "invalid model identity envelope");
     in.end();
     auto audit = graph::execute(cached_program, inputs, params.data(),
                                 params.size(), starts, ends, end - begin,
@@ -627,6 +640,7 @@ Bytes execute_request(const Bytes &bytes, Bytes &cached_bytes,
     response.number(static_cast<std::uint8_t>(cached_program.output_dtype));
     response.number(static_cast<std::uint8_t>(cached_program.output_kind));
     response.blob(output, output_bytes);
+    response.string(model_identity);
   } catch (const std::exception &error) {
     response.bytes.resize(8);
     response.number(1);
@@ -640,10 +654,10 @@ std::size_t process_response_bytes(std::size_t output_bytes,
                                    std::size_t status_bytes,
                                    std::size_t result_slots) {
   // magic/error, audit counters, status count/blob, shape count, root-status
-  // blob, dtype/kind and output blob. Each shape has three uint64 fields.
-  const auto fixed = (sizeof(audit_fields) / sizeof(audit_fields[0]) + 9) * 8;
+  // blob, dtype/kind and output blob. Each shape has rank plus three uint64 extents.
+  const auto fixed = (sizeof(audit_fields) / sizeof(audit_fields[0]) + 15) * 8;
   return planner::checked_add(planner::checked_add(fixed, output_bytes),
-      planner::checked_add(status_bytes, planner::checked_mul(result_slots, 26)));
+      planner::checked_add(status_bytes, planner::checked_mul(result_slots, 34)));
 }
 
 struct ProcessPool::Impl {
@@ -723,14 +737,17 @@ ProcessTransport::ProcessTransport(const planner::Plan &plan,
       require(batch.shared_inputs.size() == batch.inputs.size(),
               "incomplete shared input descriptors");
       input_descriptors_ = batch.shared_inputs;
+      std::map<std::string, std::size_t> shared_regions;
       for (std::size_t i = 0; i < input_descriptors_.size(); ++i) {
         const auto &d = input_descriptors_[i];
         const auto &value = batch.inputs[i];
         const auto width = input_itemsize(value);
-        require(contiguous_input(value) && d.offset <= d.bytes && d.offset % width == 0 &&
+        require((value.size() == 0 || contiguous_input(value)) && d.offset <= d.bytes && d.offset % width == 0 &&
                     planner::checked_mul(value.size(), width) <= d.bytes - d.offset,
                 "invalid pre-shared typed input geometry");
-        shared_memory_bytes += d.bytes;
+        auto region = shared_regions.emplace(d.name, d.bytes);
+        require(region.second || region.first->second == d.bytes, "inconsistent shared model region");
+        if (region.second) shared_memory_bytes = planner::checked_add(shared_memory_bytes, d.bytes);
       }
     } else
       for (const auto &input : batch.inputs) {
@@ -796,6 +813,8 @@ Bytes ProcessTransport::request(planner::Chunk chunk) const {
     out.blob(batch_.starts + chunk.begin, (chunk.end - chunk.begin) * 8);
     out.blob(batch_.ends + chunk.begin, (chunk.end - chunk.begin) * 8);
   }
+  require(batch_.model_identity.empty() || batch_.model_identity.size() == 40, "invalid model identity");
+  out.string(batch_.model_identity.empty() ? std::string(40, '\0') : batch_.model_identity);
   return out.bytes;
 }
 graph::Audit ProcessTransport::response(const Bytes &bytes,
@@ -833,6 +852,8 @@ graph::Audit ProcessTransport::response(const Bytes &bytes,
   const auto output_bytes = layout ? (plan_.use_shared_memory ? 0 : layout->row_bytes[chunk.end] - layout->row_bytes[chunk.begin])
       : planner::checked_mul(count, graph::output_itemsize(plan_.graph->program.output_dtype));
   auto values = in.array<std::uint8_t>(output_bytes);
+  require(in.string() == (batch_.model_identity.empty() ? std::string(40, '\0') : batch_.model_identity),
+          "native worker model identity mismatch");
   in.end();
   require(audit.rows == chunk.end - chunk.begin,
           "native worker result shape mismatch");

@@ -47,10 +47,12 @@ add_library(calmetrics_engine_operators STATIC
     cpp/operators/simd.cpp
     cpp/result_layout.cpp
     cpp/graph.cpp
+    cpp/pointwise.cpp
     cpp/compiler.cpp
     cpp/typed_ir.cpp
     cpp/planner.cpp
     cpp/shared_memory.cpp
+    cpp/model_payload.cpp
     cpp/native_runtime.cpp
     cpp/native_process.cpp
 )
@@ -77,6 +79,12 @@ if(calmetrics_engine_arch MATCHES "^(x86_64|AMD64|amd64)$")
 endif()
 
 add_executable(calmetrics_worker cpp/native_worker_main.cpp)
+if(NOT MSVC)
+    # Register fusion must preserve separate multiply/add rounding, including
+    # on arm64 targets where the baseline ISA already has FMA instructions.
+    set_property(SOURCE cpp/operators/simd.cpp cpp/operators/simd_avx2.cpp
+        APPEND PROPERTY COMPILE_OPTIONS "-ffp-contract=off")
+endif()
 target_link_libraries(calmetrics_worker PRIVATE calmetrics_engine_operators)
 install(TARGETS calmetrics_worker RUNTIME DESTINATION calmetrics_engine)
 set(calmetrics_engine_targets calmetrics_engine_scheduler calmetrics_engine_finance calmetrics_engine_operators calmetrics_worker)

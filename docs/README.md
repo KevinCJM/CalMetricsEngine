@@ -17,10 +17,14 @@
 
 ## 维护与实现
 
+- [编程与数学计算纪律](computation-design-rules.md)：相关设计、开发与审核的必读规则；覆盖依赖、复用、矩阵结构、状态、数值等价及性能证据，不代表待开发能力已经实现。
 - [架构](architecture.md)：模块职责、编译执行链路和所有权。
 - [文档体系设计与验收](documentation-design.md)：本轮组织方案、维护规则和检查边界。
 - [数学组合设计](mathematical-composition-design.md)：分块、过滤、分组、求根及组合算法。
 - [递推与状态设计](stateful-series-design.md)：当前递推、typed 输出和错误传播细节。
+- [物理执行优化与验收](physical-execution-optimization.md)：缓存块融合、直接根输出、迭代缓冲、张量分块与审计。
+- [M0/M1 开发设计与验收](platform-foundation-design.md)：本工作树的三维协议、具名载荷和原生迭代；验收状态以该记录为准。
+- [平台自研计算完整承接规划](platform-compute-roadmap.md)：后续算法、类型协议、平台接入及等价验收工作；附[函数盘点初表](platform-compute-inventory.csv)，均不代表迁移已完成。
 - [发布](publishing.md)：构建和分发流程；发布前还需遵守当前检出的提交规范。
 
 ## 阶段设计与验收记录

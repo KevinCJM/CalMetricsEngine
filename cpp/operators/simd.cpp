@@ -1,5 +1,8 @@
 #include "calmetrics_engine/operators.hpp"
 #include "simd_loop.hpp"
+#include "scalar_chain.hpp"
+#include <cmath>
+#include <cstring>
 
 #if defined(__aarch64__) || defined(_M_ARM64)
 #include <arm_neon.h>
@@ -16,6 +19,8 @@ namespace calmetrics_engine::ops {
 #ifdef CALMETRICS_HAVE_AVX2
 std::size_t avx2_transform(Op, const Value &, const Value &, Output &, std::size_t);
 std::size_t avx2_matmul(const Value &, const Value &, Output &);
+std::size_t avx2_residual(const double *, const double *, std::size_t, double &, bool &);
+ScalarChainKernel avx2_chain_kernel(Op, Op, Op);
 #endif
 namespace {
 #ifdef CME_SSE2
@@ -28,6 +33,8 @@ struct SSE2 {
     static Vec add(Vec a, Vec b) { return _mm_add_pd(a, b); }
     static Vec sub(Vec a, Vec b) { return _mm_sub_pd(a, b); }
     static Vec mul(Vec a, Vec b) { return _mm_mul_pd(a, b); }
+    static Vec reverse(Vec a) { return _mm_shuffle_pd(a,a,1); }
+    static double horizontal_max(Vec a) { return _mm_cvtsd_f64(_mm_max_pd(a,reverse(a))); }
     static Vec div(Vec a, Vec b) { return _mm_div_pd(a, b); }
     static Vec sqrt(Vec a) { return _mm_sqrt_pd(a); }
     static Vec negate(Vec a) { return _mm_xor_pd(a, _mm_set1_pd(-0.0)); }
@@ -57,6 +64,8 @@ struct NEON {
     static Vec add(Vec a, Vec b) { return vaddq_f64(a, b); }
     static Vec sub(Vec a, Vec b) { return vsubq_f64(a, b); }
     static Vec mul(Vec a, Vec b) { return vmulq_f64(a, b); }
+    static Vec reverse(Vec a) { return vextq_f64(a,a,1); }
+    static double horizontal_max(Vec a) { return vmaxvq_f64(a); }
     static Vec div(Vec a, Vec b) { return vdivq_f64(a, b); }
     static Vec sqrt(Vec a) { return vsqrtq_f64(a); }
     static Vec negate(Vec a) { return vnegq_f64(a); }
@@ -67,8 +76,17 @@ struct NEON {
     static Mask invert(Mask a) { return veorq_u64(a, vdupq_n_u64(~std::uint64_t(0))); }
     static Vec select(Mask m, Vec a, Vec b) { return vbslq_f64(m, a, b); }
     static void store_mask(std::uint8_t *p, Mask m) {
-        p[0] = static_cast<std::uint8_t>(vgetq_lane_u64(m, 0) != 0);
-        p[1] = static_cast<std::uint8_t>(vgetq_lane_u64(m, 1) != 0);
+        const auto pairs = vmovn_u64(m);
+        const auto halves = vmovn_u32(vcombine_u32(pairs,pairs));
+        const auto bytes = vand_u8(vmovn_u16(vcombine_u16(halves,halves)),vdup_n_u8(1));
+        std::uint8_t packed[8]; vst1_u8(packed,bytes);
+        std::memcpy(p,packed,2);
+    }
+    static void store_four_masks(std::uint8_t *p,Mask a,Mask b,Mask c,Mask d) {
+        const auto ab = vcombine_u32(vmovn_u64(a),vmovn_u64(b));
+        const auto cd = vcombine_u32(vmovn_u64(c),vmovn_u64(d));
+        const auto halves = vcombine_u16(vmovn_u32(ab),vmovn_u32(cd));
+        vst1_u8(p,vand_u8(vmovn_u16(halves),vdup_n_u8(1)));
     }
 };
 #endif
@@ -198,5 +216,38 @@ std::size_t simd_matmul(const Value &a, const Value &b, Output &out, Isa request
         audit.vector_elements += processed;
     }
     return processed;
+}
+std::size_t iteration_residual(const double *previous, const double *candidate,
+    std::size_t count, double &residual, bool &finite) {
+    const auto isa = selected_isa(Isa::automatic);
+    std::size_t processed = 0;
+#ifdef CME_NEON
+    if (isa == Isa::neon) processed = detail::residual_loop<NEON>(previous, candidate, count, residual, finite);
+#endif
+#ifdef CME_SSE2
+    if (isa == Isa::sse2) processed = detail::residual_loop<SSE2>(previous, candidate, count, residual, finite);
+#endif
+#ifdef CALMETRICS_HAVE_AVX2
+    if (isa == Isa::avx2) processed = avx2_residual(previous, candidate, count, residual, finite);
+#endif
+    for (std::size_t i = processed; i < count; ++i) {
+        finite = finite && std::isfinite(candidate[i]);
+        const auto delta = std::abs(candidate[i] - previous[i]);
+        if (delta > residual) residual = delta;
+    }
+    return processed;
+}
+ScalarChainKernel scalar_chain_kernel(Op first, Op second, Op predicate, Isa requested) {
+    const auto isa = selected_isa(requested);
+#ifdef CME_NEON
+    if (isa == Isa::neon) return detail::chain_dispatch<detail::Interleaved4<NEON>>(first,second,predicate);
+#endif
+#ifdef CME_SSE2
+    if (isa == Isa::sse2) return detail::chain_dispatch<SSE2>(first,second,predicate);
+#endif
+#ifdef CALMETRICS_HAVE_AVX2
+    if (isa == Isa::avx2) return avx2_chain_kernel(first,second,predicate);
+#endif
+    return detail::chain_dispatch<detail::ScalarLane>(first,second,predicate);
 }
 } // namespace calmetrics_engine::ops

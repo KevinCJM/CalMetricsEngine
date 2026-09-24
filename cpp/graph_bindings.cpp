@@ -14,6 +14,13 @@ namespace t = calmetrics_engine::typed;
 namespace calmetrics_engine::binding {
 py::dict graph_audit(const g::Audit &a) {
   py::dict d;
+  d["fused_pointwise_calls"] = a.fused_pointwise_calls;
+  d["pointwise_tiles"] = a.pointwise_tiles;
+  d["vector_elements"] = a.vector_elements;
+  d["root_copy_bytes"] = a.root_copy_bytes;
+  d["direct_output_bytes"] = a.direct_output_bytes;
+  d["state_copy_bytes"] = a.state_copy_bytes;
+  d["pointwise_workspace_capacity_bytes"] = a.pointwise_workspace_capacity_bytes;
   d["rows"] = a.rows;
   d["nodes"] = a.nodes;
   d["max_window"] = a.max_window;
@@ -35,6 +42,7 @@ py::dict plan_metadata(const p::Plan &x) {
   d["graph_fingerprint"] = x.graph->fingerprint;
 #define FIELD(name) d[#name] = x.name
   FIELD(lane);
+  FIELD(tensor_elements);
   FIELD(process_count);
   FIELD(thread_count);
   FIELD(threads_per_process);
@@ -58,6 +66,7 @@ py::dict plan_metadata(const p::Plan &x) {
   FIELD(max_window);
   FIELD(cpu_budget);
   FIELD(memory_budget_bytes);
+  FIELD(model_identity);
   FIELD(simd_nodes);
   FIELD(reason_codes);
 #undef FIELD
@@ -111,12 +120,16 @@ t::ValueType parse_value_type(py::handle item) {
   const auto kind = py::cast<std::string>(d["kind"]);
   if (kind == "scalar")
     value.kind = t::ValueKind::scalar;
+  else if (kind == "value")
+    value.kind = t::ValueKind::value;
   else if (kind == "series")
     value.kind = t::ValueKind::series;
   else if (kind == "vector")
     value.kind = t::ValueKind::vector;
   else if (kind == "matrix")
     value.kind = t::ValueKind::matrix;
+  else if (kind == "tensor")
+    value.kind = t::ValueKind::tensor;
   else if (kind == "window")
     value.kind = t::ValueKind::window;
   else if (kind == "record")
@@ -295,8 +308,15 @@ public:
       throw c::CompileError("result_format must be auto or typed");
     if (error_policy != "raise" && error_policy != "isolate")
       throw c::CompileError("error_policy must be raise or isolate");
-    std::vector<std::string> sources;
-    if (py::isinstance<py::str>(expressions))
+    std::vector<std::string> sources, output_names;
+    if (py::isinstance<py::dict>(expressions)) {
+      for (auto item : py::reinterpret_borrow<py::dict>(expressions)) {
+        if (!py::isinstance<py::str>(item.first) || !py::isinstance<py::str>(item.second))
+          throw c::CompileError("named outputs must map strings to expressions");
+        output_names.push_back(py::cast<std::string>(item.first));
+        sources.push_back(py::cast<std::string>(item.second));
+      }
+    } else if (py::isinstance<py::str>(expressions))
       sources.push_back(py::cast<std::string>(expressions));
     else {
       if (!py::isinstance<py::sequence>(expressions))
@@ -308,7 +328,7 @@ public:
       }
     }
     py::gil_scoped_release release;
-    return c::compile(sources, variables, error_policy == "isolate", root_bindings, source_contracts, minimum_observations, scope_work_budget, result_format == "typed");
+    return c::compile(sources, variables, error_policy == "isolate", root_bindings, source_contracts, minimum_observations, scope_work_budget, result_format == "typed", output_names);
   }
 };
 g::Program raw_program(const py::list &raw,
@@ -408,7 +428,7 @@ py::dict raw_execute(const g::Program &program, const py::tuple &input_arrays,
   const auto output_bounds = b::bounds(output);
   for (auto item : input_arrays) {
     auto a = b::require_array(item);
-    if (a.ndim() < 1 || a.ndim() > 2) throw py::value_error("input must be rank 1 or 2");
+    if (a.ndim() < 1 || a.ndim() > 3) throw py::value_error("input must be rank 1, 2 or 3");
     const bool integer = a.dtype().equal(py::dtype::of<std::int64_t>());
     const bool mask = a.dtype().equal(py::dtype::of<bool>()) || a.dtype().equal(py::dtype::of<std::uint8_t>());
     if (!integer && !mask && !a.dtype().equal(py::dtype::of<double>()))
@@ -479,6 +499,12 @@ py::dict raw_execute(const g::Program &program, const py::tuple &input_arrays,
   return result;
 }
 } // namespace
+calmetrics_engine::typed::ValueType calmetrics_engine::binding::parse_type(py::handle item) {
+  return parse_value_type(item);
+}
+py::dict calmetrics_engine::binding::type_metadata(const t::ValueType &value) {
+  return value_type_dict(value);
+}
 void register_native_api(py::module_ &module);
 void register_graph(py::module_ &parent) {
   auto module = parent.def_submodule(
@@ -599,16 +625,17 @@ void register_graph(py::module_ &parent) {
       .def_property_readonly(
           "_program", [](const c::CompiledGraph &g) { return g.program; })
       .def_readonly("fingerprint", &c::CompiledGraph::fingerprint)
+      .def_readonly("output_names", &c::CompiledGraph::output_names)
       .def_readonly("raw_node_count", &c::CompiledGraph::raw_node_count)
       .def(py::pickle(
           [](const c::CompiledGraph &g) {
             py::dict variables;
             for (const auto &variable : g.variable_types)
               variables[py::str(variable.name)] = value_type_dict(variable.type);
-            return py::make_tuple(3, g.expressions, variables,
+            return py::make_tuple(4, g.expressions, variables,
                 g.program.isolate_errors, g.root_bindings, g.source_contracts,
                 g.program.minimum_observations, g.program.scope_work_budget,
-                g.program.output_kind == g::OutputKind::typed);
+                g.program.output_kind == g::OutputKind::typed, g.output_names);
           },
           [](py::tuple state) {
             // Saved legacy definitions retain their original scalar/series
@@ -618,7 +645,8 @@ void register_graph(py::module_ &parent) {
                   py::cast<std::vector<std::string>>(state[0]),
                   py::cast<std::vector<std::pair<std::string, std::string>>>(state[1]));
             if (!((state.size() == 8 && py::cast<int>(state[0]) == 2) ||
-                  (state.size() == 9 && py::cast<int>(state[0]) == 3)))
+                  (state.size() == 9 && py::cast<int>(state[0]) == 3) ||
+                  (state.size() == 10 && py::cast<int>(state[0]) == 4)))
               throw py::value_error("invalid compiled graph state");
             std::vector<t::Variable> variables;
             for (auto item : py::cast<py::dict>(state[2]))
@@ -628,7 +656,8 @@ void register_graph(py::module_ &parent) {
                 py::cast<std::vector<std::map<std::string, std::string>>>(state[4]),
                 py::cast<std::vector<std::string>>(state[5]),
                 py::cast<std::uint32_t>(state[6]), py::cast<std::uint64_t>(state[7]),
-                state.size() == 9 && py::cast<bool>(state[8]));
+                state.size() >= 9 && py::cast<bool>(state[8]),
+                state.size() == 10 ? py::cast<std::vector<std::string>>(state[9]) : std::vector<std::string>{});
           }));
   py::class_<CompilerAPI>(module, "GraphCompiler")
       .def(py::init<const py::dict &>(), py::arg("variables"))

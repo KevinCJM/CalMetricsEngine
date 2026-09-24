@@ -1,0 +1,213 @@
+{
+  "schema": "pointwise-region-evidence-1",
+  "date": "2026-09-24",
+  "branch": "codex/platform-foundation-m0-m1",
+  "head": "730366aa15fe794e7e8b9deeeceffc221605b599",
+  "dirty": true,
+  "baseline_build_id": "69ae777de150c45016397ebd3ab952620c87aa0470d63d0a7116630fc93c72c0",
+  "source_build_id": "cf1830232871dd95b898ce8ad9572f115e2d39bb6d5cb172df2e579bbe5ed67b",
+  "wheel_sha256": "7249b32454907dba1ed854120b79157cab4efc6f76302f236a5ad75da18b56c4",
+  "source_files": 52,
+  "environment": {
+    "platform": "macOS-15.6.1-arm64-arm-64bit-Mach-O",
+    "python": "3.12.11",
+    "compiler": "AppleClang 17.0.0.17000603",
+    "mode": "Release",
+    "cpu": "arm64"
+  },
+  "files": {
+    "foundation-before.json": {
+      "sha256": "45ad2ac893d29952d47c8d49d9430fd8a429e3ce27e2807f6f56b23feaae5527",
+      "bytes": 39081
+    },
+    "candidate-regions-1.json": {
+      "sha256": "32134edb85faf0a5d833ec3853f1e7167cc874e281cb9a0c83ad00d7c3c593e1",
+      "bytes": 200791
+    },
+    "phase2-gate-summary.json": {
+      "sha256": "2befdae9da32a1a40fc2ea23748c33466b14f360c341f56ae099c307673a884d",
+      "bytes": 932
+    },
+    "phase2-1000.json": {
+      "sha256": "cd3f5c662707f3f6e47ac69722327673b51a3c6177ce79e3212a496bd24ee634",
+      "bytes": 53568
+    },
+    "build-identity.json": {
+      "sha256": "1a69c19968c5e35b54d3302f03ebc258e0f5380339ef15a066a83660511b9368",
+      "bytes": 199
+    },
+    "sanitizer-tests.log": {
+      "sha256": "7acabccccac933bb370416039fa5e8acf295cbe4f196d2240e8ede3ef29cf5c4",
+      "bytes": 1056
+    },
+    "candidate-phase2-micro.json": {
+      "sha256": "73e84a2fc24948fb7f8ee2acab4cb2ba17c1db899a3c2aaa9095d7a644508637",
+      "bytes": 4945
+    },
+    "phase2-500.json": {
+      "sha256": "d0361404c5c1c4839d166a4b4df74a6d5bf54394ad465ff8c197d39ac9004d33",
+      "bytes": 53373
+    },
+    "python-tests.log": {
+      "sha256": "f5e87c2c40a15867c60df79e75eb8b107aea07fcf66c18184ad36f17736713f1",
+      "bytes": 5701
+    },
+    "regions.json": {
+      "sha256": "a077edbc6dd5cdeac4a8d03b5cf3566c93011508fc398bc21a10c2c6f40dc954",
+      "bytes": 229161
+    },
+    "candidate-foundation.json": {
+      "sha256": "2e9c2de6926da406c57b608c108d4ee9e75f28571611d18497b2d2f743bbd790",
+      "bytes": 38449
+    },
+    "native-tests.log": {
+      "sha256": "4e1ccb37a137f8febf9881768eea009d26330bd5b15ff3770b3d91942fc728ad",
+      "bytes": 1059
+    },
+    "foundation.json": {
+      "sha256": "e4bffa5c9babfdbdc9f661276089dbb80b12dd81dc70d1e06a31d906568b4731",
+      "bytes": 38412
+    },
+    "scaling.json": {
+      "sha256": "565beafd90bfa7663e2f5483899be261ccd4116343c2d2b78cbcb5e67bd1e619",
+      "bytes": 151106
+    },
+    "candidate-regions-2.json": {
+      "sha256": "f7468373c13781aaa23d92413c7f3d72922e00a5d1ae4dcf524fd591e4474c47",
+      "bytes": 200825
+    },
+    "candidate-phase2-gate-summary.json": {
+      "sha256": "b067ae8241e2ce30d54b80eedb12e66faddb22bf4de2b11244a3d9afc82b33ae",
+      "bytes": 934
+    },
+    "phase2-micro.json": {
+      "sha256": "be257e5a7321a39d00267fa91b7fa2719e5f71665a9dc90970c6a6fc7387f8fc",
+      "bytes": 4947
+    }
+  },
+  "source_hashes": {
+    "cpp/graph.cpp": "1a6f7bb5a1865a08ab2ee4c5bb32f9c4816fae2d7f3de51ea834190d497ade58",
+    "cpp/include/calmetrics_engine/graph.hpp": "17434c3f843a80cc3f8cbd78efcc69b5357d592a8188cdae8d95c045ecbd80eb",
+    "cpp/include/calmetrics_engine/pointwise.hpp": "b3a7254b862c519391828833deb196f745f40316bcab21908ea19a58be57ea43",
+    "cpp/pointwise.cpp": "eda95810530bcb101fb80c2102682a1e8a2d8af5fbd1e303bb70df0aa9077671",
+    "tests/result_native_tests.cpp": "f9865f5ba40c069c6fc82b0591d0051662326ba501b2b9656755f0cf04e06403",
+    "tests/test_physical_pointwise.py": "d4a289664c3a85bc57e2e0603dd1c17188ca77ea5fd6e17a1eebd5f0f41dbc2e",
+    "tools/check_region_performance.py": "7ec093a61a567db30639eb25d08b1b9ace5b68522250c0b22b8b1bdd358c8ef4",
+    "tools/check_foundation_performance.py": "08e947059e05085f3b438df9574cffcb0cc5027100423fec3628211899511555",
+    "tools/check_phase2_performance.py": "4ddd64be87742a84abb396092cbd68c79ee82f6f212403da616779a353d416a4",
+    "tools/check_execution_scaling.py": "d40fb6ff2a2c9e4f88d5d90062525ef391c833fdce84509e6004fe9acdd680c8",
+    "tools/heap_probe.cpp": "d42aaf4fd9e6a21c7e221e2cce96d31c964ea8f1e0cce8b48549d9a3f01cd09b",
+    "docs/platform-foundation-workloads.json": "791423612910056e8d5266ca56b30f26b3a25fb7cb74f3d5325ce6742ce29e32"
+  },
+  "verification": {
+    "python_passed": 5106,
+    "native": "8/8",
+    "asan_ubsan": "8/8",
+    "asan_options": "detect_leaks=0",
+    "lsan": "not verified",
+    "regions_cases": 8,
+    "new_joint_gate_passed": "1/7",
+    "original_gate_passed": "2/4",
+    "all_performance_pass": false
+  },
+  "commands": [
+    "PYTHONPATH=<final-wheel-install> python -m pytest tests tools/test_platform_inventory.py -q",
+    "ctest --test-dir <Release-build> --output-on-failure",
+    "ASAN_OPTIONS=detect_leaks=0 ctest --test-dir <Sanitizer-build> --output-on-failure",
+    "python tools/check_region_performance.py --before <baseline-install> --after <final-install> --heap-probe <probe.dylib> --output <regions.json>",
+    "python tools/check_foundation_performance.py --output <foundation.json>",
+    "python tools/check_phase2_performance.py --output-dir <phase2-dir>",
+    "python tools/check_execution_scaling.py --output <scaling.json>"
+  ],
+  "scope_notes": [
+    "Initial source snapshot and baseline wheel preserved outside repository; current HEAD alone is not the before baseline.",
+    "No code imported from KunQuant, Strata or skfolio; implementations use existing canonical AOT kernels.",
+    "Candidate reports retained and are not final acceptance. candidate-regions-1 may overlap the end of native checks; exclude it from final timing conclusions.",
+    "Only final regions.json is the frozen 8-case paired before/after/NJIT comparison.",
+    "Heap instrumentation is separate from timing; heap-worker peak_rss includes instrumentation and is not the RSS acceptance source.",
+    "Setup retained allocations and warm incremental heap counters are reported separately; no total-memory superiority claim.",
+    "RSS baseline comparison measured sequentially, not paired across wheel versions; use raw samples and limitations.",
+    "No external Excel/roadmap/index changes overwritten; no commit or push.",
+    "x86/Linux/Windows runtime and complete mmap/worker allocation tracing remain unverified.",
+    "After the final build/tests, another task added Excel C++ files and development rules. Acceptance covers the frozen 52-file source identity above; it does not certify the later whole live worktree or Excel backend."
+  ],
+  "full_tested_source_hashes": {
+    "CMakeLists.txt": "eabf0fac36193d33c3c47c33c88a4aac5f9582a95a843fd8610c9996ac8f1efb",
+    "cpp/bindings.cpp": "7b511b069603cf7ea268e2fc8592bc49cb09be74575a3635bcea1afc997bf6ea",
+    "cpp/compiler.cpp": "e7cd69ce99a709b85596ee5288287b4eaa6e4e4f0048d142d5ba604847eb07f0",
+    "cpp/finance/drawdown.cpp": "c59ac5e73bed11f9a57fc846f787be438659b584fee92530e898b523ff0b91e2",
+    "cpp/finance/rolling.cpp": "1340dc1868bf1f3b8037304c0b66900d68cc74c16cdefb8dcfe85ef366fb1815",
+    "cpp/finance/statistics.cpp": "5c3b538e48ac290f2af9a4bbf16f36fb934027a18e2293742ed6ff018b27f4a1",
+    "cpp/finance/streaks.cpp": "a2db0925b4a40cfeb94cd5aa6b536c85149a73a6db9c65016b7938ff38133541",
+    "cpp/graph.cpp": "1a6f7bb5a1865a08ab2ee4c5bb32f9c4816fae2d7f3de51ea834190d497ade58",
+    "cpp/graph_binding_utils.hpp": "abbc77665218453223e1e3e10004dbf928a93c8906987cdf3822445516eecbc9",
+    "cpp/graph_bindings.cpp": "f79199a8809dfc5556db7fb7b92ec768776a915ece266b0ce9912e3709294579",
+    "cpp/include/calmetrics_engine/array_view.hpp": "f46895eac254a1cabec74e1f7d839e619e8c1db66bd1a305a5fcec09862cd1b6",
+    "cpp/include/calmetrics_engine/calendar.hpp": "21ebc1cc568abf6dc4f2833af554922f84ddfa13e036d4f7e43fb8b15c6c8137",
+    "cpp/include/calmetrics_engine/compiler.hpp": "c0a693b283f6ca4fe4bccb5606ffa9d32b98086c2ad43aa2ccca50fd58175621",
+    "cpp/include/calmetrics_engine/finance.hpp": "37e197533af95ce3fd0ad6cfbfe2edf53687652c8d91ef7156919bf0877ce1b9",
+    "cpp/include/calmetrics_engine/graph.hpp": "17434c3f843a80cc3f8cbd78efcc69b5357d592a8188cdae8d95c045ecbd80eb",
+    "cpp/include/calmetrics_engine/model_payload.hpp": "16cea5862598270a998c9b4dbd0d5cbaf9e359cd387db484ff4e1cf3a3682361",
+    "cpp/include/calmetrics_engine/native_process.hpp": "8381a49a62cc014d9fc066cb06190207c81975746fbfc89df4f88b249e1e314c",
+    "cpp/include/calmetrics_engine/native_runtime.hpp": "378d30307593b32f0fcac1ab1a427222c60a766ae2abe355b2e1ed16e5a63a14",
+    "cpp/include/calmetrics_engine/numeric.hpp": "adacba584014567f08ec836f4f69d4706baeaac9a103ec4a3be72e45a9d9956b",
+    "cpp/include/calmetrics_engine/operators.def": "f6b6edba127f0637d10cdb11e47e28827bde432b5f24ad594c9ce886721591db",
+    "cpp/include/calmetrics_engine/operators.hpp": "6800758fd1f2bcd30c7f86385ce475a935e6ff392e1f12be9b1fd1e36079acf9",
+    "cpp/include/calmetrics_engine/parallel.hpp": "9bcb22457b0660d719db7b7058d580df524488dba5e4847f92385997165877b3",
+    "cpp/include/calmetrics_engine/planner.hpp": "3f229b938e9db8515ce29a222eab07b83f9479fd422c8b0c504724249e9a5f8e",
+    "cpp/include/calmetrics_engine/pointwise.hpp": "b3a7254b862c519391828833deb196f745f40316bcab21908ea19a58be57ea43",
+    "cpp/include/calmetrics_engine/scheduler.hpp": "fd4fc6bf9f8765c8f221a1a1859f5b8cb2ea89a8698edf61719afff04fbbba86",
+    "cpp/include/calmetrics_engine/shared_memory.hpp": "d6defd233f4e0e44360bbd73bf8091cdac0eb0f01ab7de4eac86bc4f1243f274",
+    "cpp/include/calmetrics_engine/typed_ir.hpp": "c52f50b5849e32862818ab2dd4feb2fc52c68f6408f05b907a8be155c8bbe9bc",
+    "cpp/model_payload.cpp": "bcb2889b59c6ca2c7a291b87332a38bdf13b4fa3741e4776d76835adf6adafba",
+    "cpp/native_api_bindings.cpp": "f971ca7ef59dfa050be1f6b42af979555851669d512d6bdaf214997339177e77",
+    "cpp/native_process.cpp": "7cdfc026357ca04ba7edb4d05354e4385284186a35f0c9d2abc55809fcd85f2b",
+    "cpp/native_runtime.cpp": "81afa35f366bac238618dd9b711783ded65d46b47a05e6838374d6b1444546c0",
+    "cpp/native_worker_main.cpp": "b26e9784411d0d35d88a1d578301203e837195270af195ccc100f2158d54c61c",
+    "cpp/operator_bindings.cpp": "83a48d6f18264c0741843d6f09e4c88562dbd7ab608fd737d531d5d38ee0d237",
+    "cpp/operators/elementwise.cpp": "6635630ee602c096347590b666c52e0d2335f5b221497767795b8f4f6f5acbb7",
+    "cpp/operators/matrix.cpp": "6b6b5c926815e21cfc837b778320785c8328acf9c59fb28f1da54e2488c25e27",
+    "cpp/operators/recurrence.cpp": "0b973d1534bdd6cef8f9e5742800a375e4b17f68772f923ce5cef2d56f281b33",
+    "cpp/operators/reduction.cpp": "f4cd83575b6a9b6bd66190d66fcd45ffeae070aa9ac48e18e0d97c37a0730338",
+    "cpp/operators/registry.cpp": "698d292e020f55278ef5f363ccfe9467c27c7f86f892da2d937675b0fc2f84f1",
+    "cpp/operators/scalar_chain.hpp": "6d6767ce57e428634fa5252f1cb37a1e25294622a8cc266945f1062cd1031138",
+    "cpp/operators/sequence.cpp": "edbfdada54eda88f609b5b6fac4d0705a38fa237acf99fc86335b839f10ab23c",
+    "cpp/operators/simd.cpp": "687b3db6b5377064050e01226921b5d299d605d460154ff0215373b964cb62cb",
+    "cpp/operators/simd_avx2.cpp": "a3a5ee6397b882615f4b5b080d8134a92247a7c1344d1d9ebc046260edbca773",
+    "cpp/operators/simd_loop.hpp": "5ebae38e939243a9ee64334b9e0082426d1afcf188a1e3e771ea302b83c7a6a1",
+    "cpp/operators/state.cpp": "e1c6cc7987787676f80ca1e6c379d9ce99c23f9b4838b5a646d2b04b9941fece",
+    "cpp/operators/state_events.cpp": "82b16052d1d05dd2c8cd6afec9331f9449ebfb20a1cb30b98d8eaa0b51c8be29",
+    "cpp/planner.cpp": "49cdf41f41956d5c2343ac592a896d2a34ffeb837ba875eb16b49eb3cf06d7de",
+    "cpp/pointwise.cpp": "eda95810530bcb101fb80c2102682a1e8a2d8af5fbd1e303bb70df0aa9077671",
+    "cpp/result_layout.cpp": "4f663ca4ca006003ad0887e831715785285d066039272a7cbae648758498a127",
+    "cpp/scheduler.cpp": "cb54193d46dc8d362b3a4219f92a7eecbf4f3a2991c499968c4b2b1a00653842",
+    "cpp/shared_memory.cpp": "34d1de7c955694d4a5145b8ba2c9d4512e0e01b25dae47468db148a325459d81",
+    "cpp/typed_ir.cpp": "8b67d28fc752e0e9f8e3b02f086fd2234457e6757a49b4b56f762f7486044940",
+    "pyproject.toml": "d8733d8d48ba7140010dcebd784bfc850310ca605542736d94a6ab377cdc32bf"
+  },
+  "task_existing_changed_paths": [
+    "cpp/graph.cpp",
+    "cpp/include/calmetrics_engine/graph.hpp",
+    "cpp/include/calmetrics_engine/pointwise.hpp",
+    "cpp/pointwise.cpp",
+    "tests/result_native_tests.cpp",
+    "tests/test_physical_pointwise.py",
+    "docs/execution-guide.md",
+    "docs/physical-execution-optimization.md"
+  ],
+  "concurrent_changes_excluded_from_acceptance": [
+    "AGENTS.md",
+    "docs/computation-design-rules.md",
+    "docs/README.md",
+    "docs/excel-reproduction-design.md",
+    "docs/platform-compute-roadmap.md",
+    "docs/excel-generation-rules.md",
+    "cpp/excel_internal.hpp",
+    "cpp/include/calmetrics_engine/excel.hpp"
+  ],
+  "verified_source_snapshot": "/private/tmp/calmetrics-deep-verified-source",
+  "task_document_hashes": {
+    "docs/execution-guide.md": "ff6a7f1d98578d7245b7a94832617d0e77cc5e852138aa453aa1c204be51b0d7",
+    "docs/physical-execution-optimization.md": "2aa49ed75e3c6368ad8ced970b0443c989dafa778f2bf493da7a3db0344fcfaa"
+  }
+}

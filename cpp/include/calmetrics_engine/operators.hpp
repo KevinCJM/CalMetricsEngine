@@ -43,23 +43,35 @@ inline void require(bool condition, const char *code) {
 
 struct Shape {
     int rank = 0;
-    std::array<std::size_t, 2> dim{1, 1};
+    std::array<std::size_t, 3> dim{1, 1, 1};
     std::size_t size() const {
+        require(rank >= 0 && rank <= 3, "RANK_MISMATCH");
         if (rank == 0)
             return 1;
         if (rank == 1)
             return dim[0];
+        if (rank == 3 && (dim[0] == 0 || dim[1] == 0 || dim[2] == 0)) {
+            for (auto extent : dim)
+                require(extent <= static_cast<std::size_t>(PTRDIFF_MAX), "SHAPE_OVERFLOW");
+            return 0;
+        }
         require(dim[1] == 0 || dim[0] <= static_cast<std::size_t>(PTRDIFF_MAX) / dim[1],
                 "SHAPE_OVERFLOW");
-        return dim[0] * dim[1];
+        const auto plane = dim[0] * dim[1];
+        if (rank == 2) return plane;
+        require(dim[2] == 0 || plane <= static_cast<std::size_t>(PTRDIFF_MAX) / dim[2],
+                "SHAPE_OVERFLOW");
+        return plane * dim[2];
     }
     bool operator==(const Shape &other) const noexcept {
         return rank == other.rank && (rank == 0 || dim[0] == other.dim[0]) &&
-               (rank < 2 || dim[1] == other.dim[1]);
+               (rank < 2 || dim[1] == other.dim[1]) &&
+               (rank < 3 || dim[2] == other.dim[2]);
     }
 };
 inline Shape vector_shape(std::size_t n) { return {1, {n, 1}}; }
 inline Shape matrix_shape(std::size_t rows, std::size_t cols) { return {2, {rows, cols}}; }
+inline Shape tensor_shape(std::size_t a, std::size_t b, std::size_t c) { return {3, {a, b, c}}; }
 
 // Non-owning, read-only metadata. Strides are signed ELEMENT strides, never bytes.
 // Scalars/records live inline, so moving a Value cannot invalidate its own storage.
@@ -67,7 +79,7 @@ struct Value {
     Kind kind = Kind::number;
     Shape shape{};
     const void *data = nullptr;
-    std::array<std::ptrdiff_t, 2> stride{1, 1};
+    std::array<std::ptrdiff_t, 3> stride{1, 1, 1};
     double scalar = 0.0;
     std::int64_t integer = 0;
     std::array<double, 5> record{};
@@ -83,6 +95,14 @@ struct Value {
             return 0;
         if (shape.rank == 1)
             return static_cast<std::ptrdiff_t>(i) * stride[0];
+        if (shape.rank == 3) {
+            if (contiguous()) return static_cast<std::ptrdiff_t>(i);
+            const auto plane = shape.dim[1] * shape.dim[2];
+            const auto within = i % plane;
+            return static_cast<std::ptrdiff_t>(i / plane) * stride[0] +
+                   static_cast<std::ptrdiff_t>(within / shape.dim[2]) * stride[1] +
+                   static_cast<std::ptrdiff_t>(within % shape.dim[2]) * stride[2];
+        }
         return static_cast<std::ptrdiff_t>(i / shape.dim[1]) * stride[0] +
                static_cast<std::ptrdiff_t>(i % shape.dim[1]) * stride[1];
     }
@@ -102,10 +122,29 @@ struct Value {
                                                  static_cast<std::ptrdiff_t>(col) * stride[1]];
     }
     bool contiguous() const noexcept {
+        if (shape.rank == 3)
+            return stride[2] == 1 && stride[1] == static_cast<std::ptrdiff_t>(shape.dim[2]) &&
+                   stride[0] >= 0 && static_cast<std::size_t>(stride[0]) == shape.dim[1] * shape.dim[2];
         return shape.rank == 0 ||
                (shape.rank == 1
                     ? stride[0] == 1
                     : stride[1] == 1 && stride[0] == static_cast<std::ptrdiff_t>(shape.dim[1]));
+    }
+    void set_contiguous_strides() {
+        if (shape.rank <= 1) { stride = {1, 1, 1}; return; }
+        if (shape.rank == 2) {
+            require(shape.dim[1] <= static_cast<std::size_t>(PTRDIFF_MAX), "SHAPE_OVERFLOW");
+            stride = {static_cast<std::ptrdiff_t>(shape.dim[1]), 1, 1};
+            return;
+        }
+        if (shape.rank == 3 && size() == 0) { stride = {0, 0, 0}; return; }
+        std::size_t extent = 1;
+        for (int axis = shape.rank - 1; axis >= 0; --axis) {
+            require(extent <= static_cast<std::size_t>(PTRDIFF_MAX), "SHAPE_OVERFLOW");
+            stride[axis] = static_cast<std::ptrdiff_t>(extent);
+            require(shape.dim[axis] == 0 || extent <= static_cast<std::size_t>(PTRDIFF_MAX) / shape.dim[axis], "SHAPE_OVERFLOW");
+            extent *= shape.dim[axis];
+        }
     }
     Value row(std::size_t i) const;
     Value column(std::size_t i) const;
@@ -132,17 +171,37 @@ const char *temporal_dependency(const Spec &spec);
 bool series_record_projection(Op op) noexcept;
 std::vector<std::string> parameter_names(const Spec &spec, std::size_t arity);
 
+inline constexpr std::size_t max_operator_arguments = 32;
+// Existing small operators retain inline storage. Larger coupled kernels pay
+// for dynamic arguments only when their declared arity needs them.
+template <class T> class Arguments {
+    std::array<T, 8> small_{};
+    std::vector<T> large_;
+public:
+    explicit Arguments(std::size_t count = 8) {
+        require(count <= max_operator_arguments, "ARITY_MISMATCH");
+        if (count > small_.size()) large_.resize(count);
+    }
+    T *data() { return large_.empty() ? small_.data() : large_.data(); }
+    const T *data() const { return large_.empty() ? small_.data() : large_.data(); }
+    T &operator[](std::size_t i) { return data()[i]; }
+    const T &operator[](std::size_t i) const { return data()[i]; }
+    std::size_t size() const { return large_.empty() ? small_.size() : large_.size(); }
+    T *begin() { return data(); }
+    T *end() { return data() + size(); }
+};
+
 struct Prepared {
+    explicit Prepared(std::size_t capacity = 8) : args(capacity) {}
     const Spec *spec = nullptr;
-    std::array<Value, 8> args{};
+    Arguments<Value> args;
     std::size_t count = 0;
     Kind output_kind = Kind::number;
     Shape output_shape{};
     bool borrowed = false;
     // Partial validation never reads an unavailable payload or unknown shape.
-    // These flags share the existing alignment padding before the borrowed view.
-    std::uint8_t geometry_known_mask = 0xff;
-    std::uint8_t payload_available_mask = 0xff;
+    std::uint32_t geometry_known_mask = UINT32_MAX;
+    std::uint32_t payload_available_mask = UINT32_MAX;
     bool structure_only = false;
     bool output_geometry_known = true;
     Value view{};
@@ -157,9 +216,11 @@ struct StructureResult {
     bool geometry_known = false;
 };
 StructureResult validate_structure(const Spec &spec, const Value *args, std::size_t count,
-                                  std::uint8_t geometry_known,
-                                  std::uint8_t payload_available);
+                                  std::uint32_t geometry_known,
+                                  std::uint32_t payload_available);
 Prepared prepare(const Spec &spec, const Value *args, std::size_t count);
+// Known geometry with not-yet-materialized intermediate payloads, for physical lowering.
+Prepared prepare_geometry(const Spec &spec, const Value *args, std::size_t count);
 
 struct Output {
     Kind kind = Kind::number;
@@ -217,6 +278,8 @@ void execute(const Prepared &plan, Output &output, Workspace &work, Isa isa, Aud
 
 // Family kernels. They never import/call Python or create worker threads.
 void elementwise(const Prepared &, Output &, Workspace &, Isa, Audit &);
+// Internal physical tile over validated numeric descriptors, without packing.
+void elementwise_span(const Prepared &, Output &, const std::array<std::size_t, 2> &);
 void reduction(const Prepared &, Output &, Workspace &, Audit &);
 void sequence(const Prepared &, Output &, Workspace &, Audit &);
 void recurrence(const Prepared &, Output &, Workspace &, Audit &);
@@ -246,5 +309,23 @@ std::size_t simd_transform(Op op, const Value &x, const Value &y, Output &out, s
 // If nonzero, the entire result (including scalar tails) has been written.
 std::size_t simd_matmul(const Value &lhs, const Value &rhs, Output &out, Isa requested,
                         Audit &audit);
+std::size_t iteration_residual(const double *previous, const double *candidate,
+    std::size_t count, double &residual, bool &finite);
+
+// Internal AOT lowering: at most two scalar-broadcast arithmetic steps followed
+// by one predicate. Op(0) means an absent step, never a public operator.
+struct ScalarChain {
+    std::array<double, 2> constants{};
+    std::array<bool, 2> constant_first{};
+    double threshold = 0;
+    bool threshold_first = false;
+    double *first_output = nullptr, *value_output = nullptr;
+    std::uint8_t *mask_output = nullptr;
+    const double *previous = nullptr;
+    double *residual = nullptr;
+    bool *finite = nullptr;
+};
+using ScalarChainKernel = std::size_t (*)(const Value &, std::size_t, std::size_t, const ScalarChain &);
+ScalarChainKernel scalar_chain_kernel(Op first, Op second, Op predicate, Isa requested = Isa::automatic);
 
 } // namespace calmetrics_engine::ops

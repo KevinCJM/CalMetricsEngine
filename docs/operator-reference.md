@@ -6,10 +6,10 @@
 
 ## 阅读规则
 
-- S：float64 标量；L：一维 float64 数组；M：二维 float64；A：L 或 M；F：S/L/M；B：bool 或合法 uint8 0/1 mask；I：int64 数组。n/T/N 是长度符号，不是自动推断金融含义。
+- S：float64 标量；L：一维 float64 数组；M：二维 float64；T3：三维 float64；A：L/M/T3；F：S/L/M/T3；B：bool 或合法 uint8 0/1 mask；I：int64 数组。n/T/N 是长度符号，不是自动推断金融含义。
 - 下表描述直接算子的物理输入输出；进入图后还必须满足名义轴、形状、语义和公开根约束。L 在图中可能是 time series 或 asset vector，不能任意互换。
 - 签名中的方括号是可选尾部参数，不是要输入的 Python 语法。回归和协方差等真正重载逐一列出。直接接口还接受 out、workspace、simd、audit 等公共关键字；图公式不能把这些运行参数当数学参数。
-- 图的向量、矩阵及异形多输出使用 `outputs[根].values[区间]`，保持各算子的 dtype；内部记录仍须字段投影。结果接口不改变以下数学口径。
+- 图的向量、矩阵、张量及异形多输出使用 `outputs[根].values[区间]`，保持各算子的 dtype；内部记录仍须字段投影。结果接口不改变以下数学口径。
 - 大多数结果数值是 float64。直接掩码结果默认 uint8；可提供兼容 bool out。图的 bool 时序输出为 NumPy bool。int64 不能任意传给浮点算子；equal/not_equal、排序、选择和状态能力只开放明确的整数重载。
 - “SIMD 可选”只表示存在某个重载的显式向量化路径；实际 ISA、布局、长度及重载仍决定是否使用。空白/“—”不表示 Python 回退。
 
@@ -57,7 +57,7 @@
 | 55 · `divide_or_default(numerator, denominator, default)` | L,L,S → L | 同长序列相除；输入任一非有限输出 NaN，否则 abs(y)<1e−12 用有限 default，其余 x/y。 | — |
 | 72 · `normal_pdf(values)` | F → F | 标准正态密度 exp(−x²/2)/sqrt(2π)。 | — |
 | 73 · `normal_ppf(probability)` | F → F | 标准正态分位点的分段有理近似；要求概率在 (0,1)，NaN按实现传播。 | — |
-| 118 · `finite_mask(values)` | L → B[T] | 逐位置 isfinite；NaN 和正负 Inf 为 false，其他有限值为 true。 | 可选 |
+| 118 · `finite_mask(values)` | F → B[T] | 逐位置 isfinite；NaN 和正负 Inf 为 false，其他有限值为 true。 | 可选 |
 | 119 · `normal_cdf(values)` | F → F | 0.5*erfc(−x/sqrt(2))；−Inf→0，+Inf→1，NaN传播。 | — |
 | 125 · `floor(values)` | F → F | 逐元素向下取整，仍返回float64；NaN/Inf传播，不是类别强转。 | — |
 | 126 · `cos(values)` | F → F | 逐元素余弦，弧度输入；图中要求无量纲。 | — |
@@ -300,3 +300,6 @@ catalog() 给出签名、shape_rule、defaults、missing_policy、granularity、
 ## 更新与验证
 
 修改公开算子时同步本表及相应详细契约，核对 opcode/名称集合、所有重载参数和默认值。用户示例按当前已安装 wheel 执行；不通过保存旧算法副本证明历史兼容。固定参考、边界和所有权测试仍是数值真相的验证依据。
+
+
+M0/M1 开发分支的 `iterate` 与三个诊断投影由编译器拥有，不增加 canonical opcode；完整契约与示例见[使用手册](user-guide.md#12-开发分支新增有界迭代与诊断)。张量只扩展通用逐元素/掩码及全数组归约；矩阵代数、按轴归约和时序内核仍按各行指定 rank 校验。

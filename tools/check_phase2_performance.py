@@ -169,12 +169,13 @@ def main() -> None:
             (
                 f"{item['products']} products={item['ratio']:.3f}"
                 if item.get("products") != 1 or item.get("metrics") != 5
-                else f"1x1x5/{item['history']}={item['ratio']:.3f}"
+                else f"1x1x5/{item['history']} prepared={item['ratio']:.3f}, ordinary={item['scheduler_ratio']:.3f}"
             )
             for item in failed
         )
         raise SystemExit(
-            f"Phase-2 performance gate failed: {details}; required <= {args.max_ratio:.3f}"
+            f"Phase-2 performance gate failed: {details}; prepared required <= {args.max_ratio:.3f}, "
+            f"ordinary required <= {args.max_scheduler_ratio:.3f}"
         )
 
     print(f"PASS: all {len(records)} workloads beat NJIT by the configured margin.")

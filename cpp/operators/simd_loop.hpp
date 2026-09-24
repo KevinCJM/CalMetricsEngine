@@ -2,16 +2,39 @@
 #include "calmetrics_engine/operators.hpp"
 
 namespace calmetrics_engine::ops::detail {
+template <class V> std::size_t residual_loop(const double *previous, const double *candidate,
+    std::size_t count, double &residual, bool &finite) {
+    auto maximum = V::broadcast(0), invalid = V::broadcast(0);
+    const auto zero = V::broadcast(0), one = V::broadcast(1);
+    const auto infinity = V::broadcast(std::numeric_limits<double>::infinity());
+    const auto stop = count - count % V::width;
+    for (std::size_t i = 0; i < stop; i += V::width) {
+        const auto next = V::load(candidate + i);
+        const auto delta = V::absolute(V::sub(next, V::load(previous + i)));
+        maximum = V::select(V::lt(maximum, delta), delta, maximum);
+        invalid = V::add(invalid, V::select(V::lt(V::absolute(next), infinity), zero, one));
+    }
+    double maxima[V::width], failures[V::width];
+    V::store(maxima, maximum); V::store(failures, invalid);
+    for (std::size_t i = 0; i < V::width; ++i) {
+        if (maxima[i] > residual) residual = maxima[i];
+        finite = finite && failures[i] == 0;
+    }
+    return stop;
+}
 // Target-independent loop semantics; the traits supply one AOT ISA implementation.
 // Operation dispatch occurs once per block, not once per element.
-template <Op op, class V>
-std::size_t vector_loop(const Value &x, const Value &y, Output &out, std::size_t n) {
-    const auto *lhs = x.shape.rank == 0 ? &x.scalar : static_cast<const double *>(x.data);
-    const auto *rhs = y.shape.rank == 0 ? &y.scalar : static_cast<const double *>(y.data);
+template <Op op, class V, bool left_scalar, bool right_scalar>
+std::size_t vector_loop_bound(const Value &x, const Value &y, Output &out, std::size_t n) {
+    const auto *lhs = static_cast<const double *>(x.data);
+    const auto *rhs = static_cast<const double *>(y.data);
+    const auto left_constant = V::broadcast(x.scalar), right_constant = V::broadcast(y.scalar);
+    auto *numbers = static_cast<double *>(out.data);
+    auto *masks = static_cast<std::uint8_t *>(out.data);
     const auto stop = n - n % V::width;
     for (std::size_t i = 0; i < stop; i += V::width) {
-        const auto a = x.shape.rank == 0 ? V::broadcast(*lhs) : V::load(lhs + i);
-        const auto b = y.shape.rank == 0 ? V::broadcast(*rhs) : V::load(rhs + i);
+        const auto a = left_scalar ? left_constant : V::load(lhs + i);
+        const auto b = right_scalar ? right_constant : V::load(rhs + i);
         if constexpr (op >= Op::equal && op <= Op::greater_equal) {
             auto m = V::eq(a, b);
             if constexpr (op == Op::not_equal)
@@ -24,11 +47,11 @@ std::size_t vector_loop(const Value &x, const Value &y, Output &out, std::size_t
                 m = V::lt(b, a);
             if constexpr (op == Op::greater_equal)
                 m = V::le(b, a);
-            V::store_mask(static_cast<std::uint8_t *>(out.data) + i, m);
+            V::store_mask(masks + i, m);
         } else if constexpr (op == Op::finite_mask) {
             const auto m =
                 V::lt(V::absolute(a), V::broadcast(std::numeric_limits<double>::infinity()));
-            V::store_mask(static_cast<std::uint8_t *>(out.data) + i, m);
+            V::store_mask(masks + i, m);
         } else {
             auto result = a;
             if constexpr (op == Op::add)
@@ -52,10 +75,21 @@ std::size_t vector_loop(const Value &x, const Value &y, Output &out, std::size_t
                 result = V::sqrt(a);
             if constexpr (op == Op::reciprocal)
                 result = V::div(V::broadcast(1.0), a);
-            V::store(static_cast<double *>(out.data) + i, result);
+            V::store(numbers + i, result);
         }
     }
     return stop;
+}
+template <Op op, class V>
+std::size_t vector_loop(const Value &x, const Value &y, Output &out, std::size_t n) {
+    // Bind broadcast/layout once. In particular uint8 stores may alias any
+    // metadata in C++; rereading Value/Output inside the loop blocks hoisting.
+    if (x.shape.rank == 0) {
+        if (y.shape.rank == 0) return vector_loop_bound<op, V, true, true>(x, y, out, n);
+        return vector_loop_bound<op, V, true, false>(x, y, out, n);
+    }
+    if (y.shape.rank == 0) return vector_loop_bound<op, V, false, true>(x, y, out, n);
+    return vector_loop_bound<op, V, false, false>(x, y, out, n);
 }
 // Register-blocked 4-by-(2 SIMD vectors) GEMM. No packed copies of either input.
 // Each output keeps the original k-order and uses separate multiply/add, not FMA.

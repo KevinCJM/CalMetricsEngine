@@ -1,4 +1,5 @@
 #include "calmetrics_engine/native_runtime.hpp"
+#include "calmetrics_engine/pointwise.hpp"
 #include "calmetrics_engine/native_process.hpp"
 #include <algorithm>
 #include <cmath>
@@ -65,10 +66,12 @@ Engine::plan(std::shared_ptr<compiler::CompiledGraph> graph, const Batch &batch,
              bool async_io) const {
   if (closed())
     throw std::runtime_error("native engine is closed");
-  return planner::make_plan(std::move(graph), config_, batch.input_sizes(),
+  auto result = planner::make_plan(std::move(graph), config_, batch.input_sizes(),
                             batch.starts, batch.ends, batch.rows,
                             batch.product_ids, budget_.total(), memory_budget,
-                            hard_stop, async_io, !batch.shared_inputs.empty(), &batch.inputs);
+                            hard_stop, async_io, !batch.shared_inputs.empty(), &batch.inputs, batch.owned_input_bytes);
+  result->model_identity = batch.model_identity;
+  return result;
 }
 ExecutionAudit Engine::execute(const planner::Plan &p, const Batch &batch,
                                void *output,
@@ -80,6 +83,8 @@ ExecutionAudit Engine::execute(const planner::Plan &p, const Batch &batch,
     throw std::runtime_error("native engine is closed");
   planner::validate_plan(p, batch.input_sizes(), batch.starts, batch.ends,
                          batch.rows, batch.product_ids, cpu(), &batch.inputs);
+  if (p.model_identity != batch.model_identity)
+    throw std::invalid_argument("model payload does not match plan identity");
   if (batch.parameter_count != p.graph->program.parameter_count)
     throw std::invalid_argument("parameter count does not match graph");
   if (return_shared_output && (p.lane != "process" || !p.use_shared_memory))
@@ -105,7 +110,7 @@ ExecutionAudit Engine::execute(const planner::Plan &p, const Batch &batch,
     audit.chunks.push_back(
         graph::execute(p.graph->program, batch.inputs, batch.parameters,
                        batch.parameter_count, batch.starts, batch.ends,
-                       batch.rows, output, p.graph->program.roots.size(), p.result_layout.get()));
+                       batch.rows, output, p.graph->program.roots.size(), p.result_layout.get(), 0, deadline));
     check_deadline(deadline);
     audit.native_threads = 1;
   } else {
@@ -167,9 +172,21 @@ ExecutionAudit Engine::execute(const planner::Plan &p, const Batch &batch,
         std::rethrow_exception(failure);
     };
 
-    if (!process && p.parallel_dimension == "dag_branch") {
+    if (!process && p.parallel_dimension == "tensor") {
+      execute_tasks(p.chunks.size(), [&](std::size_t i, const std::atomic<bool> &cancelled) {
+        graph::Audit result;
+        const auto chunk = p.chunks[i];
+        if (!graph::execute_pointwise(p.graph->program, batch.inputs, batch.parameters,
+            batch.parameter_count, batch.starts, batch.ends, batch.rows, output,
+            p.result_layout.get(), 0, result, deadline, &cancelled, false, chunk.begin, chunk.end))
+          throw std::invalid_argument("tensor plan no longer matches pointwise geometry");
+        // Each disjoint task computes the same shape contract; expose it once.
+        if (i) { result.result_shapes.clear(); result.root_statuses.clear(); }
+        return result;
+      });
+    } else if (!process && p.parallel_dimension == "dag_branch") {
       execute_tasks(p.branch_tasks.size(), [&](std::size_t i,
-                                               const std::atomic<bool> &) {
+                                               const std::atomic<bool> &cancelled) {
         const auto task = p.branch_tasks[i];
         if (task.branch_index >= p.graph->branches.size() ||
             task.row >= batch.rows)
@@ -179,7 +196,7 @@ ExecutionAudit Engine::execute(const planner::Plan &p, const Batch &batch,
         auto result = graph::execute(
             branch.program, batch.inputs, batch.parameters,
             batch.parameter_count, batch.starts + task.row,
-            batch.ends + task.row, 1, local.data(), local.size());
+            batch.ends + task.row, 1, local.data(), local.size(), nullptr, 0, deadline, &cancelled);
         const auto columns = p.graph->program.roots.size();
         for (std::size_t root = 0; root < branch.root_indices.size(); ++root)
           static_cast<double *>(output)[task.row * columns + branch.root_indices[root]] = local[root];
@@ -201,7 +218,7 @@ ExecutionAudit Engine::execute(const planner::Plan &p, const Batch &batch,
                               p.result_layout ? output : graph::output_offset(output, output_row_offset(
                                            p.graph->program, batch, chunk.begin) *
                                            p.graph->program.roots.size(), p.graph->program.output_dtype),
-                              p.graph->program.roots.size(), p.result_layout.get(), chunk.begin);
+                              p.graph->program.roots.size(), p.result_layout.get(), chunk.begin, deadline, &cancelled);
       });
     }
     if (transport) {

@@ -1,0 +1,53 @@
+{
+  "date": "2026-09-23",
+  "base_commit": "730366aa15fe794e7e8b9deeeceffc221605b599",
+  "branch": "codex/platform-foundation-m0-m1",
+  "engine_build_id": "5162c970ecabfc48e298175c75a07e60830410e759f8dabd8ad2cd11574c7549",
+  "wheel": "calmetrics_engine-0.3.0-cp312-cp312-macosx_15_0_arm64.whl",
+  "wheel_sha256": "e6331d5d38839709646fc92055bbd585fa42d24b74c9b0774719008166ff921a",
+  "python": "3.12.11 (main, Jun  3 2025, 15:41:47) [Clang 17.0.0 (clang-1700.0.13.3)]",
+  "performance_accepted": false,
+  "test_counts": {
+    "python": 4940,
+    "release_native": 8,
+    "asan_ubsan": 8,
+    "documentation_examples": 18
+  },
+  "scope": "macOS arm64 local development; no LeakSanitizer or Linux/x86 runtime acceptance",
+  "artifacts": {
+    "foundation.json": "76a821c983c6cde4dc292371ddfdc4dd2e82e96c9c2193019b559091f2974335",
+    "native-regression.log": "d2e839164406e8609eff3092aa393867dc9a8d4b53921551f88d9c49a3426c21",
+    "phase2-1000x12x16.json": "b5163eb40db228363cc938c0d9c70453308b1589a9eb334a62a353b68da135b1",
+    "phase2-500x12x16.json": "488d17aff97326b25a734181d1443fd45c62b054882a9bd25737566b98bb0030",
+    "phase2-gate-summary.json": "5495d443da4a6bc7447ccdc3bfac563d77cf54a37b34d8a099922d199a707c95",
+    "phase2-micro-1x1x5.json": "d5ace61b1a3abe6a2851a15ad79b0c7d89f2a7e7fa80d0335f6f0e72f805e83f",
+    "python-regression.log": "f89481a0ca31bc87e90bce11d5ef3910c953274103e65996f9a91901261a89b5",
+    "sanitizer-regression.log": "f626f02dc8db20456c36aec06e33099fcb4ca6cbddc3faca4d955a87e9496024",
+    "scaling.json": "e43e704e0caa0fb41eb1e991442d99d63c77d595ad8cf1562df7b4a26ce747a3",
+    "transport.json": "29658b8afbf8284a89d1bbb9f86e692834d636093b29e7e3ecd6668904324350",
+    "documentation-examples.json": "7ea7447fcf03e6c82c41503452c0d91e6ac4128215b352dc1e04c9f7f7581900"
+  },
+  "tool_sha256": {
+    "tools/check_execution_scaling.py": "d40fb6ff2a2c9e4f88d5d90062525ef391c833fdce84509e6004fe9acdd680c8",
+    "tools/check_foundation_performance.py": "08e947059e05085f3b438df9574cffcb0cc5027100423fec3628211899511555",
+    "tools/check_phase2_performance.py": "4ddd64be87742a84abb396092cbd68c79ee82f6f212403da616779a353d416a4",
+    "tools/check_transport_cost.py": "ab383b23361dcaca163e54a1b82aefdad1445f479c70b2b17d7bc3f09d2a9b3a",
+    "tools/heap_probe.cpp": "d42aaf4fd9e6a21c7e221e2cce96d31c964ea8f1e0cce8b48549d9a3f01cd09b"
+  },
+  "commands": [
+    "python -m pytest tests tools/test_platform_inventory.py -q",
+    "ctest --test-dir <Release build> --output-on-failure",
+    "ASAN_OPTIONS=detect_leaks=0 ctest --test-dir <Sanitizer build> --output-on-failure",
+    "python tools/check_execution_scaling.py --output <scaling.json> --heap-probe <heap_probe.dylib>",
+    "python tools/check_foundation_performance.py --output <foundation.json>",
+    "python tools/check_phase2_performance.py --output-dir <phase2 directory>",
+    "python tools/check_transport_cost.py --output <transport.json>"
+  ],
+  "execution_order": [
+    "scaling",
+    "foundation",
+    "phase2",
+    "transport"
+  ],
+  "timing_concurrency": "sequential benchmarks; no concurrent build/regression launched by this task"
+}
