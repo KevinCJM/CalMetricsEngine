@@ -177,6 +177,53 @@ def test_numeric_domain_checks_graph_intermediates_and_scopes(expression):
     assert safe.reference()[0]["values"] == [1.5]
 
 
+@pytest.mark.parametrize("expression", [
+    "bisect(solve_x,-2.23e-308,2.24e-308,1e-300,2)",
+    "iteration_residual(iterate(2.24e-308,2.23e-308,1e-300,2))",
+])
+def test_numeric_domain_checks_scope_values_without_operator_nodes(expression):
+    graph = GraphCompiler({"x": "series"}).compile(expression, result_format="typed")
+    with pytest.raises(excel.ExcelExportError, match="UNREPRESENTABLE_VALUE.*arithmetic"):
+        excel.plan(graph, {"x": np.array([1., 2.])})
+
+
+@pytest.mark.parametrize("expression", ["1e-320", "rolling_apply(1e-320,2)"])
+def test_subnormal_constants_cannot_be_exported(expression):
+    from calmetrics_engine.graph import GraphCompileError
+
+    # libc++ rejects the numeric literal while parsing; other standard libraries
+    # may accept it. Neither path may produce an exportable subnormal constant.
+    try:
+        graph = GraphCompiler({"x": "series"}).compile(expression, result_format="typed")
+    except GraphCompileError as error:
+        assert "numeric literal" in str(error)
+        return
+    with pytest.raises(excel.ExcelExportError, match="UNREPRESENTABLE_VALUE"):
+        excel.plan(graph, {"x": np.array([1., 2.])})
+
+
+@pytest.mark.parametrize("value", [1e308, -1e308, 1.797693134862315e308])
+def test_formula_numeric_domain_exceeds_direct_literal_ceiling(value, tmp_path):
+    # Excel formulas can calculate well above 1e308. Only literal tokens obey the
+    # lower 9.99999999999999e307 ceiling; binary reconstruction stays below it.
+    plan = excel.plan_operator("mean", [np.array([value])])
+    assert plan.reference()[0]["values"] == [value]
+    stream = tmp_path / "large.jsonl"
+    plan.write_cells(str(stream))
+    input_cells = [c for c in map(json.loads, stream.read_text().splitlines())
+                   if c[0] == "Inputs0" and c[2] in (1, 2)]
+    assert all(c[3] == "formula" and "2^(1023)" in c[4] for c in input_cells)
+
+
+@pytest.mark.parametrize("value", [np.finfo(float).max, -np.finfo(float).max])
+def test_frozen_reference_serialization_cannot_overflow(value):
+    with pytest.raises(excel.ExcelExportError, match="UNREPRESENTABLE_VALUE"):
+        excel.plan_operator("mean", [np.array([value])])
+    graph = GraphCompiler({"x": "series"}).compile(repr(float(value)), result_format="typed")
+    with pytest.raises(excel.ExcelExportError, match="UNREPRESENTABLE_VALUE"):
+        excel.plan(graph, {"x": np.array([1.])})
+
+
 def test_numeric_domain_preserves_nan_extrema_sentinels_and_finite_limits():
     for name, expected in [("min_where", float("inf")), ("max_where", -float("inf"))]:
         plan = excel.plan_operator(name, [np.array([np.nan]), np.array([True])])

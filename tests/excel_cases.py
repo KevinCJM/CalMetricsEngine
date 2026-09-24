@@ -32,6 +32,11 @@ def cases(all_cases=False):
             continue  # Explicitly refused numerical domain, tested separately.
         seen.add(name)
         yield case["id"], lambda name=name, args=args: excel.plan_operator(name, args)
+    # Formula results have a higher finite ceiling than directly entered literals.
+    for index, value in enumerate([1e308, -1e308, 1.797693134862315e308]):
+        yield f"formula_ceiling:mean:{index}", lambda value=value: excel.plan_operator("mean", [np.array([value])])
+        graph = GraphCompiler({"x": "series"}).compile(repr(float(value)), result_format="typed")
+        yield f"formula_ceiling:constant:{index}", lambda graph=graph: excel.plan(graph, {"x": np.array([1.])})
     x = np.array([1., 3., 2., 4., np.nan, 2., 3.])
     mask = np.array([1, 0, 1, 1, 1, 1, 1], np.uint8)
     reset = np.array([0, 0, 0, 0, 1, 0, 0], np.uint8)

@@ -1942,6 +1942,8 @@ static Audit execute_impl_body(const Program &program,
             else input.scalar = *static_cast<const double *>(input.data);
           }
           if (input_failures) scratch.statuses[node_index] = (*input_failures)[node.input_index];
+          if constexpr (Observe)
+            (*value_observer)(std::nullopt, scratch.values[node_index], false);
           continue;
         }
         if (node.kind == NodeKind::parameter) {
@@ -1949,10 +1951,14 @@ static Audit execute_impl_body(const Program &program,
               ops::Value::number(parameters[node.input_index]);
           if (scratch.isolate_errors && !std::isfinite(parameters[node.input_index]))
             scratch.statuses[node_index] = 4;
+          if constexpr (Observe)
+            (*value_observer)(std::nullopt, scratch.values[node_index], false);
           continue;
         }
         if (node.kind == NodeKind::constant) {
           scratch.values[node_index] = ops::Value::number(node.constant);
+          if constexpr (Observe)
+            (*value_observer)(std::nullopt, scratch.values[node_index], false);
           continue;
         }
         if (node.kind == NodeKind::interval_tail) {
@@ -1963,12 +1969,16 @@ static Audit execute_impl_body(const Program &program,
             for (std::size_t i = skip; i < source.size(); ++i)
               mark_positions(scratch, node_index, source.size() - skip, i - skip, i - skip + 1,
                              position_error(scratch, node.parents[0], i, i + 1));
+          if constexpr (Observe)
+            (*value_observer)(std::nullopt, scratch.values[node_index], true);
           continue;
         }
         if (node.kind == NodeKind::rolling_scope) {
           scratch.values[node_index] = execute_rolling_scope(
               program, inputs, program.rolling_scopes[node.input_index], node,
               node_index, start, length, max_window, scratch);
+          if constexpr (Observe)
+            (*value_observer)(std::nullopt, scratch.values[node_index], true);
           continue;
         }
 
@@ -1993,6 +2003,8 @@ static Audit execute_impl_body(const Program &program,
           if (scratch.isolate_errors && program.apply_scopes[node.input_index].kind != ApplyKind::filter &&
               scratch.values[node_index].shape.rank == 0 &&
               !std::isfinite(scratch.values[node_index].scalar)) scratch.statuses[node_index] = 4;
+          if constexpr (Observe)
+            (*value_observer)(std::nullopt, scratch.values[node_index], true);
           continue;
         }
 
@@ -2002,6 +2014,8 @@ static Audit execute_impl_body(const Program &program,
           auto result = ops::Value::number(diagnostic);
           if (node.opcode != 2) { result.kind = ops::Kind::integer; result.integer = static_cast<std::int64_t>(diagnostic); }
           scratch.values[node_index] = result;
+          if constexpr (Observe)
+            (*value_observer)(std::nullopt, scratch.values[node_index], true);
           continue;
         }
 

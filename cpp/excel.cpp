@@ -6,6 +6,7 @@
 
 namespace calmetrics_engine::excel {
 namespace {
+constexpr double max_serialized_number = 1.797693134862315e308;
 F address(const F &sheet, std::size_t row, std::size_t column) {
   F col;
   for (auto n = column + 1; n; n = (n - 1) / 26)
@@ -35,7 +36,7 @@ F dtype(ops::Kind k) {
          : k == ops::Kind::interval ? "interval"
                                     : "float64";
 }
-void validate_numeric_domain(Op op, const ops::Value &value, bool output) {
+void validate_numeric_domain(std::optional<Op> op, const ops::Value &value, bool output) {
   if (value.shape.rank < 0 || value.kind == ops::Kind::mask)
     return;
   const auto count = value.kind == ops::Kind::fit ? 5u
@@ -52,11 +53,15 @@ void validate_numeric_domain(Op op, const ops::Value &value, bool output) {
     // Masked extrema deliberately return an infinity category when every
     // selected value is NaN. Their recipe represents that sentinel as text;
     // consuming it in another numeric operator still requires rejection.
-    const bool sentinel = output && (op == Op::min_where || op == Op::max_where);
-    if ((!sentinel && std::isinf(x)) ||
+    const bool sentinel = output && (!op || op == Op::min_where || op == Op::max_where);
+    // XlsxWriter serializes frozen numeric references with 16 significant
+    // digits. Near DBL_MAX that rounding can overflow on reload; use the
+    // largest conservative ceiling that survives the reference file path.
+    if ((std::isfinite(x) && std::abs(x) > max_serialized_number) ||
+        (!sentinel && std::isinf(x)) ||
         (x != 0 && std::isfinite(x) && std::abs(x) < std::numeric_limits<double>::min()))
       throw Error("UNREPRESENTABLE_VALUE: arithmetic exceeds Excel numeric domain in " +
-                  F(ops::lookup(static_cast<std::uint16_t>(op)).name));
+                  (op ? F(ops::lookup(static_cast<std::uint16_t>(*op)).name) : F("graph value")));
   }
 }
 } // namespace
@@ -147,6 +152,7 @@ Array Builder::array(const ops::Shape &s, ops::Kind k) {
   return a;
 }
 Array Builder::literal(double x) {
+  validate_numeric_domain(std::nullopt, ops::Value::number(x), false);
   Array a;
   a.refs = {num(x)};
   a.scalar = x;
@@ -175,8 +181,8 @@ Array Builder::input_array(const Snapshot &s, const F &name) {
       double x = (v.kind == ops::Kind::fit || v.kind == ops::Kind::interval)
                      ? v.record[j]
                      : v.f(j);
-      if (std::isinf(x))
-        throw Error("UNREPRESENTABLE_VALUE: infinite input");
+      if (std::isinf(x) || std::abs(x) > max_serialized_number)
+        throw Error("UNREPRESENTABLE_VALUE: input exceeds Excel serialization domain");
       if (x != 0 && std::abs(x) < std::numeric_limits<double>::min())
         throw Error("UNREPRESENTABLE_VALUE: subnormal input");
       if (std::isnan(x)) {

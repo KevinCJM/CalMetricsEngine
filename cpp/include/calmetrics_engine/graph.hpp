@@ -9,6 +9,7 @@
 #include <atomic>
 #include <chrono>
 #include <functional>
+#include <optional>
 #include <vector>
 
 namespace calmetrics_engine::graph {
@@ -217,7 +218,8 @@ Audit execute(const Program &program, const std::vector<ops::Value> &inputs,
 
 // Explicit diagnostic replay observes canonical operands/results, including
 // nested scopes. Ordinary execution does not scan values or invoke callbacks.
-using ValueObserver = std::function<void(ops::Op, const ops::Value &, bool)>;
+// A missing opcode denotes an input/constant or structural scope value.
+using ValueObserver = std::function<void(std::optional<ops::Op>, const ops::Value &, bool)>;
 Audit execute_observed(const Program &program, const std::vector<ops::Value> &inputs,
                        const double *parameters, std::size_t parameter_count,
                        const std::int64_t *starts, const std::int64_t *ends,

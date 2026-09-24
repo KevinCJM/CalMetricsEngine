@@ -57,6 +57,18 @@ int main() {
     }
     if (!rejected)
       throw std::runtime_error("symbolic shape multiplication overflow");
+    // Validate constants independently of platform-specific stream parsing.
+    for (double value : {1e-320, -1e-320}) {
+      rejected = false;
+      try {
+        excel::Builder constants({}, {});
+        constants.literal(value);
+      } catch (const excel::Error &) {
+        rejected = true;
+      }
+      if (!rejected)
+        throw std::runtime_error("subnormal graph constant must fail");
+    }
     excel::Snapshot input;
     input.value.shape = ops::vector_shape(3);
     input.numbers = {1, 2, 3};
