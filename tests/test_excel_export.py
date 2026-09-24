@@ -20,7 +20,7 @@ def test_registry_has_an_explicit_formula_recipe_for_every_operator():
 
 @pytest.mark.parametrize("operator", ["min_where", "max_where"])
 def test_masked_extrema_do_not_emit_excel_unparseable_double_max(operator, tmp_path):
-    from openpyxl.formula import Tokenizer
+    Tokenizer = pytest.importorskip("openpyxl.formula").Tokenizer
 
     plan = excel.plan_operator(operator, [np.array([3., 1., 2.]), np.array([True, False, True])])
     stream = tmp_path / "cells.jsonl"
