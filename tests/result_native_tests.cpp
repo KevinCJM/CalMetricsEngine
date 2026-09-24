@@ -91,6 +91,21 @@ void foundation_contracts() {
   std::vector<double> source(24, 8.0);
   o::Value input; input.shape = o::tensor_shape(2,3,4); input.data = source.data(); input.set_contiguous_strides();
   const std::int64_t start = 0, end = 1;
+  auto scalar_type = t::ValueType::scalar();
+  scalar_type.kind = t::ValueKind::value;
+  const std::map<std::string, std::string> scalar_binding{{"a", "iterate(iterate_x+1,x,0,1)"}};
+  auto scalar_graph = c::compile({"a", "iterate(iterate_x+a,x,0,1)"},
+      std::vector<t::Variable>{{"x", scalar_type}}, false, {scalar_binding, scalar_binding});
+  double initial_scalar = 2.0;
+  auto scalar_input = o::Value::number(initial_scalar);
+  scalar_input.data = &initial_scalar;
+  auto scalar_layout = g::result_layout(scalar_graph->program, {scalar_input}, &start, &end, 1);
+  std::vector<std::uint64_t> scalar_output((scalar_layout.bytes()+7)/8);
+  g::execute(scalar_graph->program, {scalar_input}, nullptr, 0, &start, &end, 1,
+      scalar_output.data(), 2, &scalar_layout);
+  const auto *scalar_values = reinterpret_cast<const double *>(scalar_output.data());
+  check(scalar_values[0] == 3 && scalar_values[1] == 5,
+      "captured scalar iteration result refreshed from initial input");
   auto layout = g::result_layout(program, {input}, &start, &end, 1);
   std::vector<std::uint64_t> output((layout.bytes()+7)/8);
   auto audit = g::execute(program, {input}, nullptr, 0, &start, &end, 1, output.data(), 2, &layout);

@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 sys.path.insert(0, str(Path(__file__).parent))
-from platform_inventory import scan, main
+from platform_inventory import main, scan
 
 
 def repository(tmp_path):
@@ -32,12 +32,27 @@ def repeated(x):
     return x+2
 registered = njit(undecorated)
 """)
-    (tmp_path / "caller.py").write_text("from kernels import wrapper as kernel\ndef call(x):\n    return kernel(x)\n")
+    (tmp_path / "caller.py").write_text(
+        "from kernels import wrapper as kernel\ndef call(x):\n    return kernel(x)\n"
+    )
     (tmp_path / "tests").mkdir()
     (tmp_path / "tests/test_fixture.py").write_text("def helper():\n    return 3\n")
     subprocess.run(["git", "-C", str(tmp_path), "add", "."], check=True)
-    subprocess.run(["git", "-C", str(tmp_path), "-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid",
-                    "commit", "-qm", "fixture"], check=True)
+    subprocess.run(
+        [
+            "git",
+            "-C",
+            str(tmp_path),
+            "-c",
+            "user.name=Fixture",
+            "-c",
+            "user.email=fixture@example.invalid",
+            "commit",
+            "-qm",
+            "fixture",
+        ],
+        check=True,
+    )
     return tmp_path
 
 

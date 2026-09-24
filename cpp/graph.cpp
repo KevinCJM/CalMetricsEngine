@@ -1456,7 +1456,12 @@ static ops::Value execute_iteration(const Program &program, const ApplyScope &sc
   }
   auto result = initial;
   result.set_contiguous_strides();
-  if (!result.shape.rank) result.scalar = current[0];
+  if (!result.shape.rank) {
+    result.scalar = current[0];
+    // Computed scalars live inline. Retaining the initial array pointer would
+    // refresh a downstream captured input from the old value instead.
+    result.data = nullptr;
+  }
   else {
     if (current != destination && count) {
       std::copy_n(current, count, destination);
