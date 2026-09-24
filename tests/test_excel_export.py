@@ -187,10 +187,14 @@ def test_numeric_domain_checks_scope_values_without_operator_nodes(expression):
         excel.plan(graph, {"x": np.array([1., 2.])})
 
 
-@pytest.mark.parametrize("expression", ["1e-320", "rolling_apply(1e-320,2)"])
+@pytest.mark.parametrize("expression", [
+    "1e-320", "rolling_apply(mean(x)+1e-320,2)", "iterate(1e-320,1,1e-8,2)",
+])
 def test_subnormal_constants_cannot_be_exported(expression):
     from calmetrics_engine.graph import GraphCompileError
 
+    # Prove the surrounding graph is valid independently of the tiny literal.
+    GraphCompiler({"x": "series"}).compile(expression.replace("1e-320", "1"), result_format="typed")
     # libc++ rejects the numeric literal while parsing; other standard libraries
     # may accept it. Neither path may produce an exportable subnormal constant.
     try:
