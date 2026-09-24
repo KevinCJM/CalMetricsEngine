@@ -294,9 +294,12 @@ Bot 的溢出意见属实：`multiply(1e200,1e200)` 原生返回 Inf，而 Excel
 
 Bot 将 `9.99999999999999e307` 作为公式计算上限的建议不采纳：[Microsoft 规格](https://support.microsoft.com/en-us/excel/excel-specifications-and-limits)明确区分直接输入和公式计算上限，公式允许约 `1.7976931348623158e308`。现有短整数/二进制幂重建支持 `1e308`。进一步实测发现 DBL_MAX 的冻结参考经 XlsxWriter 16 位有效数字序列化后可能舍入成 Inf，因此导出域采用可安全序列化的保守上界 `1.797693134862315e308`，超出时拒绝；不修改普通 C++ 数值域，也不截断为上界。
 
-最新 wheel 的 Python 5,937 项、原生和 ASan/UBSan 各 9/9 通过；LibreOffice 25.8.4.2 的 397 组、2,539 值和两项编辑检查通过。新增 6 组覆盖正负 `1e308` 和上述安全上界的直接均值与图常量，加入自动化真实重算夹具。原有 391 组的单元格内容、公式、映射、参考值/状态与之前 Microsoft Excel 已验收公式一致（仅身份文本变化）；新增六组尚未完成 Microsoft Excel 桌面重算，不将 LibreOffice 结果等同于 Excel 验收。
+最新 wheel 的 Python 5,937 项、原生和 ASan/UBSan 各 9/9 通过；LibreOffice 25.8.4.2 的 397 组、2,539 值和两项编辑检查通过。新增 6 组覆盖正负 `1e308` 和上述安全上界的直接均值与图常量，加入自动化真实重算夹具。原有 391 组的单元格内容、公式、映射、参考值/状态与之前 Microsoft Excel 已验收公式一致（仅身份文本变化）；该阶段新增六组尚未完成 Microsoft Excel 桌面重算，后续补验证据见下文；不将 LibreOffice 结果等同于 Excel 验收。
 
 源码与 wheel 身份一致：`5c0c3671292b6bdd9a241e3fe9a54a3a2b8c9ff6915f40063427248868f35864`；wheel SHA-256：`ed1b72fca16f2407f5f94c4f6cc74504ed20fcb4110d319a5f002dd6a9636b0b`。本机全量证据 `/private/tmp/calmetrics-pr5-scope-lo`，公式等价证据 `/private/tmp/calmetrics-pr5-formulas-scope.json`。先前短任务性能限制保留；本轮不修改普通计算模板或性能阈值。
 
 
 Linux CI 发现新增回归的 `rolling_apply(1e-320,2)` 本身不满足窗口体必须含区间归约的结构约束，而 macOS 更早在字面量解析阶段拒绝，掩盖了夹具问题。已改成合法的 `rolling_apply(mean(x)+1e-320,2)`，补充常量迭代体，并先将次正规常量替换为正常数来证明结构有效。此修复只改变测试，不改变数学、生成公式、构建身份或已有重算证据；最终 Python 回归为 5,938 项。
+
+
+同日补验关闭上述新增边界的 Microsoft Excel 验收缺口：使用 Microsoft Excel 16.89.1（16.89.24091630）打开新构建生成的六组边界工作簿，执行依赖重建、全部重算及“立即计算”后保存。独立工具读回 6 组/6 值全部 PASS，公式/输入/冻结参考身份核对通过；原始工作簿 SHA-256 为 `5aacde1084d43c408a0c9151b1238e06a03403f7170f80796c27c78fecdd7da1`，Excel 保存后为 `29ca4fe867909dfa11457334c38cd01e1a7d6a12a713b62c4dad8b8c083a523f`，证据位于 `/private/tmp/calmetrics-pr5-ms-ceiling`。这次确实启动桌面 Excel 重算六组新样本；原有 391 组仍采用同公式的历史完整重算证据，未将其写为本轮重新执行。
