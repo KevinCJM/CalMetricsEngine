@@ -264,10 +264,12 @@ py::tuple rolling(const std::string &code, const py::array &values,
 
 void register_operators(py::module_ &module);
 void register_graph(py::module_ &module);
+void register_excel(py::module_ &module);
 
 PYBIND11_MODULE(_native, module) {
   register_operators(module);
   register_graph(module);
+  register_excel(module);
   module.doc() = "CalMetricsEngine AOT native backend with exact-dtype strided "
                  "zero-copy inputs.";
   module.attr("__version__") = CALMETRICS_ENGINE_VERSION;

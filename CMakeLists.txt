@@ -49,6 +49,11 @@ add_library(calmetrics_engine_operators STATIC
     cpp/graph.cpp
     cpp/pointwise.cpp
     cpp/compiler.cpp
+    cpp/excel.cpp
+    cpp/excel_budget.cpp
+    cpp/excel_operators.cpp
+    cpp/excel_state.cpp
+    cpp/excel_scopes.cpp
     cpp/typed_ir.cpp
     cpp/planner.cpp
     cpp/shared_memory.cpp
@@ -94,7 +99,7 @@ if(CALMETRICS_ENGINE_BUILD_PYTHON)
     find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
     find_package(pybind11 CONFIG REQUIRED)
 
-    pybind11_add_module(_native cpp/bindings.cpp cpp/operator_bindings.cpp cpp/graph_bindings.cpp cpp/native_api_bindings.cpp)
+    pybind11_add_module(_native cpp/bindings.cpp cpp/operator_bindings.cpp cpp/graph_bindings.cpp cpp/native_api_bindings.cpp cpp/excel_bindings.cpp)
     target_link_libraries(_native PRIVATE calmetrics_engine_finance calmetrics_engine_operators)
 
     if(NOT DEFINED SKBUILD_PROJECT_VERSION)
@@ -136,6 +141,10 @@ endif()
 
 if(CALMETRICS_ENGINE_BUILD_TESTS)
     enable_testing()
+    add_executable(calmetrics_engine_excel_tests tests/excel_native_tests.cpp)
+    target_link_libraries(calmetrics_engine_excel_tests PRIVATE calmetrics_engine_operators)
+    add_test(NAME calmetrics_engine_excel_tests COMMAND calmetrics_engine_excel_tests)
+    list(APPEND calmetrics_engine_targets calmetrics_engine_excel_tests)
     add_executable(calmetrics_engine_native_tests tests/native_tests.cpp)
     target_link_libraries(calmetrics_engine_native_tests PRIVATE calmetrics_engine_finance)
     add_test(NAME calmetrics_engine_native_tests COMMAND calmetrics_engine_native_tests)
