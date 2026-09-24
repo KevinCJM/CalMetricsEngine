@@ -314,3 +314,14 @@ normal_pdf 在 `ABS(x)>40` 时直接输出 canonical binary64 已确定的零，
 最新 wheel 的 Python 5,942 项、原生/ASan/UBSan 各 9/9 通过。LibreOffice 全量 401 组、2,553 值和两项编辑 PASS。与原始 391 组公式逐项对照，387 组完全一致，变更仅为 normal_pdf 的标量/向量/矩阵三组及 bisect_scope。Microsoft Excel 16.89.1 对这 4 组和全部 10 组新增边界重新执行依赖重建、计算及保存，14 组/38 值全部 PASS，公式/输入/冻结参考身份通过；其余 387 组沿用已确认同公式的历史完整 Excel 验收，而非宣称本轮全部重算。
 
 构建身份 `2736da9cc2351349a2a977e384ebbd77486f35c40f459d2406bf950ea89b6bf4`，wheel SHA-256 `b180d5d2b5e5f3ecdcc14988df9401586803f7760a9de6323a220fe0cf56a7ac`；Excel 原始工作簿 `14390bd99ecb8367be603b48e843d03bda23587ec8b8a45777d7d98d90827320`，保存后 `2aa8f845bd5e95928389056a9989520786afda04108597a08e2adf9c88da2a55`。证据在 `/private/tmp/calmetrics-pr5-recipes-lo` 和 `/private/tmp/calmetrics-pr5-ms-recipes`。本轮仅改 Excel recipe 及差分夹具，普通 C++ 数值路径和此前披露的短任务性能限制保持不变。
+
+
+### PR 高阶矩与比较容差准入（2026-09-24）
+
+Bot 的高阶矩意见成立：极大样本的 canonical 三/四次幂可先溢出，最终为 NaN；Excel 则产生错误，检查最终节点不足以保证一致。本轮复用 canonical 均值与总体方差，以实际偏差的最大值保守限制 `n*max(abs(x-mean))^p`，并分别检查标准化分母的上溢/下溢。保留舍入余量，可能保守拒绝部分可消去的极值样本；不更换数学算法、不改 Excel 公式。NaN 输入和大数常量的既有缺失/样本不足语义保留。诊断额外执行均值、方差及偏差扫描，仅在 Excel 准入发生。
+
+另复现 `mean([1e308]), rtol=1e308` 会因核验容差乘法溢出而错误显示 MISMATCH。现在检查容差自身的可表示域，并对冻结浮点参考检查 `atol+rtol*abs(reference)` 的有限上界，风险请求在 READY 前拒绝；未修改容差、核验公式或普通计算。
+
+最终构建 Python 5,972 项通过，原生及 ASan/UBSan 各 9/9。LibreOffice 25.8.4.2 全量 403 组、2,555 值和两项编辑 PASS，证据在 `/private/tmp/calmetrics-pr5-final-lo`，重算工作簿 SHA-256 为 `aed4bf97efd15b8e4c5471770d76dc26172a5b890c0fce497843277e9f976775`。与上一公式修复构建逐项比较 403 个计划，除计划/构建身份文本外，公式、输入、输出映射及参考值/状态完全一致。新加的两组可安全计算的大数高阶矩在 Microsoft Excel 16.89.1 实际依赖重建、重算保存后均 PASS；原始工作簿和报告在 `/private/tmp/calmetrics-pr5-ms-moments`，保存后的 SHA-256 为 `fa58094b2c2053b2ffe049c8f9cd2400c2cf2d5048c2a8bd12b8c415574abeaa`。因此 403 组的 Microsoft Excel 证据由此前同公式 387 组、上一轮实际 14 组及本轮新增 2 组构成，不表述为最后构建又完整运行一遍桌面 Excel。
+
+源码与最终 wheel 身份一致：`2731514469fa5ee34c38d37ffa56bdee8ab82e35f141c392e4b84071b6409ea4`，wheel SHA-256 为 `cece253f8fd7baa2c46f48fac84268baf625fd119eb17fc46db44bdbbc1cc1b2`。普通数值路径及原有短任务性能限制不变。本轮更新导出指南和本契约，算子数学、调用接口、调度及所有权未改变，其他手册无需重复修改。

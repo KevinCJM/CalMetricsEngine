@@ -39,6 +39,9 @@ F dtype(ops::Kind k) {
 void validate_numeric_domain(std::optional<Op> op, const ops::Value &value, bool output) {
   if (value.shape.rank < 0 || value.kind == ops::Kind::mask)
     return;
+  const bool moments = !output && value.kind == ops::Kind::number &&
+      (op == Op::skewness || op == Op::excess_kurtosis);
+  bool missing = false;
   const auto count = value.kind == ops::Kind::fit ? 5u
                      : value.kind == ops::Kind::interval ? 4u : value.size();
   for (std::size_t i = 0; i < count; ++i) {
@@ -50,6 +53,7 @@ void validate_numeric_domain(std::optional<Op> op, const ops::Value &value, bool
     }
     const double x = value.kind == ops::Kind::fit || value.kind == ops::Kind::interval
                          ? value.record[i] : value.f(i);
+    missing = missing || std::isnan(x);
     // Masked extrema deliberately return an infinity category when every
     // selected value is NaN. Their recipe represents that sentinel as text;
     // consuming it in another numeric operator still requires rejection.
@@ -62,6 +66,25 @@ void validate_numeric_domain(std::optional<Op> op, const ops::Value &value, bool
         (x != 0 && std::isfinite(x) && std::abs(x) < std::numeric_limits<double>::min()))
       throw Error("UNREPRESENTABLE_VALUE: arithmetic exceeds Excel numeric domain in " +
                   (op ? F(ops::lookup(static_cast<std::uint16_t>(*op)).name) : F("graph value")));
+  }
+  if (moments && !missing && count >= (op == Op::skewness ? 3u : 4u)) {
+    // Reuse canonical mean/variance, not a second statistical implementation.
+    // Bound n*max(|x-mean|)^p and check the normalizing power separately.
+    ops::Workspace work;
+    const double mean = ops::reduce_value(Op::mean, value, nullptr, 0, 0, work);
+    const double variance = ops::reduce_value(Op::variance, value, nullptr, 0, 0, work);
+    const double per_sample = max_serialized_number / count;
+    const double limit = (op == Op::skewness ? std::cbrt(per_sample) : std::sqrt(std::sqrt(per_sample))) / 2;
+    if (!std::isfinite(mean) || !std::isfinite(variance))
+      throw Error("UNREPRESENTABLE_VALUE: higher-moment expansion may overflow");
+    for (std::size_t i = 0; i < count; ++i)
+      if (std::abs(value.f(i) - mean) > limit)
+        throw Error("UNREPRESENTABLE_VALUE: higher-moment expansion may overflow");
+    if (variance > 0) {
+      const double denominator = op == Op::skewness ? std::pow(variance, 1.5) : variance * variance;
+      if (!std::isfinite(denominator) || denominator < std::numeric_limits<double>::min())
+        throw Error("UNREPRESENTABLE_VALUE: higher-moment normalization outside Excel domain");
+    }
   }
 }
 } // namespace
@@ -295,6 +318,10 @@ void Plan::initialize() {
       limits_.atol < 0 || limits_.rtol < 0 ||
       !std::isfinite(limits_.timeout_seconds) || limits_.timeout_seconds <= 0)
     throw Error("INVALID_INPUT: tolerance/time budget");
+  for (double tolerance : {limits_.atol, limits_.rtol})
+    if (tolerance > max_serialized_number ||
+        (tolerance > 0 && tolerance < std::numeric_limits<double>::min()))
+      throw Error("UNREPRESENTABLE_VALUE: tolerance outside Excel numeric domain");
   if (limits_.cells == 0 || limits_.cells > 2000000 ||
       limits_.formula_characters == 0)
     throw Error("INVALID_INPUT: limits must be positive; max_cells cannot "
@@ -317,7 +344,14 @@ void Plan::initialize() {
   // The symbolic pass remains metadata-only and runs first. Before READY,
   // replay the frozen inputs through canonical kernels to reject unsupported
   // numeric intermediates even when a later comparison hides their range.
-  compute_reference(true);
+  const auto references = compute_reference(true);
+  for (const auto &reference : references)
+    for (double value : reference.numbers)
+      if (std::isfinite(value) &&
+          static_cast<long double>(limits_.atol) +
+                  static_cast<long double>(limits_.rtol) * std::abs(value) >
+              static_cast<long double>(max_serialized_number))
+        throw Error("UNREPRESENTABLE_VALUE: comparison tolerance may overflow");
   std::uint64_t hash = 1469598103934665603ULL;
   auto mix = [&](const void *p, std::size_t n) {
     auto *b = static_cast<const unsigned char *>(p);
@@ -591,6 +625,9 @@ std::vector<Reference> Plan::compute_reference(bool validate_domain) const {
             auto p = ops::prepare(
                 ops::lookup(static_cast<std::uint16_t>(*operator_)),
                 inputs.data(), inputs.size());
+            if (validate_domain)
+              for (const auto &input : inputs)
+                validate_numeric_domain(*operator_, input, false);
             r.shape = p.output_shape;
             r.kind = p.output_kind;
             std::vector<std::uint64_t> storage(r.shape.size());

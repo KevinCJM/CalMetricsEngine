@@ -32,6 +32,8 @@ def cases(all_cases=False):
             continue  # Explicitly refused numerical domain, tested separately.
         seen.add(name)
         yield case["id"], lambda name=name, args=args: excel.plan_operator(name, args)
+    for name in ("skewness", "excess_kurtosis"):
+        yield name + ":large_safe", lambda name=name: excel.plan_operator(name, [np.array([1e50, 0., -1e50, 1.])])
     for name in ("normal_pdf", "normal_cdf"):
         yield name + ":large_finite", lambda name=name: excel.plan_operator(
             name, [np.array([-1e308, -1e200, -40., 40., 1e200, 1e308])])

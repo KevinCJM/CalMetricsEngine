@@ -228,6 +228,58 @@ def test_frozen_reference_serialization_cannot_overflow(value):
         excel.plan(graph, {"x": np.array([1.])})
 
 
+@pytest.mark.parametrize("operator", ["skewness", "excess_kurtosis"])
+@pytest.mark.parametrize("path", ["operator", "graph", "rolling"])
+@pytest.mark.parametrize("scale", [1e150, 1e-110])
+def test_higher_moment_overflow_rejected_before_ready(operator, path, scale):
+    values = np.array([scale, 0., -scale, scale * 0.1])
+    with pytest.raises(excel.ExcelExportError, match="UNREPRESENTABLE_VALUE.*higher-moment"):
+        if path == "operator":
+            excel.plan_operator(operator, [values])
+        else:
+            expression = f"{operator}(x)"
+            if path == "rolling":
+                expression = f"rolling_apply({expression},4)"
+            graph = GraphCompiler({"x": "series"}).compile(expression, result_format="typed")
+            excel.plan(graph, {"x": values})
+
+
+@pytest.mark.parametrize("path", ["operator", "graph"])
+@pytest.mark.parametrize("tolerances", [
+    {"rtol": 1e308}, {"rtol": 2.}, {"atol": 1e308, "rtol": 1.},
+    {"atol": np.nextafter(0., 1.)}, {"rtol": np.finfo(float).max},
+])
+def test_unrepresentable_comparison_tolerance_rejected_before_ready(path, tolerances):
+    values = np.array([1e308])
+    with pytest.raises(excel.ExcelExportError, match="UNREPRESENTABLE_VALUE.*tolerance"):
+        if path == "operator":
+            excel.plan_operator("mean", [values], **tolerances)
+        else:
+            graph = GraphCompiler({"x": "series"}).compile("mean(x)", result_format="typed")
+            excel.plan(graph, {"x": values}, **tolerances)
+
+
+@pytest.mark.parametrize("tolerances", [{"atol": 1e308, "rtol": 0.}, {"atol": 0., "rtol": 0.}])
+def test_representable_comparison_tolerances_remain_exportable(tolerances):
+    plan = excel.plan_operator("mean", [np.array([1e308])], **tolerances)
+    assert plan.reference()[0]["values"] == [1e308]
+
+
+@pytest.mark.parametrize("operator", ["skewness", "excess_kurtosis"])
+def test_higher_moment_safe_large_samples_remain_exportable(operator):
+    values = np.array([1e50, 0., -1e50, 1.])
+    plan = excel.plan_operator(operator, [values])
+    assert np.isfinite(plan.reference()[0]["values"]).all()
+
+
+@pytest.mark.parametrize("operator", ["skewness", "excess_kurtosis"])
+def test_higher_moment_domain_preserves_missing_and_constant_contracts(operator):
+    constant = excel.plan_operator(operator, [np.full(4, 1e150)])
+    assert constant.reference()[0]["error"] == "INSUFFICIENT_SAMPLE"
+    missing = excel.plan_operator(operator, [np.array([1e150, np.nan, 0., -1e150])])
+    assert np.isnan(missing.reference()[0]["values"][0])
+
+
 def test_numeric_domain_preserves_nan_extrema_sentinels_and_finite_limits():
     for name, expected in [("min_where", float("inf")), ("max_where", -float("inf"))]:
         plan = excel.plan_operator(name, [np.array([np.nan]), np.array([True])])
