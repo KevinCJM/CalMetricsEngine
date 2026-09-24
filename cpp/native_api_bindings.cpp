@@ -1,4 +1,5 @@
 #include "calmetrics_engine/native_runtime.hpp"
+#include "calmetrics_engine/model_payload.hpp"
 #include "graph_binding_utils.hpp"
 #include <cstring>
 #include <filesystem>
@@ -205,7 +206,7 @@ o::Value bind_graph_array(const py::array &a, const calmetrics_engine::typed::Va
           : (a.dtype().equal(py::dtype::of<bool>()) ||
              a.dtype().equal(py::dtype::of<std::uint8_t>()));
   if (!dtype_ok) throw py::type_error("graph input must use its declared exact native dtype");
-  if (a.ndim() != static_cast<py::ssize_t>(type.rank()) || a.ndim() < 1 || a.ndim() > 2)
+  if (a.ndim() != static_cast<py::ssize_t>(type.rank()) || a.ndim() < 0 || a.ndim() > 3)
     throw py::value_error("graph input rank does not match typed declaration");
   // Existing temporal float64 batches retain the documented contiguous
   // contract. Newly typed vector/matrix/category bindings carry explicit strides.
@@ -237,7 +238,49 @@ o::Value bind_graph_array(const py::array &a, const calmetrics_engine::typed::Va
         throw py::value_error("graph inputs must share declared symbolic dimensions");
     }
   }
+  if (value.shape.rank == 0) {
+    if (value.kind == o::Kind::integer) value.integer = *static_cast<const std::int64_t *>(a.data());
+    else if (value.kind == o::Kind::mask) value.scalar = *static_cast<const std::uint8_t *>(a.data());
+    else value.scalar = *static_cast<const double *>(a.data());
+  }
   return value;
+}
+py::dict payload_arrays(const n::ModelPayload &payload) {
+  py::dict result;
+  for (std::size_t i = 0; i < payload.schema().size(); ++i) {
+    const auto &field = payload.fields()[i];
+    std::vector<py::ssize_t> shape;
+    for (int axis = 0; axis < field.shape.rank; ++axis) shape.push_back(field.shape.dim[axis]);
+    const auto dtype = field.kind == o::Kind::number ? py::dtype::of<double>() :
+        field.kind == o::Kind::integer ? py::dtype::of<std::int64_t>() : py::dtype::of<bool>();
+    py::array value(dtype, shape, {}, field.data, py::cast(payload.owner()));
+    value.attr("setflags")(py::arg("write") = false);
+    result[py::str(payload.schema()[i].name)] = std::move(value);
+  }
+  return result;
+}
+py::dict payload_types(const n::ModelPayload &payload) {
+  py::dict result;
+  for (const auto &field : payload.schema()) result[py::str(field.name)] = b::type_metadata(field.type);
+  return result;
+}
+std::shared_ptr<n::ModelPayload> create_payload(const py::dict &types, const py::dict &fields,
+    const std::map<std::string, std::string> &metadata) {
+  if (types.size() != fields.size()) throw py::value_error("model fields do not match schema");
+  std::vector<calmetrics_engine::typed::Variable> schema;
+  std::vector<o::Value> values;
+  std::vector<py::array> owners;
+  std::map<std::string, std::size_t> dimensions;
+  for (auto item : types) {
+    if (!py::isinstance<py::str>(item.first) || !fields.contains(item.first))
+      throw py::value_error("model field name does not match schema");
+    auto type = b::parse_type(item.second);
+    owners.push_back(b::require_array(fields[item.first]));
+    values.push_back(bind_graph_array(owners.back(), type, dimensions));
+    schema.push_back({py::cast<std::string>(item.first), std::move(type)});
+  }
+  py::gil_scoped_release release;
+  return n::ModelPayload::create(schema, values, metadata);
 }
 py::dict mapping(py::handle item, const char *name) {
   if (!PyMapping_Check(item.ptr()))
@@ -262,7 +305,11 @@ public:
   std::optional<ArrayPin> product_ids, parameter_pin;
   std::vector<double> parameter_values;
   std::shared_ptr<SharedInputBundle> bundle;
+  std::shared_ptr<n::ModelPayload> model;
   n::Batch native;
+  // Owned by this EngineAPI binding cache. Read/publish only while holding the
+  // GIL; execution takes a local owner before releasing it. No output is cached.
+  std::shared_ptr<p::Plan> reusable_plan;
 
   BoundData(std::shared_ptr<c::CompiledGraph> g, const py::object &inputs,
             const py::array &a, const py::array &z,
@@ -289,7 +336,23 @@ public:
         if (variable.name == name) return variable.type;
       throw py::value_error("missing graph input type: " + name);
     };
-    if (py::isinstance<SharedInputBundle>(inputs)) {
+    if (py::isinstance<n::ModelPayload>(inputs)) {
+      model = py::cast<std::shared_ptr<n::ModelPayload>>(inputs);
+      auto arrays = payload_arrays(*model);
+      if (arrays.size() != graph->input_names.size()) throw py::value_error("model input keys mismatch");
+      for (const auto &name : graph->input_names) {
+        if (!arrays.contains(py::str(name))) throw py::value_error("missing model input: " + name);
+        auto array = b::require_array(arrays[py::str(name)]);
+        auto value = bind_graph_array(array, input_type(name), dimensions);
+        native.inputs.push_back(value);
+        const auto offset = static_cast<const std::uint8_t *>(value.data) -
+            static_cast<const std::uint8_t *>(model->owner()->data());
+        native.shared_inputs.push_back({model->owner()->name(), model->bytes(), static_cast<std::size_t>(offset)});
+      }
+      native.shared_owners.push_back(model->owner());
+      native.model_identity = model->identity();
+      native.owned_input_bytes = model->bytes();
+    } else if (py::isinstance<SharedInputBundle>(inputs)) {
       bundle = py::cast<std::shared_ptr<SharedInputBundle>>(inputs);
       bundle->ensure();
       if (bundle->owners.size() != graph->input_names.size())
@@ -364,7 +427,10 @@ public:
       return false;
     if (product_ids && !product_ids->same(products))
       return false;
-    if (bundle) {
+    if (model) {
+      if (!py::isinstance<n::ModelPayload>(inputs) ||
+          py::cast<std::shared_ptr<n::ModelPayload>>(inputs).get() != model.get()) return false;
+    } else if (bundle) {
       if (!py::isinstance<SharedInputBundle>(inputs) ||
           py::cast<std::shared_ptr<SharedInputBundle>>(inputs).get() !=
               bundle.get())
@@ -422,6 +488,32 @@ struct Result {
   bool prepared = false, cache_hit = false;
   bool snapshot = false;
   bool typed() const { return plan->graph->program.output_kind == calmetrics_engine::graph::OutputKind::typed; }
+  std::shared_ptr<n::ModelPayload> to_model_payload(
+      const std::map<std::string, std::string> &metadata, std::size_t row) const {
+    if (plan->graph->output_names.empty() || row >= plan->row_count)
+      throw py::value_error("model export requires named outputs and a valid interval");
+    auto output_fields = outputs();
+    py::dict types, fields;
+    for (std::size_t i = 0; i < plan->graph->output_names.size(); ++i) {
+      const auto out = py::cast<TypedOutput>(output_fields[i]);
+      if (!py::cast<bool>(out.shape_known[row]) ||
+          *static_cast<const std::int16_t *>(out.root_statuses.data(row)) != 0)
+        throw py::value_error("failed results cannot become a model payload");
+      auto type = plan->graph->nodes[plan->graph->program.roots[i]].inferred_type;
+      const auto key = py::str(plan->graph->output_names[i]);
+      types[key] = b::type_metadata(type);
+      fields[key] = out.values[row];
+    }
+    return create_payload(types, fields, metadata);
+  }
+  py::dict named_outputs() const {
+    const auto &names = plan->graph->output_names;
+    if (names.empty()) throw py::value_error("graph has no named output schema");
+    auto fields = outputs();
+    py::dict result;
+    for (std::size_t i = 0; i < names.size(); ++i) result[py::str(names[i])] = fields[i];
+    return result;
+  }
   py::tuple outputs() const {
     if (!typed()) throw py::value_error("outputs requires result_format='typed' or a heterogeneous graph");
     const auto &layout = *plan->result_layout;
@@ -515,6 +607,7 @@ struct Result {
     d["audit_schema"] = typed() ? "cpp-aot-execution-2" : "cpp-aot-execution-1";
     d["result_protocol"] = typed() ? "typed-results-1" : "homogeneous-results-1";
     d["engine"] = "calmetrics_engine";
+    d["model_identity"] = plan->model_identity.empty() ? py::none() : py::cast(plan->model_identity);
     d["engine_version"] = CALMETRICS_ENGINE_VERSION;
     d["engine_build_id"] = CALMETRICS_ENGINE_BUILD_ID;
     d["operator_registry_version"] = o::registry_version;
@@ -760,7 +853,7 @@ public:
                                              ends, params, products, true);
     // Shared bundles own explicit lifetimes; do not retain them in an implicit
     // ordinary-call cache.
-    if (!bound->bundle)
+    if (!bound->bundle && !bound->model)
       cached = bound;
     return bound;
   }
@@ -786,8 +879,26 @@ public:
             "coroutine_orchestration_for_async_boundary");
       }
     } else {
-      py::gil_scoped_release release;
-      plan = engine->plan(graph, bound->native, memory, hard_stop, async_io);
+      const auto previous = bound->reusable_plan;
+      {
+        py::gil_scoped_release release;
+        if (previous && previous->memory_budget_bytes == memory &&
+            previous->hard_stop == hard_stop && previous->async_orchestration == async_io) {
+          try {
+            // Interval/product arrays may mutate in place. Validate their
+            // current contents and all geometry before reusing a native plan.
+            p::validate_plan(*previous, bound->native.input_sizes(), bound->native.starts,
+                bound->native.ends, bound->native.rows, bound->native.product_ids,
+                engine->cpu(), &bound->native.inputs);
+            plan = previous;
+          } catch (const std::invalid_argument &) {
+            // Ordinary execution replans changed geometry. Explicitly passed
+            // stale plans still fail in Engine::execute as before.
+          }
+        }
+        if (!plan) plan = engine->plan(graph, bound->native, memory, hard_stop, async_io);
+      }
+      bound->reusable_plan = plan;
     }
     const bool shared_output =
         plan->lane == "process" && plan->use_shared_memory;
@@ -836,6 +947,8 @@ public:
     if (plan->lane != "single")
       throw py::value_error(
           "prepared execution currently requires a single-lane plan");
+    if (plan->model_identity != bound->native.model_identity)
+      throw py::value_error("model payload does not match plan identity");
     {
       py::gil_scoped_release release;
       p::validate_plan(*plan, bound->native.input_sizes(), bound->native.starts,
@@ -868,15 +981,33 @@ public:
                                 const py::object &products) const {
     BoundData bound(graph, inputs, starts, ends, py::none(), products, false);
     py::gil_scoped_release release;
-    return p::make_plan(graph, config, bound.native.input_sizes(),
+    auto result = p::make_plan(graph, config, bound.native.input_sizes(),
                         bound.native.starts, bound.native.ends,
                         bound.native.rows, bound.native.product_ids,
                         default_cpu(cpu), memory, hard_stop, async_io,
-                        shared || !bound.native.shared_inputs.empty(), &bound.native.inputs);
+                        shared || !bound.native.shared_inputs.empty(), &bound.native.inputs, bound.native.owned_input_bytes);
+    result->model_identity = bound.native.model_identity;
+    return result;
   }
 };
 } // namespace
 void register_native_api(py::module_ &module) {
+  py::class_<n::ModelPayload, std::shared_ptr<n::ModelPayload>>(module, "ModelPayload")
+      .def_static("from_fields", &create_payload, py::arg("types"), py::arg("fields"), py::arg("metadata"))
+      .def_property_readonly("fields", &payload_arrays)
+      .def_property_readonly("types", &payload_types)
+      .def_property_readonly("metadata", &n::ModelPayload::metadata)
+      .def_property_readonly("identity", &n::ModelPayload::identity)
+      .def_property_readonly("nbytes", &n::ModelPayload::bytes)
+      .def("to_bytes", [](const n::ModelPayload &payload) {
+        const auto bytes = payload.encode();
+        return py::bytes(reinterpret_cast<const char *>(bytes.data()), bytes.size());
+      })
+      .def_static("from_bytes", [](const py::bytes &value) {
+        const auto encoded = py::cast<std::string>(value);
+        py::gil_scoped_release release;
+        return n::ModelPayload::decode(std::vector<std::uint8_t>(encoded.begin(), encoded.end()));
+      });
   py::register_exception<n::Timeout>(module, "ExecutionTimeout",
                                      PyExc_TimeoutError);
   py::class_<n::SharedRegion, std::shared_ptr<n::SharedRegion>>(
@@ -964,6 +1095,8 @@ void register_native_api(py::module_ &module) {
         return r.values;
       })
       .def_property_readonly("outputs", &Result::outputs)
+      .def_property_readonly("named_outputs", &Result::named_outputs)
+      .def("to_model_payload", &Result::to_model_payload, py::arg("metadata"), py::kw_only(), py::arg("interval") = 0)
       .def_readonly("offsets", &Result::offsets)
       .def_property_readonly("statuses", &Result::statuses)
       .def_property_readonly(

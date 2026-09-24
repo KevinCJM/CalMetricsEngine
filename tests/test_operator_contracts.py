@@ -74,7 +74,7 @@ def test_rejects_inexact_or_wrong_scalar_types(value):
         op.add(value, 1.0)
 
 
-@pytest.mark.parametrize("value", [1.0, np.asarray(1.0), np.ones((1, 1, 1))])
+@pytest.mark.parametrize("value", [1.0, np.asarray(1.0), np.ones((1, 1, 1, 1))])
 def test_reduction_rejects_wrong_rank(value):
     with pytest.raises(ValueError, match="RANK"):
         op.mean(value)

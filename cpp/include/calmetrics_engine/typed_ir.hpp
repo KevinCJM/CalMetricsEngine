@@ -21,7 +21,9 @@ enum class ValueKind : std::uint8_t {
   vector,
   matrix,
   window,
-  record
+  record,
+  tensor,
+  value // exact-dtype rank-zero input, distinct from float64 parameters
 };
 
 enum class DType : std::uint8_t { float64, boolean, int64 };
@@ -52,11 +54,15 @@ struct ValueType {
                           std::string width = "W",
                           std::string semantic = "dimensionless",
                           std::string price_basis = {});
+  static ValueType tensor(std::vector<std::string> axes,
+                          std::vector<std::string> shape,
+                          std::string semantic = "dimensionless",
+                          std::string price_basis = {});
   static ValueType mask(std::vector<std::string> axes = {},
                         std::vector<std::string> shape = {});
   static ValueType record(std::string tag, std::vector<std::string> fields);
 
-  bool is_scalar() const noexcept { return kind == ValueKind::scalar; }
+  bool is_scalar() const noexcept { return kind == ValueKind::scalar || kind == ValueKind::value; }
   bool is_integer() const noexcept { return dtype == DType::int64; }
   bool is_mask() const noexcept { return dtype == DType::boolean; }
   bool is_numeric() const noexcept {

@@ -4,6 +4,7 @@ from . import cal_std_mean as cal_std_mean_module  # noqa: F401
 from . import operators
 from ._api import build_info
 from ._native import __version__
+from ._native.graph import ModelPayload
 from .cal_all_largest_indicators import cal_all_largest_indicators
 from .cal_all_longest_indicators import cal_all_longest_indicators
 from .cal_cpr import cal_cpr
@@ -24,6 +25,7 @@ from .shared import SharedArrayDescriptor, SharedArrayOwner, SharedInputBundle
 __all__ = [
     "__version__",
     "build_info",
+    "ModelPayload",
     "operators",
     "cal_std_mean",
     "cal_std_mean_simd",

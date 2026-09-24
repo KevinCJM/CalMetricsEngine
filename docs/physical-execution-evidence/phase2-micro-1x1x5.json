@@ -1,0 +1,221 @@
+{
+  "metrics": [
+    "mean(divide(difference(adjusted_nav,1),lag(adjusted_nav,1)))",
+    "std(divide(difference(adjusted_nav,1),lag(adjusted_nav,1)),1)",
+    "median(divide(difference(adjusted_nav,1),lag(adjusted_nav,1)))",
+    "-min_value(drawdown_series(adjusted_nav))",
+    "linear_r_squared(adjusted_nav)"
+  ],
+  "njit_compile_ms": 2920.692083,
+  "graph": {
+    "fingerprint": "native-3-5de71734c2476afa5302daa0c117f569",
+    "error_policy": "raise",
+    "status_contract": "indicator-status-1",
+    "source_contracts": [],
+    "minimum_observations": 0,
+    "scope_work_budget": 100000000,
+    "expression_count": 5,
+    "node_count": 17,
+    "raw_node_count": 37,
+    "cse_eliminated_nodes": 20,
+    "root_count": 5,
+    "input_names": [
+      "adjusted_nav"
+    ],
+    "parameter_names": [],
+    "numeric_slots": 2,
+    "mask_slots": 0,
+    "integer_slots": 0,
+    "typed_ir_version": "cpp-typed-ir-1",
+    "output_kind": "scalar",
+    "output_dtype": "float64",
+    "rolling_scope_count": 0,
+    "apply_scope_count": 0,
+    "variable_types": {
+      "adjusted_nav": {
+        "kind": "series",
+        "dtype": "float64",
+        "axes": [
+          "time"
+        ],
+        "shape": [
+          "T"
+        ],
+        "semantic_dimension": "dimensionless",
+        "price_basis": null,
+        "display": "series<time>[T]"
+      }
+    },
+    "root_types": [
+      {
+        "kind": "scalar",
+        "dtype": "float64",
+        "axes": [],
+        "shape": [],
+        "semantic_dimension": "dimensionless",
+        "price_basis": null,
+        "display": "scalar"
+      },
+      {
+        "kind": "scalar",
+        "dtype": "float64",
+        "axes": [],
+        "shape": [],
+        "semantic_dimension": "dimensionless",
+        "price_basis": null,
+        "display": "scalar"
+      },
+      {
+        "kind": "scalar",
+        "dtype": "float64",
+        "axes": [],
+        "shape": [],
+        "semantic_dimension": "dimensionless",
+        "price_basis": null,
+        "display": "scalar"
+      },
+      {
+        "kind": "scalar",
+        "dtype": "float64",
+        "axes": [],
+        "shape": [],
+        "semantic_dimension": "return_decimal",
+        "price_basis": null,
+        "display": "scalar"
+      },
+      {
+        "kind": "scalar",
+        "dtype": "float64",
+        "axes": [],
+        "shape": [],
+        "semantic_dimension": "dimensionless",
+        "price_basis": null,
+        "display": "scalar"
+      }
+    ],
+    "simd_node_count": 4,
+    "branch_count": 3,
+    "physical_cost": {
+      "constant_per_row": 6.0,
+      "linear_per_observation": 10.75,
+      "sort_nlogn": 2.0
+    },
+    "branch_roots": [
+      [
+        0,
+        1,
+        2
+      ],
+      [
+        3
+      ],
+      [
+        4
+      ]
+    ],
+    "branch_details": [
+      {
+        "roots": [
+          0,
+          1,
+          2
+        ],
+        "node_count": 8,
+        "numeric_slots": 2,
+        "mask_slots": 0,
+        "integer_slots": 0,
+        "source_nodes": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "physical_cost": {
+          "constant_per_row": 0.0,
+          "linear_per_observation": 4.55,
+          "sort_nlogn": 2.0
+        }
+      },
+      {
+        "roots": [
+          3
+        ],
+        "node_count": 4,
+        "numeric_slots": 1,
+        "mask_slots": 0,
+        "integer_slots": 0,
+        "source_nodes": [
+          0,
+          8,
+          9,
+          10
+        ],
+        "physical_cost": {
+          "constant_per_row": 1.0,
+          "linear_per_observation": 2.7,
+          "sort_nlogn": 0.0
+        }
+      },
+      {
+        "roots": [
+          4
+        ],
+        "node_count": 8,
+        "numeric_slots": 0,
+        "mask_slots": 0,
+        "integer_slots": 0,
+        "source_nodes": [
+          0,
+          1,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16
+        ],
+        "physical_cost": {
+          "constant_per_row": 5.0,
+          "linear_per_observation": 3.5,
+          "sort_nlogn": 0.0
+        }
+      }
+    ],
+    "compiler_backend": "cpp",
+    "liveness_policy": "borrowed_view_aware"
+  },
+  "records": [
+    {
+      "history": 63,
+      "products": 1,
+      "intervals": 1,
+      "metrics": 5,
+      "lane": "single",
+      "max_absolute_error": 0.0,
+      "njit_median_us": 4.792,
+      "native_median_us": 3.625,
+      "native_over_njit": 0.7564691151919867,
+      "rounds": 201,
+      "scheduler_median_us": 5.0,
+      "scheduler_over_njit": 1.0810810810810811
+    },
+    {
+      "history": 252,
+      "products": 1,
+      "intervals": 1,
+      "metrics": 5,
+      "lane": "single",
+      "max_absolute_error": 0.0,
+      "njit_median_us": 9.375,
+      "native_median_us": 8.083,
+      "native_over_njit": 0.8621866666666667,
+      "rounds": 201,
+      "scheduler_median_us": 9.667,
+      "scheduler_over_njit": 1.0220976950729541
+    }
+  ]
+}

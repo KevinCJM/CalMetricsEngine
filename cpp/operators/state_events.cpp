@@ -391,7 +391,7 @@ void prepare_state_events(Prepared &p) {
         if (!p.payload(i)) return false;
         if (valid) return true;
         if (!p.structure_only) throw Error("INVALID_PARAMETER");
-        p.payload_available_mask &= static_cast<std::uint8_t>(~(1u << i));
+        p.payload_available_mask &= static_cast<std::uint32_t>(~(1u << i));
         return false;
     };
     const auto parameter = [&](std::size_t i) {

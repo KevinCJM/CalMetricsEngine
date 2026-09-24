@@ -80,11 +80,11 @@ Shape broadcast(const Shape &a, const Shape &b) {
   require(a == b, "SHAPE_MISMATCH");
   return a;
 }
-void numeric_arg(const Prepared &p, std::size_t i, int lo = 0, int hi = 2) {
+void numeric_arg(const Prepared &p, std::size_t i, int lo = 0, int hi = 3) {
   require(p.args[i].kind == Kind::number, "DTYPE_MISMATCH");
   if (p.geometry(i)) require(p.args[i].shape.rank >= lo && p.args[i].shape.rank <= hi, "RANK_MISMATCH");
 }
-void mask_arg(const Prepared &p, std::size_t i, int lo = 0, int hi = 2) {
+void mask_arg(const Prepared &p, std::size_t i, int lo = 0, int hi = 3) {
   require(p.args[i].kind == Kind::mask, "DTYPE_MISMATCH");
   if (p.geometry(i)) require(p.args[i].shape.rank >= lo && p.args[i].shape.rank <= hi, "RANK_MISMATCH");
 }
@@ -106,7 +106,7 @@ bool configuration(Prepared &p, std::size_t i, bool valid) {
   if (!p.payload(i)) return false;
   if (valid) return true;
   if (!p.structure_only) throw Error("INVALID_PARAMETER");
-  p.payload_available_mask &= static_cast<std::uint8_t>(~(1u << i));
+  p.payload_available_mask &= static_cast<std::uint32_t>(~(1u << i));
   return false;
 }
 bool integer_arg_value(Prepared &p, std::size_t i, bool zero) {
@@ -140,7 +140,7 @@ void elementwise_shape(Prepared &p) {
     broadcast_output(p, {0, 1}); p.output_kind = Kind::mask; return;
   }
   if (o == Op::finite_mask) {
-    numeric_arg(p, 0, 1, 1); p.output_kind = Kind::mask; output_from(p, 0); return;
+    numeric_arg(p, 0, 0, 3); p.output_kind = Kind::mask; output_from(p, 0); return;
   }
   if (o == Op::logical_and || o == Op::logical_or || o == Op::logical_not) {
     mask_arg(p, 0);
@@ -177,15 +177,15 @@ void reduction_shape(Prepared &p) {
     return;
   }
   if (o == Op::count_true || o == Op::max_consecutive_true) {
-    mask_arg(p, 0, 1, o == Op::count_true ? 2 : 1); return;
+    mask_arg(p, 0, 1, o == Op::count_true ? 3 : 1); return;
   }
-  numeric_arg(p, 0, 1, 2);
+  numeric_arg(p, 0, 1, 3);
   if (is_between(o, Op::sum_time, Op::max_asset)) {
     numeric_arg(p, 0, 2, 2); p.output_geometry_known = p.geometry(0);
     if (p.output_geometry_known) p.output_shape = vector_shape(a[0].shape.dim[o <= Op::max_time ? 1 : 0]);
     return;
   }
-  if (is_between(o, Op::sum_where, Op::quantile_where)) { mask_arg(p, 1, 1, 2); equal_shapes(p, 0, 1); }
+  if (is_between(o, Op::sum_where, Op::quantile_where)) { mask_arg(p, 1, 1, 3); equal_shapes(p, 0, 1); }
   if (o == Op::variance || o == Op::std) {
     if (p.count == 1) a[1] = Value::number(1);
     integer_arg_value(p, 1, true);
@@ -279,12 +279,12 @@ void rolling_shape(Prepared &p) {
   if (o == Op::rolling_std) {
     if (p.count < 3) a[2] = Value::number(0);
     if (p.count < 4) { a[3] = a[1];
-      if (!p.payload(1)) p.payload_available_mask &= static_cast<std::uint8_t>(~(1u << 3));
-      if (!p.geometry(1)) p.geometry_known_mask &= static_cast<std::uint8_t>(~(1u << 3)); }
+      if (!p.payload(1)) p.payload_available_mask &= static_cast<std::uint32_t>(~(1u << 3));
+      if (!p.geometry(1)) p.geometry_known_mask &= static_cast<std::uint32_t>(~(1u << 3)); }
     integer_arg_value(p, 2, true);
   } else if (p.count < 3) { a[2] = a[1];
-    if (!p.payload(1)) p.payload_available_mask &= static_cast<std::uint8_t>(~(1u << 2));
-    if (!p.geometry(1)) p.geometry_known_mask &= static_cast<std::uint8_t>(~(1u << 2)); }
+    if (!p.payload(1)) p.payload_available_mask &= static_cast<std::uint32_t>(~(1u << 2));
+    if (!p.geometry(1)) p.geometry_known_mask &= static_cast<std::uint32_t>(~(1u << 2)); }
   const auto minimum_index = o == Op::rolling_std ? 3u : 2u;
   const auto minimum = integer_arg_value(p, minimum_index, false);
   if (width && minimum) configuration(p, minimum_index, a[minimum_index].scalar <= a[1].scalar);
@@ -428,19 +428,19 @@ static void validate_data_structure(const Prepared &p) {
 }
 
 static Prepared prepare_impl(const Spec &spec, const Value *args, std::size_t count,
-    std::uint8_t geometry_known, std::uint8_t payload_available, bool structure_only) {
-  require(count >= spec.min_args && count <= spec.max_args && count <= 8,
+    std::uint32_t geometry_known, std::uint32_t payload_available, bool structure_only) {
+  require(count >= spec.min_args && count <= spec.max_args && count <= max_operator_arguments,
           "ARITY_MISMATCH");
-  Prepared p;
+  Prepared p(std::max<std::size_t>(count, spec.max_args));
   p.spec = &spec;
   p.count = count;
-  const auto provided = static_cast<std::uint8_t>((1u << count) - 1);
+  const auto provided = (count == 32 ? UINT32_MAX : (1u << count) - 1);
   require((payload_available & provided & ~geometry_known) == 0, "ARGUMENT_AVAILABILITY");
-  p.geometry_known_mask = geometry_known | static_cast<std::uint8_t>(~provided);
-  p.payload_available_mask = payload_available | static_cast<std::uint8_t>(~provided);
+  p.geometry_known_mask = geometry_known | static_cast<std::uint32_t>(~provided);
+  p.payload_available_mask = payload_available | static_cast<std::uint32_t>(~provided);
   p.structure_only = structure_only;
   for (std::size_t i = 0; i < count; ++i) {
-    if (p.geometry(i)) require(args[i].shape.rank >= 0 && args[i].shape.rank <= 2, "RANK_MISMATCH");
+    if (p.geometry(i)) require(args[i].shape.rank >= 0 && args[i].shape.rank <= 3, "RANK_MISMATCH");
     if (p.payload(i)) require(args[i].size() == 0 || args[i].shape.rank == 0 || args[i].data != nullptr, "NULL_INPUT");
     p.args[i] = args[i];
   }
@@ -479,10 +479,16 @@ static Prepared prepare_impl(const Spec &spec, const Value *args, std::size_t co
 }
 
 Prepared prepare(const Spec &spec, const Value *args, std::size_t count) {
-  return prepare_impl(spec, args, count, 0xff, 0xff, false);
+  return prepare_impl(spec, args, count, UINT32_MAX, UINT32_MAX, false);
+}
+Prepared prepare_geometry(const Spec &spec, const Value *args, std::size_t count) {
+  std::uint32_t payload = 0;
+  for (std::size_t i = 0; i < count; ++i)
+    if (!args[i].shape.rank || args[i].data) payload |= (1u << i);
+  return prepare_impl(spec, args, count, UINT32_MAX, payload, false);
 }
 StructureResult validate_structure(const Spec &spec, const Value *args, std::size_t count,
-    std::uint8_t geometry_known, std::uint8_t payload_available) {
+    std::uint32_t geometry_known, std::uint32_t payload_available) {
   const auto p = prepare_impl(spec, args, count, geometry_known, payload_available, true);
   return {p.output_kind, p.output_shape, p.output_geometry_known};
 }
@@ -550,7 +556,7 @@ const char *shape_rule(const Spec &s) {
     return "equal-shaped rank 1 condition/valid masks; branches scalar code or equal-shaped int64 series -> int64 state series";
   case Op::equal:
   case Op::not_equal:
-    return "numeric rank 0..2 comparison; exact int64 with int64 or integral float64 scalar |x|<=2^53-1; equal shapes or scalar broadcast -> mask";
+    return "numeric rank 0..3 comparison; exact int64 with int64 or integral float64 scalar |x|<=2^53-1; equal shapes or scalar broadcast -> mask";
   case Op::recursive_filter_adaptive:
     return "float64 rank 1; scalar/equal-shaped alpha; equal-shaped update/reset masks -> same length";
   case Op::linear_filter2:
@@ -599,12 +605,12 @@ const char *shape_rule(const Spec &s) {
   }
   switch (s.family) {
   case Family::elementwise:
-    return "numeric/mask rank 0..2; equal shapes or explicit scalar broadcast; "
+    return "numeric/mask rank 0..3; equal shapes or explicit scalar broadcast; "
            "logical "
-           "requires equal masks; finite_mask and divide_or_default require "
+           "requires equal masks; divide_or_default requires "
            "rank 1";
   case Family::reduction:
-    return "rank 1/2 -> scalar; *_time reduces axis 0; *_asset reduces axis 1; "
+    return "rank 1/2/3 -> scalar; *_time/*_asset require matrix and reduce axis 0/1; "
            "max_consecutive_true rank 1";
   case Family::sequence:
     return "rank 1; lag/difference length n-periods; first/last/length scalar; "

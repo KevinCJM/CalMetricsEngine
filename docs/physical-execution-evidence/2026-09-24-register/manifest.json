@@ -1,0 +1,59 @@
+{
+  "date": "2026-09-24",
+  "base_commit": "730366aa15fe794e7e8b9deeeceffc221605b599",
+  "branch": "codex/platform-foundation-m0-m1",
+  "engine_build_id": "69ae777de150c45016397ebd3ab952620c87aa0470d63d0a7116630fc93c72c0",
+  "wheel": "calmetrics_engine-0.3.0-cp312-cp312-macosx_15_0_arm64.whl",
+  "wheel_sha256": "62375edb9d0e9a71b564a380e612fb0ca0f1c43c3bff8c7da6616b9589c58306",
+  "performance_accepted": false,
+  "test_counts": {
+    "python": 5070,
+    "release_native": 8,
+    "asan_ubsan": 8,
+    "documentation_examples": 18
+  },
+  "scope": "macOS arm64 Release/ASan/UBSan runtime; x86_64 SSE2/AVX2 syntax only; no LSan/Linux/x86 runtime acceptance",
+  "foundation_joint_pass_count": 1,
+  "phase2_gate_pass_count": 2,
+  "equal_budget_all_speed_pass": false,
+  "execution_order": [
+    "full",
+    "doc-examples",
+    "foundation",
+    "scaling",
+    "phase2",
+    "transport"
+  ],
+  "timing_concurrency": "sequential benchmarks; no concurrent build/regression launched by this task",
+  "artifacts": {
+    "documentation-examples.json": "7ea7447fcf03e6c82c41503452c0d91e6ac4128215b352dc1e04c9f7f7581900",
+    "execution-runs.json": "48dd14517f75fff9663b562bedd8550e4a6b23b95d14f058e7db0a3740d5532d",
+    "foundation.json": "2c5736f05d470e519b8544d3b5cf1b03e317fba8576c8b580931b29e7456d1f6",
+    "native-regression.log": "23ea64ce4cd2f1500fd5c0f86d757109c320d0fab08adc37bba85c03083ea29a",
+    "phase2-1000x12x16.json": "2681017c7e0404fae1b1ce7a3694105e6a9fe9571c698310c694053ca84912c2",
+    "phase2-500x12x16.json": "0c4e087ace14ba08d24da021a14141d2b8ca635775fb9963bce4803e5d4d2872",
+    "phase2-gate-summary.json": "7b40a1e0c0256ddc2c95d0b76356c3ad1b9b0be0befe45a478d4fd126fe2d77d",
+    "phase2-micro-1x1x5.json": "8ea1907c91c4a1e848234561fbda445507b704ff3c50d95a3ce7801f35167818",
+    "prechecks/before-stride-foundation.json": "de6670fe3993889d5498e64dcf81257a7ceb08ac845525fccab756b6681f77d8",
+    "prechecks/before-warning-fix-foundation.json": "8390fdcbd0aaa5b961aad24ce54ffb6d9f0ebed4e9a6e8114d450f8f3ba7022e",
+    "prechecks/before-warning-fix-phase2-1000x12x16.json": "0ad0ff1b98be63a2a6bd823818744261457b40b8f7d1fe15d69bd21e6f3d5b50",
+    "prechecks/before-warning-fix-phase2-500x12x16.json": "34a90062b5fa54a70c2626321624cb7eadd7ecc60e9b4214395dacbad0b71d1b",
+    "prechecks/before-warning-fix-phase2-gate-summary.json": "e74c89d1d807d75b6e865961f44e83f31cf4d3c2be56483169146c909f349588",
+    "prechecks/before-warning-fix-phase2-micro-1x1x5.json": "a8915eeb00d4e098dde53e281a4ecd91c698fc81b5b148d2f6a250ed30bd2267",
+    "prechecks/before-warning-fix-scaling.json": "0561ebe7e58e4838aa005b60bf4ce01ec5fdb110eb91ce2636c3d43909da65e2",
+    "prechecks/before-warning-fix-transport.json": "8d2a3385d1e77fd2be4429f13735f2dae32fcc335d8d12145e239ef3f01465f3",
+    "prechecks/initial-foundation.json": "74313e457675780a573d253963ad50be77744eaf8ec7e9134cb54769ccf53e07",
+    "python-regression.log": "9a36bd33c7ecb07da66a14e0072576f692d0b9ac91438de37eb105af82c839a6",
+    "sanitizer-regression.log": "697feec2054a957d8426c1d3a368a63393c40a2187331b5d2fe981c47382a88d",
+    "scaling.json": "a49235ca2d552d6de4559af5c117bd4c604f4fd60ea85676e10f160b488a6691",
+    "transport.json": "d14e3dfdb0b997a218a13979d1649026d586216486064e4c294b30ec5519014f",
+    "x86-syntax.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "tool_sha256": {
+    "tools/check_foundation_performance.py": "08e947059e05085f3b438df9574cffcb0cc5027100423fec3628211899511555",
+    "tools/check_execution_scaling.py": "d40fb6ff2a2c9e4f88d5d90062525ef391c833fdce84509e6004fe9acdd680c8",
+    "tools/check_phase2_performance.py": "4ddd64be87742a84abb396092cbd68c79ee82f6f212403da616779a353d416a4",
+    "tools/check_transport_cost.py": "ab383b23361dcaca163e54a1b82aefdad1445f479c70b2b17d7bc3f09d2a9b3a",
+    "tools/heap_probe.cpp": "d42aaf4fd9e6a21c7e221e2cce96d31c964ea8f1e0cce8b48549d9a3f01cd09b"
+  }
+}

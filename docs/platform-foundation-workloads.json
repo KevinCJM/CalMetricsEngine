@@ -1,0 +1,19 @@
+{
+  "schema": "foundation-workloads-1",
+  "seed": 20260923,
+  "cpu_budget": 1,
+  "time_ratio_upper95_max_exclusive": 1.0,
+  "rss_ratio_max_exclusive": 1.0,
+  "incremental_peak_ratio_max_exclusive": 1.0,
+  "zero_or_unresolved_memory": "unproven_fail",
+  "reference_scope": "M1 protocol formulas only; does not certify M2-M8 platform algorithms",
+  "cases": [
+    {"id": "tensor_small", "kernel": "affine", "shape": [2, 3, 4], "layout": "C"},
+    {"id": "tensor_medium", "kernel": "affine", "shape": [252, 16, 8], "layout": "C"},
+    {"id": "tensor_large", "kernel": "affine", "shape": [2520, 64, 8], "layout": "C"},
+    {"id": "tensor_reverse", "kernel": "affine", "shape": [252, 16, 8], "layout": "reverse"},
+    {"id": "iteration_small", "kernel": "relaxation", "shape": [8], "layout": "C"},
+    {"id": "iteration_medium", "kernel": "relaxation", "shape": [4096], "layout": "C"},
+    {"id": "iteration_large", "kernel": "relaxation", "shape": [262144], "layout": "C"}
+  ]
+}

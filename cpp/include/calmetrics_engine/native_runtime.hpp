@@ -18,6 +18,8 @@ inline void check_deadline(Deadline deadline) {
 }
 
 struct Batch {
+  std::string model_identity;
+  std::size_t owned_input_bytes = 0;
   std::vector<ops::Value> inputs;
   const double *parameters = nullptr;
   std::size_t parameter_count = 0;

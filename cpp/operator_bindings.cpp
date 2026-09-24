@@ -28,7 +28,7 @@ op::Value array_value(const py::array &a) {
   else
     throw py::type_error("Exact native float64, int64 or bool/uint8 ndarray required; "
                          "no implicit conversion");
-  op::require(a.ndim() >= 0 && a.ndim() <= 2, "RANK_MISMATCH");
+  op::require(a.ndim() >= 0 && a.ndim() <= 3, "RANK_MISMATCH");
   const auto item =
       v.kind == op::Kind::mask ? sizeof(std::uint8_t) : sizeof(double);
   op::require(reinterpret_cast<std::uintptr_t>(a.data()) % item == 0,
@@ -104,16 +104,17 @@ op::Value parse_value(py::handle object) {
 }
 
 struct Bound {
-  std::array<py::object, 8> owners;
-  std::array<op::Value, 8> args;
-  std::array<bool, 8> provided{};
+  op::Arguments<py::object> owners;
+  op::Arguments<op::Value> args;
+  std::array<bool, op::max_operator_arguments> provided{};
+  explicit Bound(std::size_t arity) : owners(arity), args(arity) {}
   std::size_t count = 0;
   py::object out = py::none(), workspace = py::none();
   op::Isa isa = op::Isa::automatic;
   bool audit = false;
 };
 Bound bind_args(const op::Spec &spec, py::args args, py::kwargs kwargs) {
-  Bound b;
+  Bound b(spec.max_args);
   for (auto &owner : b.owners)
     owner = py::none();
   op::require(args.size() <= spec.max_args, "ARITY_MISMATCH");

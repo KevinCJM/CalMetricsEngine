@@ -8,6 +8,8 @@
 
 namespace calmetrics_engine::binding {
 namespace py = pybind11;
+typed::ValueType parse_type(py::handle);
+py::dict type_metadata(const typed::ValueType &);
 py::dict graph_audit(const graph::Audit &audit);
 py::dict plan_metadata(const planner::Plan &plan);
 struct Bounds {

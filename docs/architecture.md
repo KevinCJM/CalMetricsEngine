@@ -3,6 +3,10 @@
 User-facing entry points: [user guide](user-guide.md), [operator reference](operator-reference.md),
 and [execution guide](execution-guide.md). This page focuses on implementation responsibilities.
 
+Before changing these mechanisms, apply the [computation design rules](computation-design-rules.md).
+They govern dependency proofs, reuse, mathematical equivalence and resource evidence; conditional
+requirements for future capabilities do not extend the implemented scope described by code and tests.
+
 ## 1. Current execution boundary
 
 ```text

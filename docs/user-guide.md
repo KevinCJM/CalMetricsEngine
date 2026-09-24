@@ -9,21 +9,23 @@
 | 入口 | 用途 | 输入和输出特点 |
 | --- | --- | --- |
 | operators | 单次数学运算、直接矩阵输出、out/Workspace 复用 | 按每个算子的 rank/dtype 契约；不自行创建计算线程池 |
-| GraphCompiler + AdaptiveScheduler | 多输出共享 DAG、多产品/区间、自动计划与执行 | 显式类型/轴，支持标量、时序、向量、矩阵及异形多输出，统一调度和结果凭据 |
+| GraphCompiler + AdaptiveScheduler | 多输出共享 DAG、多产品/区间、自动计划与执行 | 显式类型/轴，支持标量、时序、向量、矩阵、三维张量及异形多输出，统一调度和结果凭据 |
 | cal_* | 已有财务接口的兼容调用 | 独立的二维数值、int32 分组、日期及窗口契约；不要套用图接口规则 |
 
 调用方决定输入是净值、成交量还是某种价格，负责数据来源、口径、日期对齐、指标定义及结果解释。引擎负责其公开数学、类型、执行和内存契约。
 
 **当前兼容边界**：Typed IR 仍支持 semantic_dimension 与 price_basis，并校验部分已声明语义的兼容性。简写 series 默认 dimensionless，不按变量名称猜测金融字段。本文不新增金融约束，也不表示已有语义校验已移除。不能仅凭图运行成功认证金融口径或因果性正确。
 
-## 2. 标量、时序、向量和矩阵
+## 2. 标量、时序、向量、矩阵和张量
 
 | kind | 数学意义 / shape | 图声明与传入方式 |
 | --- | --- | --- |
 | scalar | 一个数，无轴 | 声明 scalar，经 parameters 传入；当前参数为 float64 |
 | series | 时间序列 T | time 轴，inputs 中的一维 ndarray |
-| vector | 静态横截面 N | asset 轴，一维 ndarray；不会随每个时间区间裁切 |
+| vector | 静态一维数据 N | 默认 asset 轴，也支持 model/path 等已注册静态轴；不按时间区间裁切 |
 | matrix | 二维数据，例如 T×N | 显式 axes/shape；默认 time×asset，按时间区间切行 |
+| value | 精确 dtype 的零维数值 | 经 inputs 传入零维 float64/int64/bool ndarray；区别于 float64 parameters |
+| tensor | 三维数组 | 显式三条 axes/shape；time 只能在首轴，没有 time 时整块作为静态输入 |
 | window | 逻辑上的 T×W 窗口 | 编译器中间态；不要求输入展开矩阵，也不能直接成为公开根 |
 | record | 同一次求解的多个字段 | 拟合/区间记录先用投影算子取字段；不能直接成为公开根 |
 
@@ -35,7 +37,7 @@ series 和 vector 都可能是一维，但轴不同。矩阵 `(T,N)` 配向量 `
 
 - 数值 float64、类别/索引 int64、条件 bool；声明为 bool 的数组也接受经校验的 uint8 0/1。不得隐式把大整数变成 double，或把浮点数组变成状态编码。
 - 必须提供本机字节序、元素对齐的 NumPy ndarray。list、float32、object 等不自动转换。必要转换在调用方入口完成一次。
-- 图的 float64 series 必须 C 连续；typed vector/matrix、int64 和 mask 支持合法的正/负步长视图。直接算子支持其契约允许的步长，不要套用图的连续性限制。
+- 图的 float64 series 必须 C 连续；typed vector/matrix/tensor、int64 和 mask 支持合法的正/负步长视图。直接算子支持其契约允许的步长，不要套用图的连续性限制。
 - inputs 名称必须与编译后 input_names 完全匹配。相同符号维度（例如 T、N）必须长度一致。时间数据的排序、频率与日期对齐仍由调用方保证。
 - 数组可以只读。引擎保活输入 owner；计算期间不得通过其他别名修改数据。prepared 可在两次已完成运行之间更新原缓冲内容，但不能改变其地址、dtype、shape、strides 或区间几何。
 - 不统一删 NaN、填零或忽略 Inf：各算子的缺失规则见参考表。价格角色、币种、成交量单位等不是从 ndarray 自动识别的。
@@ -63,7 +65,7 @@ out 必须 shape/dtype 正确、连续、可写且不与输入重叠；异常后
 
 ## 5. 声明参数并运行共享 DAG
 
-compile 接受一个公式或多个根公式。参数和数值常量不作为时序输入传入；根的顺序就是结果列顺序。公共 DSL 不允许任意 Python callback、属性、导入、列表推导等。直接 API 可以用关键字；公式中的 canonical 调用使用位置参数。
+compile 接受一个公式、根公式序列，或 `{输出名: 公式}` 的具名多输出。参数和数值常量不作为时序输入传入；根的顺序就是结果列顺序。公共 DSL 不允许任意 Python callback、属性、导入、列表推导等。直接 API 可以用关键字；公式中的 canonical 调用使用位置参数。
 
 ```python
 import numpy as np
@@ -105,7 +107,7 @@ np.testing.assert_array_equal(result.offsets, [0, 3, 6])
 | 标量根 | `(区间数, 根数)`，float64（包括标量比较的数值输出） | None |
 | 时序根 | `(所有区间长度之和, 根数)`，连续数组 | int64 前缀和，长度为区间数+1 |
 
-默认 `result_format="auto"` 对纯标量和同 dtype、同 time/T 轴的时序保留上表接口；向量、矩阵、裁短序列，以及混合 rank/dtype 的根自动返回 `output_kind="typed"`。可显式指定 `result_format="typed"`，统一使用下面的输出接口。记录、逻辑窗口和带内部状态标签的矩阵仍须先投影字段；本轮没有改变数学算子的返回 dtype（例如 distinct_count 仍返回 float64）。
+默认 `result_format="auto"` 对纯标量和同 dtype、同 time/T 轴的时序保留上表接口；向量、矩阵、张量、裁短序列，以及混合 rank/dtype 的根自动返回 `output_kind="typed"`。可显式指定 `result_format="typed"`，统一使用下面的输出接口。记录、逻辑窗口和带内部状态标签的矩阵仍须先投影字段；本轮没有改变数学算子的返回 dtype（例如 distinct_count 仍返回 float64）。
 
 ### 不同形状和 dtype 的多输出
 
@@ -167,6 +169,7 @@ np.testing.assert_allclose(result.values, [[1.75, 3.], [3.75, 7.], [5.75, 11.]])
 | filter_apply(body,mask[,empty_default]) | 保留选中行的原顺序，计算标量；空集默认 NaN；empty_default 不捕获 body 异常 |
 | group_apply(body,keys) | 精确 int64 分组，标量结果广播回原组位置 |
 | bisect(body,lower,upper,tolerance,max_iterations) | 对局部标量 solve_x 求零点；检查夹根、有限性和有界收敛 |
+| iterate(body,initial,tolerance,max_iterations) | 原生有界反馈：body 通过 iterate_x 访问上一轮 float64 状态，保留 rank/shape/轴；残差为最大绝对步长，达到 tolerance 停止 |
 | segment_apply(body,boundaries) | 对完整事件段的两端 `[left,right]` 计算标量，广播到 `[left,right)`；未闭合段保持缺失 |
 
 作用域重排可能改变结果，例如先过滤再分块与先分块再过滤不同。动态/静态 captures 见[数学组合设计](mathematical-composition-design.md)。当前 rolling_apply body 必须含区间聚合并依赖数值时序；不能嵌套 rolling_apply、滚动族算子或 recursive_smooth，也没有一个开关可以绕过该限制。
@@ -266,6 +269,8 @@ assert not retained.values.flags.writeable
 
 数据、区间或计划身份不兼容时重新绑定/规划；不要绕过 stale/prepared 检查。共享输出即使底层来自原生映射也会保活 owner；只读标志本身不能证明结果独立。
 
+普通 execute 会在复核当前布局、区间内容和请求策略后复用兼容计划；几何变化时自动重建。显式传入不兼容计划、或改变 prepared 的绑定几何仍报错。计划复用不影响每次结果的独立所有权。
+
 ## 10. 常见问题
 
 | 现象 | 首先检查 |
@@ -280,3 +285,56 @@ assert not retained.values.flags.writeable
 | 没有多线程或 SIMD | 先查看计划与实际审计，不以数组大/节点多直接推断，见执行指南 |
 
 公开能力和解释应与实际安装包的 catalog、graph.metadata()、plan.metadata() 和 result.audit 对照。数学正确性、执行性能与金融业务有效性是三种不同验收。
+
+
+## 11. 开发分支新增：具名结果与模型载荷
+
+本节对应 M0/M1 开发代码，性能验收状态见 [开发设计](platform-foundation-design.md)，不表示已发布或已超过 NJIT。具名输出自动使用 typed 结果；`result.named_outputs[名称]` 与 `result.outputs[序号]` 指向同一份结果数据。零维 value 输入保留精确 dtype，包括超过 2^53 的 int64；普通 scalar 参数继续使用 float64。
+
+```python
+import numpy as np
+from calmetrics_engine import GraphCompiler, AdaptiveScheduler, ModelPayload
+
+schema = {"x": {"kind": "tensor", "axes": ["scenario", "path", "asset"],
+                "shape": ["S", "P", "N"]}}
+graph = GraphCompiler(schema).compile({"values": "x*2+1", "mask": "x>2"})
+metadata = {"schema": "example-1", "algorithm": "affine", "algorithm_version": "1",
+            "source_identity": graph.fingerprint, "training_options": "{}", "random_version": "none"}
+with AdaptiveScheduler(cpu_budget=1) as engine:
+    result = engine.execute(graph, {"x": np.arange(24.).reshape(2, 3, 4)},
+                            np.array([0], np.int64), np.array([1], np.int64))
+    model = result.to_model_payload(metadata)
+assert result.named_outputs["values"].values[0].shape == (2, 3, 4)
+restored = ModelPayload.from_bytes(model.to_bytes())
+assert restored.identity == model.identity
+assert not restored.fields["values"].flags.writeable
+```
+
+`ModelPayload.from_fields(types, fields, metadata)` 也可从数组建立载荷。最多 4096 个具名字段；字段为静态 rank-0/1/2/3 数组，不接受 time 轴、逻辑窗口或内部记录。建立时复制一次到物理只读共享存储；字段 NumPy 视图保活 owner。可用 `GraphCompiler(model.types)` 编译并将 model 直接作为 inputs；输入名必须完全匹配。混合外部数组时可使用 `model.fields` 的视图，但普通 dict 输入不携带完整模型身份。
+
+六项示例 metadata 均必填非空字符串。身份覆盖字段声明顺序、精确 dtype/shape/字节以及全部 metadata，属于内容标识，不是认证签名。`to_bytes/from_bytes` 使用版本化 little-endian 协议，不使用 pickle；解码会分配新的独立载荷。算法版本、训练选项和随机版本的含义由调用方负责。失败结果和时间序列不能直接导出为模型。载荷改变后需重新规划；旧模型、旧结果不会被覆写。
+
+## 12. 开发分支新增：有界迭代与诊断
+
+```python
+import numpy as np
+from calmetrics_engine import GraphCompiler, AdaptiveScheduler
+
+expr = "iterate(iterate_x*0.5,x,1e-6,100)"
+graph = GraphCompiler({"x": {"kind": "vector", "axes": ["asset"], "shape": ["N"]}}).compile({
+    "value": expr, "status": f"iteration_status({expr})",
+    "count": f"iteration_count({expr})", "residual": f"iteration_residual({expr})"})
+with AdaptiveScheduler(cpu_budget=1) as engine:
+    result = engine.execute(graph, {"x": np.full(8, 8.)},
+                            np.array([0], np.int64), np.array([1], np.int64))
+assert result.named_outputs["status"].values[0] == 0
+assert result.named_outputs["count"].values[0] == 23
+```
+
+同一 iterate 表达式经 CSE 只执行一次。tolerance 必须有限且 >=0，max_iterations 为 1–10000 的整数值 float64。更新前后状态的 dtype、轴、形状和已有语义声明必须一致；更新可以捕获不同形状的数组，不能传 Python callable。每次调用从 initial 重新开始，不自动承接上次请求。
+
+status/count 为 int64 标量，residual 为 float64。当前产生 0（步长收敛）、1（迭代上限）、5（数值失败）；2/3/4 为后续求解内核保留的无可行起点/已证不可行/局部停止状态，不能据此认定已有这些求解能力。步长收敛不证明最优或可行。数值更新失败时保留最后有限状态；初态本身非有限时没有有效候选，状态为 5。残差此时为 Inf，在 isolate 结果中对应残差根不可用。
+
+结构错误、预算超限、取消和超时仍为执行错误；独立根的隔离行为遵循原契约。每轮复用原生子图和状态缓冲，使用同一 CPU/内存准入，不创建额外线程池。该通用接口尚不等于 QP、SQP、EM 或具体模型算法的实现。
+
+执行层可将逐元素链按缓存块融合，短标量广播链进一步使用 AOT 寄存器融合，并让 typed 根直接写本次独占输出。可证明始终有限的短迭代链复用独占结果缓冲，一般子图保留候选状态以支持失败恢复。这些优化不改变逻辑 DAG、dtype、轴、错误策略或 prepared 的借用／快照契约。只读输入与先前的独立结果均不作为工作缓冲。调度与复制审计见[执行指南](execution-guide.md#9-本轮物理执行优化与审计)。

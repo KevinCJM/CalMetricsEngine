@@ -159,4 +159,46 @@ void elementwise(const Prepared &p, Output &out, Workspace &, Isa requested, Aud
             out.set(i, scalar_math(op, a[0].f(i), a[1].f(i), a[2].scalar));
     }
 }
+
+namespace {
+template <Op op> void span_loop(const Prepared &p, Output &out,
+                                const std::array<std::size_t, 2> &starts) {
+    const auto &a = p.args[0], &b = p.args[1];
+    const bool ac = a.contiguous(), bc = b.contiguous();
+    const auto n = out.shape.size();
+    // Resolve the multidimensional offset once per contiguous/strided inner
+    // run, rather than dividing flat indices at every arithmetic operation.
+    for (std::size_t first = 0; first < n;) {
+        auto count = n - first;
+        if (a.shape.rank && !ac) count = std::min(count,
+            a.shape.dim[a.shape.rank - 1] - (starts[0] + first) % a.shape.dim[a.shape.rank - 1]);
+        if (b.shape.rank && !bc) count = std::min(count,
+            b.shape.dim[b.shape.rank - 1] - (starts[1] + first) % b.shape.dim[b.shape.rank - 1]);
+        const auto *lhs = a.shape.rank ? static_cast<const double *>(a.data) + a.offset(starts[0] + first) : &a.scalar;
+        const auto *rhs = b.shape.rank ? static_cast<const double *>(b.data) + b.offset(starts[1] + first) : &b.scalar;
+        const auto sa = !a.shape.rank ? 0 : ac ? 1 : a.stride[a.shape.rank - 1];
+        const auto sb = !b.shape.rank ? 0 : bc ? 1 : b.stride[b.shape.rank - 1];
+        for (std::size_t j = 0; j < count; ++j) {
+            const double x = lhs[static_cast<std::ptrdiff_t>(j) * sa];
+            const double y = rhs[static_cast<std::ptrdiff_t>(j) * sb];
+            if constexpr (op >= Op::equal && op <= Op::greater_equal)
+                static_cast<std::uint8_t *>(out.data)[first+j] = compare(op, x, y);
+            else if constexpr (op == Op::finite_mask)
+                static_cast<std::uint8_t *>(out.data)[first+j] = std::isfinite(x);
+            else static_cast<double *>(out.data)[first+j] = scalar_math(op, x, y);
+        }
+        first += count;
+    }
+}
+}
+void elementwise_span(const Prepared &p, Output &out, const std::array<std::size_t, 2> &starts) {
+    switch (p.spec->op) {
+#define SPAN(name) case Op::name: return span_loop<Op::name>(p, out, starts);
+    SPAN(add) SPAN(subtract) SPAN(multiply) SPAN(minimum) SPAN(maximum)
+    SPAN(negate) SPAN(absolute) SPAN(equal) SPAN(not_equal) SPAN(less_than)
+    SPAN(less_equal) SPAN(greater_than) SPAN(greater_equal) SPAN(finite_mask)
+#undef SPAN
+    default: throw Error("INVALID_POINTWISE_SPAN");
+    }
+}
 } // namespace calmetrics_engine::ops

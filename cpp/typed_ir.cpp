@@ -61,10 +61,14 @@ ValueType from_axes(const std::vector<std::string> &axes,
   ValueType out;
   if (axes == std::vector<std::string>{"time"})
     out = ValueType::series(shape.at(0), semantic, basis);
-  else if (axes == std::vector<std::string>{"asset"})
+  else if (axes.size() == 1) {
     out = ValueType::vector(shape.at(0), semantic, basis);
+    out.axes = axes;
+  }
   else if (axes == std::vector<std::string>{"time", "window"})
     out = ValueType::window(shape.at(0), shape.at(1), semantic, basis);
+  else if (axes.size() == 3)
+    out = ValueType::tensor(axes, shape, semantic, basis);
   else
     out = ValueType::matrix(axes, shape, semantic, basis);
   out.dtype = dtype;
@@ -207,6 +211,17 @@ ValueType ValueType::matrix(std::vector<std::string> a,
   out.validate();
   return out;
 }
+ValueType ValueType::tensor(std::vector<std::string> axes, std::vector<std::string> shape,
+                            std::string semantic, std::string basis) {
+  ValueType out;
+  out.kind = ValueKind::tensor;
+  out.axes = std::move(axes);
+  out.shape = std::move(shape);
+  out.semantic_dimension = normalize_semantic_dimension(std::move(semantic));
+  out.price_basis = std::move(basis);
+  out.validate();
+  return out;
+}
 ValueType ValueType::window(std::string length, std::string width,
                             std::string semantic, std::string basis) {
   ValueType out;
@@ -224,9 +239,9 @@ ValueType ValueType::mask(std::vector<std::string> a,
   out.kind = a.empty() ? ValueKind::scalar
                        : (a == std::vector<std::string>{"time"}
                               ? ValueKind::series
-                              : (a == std::vector<std::string>{"asset"}
+                              : (a.size() == 1
                                      ? ValueKind::vector
-                                     : ValueKind::matrix));
+                                     : (a.size() == 3 ? ValueKind::tensor : ValueKind::matrix)));
   out.dtype = DType::boolean;
   out.axes = std::move(a);
   out.shape = std::move(s);
@@ -244,7 +259,8 @@ ValueType ValueType::record(std::string tag, std::vector<std::string> names) {
 }
 void ValueType::validate() const {
   static const std::unordered_set<std::string> axes_allowed{
-      "time", "asset", "window", "kalman_field", "state_field", "segment_field"};
+      "time", "asset", "window", "kalman_field", "state_field", "segment_field",
+      "path", "scenario", "model", "component", "factor", "month"};
   if (axes.size() != shape.size())
     fail("TYPE_MISMATCH", "axes and symbolic shape ranks differ");
   for (const auto &axis : axes)
@@ -262,14 +278,19 @@ void ValueType::validate() const {
       (semantic_dimension != "mask" || !price_basis.empty()))
     fail("TYPE_MISMATCH", "boolean values must use mask semantics");
   const auto rank = axes.size();
-  if (kind == ValueKind::scalar && rank != 0)
+  if (is_scalar() && rank != 0)
     fail("RANK_MISMATCH", "scalar must be rank zero");
   if (kind == ValueKind::series &&
       (axes != std::vector<std::string>{"time"}))
     fail("AXIS_MISMATCH", "series must use the time axis");
   if (kind == ValueKind::vector &&
-      (axes != std::vector<std::string>{"asset"}))
-    fail("AXIS_MISMATCH", "vector must use the asset axis");
+      (rank != 1 || axes[0] == "time"))
+    fail("AXIS_MISMATCH", "vector must use one static named axis");
+  if (kind == ValueKind::tensor && rank != 3)
+    fail("RANK_MISMATCH", "tensor must be rank three");
+  if (kind == ValueKind::tensor &&
+      std::find(axes.begin() + 1, axes.end(), "time") != axes.end())
+    fail("AXIS_MISMATCH", "tensor time axis must be first");
   if (kind == ValueKind::matrix && rank != 2)
     fail("RANK_MISMATCH", "matrix must be rank two");
   if (kind == ValueKind::window &&
@@ -294,6 +315,8 @@ const char *kind_name(ValueKind kind) noexcept {
   switch (kind) {
   case ValueKind::scalar:
     return "scalar";
+  case ValueKind::value:
+    return "value";
   case ValueKind::series:
     return "series";
   case ValueKind::vector:
@@ -304,6 +327,8 @@ const char *kind_name(ValueKind kind) noexcept {
     return "window";
   case ValueKind::record:
     return "record";
+  case ValueKind::tensor:
+    return "tensor";
   }
   return "invalid";
 }

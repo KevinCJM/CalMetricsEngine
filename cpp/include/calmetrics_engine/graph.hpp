@@ -6,6 +6,8 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <atomic>
+#include <chrono>
 #include <vector>
 
 namespace calmetrics_engine::graph {
@@ -17,7 +19,8 @@ enum class NodeKind : std::uint8_t {
   operation = 3,
   rolling_scope = 4,
   interval_tail = 5,
-  apply_scope = 6
+  apply_scope = 6,
+  iteration_projection = 7
 };
 
 enum class OutputKind : std::uint8_t { scalar = 0, series = 1, typed = 2 };
@@ -102,7 +105,11 @@ struct RollingScope {
   std::size_t array_count = 0;
 };
 
-enum class ApplyKind : std::uint8_t { block = 0, filter = 1, group = 2, bisect = 3, segment = 4 };
+enum class ApplyKind : std::uint8_t { block = 0, filter = 1, group = 2, bisect = 3, segment = 4, iterate = 5 };
+enum class SolverStatus : std::int64_t {
+  converged = 0, iteration_limit = 1, no_feasible_start = 2,
+  infeasible = 3, local_stop = 4, numerical_failure = 5
+};
 struct ApplyScope {
   ApplyKind kind = ApplyKind::block;
   std::shared_ptr<Program> body;
@@ -111,9 +118,22 @@ struct ApplyScope {
   std::vector<std::uint32_t> parameter_nodes;
   std::vector<std::uint32_t> argument_nodes;
   std::size_t body_node_count = 0;
+  std::int32_t state_input_index = -1;
 };
 
+// Process-local AOT kernels are rebuilt by finalize(), never serialized.
+struct PointwiseRegion {
+  std::uint32_t source = 0, first = 0, second = UINT32_MAX, predicate = UINT32_MAX;
+  std::array<std::uint32_t, 3> scalars{UINT32_MAX, UINT32_MAX, UINT32_MAX};
+  std::array<bool, 3> scalar_first{};
+  ops::ScalarChainKernel kernel = nullptr;
+  bool retain_first = true;
+  std::uint32_t end() const { return predicate != UINT32_MAX ? predicate : second; }
+};
 struct ExecutionMetadata {
+  bool pointwise = false;
+  bool numeric_roots_only = false;
+  std::vector<std::int32_t> root_destinations;
   bool requires_shape_planning = false;
   std::vector<const ops::Spec *> specs;
   std::vector<std::uint8_t> summary_consumers;
@@ -122,6 +142,10 @@ struct ExecutionMetadata {
   std::size_t position_status_nodes = 0;
   std::vector<std::uint8_t> position_status_reachable;
   bool contains_segment_scope = false;
+  std::vector<PointwiseRegion> pointwise_regions;
+  std::size_t pointwise_numeric_slots = 0, pointwise_mask_slots = 0;
+  bool pointwise_complete_region = false;
+  std::vector<std::size_t> pointwise_root_copies;
 };
 
 struct Program {
@@ -149,6 +173,7 @@ struct Program {
 };
 
 bool summary_fusion_eligible(ops::Op op) noexcept;
+void release_graph_workspace();
 bool order_fusion_eligible(ops::Op op) noexcept;
 
 std::size_t required_array_capacity(const Program &program,
@@ -160,6 +185,9 @@ ResultLayout result_layout(const Program &, const std::vector<ops::Value> &,
                            const std::int64_t *starts, const std::int64_t *ends, std::size_t rows);
 
 struct Audit {
+  std::size_t fused_pointwise_calls = 0, pointwise_tiles = 0, vector_elements = 0;
+  std::size_t root_copy_bytes = 0, direct_output_bytes = 0, state_copy_bytes = 0;
+  std::size_t pointwise_workspace_capacity_bytes = 0;
   std::vector<ops::Shape> result_shapes; // row/root order; rank=-1 means unknown on failure
   std::vector<std::int16_t> root_statuses;
   // Present only for isolate mode; row-major, with the same shape as values.
@@ -182,6 +210,8 @@ Audit execute(const Program &program, const std::vector<ops::Value> &inputs,
               const double *parameters, std::size_t parameter_count,
               const std::int64_t *starts, const std::int64_t *ends,
               std::size_t rows, void *output, std::size_t output_columns,
-              const ResultLayout *layout = nullptr, std::size_t result_row = 0);
+              const ResultLayout *layout = nullptr, std::size_t result_row = 0,
+              std::chrono::steady_clock::time_point deadline = std::chrono::steady_clock::time_point::max(),
+              const std::atomic<bool> *cancelled = nullptr);
 
 } // namespace calmetrics_engine::graph

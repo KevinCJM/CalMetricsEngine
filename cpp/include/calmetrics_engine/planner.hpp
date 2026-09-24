@@ -34,6 +34,7 @@ struct BranchTask {
   std::uint32_t branch_index = 0;
 };
 struct Plan {
+  std::string model_identity;
   std::shared_ptr<compiler::CompiledGraph> graph;
   std::string lane = "single";
   std::size_t process_count = 1, thread_count = 1, threads_per_process = 1;
@@ -55,6 +56,7 @@ struct Plan {
   std::string parallel_dimension = "interval";
   std::vector<std::uint32_t> simd_nodes;
   std::vector<std::string> reason_codes;
+  std::size_t tensor_elements = 0;
   std::vector<Chunk> chunks;
   std::vector<BranchTask> branch_tasks;
   std::vector<std::size_t> input_sizes;
@@ -76,7 +78,7 @@ make_plan(std::shared_ptr<compiler::CompiledGraph> graph, const Config &config,
           const std::int64_t *product_ids, std::size_t cpu,
           std::optional<std::size_t> memory_budget = {}, bool hard_stop = false,
           bool async_io = false, bool already_shared = false,
-          const std::vector<ops::Value> *inputs = nullptr);
+          const std::vector<ops::Value> *inputs = nullptr, std::size_t owned_input_bytes = 0);
 void validate_plan(const Plan &plan, const std::vector<std::size_t> &sizes,
                    const std::int64_t *starts, const std::int64_t *ends,
                    std::size_t rows, const std::int64_t *product_ids,
