@@ -406,7 +406,10 @@ Array Builder::recipe(Op op, const std::vector<Array> &given) {
         f = iff(fin(x), fn("SIGN", x), "0");
         break;
       case Op::normal_pdf:
-        f = "EXP(-0.5*" + x + "*" + x + ")/SQRT(2*PI())";
+        // Beyond 40 sigma the canonical binary64 result is exactly zero.
+        // Guard before squaring: Excel errors on the native intermediate Inf.
+        f = iff("ABS(" + x + ")>40", "0",
+                "EXP(-0.5*" + x + "*" + x + ")/SQRT(2*PI())");
         break;
       case Op::normal_cdf:
         f = "_xlfn.NORM.S.DIST(" + x + ",TRUE)";

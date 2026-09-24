@@ -207,9 +207,12 @@ std::vector<Array> Builder::program(const graph::Program &p,
                     iff(fh + "=0", high,
                         iff("SIGN(" + fl + ")=SIGN(" + fh + ")",
                             err("ROOT_NOT_BRACKETED"), q("PENDING"))))));
+        // Finite ordered endpoints can have an overflowing difference. Native
+        // IEEE +Inf <= tolerance is false; contain only this width overflow.
+        auto width_done = [&]() { return "IFERROR(" + high + "-" + low + "<=" + tol + ",FALSE)"; };
         for (std::size_t j = 0; j < limit; ++j) {
           auto mid = formula(low + "*0.5+" + high + "*0.5"),
-               stop = formula("OR(" + high + "-" + low + "<=" + tol + "," +
+               stop = formula("OR(" + width_done() + "," +
                               mid + "=" + low + "," + mid + "=" + high + ")");
           auto fm = eval(captured, count, scalar(mid)).at();
           auto active = formula(answer + "=" + q("PENDING"));
@@ -228,8 +231,7 @@ std::vector<Array> Builder::program(const graph::Program &p,
         }
         value = scalar(formula(
             iff(answer + "=" + q("PENDING"),
-                iff(high + "-" + low + "<=" + tol,
-                    low + "*0.5+" + high + "*0.5", err("NON_CONVERGENCE")),
+                iff(width_done(), low + "*0.5+" + high + "*0.5", err("NON_CONVERGENCE")),
                 answer)));
       } else if (scope.kind == graph::ApplyKind::block) {
         auto width = bound(arg(0), "block width");

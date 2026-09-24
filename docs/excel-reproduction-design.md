@@ -303,3 +303,14 @@ Linux CI 发现新增回归的 `rolling_apply(1e-320,2)` 本身不满足窗口�
 
 
 同日补验关闭上述新增边界的 Microsoft Excel 验收缺口：使用 Microsoft Excel 16.89.1（16.89.24091630）打开新构建生成的六组边界工作簿，执行依赖重建、全部重算及“立即计算”后保存。独立工具读回 6 组/6 值全部 PASS，公式/输入/冻结参考身份核对通过；原始工作簿 SHA-256 为 `5aacde1084d43c408a0c9151b1238e06a03403f7170f80796c27c78fecdd7da1`，Excel 保存后为 `29ca4fe867909dfa11457334c38cd01e1a7d6a12a713b62c4dad8b8c083a523f`，证据位于 `/private/tmp/calmetrics-pr5-ms-ceiling`。这次确实启动桌面 Excel 重算六组新样本；原有 391 组仍采用同公式的历史完整重算证据，未将其写为本轮重新执行。
+
+
+### PR 公式内部极值修复（2026-09-24）
+
+Bot 对 normal_pdf 和二分宽度的意见复现成立：native 的 `exp(-0.5*x*x)` 允许内部 -Inf 后得到零，Excel 直接平方却产生错误；跨越正负大数的 `high-low` 在 native 为 +Inf，使停止比较为 false，Excel 则会传播错误。节点 observer 无法观察 recipe 内部步骤，不能把节点结果正常当作所有内部公式都安全。
+
+normal_pdf 在 `ABS(x)>40` 时直接输出 canonical binary64 已确定的零，再进入平方表达式；不修改尾部精度和非零区间公式。bisect 只对宽度比较增加 `IFERROR(...,FALSE)`，对应有限有序端点相减溢出时的原生比较结果，同时覆盖循环和最终停止判断；保留端点/非有限函数值、停止规则及不收敛错误。公式单元格数不变，字符增长仍由原有精确检查及符号上界覆盖。
+
+最新 wheel 的 Python 5,942 项、原生/ASan/UBSan 各 9/9 通过。LibreOffice 全量 401 组、2,553 值和两项编辑 PASS。与原始 391 组公式逐项对照，387 组完全一致，变更仅为 normal_pdf 的标量/向量/矩阵三组及 bisect_scope。Microsoft Excel 16.89.1 对这 4 组和全部 10 组新增边界重新执行依赖重建、计算及保存，14 组/38 值全部 PASS，公式/输入/冻结参考身份通过；其余 387 组沿用已确认同公式的历史完整 Excel 验收，而非宣称本轮全部重算。
+
+构建身份 `2736da9cc2351349a2a977e384ebbd77486f35c40f459d2406bf950ea89b6bf4`，wheel SHA-256 `b180d5d2b5e5f3ecdcc14988df9401586803f7760a9de6323a220fe0cf56a7ac`；Excel 原始工作簿 `14390bd99ecb8367be603b48e843d03bda23587ec8b8a45777d7d98d90827320`，保存后 `2aa8f845bd5e95928389056a9989520786afda04108597a08e2adf9c88da2a55`。证据在 `/private/tmp/calmetrics-pr5-recipes-lo` 和 `/private/tmp/calmetrics-pr5-ms-recipes`。本轮仅改 Excel recipe 及差分夹具，普通 C++ 数值路径和此前披露的短任务性能限制保持不变。

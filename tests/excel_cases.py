@@ -32,6 +32,13 @@ def cases(all_cases=False):
             continue  # Explicitly refused numerical domain, tested separately.
         seen.add(name)
         yield case["id"], lambda name=name, args=args: excel.plan_operator(name, args)
+    for name in ("normal_pdf", "normal_cdf"):
+        yield name + ":large_finite", lambda name=name: excel.plan_operator(
+            name, [np.array([-1e308, -1e200, -40., 40., 1e200, 1e308])])
+    for label, body in [("root", "solve_x"), ("non_convergence", "solve_x+1")]:
+        graph = GraphCompiler({"x": "series"}).compile(
+            f"bisect({body},-1e308,1e308,1e-10,2)", result_format="typed", error_policy="isolate")
+        yield "bisect:wide:" + label, lambda graph=graph: excel.plan(graph, {"x": np.array([1.])})
     # Formula results have a higher finite ceiling than directly entered literals.
     for index, value in enumerate([1e308, -1e308, 1.797693134862315e308]):
         yield f"formula_ceiling:mean:{index}", lambda value=value: excel.plan_operator("mean", [np.array([value])])
