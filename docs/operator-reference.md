@@ -4,6 +4,8 @@
 
 本页覆盖当前 `canonical-native-1` 的 **146 个算子**，不是历史 opcode 的外部映射表。名称、opcode 和重载参数经当前原生 `operators.catalog()` 与 [operators.def](../cpp/include/calmetrics_engine/operators.def) 核对；计算逻辑按 C++ 内核整理。运行包可能与源码不同，使用者应查询所安装包的目录。
 
+上述算子均有独立的原生 Excel 展开实现，数学签名沿用本页；Excel 的资源、数值域和目标版本限制另见[导出说明](excel-export.md)。`excel.coverage()` 的实现登记不等于真实 Excel 验收，最新差分证据见[验收记录](excel-reproduction-design.md#10-原生实现与验收)。
+
 ## 阅读规则
 
 - S：float64 标量；L：一维 float64 数组；M：二维 float64；T3：三维 float64；A：L/M/T3；F：S/L/M/T3；B：bool 或合法 uint8 0/1 mask；I：int64 数组。n/T/N 是长度符号，不是自动推断金融含义。

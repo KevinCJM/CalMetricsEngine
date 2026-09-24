@@ -8,6 +8,8 @@
 #include <memory>
 #include <atomic>
 #include <chrono>
+#include <functional>
+#include <optional>
 #include <vector>
 
 namespace calmetrics_engine::graph {
@@ -213,5 +215,15 @@ Audit execute(const Program &program, const std::vector<ops::Value> &inputs,
               const ResultLayout *layout = nullptr, std::size_t result_row = 0,
               std::chrono::steady_clock::time_point deadline = std::chrono::steady_clock::time_point::max(),
               const std::atomic<bool> *cancelled = nullptr);
+
+// Explicit diagnostic replay observes canonical operands/results, including
+// nested scopes. Ordinary execution does not scan values or invoke callbacks.
+// A missing opcode denotes an input/constant or structural scope value.
+using ValueObserver = std::function<void(std::optional<ops::Op>, const ops::Value &, bool)>;
+Audit execute_observed(const Program &program, const std::vector<ops::Value> &inputs,
+                       const double *parameters, std::size_t parameter_count,
+                       const std::int64_t *starts, const std::int64_t *ends,
+                       std::size_t rows, void *output, std::size_t output_columns,
+                       const ResultLayout *layout, const ValueObserver &observer);
 
 } // namespace calmetrics_engine::graph

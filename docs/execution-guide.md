@@ -4,6 +4,8 @@
 
 本页说明当前 Planner 的行为，不承诺任意数据上并行都更快。依据是 [planner.cpp](../cpp/planner.cpp)、[默认配置](../cpp/include/calmetrics_engine/planner.hpp)、[原生运行时](../cpp/native_runtime.cpp) 与 [async 适配](../src/calmetrics_engine/runtime.py)。
 
+Excel 下载是独立的按需任务：[公式导出](excel-export.md) 用 C++ 规划、串行流式写出，不沿用 arena 槽位覆盖 Excel 中间步骤，也不自动启动 Excel。补算 C++ 参考值使用现有 Scheduler 的单任务准入；常规计算不规划、生成或重算 Excel。表格引擎自己的重算线程由其管理，不能当作 C++ Planner 的并行证据。
+
 ## 1. 五个概念并不互斥
 
 | 能力 | 解决的问题 | 如何启用 |

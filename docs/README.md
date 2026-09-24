@@ -12,12 +12,14 @@
 | 直接调用算子、复用 out/Workspace、理解借用视图 | [算子接口与内存契约](canonical-operators.md) |
 | 接入逐指标错误、快照和执行凭据 | [平台执行契约](platform-execution-contracts.md) |
 | 深入了解状态编码、确认、峰谷及区间边界 | [状态与事件契约](state-event-contracts.md) |
+| 从 AST/DAG 导出 Excel 步骤、公式和 C++ 对照 | [Excel 导出使用说明](excel-export.md) |
 
 首次接入建议依次阅读使用手册第 1–5 节、执行指南第 1–3 节，再查所需算子。算法数值契约以当前原生实现及其回归测试为依据；发现文档与实现冲突时先核查，不凭文档静默改变数学逻辑。
 
 ## 维护与实现
 
 - [编程与数学计算纪律](computation-design-rules.md)：相关设计、开发与审核的必读规则；覆盖依赖、复用、矩阵结构、状态、数值等价及性能证据，不代表待开发能力已经实现。
+- [Excel 公式生成的数学与编程纪律](excel-generation-rules.md)：相关开发与审核必读；规范数学映射、真实可见步骤、状态/迭代、预算、流式写出、所有权、真实重算与变更联动。
 - [架构](architecture.md)：模块职责、编译执行链路和所有权。
 - [文档体系设计与验收](documentation-design.md)：本轮组织方案、维护规则和检查边界。
 - [数学组合设计](mathematical-composition-design.md)：分块、过滤、分组、求根及组合算法。
@@ -25,6 +27,7 @@
 - [物理执行优化与验收](physical-execution-optimization.md)：缓存块融合、直接根输出、迭代缓冲、张量分块与审计。
 - [M0/M1 开发设计与验收](platform-foundation-design.md)：本工作树的三维协议、具名载荷和原生迭代；验收状态以该记录为准。
 - [平台自研计算完整承接规划](platform-compute-roadmap.md)：后续算法、类型协议、平台接入及等价验收工作；附[函数盘点初表](platform-compute-inventory.csv)，均不代表迁移已完成。
+- [Excel 公式复现与核验契约](excel-reproduction-design.md)：引擎公式/写出后端、平台迁移、200 万单元格预算与验收记录；含 Microsoft Excel 16.89.1 全量夹具验收和独立符号上界规划；平台迁移仍待完成。
 - [发布](publishing.md)：构建和分发流程；发布前还需遵守当前检出的提交规范。
 
 ## 阶段设计与验收记录

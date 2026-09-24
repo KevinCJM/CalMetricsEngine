@@ -17,6 +17,13 @@
   decisions and validation evidence in the task's existing design or review. Rules for future
   capabilities are conditional requirements, not claims of implementation or authorization to
   change existing contracts. Preserve the applicable NJIT time and memory acceptance gates.
+- Before designing, developing or reviewing algorithms, operators, scopes, Excel formula generation,
+  layout, export or verification, read [Excel generation rules](docs/excel-generation-rules.md)
+  and [Excel reproduction requirements](docs/excel-reproduction-design.md). Record applicable
+  mathematical equivalence, dependency/layout, budget, ownership and recalculation evidence in the
+  task's existing design or review, and maintain formula-expansion coverage when contracts change.
+  These rules do not claim an implemented export API or automated gate, authorize changes to
+  existing numerical contracts, or add Excel work to ordinary C++ requests.
 
 ## 1. Project Mission
 
