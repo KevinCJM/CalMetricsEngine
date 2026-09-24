@@ -147,6 +147,56 @@ def test_early_input_and_work_budgets():
         excel.plan_operator("logical_not", [np.array(2, np.uint8)])
 
 
+@pytest.mark.parametrize("operator,args", [
+    ("multiply", [1e200, 1e200]),
+    ("multiply", [-1e200, 1e200]),
+    ("multiply", [1e-200, 1e-120]),
+    ("multiply", [np.array([1., 1e200]), np.array([2., 1e200])]),
+    ("sum", [np.array([1e308, 1e308])]),
+    ("dot", [np.array([1e200]), np.array([1e200])]),
+])
+def test_unrepresentable_arithmetic_rejected_before_ready(operator, args):
+    with pytest.raises(excel.ExcelExportError, match="UNREPRESENTABLE_VALUE.*arithmetic"):
+        excel.plan_operator(operator, args)
+
+
+@pytest.mark.parametrize("expression", [
+    "x*x", "x*x>0", "mean(x*x)",
+    "rolling_apply(count_true(x*x>0),2)",
+    "block_apply(count_true(x*x>0),2)",
+    "filter_apply(count_true(x*x>0),x>0)",
+    "group_apply(count_true(x*x>0),argsort(x))",
+    "iterate(iterate_x*iterate_x,mean(x),1e-10,3)",
+])
+def test_numeric_domain_checks_graph_intermediates_and_scopes(expression):
+    graph = GraphCompiler({"x": "series"}).compile(expression, result_format="typed", error_policy="isolate")
+    with pytest.raises(excel.ExcelExportError, match="UNREPRESENTABLE_VALUE.*arithmetic"):
+        excel.plan(graph, {"x": np.array([1e200, 1e200])})
+    # A throwing observer cannot leak into another plan on the same thread.
+    safe = excel.plan(GraphCompiler({"x": "series"}).compile("mean(x)"), {"x": np.array([1., 2.])})
+    assert safe.reference()[0]["values"] == [1.5]
+
+
+def test_numeric_domain_preserves_nan_extrema_sentinels_and_finite_limits():
+    for name, expected in [("min_where", float("inf")), ("max_where", -float("inf"))]:
+        plan = excel.plan_operator(name, [np.array([np.nan]), np.array([True])])
+        assert plan.reference()[0]["values"] == [expected]
+    assert excel.plan_operator("multiply", [1e150, 1e150]).reference()[0]["values"] == pytest.approx([1e300])
+    assert excel.plan_operator("multiply", [1e-150, 1e-150]).reference()[0]["values"] == pytest.approx([1e-300], abs=0)
+
+
+def test_export_rejection_does_not_change_ordinary_graph_execution():
+    from calmetrics_engine import AdaptiveScheduler
+
+    graph = GraphCompiler({"x": "series"}).compile("count_true(x*x>0)")
+    inputs = {"x": np.array([1e200, 1e200])}
+    with pytest.raises(excel.ExcelExportError, match="UNREPRESENTABLE_VALUE"):
+        excel.plan(graph, inputs)
+    with AdaptiveScheduler(cpu_budget=1) as scheduler:
+        result = scheduler.execute(graph, inputs, np.array([0], np.int64), np.array([2], np.int64))
+    assert result.values[0, 0] == 2
+
+
 def test_cancel_and_writer_failure_preserve_destination(tmp_path, monkeypatch):
     xlsxwriter = pytest.importorskip("xlsxwriter")
     path = tmp_path / "unchanged.xlsx"

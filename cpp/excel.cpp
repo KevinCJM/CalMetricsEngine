@@ -35,6 +35,30 @@ F dtype(ops::Kind k) {
          : k == ops::Kind::interval ? "interval"
                                     : "float64";
 }
+void validate_numeric_domain(Op op, const ops::Value &value, bool output) {
+  if (value.shape.rank < 0 || value.kind == ops::Kind::mask)
+    return;
+  const auto count = value.kind == ops::Kind::fit ? 5u
+                     : value.kind == ops::Kind::interval ? 4u : value.size();
+  for (std::size_t i = 0; i < count; ++i) {
+    if (value.kind == ops::Kind::integer) {
+      const auto x = value.i(i);
+      if (x < -999999999999999LL || x > 999999999999999LL)
+        throw Error("UNREPRESENTABLE_VALUE: computed integer exceeds Excel domain");
+      continue;
+    }
+    const double x = value.kind == ops::Kind::fit || value.kind == ops::Kind::interval
+                         ? value.record[i] : value.f(i);
+    // Masked extrema deliberately return an infinity category when every
+    // selected value is NaN. Their recipe represents that sentinel as text;
+    // consuming it in another numeric operator still requires rejection.
+    const bool sentinel = output && (op == Op::min_where || op == Op::max_where);
+    if ((!sentinel && std::isinf(x)) ||
+        (x != 0 && std::isfinite(x) && std::abs(x) < std::numeric_limits<double>::min()))
+      throw Error("UNREPRESENTABLE_VALUE: arithmetic exceeds Excel numeric domain in " +
+                  F(ops::lookup(static_cast<std::uint16_t>(op)).name));
+  }
+}
 } // namespace
 ops::Value Snapshot::view() const {
   auto v = value;
@@ -284,6 +308,10 @@ void Plan::initialize() {
       report_.estimated_work > budget_.work_units)
     throw Error(
         "SYMBOLIC_BOUND_VIOLATION: formula expansion exceeded its bound");
+  // The symbolic pass remains metadata-only and runs first. Before READY,
+  // replay the frozen inputs through canonical kernels to reject unsupported
+  // numeric intermediates even when a later comparison hides their range.
+  compute_reference(true);
   std::uint64_t hash = 1469598103934665603ULL;
   auto mix = [&](const void *p, std::size_t n) {
     auto *b = static_cast<const unsigned char *>(p);
@@ -539,6 +567,9 @@ void Plan::write(const std::string &path, const F &prefix) const {
     throw Error("export stream close failed");
 }
 std::vector<Reference> Plan::reference() const {
+  return compute_reference(false);
+}
+std::vector<Reference> Plan::compute_reference(bool validate_domain) const {
   check_cancelled();
   std::vector<Reference> result;
   // Existing CPU admission and canonical execution only. Export recipes never
@@ -565,6 +596,16 @@ std::vector<Reference> Plan::reference() const {
             ops::Workspace work;
             ops::Audit audit;
             ops::execute(p, output, work, ops::Isa::automatic, audit);
+            if (validate_domain) {
+              auto value = p.output_shape.rank ? ops::Value{} : ops::Value::number(output.scalar);
+              value.kind = output.kind;
+              value.shape = output.shape;
+              value.data = output.data;
+              value.integer = output.integer;
+              value.record = output.record;
+              value.set_contiguous_strides();
+              validate_numeric_domain(*operator_, value, true);
+            }
             if (r.kind == ops::Kind::fit || r.kind == ops::Kind::interval)
               r.numbers.assign(output.record.begin(),
                                output.record.begin() +
@@ -610,9 +651,11 @@ std::vector<Reference> Plan::reference() const {
           }
         auto layout = graph::result_layout(program, inputs, &start, &end, 1);
         std::vector<std::uint64_t> storage((layout.bytes() + 7) / 8);
-        auto audit = graph::execute(
-            program, inputs, parameters_.data(), parameters_.size(), &start,
-            &end, 1, storage.data(), program.roots.size(), &layout);
+        auto audit = validate_domain
+            ? graph::execute_observed(program, inputs, parameters_.data(), parameters_.size(),
+                &start, &end, 1, storage.data(), program.roots.size(), &layout, validate_numeric_domain)
+            : graph::execute(program, inputs, parameters_.data(), parameters_.size(), &start,
+                &end, 1, storage.data(), program.roots.size(), &layout);
         for (std::size_t j = 0; j < program.roots.size(); ++j) {
           Reference r;
           r.shape = audit.result_shapes.at(j);

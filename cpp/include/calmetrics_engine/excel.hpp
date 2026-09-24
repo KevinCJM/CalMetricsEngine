@@ -102,6 +102,7 @@ private:
   Report generate(const std::function<void(const Cell &)> &sink,
                   const std::string &prefix = "") const;
   void initialize();
+  std::vector<Reference> compute_reference(bool validate_domain) const;
 };
 std::vector<std::pair<std::string, std::string>> coverage();
 } // namespace calmetrics_engine::excel

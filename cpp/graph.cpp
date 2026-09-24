@@ -13,6 +13,8 @@
 namespace calmetrics_engine::graph {
 namespace {
 
+thread_local const ValueObserver *value_observer = nullptr;
+
 struct SummaryCache {
   std::size_t generation = 0;
   std::size_t count = 0;
@@ -1356,7 +1358,7 @@ static ops::Value execute_iteration(const Program &program, const ApplyScope &sc
   std::vector<double> parameters;
   for (auto id : scope.parameter_nodes) parameters.push_back(scratch.values[id].scalar);
   if (scope.state_input_index >= 0) inputs[scope.state_input_index] = initial;
-  const bool inplace = finite && pointwise_iteration_inplace_safe(*scope.body,inputs,
+  const bool inplace = !value_observer && finite && pointwise_iteration_inplace_safe(*scope.body,inputs,
       parameters.data(),static_cast<std::size_t>(scope.state_input_index));
   const double *current = static_cast<const double *>(initial.data);
   if (inplace) {
@@ -1426,7 +1428,7 @@ static ops::Value execute_iteration(const Program &program, const ApplyScope &sc
       if (repeated_chain.kernel) {
         execute_inplace_pointwise_chain(repeated_chain,iteration_audit,residual,finite,scratch.deadline,scratch.cancelled);
         scanned = true;
-      } else scanned = execute_pointwise(*scope.body, inputs, parameters.data(), parameters.size(),
+      } else if (!value_observer) scanned = execute_pointwise(*scope.body, inputs, parameters.data(), parameters.size(),
           &begin, &end, 1, next, &layout, 0, iteration_audit, scratch.deadline, scratch.cancelled,
           true, 0, SIZE_MAX, current, &residual, &finite,inplace ? &repeated_chain : nullptr);
       if (!scanned) iteration_audit = execute_impl(*scope.body, inputs, parameters.data(), parameters.size(),
@@ -1761,7 +1763,7 @@ static ops::Value execute_apply_scope(const Program &program, const ApplyScope &
   return result;
 }
 
-template <bool TrackPositions>
+template <bool TrackPositions, bool Observe = false>
 static Audit execute_impl_body(const Program &program,
                           const std::vector<ops::Value> &inputs,
                           const double *parameters,
@@ -2008,6 +2010,9 @@ static Audit execute_impl_body(const Program &program,
           arguments[parent] = scratch.values[node.parents[parent]];
 
         const auto &spec = *program.execution_metadata->specs[node_index];
+        if constexpr (Observe)
+          for (std::size_t i = 0; i < node.parent_count; ++i)
+            (*value_observer)(spec.op, arguments[i], false);
         const auto prepared =
             ops::prepare(spec, arguments.data(), node.parent_count);
         if (inherited_positions && pointwise_status(spec) && prepared.output_shape.rank != 1) {
@@ -2091,6 +2096,8 @@ static Audit execute_impl_body(const Program &program,
         }
         scratch.values[node_index] =
             output_value(prepared, native_output, max_window);
+        if constexpr (Observe)
+          (*value_observer)(spec.op, scratch.values[node_index], true);
         if (scratch.isolate_errors) {
           const auto &value = scratch.values[node_index];
           auto &status = scratch.statuses[node_index];
@@ -2327,7 +2334,7 @@ static Audit execute_impl(const Program &program, const std::vector<ops::Value> 
   // Choose once per native execution. AOT specialization removes optional
   // per-node provenance branches from graphs that cannot produce local scope errors.
   ops::require(!input_failures || input_failures->size() == program.input_count, "GRAPH_INPUT_STATUS_COUNT");
-  if (!input_failures && interval_known && program.execution_metadata->pointwise) {
+  if (!value_observer && !input_failures && interval_known && program.execution_metadata->pointwise) {
     if (!prebound_inputs && scratch.arena_owner) scratch.release_execution_buffers();
     Audit fused;
     if (execute_pointwise(program, inputs, parameters, parameter_count, starts, ends,
@@ -2336,6 +2343,13 @@ static Audit execute_impl(const Program &program, const std::vector<ops::Value> 
   }
   if (!prebound_inputs && scratch.arena_owner.get() != program.execution_metadata.get())
     release_pointwise_workspace();
+  if (value_observer) {
+    if ((program.isolate_errors || input_failures) && program.execution_metadata->position_status_nodes)
+      return execute_impl_body<true, true>(program, inputs, parameters, parameter_count,
+          starts, ends, rows, output, output_columns, scratch, prebound_inputs, input_failures, interval_known, layout, result_row);
+    return execute_impl_body<false, true>(program, inputs, parameters, parameter_count,
+        starts, ends, rows, output, output_columns, scratch, prebound_inputs, input_failures, interval_known, layout, result_row);
+  }
   if ((program.isolate_errors || input_failures) && program.execution_metadata->position_status_nodes)
     return execute_impl_body<true>(program, inputs, parameters, parameter_count,
         starts, ends, rows, output, output_columns, scratch, prebound_inputs, input_failures, interval_known, layout, result_row);
@@ -2361,6 +2375,21 @@ Audit execute(const Program &program, const std::vector<ops::Value> &inputs,
   }
   return execute_impl(program, inputs, parameters, parameter_count, starts, ends,
                       rows, output, output_columns, root_scratch, false, nullptr, true, false, layout, result_row);
+}
+
+Audit execute_observed(const Program &program, const std::vector<ops::Value> &inputs,
+                       const double *parameters, std::size_t parameter_count,
+                       const std::int64_t *starts, const std::int64_t *ends,
+                       std::size_t rows, void *output, std::size_t output_columns,
+                       const ResultLayout *layout, const ValueObserver &observer) {
+  ops::require(bool(observer), "GRAPH_NULL_OBSERVER");
+  struct Restore {
+    const ValueObserver *previous;
+    ~Restore() { value_observer = previous; }
+  } restore{value_observer};
+  value_observer = &observer;
+  return execute(program, inputs, parameters, parameter_count, starts, ends,
+                 rows, output, output_columns, layout);
 }
 
 } // namespace calmetrics_engine::graph
