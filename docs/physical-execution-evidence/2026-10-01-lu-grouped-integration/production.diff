@@ -1,0 +1,50 @@
+--- cf448fc4/cpp/operators/solve_multi_library.hpp
++++ e619f8cd/cpp/operators/solve_multi_library.hpp
+@@ -87,13 +87,46 @@
+     }
+ }
+ 
++// These rows are independent only after their pivot panel is complete. Keep
++// each coefficient's ascending-pivot order in fixed Eigen arrays, sharing the
++// source row reads and writing each destination tile once. No heap/packing.
++CME_SOLVE_MULTI_INLINE void update_group(double *matrix, std::size_t n,
++    std::size_t row, std::size_t first, std::size_t last, std::size_t column) {
++    constexpr std::size_t width = 8, rows = 4;
++    const auto count = n - column;
++    using Tile = Eigen::Array<double, width, 1>;
++    using Read = Eigen::Map<const Tile, Eigen::Unaligned>;
++    std::size_t j = 0;
++    for (; count - j >= width; j += width) {
++        Tile values[rows];
++        for (std::size_t r = 0; r < rows; ++r)
++            values[r] = Read(matrix + (row + r) * n + column + j);
++        for (auto p = first; p < last; ++p) {
++            const Read source(matrix + p * n + column + j);
++            for (std::size_t r = 0; r < rows; ++r)
++                values[r] -= matrix[(row + r) * n + p] * source;
++        }
++        for (std::size_t r = 0; r < rows; ++r)
++            Eigen::Map<Tile, Eigen::Unaligned>(matrix + (row + r) * n + column + j) = values[r];
++    }
++    for (; j < count; ++j) for (std::size_t r = 0; r < rows; ++r) {
++        double value = matrix[(row + r) * n + column + j];
++        for (auto p = first; p < last; ++p)
++            value -= matrix[(row + r) * n + p] * matrix[p * n + column + j];
++        matrix[(row + r) * n + column + j] = value;
++    }
++}
++
+ CME_SOLVE_MULTI_INLINE void eliminate(double *matrix, double *rhs,
+     std::size_t n, std::size_t columns) {
+     constexpr std::size_t panel_width = 32;
+     for (std::size_t first = 0; first < n;) {
+         const auto last = first + std::min(panel_width, n - first);
+         eliminate_panel(matrix, rhs, n, columns, first, last);
+-        for (auto i = last; i < n; ++i)
++        auto i = last;
++        if (n >= 1024)
++            for (; n - i >= 4; i += 4) update_group(matrix, n, i, first, last, last);
++        for (; i < n; ++i)
+             update_pending(matrix, n, i, first, last, last);
+         first = last;
+     }

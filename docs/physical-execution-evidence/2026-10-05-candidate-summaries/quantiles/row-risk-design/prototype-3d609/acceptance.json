@@ -1,0 +1,154 @@
+{
+  "build_id": "3d609aa21862c95501e1690aed5e169d5f785611f98aee8a7d6c1a5ca6e91ccf",
+  "targeted_tests": 679,
+  "native_tests": 9,
+  "initial_cases": 30,
+  "timing": [
+    {
+      "shape": [
+        16384,
+        2520,
+        30
+      ],
+      "layout": "C",
+      "medians_seconds": {
+        "old": 5.2346421045,
+        "candidate": 5.1998800835,
+        "bounded-blas-njit": 2.1438535830000003
+      },
+      "maximum_absolute_errors": {
+        "old": [
+          3.469446951953614e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "candidate": [
+          3.469446951953614e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "bounded-blas-njit": [
+          4.336808689942018e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ]
+      }
+    },
+    {
+      "shape": [
+        16384,
+        2520,
+        30
+      ],
+      "layout": "F",
+      "medians_seconds": {
+        "old": 3.231924292,
+        "candidate": 3.2044891460000002,
+        "bounded-blas-njit": 2.146165813
+      },
+      "maximum_absolute_errors": {
+        "old": [
+          3.469446951953614e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "candidate": [
+          3.469446951953614e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "bounded-blas-njit": [
+          4.336808689942018e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ]
+      }
+    }
+  ],
+  "memory": [
+    {
+      "backend": "old",
+      "requested_heap_warm_peak_bytes": 3404465467,
+      "rss_delta_median_bytes": 3414933504,
+      "rss_absolute_median_bytes": 3502899200
+    },
+    {
+      "backend": "candidate",
+      "requested_heap_warm_peak_bytes": 25201825,
+      "rss_delta_median_bytes": 43220992,
+      "rss_absolute_median_bytes": 130318336
+    },
+    {
+      "backend": "bounded-blas-njit",
+      "requested_heap_warm_peak_bytes": 20309536,
+      "rss_delta_median_bytes": 56655872,
+      "rss_absolute_median_bytes": 200474624
+    }
+  ],
+  "budget_probe": {
+    "build_id": "3d609aa21862c95501e1690aed5e169d5f785611f98aee8a7d6c1a5ca6e91ccf",
+    "estimated_worker_scratch_bytes": 4051266,
+    "observed_payload_scratch_bytes": 7372826,
+    "native_chunks": [
+      {
+        "compact_path_groups": 0,
+        "compact_path_batches": 0,
+        "compact_path_steps": 0,
+        "compact_path_raw_rows": 0,
+        "compact_path_raw_scale_elements": 0,
+        "compact_path_raw_pack_bytes": 0,
+        "highway_vqsort_calls": 256,
+        "fused_pointwise_calls": 0,
+        "pointwise_tiles": 0,
+        "vector_elements": 104858880,
+        "root_copy_bytes": 0,
+        "direct_output_bytes": 6144,
+        "state_copy_bytes": 0,
+        "pointwise_workspace_capacity_bytes": 0,
+        "rows": 2,
+        "nodes": 45,
+        "max_window": 0,
+        "numeric_arena_bytes": 6553616,
+        "mask_arena_bytes": 163842,
+        "operator_workspace_capacity_bytes": 655368,
+        "order_scratch_capacity_bytes": 0,
+        "input_copy_bytes": 0,
+        "eigen_rotation_calls": 0,
+        "eigen_matvec_calls": 0,
+        "eigen_covariance_calls": 0,
+        "eigen_density_calls": 0,
+        "accelerate_covchol_calls": 0,
+        "accelerate_matmul_calls": 0,
+        "matmul_zero_calls": 0,
+        "accelerate_covariance_attempts": 0,
+        "accelerate_covariance_calls": 0,
+        "covariance_syrk_calls": 0,
+        "covariance_replayed_cells": 0,
+        "covariance_fallbacks": 0,
+        "covariance_zero_calls": 0,
+        "accelerate_vforce_calls": 0,
+        "accelerate_lu_attempts": 0,
+        "accelerate_lu_calls": 0,
+        "accelerate_lu_fallbacks": 0,
+        "solve_residual_materialization_bytes": 0,
+        "covariance_panel_materialization_bytes": 0,
+        "native_library_workspace_reserve_bytes": 16384,
+        "algorithm_copy_bytes": 167773184,
+        "fused_scalar_calls": 0,
+        "summary_source_scans": 0,
+        "order_stat_sorts": 0,
+        "python_operator_calls": 0,
+        "execution_backend": "native_graph_interpreter"
+      }
+    ],
+    "estimate_covers_observed": false,
+    "reported_max_windows": [
+      0
+    ],
+    "production_adopted": false,
+    "whole_goal_complete": false
+  },
+  "production_adopted": false,
+  "whole_goal_complete": false,
+  "acceptance": "rejected: scratch upper bound violated; window audit incorrect; complete time materially slower than NJIT"
+}

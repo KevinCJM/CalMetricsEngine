@@ -1,0 +1,3967 @@
+{
+  "status": "passed",
+  "jobs": [
+    {
+      "label": "many-short-large-C-cpu1-baseline88ea",
+      "pid": 5838,
+      "created": 1791199446.626558,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "baseline",
+        "--n",
+        "262144",
+        "--t",
+        "252",
+        "--k",
+        "30",
+        "--layout",
+        "C",
+        "--cpu",
+        "1",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791199446.628354,
+      "samples": [
+        {
+          "wall": 0.851454166,
+          "cpu": 0.848535
+        },
+        {
+          "wall": 0.856880583,
+          "cpu": 0.852949
+        },
+        {
+          "wall": 0.850954208,
+          "cpu": 0.84711
+        },
+        {
+          "wall": 0.850807917,
+          "cpu": 0.847073
+        },
+        {
+          "wall": 0.850021833,
+          "cpu": 0.846257
+        },
+        {
+          "wall": 0.855067541,
+          "cpu": 0.849981
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791199483.0930822
+    },
+    {
+      "label": "many-short-large-C-cpu1-candidate",
+      "pid": 5850,
+      "created": 1791199447.93906,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "candidate",
+        "--n",
+        "262144",
+        "--t",
+        "252",
+        "--k",
+        "30",
+        "--layout",
+        "C",
+        "--cpu",
+        "1",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791199447.9406579,
+      "samples": [
+        {
+          "wall": 0.86108025,
+          "cpu": 0.856605
+        },
+        {
+          "wall": 0.855337708,
+          "cpu": 0.851982
+        },
+        {
+          "wall": 0.877943375,
+          "cpu": 0.857642
+        },
+        {
+          "wall": 0.851766208,
+          "cpu": 0.847691
+        },
+        {
+          "wall": 0.856859375,
+          "cpu": 0.851553
+        },
+        {
+          "wall": 0.854932584,
+          "cpu": 0.850857
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791199483.238836
+    },
+    {
+      "label": "many-short-large-C-cpu1-njit64",
+      "pid": 5860,
+      "created": 1791199449.110001,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "njit",
+        "--n",
+        "262144",
+        "--t",
+        "252",
+        "--k",
+        "30",
+        "--layout",
+        "C",
+        "--cpu",
+        "1",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791199449.111588,
+      "samples": [
+        {
+          "wall": 1.176118334,
+          "cpu": 1.164517
+        },
+        {
+          "wall": 1.160639,
+          "cpu": 1.154136
+        },
+        {
+          "wall": 1.174396125,
+          "cpu": 1.170082
+        },
+        {
+          "wall": 1.162392625,
+          "cpu": 1.15686
+        },
+        {
+          "wall": 1.1717,
+          "cpu": 1.166142
+        },
+        {
+          "wall": 1.172939917,
+          "cpu": 1.166815
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791199483.239699
+    },
+    {
+      "label": "many-short-large-C-cpu1-njit512",
+      "pid": 5890,
+      "created": 1791199453.922404,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "njit",
+        "--n",
+        "262144",
+        "--t",
+        "252",
+        "--k",
+        "30",
+        "--layout",
+        "C",
+        "--cpu",
+        "1",
+        "--block",
+        "512",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791199453.9238532,
+      "samples": [
+        {
+          "wall": 1.130018791,
+          "cpu": 1.124168
+        },
+        {
+          "wall": 1.132297,
+          "cpu": 1.126912
+        },
+        {
+          "wall": 1.136246291,
+          "cpu": 1.13056
+        },
+        {
+          "wall": 1.130905208,
+          "cpu": 1.126944
+        },
+        {
+          "wall": 1.138827042,
+          "cpu": 1.133014
+        },
+        {
+          "wall": 1.131266542,
+          "cpu": 1.125063
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791199483.2401211
+    },
+    {
+      "label": "many-short-large-F-cpu1-baseline88ea",
+      "pid": 6014,
+      "created": 1791199483.27313,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "baseline",
+        "--n",
+        "262144",
+        "--t",
+        "252",
+        "--k",
+        "30",
+        "--layout",
+        "F",
+        "--cpu",
+        "1",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791199483.275171,
+      "samples": [
+        {
+          "wall": 0.9244975,
+          "cpu": 0.876735
+        },
+        {
+          "wall": 0.92898375,
+          "cpu": 0.882949
+        },
+        {
+          "wall": 0.8561795,
+          "cpu": 0.852409
+        },
+        {
+          "wall": 0.851110875,
+          "cpu": 0.848917
+        },
+        {
+          "wall": 0.8549385,
+          "cpu": 0.851083
+        },
+        {
+          "wall": 0.85756875,
+          "cpu": 0.85269
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791199520.843963
+    },
+    {
+      "label": "many-short-large-F-cpu1-candidate",
+      "pid": 6024,
+      "created": 1791199484.622383,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "candidate",
+        "--n",
+        "262144",
+        "--t",
+        "252",
+        "--k",
+        "30",
+        "--layout",
+        "F",
+        "--cpu",
+        "1",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791199484.623728,
+      "samples": [
+        {
+          "wall": 0.861503041,
+          "cpu": 0.856611
+        },
+        {
+          "wall": 0.867597833,
+          "cpu": 0.862473
+        },
+        {
+          "wall": 0.858367667,
+          "cpu": 0.853927
+        },
+        {
+          "wall": 0.868292375,
+          "cpu": 0.860179
+        },
+        {
+          "wall": 0.856299792,
+          "cpu": 0.85252
+        },
+        {
+          "wall": 0.866338625,
+          "cpu": 0.86213
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791199521.0407639
+    },
+    {
+      "label": "many-short-large-F-cpu1-njit64",
+      "pid": 6031,
+      "created": 1791199485.807112,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "njit",
+        "--n",
+        "262144",
+        "--t",
+        "252",
+        "--k",
+        "30",
+        "--layout",
+        "F",
+        "--cpu",
+        "1",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791199485.808953,
+      "samples": [
+        {
+          "wall": 1.167439292,
+          "cpu": 1.16102
+        },
+        {
+          "wall": 1.151129833,
+          "cpu": 1.14699
+        },
+        {
+          "wall": 1.163113625,
+          "cpu": 1.157313
+        },
+        {
+          "wall": 1.167342208,
+          "cpu": 1.16103
+        },
+        {
+          "wall": 1.161003166,
+          "cpu": 1.155019
+        },
+        {
+          "wall": 1.168928083,
+          "cpu": 1.164448
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791199521.041808
+    },
+    {
+      "label": "many-short-large-F-cpu1-njit512",
+      "pid": 6038,
+      "created": 1791199490.891708,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "njit",
+        "--n",
+        "262144",
+        "--t",
+        "252",
+        "--k",
+        "30",
+        "--layout",
+        "F",
+        "--cpu",
+        "1",
+        "--block",
+        "512",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791199490.89362,
+      "samples": [
+        {
+          "wall": 1.195996916,
+          "cpu": 1.190143
+        },
+        {
+          "wall": 1.19985225,
+          "cpu": 1.193895
+        },
+        {
+          "wall": 1.198040792,
+          "cpu": 1.192033
+        },
+        {
+          "wall": 1.194118458,
+          "cpu": 1.188286
+        },
+        {
+          "wall": 1.19910375,
+          "cpu": 1.193172
+        },
+        {
+          "wall": 1.19928425,
+          "cpu": 1.194163
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791199521.042495
+    },
+    {
+      "label": "regular-history-C-cpu1-baseline88ea",
+      "pid": 6129,
+      "created": 1791199521.103695,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "baseline",
+        "--n",
+        "16384",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "C",
+        "--cpu",
+        "1",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791199521.105872,
+      "samples": [
+        {
+          "wall": 0.4908555,
+          "cpu": 0.488369
+        },
+        {
+          "wall": 0.489871708,
+          "cpu": 0.487452
+        },
+        {
+          "wall": 0.4902645,
+          "cpu": 0.487708
+        },
+        {
+          "wall": 0.491306917,
+          "cpu": 0.488823
+        },
+        {
+          "wall": 0.489683333,
+          "cpu": 0.487252
+        },
+        {
+          "wall": 0.490125917,
+          "cpu": 0.487707
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791199541.6015098
+    },
+    {
+      "label": "regular-history-C-cpu1-candidate",
+      "pid": 6130,
+      "created": 1791199521.965959,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "candidate",
+        "--n",
+        "16384",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "C",
+        "--cpu",
+        "1",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791199521.967802,
+      "samples": [
+        {
+          "wall": 0.489692084,
+          "cpu": 0.487379
+        },
+        {
+          "wall": 0.489752333,
+          "cpu": 0.487175
+        },
+        {
+          "wall": 0.492328,
+          "cpu": 0.489553
+        },
+        {
+          "wall": 0.490464583,
+          "cpu": 0.487836
+        },
+        {
+          "wall": 0.489755833,
+          "cpu": 0.487383
+        },
+        {
+          "wall": 0.499573958,
+          "cpu": 0.496018
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791199542.327531
+    },
+    {
+      "label": "regular-history-C-cpu1-njit64",
+      "pid": 6131,
+      "created": 1791199522.702771,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "njit",
+        "--n",
+        "16384",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "C",
+        "--cpu",
+        "1",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791199522.704355,
+      "samples": [
+        {
+          "wall": 0.415885583,
+          "cpu": 0.413179
+        },
+        {
+          "wall": 0.414707167,
+          "cpu": 0.412475
+        },
+        {
+          "wall": 0.411859125,
+          "cpu": 0.410276
+        },
+        {
+          "wall": 0.418109333,
+          "cpu": 0.416268
+        },
+        {
+          "wall": 0.416986833,
+          "cpu": 0.414639
+        },
+        {
+          "wall": 0.424211,
+          "cpu": 0.420973
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791199542.328523
+    },
+    {
+      "label": "regular-history-C-cpu1-njit512",
+      "pid": 6136,
+      "created": 1791199526.727611,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "njit",
+        "--n",
+        "16384",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "C",
+        "--cpu",
+        "1",
+        "--block",
+        "512",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791199526.7294238,
+      "samples": [
+        {
+          "wall": 0.414611875,
+          "cpu": 0.412482
+        },
+        {
+          "wall": 0.412813916,
+          "cpu": 0.410939
+        },
+        {
+          "wall": 0.412532333,
+          "cpu": 0.411717
+        },
+        {
+          "wall": 0.415483417,
+          "cpu": 0.413496
+        },
+        {
+          "wall": 0.415513333,
+          "cpu": 0.412889
+        },
+        {
+          "wall": 0.416295625,
+          "cpu": 0.413965
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791199542.329087
+    },
+    {
+      "label": "regular-history-F-cpu1-baseline88ea",
+      "pid": 6204,
+      "created": 1791199542.344054,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "baseline",
+        "--n",
+        "16384",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "F",
+        "--cpu",
+        "1",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791199542.34586,
+      "samples": [
+        {
+          "wall": 0.490520375,
+          "cpu": 0.488002
+        },
+        {
+          "wall": 0.496419333,
+          "cpu": 0.490169
+        },
+        {
+          "wall": 0.491434667,
+          "cpu": 0.488597
+        },
+        {
+          "wall": 0.490845041,
+          "cpu": 0.488307
+        },
+        {
+          "wall": 0.491159709,
+          "cpu": 0.488433
+        },
+        {
+          "wall": 0.492869208,
+          "cpu": 0.490469
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791199563.118433
+    },
+    {
+      "label": "regular-history-F-cpu1-candidate",
+      "pid": 6205,
+      "created": 1791199543.072134,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "candidate",
+        "--n",
+        "16384",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "F",
+        "--cpu",
+        "1",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791199543.0739782,
+      "samples": [
+        {
+          "wall": 0.490531125,
+          "cpu": 0.488203
+        },
+        {
+          "wall": 0.490891583,
+          "cpu": 0.488455
+        },
+        {
+          "wall": 0.488472334,
+          "cpu": 0.486367
+        },
+        {
+          "wall": 0.491224375,
+          "cpu": 0.48866
+        },
+        {
+          "wall": 0.489414583,
+          "cpu": 0.486865
+        },
+        {
+          "wall": 0.493681792,
+          "cpu": 0.491792
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791199563.844566
+    },
+    {
+      "label": "regular-history-F-cpu1-njit64",
+      "pid": 6206,
+      "created": 1791199543.795961,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "njit",
+        "--n",
+        "16384",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "F",
+        "--cpu",
+        "1",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791199543.797749,
+      "samples": [
+        {
+          "wall": 0.421002042,
+          "cpu": 0.418812
+        },
+        {
+          "wall": 0.423911125,
+          "cpu": 0.419925
+        },
+        {
+          "wall": 0.421147042,
+          "cpu": 0.419082
+        },
+        {
+          "wall": 0.422327167,
+          "cpu": 0.420278
+        },
+        {
+          "wall": 0.420251291,
+          "cpu": 0.41814
+        },
+        {
+          "wall": 0.4242715,
+          "cpu": 0.421805
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791199563.845672
+    },
+    {
+      "label": "regular-history-F-cpu1-njit512",
+      "pid": 6226,
+      "created": 1791199547.984631,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "njit",
+        "--n",
+        "16384",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "F",
+        "--cpu",
+        "1",
+        "--block",
+        "512",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791199547.986458,
+      "samples": [
+        {
+          "wall": 0.416958042,
+          "cpu": 0.415072
+        },
+        {
+          "wall": 0.421032792,
+          "cpu": 0.417542
+        },
+        {
+          "wall": 0.416672708,
+          "cpu": 0.414677
+        },
+        {
+          "wall": 0.416708458,
+          "cpu": 0.414506
+        },
+        {
+          "wall": 0.416317208,
+          "cpu": 0.414152
+        },
+        {
+          "wall": 0.417776375,
+          "cpu": 0.415446
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791199563.846328
+    },
+    {
+      "label": "regular-history-large-C-cpu1-baseline88ea",
+      "pid": 6244,
+      "created": 1791199563.861335,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "baseline",
+        "--n",
+        "262144",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "C",
+        "--cpu",
+        "1",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791199563.863234,
+      "samples": [
+        {
+          "wall": 7.86751975,
+          "cpu": 7.819263
+        },
+        {
+          "wall": 7.878250333,
+          "cpu": 7.800975
+        },
+        {
+          "wall": 7.841664667,
+          "cpu": 7.79322
+        },
+        {
+          "wall": 7.839449,
+          "cpu": 7.797125
+        },
+        {
+          "wall": 7.839331791,
+          "cpu": 7.797917
+        },
+        {
+          "wall": 7.859901583,
+          "cpu": 7.803593
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791199801.3537621
+    },
+    {
+      "label": "regular-history-large-C-cpu1-candidate",
+      "pid": 6291,
+      "created": 1791199572.0095,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "candidate",
+        "--n",
+        "262144",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "C",
+        "--cpu",
+        "1",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791199572.011303,
+      "samples": [
+        {
+          "wall": 7.825690708,
+          "cpu": 7.786526
+        },
+        {
+          "wall": 7.850831541,
+          "cpu": 7.806462
+        },
+        {
+          "wall": 7.848920625,
+          "cpu": 7.801612
+        },
+        {
+          "wall": 7.845719625,
+          "cpu": 7.803005
+        },
+        {
+          "wall": 7.844166792,
+          "cpu": 7.800351
+        },
+        {
+          "wall": 7.856244208,
+          "cpu": 7.807878
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791199802.118252
+    },
+    {
+      "label": "regular-history-large-C-cpu1-njit64",
+      "pid": 6317,
+      "created": 1791199580.130123,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "njit",
+        "--n",
+        "262144",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "C",
+        "--cpu",
+        "1",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791199580.131924,
+      "samples": [
+        {
+          "wall": 8.473911708,
+          "cpu": 8.43296
+        },
+        {
+          "wall": 8.499684375,
+          "cpu": 8.438046
+        },
+        {
+          "wall": 8.526874208,
+          "cpu": 8.466695
+        },
+        {
+          "wall": 8.676839333,
+          "cpu": 8.537159
+        },
+        {
+          "wall": 8.567745625,
+          "cpu": 8.506455
+        },
+        {
+          "wall": 8.570843042,
+          "cpu": 8.512877
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791199802.119509
+    },
+    {
+      "label": "regular-history-large-C-cpu1-njit512",
+      "pid": 6355,
+      "created": 1791199592.263673,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "njit",
+        "--n",
+        "262144",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "C",
+        "--cpu",
+        "1",
+        "--block",
+        "512",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791199592.2656472,
+      "samples": [
+        {
+          "wall": 8.489605291,
+          "cpu": 8.436311
+        },
+        {
+          "wall": 8.518471208,
+          "cpu": 8.461022
+        },
+        {
+          "wall": 8.492439125,
+          "cpu": 8.445394
+        },
+        {
+          "wall": 8.512342209,
+          "cpu": 8.45372
+        },
+        {
+          "wall": 8.513627084,
+          "cpu": 8.463285
+        },
+        {
+          "wall": 8.518731875,
+          "cpu": 8.47065
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791199802.120288
+    },
+    {
+      "label": "regular-history-large-F-cpu1-baseline88ea",
+      "pid": 8034,
+      "created": 1791199802.156072,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "baseline",
+        "--n",
+        "262144",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "F",
+        "--cpu",
+        "1",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791199802.1580338,
+      "samples": [
+        {
+          "wall": 7.851239291,
+          "cpu": 7.808219
+        },
+        {
+          "wall": 7.849547625,
+          "cpu": 7.799753
+        },
+        {
+          "wall": 7.864059042,
+          "cpu": 7.820395
+        },
+        {
+          "wall": 7.846866917,
+          "cpu": 7.806954
+        },
+        {
+          "wall": 7.873972,
+          "cpu": 7.817474
+        },
+        {
+          "wall": 7.866720333,
+          "cpu": 7.824146
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200041.747701
+    },
+    {
+      "label": "regular-history-large-F-cpu1-candidate",
+      "pid": 8081,
+      "created": 1791199810.497654,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "candidate",
+        "--n",
+        "262144",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "F",
+        "--cpu",
+        "1",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791199810.4991648,
+      "samples": [
+        {
+          "wall": 8.036303292,
+          "cpu": 7.802582
+        },
+        {
+          "wall": 7.627700916,
+          "cpu": 7.622156
+        },
+        {
+          "wall": 8.133009959,
+          "cpu": 7.863676
+        },
+        {
+          "wall": 7.905263625,
+          "cpu": 7.826505
+        },
+        {
+          "wall": 7.89979075,
+          "cpu": 7.845742
+        },
+        {
+          "wall": 7.880636458,
+          "cpu": 7.834676
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200042.544234
+    },
+    {
+      "label": "regular-history-large-F-cpu1-njit64",
+      "pid": 8088,
+      "created": 1791199818.820269,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "njit",
+        "--n",
+        "262144",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "F",
+        "--cpu",
+        "1",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791199818.821985,
+      "samples": [
+        {
+          "wall": 8.548577458,
+          "cpu": 8.502402
+        },
+        {
+          "wall": 8.571856333,
+          "cpu": 8.510775
+        },
+        {
+          "wall": 8.550532916,
+          "cpu": 8.492803
+        },
+        {
+          "wall": 8.552318792,
+          "cpu": 8.506759
+        },
+        {
+          "wall": 8.570091292,
+          "cpu": 8.522334
+        },
+        {
+          "wall": 8.58732525,
+          "cpu": 8.541853
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200042.5462358
+    },
+    {
+      "label": "regular-history-large-F-cpu1-njit512",
+      "pid": 8127,
+      "created": 1791199831.239139,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "njit",
+        "--n",
+        "262144",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "F",
+        "--cpu",
+        "1",
+        "--block",
+        "512",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791199831.24093,
+      "samples": [
+        {
+          "wall": 8.59173875,
+          "cpu": 8.503223
+        },
+        {
+          "wall": 8.554752084,
+          "cpu": 8.508341
+        },
+        {
+          "wall": 8.5387,
+          "cpu": 8.493537
+        },
+        {
+          "wall": 8.677359,
+          "cpu": 8.527837
+        },
+        {
+          "wall": 8.567250625,
+          "cpu": 8.506116
+        },
+        {
+          "wall": 8.592952,
+          "cpu": 8.527896
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200042.547606
+    },
+    {
+      "label": "many-short-large-C-cpu2-baseline88ea",
+      "pid": 12025,
+      "created": 1791200042.583747,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "baseline",
+        "--n",
+        "262144",
+        "--t",
+        "252",
+        "--k",
+        "30",
+        "--layout",
+        "C",
+        "--cpu",
+        "2",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200042.5861492,
+      "samples": [
+        {
+          "wall": 0.863973334,
+          "cpu": 0.859582
+        },
+        {
+          "wall": 0.860532375,
+          "cpu": 0.856217
+        },
+        {
+          "wall": 0.854927833,
+          "cpu": 0.850163
+        },
+        {
+          "wall": 0.851657292,
+          "cpu": 0.847509
+        },
+        {
+          "wall": 0.871413125,
+          "cpu": 0.85311
+        },
+        {
+          "wall": 0.85392175,
+          "cpu": 0.849403
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200068.558518
+    },
+    {
+      "label": "many-short-large-C-cpu2-candidate",
+      "pid": 12029,
+      "created": 1791200044.138467,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "candidate",
+        "--n",
+        "262144",
+        "--t",
+        "252",
+        "--k",
+        "30",
+        "--layout",
+        "C",
+        "--cpu",
+        "2",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200044.1402109,
+      "samples": [
+        {
+          "wall": 0.438702625,
+          "cpu": 0.863451
+        },
+        {
+          "wall": 0.436799291,
+          "cpu": 0.861748
+        },
+        {
+          "wall": 0.441636583,
+          "cpu": 0.870305
+        },
+        {
+          "wall": 0.430990958,
+          "cpu": 0.854241
+        },
+        {
+          "wall": 0.432830459,
+          "cpu": 0.858167
+        },
+        {
+          "wall": 0.434758625,
+          "cpu": 0.86192
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200068.704781
+    },
+    {
+      "label": "many-short-large-C-cpu2-njit64",
+      "pid": 12032,
+      "created": 1791200044.878882,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "njit",
+        "--n",
+        "262144",
+        "--t",
+        "252",
+        "--k",
+        "30",
+        "--layout",
+        "C",
+        "--cpu",
+        "2",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200044.880455,
+      "samples": [
+        {
+          "wall": 0.599651834,
+          "cpu": 1.181439
+        },
+        {
+          "wall": 0.591335958,
+          "cpu": 1.172462
+        },
+        {
+          "wall": 0.594665875,
+          "cpu": 1.178232
+        },
+        {
+          "wall": 0.604734667,
+          "cpu": 1.19183
+        },
+        {
+          "wall": 0.592677042,
+          "cpu": 1.176723
+        },
+        {
+          "wall": 0.597613666,
+          "cpu": 1.186271
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200068.706736
+    },
+    {
+      "label": "many-short-large-C-cpu2-njit512",
+      "pid": 12068,
+      "created": 1791200049.195271,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "njit",
+        "--n",
+        "262144",
+        "--t",
+        "252",
+        "--k",
+        "30",
+        "--layout",
+        "C",
+        "--cpu",
+        "2",
+        "--block",
+        "512",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200049.196842,
+      "samples": [
+        {
+          "wall": 0.573304667,
+          "cpu": 1.13556
+        },
+        {
+          "wall": 0.576152875,
+          "cpu": 1.140587
+        },
+        {
+          "wall": 0.574170833,
+          "cpu": 1.138036
+        },
+        {
+          "wall": 0.578220959,
+          "cpu": 1.14738
+        },
+        {
+          "wall": 0.578400333,
+          "cpu": 1.139608
+        },
+        {
+          "wall": 0.574669417,
+          "cpu": 1.139928
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200068.708092
+    },
+    {
+      "label": "many-short-large-F-cpu2-baseline88ea",
+      "pid": 12109,
+      "created": 1791200068.742896,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "baseline",
+        "--n",
+        "262144",
+        "--t",
+        "252",
+        "--k",
+        "30",
+        "--layout",
+        "F",
+        "--cpu",
+        "2",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200068.744977,
+      "samples": [
+        {
+          "wall": 0.85956825,
+          "cpu": 0.855317
+        },
+        {
+          "wall": 0.861513334,
+          "cpu": 0.857096
+        },
+        {
+          "wall": 0.858954875,
+          "cpu": 0.854602
+        },
+        {
+          "wall": 0.854429583,
+          "cpu": 0.850245
+        },
+        {
+          "wall": 0.854255291,
+          "cpu": 0.849941
+        },
+        {
+          "wall": 0.852685834,
+          "cpu": 0.848731
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200095.169699
+    },
+    {
+      "label": "many-short-large-F-cpu2-candidate",
+      "pid": 12112,
+      "created": 1791200070.060237,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "candidate",
+        "--n",
+        "262144",
+        "--t",
+        "252",
+        "--k",
+        "30",
+        "--layout",
+        "F",
+        "--cpu",
+        "2",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200070.061891,
+      "samples": [
+        {
+          "wall": 0.433847959,
+          "cpu": 0.851695
+        },
+        {
+          "wall": 0.47163625,
+          "cpu": 0.886615
+        },
+        {
+          "wall": 0.431374417,
+          "cpu": 0.854594
+        },
+        {
+          "wall": 0.431621375,
+          "cpu": 0.85586
+        },
+        {
+          "wall": 0.432444667,
+          "cpu": 0.855855
+        },
+        {
+          "wall": 0.437469708,
+          "cpu": 0.865737
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200095.344377
+    },
+    {
+      "label": "many-short-large-F-cpu2-njit64",
+      "pid": 12127,
+      "created": 1791200070.841074,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "njit",
+        "--n",
+        "262144",
+        "--t",
+        "252",
+        "--k",
+        "30",
+        "--layout",
+        "F",
+        "--cpu",
+        "2",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200070.842724,
+      "samples": [
+        {
+          "wall": 0.6012415,
+          "cpu": 1.194112
+        },
+        {
+          "wall": 0.629477083,
+          "cpu": 1.226773
+        },
+        {
+          "wall": 0.616608667,
+          "cpu": 1.217856
+        },
+        {
+          "wall": 0.612399084,
+          "cpu": 1.212733
+        },
+        {
+          "wall": 0.61535925,
+          "cpu": 1.20387
+        },
+        {
+          "wall": 0.634472042,
+          "cpu": 1.242098
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200095.345937
+    },
+    {
+      "label": "many-short-large-F-cpu2-njit512",
+      "pid": 12135,
+      "created": 1791200075.304272,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "njit",
+        "--n",
+        "262144",
+        "--t",
+        "252",
+        "--k",
+        "30",
+        "--layout",
+        "F",
+        "--cpu",
+        "2",
+        "--block",
+        "512",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200075.305992,
+      "samples": [
+        {
+          "wall": 0.603487625,
+          "cpu": 1.194577
+        },
+        {
+          "wall": 0.635980458,
+          "cpu": 1.200757
+        },
+        {
+          "wall": 0.600746,
+          "cpu": 1.192449
+        },
+        {
+          "wall": 0.600564,
+          "cpu": 1.188445
+        },
+        {
+          "wall": 0.601206583,
+          "cpu": 1.192017
+        },
+        {
+          "wall": 0.606590875,
+          "cpu": 1.199795
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200095.347028
+    },
+    {
+      "label": "regular-history-C-cpu2-baseline88ea",
+      "pid": 13187,
+      "created": 1791200095.382796,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "baseline",
+        "--n",
+        "16384",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "C",
+        "--cpu",
+        "2",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200095.384973,
+      "samples": [
+        {
+          "wall": 0.48921125,
+          "cpu": 0.486591
+        },
+        {
+          "wall": 0.504484833,
+          "cpu": 0.493186
+        },
+        {
+          "wall": 0.490285708,
+          "cpu": 0.487606
+        },
+        {
+          "wall": 0.487867958,
+          "cpu": 0.485728
+        },
+        {
+          "wall": 0.488341041,
+          "cpu": 0.485985
+        },
+        {
+          "wall": 0.489392333,
+          "cpu": 0.486992
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200111.538829
+    },
+    {
+      "label": "regular-history-C-cpu2-candidate",
+      "pid": 13189,
+      "created": 1791200096.265729,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "candidate",
+        "--n",
+        "16384",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "C",
+        "--cpu",
+        "2",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200096.267325,
+      "samples": [
+        {
+          "wall": 0.246821459,
+          "cpu": 0.489047
+        },
+        {
+          "wall": 0.2467685,
+          "cpu": 0.488716
+        },
+        {
+          "wall": 0.245494791,
+          "cpu": 0.487249
+        },
+        {
+          "wall": 0.2471795,
+          "cpu": 0.488677
+        },
+        {
+          "wall": 0.24872725,
+          "cpu": 0.491057
+        },
+        {
+          "wall": 0.263835542,
+          "cpu": 0.509595
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200112.26141
+    },
+    {
+      "label": "regular-history-C-cpu2-njit64",
+      "pid": 13190,
+      "created": 1791200096.752195,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "njit",
+        "--n",
+        "16384",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "C",
+        "--cpu",
+        "2",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200096.753783,
+      "samples": [
+        {
+          "wall": 0.208859833,
+          "cpu": 0.413572
+        },
+        {
+          "wall": 0.212444834,
+          "cpu": 0.419894
+        },
+        {
+          "wall": 0.211844375,
+          "cpu": 0.419587
+        },
+        {
+          "wall": 0.20973025,
+          "cpu": 0.416517
+        },
+        {
+          "wall": 0.211010042,
+          "cpu": 0.418291
+        },
+        {
+          "wall": 0.336680417,
+          "cpu": 0.455696
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200112.263049
+    },
+    {
+      "label": "regular-history-C-cpu2-njit512",
+      "pid": 13194,
+      "created": 1791200100.536959,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "njit",
+        "--n",
+        "16384",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "C",
+        "--cpu",
+        "2",
+        "--block",
+        "512",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200100.5385642,
+      "samples": [
+        {
+          "wall": 0.210440667,
+          "cpu": 0.415536
+        },
+        {
+          "wall": 0.21110225,
+          "cpu": 0.418293
+        },
+        {
+          "wall": 0.213529041,
+          "cpu": 0.421525
+        },
+        {
+          "wall": 0.210531125,
+          "cpu": 0.41754
+        },
+        {
+          "wall": 0.210241167,
+          "cpu": 0.416043
+        },
+        {
+          "wall": 0.213201833,
+          "cpu": 0.42223
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200112.264228
+    },
+    {
+      "label": "regular-history-F-cpu2-baseline88ea",
+      "pid": 13251,
+      "created": 1791200112.280055,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "baseline",
+        "--n",
+        "16384",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "F",
+        "--cpu",
+        "2",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200112.2818172,
+      "samples": [
+        {
+          "wall": 0.49635925,
+          "cpu": 0.493525
+        },
+        {
+          "wall": 0.49225925,
+          "cpu": 0.489484
+        },
+        {
+          "wall": 0.489254666,
+          "cpu": 0.486917
+        },
+        {
+          "wall": 0.491418041,
+          "cpu": 0.488693
+        },
+        {
+          "wall": 0.495378417,
+          "cpu": 0.492243
+        },
+        {
+          "wall": 0.491878834,
+          "cpu": 0.490071
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200128.48138
+    },
+    {
+      "label": "regular-history-F-cpu2-candidate",
+      "pid": 13252,
+      "created": 1791200113.007473,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "candidate",
+        "--n",
+        "16384",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "F",
+        "--cpu",
+        "2",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200113.009451,
+      "samples": [
+        {
+          "wall": 0.249278375,
+          "cpu": 0.493396
+        },
+        {
+          "wall": 0.250462542,
+          "cpu": 0.495833
+        },
+        {
+          "wall": 0.250727083,
+          "cpu": 0.496295
+        },
+        {
+          "wall": 0.246773166,
+          "cpu": 0.489668
+        },
+        {
+          "wall": 0.249684958,
+          "cpu": 0.495866
+        },
+        {
+          "wall": 0.264801875,
+          "cpu": 0.50879
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200129.1983669
+    },
+    {
+      "label": "regular-history-F-cpu2-njit64",
+      "pid": 13253,
+      "created": 1791200113.497337,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "njit",
+        "--n",
+        "16384",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "F",
+        "--cpu",
+        "2",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200113.4990249,
+      "samples": [
+        {
+          "wall": 0.215367375,
+          "cpu": 0.422107
+        },
+        {
+          "wall": 0.21427325,
+          "cpu": 0.424853
+        },
+        {
+          "wall": 0.212762125,
+          "cpu": 0.418794
+        },
+        {
+          "wall": 0.214337584,
+          "cpu": 0.425173
+        },
+        {
+          "wall": 0.231660167,
+          "cpu": 0.433295
+        },
+        {
+          "wall": 0.224380292,
+          "cpu": 0.436789
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200129.200122
+    },
+    {
+      "label": "regular-history-F-cpu2-njit512",
+      "pid": 13257,
+      "created": 1791200117.396755,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "njit",
+        "--n",
+        "16384",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "F",
+        "--cpu",
+        "2",
+        "--block",
+        "512",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200117.3986151,
+      "samples": [
+        {
+          "wall": 0.210143541,
+          "cpu": 0.417323
+        },
+        {
+          "wall": 0.212205417,
+          "cpu": 0.419816
+        },
+        {
+          "wall": 0.210009667,
+          "cpu": 0.416266
+        },
+        {
+          "wall": 0.211162458,
+          "cpu": 0.41791
+        },
+        {
+          "wall": 0.214099041,
+          "cpu": 0.424063
+        },
+        {
+          "wall": 0.217029667,
+          "cpu": 0.427902
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200129.2019122
+    },
+    {
+      "label": "regular-history-large-C-cpu2-baseline88ea",
+      "pid": 13287,
+      "created": 1791200129.239438,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "baseline",
+        "--n",
+        "262144",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "C",
+        "--cpu",
+        "2",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200129.241622,
+      "samples": [
+        {
+          "wall": 7.814072916,
+          "cpu": 7.775983
+        },
+        {
+          "wall": 7.821561458,
+          "cpu": 7.779312
+        },
+        {
+          "wall": 7.840836125,
+          "cpu": 7.778769
+        },
+        {
+          "wall": 7.823463791,
+          "cpu": 7.770186
+        },
+        {
+          "wall": 7.818419458,
+          "cpu": 7.781245
+        },
+        {
+          "wall": 8.091177791,
+          "cpu": 7.850401
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200280.472745
+    },
+    {
+      "label": "regular-history-large-C-cpu2-candidate",
+      "pid": 13330,
+      "created": 1791200137.436039,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "candidate",
+        "--n",
+        "262144",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "C",
+        "--cpu",
+        "2",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200137.437619,
+      "samples": [
+        {
+          "wall": 3.956643959,
+          "cpu": 7.822143
+        },
+        {
+          "wall": 3.937739583,
+          "cpu": 7.81328
+        },
+        {
+          "wall": 4.008550541,
+          "cpu": 7.936069
+        },
+        {
+          "wall": 3.929823416,
+          "cpu": 7.808422
+        },
+        {
+          "wall": 3.985927458,
+          "cpu": 7.917584
+        },
+        {
+          "wall": 3.95009275,
+          "cpu": 7.849277
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200281.2232919
+    },
+    {
+      "label": "regular-history-large-C-cpu2-njit64",
+      "pid": 13355,
+      "created": 1791200141.675168,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "njit",
+        "--n",
+        "262144",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "C",
+        "--cpu",
+        "2",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200141.676836,
+      "samples": [
+        {
+          "wall": 4.276697041,
+          "cpu": 8.492255
+        },
+        {
+          "wall": 4.314704459,
+          "cpu": 8.525971
+        },
+        {
+          "wall": 4.270935167,
+          "cpu": 8.481396
+        },
+        {
+          "wall": 4.27186775,
+          "cpu": 8.488001
+        },
+        {
+          "wall": 4.388880625,
+          "cpu": 8.648428
+        },
+        {
+          "wall": 4.351375334,
+          "cpu": 8.595701
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200281.226145
+    },
+    {
+      "label": "regular-history-large-C-cpu2-njit512",
+      "pid": 13374,
+      "created": 1791200149.652087,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "njit",
+        "--n",
+        "262144",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "C",
+        "--cpu",
+        "2",
+        "--block",
+        "512",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200149.654072,
+      "samples": [
+        {
+          "wall": 4.260211292,
+          "cpu": 8.452549
+        },
+        {
+          "wall": 4.274254583,
+          "cpu": 8.48845
+        },
+        {
+          "wall": 4.269679083,
+          "cpu": 8.47793
+        },
+        {
+          "wall": 4.302277875,
+          "cpu": 8.519766
+        },
+        {
+          "wall": 4.296530959,
+          "cpu": 8.528125
+        },
+        {
+          "wall": 4.291203917,
+          "cpu": 8.512647
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200281.228235
+    },
+    {
+      "label": "regular-history-large-F-cpu2-baseline88ea",
+      "pid": 13720,
+      "created": 1791200281.266102,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "baseline",
+        "--n",
+        "262144",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "F",
+        "--cpu",
+        "2",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200281.268248,
+      "samples": [
+        {
+          "wall": 7.884940625,
+          "cpu": 7.831924
+        },
+        {
+          "wall": 7.898976167,
+          "cpu": 7.823884
+        },
+        {
+          "wall": 7.838482333,
+          "cpu": 7.800266
+        },
+        {
+          "wall": 7.845837625,
+          "cpu": 7.805171
+        },
+        {
+          "wall": 7.876317459,
+          "cpu": 7.818138
+        },
+        {
+          "wall": 7.86823075,
+          "cpu": 7.815698
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200434.5311391
+    },
+    {
+      "label": "regular-history-large-F-cpu2-candidate",
+      "pid": 14241,
+      "created": 1791200290.232664,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "candidate",
+        "--n",
+        "262144",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "F",
+        "--cpu",
+        "2",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200290.2342558,
+      "samples": [
+        {
+          "wall": 3.954693666,
+          "cpu": 7.851706
+        },
+        {
+          "wall": 3.953321209,
+          "cpu": 7.849141
+        },
+        {
+          "wall": 3.954959583,
+          "cpu": 7.859492
+        },
+        {
+          "wall": 3.967716292,
+          "cpu": 7.885111
+        },
+        {
+          "wall": 3.9428485,
+          "cpu": 7.834319
+        },
+        {
+          "wall": 3.97855325,
+          "cpu": 7.872312
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200435.316393
+    },
+    {
+      "label": "regular-history-large-F-cpu2-njit64",
+      "pid": 14246,
+      "created": 1791200294.526182,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "njit",
+        "--n",
+        "262144",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "F",
+        "--cpu",
+        "2",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200294.527873,
+      "samples": [
+        {
+          "wall": 4.338549375,
+          "cpu": 8.604278
+        },
+        {
+          "wall": 4.315431417,
+          "cpu": 8.572747
+        },
+        {
+          "wall": 4.329301333,
+          "cpu": 8.578276
+        },
+        {
+          "wall": 4.346248375,
+          "cpu": 8.599613
+        },
+        {
+          "wall": 4.332046167,
+          "cpu": 8.602576
+        },
+        {
+          "wall": 4.3430465,
+          "cpu": 8.616416
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200435.32027
+    },
+    {
+      "label": "regular-history-large-F-cpu2-njit512",
+      "pid": 14267,
+      "created": 1791200302.696201,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "njit",
+        "--n",
+        "262144",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "F",
+        "--cpu",
+        "2",
+        "--block",
+        "512",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200302.6986082,
+      "samples": [
+        {
+          "wall": 4.3059105,
+          "cpu": 8.546435
+        },
+        {
+          "wall": 4.302434167,
+          "cpu": 8.546794
+        },
+        {
+          "wall": 4.32733625,
+          "cpu": 8.581625
+        },
+        {
+          "wall": 4.314221416,
+          "cpu": 8.57068
+        },
+        {
+          "wall": 4.342958125,
+          "cpu": 8.61385
+        },
+        {
+          "wall": 4.349941542,
+          "cpu": 8.632104
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200435.32269
+    },
+    {
+      "label": "many-short-large-C-cpu4-baseline88ea",
+      "pid": 16053,
+      "created": 1791200435.361546,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "baseline",
+        "--n",
+        "262144",
+        "--t",
+        "252",
+        "--k",
+        "30",
+        "--layout",
+        "C",
+        "--cpu",
+        "4",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200435.363769,
+      "samples": [
+        {
+          "wall": 0.854717875,
+          "cpu": 0.850144
+        },
+        {
+          "wall": 0.88491875,
+          "cpu": 0.871245
+        },
+        {
+          "wall": 0.863199958,
+          "cpu": 0.859229
+        },
+        {
+          "wall": 0.852810792,
+          "cpu": 0.848575
+        },
+        {
+          "wall": 0.850797166,
+          "cpu": 0.846743
+        },
+        {
+          "wall": 0.894368459,
+          "cpu": 0.85608
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200455.7186291
+    },
+    {
+      "label": "many-short-large-C-cpu4-candidate",
+      "pid": 16061,
+      "created": 1791200436.668321,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "candidate",
+        "--n",
+        "262144",
+        "--t",
+        "252",
+        "--k",
+        "30",
+        "--layout",
+        "C",
+        "--cpu",
+        "4",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200436.6699781,
+      "samples": [
+        {
+          "wall": 0.223806917,
+          "cpu": 0.874798
+        },
+        {
+          "wall": 0.243767041,
+          "cpu": 0.892543
+        },
+        {
+          "wall": 0.223573333,
+          "cpu": 0.873299
+        },
+        {
+          "wall": 0.223351792,
+          "cpu": 0.87576
+        },
+        {
+          "wall": 0.225189958,
+          "cpu": 0.878411
+        },
+        {
+          "wall": 0.228520125,
+          "cpu": 0.885243
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200455.873461
+    },
+    {
+      "label": "many-short-large-C-cpu4-njit64",
+      "pid": 16077,
+      "created": 1791200437.19614,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "njit",
+        "--n",
+        "262144",
+        "--t",
+        "252",
+        "--k",
+        "30",
+        "--layout",
+        "C",
+        "--cpu",
+        "4",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200437.197759,
+      "samples": [
+        {
+          "wall": 0.31080075,
+          "cpu": 1.222416
+        },
+        {
+          "wall": 0.321512083,
+          "cpu": 1.230765
+        },
+        {
+          "wall": 0.314594458,
+          "cpu": 1.223792
+        },
+        {
+          "wall": 0.319876167,
+          "cpu": 1.227985
+        },
+        {
+          "wall": 0.31000975,
+          "cpu": 1.21818
+        },
+        {
+          "wall": 0.317959834,
+          "cpu": 1.2408
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200455.8755279
+    },
+    {
+      "label": "many-short-large-C-cpu4-njit512",
+      "pid": 16101,
+      "created": 1791200441.184506,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "njit",
+        "--n",
+        "262144",
+        "--t",
+        "252",
+        "--k",
+        "30",
+        "--layout",
+        "C",
+        "--cpu",
+        "4",
+        "--block",
+        "512",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200441.185869,
+      "samples": [
+        {
+          "wall": 0.302730291,
+          "cpu": 1.180499
+        },
+        {
+          "wall": 0.336445042,
+          "cpu": 1.20583
+        },
+        {
+          "wall": 0.304389917,
+          "cpu": 1.183461
+        },
+        {
+          "wall": 0.305414375,
+          "cpu": 1.183568
+        },
+        {
+          "wall": 0.2984005,
+          "cpu": 1.174043
+        },
+        {
+          "wall": 0.31171725,
+          "cpu": 1.197431
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200455.877423
+    },
+    {
+      "label": "many-short-large-F-cpu4-baseline88ea",
+      "pid": 16141,
+      "created": 1791200455.915319,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "baseline",
+        "--n",
+        "262144",
+        "--t",
+        "252",
+        "--k",
+        "30",
+        "--layout",
+        "F",
+        "--cpu",
+        "4",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200455.91749,
+      "samples": [
+        {
+          "wall": 0.859498458,
+          "cpu": 0.854944
+        },
+        {
+          "wall": 0.8623905,
+          "cpu": 0.857977
+        },
+        {
+          "wall": 0.855598667,
+          "cpu": 0.85135
+        },
+        {
+          "wall": 0.856250708,
+          "cpu": 0.851864
+        },
+        {
+          "wall": 0.851517458,
+          "cpu": 0.847411
+        },
+        {
+          "wall": 0.853639709,
+          "cpu": 0.849635
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200476.676016
+    },
+    {
+      "label": "many-short-large-F-cpu4-candidate",
+      "pid": 16143,
+      "created": 1791200457.23218,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "candidate",
+        "--n",
+        "262144",
+        "--t",
+        "252",
+        "--k",
+        "30",
+        "--layout",
+        "F",
+        "--cpu",
+        "4",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200457.233875,
+      "samples": [
+        {
+          "wall": 0.229574833,
+          "cpu": 0.884968
+        },
+        {
+          "wall": 0.234006416,
+          "cpu": 0.891
+        },
+        {
+          "wall": 0.223679417,
+          "cpu": 0.877462
+        },
+        {
+          "wall": 0.223222584,
+          "cpu": 0.877545
+        },
+        {
+          "wall": 0.223967666,
+          "cpu": 0.879518
+        },
+        {
+          "wall": 0.229316667,
+          "cpu": 0.887468
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200476.858737
+    },
+    {
+      "label": "many-short-large-F-cpu4-njit64",
+      "pid": 16144,
+      "created": 1791200457.794567,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "njit",
+        "--n",
+        "262144",
+        "--t",
+        "252",
+        "--k",
+        "30",
+        "--layout",
+        "F",
+        "--cpu",
+        "4",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200457.7962492,
+      "samples": [
+        {
+          "wall": 0.317266666,
+          "cpu": 1.244531
+        },
+        {
+          "wall": 0.319321875,
+          "cpu": 1.254751
+        },
+        {
+          "wall": 0.320534625,
+          "cpu": 1.256064
+        },
+        {
+          "wall": 0.320799333,
+          "cpu": 1.253727
+        },
+        {
+          "wall": 0.340591083,
+          "cpu": 1.255589
+        },
+        {
+          "wall": 0.328504417,
+          "cpu": 1.28267
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200476.8621771
+    },
+    {
+      "label": "many-short-large-F-cpu4-njit512",
+      "pid": 16148,
+      "created": 1791200461.918219,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "njit",
+        "--n",
+        "262144",
+        "--t",
+        "252",
+        "--k",
+        "30",
+        "--layout",
+        "F",
+        "--cpu",
+        "4",
+        "--block",
+        "512",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200461.9199018,
+      "samples": [
+        {
+          "wall": 0.313015875,
+          "cpu": 1.230806
+        },
+        {
+          "wall": 0.315381292,
+          "cpu": 1.23337
+        },
+        {
+          "wall": 0.314318292,
+          "cpu": 1.2329
+        },
+        {
+          "wall": 0.314481,
+          "cpu": 1.232537
+        },
+        {
+          "wall": 0.31268825,
+          "cpu": 1.230697
+        },
+        {
+          "wall": 0.318128208,
+          "cpu": 1.243825
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200476.864466
+    },
+    {
+      "label": "regular-history-C-cpu4-baseline88ea",
+      "pid": 16203,
+      "created": 1791200476.903798,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "baseline",
+        "--n",
+        "16384",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "C",
+        "--cpu",
+        "4",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200476.905958,
+      "samples": [
+        {
+          "wall": 0.489078958,
+          "cpu": 0.486938
+        },
+        {
+          "wall": 0.490328583,
+          "cpu": 0.487695
+        },
+        {
+          "wall": 0.488770459,
+          "cpu": 0.486391
+        },
+        {
+          "wall": 0.488748667,
+          "cpu": 0.486361
+        },
+        {
+          "wall": 0.489507709,
+          "cpu": 0.486553
+        },
+        {
+          "wall": 0.48684425,
+          "cpu": 0.484553
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200490.996037
+    },
+    {
+      "label": "regular-history-C-cpu4-candidate",
+      "pid": 16205,
+      "created": 1791200477.779034,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "candidate",
+        "--n",
+        "16384",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "C",
+        "--cpu",
+        "4",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200477.780746,
+      "samples": [
+        {
+          "wall": 0.12806075,
+          "cpu": 0.50331
+        },
+        {
+          "wall": 0.12786275,
+          "cpu": 0.502461
+        },
+        {
+          "wall": 0.12804025,
+          "cpu": 0.501906
+        },
+        {
+          "wall": 0.128086291,
+          "cpu": 0.501209
+        },
+        {
+          "wall": 0.127604583,
+          "cpu": 0.501491
+        },
+        {
+          "wall": 0.180285208,
+          "cpu": 0.552967
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200491.377331
+    },
+    {
+      "label": "regular-history-C-cpu4-njit64",
+      "pid": 16206,
+      "created": 1791200478.148861,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "njit",
+        "--n",
+        "16384",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "C",
+        "--cpu",
+        "4",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200478.150859,
+      "samples": [
+        {
+          "wall": 0.111405833,
+          "cpu": 0.433111
+        },
+        {
+          "wall": 0.110832041,
+          "cpu": 0.433837
+        },
+        {
+          "wall": 0.110317375,
+          "cpu": 0.431947
+        },
+        {
+          "wall": 0.110789458,
+          "cpu": 0.434271
+        },
+        {
+          "wall": 0.110019208,
+          "cpu": 0.432346
+        },
+        {
+          "wall": 0.1334155,
+          "cpu": 0.450915
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200491.379633
+    },
+    {
+      "label": "regular-history-C-cpu4-njit512",
+      "pid": 16231,
+      "created": 1791200481.841288,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "njit",
+        "--n",
+        "16384",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "C",
+        "--cpu",
+        "4",
+        "--block",
+        "512",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200481.8428779,
+      "samples": [
+        {
+          "wall": 0.111499458,
+          "cpu": 0.436422
+        },
+        {
+          "wall": 0.110340125,
+          "cpu": 0.433347
+        },
+        {
+          "wall": 0.110785958,
+          "cpu": 0.434013
+        },
+        {
+          "wall": 0.109547375,
+          "cpu": 0.429649
+        },
+        {
+          "wall": 0.111025958,
+          "cpu": 0.436101
+        },
+        {
+          "wall": 0.115618417,
+          "cpu": 0.440753
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200491.381441
+    },
+    {
+      "label": "regular-history-F-cpu4-baseline88ea",
+      "pid": 16259,
+      "created": 1791200491.399118,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "baseline",
+        "--n",
+        "16384",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "F",
+        "--cpu",
+        "4",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200491.401241,
+      "samples": [
+        {
+          "wall": 0.490040292,
+          "cpu": 0.487672
+        },
+        {
+          "wall": 0.490021,
+          "cpu": 0.487542
+        },
+        {
+          "wall": 0.487636792,
+          "cpu": 0.485387
+        },
+        {
+          "wall": 0.489967458,
+          "cpu": 0.487554
+        },
+        {
+          "wall": 0.488251375,
+          "cpu": 0.485953
+        },
+        {
+          "wall": 0.494972875,
+          "cpu": 0.490479
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200505.593178
+    },
+    {
+      "label": "regular-history-F-cpu4-candidate",
+      "pid": 16261,
+      "created": 1791200492.135782,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "candidate",
+        "--n",
+        "16384",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "F",
+        "--cpu",
+        "4",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200492.137533,
+      "samples": [
+        {
+          "wall": 0.128145334,
+          "cpu": 0.503532
+        },
+        {
+          "wall": 0.129188167,
+          "cpu": 0.504861
+        },
+        {
+          "wall": 0.127728625,
+          "cpu": 0.502226
+        },
+        {
+          "wall": 0.127545125,
+          "cpu": 0.502039
+        },
+        {
+          "wall": 0.128238916,
+          "cpu": 0.502518
+        },
+        {
+          "wall": 0.1600815,
+          "cpu": 0.551056
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200505.9571688
+    },
+    {
+      "label": "regular-history-F-cpu4-njit64",
+      "pid": 16262,
+      "created": 1791200492.494691,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "njit",
+        "--n",
+        "16384",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "F",
+        "--cpu",
+        "4",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200492.496307,
+      "samples": [
+        {
+          "wall": 0.11152175,
+          "cpu": 0.434747
+        },
+        {
+          "wall": 0.110341792,
+          "cpu": 0.433702
+        },
+        {
+          "wall": 0.112415875,
+          "cpu": 0.43919
+        },
+        {
+          "wall": 0.110826083,
+          "cpu": 0.434142
+        },
+        {
+          "wall": 0.110674167,
+          "cpu": 0.434708
+        },
+        {
+          "wall": 0.114594417,
+          "cpu": 0.441396
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200505.9596438
+    },
+    {
+      "label": "regular-history-F-cpu4-njit512",
+      "pid": 16276,
+      "created": 1791200496.267314,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "njit",
+        "--n",
+        "16384",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "F",
+        "--cpu",
+        "4",
+        "--block",
+        "512",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200496.269038,
+      "samples": [
+        {
+          "wall": 0.110250916,
+          "cpu": 0.432345
+        },
+        {
+          "wall": 0.10930625,
+          "cpu": 0.429369
+        },
+        {
+          "wall": 0.111581833,
+          "cpu": 0.435374
+        },
+        {
+          "wall": 0.110268209,
+          "cpu": 0.434142
+        },
+        {
+          "wall": 0.110790375,
+          "cpu": 0.433697
+        },
+        {
+          "wall": 0.11226425,
+          "cpu": 0.434968
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200505.9615538
+    },
+    {
+      "label": "regular-history-large-C-cpu4-baseline88ea",
+      "pid": 16335,
+      "created": 1791200505.980817,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "baseline",
+        "--n",
+        "262144",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "C",
+        "--cpu",
+        "4",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200505.98272,
+      "samples": [
+        {
+          "wall": 7.828058958,
+          "cpu": 7.776615
+        },
+        {
+          "wall": 7.807525333,
+          "cpu": 7.769625
+        },
+        {
+          "wall": 7.802973125,
+          "cpu": 7.763468
+        },
+        {
+          "wall": 7.81786425,
+          "cpu": 7.767065
+        },
+        {
+          "wall": 7.806199833,
+          "cpu": 7.769413
+        },
+        {
+          "wall": 7.811169833,
+          "cpu": 7.769258
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200614.8849049
+    },
+    {
+      "label": "regular-history-large-C-cpu4-candidate",
+      "pid": 16341,
+      "created": 1791200514.080732,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "candidate",
+        "--n",
+        "262144",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "C",
+        "--cpu",
+        "4",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200514.0824242,
+      "samples": [
+        {
+          "wall": 2.100706584,
+          "cpu": 8.107391
+        },
+        {
+          "wall": 2.066219583,
+          "cpu": 8.047098
+        },
+        {
+          "wall": 2.030521584,
+          "cpu": 8.014262
+        },
+        {
+          "wall": 2.062318667,
+          "cpu": 8.038004
+        },
+        {
+          "wall": 2.028426958,
+          "cpu": 8.009577
+        },
+        {
+          "wall": 2.062339458,
+          "cpu": 8.062101
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200615.638035
+    },
+    {
+      "label": "regular-history-large-C-cpu4-njit64",
+      "pid": 16346,
+      "created": 1791200516.443755,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "njit",
+        "--n",
+        "262144",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "C",
+        "--cpu",
+        "4",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200516.445447,
+      "samples": [
+        {
+          "wall": 2.256628125,
+          "cpu": 8.839341
+        },
+        {
+          "wall": 2.283895708,
+          "cpu": 8.861596
+        },
+        {
+          "wall": 2.29034075,
+          "cpu": 8.860846
+        },
+        {
+          "wall": 2.236434834,
+          "cpu": 8.823995
+        },
+        {
+          "wall": 2.253975042,
+          "cpu": 8.82367
+        },
+        {
+          "wall": 2.321128208,
+          "cpu": 8.991818
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200615.6410701
+    },
+    {
+      "label": "regular-history-large-C-cpu4-njit512",
+      "pid": 16351,
+      "created": 1791200522.22406,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "njit",
+        "--n",
+        "262144",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "C",
+        "--cpu",
+        "4",
+        "--block",
+        "512",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200522.225764,
+      "samples": [
+        {
+          "wall": 2.255736042,
+          "cpu": 8.805691
+        },
+        {
+          "wall": 2.240728,
+          "cpu": 8.794081
+        },
+        {
+          "wall": 2.236264333,
+          "cpu": 8.762316
+        },
+        {
+          "wall": 2.221967875,
+          "cpu": 8.750847
+        },
+        {
+          "wall": 2.219269708,
+          "cpu": 8.741986
+        },
+        {
+          "wall": 2.491934125,
+          "cpu": 8.982708
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200615.643219
+    },
+    {
+      "label": "regular-history-large-F-cpu4-baseline88ea",
+      "pid": 16648,
+      "created": 1791200615.685298,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "baseline",
+        "--n",
+        "262144",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "F",
+        "--cpu",
+        "4",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200615.6879098,
+      "samples": [
+        {
+          "wall": 7.825852584,
+          "cpu": 7.789216
+        },
+        {
+          "wall": 7.886444959,
+          "cpu": 7.832577
+        },
+        {
+          "wall": 7.85441525,
+          "cpu": 7.800243
+        },
+        {
+          "wall": 7.829603042,
+          "cpu": 7.792685
+        },
+        {
+          "wall": 7.841216084,
+          "cpu": 7.796226
+        },
+        {
+          "wall": 7.833410167,
+          "cpu": 7.794578
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200725.5541608
+    },
+    {
+      "label": "regular-history-large-F-cpu4-candidate",
+      "pid": 16693,
+      "created": 1791200624.048721,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "candidate",
+        "--n",
+        "262144",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "F",
+        "--cpu",
+        "4",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200624.050505,
+      "samples": [
+        {
+          "wall": 2.03663375,
+          "cpu": 8.028166
+        },
+        {
+          "wall": 2.026495291,
+          "cpu": 7.986167
+        },
+        {
+          "wall": 2.031422,
+          "cpu": 8.020306
+        },
+        {
+          "wall": 2.0622965,
+          "cpu": 8.063031
+        },
+        {
+          "wall": 2.0337825,
+          "cpu": 8.024767
+        },
+        {
+          "wall": 2.04724575,
+          "cpu": 8.059517
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200726.3453162
+    },
+    {
+      "label": "regular-history-large-F-cpu4-njit64",
+      "pid": 16711,
+      "created": 1791200626.425873,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "njit",
+        "--n",
+        "262144",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "F",
+        "--cpu",
+        "4",
+        "--block",
+        "64",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200626.427426,
+      "samples": [
+        {
+          "wall": 2.24493575,
+          "cpu": 8.838556
+        },
+        {
+          "wall": 2.240024583,
+          "cpu": 8.838278
+        },
+        {
+          "wall": 2.239982291,
+          "cpu": 8.836525
+        },
+        {
+          "wall": 2.247215542,
+          "cpu": 8.858953
+        },
+        {
+          "wall": 2.257815208,
+          "cpu": 8.878535
+        },
+        {
+          "wall": 2.448471209,
+          "cpu": 9.059622
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200726.348881
+    },
+    {
+      "label": "regular-history-large-F-cpu4-njit512",
+      "pid": 16720,
+      "created": 1791200632.671449,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/benchmark_risks_parallel_v20b.py",
+        "--backend",
+        "njit",
+        "--n",
+        "262144",
+        "--t",
+        "2520",
+        "--k",
+        "30",
+        "--layout",
+        "F",
+        "--cpu",
+        "4",
+        "--block",
+        "512",
+        "--rounds",
+        "6",
+        "--interactive"
+      ],
+      "started": 1791200632.6732428,
+      "samples": [
+        {
+          "wall": 2.232186667,
+          "cpu": 8.792667
+        },
+        {
+          "wall": 2.234884417,
+          "cpu": 8.787989
+        },
+        {
+          "wall": 2.250159833,
+          "cpu": 8.835146
+        },
+        {
+          "wall": 2.255471,
+          "cpu": 8.840367
+        },
+        {
+          "wall": 2.235563083,
+          "cpu": 8.795167
+        },
+        {
+          "wall": 2.286680541,
+          "cpu": 8.864883
+        }
+      ],
+      "returncode": 0,
+      "finished": 1791200726.351566
+    }
+  ],
+  "production_adopted": false,
+  "whole_goal_complete": false
+}

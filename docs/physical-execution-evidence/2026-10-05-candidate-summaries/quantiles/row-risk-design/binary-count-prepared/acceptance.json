@@ -1,0 +1,20 @@
+{
+  "status": "prepared_not_built",
+  "source_preimages": {
+    "cpp/graph.cpp": "2a5e33cbc7a85967117612a6e2ebee6d4c9365c360645ea306087ec22a1259ce",
+    "tests/test_binary_count_fusion.py": null
+  },
+  "source_postimages": {
+    "cpp/graph.cpp": "0cff7a48eb265ca9191c0d0b82521462d61f028d248ae2a6ab6f4db98d85d6fe",
+    "tests/test_binary_count_fusion.py": "96f31db463be1bd35462c6300ed63111d39285702ab7c2c5caaaaf32697e11c3"
+  },
+  "new_cases": 120,
+  "tests_run": false,
+  "performance_measured": false,
+  "memory_measured": false,
+  "production_adopted": false,
+  "whole_goal_complete": false,
+  "review": "positive binary 0/1 sums are exact integer counts up to 2^53; canonical payload validation precedes counting, private geometry forces rank2 mask; negative zero/general scalars keep existing floating loop; no allocations/layout/ownership changes",
+  "followup": "after current actual SIMD pipeline completes, profile the remaining regular-history path and measure complete candidate time/heap before any adoption; keep strongest warmed NJIT controls",
+  "self_review": "constant recognition uses bit copies, avoiding floating comparisons on unconsumed signaling NaN values; not measured or tested yet"
+}

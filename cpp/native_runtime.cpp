@@ -3,6 +3,7 @@
 #include "calmetrics_engine/native_process.hpp"
 #include <algorithm>
 #include <cmath>
+#include <limits>
 
 namespace calmetrics_engine::native {
 namespace {
@@ -17,13 +18,13 @@ struct Lease {
   }
   ~Lease() { budget.release(count); }
 };
-Deadline deadline_from(std::optional<double> seconds) {
+Deadline deadline_from(std::optional<double> seconds, Deadline started) {
   if (!seconds)
     return Deadline::max();
   if (!std::isfinite(*seconds) || *seconds < 0 || *seconds > 365.0 * 86400)
     throw std::invalid_argument(
         "timeout must be finite and between zero and one year");
-  return Clock::now() + std::chrono::duration_cast<Clock::duration>(
+  return started + std::chrono::duration_cast<Clock::duration>(
                             std::chrono::duration<double>(*seconds));
 }
 double milliseconds(Deadline from, Deadline to) {
@@ -48,7 +49,7 @@ std::vector<std::size_t> Batch::input_sizes() const {
   return result;
 }
 Engine::Engine(std::size_t cpu, planner::Config config, std::string worker_path)
-    : config_(config), budget_(cpu), worker_path_(std::move(worker_path)) {
+    : config_(config), cpu_limit_(cpu), budget_(cpu), worker_path_(std::move(worker_path)) {
   config_.validate();
   NativeScheduler::instance().ensure_capacity(cpu);
 }
@@ -76,13 +77,36 @@ Engine::plan(std::shared_ptr<compiler::CompiledGraph> graph, const Batch &batch,
 ExecutionAudit Engine::execute(const planner::Plan &p, const Batch &batch,
                                void *output,
                                std::optional<double> timeout_seconds,
-                               bool return_shared_output) {
+                               bool return_shared_output, bool allow_workspace_loan) {
+  // Preserve admission error precedence for the ordinary native entry point.
+  if (timeout_seconds) (void)deadline_from(timeout_seconds, Deadline{});
+  return execute(check(p, batch), output, timeout_seconds, return_shared_output, allow_workspace_loan);
+}
+Engine::CheckedBatch Engine::check(const planner::Plan &p, const Batch &batch) const {
   const auto started = Clock::now();
-  const auto deadline = deadline_from(timeout_seconds);
+  if (closed()) throw std::runtime_error("native engine is closed");
+  if (p.input_sizes.size() != batch.inputs.size())
+    throw std::invalid_argument("stale execution plan input shape");
+  for (std::size_t i = 0; i < batch.inputs.size(); ++i)
+    if (p.input_sizes[i] != batch.inputs[i].size())
+      throw std::invalid_argument("stale execution plan input shape");
+  // Geometry reads the actual views. The size comparison above avoids allocating
+  // a second vector merely to compare it with this immutable plan metadata.
+  planner::validate_plan(p, p.input_sizes, batch.starts, batch.ends,
+                        batch.rows, batch.product_ids, cpu(), &batch.inputs);
+  return CheckedBatch(this, p, batch, started);
+}
+ExecutionAudit Engine::execute(CheckedBatch &&checked, void *output,
+                               std::optional<double> timeout_seconds,
+                               bool return_shared_output, bool allow_workspace_loan) {
+  if (std::exchange(checked.owner_, nullptr) != this)
+    throw std::invalid_argument("invalid or consumed execution check");
+  const auto &p = *checked.plan_;
+  const auto &batch = *checked.batch_;
+  const auto started = checked.started_;
+  const auto deadline = deadline_from(timeout_seconds, started);
   if (closed())
     throw std::runtime_error("native engine is closed");
-  planner::validate_plan(p, batch.input_sizes(), batch.starts, batch.ends,
-                         batch.rows, batch.product_ids, cpu(), &batch.inputs);
   if (p.model_identity != batch.model_identity)
     throw std::invalid_argument("model payload does not match plan identity");
   if (batch.parameter_count != p.graph->program.parameter_count)
@@ -96,7 +120,8 @@ ExecutionAudit Engine::execute(const planner::Plan &p, const Batch &batch,
   Lease local_lease(budget_, count, deadline,
                     "native engine CPU admission deadline exceeded");
   auto &shared_scheduler = NativeScheduler::instance();
-  shared_scheduler.ensure_capacity(cpu());
+  // Construction already admits this engine's immutable limit. Global capacity
+  // only grows; acquiring both leases below still enforces current CPU usage.
   if (count > 1)
     shared_scheduler.ensure_threads(count);
   Lease global_lease(shared_scheduler.budget(), count, deadline,
@@ -110,7 +135,7 @@ ExecutionAudit Engine::execute(const planner::Plan &p, const Batch &batch,
     audit.chunks.push_back(
         graph::execute(p.graph->program, batch.inputs, batch.parameters,
                        batch.parameter_count, batch.starts, batch.ends,
-                       batch.rows, output, p.graph->program.roots.size(), p.result_layout.get(), 0, deadline));
+                       batch.rows, output, p.graph->program.roots.size(), p.result_layout.get(), 0, deadline, nullptr, allow_workspace_loan, p.expanded_matmul_roots, p.row_subviews));
     check_deadline(deadline);
     audit.native_threads = 1;
   } else {
@@ -178,12 +203,35 @@ ExecutionAudit Engine::execute(const planner::Plan &p, const Batch &batch,
         const auto chunk = p.chunks[i];
         if (!graph::execute_pointwise(p.graph->program, batch.inputs, batch.parameters,
             batch.parameter_count, batch.starts, batch.ends, batch.rows, output,
-            p.result_layout.get(), 0, result, deadline, &cancelled, false, chunk.begin, chunk.end))
+            p.result_layout.get(), 0, result, deadline, &cancelled, false, chunk.begin, chunk.end,
+            nullptr, nullptr, nullptr, nullptr, i == 0))
           throw std::invalid_argument("tensor plan no longer matches pointwise geometry");
-        // Each disjoint task computes the same shape contract; expose it once.
-        if (i) { result.result_shapes.clear(); result.root_statuses.clear(); }
         return result;
       });
+    } else if (!process && p.parallel_dimension == "array_row") {
+      struct Failure { std::size_t node = std::numeric_limits<std::size_t>::max(); std::string text; };
+      std::vector<Failure> failures(p.chunks.size());
+      execute_tasks(p.chunks.size(), [&](std::size_t i, const std::atomic<bool> &cancelled) {
+        const auto chunk = p.chunks[i];
+        std::size_t node = std::numeric_limits<std::size_t>::max();
+        try {
+          return graph::execute_row_batch_range(p.graph->program, batch.inputs,
+              batch.parameters, batch.parameter_count, batch.starts, batch.ends,
+              output, *p.result_layout, chunk.begin, chunk.end, i == 0, node,
+              deadline, &cancelled, allow_workspace_loan, p.expanded_matmul_roots);
+        } catch (const ops::Error &error) {
+          if (node == std::numeric_limits<std::size_t>::max()) throw;
+          // Numerical failures do not cancel later ranges: a later row can
+          // fail at an earlier logical node. Resource/timeout errors still use
+          // execute_tasks' existing cancellation and drain protocol.
+          failures[i].node = node; failures[i].text = error.what();
+          return graph::Audit{};
+        }
+      });
+      const auto first = std::min_element(failures.begin(), failures.end(),
+          [](const Failure &a, const Failure &b) { return a.node < b.node; });
+      if (first != failures.end() && first->node != std::numeric_limits<std::size_t>::max())
+        throw ops::Error(first->text.c_str());
     } else if (!process && p.parallel_dimension == "dag_branch") {
       execute_tasks(p.branch_tasks.size(), [&](std::size_t i,
                                                const std::atomic<bool> &cancelled) {
@@ -196,7 +244,7 @@ ExecutionAudit Engine::execute(const planner::Plan &p, const Batch &batch,
         auto result = graph::execute(
             branch.program, batch.inputs, batch.parameters,
             batch.parameter_count, batch.starts + task.row,
-            batch.ends + task.row, 1, local.data(), local.size(), nullptr, 0, deadline, &cancelled);
+            batch.ends + task.row, 1, local.data(), local.size(), nullptr, 0, deadline, &cancelled, false, p.expanded_matmul_roots, false);
         const auto columns = p.graph->program.roots.size();
         for (std::size_t root = 0; root < branch.root_indices.size(); ++root)
           static_cast<double *>(output)[task.row * columns + branch.root_indices[root]] = local[root];
@@ -218,7 +266,7 @@ ExecutionAudit Engine::execute(const planner::Plan &p, const Batch &batch,
                               p.result_layout ? output : graph::output_offset(output, output_row_offset(
                                            p.graph->program, batch, chunk.begin) *
                                            p.graph->program.roots.size(), p.graph->program.output_dtype),
-                              p.graph->program.roots.size(), p.result_layout.get(), chunk.begin, deadline, &cancelled);
+                              p.graph->program.roots.size(), p.result_layout.get(), chunk.begin, deadline, &cancelled, allow_workspace_loan, p.expanded_matmul_roots, p.row_subviews);
       });
     }
     if (transport) {

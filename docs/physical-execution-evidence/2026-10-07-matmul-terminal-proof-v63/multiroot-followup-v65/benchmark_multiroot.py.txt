@@ -1,0 +1,143 @@
+"""Full ordinary matrix task; same preparations, two retained result generations."""
+import os
+for key in ('OPENBLAS_NUM_THREADS','OMP_NUM_THREADS','VECLIB_MAXIMUM_THREADS','NUMBA_NUM_THREADS','MKL_NUM_THREADS'):
+ os.environ[key]='1'
+import argparse,ctypes,gc,hashlib,json,statistics,sys,time,threading
+from pathlib import Path
+import numpy as np
+from numba import njit
+D=Path(__file__).resolve().parent
+p=argparse.ArgumentParser()
+p.add_argument('--backend',choices=('cpp','njit'),required=True)
+p.add_argument('--metric',choices=('time','heap','rss'),default='time')
+p.add_argument('--layout',choices=('C','F'),default='C')
+p.add_argument('--outputs',type=int,choices=(1,2),default=2)
+p.add_argument('--rows',type=int,default=8192)
+p.add_argument('--inner',type=int,default=1024)
+p.add_argument('--columns',type=int,default=8192)
+p.add_argument('--rounds',type=int,default=3)
+args=p.parse_args()
+@njit(nogil=True)
+def reference(a,b,f_output,two):
+ # For F results, the transposed dot writes the final F view directly.
+ # Both paths use mature BLAS and keep only the required output matrices.
+ if f_output:
+  raw=np.dot(b.T,a.T)
+ else:
+  raw=np.dot(a,b)
+ extra=np.empty_like(raw) if two else np.empty((0,0))
+ for i in range(raw.shape[0]):
+  for j in range(raw.shape[1]):
+   value=raw[i,j]
+   if two:
+    extra[i,j]=value*0.5+0.25
+    raw[i,j]=value*0.25-0.125
+   else:
+    raw[i,j]=value*0.5+0.25
+ if f_output:return (extra.T,raw.T) if two else (raw.T,extra.T)
+ return (extra,raw) if two else (raw,extra)
+rng=np.random.default_rng(2026100865)
+a0=np.array(rng.uniform(-.01,.01,(args.rows,args.inner)),order=args.layout)
+b0=np.array(rng.uniform(-.01,.01,(args.inner,args.columns)),order=args.layout)
+a0.flags.writeable=b0.flags.writeable=False
+warm=np.array(np.full((16,16),.005),order=args.layout);warm.flags.writeable=False
+reference(warm,warm,args.layout=='F',args.outputs==2)
+signatures=tuple(reference.signatures)
+identity=json.loads((D/'baseline-identity.json').read_text())
+scheduler=graph=None;last_audit=None
+if args.backend=='cpp':
+ install=Path(identity['installed'])
+ assert all(hashlib.sha256((install/n).read_bytes()).hexdigest()==h for n,h in identity['installed_binaries'].items())
+ sys.path.insert(0,str(install))
+ import calmetrics_engine as c
+ decl={'a':dict(kind='matrix',axes=['asset','asset'],shape=['M','K']),
+       'b':dict(kind='matrix',axes=['asset','asset'],shape=['K','N'])}
+ expressions=['matmul(a,b)*0.5+0.25','matmul(a,b)*0.25-0.125'][:args.outputs]
+ graph=c.GraphCompiler(decl).compile(expressions,output_order=args.layout)
+ scheduler=c.AdaptiveScheduler(cpu_budget=1)
+ z=np.zeros(1,np.int64)
+def digest(outputs):
+ return tuple(hashlib.sha256(memoryview(o.ravel(order='K')).cast('B')).hexdigest() for o in outputs)
+def call():
+ global last_audit
+ a=np.array(a0,order=args.layout,copy=True);b=np.array(b0,order=args.layout,copy=True)
+ a.flags.writeable=b.flags.writeable=False
+ if scheduler:
+  result=scheduler.execute(graph,{'a':a,'b':b},z,z)
+  last_audit=result.audit
+  assert last_audit['python_operator_calls']==last_audit['python_fallback']==0
+  assert scheduler.peak_active_cpu_tokens<=1
+  assert all(np.all(o.root_statuses==0) and len(o.statuses)==1 and o.statuses[0] is None for o in result.outputs)
+  out=tuple(o.values[0] for o in result.outputs)
+ else:
+  out=reference(a,b,args.layout=='F',args.outputs==2)[:args.outputs]
+  assert tuple(reference.signatures)==signatures
+ for o in out:
+  o.flags.writeable=False
+  assert o.shape==(args.rows,args.columns) and o.dtype==np.float64
+  assert o.flags.c_contiguous if args.layout=='C' else o.flags.f_contiguous
+  assert not np.shares_memory(o,a) and not np.shares_memory(o,b)
+ if len(out)==2:assert not np.shares_memory(*out)
+ return out
+def independent(first,second):
+ assert all(not np.shares_memory(a,b) for a in first for b in second)
+old=previous=None
+try:
+ if args.metric=='time':
+  old=call();samples=[];cpu=[]
+  for repeat in range(args.rounds):
+   saved=digest(old)
+   start=time.perf_counter();cpu_start=time.process_time();out=call()
+   samples.append(time.perf_counter()-start);cpu.append(time.process_time()-cpu_start)
+   assert saved==digest(old);independent(old,out)
+   if repeat==args.rounds-1:previous=old
+   old=out
+  raw={'seconds':samples,'cpu_seconds':cpu,'median_seconds':statistics.median(samples),'cpu_utilization_percent':100*sum(cpu)/sum(samples)}
+ elif args.metric=='heap':
+  sys.path.insert(0,'/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/tools')
+  from benchmark_memory import HeapStats
+  probe=ctypes.CDLL(None);gc.collect();probe.cme_heap_begin();stages={}
+  try:
+   for repeat in range(3):
+    saved=digest(old) if old else None
+    probe.cme_heap_reset_peak();out=call();s=HeapStats();probe.cme_heap_snapshot(ctypes.byref(s))
+    assert s.table_overflows==0
+    stages[str(repeat)]={n:getattr(s,n) for n,_ in s._fields_}
+    if old:assert saved==digest(old);independent(old,out)
+    if repeat==2:previous=old
+    old=out
+  finally:
+   s=HeapStats();probe.cme_heap_end(ctypes.byref(s));assert s.table_overflows==0
+  raw={'stages':stages,'warm_peak_bytes':stages['2']['peak_bytes']}
+ else:
+  import psutil
+  process=psutil.Process();stop=threading.Event();active=threading.Event();peak=[0]
+  def sample():
+   while not stop.wait(.0005):
+    if active.is_set():peak[0]=max(peak[0],process.memory_info().rss)
+  thread=threading.Thread(target=sample);thread.start();stages={}
+  baseline=process.memory_info().rss
+  try:
+   for repeat in range(3):
+    saved=digest(old) if old else None
+    before=process.memory_info().rss;peak[0]=before;active.set();out=call();after=process.memory_info().rss;active.clear()
+    stages[str(repeat)]={'baseline':before,'peak':max(peak[0],after),'retained':after}
+    if old:assert saved==digest(old);independent(old,out)
+    if repeat==2:previous=old
+    old=out
+  finally:stop.set();thread.join()
+  raw={'stages':stages,'baseline_bytes':baseline,'warm_incremental_rss_bytes':stages['2']['peak']-baseline}
+ # Validate every cell in both independent generations after measured epochs.
+ expected=reference(a0,b0,args.layout=='F',args.outputs==2)[:args.outputs];maximum=0.
+ for actual in (previous,old):
+  assert actual is not None
+  for got,want in zip(actual,expected):
+   for i in range(0,args.rows,64):
+    g,w=got[i:i+64],want[i:i+64]
+    assert np.isfinite(g).all()
+    maximum=max(maximum,float(np.max(np.abs(g-w))))
+    np.testing.assert_allclose(g,w,rtol=0,atol=.000049)
+ assert tuple(reference.signatures)==signatures
+ print(json.dumps(dict(backend=args.backend,metric=args.metric,layout=args.layout,outputs=args.outputs,shape=[args.rows,args.inner,args.columns],full_parity='passed',max_full_absolute_error=maximum,audit=last_audit,scope='ordinary CPU1 request; same owned readonly input copies; required outputs only; two independent retained generations; warmed same-core BLAS NJIT; fixture/graph/JIT excluded',**raw)),flush=True)
+finally:
+ if scheduler:scheduler.close()

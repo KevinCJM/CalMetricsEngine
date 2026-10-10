@@ -1,0 +1,259 @@
+{
+  "build_id": "4a91e6fda7e431d65e073f1f4673efe872e2474d54e83d2058fee1025bc0ea97",
+  "production_adopted": true,
+  "full": {
+    "original_passed": 13092,
+    "original_skipped": 59,
+    "exact_skipped_nodeid_supplement_passed": 59,
+    "unique_covered": 13151,
+    "scope": "two invocations, not a single no-skip run"
+  },
+  "related": {
+    "normal": 625,
+    "asan_ubsan": 625,
+    "libraries_off": 625,
+    "production": 625
+  },
+  "native": {
+    "normal": 9,
+    "asan_ubsan": 9,
+    "libraries_off": 9,
+    "production": 9
+  },
+  "production_timing": [
+    {
+      "shape": [
+        100000,
+        2520,
+        30
+      ],
+      "layout": "C",
+      "medians_seconds": {
+        "candidate": 5.260506208000001,
+        "inplace-stream-njit": 14.742643270999999,
+        "bounded-blas-njit": 12.9030580415
+      },
+      "maximum_absolute_errors": {
+        "candidate": [
+          1.6653345369377348e-16,
+          5.551115123125783e-17,
+          1.734723475976807e-18
+        ],
+        "inplace-stream-njit": [
+          1.3877787807814457e-16,
+          5.551115123125783e-17,
+          0.0
+        ],
+        "bounded-blas-njit": [
+          1.6653345369377348e-16,
+          5.551115123125783e-17,
+          1.734723475976807e-18
+        ]
+      }
+    },
+    {
+      "shape": [
+        100000,
+        2520,
+        30
+      ],
+      "layout": "F",
+      "medians_seconds": {
+        "candidate": 5.1136627295,
+        "inplace-stream-njit": 15.543449979,
+        "bounded-blas-njit": 12.5886792915
+      },
+      "maximum_absolute_errors": {
+        "candidate": [
+          1.6653345369377348e-16,
+          5.551115123125783e-17,
+          1.734723475976807e-18
+        ],
+        "inplace-stream-njit": [
+          1.3877787807814457e-16,
+          5.551115123125783e-17,
+          0.0
+        ],
+        "bounded-blas-njit": [
+          1.6653345369377348e-16,
+          5.551115123125783e-17,
+          1.734723475976807e-18
+        ]
+      }
+    },
+    {
+      "shape": [
+        256,
+        200000,
+        30
+      ],
+      "layout": "C",
+      "medians_seconds": {
+        "candidate": 1.6430316875,
+        "inplace-stream-njit": 4.300517792,
+        "bounded-blas-njit": 4.1707065414999995
+      },
+      "maximum_absolute_errors": {
+        "candidate": [
+          1.8457457784393227e-15,
+          6.245004513516506e-16,
+          1.734723475976807e-18
+        ],
+        "inplace-stream-njit": [
+          1.8735013540549517e-15,
+          6.175615574477433e-16,
+          0.0
+        ],
+        "bounded-blas-njit": [
+          1.8457457784393227e-15,
+          6.245004513516506e-16,
+          1.734723475976807e-18
+        ]
+      }
+    }
+  ],
+  "production_memory": [
+    {
+      "backend": "candidate",
+      "requested_heap_warm_peak_bytes": 66356201,
+      "rss_delta_median_bytes": 73056256,
+      "rss_absolute_median_bytes": 157007872
+    },
+    {
+      "backend": "inplace-stream-njit",
+      "requested_heap_warm_peak_bytes": 57232768,
+      "rss_delta_median_bytes": 62537728,
+      "rss_absolute_median_bytes": 201326592
+    },
+    {
+      "backend": "bounded-blas-njit",
+      "requested_heap_warm_peak_bytes": 59007968,
+      "rss_delta_median_bytes": 81428480,
+      "rss_absolute_median_bytes": 221102080
+    }
+  ],
+  "isolated_timing": [
+    {
+      "shape": [
+        100000,
+        2520,
+        30
+      ],
+      "layout": "C",
+      "medians_seconds": {
+        "candidate": 5.1281924375,
+        "inplace-stream-njit": 14.375423875,
+        "bounded-blas-njit": 12.630303896000001
+      },
+      "maximum_absolute_errors": {
+        "candidate": [
+          1.6653345369377348e-16,
+          5.551115123125783e-17,
+          1.734723475976807e-18
+        ],
+        "inplace-stream-njit": [
+          1.3877787807814457e-16,
+          5.551115123125783e-17,
+          0.0
+        ],
+        "bounded-blas-njit": [
+          1.6653345369377348e-16,
+          5.551115123125783e-17,
+          1.734723475976807e-18
+        ]
+      }
+    },
+    {
+      "shape": [
+        100000,
+        2520,
+        30
+      ],
+      "layout": "F",
+      "medians_seconds": {
+        "candidate": 5.802492292,
+        "inplace-stream-njit": 16.430471603999997,
+        "bounded-blas-njit": 13.4515774995
+      },
+      "maximum_absolute_errors": {
+        "candidate": [
+          1.6653345369377348e-16,
+          5.551115123125783e-17,
+          1.734723475976807e-18
+        ],
+        "inplace-stream-njit": [
+          1.3877787807814457e-16,
+          5.551115123125783e-17,
+          0.0
+        ],
+        "bounded-blas-njit": [
+          1.6653345369377348e-16,
+          5.551115123125783e-17,
+          1.734723475976807e-18
+        ]
+      }
+    },
+    {
+      "shape": [
+        256,
+        200000,
+        30
+      ],
+      "layout": "C",
+      "medians_seconds": {
+        "candidate": 1.6753400205,
+        "inplace-stream-njit": 4.3225249165,
+        "bounded-blas-njit": 4.220420188
+      },
+      "maximum_absolute_errors": {
+        "candidate": [
+          1.8457457784393227e-15,
+          6.245004513516506e-16,
+          1.734723475976807e-18
+        ],
+        "inplace-stream-njit": [
+          1.8735013540549517e-15,
+          6.175615574477433e-16,
+          0.0
+        ],
+        "bounded-blas-njit": [
+          1.8457457784393227e-15,
+          6.245004513516506e-16,
+          1.734723475976807e-18
+        ]
+      }
+    }
+  ],
+  "isolated_memory": [
+    {
+      "backend": "old",
+      "requested_heap_warm_peak_bytes": 2076455801,
+      "rss_delta_median_bytes": null,
+      "rss_absolute_median_bytes": null
+    },
+    {
+      "backend": "candidate",
+      "requested_heap_warm_peak_bytes": 66356193,
+      "rss_delta_median_bytes": 77840384,
+      "rss_absolute_median_bytes": 161841152
+    },
+    {
+      "backend": "inplace-stream-njit",
+      "requested_heap_warm_peak_bytes": 57232768,
+      "rss_delta_median_bytes": 62078976,
+      "rss_absolute_median_bytes": 201441280
+    },
+    {
+      "backend": "bounded-blas-njit",
+      "requested_heap_warm_peak_bytes": 59007968,
+      "rss_delta_median_bytes": 78675968,
+      "rss_absolute_median_bytes": 218923008
+    }
+  ],
+  "scope": "supplied candidates; whole owned-input/ordinary Scheduler/annual mean/std/three VaR request; CPU1; two independent result generations; compilation excluded",
+  "excluded": "sampling, constraint repair, Pareto/frontier, CVaR/downside/drawdown and platform service",
+  "memory_blind_spots": "heap excludes Python arena and mmap; RSS sampled at 0.5ms; no worker children in CPU1 comparison",
+  "whole_goal_complete": false,
+  "submitted": false,
+  "pushed": false
+}

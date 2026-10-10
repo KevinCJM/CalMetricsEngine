@@ -1,0 +1,100 @@
+{
+  "build_id": "854627d5005df2899097cd8a6dac797940f3fce401e641e672721bad9716c4f7",
+  "baseline_build": "31dfa69ffbed1033f99b4f3ab61de340f93a4d3d0e10fcc104ade95a4f98e6d8",
+  "head": "d17b371abbd692e3ac839c7ba191a44d11054d7f",
+  "python_passed": 8979,
+  "added_python_tests": 284,
+  "native_passed": "9/9",
+  "asan_ubsan_passed": "9/9",
+  "eigen_off_passed": "9/9",
+  "canonical_operator_fixtures": 185,
+  "historical_excel_snapshot": {
+    "status": "PASS_AGAINST_RECALCULATED_SNAPSHOT",
+    "checked_values": 3056,
+    "failures": [],
+    "newly_recalculated": false,
+    "cases": 469,
+    "snapshot_engine": "Microsoft Excel 16.89.1 (16.89.24091630), macOS desktop full dependency rebuild",
+    "snapshot_sha256": "eab3361371bfff228fe3e6c1ea458fcb3e3d0a7a9b29cbda438c6e5604fb32b1",
+    "current_source_sha256": "3ed925b526997a569dba71fa9c11e6beba26d0c647ae636ddc8492635b49bb30",
+    "source_identity_differences": 938,
+    "allowed_identity_changes": "Only Readme B4 export identity and B9 build identity; formula and input cells unchanged.",
+    "engine_build_id": "854627d5005df2899097cd8a6dac797940f3fce401e641e672721bad9716c4f7",
+    "historical_snapshot": "/private/tmp/calmetrics-reaccept-20260929/excel-ms"
+  },
+  "phase2": [
+    {
+      "products": 500,
+      "njit_ms": 74.486125,
+      "native_ms": 56.739,
+      "ratio": 0.7617391829686401,
+      "max_ratio": 0.9,
+      "passed": true
+    },
+    {
+      "products": 1000,
+      "njit_ms": 148.245417,
+      "native_ms": 111.991208,
+      "ratio": 0.7554446556685122,
+      "max_ratio": 0.9,
+      "passed": true
+    },
+    {
+      "products": 1,
+      "intervals": 1,
+      "metrics": 5,
+      "history": 63,
+      "njit_us": 4.75,
+      "native_us": 3.333,
+      "ratio": 0.7016842105263158,
+      "max_ratio": 0.9,
+      "scheduler_us": 4.708,
+      "scheduler_ratio": 0.9657435897435898,
+      "max_scheduler_ratio": 1.0,
+      "passed": true
+    },
+    {
+      "products": 1,
+      "intervals": 1,
+      "metrics": 5,
+      "history": 252,
+      "njit_us": 9.75,
+      "native_us": 8.042,
+      "ratio": 0.8248205128205128,
+      "max_ratio": 0.9,
+      "scheduler_us": 9.375,
+      "scheduler_ratio": 0.9575120008170769,
+      "max_scheduler_ratio": 1.0,
+      "passed": true
+    }
+  ],
+  "self_review": {
+    "scope": "triangular_solve native implementation only; previous dirty work preserved",
+    "math": "ascending k and separate multiply/subtract preserved; no zero skip; division/finite checks remain column ordered",
+    "errors": "per-row nonfinite pre-scan falls back before any writes in that row; canonical failed prefix retained; unused triangle/unit diagonal ignored",
+    "ownership": "existing independent RHS result buffer only; no input write, matrix pack, private threads or extra numeric workspace",
+    "layout": "A borrows existing C/F/signed strides; eligible kernel operates across C RHS result columns; public C/F result policy unchanged",
+    "stack": "production object: old/new dispatcher 752B, tail branch at 0x1eec restores frame; new numeric finish 112B with no FMA; not whole request stack bound",
+    "portability": "Mac15+arm64 Eigen eligibility; same canonical fallback for scalar, small, wide nonrow-contiguous and Eigen-OFF; other host performance not established",
+    "first_test_failure": "18 test cases incorrectly called prepared for non-single plans; corrected fixture to ordinary multi-lane API; runtime contract unchanged",
+    "not_adopted": "Eigen triangularView solveInPlace changes cancellation result 0 to1 in admitted finite fixtures; width8 prototype regresses wide F; raw results retained"
+  },
+  "changed_files": [
+    "cpp/include/calmetrics_engine/matrix_backend.hpp",
+    "cpp/operators/matrix_backend.cpp",
+    "cpp/operators/matrix_foundation.cpp",
+    "docs/execution-guide.md",
+    "docs/physical-execution-optimization.md",
+    "tests/operator_native_tests.cpp",
+    "tests/test_triangular_library.py"
+  ],
+  "preserved_preexisting_files": 1664,
+  "limitations": [
+    "all-operator NJIT time/memory objective remains incomplete",
+    "memory malloc phases unchanged vs old, but RSS no-increase not established",
+    "native cold/warm heap exceeds NJIT by14242/14604bytes",
+    "frozen NJIT validates full matrix; native only consumed triangle",
+    "new Excel recalculation not run"
+  ],
+  "committed_or_pushed": false
+}

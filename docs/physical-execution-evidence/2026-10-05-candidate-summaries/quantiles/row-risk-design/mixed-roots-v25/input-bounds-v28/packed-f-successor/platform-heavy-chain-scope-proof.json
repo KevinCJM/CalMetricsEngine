@@ -1,0 +1,263 @@
+{
+  "status": "static_scope_verified_not_runtime_or_platform_parity",
+  "platform_head": "9b99048d188017816358f581a86b27df1c388161",
+  "platform_optimizer_sha256": "34c868448c3deb720b55f390bd121d16eddcb0dc13793eee5092aec372e42622",
+  "optimizer_functions": {
+    "calculate_return_kernel": {
+      "line": 74,
+      "end_line": 100,
+      "calls": [
+        "max",
+        "min",
+        "njit",
+        "np.isfinite",
+        "range",
+        "types.float64"
+      ],
+      "njit": true
+    },
+    "calculate_risk_kernel": {
+      "line": 115,
+      "end_line": 199,
+      "calls": [
+        "int",
+        "max",
+        "min",
+        "njit",
+        "np.ceil",
+        "np.floor",
+        "np.isfinite",
+        "np.sort",
+        "np.sqrt",
+        "range",
+        "returns.copy",
+        "types.float64"
+      ],
+      "njit": true
+    },
+    "portfolio_returns_kernel": {
+      "line": 250,
+      "end_line": 260,
+      "calls": [
+        "njit",
+        "np.empty",
+        "range"
+      ],
+      "njit": true
+    },
+    "repair_weights_kernel": {
+      "line": 268,
+      "end_line": 393,
+      "calls": [
+        "abs",
+        "integer_weights_kernel",
+        "max",
+        "min",
+        "njit",
+        "np.isfinite",
+        "np.sum",
+        "range",
+        "raw_weights.copy"
+      ],
+      "njit": true
+    },
+    "pareto_frontier_indices_kernel": {
+      "line": 401,
+      "end_line": 431,
+      "calls": [
+        "ValueError",
+        "_FRONTIER_RESULT",
+        "njit",
+        "np.argsort",
+        "np.full",
+        "np.isfinite"
+      ],
+      "njit": true
+    },
+    "representative_indices_kernel": {
+      "line": 439,
+      "end_line": 469,
+      "calls": [
+        "ValueError",
+        "_REPRESENTATIVE_RESULT",
+        "njit",
+        "np.isfinite",
+        "range"
+      ],
+      "njit": true
+    },
+    "explore_portfolios_kernel": {
+      "line": 483,
+      "end_line": 616,
+      "calls": [
+        "calculate_return_kernel",
+        "calculate_risk_kernel",
+        "int",
+        "max",
+        "min",
+        "njit",
+        "np.arange",
+        "np.empty",
+        "np.full",
+        "np.isfinite",
+        "np.log",
+        "np.random.random",
+        "np.random.seed",
+        "np.sum",
+        "np.zeros",
+        "pareto_frontier_indices_kernel",
+        "portfolio_returns_kernel",
+        "range",
+        "repair_weights_kernel",
+        "representative_indices_kernel",
+        "return_bucket_indices_kernel"
+      ],
+      "njit": true
+    },
+    "refine_special_candidates_kernel": {
+      "line": 665,
+      "end_line": 782,
+      "calls": [
+        "abs",
+        "current.copy",
+        "min",
+        "njit",
+        "np.any",
+        "np.full",
+        "np.isfinite",
+        "np.ones",
+        "np.round",
+        "np.zeros",
+        "range",
+        "raw.copy",
+        "refine_objective_kernel",
+        "repair_weights_kernel"
+      ],
+      "njit": true
+    },
+    "solve_frontier_grid_kernel": {
+      "line": 935,
+      "end_line": 1000,
+      "calls": [
+        "ValueError",
+        "abs",
+        "calculate_return_kernel",
+        "calculate_risk_kernel",
+        "feasible_qp_kernel",
+        "frontier_grid_model_kernel",
+        "grid_minimum_risk_kernel",
+        "int",
+        "max",
+        "njit",
+        "np.array",
+        "np.dot",
+        "np.full",
+        "np.isfinite",
+        "np.linspace",
+        "np.min",
+        "np.zeros",
+        "portfolio_returns_kernel",
+        "range"
+      ],
+      "njit": true
+    },
+    "_run_exploration": {
+      "line": 1393,
+      "end_line": 1476,
+      "calls": [
+        "ValueError",
+        "_constraint_arrays",
+        "_return_metric_code",
+        "_return_window",
+        "_risk_metric_code",
+        "_round_arrays",
+        "_target_code",
+        "explore_portfolios_kernel",
+        "float",
+        "int",
+        "integer_weights_kernel",
+        "np.all",
+        "np.asarray",
+        "np.ascontiguousarray",
+        "np.float64",
+        "np.int64",
+        "np.isfinite",
+        "np.ones",
+        "return_config.get",
+        "risk_config.get",
+        "type"
+      ],
+      "njit": false
+    },
+    "calculate_efficient_frontier_exploration": {
+      "line": 1483,
+      "end_line": 1745,
+      "calls": [
+        "ValueError",
+        "_constraint_arrays",
+        "_point",
+        "_return_metric_code",
+        "_return_window",
+        "_risk_metric_code",
+        "_run_exploration",
+        "_validate_optimizer_audit",
+        "append_grid_candidates_kernel",
+        "asset_returns.to_numpy",
+        "bool",
+        "enumerate",
+        "final_indices.items",
+        "finite",
+        "float",
+        "frontier_grid.get",
+        "grid_curve_membership_kernel",
+        "int",
+        "len",
+        "list",
+        "np.array",
+        "np.ascontiguousarray",
+        "np.empty",
+        "np.empty_like",
+        "np.float64",
+        "np.full",
+        "np.int64",
+        "np.isfinite",
+        "optimizer_numba_status",
+        "pareto_frontier_indices_kernel",
+        "point.get",
+        "point.get('adoption', {}).get",
+        "points.append",
+        "project_grid_weights_kernel",
+        "range",
+        "refine_special_candidates_kernel",
+        "refinement['items'].append",
+        "representative_indices_kernel",
+        "return_config.get",
+        "risk_config.get",
+        "solve_frontier_grid_kernel",
+        "sum",
+        "type"
+      ],
+      "njit": false
+    }
+  },
+  "canonical_registry_sha256": "f143867e6432f1af3a536d09f1bff77345cbff392e406a34d8d58730862cb5fc",
+  "canonical_operator_count": 190,
+  "current_actual_engine_build_id": "02164eb4fd6882b06271a039617c00dd06ca352cc8d09201a97694bff0cddd40",
+  "scope_of_completed_benchmark": "supplied/derived weights \u2192 shared MatMul \u2192 CVaR/negative-subset sample deviation/maximum drawdown; mixed adds normalized weights",
+  "real_platform_additional_stages": [
+    "seeded RNG draw/consumption order",
+    "single/group continuous repair",
+    "optional bounded integer feasibility search",
+    "parent selection and multiple rounds",
+    "return/risk metric selection/windows/annualization",
+    "bucket selection",
+    "Pareto/representative indices",
+    "optional local refinement",
+    "optional continuous target-gridQP/SQP and candidate append",
+    "caller ingress/validation/result formatting"
+  ],
+  "capability_boundary": "registry190 is an inventory, not proof that every stage can/cannot be composed; no engine full-stage parity or performance assertion without a real explicit DAG and contract qualification",
+  "no_engine_import_of_platform": true,
+  "no_platform_edits": true,
+  "whole_goal_complete": false
+}

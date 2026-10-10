@@ -1,0 +1,75 @@
+{
+  "status": "primary_paper_checked_no_package_adoption",
+  "primary_source": "https://arxiv.org/pdf/2302.08417",
+  "authors_code": "https://github.com/xrq-phys/blis",
+  "verified_facts": [
+    "Paper implementation is a BLIS 0.9.0-derived optional GEMMFIP sandbox, with NEON/SVE kernels and an arm64 configuration.",
+    "Paper experiments include Apple M2; its Accelerate comparison uses a shared chip coprocessor, unlike the NEON single-core curves."
+  ],
+  "inference": "Removing packing does not by itself establish a benefit over this project Accelerate backend; the actual M1 accelerator path has not been hardware-profiled here.",
+  "not_claimed": [
+    "GEMMFIP is shipped in pinned BLIS 2.1",
+    "Paper M2 curves prove a win on this M1 Max",
+    "Single-thread count equates two different hardware pipelines",
+    "The experimental sandbox is production-qualified"
+  ],
+  "next_steps": [
+    "Finish qualified ordinary V35r2 engine time and fresh memory observations before numerical changes.",
+    "If integration retains a material NJIT gap, evaluate prepared packing reuse or supported native backend methods with the unchanged 152 fixtures and five high-scale controls."
+  ],
+  "production_adopted": false,
+  "whole_goal_complete": false,
+  "follow_up_2026_10_06": {
+    "status": "primary_sources_reviewed_no_backend_adoption",
+    "sources": [
+      "https://arxiv.org/abs/2606.25426",
+      "https://github.com/xrq-phys/blis",
+      "https://github.com/flame/blis/blob/caf0db6be1202d9c83c79b51e75eceb96aa8b556/docs/BLISObjectAPI.md",
+      "https://github.com/flame/blis/blob/caf0db6be1202d9c83c79b51e75eceb96aa8b556/frame/base/bli_rntm.h"
+    ],
+    "verified_facts": [
+      "The June 2026 M1 AMX prefill paper evaluates fp32, panel scheduling and constant-weight prepacking. It does not establish a qualified fp64 implementation for this engine.",
+      "Pinned BLIS object expert interfaces accept caller-local context/runtime objects. Runtime pack_a/pack_b switches are consumed by the level-3 sup path.",
+      "These packing switches alone do not document a persistent packed-weight API. The internal packm control tree is a separate integration burden.",
+      "The GEMMFIP author fork is an optional experimental sandbox, not the pinned BLIS 2.1 default implementation."
+    ],
+    "inference_and_next_steps": [
+      "Evaluate bounded within-request panel/packing reuse only if ordinary V35r2 complete requests retain material gaps; count all packing, ownership and fresh peak memory.",
+      "Do not carry numeric packed contents across prepared runs merely because input geometry is stable: callers may change payload values.",
+      "Do not translate fp32 paper speedups into this binary64 workload, adopt private hardware instructions, or raise CPU use outside Scheduler admission."
+    ],
+    "result_extraction_diagnostic": {
+      "status": "source_review_only_no_cache_change",
+      "source": "cpp/native_api_bindings.cpp",
+      "source_sha256": "6b9fa63b46419f7dc78fb544d380aa6cc1d70d3f8a7e73df4e5591a53ef48b81",
+      "finding": "Repeated named_outputs access reconstructs all ndarray wrappers. A live sample during the full regression showed this extraction path; it is not a paired workload measurement.",
+      "cache_risk": "Read-only arrays still have mutable view metadata. Reusing publicly exposed ndarray objects could leak user reshaping or metadata mutations into later property access.",
+      "platform_boundary": "After CodeGraph narrowing, a current backend text scan found no named_outputs references. This does not prove absence of dynamic or external callers, and does not establish a platform bottleneck."
+    },
+    "zero_operand_hypothesis": {
+      "status": "disproved_no_code_change",
+      "probe": "v33-zero-root-observed-probe.json",
+      "finding": "Both zero-operand directions already return through matmul_zero_calls=1 and accelerate_matmul_calls=0. Fast bounds route zero values to the full scalar validation."
+    },
+    "production_adopted": false,
+    "whole_goal_complete": false
+  },
+  "current_follow_up": {
+    "status": "primary_sources_reviewed_design_prepared_no_new_variant_measurement",
+    "sources": [
+      "https://raw.githubusercontent.com/flame/blis/master/docs/BLISObjectAPI.md",
+      "https://arxiv.org/abs/2302.08417",
+      "https://github.com/xrq-phys/blis",
+      "https://eprints.maths.manchester.ac.uk/2731/1/paper.pdf"
+    ],
+    "findings": [
+      "GEMMFIP fuses packing with the first compute pass; published prototype/hardware results do not establish this host float64 superiority",
+      "Higham/Mary Eq 3.5 and deterministic gamma_n comparison support a path-depth review under the classical binary64 model; probabilistic bounds are not admission criteria",
+      "Pinned BLIS replacement screening remains rejected on this host; mature-library reputation alone is not measured benefit"
+    ],
+    "next_design": "v36-matmul-follow-up-design.md",
+    "next_variants_compiled": false,
+    "next_variants_measured": false,
+    "whole_goal_complete": false
+  }
+}

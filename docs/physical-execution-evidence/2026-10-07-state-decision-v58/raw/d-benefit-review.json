@@ -1,0 +1,31 @@
+{
+  "status": "qualified_for_partial_adoption",
+  "source_build_id": "6a4114d3736f7967e011c5e7619172eb093685461cbacd3cbda74191de02aadb",
+  "median_seconds": {
+    "baseline": 2.094073624815792,
+    "candidate": 2.09992304071784,
+    "njit": 7.488517417106777
+  },
+  "malloc_peak_bytes": {
+    "baseline": 868304738,
+    "candidate": 834750250,
+    "njit": 851456928
+  },
+  "saved_malloc_peak_bytes": 33554488,
+  "candidate_less_than_njit_bytes": 16706678,
+  "rss_absolute_bytes": {
+    "baseline": 1062600704,
+    "candidate": 1028653056,
+    "njit": 1423736832
+  },
+  "rss_incremental_bytes": {
+    "baseline": 769884160,
+    "candidate": 736215040,
+    "njit": 1093664768
+  },
+  "timing_difference_diagnostic_only": true,
+  "reason": "material whole-request peak allocation reduction around 32 MiB, no material whole-request slowdown",
+  "other_large_matrix_and_platform_chains_open": true,
+  "goal_complete": false,
+  "actual_adopted": false
+}

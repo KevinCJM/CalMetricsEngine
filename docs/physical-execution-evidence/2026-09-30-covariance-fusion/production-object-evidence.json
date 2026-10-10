@@ -1,0 +1,38 @@
+{
+  "object_sha256": "81ffdaf18b3c4ddaff3313b24c029cf8c0b2c4002e6e45cf12adbcecc5e9b0bf",
+  "baseline_object_sha256": "d3fbd55eac3e3668c6fc27f0281ba2e5b7fe4d3e5c9a778dc9d299ff9ad80f6f",
+  "source_sha256": "d746e2a438f918d9e4694a921c37a96b4a97ab6a06ff49dc540231c715d710de",
+  "assembly_sha256": "d60ff0486bc3db0f49e77e445c49ab7982d56160c5d8977307b9bb49bb0d1815",
+  "known_chain_bytes": {
+    "matrix_caller": 320,
+    "old_f_fast": 672,
+    "new_f_fast": 624,
+    "old_f_fallback": 768,
+    "initial_f_fallback": 784,
+    "new_f_fallback": 736,
+    "old_and_new_c": 656
+  },
+  "new_f_frames": {
+    "outer": 48,
+    "admission": 48,
+    "fast_driver": 48,
+    "mean8": 80,
+    "upper": 304,
+    "fallback_driver": 48,
+    "fallback_means": 192,
+    "fallback_products": 80,
+    "reduce_value": 144,
+    "Shape_size": 32
+  },
+  "tail_calls": [
+    "outer->admission",
+    "admission->fast",
+    "admission->fallback",
+    "fast->upper",
+    "fallback->products"
+  ],
+  "hot_loop": "4 ldp q,q per four observations; 8 fmul.2d and 8 fadd.2d; no stack access/call/FMA",
+  "numeric_spill": false,
+  "float_abi_save_bytes": 32,
+  "scope": "Known visible native arithmetic call chain only; excludes runtime/system/exception and upstream request frames, not complete request memory."
+}

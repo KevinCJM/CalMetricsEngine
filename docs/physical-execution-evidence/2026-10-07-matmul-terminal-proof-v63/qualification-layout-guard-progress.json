@@ -1,0 +1,142 @@
+{
+  "status": "qualified_actual_built_verified_measured",
+  "normal": {
+    "status": "passed",
+    "build_id": "4c39b63bd64febb6a076deacddd620f389f09206324ba6395a7b789d3c43aa62",
+    "source_count": 93,
+    "jobs": [
+      {
+        "label": "native",
+        "returncode": 0,
+        "counts": {
+          "tests": 9,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "skip_reasons": []
+      },
+      {
+        "label": "full",
+        "returncode": 0,
+        "counts": {
+          "tests": 16514,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "skip_reasons": []
+      }
+    ],
+    "actual_adopted": false,
+    "goal_complete": false,
+    "sanitizer_leak_detection": null,
+    "finished": 1791361881.6375449
+  },
+  "asan": {
+    "status": "passed",
+    "build_id": "06e79c455533f5f03ad1a8b69ea88049bbc3fd126a2257cbf0ae1b0e200dd7a5",
+    "source_count": 93,
+    "jobs": [
+      {
+        "label": "native",
+        "returncode": 0,
+        "counts": {
+          "tests": 9,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "skip_reasons": []
+      },
+      {
+        "label": "related",
+        "returncode": 0,
+        "counts": {
+          "tests": 2936,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "skip_reasons": []
+      }
+    ],
+    "actual_adopted": false,
+    "goal_complete": false,
+    "sanitizer_leak_detection": false,
+    "finished": 1791363825.709027
+  },
+  "off": {
+    "status": "passed",
+    "build_id": "f21f7075df8fee9603e1df7fb0c932815ae7b28871c4b22af74c487a32d30c69",
+    "source_count": 93,
+    "jobs": [
+      {
+        "label": "native",
+        "returncode": 0,
+        "counts": {
+          "tests": 9,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "skip_reasons": []
+      },
+      {
+        "label": "related",
+        "returncode": 0,
+        "counts": {
+          "tests": 2936,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 392
+        },
+        "skip_reasons": [
+          "enabled macOS 15 arm64 library",
+          "enabled macOS arm64 Accelerate",
+          "qualified macOS arm64 rounding environment"
+        ]
+      }
+    ],
+    "actual_adopted": false,
+    "goal_complete": false,
+    "sanitizer_leak_detection": null,
+    "finished": 1791364124.748874
+  },
+  "actual_adopted": true,
+  "goal_complete": false,
+  "build_cache_cleanup": {
+    "deleted": 212,
+    "recovered_free_bytes": 23393824768,
+    "current_free_bytes": 26489565184
+  },
+  "actual_build_id": "4c39b63bd64febb6a076deacddd620f389f09206324ba6395a7b789d3c43aa62",
+  "actual_checks": {
+    "status": "passed",
+    "build_id": "4c39b63bd64febb6a076deacddd620f389f09206324ba6395a7b789d3c43aa62",
+    "jobs": [
+      {
+        "name": "native",
+        "returncode": 0,
+        "counts": {
+          "tests": 9,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      },
+      {
+        "name": "targeted",
+        "returncode": 0,
+        "counts": {
+          "tests": 460,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      }
+    ],
+    "goal_complete": false
+  },
+  "actual_complete_requests": 12
+}

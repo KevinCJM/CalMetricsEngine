@@ -1,0 +1,94 @@
+[0/1] Re-running CMake...
+CMake Deprecation Warning at /private/tmp/calmetrics-covchol-next/asan-build/_deps/highway-1.3.0/CMakeLists.txt:28 (cmake_policy):
+  The OLD behavior for policy CMP0111 will be removed from a future version
+  of CMake.
+
+  The cmake-policies(7) manual explains that the OLD behaviors of all
+  policies are deprecated and that a policy should be set to OLD only under
+  specific short-term circumstances.  Projects should be ported to the NEW
+  behavior and not rely on setting a policy to OLD.
+
+
+-- Configuring done (0.5s)
+-- Generating done (0.0s)
+-- Build files have been written to: /private/tmp/calmetrics-covchol-next/asan-build
+[1/56] Building CXX object CMakeFiles/calmetrics_engine_operators.dir/cpp/operators/reduction.cpp.o
+In file included from /Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/cpp/operators/reduction.cpp:5:
+In file included from /private/tmp/calmetrics-covchol-next/asan-build/_deps/highway-1.3.0/hwy/contrib/sort/vqsort.h:33:
+/private/tmp/calmetrics-covchol-next/asan-build/_deps/highway-1.3.0/hwy/base.h:341:44: warning: token pasting of ',' and __VA_ARGS__ is a GNU extension [-Wgnu-zero-variadic-macro-arguments]
+  341 |   ::hwy::Abort(__FILE__, __LINE__, format, ##__VA_ARGS__)
+      |                                            ^
+/private/tmp/calmetrics-covchol-next/asan-build/_deps/highway-1.3.0/hwy/base.h:341:44: warning: token pasting of ',' and __VA_ARGS__ is a GNU extension [-Wgnu-zero-variadic-macro-arguments]
+/private/tmp/calmetrics-covchol-next/asan-build/_deps/highway-1.3.0/hwy/base.h:341:44: warning: token pasting of ',' and __VA_ARGS__ is a GNU extension [-Wgnu-zero-variadic-macro-arguments]
+/private/tmp/calmetrics-covchol-next/asan-build/_deps/highway-1.3.0/hwy/base.h:341:44: warning: token pasting of ',' and __VA_ARGS__ is a GNU extension [-Wgnu-zero-variadic-macro-arguments]
+/private/tmp/calmetrics-covchol-next/asan-build/_deps/highway-1.3.0/hwy/base.h:341:44: warning: token pasting of ',' and __VA_ARGS__ is a GNU extension [-Wgnu-zero-variadic-macro-arguments]
+5 warnings generated.
+[2/56] Building CXX object CMakeFiles/calmetrics_engine_operators.dir/cpp/operators/registry.cpp.o
+[3/56] Building CXX object CMakeFiles/calmetrics_engine_operators.dir/cpp/operators/sequence.cpp.o
+[4/56] Building CXX object CMakeFiles/calmetrics_engine_operators.dir/cpp/operators/recurrence.cpp.o
+[5/56] Building CXX object CMakeFiles/calmetrics_engine_operators.dir/cpp/operators/state_events.cpp.o
+[6/56] Building CXX object CMakeFiles/calmetrics_engine_operators.dir/cpp/operators/matrix.cpp.o
+[7/56] Building CXX object CMakeFiles/calmetrics_engine_operators.dir/cpp/operators/elementwise.cpp.o
+[8/56] Building CXX object CMakeFiles/calmetrics_engine_operators.dir/cpp/operators/covchol_accelerate.cpp.o
+[9/56] Building CXX object CMakeFiles/calmetrics_engine_operators.dir/cpp/operators/matmul_accelerate.cpp.o
+[10/56] Building CXX object CMakeFiles/calmetrics_engine_operators.dir/cpp/operators/matmul_packed.cpp.o
+[11/56] Building CXX object CMakeFiles/calmetrics_engine_operators.dir/cpp/operators/transcendental_accelerate.cpp.o
+[12/56] Building CXX object CMakeFiles/calmetrics_engine_operators.dir/cpp/operators/matrix_backend.cpp.o
+[13/56] Building CXX object CMakeFiles/calmetrics_engine_operators.dir/cpp/operators/covariance_accelerate.cpp.o
+/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/cpp/operators/covariance_accelerate.cpp:189:9: warning: 'cblas_dsyrk' is only available on macOS 13.3 or newer [-Wunguarded-availability-new]
+  189 |         cblas_dsyrk(lower_result ? CblasColMajor : CblasRowMajor,
+      |         ^~~~~~~~~~~
+/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/vecLib.framework/Headers/cblas_new.h:1011:6: note: 'cblas_dsyrk' has been marked as being introduced in macOS 13.3 here, but the deployment target is macOS 11.0.0
+ 1011 | void cblas_dsyrk(const enum CBLAS_ORDER ORDER, const enum CBLAS_UPLO UPLO,
+      |      ^
+/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/cpp/operators/covariance_accelerate.cpp:189:9: note: enclose 'cblas_dsyrk' in a __builtin_available check to silence this warning
+  189 |         cblas_dsyrk(lower_result ? CblasColMajor : CblasRowMajor,
+      |         ^~~~~~~~~~~
+  190 |             CblasUpper, lower_result ? CblasTrans : layout ? CblasNoTrans : CblasTrans,
+  191 |             static_cast<int>(d), static_cast<int>(count), 1.0, panel,
+  192 |             static_cast<int>(layout ? count : d), first == 0 ? 0.0 : 1.0,
+  193 |             result, static_cast<int>(d));
+      |                                          
+1 warning generated.
+[14/56] Building CXX object CMakeFiles/calmetrics_engine_operators.dir/cpp/operators/state.cpp.o
+[15/56] Building CXX object CMakeFiles/calmetrics_engine_operators.dir/cpp/operators/matrix_foundation.cpp.o
+[16/56] Building CXX object CMakeFiles/calmetrics_engine_operators.dir/cpp/result_layout.cpp.o
+[17/56] Building CXX object CMakeFiles/calmetrics_engine_operators.dir/cpp/operators/latent.cpp.o
+[18/56] Building CXX object CMakeFiles/calmetrics_engine_operators.dir/cpp/affine_projection.cpp.o
+[19/56] Building CXX object CMakeFiles/calmetrics_engine_operators.dir/cpp/pointwise.cpp.o
+[20/56] Building CXX object CMakeFiles/calmetrics_engine_operators.dir/cpp/graph.cpp.o
+[21/56] Building CXX object CMakeFiles/calmetrics_engine_operators.dir/cpp/compiler.cpp.o
+[22/56] Building CXX object CMakeFiles/calmetrics_engine_operators.dir/cpp/excel_budget.cpp.o
+[23/56] Building CXX object CMakeFiles/calmetrics_engine_operators.dir/cpp/excel.cpp.o
+[24/56] Building CXX object CMakeFiles/calmetrics_engine_operators.dir/cpp/operators/simd.cpp.o
+[25/56] Building CXX object CMakeFiles/calmetrics_engine_operators.dir/cpp/excel_state.cpp.o
+[26/56] Building CXX object CMakeFiles/calmetrics_engine_operators.dir/cpp/excel_operators.cpp.o
+[27/56] Building CXX object CMakeFiles/calmetrics_engine_operators.dir/cpp/excel_matrix_foundation.cpp.o
+[28/56] Building CXX object CMakeFiles/calmetrics_engine_operators.dir/cpp/excel_scopes.cpp.o
+[29/56] Building CXX object CMakeFiles/calmetrics_engine_operators.dir/cpp/excel_latent.cpp.o
+[30/56] Building CXX object CMakeFiles/calmetrics_engine_operators.dir/cpp/typed_ir.cpp.o
+[31/56] Building CXX object CMakeFiles/calmetrics_engine_operators.dir/cpp/typed_latent.cpp.o
+[32/56] Building CXX object CMakeFiles/calmetrics_engine_operators.dir/cpp/typed_foundation.cpp.o
+[33/56] Building CXX object CMakeFiles/calmetrics_engine_operators.dir/cpp/native_runtime.cpp.o
+[34/56] Building CXX object CMakeFiles/calmetrics_engine_operators.dir/cpp/model_payload.cpp.o
+[35/56] Building CXX object CMakeFiles/calmetrics_worker.dir/cpp/native_worker_main.cpp.o
+[36/56] Building CXX object CMakeFiles/calmetrics_engine_operators.dir/cpp/planner.cpp.o
+[37/56] Building CXX object CMakeFiles/calmetrics_engine_excel_tests.dir/tests/excel_native_tests.cpp.o
+[38/56] Building CXX object CMakeFiles/calmetrics_engine_operators.dir/cpp/native_process.cpp.o
+[39/56] Linking CXX static library libcalmetrics_engine_operators.a
+[40/56] Building CXX object CMakeFiles/calmetrics_engine_graph_tests.dir/tests/graph_native_tests.cpp.o
+[41/56] Building CXX object CMakeFiles/calmetrics_engine_compiler_tests.dir/tests/compiler_native_tests.cpp.o
+[42/56] Building CXX object CMakeFiles/calmetrics_engine_math_tests.dir/tests/math_native_tests.cpp.o
+[43/56] Building CXX object CMakeFiles/calmetrics_engine_operator_tests.dir/tests/operator_native_tests.cpp.o
+[44/56] Building CXX object CMakeFiles/calmetrics_engine_runtime_tests.dir/tests/runtime_native_tests.cpp.o
+[45/56] Linking CXX executable calmetrics_worker
+[46/56] Linking CXX executable calmetrics_engine_excel_tests
+[47/56] Linking CXX executable calmetrics_engine_operator_tests
+[48/56] Linking CXX executable calmetrics_engine_graph_tests
+[49/56] Linking CXX executable calmetrics_engine_compiler_tests
+[50/56] Linking CXX executable calmetrics_engine_runtime_tests
+[51/56] Linking CXX executable calmetrics_engine_math_tests
+[52/56] Building CXX object CMakeFiles/calmetrics_engine_stateful_tests.dir/tests/stateful_native_tests.cpp.o
+[53/56] Linking CXX executable calmetrics_engine_stateful_tests
+[54/56] Building CXX object CMakeFiles/calmetrics_engine_result_tests.dir/tests/result_native_tests.cpp.o
+[55/56] Linking CXX executable calmetrics_engine_result_tests

@@ -1,0 +1,89 @@
+{
+  "status": "passed_qualified_actual_adoption",
+  "actual_build_id": "d0f5e50fa5ce9b4440178b474f72f6970a24d404fc968826b6890bf7a01d31d8",
+  "source_files_checked": 93,
+  "test_files_checked": 192,
+  "protected_files_checked": 341,
+  "platform_unchanged": true,
+  "qualification_xml_counts": {
+    "full.xml": {
+      "tests": 16824,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "asan-related.xml": {
+      "tests": 6116,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "off-related.xml": {
+      "tests": 6116,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "actual-native.xml": {
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "actual-related.xml": {
+      "tests": 717,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "asan-native.xml": {
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "off-native.xml": {
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "native-elevated.xml": {
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "prior_manifests_checked": {
+    "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/docs/physical-execution-evidence/2026-10-09-latent-current-v69": 405,
+    "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/docs/physical-execution-evidence/2026-10-09-latent-current-v69/future-result-screen-v74": 81,
+    "fusion-followup-v70": 68,
+    "arena-diagnosis-v71": 72,
+    "gmm-replay-screen-v72": 55,
+    "gmm-replay-eigen-screen-v73": 55
+  },
+  "initial_measurements": 30,
+  "repeat_measurements": 21,
+  "actual_measurements": 7,
+  "actual_smokes": 2,
+  "source_native_worker_wheel_driver_and_raw_log_guards": "passed",
+  "qualification_reuse": "Full/SAN/OFF qualifications cover the same 93 source/config and 192 tests. Actual installed wheel/native/worker rebuilt, native9/related717 and complete replay executed; not a second actual full or sanitizer full run.",
+  "float_math_and_discrete_error_ownership": "passed within recorded scope",
+  "next_gaps": [
+    "GMM heap excess 12031190/48031190 bytes vs warmed NJIT",
+    "HMM750k heap excess 46540614 bytes unchanged",
+    "full active-set QP/frontier/seed exploration and other major loads"
+  ],
+  "documentation_impact": "Execution guide must describe new >=1Mi-element pure future-result loan and no arena save/restore on that path. Public operator/math/AST/IPC/layout/Excel formula/budget contracts unchanged; no Microsoft recalculation claimed.",
+  "created_utc": "2026-10-08T22:37:19.650804+00:00",
+  "goal_complete": false,
+  "offline_followup": {
+    "status": "completed_structural_counterfactual_only",
+    "fresh_graphs": 5,
+    "graph_nodes_roots_and_original_slot_capacity_matches": true,
+    "runtime_optimization_implemented": false,
+    "evidence": "reuse-diagnosis.json",
+    "sha256": "7591799af4ef55586ccdf4bd6b1b0194590697b945ebef7e39e17b761478c72f"
+  }
+}

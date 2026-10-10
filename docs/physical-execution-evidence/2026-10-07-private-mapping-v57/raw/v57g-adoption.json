@@ -1,0 +1,71 @@
+{
+  "status": "passed",
+  "candidate_build_id": "db14f515428e1f822a87b304a65b9c2c0ad6da134c54c71787f7edc6c590e1e1",
+  "changes": {
+    "cpp/graph.cpp": {
+      "before": "f8c65f444c8b7579d17ca9a17fde99cc6995b365fb259b9c8a6a674daca7de24",
+      "after": "26d019436246774247089aeb2b948efb7ef5cc7deff99a5935f6b2065b308cbc"
+    },
+    "cpp/include/calmetrics_engine/graph.hpp": {
+      "before": "44946315fb77ecb3a383e4b7fefb69e8094a0eb1393954f910fd3562da4f1b16",
+      "after": "fdc188ccce3c23384ecc3f5258fd652d86c05dc9c7af5e84cf2916279f7a68dd"
+    },
+    "cpp/include/calmetrics_engine/operators.hpp": {
+      "before": "bffa28f96d4f4367a05df81b4802efc675b2a52268ea3b528dcf97b7c43557e1",
+      "after": "1121734fb7fba6a63a8964dce388242f217ae21e43d7201c999d423e30f0a642"
+    },
+    "cpp/operators/latent.cpp": {
+      "before": "b095a46e1d416e6b8cfcc89f8d7f168ff2046c2ac694655d9644f277f1603a30",
+      "after": "68fa89bb1dad3b1dfd97c0aac01520d87035cc9c764b61b956d389e46f679183"
+    },
+    "tests/graph_native_tests.cpp": {
+      "before": "dba272724f25c6460e5ecc82060be9ac0b59d8ee412cb5e15f5c8edc45383d3b",
+      "after": "5e4f7daf5f77065da229544032f7b8c55e3e988f9199feec0ced6113de361dfe"
+    },
+    "tests/test_private_arithmetic_pair.py": {
+      "before": null,
+      "after": "6cc356871d37976c980a23857171f9d5b80b30b42dd3a3d1d3a0d7d409de8d3c"
+    },
+    "tests/test_take_scatter_pair.py": {
+      "before": null,
+      "after": "a611140463278705cc70b986a05b9274a0674e45e0a7406d94aaef81b764a83a"
+    },
+    "tests/take_scatter_native_cases.hpp": {
+      "before": null,
+      "after": "636e190c1e75a8a129ffd0a0681c2822d681ab509a783a5a4e3a586e44bb9d9b"
+    }
+  },
+  "baseline_files_preserved_outside_scope": 317,
+  "benefit_review": {
+    "status": "qualified_for_partial_adoption",
+    "source_build_id": "db14f515428e1f822a87b304a65b9c2c0ad6da134c54c71787f7edc6c590e1e1",
+    "six_fresh_time_cycles": {
+      "baseline": 2.1182382500264794,
+      "candidate": 2.081957896007225,
+      "njit": 7.322156583424658
+    },
+    "malloc_warm_peak_bytes": {
+      "baseline": 932617522,
+      "candidate": 868304738,
+      "njit": 851456928
+    },
+    "saved_bytes": 64312784,
+    "saved_mib": 61.33345031738281,
+    "remaining_njit_gap_bytes": 16847810,
+    "time_interpretation": "Time remains near the predecessor;36ms diagnostic difference is not the adoption reason. Adoption is justified by stable whole-chain allocation reduction and retained3.5x NI speed.",
+    "memory_scope": "One separate fresh allocator and one RSS process per backend, three request generations; actual rebuild will be checked separately.",
+    "open": [
+      "whole-chain malloc remains16MiB above NJIT",
+      "state masks and lifetime-aware arena costs",
+      "important large matrix regressions",
+      "other full platform chains and complete copy/allocation audit"
+    ],
+    "git_delivery": false,
+    "goal_complete": false
+  },
+  "git_delivery": false,
+  "goal_complete": false,
+  "actual_build_id": "db14f515428e1f822a87b304a65b9c2c0ad6da134c54c71787f7edc6c590e1e1",
+  "actual_quality": "v57g-actual-quality.json",
+  "actual_confirmation": "v57g-actual-confirmation.json"
+}

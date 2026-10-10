@@ -1,0 +1,46 @@
+{
+  "status": "plan_only_verified",
+  "build_id": "88eac09a9e740895200c37fbf6caf5ef74e995873864d22e0830c492339872da",
+  "shape": [
+    16384,
+    2520,
+    30
+  ],
+  "plans": [
+    {
+      "lane": "single",
+      "parallel_dimension": "interval",
+      "thread_count": 1,
+      "process_count": 1,
+      "reason_codes": [
+        "typed_array_shape_work_accounted",
+        "typed_result_capacity_write_work_accounted",
+        "parallel_overhead_expected_to_dominate",
+        "native_numeric_line_sort_resource_reserve",
+        "eligible_nodes_use_native_runtime_simd_dispatch"
+      ],
+      "estimated_worker_scratch_bytes": 2858376,
+      "estimated_work_units": 4465516909.841628,
+      "cpu_budget": 1
+    },
+    {
+      "lane": "single",
+      "parallel_dimension": "interval",
+      "thread_count": 1,
+      "process_count": 1,
+      "reason_codes": [
+        "typed_array_shape_work_accounted",
+        "typed_result_capacity_write_work_accounted",
+        "parallel_overhead_expected_to_dominate",
+        "native_numeric_line_sort_resource_reserve",
+        "eligible_nodes_use_native_runtime_simd_dispatch"
+      ],
+      "estimated_worker_scratch_bytes": 2858376,
+      "estimated_work_units": 4465516909.841628,
+      "cpu_budget": 4
+    }
+  ],
+  "numeric_execution": false,
+  "performance_claim": false,
+  "whole_goal_complete": false
+}

@@ -1,0 +1,23 @@
+# V57：私有训练标准化的受证融合（隔离设计）
+
+目的：降低上一实际V56的13输出完整链932617522bytes malloc峰值；它仍比暖NI851456928高81160594bytes。训练take(1048578×8)和subtract的两个64MiB级数组是源码/实际arena确认的目标，本轮先消除subtract物化，不把局部通过当作整体目标完成。
+
+## 依赖、复用与失效
+
+现有两段elementwise_pair复用Eigen Map/惰性算术及canonical scalar bodies，不新写数学内核。第一段私有add/subtract/multiply只有一个消费者且非公开，第二段仍为add/subtract/multiply/divide。最多允许一个第一段私有数组父；它须是已物化、非公开numeric operation，未被其他deferred节点替代，并排除所有已知借用视图（含raw native diag）。没有rolling/apply子作用域；原strict typed、observer/isolate/deferred-errors禁入规则保留。computed short broadcast依然在第一段保存D个值。值每次重算，不缓存模型/数据；跨请求输入改变和Prepared快照不复用旧数值。
+
+保持编译器原logical slot/lifetime，不额外延长生活区或重新着色。检查第一段到消费者之间，没有numeric节点写同一个私有输入slot；第一段自己的短缓存slot也须不同。消费者若复用该输入slot，只允许完整同形canonical C输入逐单元读后写；第二个消费者操作数不得通过借用视图引用该slot，保守回原路径。geometry证明要求该私有父、第一段与第二段的完整rank/shape一致；未知/标量/广播输出扩大保持canonical。对公共F根直接独立写F，不转换调用方输入。
+
+## 分配、Planner与错误
+
+共享deferred_pair_geometry同时控制Planner/arena容量和执行资格，新deferred_private_argument只记录证明，不更改AST/DAG/operator/IPC。工作区为原输入矩阵、必要短缓存和最终结果，不物化第一段矩阵；不降低仍需保留的输出、重试或非准入路径空间。worker重建同一metadata。consumer可能原地覆盖本次已经死亡的私有C输入，绝不写外部输入、公开当前根或旧独立结果；仍有其他消费者的父由原liveness保留独立slot。
+
+第一段prepare和结构错误仍位于原节点，第二段prepare仍在原位置；纯加减乘未引入有限值拒绝，原divide检查/故障发布顺序沿elementwise_pair保持。新proof不跨作用域，不因参数快照隐藏失败；有观察器/隔离/延迟错误走canonical物化。尾差许可不是改离散消费者或错误顺序的依据。本轮优先逐字节baseline对照，另以直接canonical算子/不变量核验。
+
+## 资格与性能
+
+先做普通/原生相关数学、布局、别名/中途覆盖拒绝、broadcast rank变化、同图输入/索引变化、readonly、两代结果、Prepared、single/thread/inline/shared和错误隔离控制，再完整normal/SAN/OFF资格。与V56同源之前版本、暖NI完整13输出链按相同seed/shape/output/CPU1、只读caller准备和两代结果计时；先筛选是否有64MiB级真实峰值改善，再配对/fresh heap/RSS重复。小控制差异只作诊断。未测不采用，实际源保持V56直至完整资格、数据证据与自审核通过。
+
+Excel从同一logical图展开，数学操作/类型/节点/公式/预算未改变。C++请求不触发Excel，不保存导出中间结果；本轮不要求修改公式，也不能宣称新的Microsoft Excel实机重算。公开operator/types/user接口不变化，资格通过后仅同步物理执行文档。
+
+整个目标仍含主要矩阵NI差距、state-mask内存、真实平台链和完整分配/复制审计；不得缩小为本次private pair。

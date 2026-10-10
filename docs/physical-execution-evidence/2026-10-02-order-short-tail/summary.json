@@ -1,0 +1,606 @@
+{
+  "build_id": "a6841b56ae9e25c011f991df43385f47c1b5fa7285d0ec804cdf7f71366d75a2",
+  "baseline_build_id": "ccca6b67a5220ea2134a4743d281b80c5af4c096e7d41c3d5b747bb8de70e331",
+  "time_cases": 32,
+  "rounds": 9,
+  "memory_cases": 4,
+  "fresh_memory_children": 24,
+  "heap_stages": 72,
+  "new_old_bits_changed": 0,
+  "heap_new_old_delta_bytes": [
+    {
+      "case": {
+        "name": "quantile",
+        "n": 4194304,
+        "layout": "c",
+        "entry": "ordinary",
+        "pattern": "random"
+      },
+      "cold": 8,
+      "warm": 8,
+      "delta_njit_cold": -37740296,
+      "rss_request_delta_new_old": 0
+    },
+    {
+      "case": {
+        "name": "quantile",
+        "n": 16777216,
+        "layout": "c",
+        "entry": "ordinary",
+        "pattern": "random"
+      },
+      "cold": 8,
+      "warm": 8,
+      "delta_njit_cold": -150986504,
+      "rss_request_delta_new_old": -32768
+    },
+    {
+      "case": {
+        "name": "quantile",
+        "n": 4194304,
+        "layout": "c",
+        "entry": "prepared",
+        "pattern": "random"
+      },
+      "cold": 8,
+      "warm": 8,
+      "delta_njit_cold": -37740136,
+      "rss_request_delta_new_old": -65536
+    },
+    {
+      "case": {
+        "name": "quantile_where",
+        "n": 16777216,
+        "layout": "c",
+        "entry": "ordinary",
+        "pattern": "random",
+        "density": 0.01
+      },
+      "cold": 8,
+      "warm": 8,
+      "delta_njit_cold": -2836460,
+      "rss_request_delta_new_old": -131072
+    }
+  ],
+  "time": [
+    {
+      "case": {
+        "name": "median",
+        "n": 63,
+        "layout": "c",
+        "entry": "ordinary",
+        "pattern": "random"
+      },
+      "median_ms": {
+        "old": 0.0055,
+        "new": 0.005583,
+        "njit": 0.00075
+      },
+      "delta_old_ms": 8.300000000000061e-05,
+      "delta_njit_ms": 0.0048330000000000005
+    },
+    {
+      "case": {
+        "name": "median",
+        "n": 1048576,
+        "layout": "c",
+        "entry": "ordinary",
+        "pattern": "random"
+      },
+      "median_ms": {
+        "old": 7.715834,
+        "new": 7.753,
+        "njit": 10.259708
+      },
+      "delta_old_ms": 0.03716600000000003,
+      "delta_njit_ms": -2.5067079999999997
+    },
+    {
+      "case": {
+        "name": "median",
+        "n": 4194304,
+        "layout": "c",
+        "entry": "ordinary",
+        "pattern": "random"
+      },
+      "median_ms": {
+        "old": 36.318792,
+        "new": 35.996417,
+        "njit": 36.294083
+      },
+      "delta_old_ms": -0.32237500000000097,
+      "delta_njit_ms": -0.29766599999999954
+    },
+    {
+      "case": {
+        "name": "median",
+        "n": 16777216,
+        "layout": "c",
+        "entry": "ordinary",
+        "pattern": "random"
+      },
+      "median_ms": {
+        "old": 140.335833,
+        "new": 139.81325,
+        "njit": 133.378042
+      },
+      "delta_old_ms": -0.5225829999999974,
+      "delta_njit_ms": 6.435208000000017
+    },
+    {
+      "case": {
+        "name": "quantile",
+        "n": 63,
+        "layout": "c",
+        "entry": "ordinary",
+        "pattern": "random"
+      },
+      "median_ms": {
+        "old": 0.005416,
+        "new": 0.005292,
+        "njit": 0.001292
+      },
+      "delta_old_ms": -0.00012399999999999998,
+      "delta_njit_ms": 0.004
+    },
+    {
+      "case": {
+        "name": "quantile",
+        "n": 1048576,
+        "layout": "c",
+        "entry": "ordinary",
+        "pattern": "random"
+      },
+      "median_ms": {
+        "old": 9.247875,
+        "new": 8.02075,
+        "njit": 10.413916
+      },
+      "delta_old_ms": -1.227125000000001,
+      "delta_njit_ms": -2.393166000000001
+    },
+    {
+      "case": {
+        "name": "quantile",
+        "n": 4194304,
+        "layout": "c",
+        "entry": "ordinary",
+        "pattern": "random"
+      },
+      "median_ms": {
+        "old": 41.357,
+        "new": 36.095167,
+        "njit": 51.682542
+      },
+      "delta_old_ms": -5.261833000000003,
+      "delta_njit_ms": -15.587375000000002
+    },
+    {
+      "case": {
+        "name": "quantile",
+        "n": 16777216,
+        "layout": "c",
+        "entry": "ordinary",
+        "pattern": "random"
+      },
+      "median_ms": {
+        "old": 171.263167,
+        "new": 151.682416,
+        "njit": 133.261875
+      },
+      "delta_old_ms": -19.58075100000002,
+      "delta_njit_ms": 18.420540999999986
+    },
+    {
+      "case": {
+        "name": "median_where",
+        "n": 63,
+        "layout": "c",
+        "entry": "ordinary",
+        "pattern": "random",
+        "density": 0.55
+      },
+      "median_ms": {
+        "old": 0.005125,
+        "new": 0.005042,
+        "njit": 0.000792
+      },
+      "delta_old_ms": -8.300000000000061e-05,
+      "delta_njit_ms": 0.0042499999999999994
+    },
+    {
+      "case": {
+        "name": "median_where",
+        "n": 1048576,
+        "layout": "c",
+        "entry": "ordinary",
+        "pattern": "random",
+        "density": 0.55
+      },
+      "median_ms": {
+        "old": 8.918459,
+        "new": 8.885625,
+        "njit": 9.337083
+      },
+      "delta_old_ms": -0.03283400000000114,
+      "delta_njit_ms": -0.4514580000000006
+    },
+    {
+      "case": {
+        "name": "median_where",
+        "n": 4194304,
+        "layout": "c",
+        "entry": "ordinary",
+        "pattern": "random",
+        "density": 0.55
+      },
+      "median_ms": {
+        "old": 34.236083,
+        "new": 33.950167,
+        "njit": 37.117125
+      },
+      "delta_old_ms": -0.2859160000000003,
+      "delta_njit_ms": -3.166958000000001
+    },
+    {
+      "case": {
+        "name": "median_where",
+        "n": 16777216,
+        "layout": "c",
+        "entry": "ordinary",
+        "pattern": "random",
+        "density": 0.55
+      },
+      "median_ms": {
+        "old": 120.112708,
+        "new": 119.32575,
+        "njit": 133.5435
+      },
+      "delta_old_ms": -0.7869579999999985,
+      "delta_njit_ms": -14.217749999999995
+    },
+    {
+      "case": {
+        "name": "quantile_where",
+        "n": 63,
+        "layout": "c",
+        "entry": "ordinary",
+        "pattern": "random",
+        "density": 0.55
+      },
+      "median_ms": {
+        "old": 0.005042,
+        "new": 0.00525,
+        "njit": 0.00125
+      },
+      "delta_old_ms": 0.00020800000000000072,
+      "delta_njit_ms": 0.004
+    },
+    {
+      "case": {
+        "name": "quantile_where",
+        "n": 1048576,
+        "layout": "c",
+        "entry": "ordinary",
+        "pattern": "random",
+        "density": 0.55
+      },
+      "median_ms": {
+        "old": 8.5725,
+        "new": 7.859375,
+        "njit": 10.568042
+      },
+      "delta_old_ms": -0.7131249999999998,
+      "delta_njit_ms": -2.708667
+    },
+    {
+      "case": {
+        "name": "quantile_where",
+        "n": 4194304,
+        "layout": "c",
+        "entry": "ordinary",
+        "pattern": "random",
+        "density": 0.55
+      },
+      "median_ms": {
+        "old": 32.50775,
+        "new": 29.759542,
+        "njit": 42.707
+      },
+      "delta_old_ms": -2.7482080000000018,
+      "delta_njit_ms": -12.947458000000001
+    },
+    {
+      "case": {
+        "name": "quantile_where",
+        "n": 16777216,
+        "layout": "c",
+        "entry": "ordinary",
+        "pattern": "random",
+        "density": 0.55
+      },
+      "median_ms": {
+        "old": 154.539375,
+        "new": 143.327708,
+        "njit": 173.158459
+      },
+      "delta_old_ms": -11.211667000000006,
+      "delta_njit_ms": -29.830750999999992
+    },
+    {
+      "case": {
+        "name": "quantile",
+        "n": 1048576,
+        "layout": "c",
+        "entry": "ordinary",
+        "pattern": "sorted"
+      },
+      "median_ms": {
+        "old": 2.738208,
+        "new": 1.533458,
+        "njit": 3.909542
+      },
+      "delta_old_ms": -1.2047500000000002,
+      "delta_njit_ms": -2.376084
+    },
+    {
+      "case": {
+        "name": "quantile",
+        "n": 1048576,
+        "layout": "c",
+        "entry": "ordinary",
+        "pattern": "reverse"
+      },
+      "median_ms": {
+        "old": 2.797,
+        "new": 1.577625,
+        "njit": 3.857417
+      },
+      "delta_old_ms": -1.219375,
+      "delta_njit_ms": -2.2797919999999996
+    },
+    {
+      "case": {
+        "name": "quantile",
+        "n": 1048576,
+        "layout": "c",
+        "entry": "ordinary",
+        "pattern": "equal"
+      },
+      "median_ms": {
+        "old": 2.7775,
+        "new": 1.557125,
+        "njit": 3.841
+      },
+      "delta_old_ms": -1.2203749999999998,
+      "delta_njit_ms": -2.283875
+    },
+    {
+      "case": {
+        "name": "quantile",
+        "n": 4194304,
+        "layout": "c",
+        "entry": "prepared",
+        "pattern": "random"
+      },
+      "median_ms": {
+        "old": 41.427833,
+        "new": 36.099042,
+        "njit": 51.822292
+      },
+      "delta_old_ms": -5.3287910000000025,
+      "delta_njit_ms": -15.72325
+    },
+    {
+      "case": {
+        "name": "median_where",
+        "n": 4194304,
+        "layout": "c",
+        "entry": "ordinary",
+        "pattern": "random",
+        "density": 0.01
+      },
+      "median_ms": {
+        "old": 4.703666,
+        "new": 4.813625,
+        "njit": 4.241334
+      },
+      "delta_old_ms": 0.10995899999999992,
+      "delta_njit_ms": 0.5722909999999999
+    },
+    {
+      "case": {
+        "name": "median_where",
+        "n": 4194304,
+        "layout": "c",
+        "entry": "ordinary",
+        "pattern": "random",
+        "density": 1.0
+      },
+      "median_ms": {
+        "old": 38.025041,
+        "new": 38.092458,
+        "njit": 41.623958
+      },
+      "delta_old_ms": 0.06741699999999895,
+      "delta_njit_ms": -3.531500000000001
+    },
+    {
+      "case": {
+        "name": "quantile_where",
+        "n": 4194304,
+        "layout": "c",
+        "entry": "ordinary",
+        "pattern": "random",
+        "density": 0.01
+      },
+      "median_ms": {
+        "old": 4.756833,
+        "new": 4.74,
+        "njit": 4.975208
+      },
+      "delta_old_ms": -0.016833000000000098,
+      "delta_njit_ms": -0.23520800000000008
+    },
+    {
+      "case": {
+        "name": "quantile_where",
+        "n": 4194304,
+        "layout": "c",
+        "entry": "ordinary",
+        "pattern": "random",
+        "density": 1.0
+      },
+      "median_ms": {
+        "old": 43.131667,
+        "new": 38.190458,
+        "njit": 57.283084
+      },
+      "delta_old_ms": -4.941209000000001,
+      "delta_njit_ms": -19.092626000000003
+    },
+    {
+      "case": {
+        "name": "median_where",
+        "n": 16777216,
+        "layout": "c",
+        "entry": "ordinary",
+        "pattern": "random",
+        "density": 0.01
+      },
+      "median_ms": {
+        "old": 22.248791,
+        "new": 22.253417,
+        "njit": 22.562375
+      },
+      "delta_old_ms": 0.004625999999998243,
+      "delta_njit_ms": -0.3089580000000005
+    },
+    {
+      "case": {
+        "name": "median_where",
+        "n": 4194304,
+        "layout": "c",
+        "entry": "prepared",
+        "pattern": "random",
+        "density": 0.01
+      },
+      "median_ms": {
+        "old": 4.606292,
+        "new": 4.203,
+        "njit": 4.300166
+      },
+      "delta_old_ms": -0.40329199999999954,
+      "delta_njit_ms": -0.09716599999999964
+    },
+    {
+      "case": {
+        "name": "median_where",
+        "n": 4194304,
+        "layout": "c",
+        "entry": "prepared",
+        "pattern": "random",
+        "density": 0.55
+      },
+      "median_ms": {
+        "old": 34.0745,
+        "new": 34.016458,
+        "njit": 38.592417
+      },
+      "delta_old_ms": -0.05804200000000037,
+      "delta_njit_ms": -4.5759589999999974
+    },
+    {
+      "case": {
+        "name": "quantile_where",
+        "n": 16777216,
+        "layout": "c",
+        "entry": "ordinary",
+        "pattern": "random",
+        "density": 0.01
+      },
+      "median_ms": {
+        "old": 21.365125,
+        "new": 21.208333,
+        "njit": 21.802333
+      },
+      "delta_old_ms": -0.15679199999999938,
+      "delta_njit_ms": -0.5940000000000012
+    },
+    {
+      "case": {
+        "name": "quantile_where",
+        "n": 4194304,
+        "layout": "c",
+        "entry": "prepared",
+        "pattern": "random",
+        "density": 0.01
+      },
+      "median_ms": {
+        "old": 4.2685,
+        "new": 4.3965,
+        "njit": 4.092583
+      },
+      "delta_old_ms": 0.12799999999999923,
+      "delta_njit_ms": 0.3039169999999993
+    },
+    {
+      "case": {
+        "name": "quantile_where",
+        "n": 4194304,
+        "layout": "c",
+        "entry": "prepared",
+        "pattern": "random",
+        "density": 0.55
+      },
+      "median_ms": {
+        "old": 32.463333,
+        "new": 29.712542,
+        "njit": 43.938083
+      },
+      "delta_old_ms": -2.7507909999999995,
+      "delta_njit_ms": -14.225541
+    },
+    {
+      "case": {
+        "name": "quantile",
+        "n": 4194304,
+        "layout": "c",
+        "entry": "ordinary",
+        "pattern": "random",
+        "probability": 0.05
+      },
+      "median_ms": {
+        "old": 42.212208,
+        "new": 41.684084,
+        "njit": 60.441542
+      },
+      "delta_old_ms": -0.5281239999999983,
+      "delta_njit_ms": -18.757458
+    },
+    {
+      "case": {
+        "name": "quantile",
+        "n": 4194304,
+        "layout": "c",
+        "entry": "ordinary",
+        "pattern": "random",
+        "probability": 0.5
+      },
+      "median_ms": {
+        "old": 36.24,
+        "new": 36.21625,
+        "njit": 48.198541
+      },
+      "delta_old_ms": -0.023749999999999716,
+      "delta_njit_ms": -11.982290999999996
+    }
+  ],
+  "limitations": [
+    "16M unmasked quantile remains materially slower than this warmed NJIT",
+    "malloc coverage and fresh RSS preparation baseline are distinct",
+    "no new Microsoft Excel recalculation",
+    "local arm64 only; no new cross-platform CI",
+    "not committed or pushed"
+  ]
+}

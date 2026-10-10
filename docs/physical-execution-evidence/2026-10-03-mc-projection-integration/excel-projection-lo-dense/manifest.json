@@ -1,0 +1,826 @@
+{
+  "build": {
+    "version": "0.3.0",
+    "compiler": "AppleClang 17.0.0.17000603",
+    "architecture": "arm64",
+    "cpu_policy": "baseline",
+    "thread_backend": "persistent_cpp_native_scheduler",
+    "cxx_standard": 17,
+    "execution_backend": "pybind11_aot",
+    "graph_execution_backend": "native_graph_interpreter",
+    "scheduler_backend": "bounded_thread_process_pool",
+    "scheduler_scope": "process_wide_cpp_cpu_admission",
+    "legacy_finance_scheduler": "shared_native_scheduler",
+    "coroutine_backend": "asyncio_orchestration_only",
+    "process_transport": "shared_memory_or_serialized_small_input",
+    "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+    "runtime_jit": 0,
+    "compiler_backend": "cpp_restricted_ast",
+    "planner_backend": "cpp",
+    "native_scheduler_backend": "persistent_cpp_threads_processes",
+    "native_worker_runtime": "standalone_no_python",
+    "python_role": "numpy_binding_async_adapter",
+    "input_memory_policy": "exact_dtype_strided_zero_copy"
+  },
+  "cases": [
+    {
+      "case": "projection:affine_rank2",
+      "prefix": "C000_",
+      "plan": {
+        "identity": "e6e99f0569201d22",
+        "engine_build_id": "63a1dacd485576f5d148be0fb577bf2d277c91a00ab35c970e6bc88d2330a39a",
+        "formula_version": "excel-formulas-1",
+        "status": "READY",
+        "verification": "NOT_RECALCULATED",
+        "cells": 182,
+        "formula_characters": 10229,
+        "snapshot_bytes": 104,
+        "estimated_work": 1480,
+        "upper_bound": {
+          "method": "symbolic-shape-upper-bound-v1",
+          "cells": 182,
+          "formula_cells": 133,
+          "formula_characters": 1089536,
+          "snapshot_bytes": 104,
+          "work_units": 1480,
+          "largest_nodes": []
+        },
+        "timeout_seconds": 180.0,
+        "atol": 1e-12,
+        "rtol": 1e-10,
+        "max_stream_bytes": 536870912,
+        "sheets": [
+          "Readme",
+          "Inputs0",
+          "Steps0",
+          "Outputs",
+          "Results0"
+        ],
+        "outputs": [
+          {
+            "name": "affine_contract",
+            "dtype": "float64",
+            "shape": [
+              2,
+              3
+            ],
+            "addresses": [
+              "'Results0'!$B$1",
+              "'Results0'!$B$2",
+              "'Results0'!$B$3",
+              "'Results0'!$B$4",
+              "'Results0'!$B$5",
+              "'Results0'!$B$6"
+            ],
+            "axes": [
+              "axis_0",
+              "axis_1"
+            ],
+            "fields": []
+          }
+        ]
+      },
+      "reference": [
+        {
+          "shape": [
+            2,
+            3
+          ],
+          "error": "",
+          "statuses": [],
+          "values": [
+            1.01,
+            -0.12,
+            -0.27,
+            0.010000000000000009,
+            0.32999999999999996,
+            -0.17
+          ]
+        }
+      ]
+    },
+    {
+      "case": "projection:affine_rank3",
+      "prefix": "C001_",
+      "plan": {
+        "identity": "ca5580c729c92265",
+        "engine_build_id": "63a1dacd485576f5d148be0fb577bf2d277c91a00ab35c970e6bc88d2330a39a",
+        "formula_version": "excel-formulas-1",
+        "status": "READY",
+        "verification": "NOT_RECALCULATED",
+        "cells": 278,
+        "formula_characters": 17674,
+        "snapshot_bytes": 136,
+        "estimated_work": 3560,
+        "upper_bound": {
+          "method": "symbolic-shape-upper-bound-v1",
+          "cells": 278,
+          "formula_cells": 213,
+          "formula_characters": 1744896,
+          "snapshot_bytes": 136,
+          "work_units": 3560,
+          "largest_nodes": []
+        },
+        "timeout_seconds": 180.0,
+        "atol": 1e-12,
+        "rtol": 1e-10,
+        "max_stream_bytes": 536870912,
+        "sheets": [
+          "Readme",
+          "Inputs0",
+          "Steps0",
+          "Outputs",
+          "Results0"
+        ],
+        "outputs": [
+          {
+            "name": "affine_contract",
+            "dtype": "float64",
+            "shape": [
+              2,
+              3,
+              2
+            ],
+            "addresses": [
+              "'Results0'!$B$1",
+              "'Results0'!$B$2",
+              "'Results0'!$B$3",
+              "'Results0'!$B$4",
+              "'Results0'!$B$5",
+              "'Results0'!$B$6",
+              "'Results0'!$B$7",
+              "'Results0'!$B$8",
+              "'Results0'!$B$9",
+              "'Results0'!$B$10",
+              "'Results0'!$B$11",
+              "'Results0'!$B$12"
+            ],
+            "axes": [
+              "axis_0",
+              "axis_1",
+              "axis_2"
+            ],
+            "fields": []
+          }
+        ]
+      },
+      "reference": [
+        {
+          "shape": [
+            2,
+            3,
+            2
+          ],
+          "error": "",
+          "statuses": [],
+          "values": [
+            2.81,
+            -0.69,
+            1.6100000000000003,
+            -0.2899999999999999,
+            0.41000000000000003,
+            0.11,
+            6.41,
+            -1.8900000000000001,
+            5.21,
+            -1.4900000000000002,
+            4.010000000000001,
+            -1.0899999999999999
+          ]
+        }
+      ]
+    },
+    {
+      "case": "projection:affine_initial_order",
+      "prefix": "C002_",
+      "plan": {
+        "identity": "83bd8c33f5747dc1",
+        "engine_build_id": "63a1dacd485576f5d148be0fb577bf2d277c91a00ab35c970e6bc88d2330a39a",
+        "formula_version": "excel-formulas-1",
+        "status": "READY",
+        "verification": "NOT_RECALCULATED",
+        "cells": 74,
+        "formula_characters": 2376,
+        "snapshot_bytes": 40,
+        "estimated_work": 680,
+        "upper_bound": {
+          "method": "symbolic-shape-upper-bound-v1",
+          "cells": 74,
+          "formula_cells": 43,
+          "formula_characters": 352256,
+          "snapshot_bytes": 40,
+          "work_units": 680,
+          "largest_nodes": []
+        },
+        "timeout_seconds": 180.0,
+        "atol": 1e-12,
+        "rtol": 1e-10,
+        "max_stream_bytes": 536870912,
+        "sheets": [
+          "Readme",
+          "Inputs0",
+          "Steps0",
+          "Outputs",
+          "Results0"
+        ],
+        "outputs": [
+          {
+            "name": "affine_contract",
+            "dtype": "float64",
+            "shape": [
+              1,
+              1
+            ],
+            "addresses": [
+              "'Results0'!$B$1"
+            ],
+            "axes": [
+              "axis_0",
+              "axis_1"
+            ],
+            "fields": []
+          }
+        ]
+      },
+      "reference": [
+        {
+          "shape": [
+            1,
+            1
+          ],
+          "error": "",
+          "statuses": [],
+          "values": [
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "case": "projection:affine_empty_factor",
+      "prefix": "C003_",
+      "plan": {
+        "identity": "db6a187fd7a317ee",
+        "engine_build_id": "63a1dacd485576f5d148be0fb577bf2d277c91a00ab35c970e6bc88d2330a39a",
+        "formula_version": "excel-formulas-1",
+        "status": "READY",
+        "verification": "NOT_RECALCULATED",
+        "cells": 98,
+        "formula_characters": 4867,
+        "snapshot_bytes": 24,
+        "estimated_work": 296,
+        "upper_bound": {
+          "method": "symbolic-shape-upper-bound-v1",
+          "cells": 98,
+          "formula_cells": 59,
+          "formula_characters": 483328,
+          "snapshot_bytes": 24,
+          "work_units": 296,
+          "largest_nodes": []
+        },
+        "timeout_seconds": 180.0,
+        "atol": 1e-12,
+        "rtol": 1e-10,
+        "max_stream_bytes": 536870912,
+        "sheets": [
+          "Readme",
+          "Inputs0",
+          "Steps0",
+          "Outputs",
+          "Results0"
+        ],
+        "outputs": [
+          {
+            "name": "affine_contract",
+            "dtype": "float64",
+            "shape": [
+              2,
+              3
+            ],
+            "addresses": [
+              "'Results0'!$B$1",
+              "'Results0'!$B$2",
+              "'Results0'!$B$3",
+              "'Results0'!$B$4",
+              "'Results0'!$B$5",
+              "'Results0'!$B$6"
+            ],
+            "axes": [
+              "axis_0",
+              "axis_1"
+            ],
+            "fields": []
+          }
+        ]
+      },
+      "reference": [
+        {
+          "shape": [
+            2,
+            3
+          ],
+          "error": "",
+          "statuses": [],
+          "values": [
+            0.1,
+            0.2,
+            0.3,
+            0.1,
+            0.2,
+            0.3
+          ]
+        }
+      ]
+    },
+    {
+      "case": "projection:affine_empty_output",
+      "prefix": "C004_",
+      "plan": {
+        "identity": "4bbe3a89f144191e",
+        "engine_build_id": "63a1dacd485576f5d148be0fb577bf2d277c91a00ab35c970e6bc88d2330a39a",
+        "formula_version": "excel-formulas-1",
+        "status": "READY",
+        "verification": "NOT_RECALCULATED",
+        "cells": 68,
+        "formula_characters": 1180,
+        "snapshot_bytes": 48,
+        "estimated_work": 1400,
+        "upper_bound": {
+          "method": "symbolic-shape-upper-bound-v1",
+          "cells": 68,
+          "formula_cells": 38,
+          "formula_characters": 311296,
+          "snapshot_bytes": 48,
+          "work_units": 1400,
+          "largest_nodes": []
+        },
+        "timeout_seconds": 180.0,
+        "atol": 1e-12,
+        "rtol": 1e-10,
+        "max_stream_bytes": 536870912,
+        "sheets": [
+          "Readme",
+          "Inputs0",
+          "Steps0",
+          "Outputs"
+        ],
+        "outputs": [
+          {
+            "name": "affine_contract",
+            "dtype": "float64",
+            "shape": [
+              2,
+              0
+            ],
+            "addresses": [],
+            "axes": [
+              "axis_0",
+              "axis_1"
+            ],
+            "fields": []
+          }
+        ]
+      },
+      "reference": [
+        {
+          "shape": [
+            2,
+            0
+          ],
+          "error": "",
+          "statuses": [],
+          "values": []
+        }
+      ]
+    },
+    {
+      "case": "projection:affine_missing",
+      "prefix": "C005_",
+      "plan": {
+        "identity": "65b67c6dcc79f472",
+        "engine_build_id": "63a1dacd485576f5d148be0fb577bf2d277c91a00ab35c970e6bc88d2330a39a",
+        "formula_version": "excel-formulas-1",
+        "status": "READY",
+        "verification": "NOT_RECALCULATED",
+        "cells": 98,
+        "formula_characters": 3772,
+        "snapshot_bytes": 56,
+        "estimated_work": 1160,
+        "upper_bound": {
+          "method": "symbolic-shape-upper-bound-v1",
+          "cells": 98,
+          "formula_cells": 63,
+          "formula_characters": 516096,
+          "snapshot_bytes": 56,
+          "work_units": 1160,
+          "largest_nodes": []
+        },
+        "timeout_seconds": 180.0,
+        "atol": 1e-12,
+        "rtol": 1e-10,
+        "max_stream_bytes": 536870912,
+        "sheets": [
+          "Readme",
+          "Inputs0",
+          "Steps0",
+          "Outputs",
+          "Results0"
+        ],
+        "outputs": [
+          {
+            "name": "affine_contract",
+            "dtype": "float64",
+            "shape": [
+              2,
+              1
+            ],
+            "addresses": [
+              "'Results0'!$B$1",
+              "'Results0'!$B$2"
+            ],
+            "axes": [
+              "axis_0",
+              "axis_1"
+            ],
+            "fields": []
+          }
+        ]
+      },
+      "reference": [
+        {
+          "shape": [
+            2,
+            1
+          ],
+          "error": "",
+          "statuses": [],
+          "values": [
+            NaN,
+            5.1
+          ]
+        }
+      ]
+    },
+    {
+      "case": "projection:expm1_domain",
+      "prefix": "C006_",
+      "plan": {
+        "identity": "debd6932fa6a2c86",
+        "engine_build_id": "63a1dacd485576f5d148be0fb577bf2d277c91a00ab35c970e6bc88d2330a39a",
+        "formula_version": "excel-formulas-1",
+        "status": "READY",
+        "verification": "NOT_RECALCULATED",
+        "cells": 368,
+        "formula_characters": 22963,
+        "snapshot_bytes": 104,
+        "estimated_work": 2800,
+        "upper_bound": {
+          "method": "symbolic-shape-upper-bound-v1",
+          "cells": 368,
+          "formula_cells": 305,
+          "formula_characters": 2498560,
+          "snapshot_bytes": 104,
+          "work_units": 2800,
+          "largest_nodes": []
+        },
+        "timeout_seconds": 180.0,
+        "atol": 1e-12,
+        "rtol": 1e-10,
+        "max_stream_bytes": 536870912,
+        "sheets": [
+          "Readme",
+          "Inputs0",
+          "Steps0",
+          "Outputs",
+          "Results0"
+        ],
+        "outputs": [
+          {
+            "name": "expm1",
+            "dtype": "float64",
+            "shape": [
+              13
+            ],
+            "addresses": [
+              "'Results0'!$B$1",
+              "'Results0'!$B$2",
+              "'Results0'!$B$3",
+              "'Results0'!$B$4",
+              "'Results0'!$B$5",
+              "'Results0'!$B$6",
+              "'Results0'!$B$7",
+              "'Results0'!$B$8",
+              "'Results0'!$B$9",
+              "'Results0'!$B$10",
+              "'Results0'!$B$11",
+              "'Results0'!$B$12",
+              "'Results0'!$B$13"
+            ],
+            "axes": [
+              "axis_0"
+            ],
+            "fields": []
+          }
+        ]
+      },
+      "reference": [
+        {
+          "shape": [
+            13
+          ],
+          "error": "",
+          "statuses": [],
+          "values": [
+            -1.0,
+            -1.0,
+            -0.12190456907943868,
+            -0.1175030974154046,
+            -1e-16,
+            -0.0,
+            0.0,
+            1e-16,
+            0.13314845306682632,
+            0.13882838332462183,
+            1.7182818284590453,
+            1.0142320547350045e+304,
+            NaN
+          ]
+        }
+      ]
+    },
+    {
+      "case": "projection:expm1_scalar_tiny",
+      "prefix": "C007_",
+      "plan": {
+        "identity": "bc765bdb2c354f87",
+        "engine_build_id": "63a1dacd485576f5d148be0fb577bf2d277c91a00ab35c970e6bc88d2330a39a",
+        "formula_version": "excel-formulas-1",
+        "status": "READY",
+        "verification": "NOT_RECALCULATED",
+        "cells": 55,
+        "formula_characters": 1922,
+        "snapshot_bytes": 8,
+        "estimated_work": 400,
+        "upper_bound": {
+          "method": "symbolic-shape-upper-bound-v1",
+          "cells": 55,
+          "formula_cells": 28,
+          "formula_characters": 229376,
+          "snapshot_bytes": 8,
+          "work_units": 400,
+          "largest_nodes": []
+        },
+        "timeout_seconds": 180.0,
+        "atol": 1e-12,
+        "rtol": 1e-10,
+        "max_stream_bytes": 536870912,
+        "sheets": [
+          "Readme",
+          "Inputs0",
+          "Steps0",
+          "Outputs",
+          "Results0"
+        ],
+        "outputs": [
+          {
+            "name": "expm1",
+            "dtype": "float64",
+            "shape": [],
+            "addresses": [
+              "'Results0'!$B$1"
+            ],
+            "axes": [],
+            "fields": []
+          }
+        ]
+      },
+      "reference": [
+        {
+          "shape": [],
+          "error": "",
+          "statuses": [],
+          "values": [
+            1e-16
+          ]
+        }
+      ]
+    },
+    {
+      "case": "projection:expm1_empty",
+      "prefix": "C008_",
+      "plan": {
+        "identity": "bcee90759d2ad6c5",
+        "engine_build_id": "63a1dacd485576f5d148be0fb577bf2d277c91a00ab35c970e6bc88d2330a39a",
+        "formula_version": "excel-formulas-1",
+        "status": "READY",
+        "verification": "NOT_RECALCULATED",
+        "cells": 29,
+        "formula_characters": 181,
+        "snapshot_bytes": 0,
+        "estimated_work": 200,
+        "upper_bound": {
+          "method": "symbolic-shape-upper-bound-v1",
+          "cells": 29,
+          "formula_cells": 5,
+          "formula_characters": 40960,
+          "snapshot_bytes": 0,
+          "work_units": 200,
+          "largest_nodes": []
+        },
+        "timeout_seconds": 180.0,
+        "atol": 1e-12,
+        "rtol": 1e-10,
+        "max_stream_bytes": 536870912,
+        "sheets": [
+          "Readme",
+          "Steps0",
+          "Outputs"
+        ],
+        "outputs": [
+          {
+            "name": "expm1",
+            "dtype": "float64",
+            "shape": [
+              0,
+              2
+            ],
+            "addresses": [],
+            "axes": [
+              "axis_0",
+              "axis_1"
+            ],
+            "fields": []
+          }
+        ]
+      },
+      "reference": [
+        {
+          "shape": [
+            0,
+            2
+          ],
+          "error": "",
+          "statuses": [],
+          "values": []
+        }
+      ]
+    },
+    {
+      "case": "projection:shared_graph",
+      "prefix": "C009_",
+      "plan": {
+        "identity": "bde7058d32bfcb11",
+        "engine_build_id": "63a1dacd485576f5d148be0fb577bf2d277c91a00ab35c970e6bc88d2330a39a",
+        "formula_version": "excel-formulas-1",
+        "status": "READY",
+        "verification": "NOT_RECALCULATED",
+        "cells": 901,
+        "formula_characters": 54187,
+        "snapshot_bytes": 160,
+        "estimated_work": 17817,
+        "upper_bound": {
+          "method": "symbolic-shape-upper-bound-v1",
+          "cells": 933,
+          "formula_cells": 718,
+          "formula_characters": 5881856,
+          "snapshot_bytes": 160,
+          "work_units": 18681,
+          "largest_nodes": [
+            {
+              "node": 5,
+              "kind": "expm1",
+              "cells": 202
+            },
+            {
+              "node": 4,
+              "kind": "affine_contract",
+              "cells": 114
+            },
+            {
+              "node": 9,
+              "kind": "sum_axis",
+              "cells": 90
+            },
+            {
+              "node": 7,
+              "kind": "multiply",
+              "cells": 71
+            },
+            {
+              "node": 6,
+              "kind": "broadcast_like",
+              "cells": 49
+            },
+            {
+              "node": 14,
+              "kind": "slice_axis",
+              "cells": 42
+            },
+            {
+              "node": 15,
+              "kind": "multiply",
+              "cells": 41
+            },
+            {
+              "node": 16,
+              "kind": "sum",
+              "cells": 31
+            },
+            {
+              "node": 12,
+              "kind": "slice_axis",
+              "cells": 22
+            },
+            {
+              "node": 18,
+              "kind": "divide",
+              "cells": 16
+            }
+          ]
+        },
+        "timeout_seconds": 180.0,
+        "atol": 1e-12,
+        "rtol": 1e-10,
+        "max_stream_bytes": 536870912,
+        "sheets": [
+          "Readme",
+          "Definitions",
+          "Inputs0",
+          "Nodes",
+          "Steps0",
+          "Outputs",
+          "Results0"
+        ],
+        "outputs": [
+          {
+            "name": "period",
+            "dtype": "float64",
+            "shape": [
+              2,
+              3
+            ],
+            "addresses": [
+              "'Results0'!$B$1",
+              "'Results0'!$B$2",
+              "'Results0'!$B$3",
+              "'Results0'!$B$4",
+              "'Results0'!$B$5",
+              "'Results0'!$B$6"
+            ],
+            "axes": [
+              "time",
+              "path"
+            ],
+            "fields": []
+          },
+          {
+            "name": "asset",
+            "dtype": "float64",
+            "shape": [],
+            "addresses": [
+              "'Results0'!$B$7"
+            ],
+            "axes": [],
+            "fields": []
+          }
+        ]
+      },
+      "reference": [
+        {
+          "shape": [
+            2,
+            3
+          ],
+          "error": "",
+          "statuses": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "values": [
+            -0.00894490874848809,
+            -0.008013976816673417,
+            -0.007027761069414924,
+            -0.005985769933974622,
+            -0.004887505201293361,
+            -0.0037324619486773236
+          ]
+        },
+        {
+          "shape": [],
+          "error": "",
+          "statuses": [
+            0
+          ],
+          "values": [
+            0.027121088689070982
+          ]
+        }
+      ]
+    }
+  ],
+  "generated_sha256": "7c01c5a2096d8d8ea7392191137f17e271ddba7ed3fa65ce73bf6a4aca1196d0"
+}

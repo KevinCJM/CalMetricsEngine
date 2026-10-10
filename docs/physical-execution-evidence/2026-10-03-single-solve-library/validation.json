@@ -1,0 +1,38 @@
+{
+  "status": "PASS_WITH_DISCLOSED_TRACKING_LIMITATION",
+  "timing_cases": 11,
+  "rounds": 9,
+  "fresh_memory_children": 12,
+  "heap_stages": 36,
+  "source_inputs": 77,
+  "old_new_bitwise_equal": true,
+  "strict_njit_equivalent": true,
+  "cold_warm_tracking_overflow_or_untracked_frees": 0,
+  "post_peak_untracked_frees": [
+    {
+      "case": "medium2048_c",
+      "backend": "old",
+      "stage": "warm_retained_heap",
+      "count": 2
+    },
+    {
+      "case": "medium2048_c",
+      "backend": "new",
+      "stage": "warm_retained_heap",
+      "count": 2
+    },
+    {
+      "case": "large4096_f",
+      "backend": "old",
+      "stage": "warm_retained_heap",
+      "count": 2
+    },
+    {
+      "case": "large4096_f",
+      "backend": "new",
+      "stage": "warm_retained_heap",
+      "count": 2
+    }
+  ],
+  "limitation": "Two untracked frees per native child occur only when deleting the final result after warm peak capture; origin not resolved. No complete lifetime-allocation claim."
+}

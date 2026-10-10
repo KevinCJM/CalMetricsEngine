@@ -1,0 +1,13 @@
+# Single-RHS solve: reuse existing ordered Eigen LU
+
+Baseline native build 5d658a12626a65ea524e82d680c17c04b792bc3e1067f194e18cae2a2704ed8f, all 77 native inputs verified. Current candidate until full validation. No commit or push.
+
+Reuse the existing Eigen Array/Map blocked LU eliminator and its macOS15/arm64, Eigen-enabled, n>=128 gate. Explicit scalar and unsupported builds/platforms keep the current portable kernel. The previous single-RHS exclusion was a small stack increase, not a demonstrated mathematical incompatibility; current acceptance does not reject small byte changes by themselves.
+
+Single solve keeps its original private n*n+n coefficients/RHS workspace, original input-copy order, and original back-substitution/output write order. A and b stay readonly; independent results and explicit-out failure prefix remain unchanged. No extra matrix, heap workspace, thread pool, public operator, IPC field, or Excel formula.
+
+The shared eliminator gets one compile-time pivot predicate: existing solve_multi rejects NaN pivots, while solve rejects only magnitude<=1e-14 and permits NaN propagation. All comparisons preserve first-max ties. Delayed updates retain ascending pivot multiply/subtract order, no zero-factor skipping or FMA. Single solve can retain panel multipliers instead of zeroing dead lower cells because only the shared internal updater consumes them; public output and backsolve use the upper triangle. Saved multipliers follow within-panel row swaps. The two consumers continue their different original finite-check/error/output-prefix contracts.
+
+Validate with the existing independent canonical reference, threshold neighbors, first-max ties, cross-panel pivots, zero*Inf, intermediate overflow, NaN, signed zeros, strided/alias/readonly inputs, explicit-out sentinel and capacity, prepared refresh, isolate and real worker lanes. Add large grouped-LU coverage for single solve; do not treat scalar-vs-auto alone as independent proof. Full Python, native, ASan/UBSan and library-OFF regression; direct fixtures and historical Excel snapshot.
+
+Benchmark actual old/new wheels against compiled/warmed NJIT(np.linalg.solve), same CPU budget and independent vector result, complete ordinary Scheduler requests. Nine balanced rounds including small gate controls, C/F/strided matrices and 1024/2048/4096, plus unchanged solve_multi control. Fresh heap and RSS include setup, cold library use and warm retained independent results, with bounded input generation/hash before RSS. Source identity, input/output hashes, old/new bits and residuals are checked. Report real absolute deltas and NI gaps; no fixed micro-increase veto, no universal superiority claim.

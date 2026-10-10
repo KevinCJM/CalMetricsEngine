@@ -1,4 +1,5 @@
 #include "calmetrics_engine/operators.hpp"
+#include "calmetrics_engine/matrix_backend.hpp"
 #include "calmetrics_engine/scheduler.hpp"
 #include "graph_binding_utils.hpp"
 #include <algorithm>
@@ -169,11 +170,19 @@ Bound bind_args(const op::Spec &spec, py::args args, py::kwargs kwargs) {
       else if ((spec.op == op::Op::linear_filter2 && i >= 6) ||
                (spec.op == op::Op::scalar_kalman && i == 3))
         b.owners[i] = py::float_(1.0);
+      else if (spec.op == op::Op::gaussian_mixture_em)
+        b.owners[i] = py::float_(i == 4 ? 100.0 : 1e-6);
+      else if (spec.op == op::Op::gaussian_hmm_em)
+        b.owners[i] = py::float_(i == 5 ? 100.0 : 1e-5);
+      else if (spec.op == op::Op::symmetric_eigh)
+        b.owners[i] = py::float_(i == 1 ? 1e-12 : 32.0);
+      else if (spec.op == op::Op::triangular_solve)
+        b.owners[i] = py::float_(i == 2 ? 1.0 : 0.0);
       else
         throw py::type_error("Missing operator parameter: " + names[i]);
     }
     b.args[i] = parse_value(b.owners[i]);
-    if (b.args[i].kind == op::Kind::integer && spec.op != op::Op::argsort &&
+    if (b.args[i].kind == op::Kind::integer && !op::matrix_foundation(spec.op) && !op::latent_operator(spec.op) && spec.op != op::Op::argsort &&
         spec.op != op::Op::gather && spec.op != op::Op::distinct_count &&
         spec.op != op::Op::equal && spec.op != op::Op::not_equal &&
         spec.op != op::Op::state_confirm && spec.op != op::Op::state_continuous &&
@@ -223,7 +232,7 @@ py::object borrowed_output(const Bound &b, const op::Prepared &p) {
   std::vector<py::ssize_t> strides;
   for (int i = 0; i < p.view.shape.rank; ++i)
     strides.push_back(p.view.stride[i] *
-                      static_cast<py::ssize_t>(sizeof(double)));
+                      static_cast<py::ssize_t>(p.output_kind == op::Kind::mask ? 1 : sizeof(double)));
   py::array result(dtype(p.output_kind), dimensions(p.output_shape), strides,
                    p.view.data, b.owners[0]);
   result.attr("setflags")(false);
@@ -242,6 +251,19 @@ py::dict execution_audit(const Bound &b, const op::Prepared &p,
   d["isa"] = p.borrowed && b.out.is_none() ? "view" : audit.isa;
   d["vector_elements"] = audit.vector_elements;
   d["input_copy_bytes"] = 0;
+  d["eigen_rotation_calls"] = audit.eigen_rotation_calls;
+  d["highway_vqsort_calls"] = audit.highway_vqsort_calls;
+  d["native_library_workspace_reserve_bytes"] = audit.native_library_workspace_reserve_bytes;
+  d["eigen_matvec_calls"] = audit.eigen_matvec_calls;
+  d["eigen_covariance_calls"] = audit.eigen_covariance_calls;
+  d["eigen_density_calls"] = audit.eigen_density_calls;
+  d["accelerate_covchol_calls"] = audit.accelerate_covchol_calls;
+  d["accelerate_vforce_calls"] = audit.accelerate_vforce_calls;
+  d["accelerate_matmul_calls"] = audit.accelerate_matmul_calls;
+  d["accelerate_lu_attempts"] = audit.accelerate_lu_attempts;
+  d["accelerate_lu_calls"] = audit.accelerate_lu_calls;
+  d["accelerate_lu_fallbacks"] = audit.accelerate_lu_fallbacks;
+  d["solve_residual_materialization_bytes"] = audit.solve_residual_materialization_bytes;
   d["algorithm_copy_bytes"] = audit.algorithm_copy_bytes;
   d["workspace_bytes"] = audit.scratch_bytes;
   d["workspace_capacity_bytes"] = workspace.capacity_bytes();
@@ -268,9 +290,11 @@ py::object invoke(const op::Spec &spec, py::args args, py::kwargs kwargs) {
   op::require(lease.owns_lock(), "WORKSPACE_BUSY");
   op::Audit audit;
   py::object result;
-  if (p.borrowed && b.out.is_none())
+  if (p.borrowed && b.out.is_none()) {
+    if (p.output_kind == op::Kind::mask)
+      op::validate_structure(spec, b.args.data(), b.count, UINT32_MAX, UINT32_MAX);
     result = borrowed_output(b, p);
-  else {
+  } else {
     op::Output out;
     out.kind = p.output_kind;
     out.shape = p.output_shape;
@@ -292,7 +316,9 @@ py::object invoke(const op::Spec &spec, py::args args, py::kwargs kwargs) {
         calmetrics_engine::native::CpuBudget &budget;
         ~CpuRelease() { budget.release(1); }
       } cpu_release{cpu};
-      op::execute(p, out, workspace, b.isa, audit);
+      if (b.isa != op::Isa::automatic ||
+          !op::try_accelerate_transcendental(p, out, workspace, audit))
+        op::execute(p, out, workspace, b.isa, audit);
     }
     if (out.kind == op::Kind::fit || out.kind == op::Kind::interval) {
       const auto size = out.kind == op::Kind::fit ? 5u : 4u;

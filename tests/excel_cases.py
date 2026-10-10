@@ -21,6 +21,10 @@ def decode(v):
 
 
 def cases(all_cases=False):
+    yield from axis_path_cases()
+    yield from projection_primitive_cases()
+    yield from foundation_cases()
+    yield from latent_cases()
     seen = set()
     frozen = json.loads((Path(__file__).parent / "data/canonical_reference.json").read_text())
     for case in frozen["cases"]:
@@ -148,3 +152,148 @@ def cases(all_cases=False):
     yield "matrix_attribution_and_fit", lambda: excel.plan(graph, data)
     tensor = np.arange(1., 25.).reshape(2, 3, 4)
     yield "tensor_scalar_broadcast", lambda: excel.plan_operator("multiply", [tensor, .3])
+
+
+def axis_path_cases():
+    """Axis recurrences and one shared NaN-last ranking for all probabilities.
+
+    These are deterministic target-engine inputs, not recalculation evidence.
+    """
+    samples = {
+        "product_axis": ("cumulative_product_axis", [
+            np.array([[1.25, .5], [.8, 2.], [1.5, .75]]), 0, 3.]),
+        "strict_max_axis": ("cumulative_max_axis", [
+            np.array([[1., 1., np.nan, 2.], [-2., np.nan, -1., -1.]])[:, ::-1],
+            1, -1.]),
+        "multi_quantiles_axis": ("quantiles_axis", [
+            np.array([[[3., 8.], [1., np.nan], [2., 4.]],
+                      [[-1., 1.], [-1., 3.], [2., 2.]]]),
+            np.array([1., .5, 0., .25, .5]), 1]),
+    }
+    for label, (name, args) in samples.items():
+        yield "axis_path:" + label, lambda name=name, args=args: excel.plan_operator(name, args)
+
+
+def projection_primitive_cases():
+    """Initial-first contraction and stable expm1, including shared graph use."""
+    samples = {
+        "affine_rank2": ("affine_contract", [
+            np.array([[1., 2.], [-1., .5]]),
+            np.array([[.2, -.3, .1], [.4, .1, -.2]]), np.array([.01, -.02, .03])]),
+        "affine_rank3": ("affine_contract", [
+            np.arange(12., dtype=np.float64).reshape(2, 3, 2)[:, ::-1],
+            np.array([[.2, -.3], [.4, .1]]), .01]),
+        "affine_initial_order": ("affine_contract", [
+            np.array([[1e16, -1e16]]), np.ones((2, 1)), 1.]),
+        "affine_empty_factor": ("affine_contract", [
+            np.empty((2, 0)), np.empty((0, 3)), np.array([.1, .2, .3])]),
+        "affine_empty_output": ("affine_contract", [
+            np.empty((2, 3)), np.empty((3, 0)), np.empty(0)]),
+        "affine_missing": ("affine_contract", [
+            np.array([[np.nan, 1.], [2., 3.]]), np.ones((2, 1)), .1]),
+        "expm1_domain": ("expm1", [np.array([
+            -1000., -40., -.13, -.125, -1e-16, -0., 0., 1e-16, .125, .13, 1., 700., np.nan])]),
+        "expm1_scalar_tiny": ("expm1", [1e-16]),
+        "expm1_empty": ("expm1", [np.empty((0, 2))]),
+    }
+    for label, (name, args) in samples.items():
+        yield "projection:" + label, lambda name=name, args=args: excel.plan_operator(name, args)
+    graph = GraphCompiler({
+        "x": {"kind": "tensor", "axes": ["time", "path", "factor"], "shape": ["T", "P", "F"]},
+        "k": {"kind": "matrix", "axes": ["factor", "asset"], "shape": ["F", "A"]},
+        "i": {"kind": "vector", "axes": ["asset"], "shape": ["A"]},
+        "w": {"kind": "vector", "axes": ["asset"], "shape": ["A"]},
+    }).compile({
+        "period": "sum_axis(multiply(broadcast_like(w,expm1(affine_contract(x,k,i))),expm1(affine_contract(x,k,i))),2)",
+        "asset": "sum(multiply(first(slice_axis(w,0,0,1,1)),slice_axis(expm1(affine_contract(x,k,i)),2,0,1,1)))/3",
+    }, result_format="typed")
+    data = {"x": np.arange(12., dtype=np.float64).reshape(2, 3, 2) * .01,
+            "k": np.array([[.2, -.3], [.4, .1]]), "i": np.array([.01, -.02]), "w": np.array([.3, .7])}
+    yield "projection:shared_graph", lambda: excel.plan(graph, data)
+
+
+def foundation_cases():
+    """All matrix/array recipes plus domain and composed-graph cases."""
+    a = np.array([[4., 1., 2.], [1., 3., 0.], [2., 0., 5.]])
+    b = np.arange(6., dtype=np.float64).reshape(3, 2)
+    bundle = np.array([[1., 1., 0.], [2., 0., 1.]])
+    samples = {
+        "cholesky": [a], "solve_multi": [a, b],
+        "triangular_solve": [np.tril(a), b], "symmetric_eigh": [a],
+        "eigenvalues": [bundle], "eigenvectors": [bundle],
+        "take_axis": [b, np.array([2, 0], np.int64), 0],
+        "slice_axis": [b, 0, 0, 3, 2], "concatenate": [b, b, 1],
+        "stack": [b, b, 1], "broadcast_like": [np.arange(2.), b],
+        "sum_axis": [b, 0], "mean_axis": [b, 1], "swap_axes": [b, 0, 1],
+    }
+    for name, args in samples.items():
+        yield "foundation:" + name, lambda name=name,args=args: excel.plan_operator(name,args)
+    for label, name, args in [
+        ("singular", "solve_multi", [np.ones((2, 2)), np.ones((2, 2))]),
+        ("indefinite", "cholesky", [np.array([[1., 2.], [2., 1.]])]),
+        ("asymmetric", "symmetric_eigh", [np.array([[1., 2.], [1., 3.]])]),
+        ("no_convergence", "symmetric_eigh", [a, 1e-15, 1]),
+        ("upper_unit", "triangular_solve", [np.array([[np.nan, 2.], [np.nan, np.nan]]), np.array([3., 4.]), 0, 1]),
+        ("mean_cancellation", "mean_axis", [np.array([[1e16, 1., -1e16]]), 1]),
+        ("mean_nan", "mean_axis", [np.array([[np.nan, 1.], [2., 3.]]), 1]),
+        ("empty_mean", "mean_axis", [np.empty((2, 0)), 1]),
+        ("empty_sum", "sum_axis", [np.empty((2, 0)), 1]),
+        ("empty_eigh", "symmetric_eigh", [np.empty((0, 0))]),
+        ("repeat_eigh", "symmetric_eigh", [np.eye(3)]),
+        ("mask_view", "slice_axis", [np.array([[True, False], [False, True]]), 1, 0, 2, 1]),
+        ("int_view", "swap_axes", [np.arange(6, dtype=np.int64).reshape(2, 3), 0, 1]),
+    ]:
+        yield "foundation:" + label, lambda name=name,args=args: excel.plan_operator(name,args)
+    g = GraphCompiler({"a": {"kind":"matrix", "axes":["asset","asset"],"shape":["N","N"]}}).compile({
+        "values":"eigenvalues(symmetric_eigh(a))", "vectors":"eigenvectors(symmetric_eigh(a))",
+        "sum":"sum_axis(slice_axis(a,1,0,3,2),0)"}, result_format="typed", error_policy="isolate")
+    yield "foundation:composed", lambda: excel.plan(g,{"a":a})
+
+
+def latent_cases():
+    """Every latent opcode, iteration stop/budget, edge cases and composed graph."""
+    from calmetrics_engine import operators as op
+    x=np.array([[-1.,-.7],[-.8,-1.],[.9,1.],[1.2,.8]])
+    w=np.array([.5,.5])
+    m=np.array([[-1.,-1.],[1.,1.]])
+    v=np.ones((2,2))
+    transition=np.array([[.9,.1],[.1,.9]])
+    gm=op.gaussian_mixture_em(x,w,m,v,4)
+    hm=op.gaussian_hmm_em(x,w,transition,m,v,4)
+    emission=op.gaussian_log_density(x,m,v)
+    args={
+        "variance_axis":[x,0],"max_axis":[x,1],"argmax_axis":[x,1],
+        "logsumexp_axis":[x,1],"softmax_axis":[x,1],
+        "gaussian_log_density":[x,m,v],"gaussian_mixture_em":[x,w,m,v,4],
+        "gaussian_hmm_em":[x,w,transition,m,v,4],
+        "mixture_weights":[gm],"mixture_means":[gm],"mixture_variances":[gm],
+        "em_iterations":[gm],"em_log_likelihood":[hm],"em_converged":[hm],
+        "hmm_initial":[hm],"hmm_transition":[hm],"hmm_means":[hm],"hmm_variances":[hm],
+        "hmm_filter":[emission,w,transition,1],"hmm_smooth":[emission,w,transition],
+        "transition_counts":[np.array([0,0,-1,1,0],np.int64),2],
+        "one_hot":[np.array([0,0,-1,1,0],np.int64),2],
+        "partition_mean":[x,np.array([1,0,2,3],np.int64),2],
+        "sample_unique_indices":[x,4,-3],
+        "scatter_rows":[x,np.array([0,2,3,5],np.int64),6],
+    }
+    for name,values in args.items():
+        yield "latent:"+name, lambda name=name,values=values: excel.plan_operator(name,values)
+    for seed in [2**53-1,-2**53+1,2147483646*4194304-1,-(2147483646*4194304-1)]:
+        # Seeds use the float64 parameter contract; generic Excel int64 literals
+        # retain their existing 15-digit input restriction.
+        yield f"latent:sample_unique_indices:seed:{seed}", lambda seed=seed: excel.plan_operator("sample_unique_indices",[np.zeros((17,2)),17,float(seed)])
+    for name,values in [
+        ("gaussian_mixture_em",[np.array([[-1e154],[0.],[1e154]]),np.ones(1),np.zeros((1,1)),np.full((1,1),1e308),1]),
+        ("gaussian_hmm_em",[np.array([[-1e154],[0.],[1e154]]),np.ones(1),np.ones((1,1)),np.zeros((1,1)),np.full((1,1),1e308),1]),
+    ]:
+        yield "latent:"+name+":variance_overflow",lambda name=name,values=values: excel.plan_operator(name,values)
+    for iterations,tolerance in [(1,0.),(5,1e10),(5,0.)]:
+        for name,values in [("gaussian_mixture_em",[x,w,m,v]),("gaussian_hmm_em",[x,w,transition,m,v])]:
+            yield f"latent:{name}:stop:{iterations}:{tolerance}", lambda name=name,values=values,iterations=iterations,tolerance=tolerance: excel.plan_operator(name,values+[iterations,tolerance])
+    types={"x":{"kind":"matrix","axes":["scenario","factor"],"shape":["N","D"]},
+           "m":{"kind":"matrix","axes":["component","factor"],"shape":["K","D"]},
+           "v":{"kind":"matrix","axes":["component","factor"],"shape":["K","D"]},
+           "w":{"kind":"vector","axes":["component"],"shape":["K"]}}
+    fit="gaussian_mixture_em(x,w,m,v,4)"
+    graph=GraphCompiler(types).compile([f"mixture_means({fit})",f"em_iterations({fit})",f"em_converged({fit})",f"argmax_axis(gaussian_log_density(x,mixture_means({fit}),mixture_variances({fit})),1)"],result_format="typed",error_policy="isolate")
+    yield "latent:dag",lambda: excel.plan(graph,{"x":x,"m":m,"v":v,"w":w})

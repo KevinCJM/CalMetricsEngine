@@ -1,0 +1,39 @@
+{
+  "status": "prepared_not_executed",
+  "source_sha256": {
+    "benchmark_matmul_root_v28.py": "2bfe1b4688eea253afc9a23152e560eb8c82d504efcd1f428cc2d3a878eccf44",
+    "screen-v28-matmul.py": "959ad900f07f8b1f88c2c1eabe79b12e21565eabff47183e2cf03c73ea9c245a",
+    "memory-v28-matmul.py": "3fefd69e1d67a6e791891d29731f2300e90a2176478c4e1d57ff93c721bc7e7d",
+    "benchmark_derived_risks_v28.py": "e1b5671dcf0071c801a800e8271d85aaa947612d755d98ee39753ca5c3e599b9",
+    "screen-v28-derived.py": "2c55b2528035f148158a5d6cd37d9df9623f9cea485b5372f3794e02d3ef3876",
+    "memory-v28-derived.py": "4334f9aefc74ebf8fd3a12df8dffd605fa061486f5062a97f8ff2a639e125e72",
+    "benchmark_mixed_risks_v28.py": "681b1cc646dc1b2465ba7e65747d410fb751e8888ea2bb76a23c157317dcf84c",
+    "screen-v28-mixed.py": "9cae494f8f97afcf17eff226142371080d9596881f037c2b334bf41dda22da9e",
+    "memory-v28-mixed.py": "649134cb9e32573d5d3efeb6943834c33c33b76eaeff1728c6a6fbfa3cd0ba63",
+    "benchmark_risks_parallel_v28.py": "84fc36913072197739d46c6480113d449ef93f38f603200a3ac09b50e7b1eb8a",
+    "screen-v28-supplied.py": "85ef8f8347b46a4a5b12de36d8bab65ae08c1aa8b29e1fcd6207c271f91319ce",
+    "memory-v28-supplied.py": "dde20ba2dc75e3805dda055d9e8a2ad883b4013bc9159c4e6c665bee88c504df",
+    "risk_graphs_derived_v28.py": "2d8c4b7e44ea03311cfd0528201e9dd9efd5d277bed67dd40654300cad63f0c0",
+    "risk_graphs_mixed_v28.py": "f026607ba5b1417b2ab05d16ae542c2b6501ee6870a5097c9fdc49d85adbe1eb",
+    "risk_graphs.py": "e8a566dd3a991622f2f1d5c1f6368fca7a9cbea71f2cd3bc1be02e6b67b006d3",
+    "prepare-v28-performance.py": "7b2830254cf31c2b030ee53ac25ddc846479d93facb68b3cd21120423f48f128",
+    "run-v28-next.py": "de3feb3e002b7d48c27d812faf0bbab73f9de664b793d1ee635a2fa0911186e9"
+  },
+  "matrix": {
+    "time_jobs": 60,
+    "time_samples": 360,
+    "peak_jobs": 80,
+    "cases": "same original12 matrix cases, including reject scale and small diagnostics; extra V26 predecessor"
+  },
+  "risk_regression": {
+    "time_jobs": 24,
+    "time_samples": 144,
+    "peak_jobs": 96,
+    "scope": "largest C/F complete derived, mixed matrix roots, supplied weights, CPU4; prior broader V26 evidence stays source-labelled"
+  },
+  "fairness": "same algorithm/data/output/CPU; owned readonly input preparation, ordinary Scheduler, two independent readonly generations, warmed NJIT; actual V21 package",
+  "measured_boundary": "complete requests; borrowed/reused kernel profile is not acceptance",
+  "new_compilation_excluded": true,
+  "production_adopted": false,
+  "whole_goal_complete": false
+}

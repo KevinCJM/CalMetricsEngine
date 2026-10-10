@@ -1,0 +1,131 @@
+"""Serial Eigen-on Scheduler transport and memory-budget acceptance.
+
+No benchmarks: verifies A17 packet execution, per-chunk transpose packing,
+bounded Scheduler transport and exact request-budget admission. The source
+arrays and two generations of independent results remain alive together.
+"""
+
+import gc
+import os
+
+import numpy as np
+import pytest
+
+from calmetrics_engine import AdaptiveScheduler
+
+from .test_affine_projection_library import compare, data, graphs, hits, ieee_bits
+from .test_mc_projection_primitives import (
+    chunk_sum,
+    projection_lane_configuration,
+)
+
+pytestmark = pytest.mark.skipif(
+    os.environ.get("CALMETRICS_TEST_EXPECT_EIGEN") != "1",
+    reason="explicit Eigen-on transport/budget acceptance",
+)
+
+
+def retained_values(result, names):
+    return {name: [value.copy() for value in result.named_outputs[name].values]
+            for name in names}
+
+
+def assert_two_generations(first, later, saved, names):
+    for name in names:
+        for old, new, snapshot in zip(first.named_outputs[name].values,
+                                      later.named_outputs[name].values,
+                                      saved[name], strict=True):
+            ieee_bits(old, snapshot)
+            assert not np.shares_memory(old, new)
+            assert not old.flags.writeable and not new.flags.writeable
+
+
+def assert_a17_packet_pack(result, total_rows):
+    assert hits(result) == total_rows * 16
+    assert chunk_sum(result, "numeric_arena_bytes") == 0
+    assert chunk_sum(result, "root_copy_bytes") == 0
+    for chunk in result.audit["native_chunks"]:
+        # Both chosen layouts need physical packing of transpose(beta).
+        # Transport may normalize its storage, but beta[A,F] still has
+        # factor-contiguous rows, so its transpose has asset stride F.
+        assert chunk["vector_elements"] > 0
+        assert chunk["algorithm_copy_bytes"] == 4 * 17 * 8
+        assert chunk["operator_workspace_capacity_bytes"] <= result.plan.estimated_worker_scratch_bytes
+
+
+@pytest.mark.parametrize("lane", ["thread", "process_inline", "process_shared"])
+@pytest.mark.parametrize("layout", ["strided", "negative"])
+@pytest.mark.parametrize("order", ["C", "F"])
+def test_a17_eigen_scheduler_lanes_pack_and_retain_complete_outputs(lane, layout, order):
+    inputs = data(steps=18, paths=5, assets=17, layout=layout)
+    assert inputs["beta"].strides[0] // 8 != 1
+    originals = {name: value.copy() for name, value in inputs.items()}
+    graph, generic, names = graphs(17, 5, order)
+    starts, ends = np.array([0, 6], np.int64), np.array([6, 18], np.int64)
+    with AdaptiveScheduler(cpu_budget=1) as single:
+        expected = single.execute(generic, inputs, starts, ends)
+    with AdaptiveScheduler(cpu_budget=2, config=projection_lane_configuration(lane)) as scheduler:
+        first = scheduler.execute(graph, inputs, starts, ends)
+        saved = retained_values(first, names)
+        later = scheduler.execute(graph, inputs, starts, ends)
+        for result in (first, later):
+            assert result.plan.lane == ("process" if lane.startswith("process") else "thread")
+            assert 0 < result.audit["cpu_tokens"] <= 2
+            assert result.audit["python_worker_callbacks"] == 0
+            compare(result, expected, names, inputs)
+            assert_a17_packet_pack(result, (6 + 12) * 5)
+            if lane == "process_shared":
+                assert result.plan.use_shared_memory
+                assert result.audit["output_copy_bytes"] == 0
+            for name in names:
+                for value in result.named_outputs[name].values:
+                    if value.ndim == 2:
+                        assert value.flags.f_contiguous if order == "F" else value.flags.c_contiguous
+        assert_two_generations(first, later, saved, names)
+    for name, original in originals.items():
+        ieee_bits(inputs[name], original)
+    # Normal results retain their independent native/shared owner after close
+    # and source release; read-only flags alone are not the ownership oracle.
+    del inputs, later, expected
+    gc.collect()
+    for name in names:
+        for old, snapshot in zip(first.named_outputs[name].values, saved[name], strict=True):
+            ieee_bits(old, snapshot)
+
+
+@pytest.mark.parametrize("layout", ["strided", "negative"])
+@pytest.mark.parametrize("order", ["C", "F"])
+def test_a17_eigen_pack_is_in_exact_total_budget_and_bounded_across_windows(layout, order):
+    first_inputs = data(steps=513, paths=17, assets=17, layout=layout)
+    larger = data(steps=1026, paths=17, assets=17, layout=layout)
+    assert larger["beta"].strides[0] // 8 != 1
+    originals = {name: value.copy() for name, value in larger.items()}
+    graph, generic, names = graphs(17, 17, order)
+    starts = np.array([0], np.int64)
+    ends = np.array([1026], np.int64)
+    with AdaptiveScheduler(cpu_budget=1) as scheduler:
+        short_plan = scheduler.plan(graph, first_inputs, starts, np.array([513], np.int64))
+        plan = scheduler.plan(graph, larger, starts, ends)
+        assert plan.estimated_worker_scratch_bytes == short_plan.estimated_worker_scratch_bytes
+        assert plan.estimated_output_bytes > short_plan.estimated_output_bytes
+        with pytest.raises(MemoryError):
+            scheduler.execute(graph, larger, starts, ends,
+                              memory_budget_bytes=plan.estimated_total_memory_bytes - 1)
+        first = scheduler.execute(graph, larger, starts, ends,
+                                  memory_budget_bytes=plan.estimated_total_memory_bytes)
+        saved = retained_values(first, names)
+        later = scheduler.execute(graph, larger, starts, ends,
+                                  memory_budget_bytes=plan.estimated_total_memory_bytes)
+        expected = scheduler.execute(generic, larger, starts, ends)
+        for result in (first, later):
+            compare(result, expected, names, larger)
+            assert_a17_packet_pack(result, 1026 * 17)
+            assert result.audit["cpu_tokens"] <= 1
+        assert_two_generations(first, later, saved, names)
+    for name, original in originals.items():
+        ieee_bits(larger[name], original)
+    del larger, first_inputs, later, expected
+    gc.collect()
+    for name in names:
+        for old, snapshot in zip(first.named_outputs[name].values, saved[name], strict=True):
+            ieee_bits(old, snapshot)

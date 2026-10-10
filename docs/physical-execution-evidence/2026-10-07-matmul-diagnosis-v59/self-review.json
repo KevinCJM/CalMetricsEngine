@@ -1,0 +1,243 @@
+{
+  "status": "screening_complete_candidate_not_adopted",
+  "decision": "not_adopted",
+  "reason": "No consistent substantial whole-request improvement or memory reduction; significant NJIT lead remains unproved. KB/ms differences are diagnostics, not rejection gates.",
+  "actual_build_id": "6a4114d3736f7967e011c5e7619172eb093685461cbacd3cbda74191de02aadb",
+  "candidate_build_id": "961a5036ceaceb72cfc7727708595aeb0ddd58f358807d2304092ca4b651387e",
+  "timed_samples": 120,
+  "results": {
+    "long-cc": {
+      "actual": {
+        "group_wall_s": [
+          0.9275074585,
+          0.846041333,
+          0.789765958
+        ],
+        "wall_s": 0.846041333,
+        "group_cpu_s": [
+          0.8750290000000001,
+          0.814791,
+          0.769658
+        ],
+        "cpu_s": 0.814791,
+        "maximum_sampled_fsum_error": 4.7704895589362195e-18
+      },
+      "candidate": {
+        "group_wall_s": [
+          0.8298669585,
+          0.858094875,
+          0.791287709
+        ],
+        "wall_s": 0.8298669585,
+        "group_cpu_s": [
+          0.7719445,
+          0.817133,
+          0.745317
+        ],
+        "cpu_s": 0.7719445,
+        "maximum_sampled_fsum_error": 4.7704895589362195e-18
+      },
+      "njit": {
+        "group_wall_s": [
+          0.8252884375,
+          0.7780915,
+          0.705011792
+        ],
+        "wall_s": 0.7780915,
+        "group_cpu_s": [
+          0.7270625,
+          0.739784,
+          0.660188
+        ],
+        "cpu_s": 0.7270625,
+        "maximum_sampled_fsum_error": 4.7704895589362195e-18
+      },
+      "candidate_vs_actual": 0.9808822880524681,
+      "candidate_vs_njit": 1.0665416066105335
+    },
+    "long-ff": {
+      "actual": {
+        "group_wall_s": [
+          1.195970375,
+          1.26501975,
+          1.117825875
+        ],
+        "wall_s": 1.195970375,
+        "group_cpu_s": [
+          1.134935,
+          1.162654,
+          1.088232
+        ],
+        "cpu_s": 1.134935,
+        "maximum_sampled_fsum_error": 4.7704895589362195e-18
+      },
+      "candidate": {
+        "group_wall_s": [
+          1.144577333,
+          1.162765208,
+          1.060035125
+        ],
+        "wall_s": 1.144577333,
+        "group_cpu_s": [
+          1.09782,
+          1.104034,
+          1.029962
+        ],
+        "cpu_s": 1.09782,
+        "maximum_sampled_fsum_error": 4.7704895589362195e-18
+      },
+      "njit": {
+        "group_wall_s": [
+          1.0958455205000002,
+          1.13521325,
+          1.00034375
+        ],
+        "wall_s": 1.0958455205000002,
+        "group_cpu_s": [
+          1.0221045,
+          1.046022,
+          0.978259
+        ],
+        "cpu_s": 1.0221045,
+        "maximum_sampled_fsum_error": 4.7704895589362195e-18
+      },
+      "candidate_vs_actual": 0.9570281646817548,
+      "candidate_vs_njit": 1.0444696004942056
+    },
+    "wide-cc": {
+      "actual": {
+        "group_wall_s": [
+          1.3428954165,
+          1.1304245,
+          1.183289542
+        ],
+        "wall_s": 1.183289542,
+        "group_cpu_s": [
+          1.143033,
+          1.10109,
+          1.104963
+        ],
+        "cpu_s": 1.104963,
+        "maximum_sampled_fsum_error": 4.9873299934333204e-18
+      },
+      "candidate": {
+        "group_wall_s": [
+          1.1608792289999998,
+          1.184956791,
+          1.112000292
+        ],
+        "wall_s": 1.1608792289999998,
+        "group_cpu_s": [
+          1.1096255,
+          1.074752,
+          1.083139
+        ],
+        "cpu_s": 1.083139,
+        "maximum_sampled_fsum_error": 4.9873299934333204e-18
+      },
+      "njit": {
+        "group_wall_s": [
+          1.1359388545,
+          1.019125208,
+          1.065457166
+        ],
+        "wall_s": 1.065457166,
+        "group_cpu_s": [
+          1.0424295,
+          0.994587,
+          0.988882
+        ],
+        "cpu_s": 0.994587,
+        "maximum_sampled_fsum_error": 4.9873299934333204e-18
+      },
+      "candidate_vs_actual": 0.981061006453144,
+      "candidate_vs_njit": 1.0895597364633989
+    },
+    "wide-ff": {
+      "actual": {
+        "group_wall_s": [
+          0.8544544375,
+          0.826038625,
+          0.794247416
+        ],
+        "wall_s": 0.826038625,
+        "group_cpu_s": [
+          0.8166395,
+          0.77358,
+          0.769153
+        ],
+        "cpu_s": 0.77358,
+        "maximum_sampled_fsum_error": 4.9873299934333204e-18
+      },
+      "candidate": {
+        "group_wall_s": [
+          0.8673930205,
+          0.748887583,
+          0.74192775
+        ],
+        "wall_s": 0.748887583,
+        "group_cpu_s": [
+          0.7910075,
+          0.733455,
+          0.730082
+        ],
+        "cpu_s": 0.733455,
+        "maximum_sampled_fsum_error": 4.9873299934333204e-18
+      },
+      "njit": {
+        "group_wall_s": [
+          0.834299396,
+          0.659881167,
+          0.668240666
+        ],
+        "wall_s": 0.668240666,
+        "group_cpu_s": [
+          0.7778705,
+          0.645617,
+          0.654375
+        ],
+        "cpu_s": 0.654375,
+        "maximum_sampled_fsum_error": 4.9873299934333204e-18
+      },
+      "candidate_vs_actual": 0.906601168922337,
+      "candidate_vs_njit": 1.1206854373032127
+    }
+  },
+  "heap_peak_bytes": {
+    "actual": 2156010256,
+    "candidate": 2156010256,
+    "njit": 2156003744
+  },
+  "quality": {
+    "status": "passed",
+    "build_id": "961a5036ceaceb72cfc7727708595aeb0ddd58f358807d2304092ca4b651387e",
+    "jobs": [
+      {
+        "label": "native",
+        "returncode": 0,
+        "counts": {
+          "tests": 9,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      },
+      {
+        "label": "related",
+        "returncode": 0,
+        "counts": {
+          "tests": 734,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      }
+    ],
+    "actual_adopted": false
+  },
+  "full_regression_rerun": false,
+  "sanitizers_run": false,
+  "library_off_run": false,
+  "actual_cpp_changes": [],
+  "goal_complete": false
+}

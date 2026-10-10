@@ -1,0 +1,290 @@
+--- a/cpp/graph.cpp
++++ b/cpp/graph.cpp
+@@ -715,11 +715,32 @@
+     producer = id;
+   }
+   if (producer == UINT32_MAX) return nullptr;
+-  const auto &left = program.nodes[program.nodes[producer].parents[0]];
+-  if (left.kind != NodeKind::input || program.input_axes.empty() ||
+-      program.input_axes[left.input_index] != 1) return nullptr;
++  // A row-local left operand can be derived from one static input. Keep
++  // its actual logical nodes in every child; do not materialize the full
++  // transformed weights or trajectory before partitioning. The axis proof
++  // below rejects cross-row reductions, and runtime shape validation proves
++  // the same dependency closure for the full and blocked input geometry.
++  std::uint32_t source_input = UINT32_MAX;
++  std::vector<std::uint8_t> visited(program.nodes.size(), 0);
++  std::vector<std::uint32_t> pending{program.nodes[producer].parents[0]};
++  while (!pending.empty()) {
++    const auto id = pending.back(); pending.pop_back();
++    if (visited[id]) continue;
++    visited[id] = 1;
++    const auto &node = program.nodes[id];
++    if (node.kind == NodeKind::input) {
++      if (node.input_index >= program.input_axes.size() ||
++          program.input_axes[node.input_index] != 1 ||
++          (source_input != UINT32_MAX && source_input != node.input_index)) return nullptr;
++      source_input = node.input_index;
++    } else if (node.kind == NodeKind::operation) {
++      for (std::size_t j = 0; j < node.parent_count; ++j)
++        pending.push_back(node.parents[j]);
++    } else if (node.kind != NodeKind::constant && node.kind != NodeKind::parameter) return nullptr;
++  }
++  if (source_input == UINT32_MAX) return nullptr;
+   auto plan = std::make_shared<RowBatchPlan>();
+-  plan->input = left.input_index; plan->producer = producer;
++  plan->input = source_input; plan->producer = producer;
+   plan->axes.assign(program.nodes.size(), -1);
+   const auto axis_literal = [&](const Node &node, std::size_t argument) {
+     if (argument >= node.parent_count) return -1;
+--- a/tests/graph_native_tests.cpp
++++ b/tests/graph_native_tests.cpp
+@@ -6,6 +6,7 @@
+ #include "matmul_statistics_native_cases.hpp"
+ #include "matmul_root_native_cases.hpp"
+ #include "row_batch_native_cases.hpp"
++#include "derived_row_native_cases.hpp"
+ #include "masked_reduce_native_cases.hpp"
+ 
+ #include <algorithm>
+@@ -133,6 +134,7 @@
+   masked_reduce_native_cases::run();
+   test_scan_packet_exception_and_lifetime();
+   row_batch_native_cases::run();
++  derived_row_native_cases::run();
+   matmul_statistics_cases::run();
+     matmul_statistics_cases::run_quantiles();
+   {
+--- a/tests/derived_row_native_cases.hpp
++++ b/tests/derived_row_native_cases.hpp
+@@ -0,0 +1,74 @@
++#pragma once
++#include "calmetrics_engine/graph.hpp"
++#include <climits>
++#include <cmath>
++#include <stdexcept>
++#include <vector>
++
++namespace derived_row_native_cases {
++inline void require(bool condition, const char *message) {
++  if (!condition) throw std::runtime_error(message);
++}
++inline void run() {
++  namespace g = calmetrics_engine::graph;
++  namespace o = calmetrics_engine::ops;
++  const auto input = [](unsigned i) { g::Node x; x.kind=g::NodeKind::input; x.input_index=i; return x; };
++  const auto constant = [](double v) { g::Node x; x.kind=g::NodeKind::constant; x.constant=v; return x; };
++  const auto op = [](o::Op code, std::initializer_list<std::uint32_t> parents, unsigned slot) {
++    g::Node x; x.kind=g::NodeKind::operation; x.opcode=std::uint16_t(code);
++    x.parent_count=parents.size(); x.storage=g::StorageKind::numeric; x.slot=slot;
++    unsigned j=0; for (auto p:parents) x.parents[j++]=p; return x;
++  };
++  g::Program p; p.input_count=2; p.input_axes={1,2}; p.numeric_slots=4;
++  p.output_kind=g::OutputKind::typed;
++  p.root_outputs={{g::OutputDType::float64,1,g::OutputOrder::c}};
++  p.nodes={input(0),input(1),constant(2),op(o::Op::multiply,{0,2},0),
++           op(o::Op::transpose,{1},1),op(o::Op::matmul,{3,4},2),
++           constant(1),op(o::Op::sum_axis,{5,6},3)};
++  p.roots={7}; p.finalize();
++  require(bool(p.execution_metadata->row_batch), "derived row proof missing");
++  require(p.execution_metadata->row_batch->input==0, "wrong derived source");
++  constexpr std::size_t rows=257, times=129, columns=7;
++  std::vector<double> weights(rows*columns), returns(times*columns);
++  for (std::size_t i=0;i<weights.size();++i) weights[i]=double(i%5)*.125;
++  for (std::size_t i=0;i<returns.size();++i) returns[i]=double(int(i%7)-3)*.0625;
++  const auto matrix=[](const double *data,std::size_t r,std::size_t c) {
++    o::Value x; x.kind=o::Kind::number; x.shape=o::matrix_shape(r,c);
++    x.data=data; x.stride[0]=c; x.stride[1]=1; return x;
++  };
++  for (const bool reverse : {false,true}) {
++    auto left=matrix(weights.data(),rows,columns);
++    if (reverse) {left.data=weights.data()+(rows-1)*columns; left.stride[0]=-std::ptrdiff_t(columns);}
++    std::vector<o::Value> args{left,matrix(returns.data(),times,columns)};
++    const std::int64_t start=0,end=times;
++    auto layout=g::result_layout(p,args,&start,&end,1);
++    std::vector<double> out(layout.bytes()/8+8,-777.);
++    g::execute(p,args,nullptr,0,&start,&end,1,out.data(),1,&layout);
++    for (std::size_t i=0;i<rows;++i) {
++      double expected=0.;
++      for (std::size_t t=0;t<times;++t) {
++        double value=0.;
++        for (std::size_t k=0;k<columns;++k) value+=(left.at(i,k)*2.)*returns[t*columns+k];
++        expected+=value;
++      }
++      require(out[i]==expected,"derived native fold changed");
++    }
++    for (std::size_t i=layout.bytes()/8;i<out.size();++i) require(out[i]==-777.,"derived result canary overwritten");
++  }
++  // Empty raw storage with non-null data and extreme strides must never be advanced.
++  double sentinel=3.;
++  for (const auto stride : {std::ptrdiff_t(PTRDIFF_MAX),std::ptrdiff_t(PTRDIFF_MIN)}) {
++    auto left=matrix(&sentinel,rows,0); left.stride[0]=stride;
++    auto right=matrix(&sentinel,times,0);
++    const std::int64_t start=0,end=times;
++    std::vector<o::Value> args{left,right};
++    auto layout=g::result_layout(p,args,&start,&end,1);
++    std::vector<double> out(layout.bytes()/8+8,-777.);
++    g::execute(p,args,nullptr,0,&start,&end,1,out.data(),1,&layout);
++    for (std::size_t i=0;i<rows;++i) require(out[i]==0. && !std::signbit(out[i]),"empty derived matrix changed zero");
++    for (std::size_t i=layout.bytes()/8;i<out.size();++i) require(out[i]==-777.,"empty derived canary overwritten");
++    require(sentinel==3.,"empty input mutated");
++  }
++  g::release_graph_workspace();
++}
++}
+--- a/tests/test_derived_row_batch.py
++++ b/tests/test_derived_row_batch.py
+@@ -0,0 +1,153 @@
++"""Derived independent rows retain canonical math, failures and owned results."""
++import numpy as np
++import pytest
++
++from calmetrics_engine import AdaptiveScheduler, GraphCompiler, PlannerConfig
++from .test_row_batch_execution import TYPES, Y, ROOTS, TAIL_COUNT, NEGATIVE_COUNT, arena
++from .test_array_row_parallel import data, config
++
++EXPONENTIAL = '-log(maximum(w,1e-15))'
++DENOMINATOR = f'transpose(broadcast_like(sum_axis({EXPONENTIAL},1),transpose({EXPONENTIAL})))'
++NORMALIZED = f'divide({EXPONENTIAL},{DENOMINATOR})'
++TRAJECTORY = f'matmul({NORMALIZED},transpose(r))'
++
++
++def compile_roots(prefix=TRAJECTORY, expose=False, types=TYPES, order='C'):
++    roots = [x.replace(Y, prefix) for x in ROOTS + [TAIL_COUNT, NEGATIVE_COUNT]]
++    if expose:
++        roots.append(prefix)
++    return GraphCompiler(types).compile(roots, result_format='typed', output_order=order)
++
++
++@pytest.mark.parametrize('layout', ['C', 'F', 'negative', 'padded'])
++@pytest.mark.parametrize('n', [127, 128, 257, 517])
++@pytest.mark.parametrize('k', [0, 1, 7])
++@pytest.mark.parametrize('cpu', [1, 4])
++def test_transformed_normalized_rows_math_budget_and_ownership(layout, n, k, cpu):
++    inputs = data(n, 129, k, layout)
++    original = {name: value.copy() for name, value in inputs.items()}
++    starts = np.array([0], np.int64)
++    ends = np.array([129], np.int64)
++    with AdaptiveScheduler(cpu_budget=cpu, config=config()) as scheduler:
++        first = scheduler.execute(compile_roots(order=layout if layout in ['C', 'F'] else 'C'),
++                                  inputs, starts, ends)
++        saved = [out.values[0].copy() for out in first.outputs]
++        control = scheduler.execute(compile_roots(expose=True), inputs, starts, ends)
++        second = scheduler.execute(compile_roots(), inputs, starts, ends)
++    for index, out in enumerate(first.outputs):
++        actual = out.values[0]
++        np.testing.assert_array_equal(actual.view(np.uint64),
++                                      control.outputs[index].values[0].view(np.uint64))
++        np.testing.assert_array_equal(actual.view(np.uint64), saved[index].view(np.uint64))
++        assert actual.shape == (n,) and not actual.flags.writeable
++        assert out.root_statuses[0] == 0
++        assert not np.shares_memory(actual, second.outputs[index].values[0])
++        assert all(not np.shares_memory(actual, value) for value in inputs.values())
++    for name, value in inputs.items():
++        np.testing.assert_array_equal(value.view(np.uint64), original[name].view(np.uint64))
++    observed = max(c['numeric_arena_bytes'] + c['mask_arena_bytes'] +
++                   c['operator_workspace_capacity_bytes'] for c in first.audit['native_chunks'])
++    assert first.plan.estimated_worker_scratch_bytes >= observed
++    if n >= 128:
++        assert arena(first) < arena(control) / 2
++    if cpu == 4 and n >= 256:
++        assert first.plan.parallel_dimension == 'array_row'
++        assert first.plan.thread_count == min(4, n // 128)
++    assert sum(c['root_copy_bytes'] for c in first.audit['native_chunks']) == 0
++
++
++@pytest.mark.parametrize('layout', ['C', 'F', 'negative', 'padded'])
++@pytest.mark.parametrize('lane', ['single', 'thread', 'process_inline', 'process_shared'])
++def test_multiple_intervals_transports_and_derived_prefix(layout, lane):
++    inputs = data(257, 257, 7, layout)
++    starts = np.array([0, 11], np.int64)
++    ends = np.array([257, 257], np.int64)
++    cfg = PlannerConfig(thread_work_units=1e100 if lane == 'single' else 1,
++                        process_work_units=1 if lane.startswith('process') else 1e100,
++                        shared_memory_threshold_bytes=1 if lane == 'process_shared' else 1 << 30,
++                        min_rows_per_worker=1, max_processes=2)
++    with AdaptiveScheduler(cpu_budget=2, config=cfg) as scheduler:
++        result = scheduler.execute(compile_roots(), inputs, starts, ends)
++        control = scheduler.execute(compile_roots(expose=True), inputs, starts, ends)
++    assert result.plan.lane == ('process' if lane.startswith('process') else lane)
++    for a, b in zip(result.outputs, control.outputs[:5], strict=True):
++        for row in range(2):
++            np.testing.assert_array_equal(a.values[row].view(np.uint64), b.values[row].view(np.uint64))
++            assert not a.values[row].flags.writeable
++
++
++@pytest.mark.parametrize('layout', ['C', 'F', 'negative', 'padded'])
++@pytest.mark.parametrize('cpu', [1, 4])
++def test_prefix_failure_precedes_later_node_in_an_earlier_batch(layout, cpu):
++    inputs = data(517, 129, 1, layout)
++    weights = np.full((517, 1), 2.)
++    weights[10] = 1.
++    weights[-5] = -1.
++    if layout == 'negative':
++        weights = weights[::-1]
++    weights.flags.writeable = False
++    returns = np.ones((129, 1)); returns.flags.writeable = False
++    inputs.update(w=weights, r=returns)
++    y = 'matmul(log(w),transpose(r))'
++    roots = [f'sum_axis(divide(1,{y}),1)']
++    compiler = GraphCompiler(TYPES)
++    starts = np.array([0], np.int64); ends = np.array([129], np.int64)
++    with AdaptiveScheduler(cpu_budget=cpu, config=config()) as scheduler:
++        messages = []
++        for expressions in [roots, roots + [y]]:
++            with pytest.raises(ValueError) as error:
++                scheduler.execute(compiler.compile(expressions, result_format='typed'),
++                                  inputs, starts, ends)
++            messages.append(str(error.value))
++        assert messages[0] == messages[1] and 'DOMAIN_ERROR' in messages[0]
++        healthy = scheduler.execute(compile_roots(), data(517, 129, 1), starts, ends)
++        assert all(np.isfinite(out.values[0]).all() for out in healthy.outputs)
++
++
++@pytest.mark.parametrize('prefix', ['cross_row', 'second_input', 'global_scalar', 'matrix_root'])
++@pytest.mark.parametrize('cpu', [1, 4])
++def test_unproven_dependencies_remain_on_full_canonical_path(prefix, cpu):
++    inputs = data(257, 129, 7)
++    types = dict(TYPES)
++    y = TRAJECTORY
++    if prefix == 'cross_row':
++        left = 'divide(w,broadcast_like(sum_axis(w,0),w))'
++        y = f'matmul({left},transpose(r))'
++    elif prefix == 'second_input':
++        types['v'] = TYPES['w']
++        inputs['v'] = inputs['w'].copy(); inputs['v'].flags.writeable = False
++        y = 'matmul(add(w,v),transpose(r))'
++    elif prefix == 'global_scalar':
++        y = 'matmul(divide(w,sum(w)),transpose(r))'
++    expressions = [x.replace(Y, y) for x in ROOTS + [TAIL_COUNT, NEGATIVE_COUNT]]
++    if prefix == 'matrix_root':
++        expressions.append(NORMALIZED)
++    with AdaptiveScheduler(cpu_budget=cpu, config=config()) as scheduler:
++        compiler = GraphCompiler(types)
++        result = scheduler.execute(compiler.compile(expressions, result_format='typed'), inputs,
++                                   np.array([0], np.int64), np.array([129], np.int64))
++        control = scheduler.execute(compiler.compile(expressions + [y], result_format='typed'), inputs,
++                                    np.array([0], np.int64), np.array([129], np.int64))
++    assert result.plan.parallel_dimension != 'array_row'
++    for a, b in zip(result.outputs, control.outputs[:len(expressions)], strict=True):
++        np.testing.assert_array_equal(a.values[0].view(np.uint64), b.values[0].view(np.uint64))
++
++
++@pytest.mark.parametrize('layout', ['C', 'F', 'negative', 'padded'])
++def test_prepared_content_changes_preserve_prior_snapshot(layout):
++    inputs = data(517, 129, 7, layout)
++    # Keep addresses/strides stable while changing the live numerical contents.
++    inputs['w'].flags.writeable = True
++    starts = np.array([0], np.int64); ends = np.array([129], np.int64)
++    g = compile_roots()
++    with AdaptiveScheduler(cpu_budget=4, config=config()) as scheduler:
++        prepared = scheduler.prepare_execution(g, inputs, starts, ends)
++        first = prepared.run_snapshot()
++        saved = [x.values[0].copy() for x in first.outputs]
++        inputs['w'] *= .5
++        current = prepared.run_snapshot()
++        ordinary = scheduler.execute(g, inputs, starts, ends)
++    for index, out in enumerate(first.outputs):
++        np.testing.assert_array_equal(out.values[0], saved[index])
++        np.testing.assert_array_equal(current.outputs[index].values[0], ordinary.outputs[index].values[0])
++        assert not np.shares_memory(out.values[0], current.outputs[index].values[0])

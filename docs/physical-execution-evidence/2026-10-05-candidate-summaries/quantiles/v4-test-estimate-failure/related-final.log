@@ -1,0 +1,92 @@
+........................................................................ [ 11%]
+..FFF................................................................... [ 23%]
+........................................................................ [ 34%]
+........................................................................ [ 46%]
+........................................................................ [ 57%]
+........................................................................ [ 69%]
+........................................................................ [ 80%]
+........................................................................ [ 92%]
+.................................................                        [100%]
+=================================== FAILURES ===================================
+_______ test_long_history_has_bounded_working_set_and_certified_sqrt[C] ________
+
+layout = 'C'
+
+    @pytest.mark.parametrize('layout',['C','F'])
+    def test_long_history_has_bounded_working_set_and_certified_sqrt(layout):
+        values=data(32,200000,1,layout);values['r']+=.002
+        bounds=np.zeros(1,np.int64)
+        for value in values.values():value.flags.writeable=False
+        with AdaptiveScheduler(cpu_budget=1) as scheduler:
+            g=graph();plan=scheduler.plan(g,values,bounds,bounds)
+            first=scheduler.execute(g,values,bounds,bounds,
+                memory_budget_bytes=plan.estimated_total_memory_bytes)
+            saved=[out.values[0].copy() for out in first.outputs]
+            second=scheduler.execute(g,values,bounds,bounds)
+        y=values['w'][:3].astype(np.longdouble)@values['r'].astype(np.longdouble).T
+        mean=y.mean(axis=1);variance=((y-mean[:,None])**2).sum(axis=1)/(y.shape[1]-1)
+        np.testing.assert_allclose(first.outputs[0].values[0][:3],mean*252,rtol=1e-12,atol=4e-5)
+        np.testing.assert_allclose(first.outputs[1].values[0][:3],np.sqrt(variance*252),rtol=1e-12,atol=4e-5)
+        np.testing.assert_allclose(first.outputs[2].values[0][:3],
+            -np.quantile(y,np.asarray(values['q'],dtype=np.longdouble),axis=1).T,rtol=1e-12,atol=4e-5)
+        # Full Y would be 51.2 MB. The longest single trajectory is the only
+        # time-dependent working-set lower bound, not 32 complete trajectories.
+        assert count(first,'numeric_arena_bytes')<2_000_000
+>       assert plan.estimated_worker_scratch_bytes<4_000_000
+E       assert 4272624 < 4000000
+E        +  where 4272624 = <calmetrics_engine._native.graph.ExecutionPlan object at 0x110d3a4b0>.estimated_worker_scratch_bytes
+
+tests/test_matmul_quantile_statistics.py:252: AssertionError
+_______ test_long_history_has_bounded_working_set_and_certified_sqrt[F] ________
+
+layout = 'F'
+
+    @pytest.mark.parametrize('layout',['C','F'])
+    def test_long_history_has_bounded_working_set_and_certified_sqrt(layout):
+        values=data(32,200000,1,layout);values['r']+=.002
+        bounds=np.zeros(1,np.int64)
+        for value in values.values():value.flags.writeable=False
+        with AdaptiveScheduler(cpu_budget=1) as scheduler:
+            g=graph();plan=scheduler.plan(g,values,bounds,bounds)
+            first=scheduler.execute(g,values,bounds,bounds,
+                memory_budget_bytes=plan.estimated_total_memory_bytes)
+            saved=[out.values[0].copy() for out in first.outputs]
+            second=scheduler.execute(g,values,bounds,bounds)
+        y=values['w'][:3].astype(np.longdouble)@values['r'].astype(np.longdouble).T
+        mean=y.mean(axis=1);variance=((y-mean[:,None])**2).sum(axis=1)/(y.shape[1]-1)
+        np.testing.assert_allclose(first.outputs[0].values[0][:3],mean*252,rtol=1e-12,atol=4e-5)
+        np.testing.assert_allclose(first.outputs[1].values[0][:3],np.sqrt(variance*252),rtol=1e-12,atol=4e-5)
+        np.testing.assert_allclose(first.outputs[2].values[0][:3],
+            -np.quantile(y,np.asarray(values['q'],dtype=np.longdouble),axis=1).T,rtol=1e-12,atol=4e-5)
+        # Full Y would be 51.2 MB. The longest single trajectory is the only
+        # time-dependent working-set lower bound, not 32 complete trajectories.
+        assert count(first,'numeric_arena_bytes')<2_000_000
+>       assert plan.estimated_worker_scratch_bytes<4_000_000
+E       assert 4272624 < 4000000
+E        +  where 4272624 = <calmetrics_engine._native.graph.ExecutionPlan object at 0x111ece970>.estimated_worker_scratch_bytes
+
+tests/test_matmul_quantile_statistics.py:252: AssertionError
+___________ test_time_upper_bound_covers_larger_short_interval_batch ___________
+
+    def test_time_upper_bound_covers_larger_short_interval_batch():
+        values=data(65,100000,3);types=dict(TYPES)
+        types['r']=dict(kind='matrix',axes=['time','asset'],shape=['T','K'])
+        roots=[*ROOTS];compiler=GraphCompiler(types)
+        starts=np.array([0,0],np.int64);ends=np.array([2520,100000],np.int64)
+        with AdaptiveScheduler(cpu_budget=1) as scheduler:
+            g=compiler.compile(roots,result_format='typed');plan=scheduler.plan(g,values,starts,ends)
+            actual=scheduler.execute(g,values,starts,ends,memory_budget_bytes=plan.estimated_total_memory_bytes)
+            expected=scheduler.execute(compiler.compile([*roots,Y],result_format='typed'),values,starts,ends)
+        compare(actual,expected)
+        assert count(actual,'numeric_arena_bytes')<3_000_000
+>       assert plan.estimated_worker_scratch_bytes<3_000_000
+E       assert 3188056 < 3000000
+E        +  where 3188056 = <calmetrics_engine._native.graph.ExecutionPlan object at 0x1120ca4f0>.estimated_worker_scratch_bytes
+
+tests/test_matmul_quantile_statistics.py:272: AssertionError
+- generated xml file: /private/tmp/calmetrics-matmul-quantiles-20261005/related-final.xml -
+=========================== short test summary info ============================
+FAILED tests/test_matmul_quantile_statistics.py::test_long_history_has_bounded_working_set_and_certified_sqrt[C]
+FAILED tests/test_matmul_quantile_statistics.py::test_long_history_has_bounded_working_set_and_certified_sqrt[F]
+FAILED tests/test_matmul_quantile_statistics.py::test_time_upper_bound_covers_larger_short_interval_batch
+3 failed, 622 passed in 5.72s

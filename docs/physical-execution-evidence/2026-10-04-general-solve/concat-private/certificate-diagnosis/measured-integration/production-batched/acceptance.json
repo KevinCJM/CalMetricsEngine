@@ -1,0 +1,61 @@
+{
+  "source_build_id": "20cfaf3ed42593a7596230f80fd8621261042d64620e366b37a251939e82711a",
+  "quality": {
+    "production-batched-related": 528,
+    "production-batched-native": 9
+  },
+  "measured_jobs": 20,
+  "timings": {
+    "4112-c": {
+      "new": 0.681215271,
+      "njit": 0.6407125205
+    },
+    "4112-f": {
+      "new": 0.7863297295,
+      "njit": 0.7205043745
+    },
+    "8192-c": {
+      "new": 4.7054473125,
+      "njit": 5.2654083745
+    },
+    "8192-f": {
+      "new": 5.581052042,
+      "njit": 5.352096271
+    }
+  },
+  "memory": [
+    {
+      "layout": "c",
+      "backend": "new",
+      "requested_heap_peak_bytes": 1639573677,
+      "rss_delta_median_bytes": 1675755520,
+      "rss_absolute_peak_median_bytes": 1821736960
+    },
+    {
+      "layout": "c",
+      "backend": "njit",
+      "requested_heap_peak_bytes": 2147898640,
+      "rss_delta_median_bytes": 2687844352,
+      "rss_absolute_peak_median_bytes": 2828271616
+    },
+    {
+      "layout": "f",
+      "backend": "new",
+      "requested_heap_peak_bytes": 1639639239,
+      "rss_delta_median_bytes": 1679409152,
+      "rss_absolute_peak_median_bytes": 1824735232
+    },
+    {
+      "layout": "f",
+      "backend": "njit",
+      "requested_heap_peak_bytes": 2147898640,
+      "rss_delta_median_bytes": 2687795200,
+      "rss_absolute_peak_median_bytes": 2826895360
+    }
+  ],
+  "production_adopted": true,
+  "all_njit_time_goals_met": false,
+  "whole_goal_complete": false,
+  "no_git_operations": true,
+  "test_only_recheck": "../batched-screen/quality-closure"
+}

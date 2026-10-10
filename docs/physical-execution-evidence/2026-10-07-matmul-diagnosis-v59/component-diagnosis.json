@@ -1,0 +1,45 @@
+{
+  "instrumented_build": "a0d43ca1126bdae41420741cddab1d9532406e886cefe2a506feda913cc7de51",
+  "label": "diagnostic, not adoption performance",
+  "shape": [
+    131072,
+    1024,
+    512
+  ],
+  "layout": "CCC",
+  "warm_excluded": true,
+  "stages_median": {
+    "input_check_s": 0.107724,
+    "gemm_s": 0.531746,
+    "result_check_s": 0.0328994
+  },
+  "root_clear_s": 0.056797,
+  "raw_stages": [
+    {
+      "input_check_s": 0.178742,
+      "gemm_s": 0.646867,
+      "result_check_s": 0.0380123
+    },
+    {
+      "input_check_s": 0.107724,
+      "gemm_s": 0.534774,
+      "result_check_s": 0.0483594
+    },
+    {
+      "input_check_s": 0.107241,
+      "gemm_s": 0.531746,
+      "result_check_s": 0.0328994
+    },
+    {
+      "input_check_s": 0.133676,
+      "gemm_s": 0.504108,
+      "result_check_s": 0.0319328
+    }
+  ],
+  "raw_clear": [
+    0.23022,
+    0.0435038,
+    0.0574172,
+    0.056797
+  ]
+}

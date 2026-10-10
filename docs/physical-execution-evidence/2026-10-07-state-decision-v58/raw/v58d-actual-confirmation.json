@@ -1,0 +1,95 @@
+{
+  "status": "passed",
+  "build_id": "6a4114d3736f7967e011c5e7619172eb093685461cbacd3cbda74191de02aadb",
+  "samples": [
+    {
+      "stem": "v58d-actual-time-0-cpp",
+      "backend": "cpp",
+      "metric": "time",
+      "build_id": "6a4114d3736f7967e011c5e7619172eb093685461cbacd3cbda74191de02aadb",
+      "median_seconds": 2.123984542209655,
+      "cpu_utilization_percent": 99.80722354008306,
+      "all13_parity": "passed"
+    },
+    {
+      "stem": "v58d-actual-time-0-njit",
+      "backend": "njit",
+      "metric": "time",
+      "build_id": null,
+      "median_seconds": 7.32562266709283,
+      "cpu_utilization_percent": 99.91280376586249,
+      "all13_parity": "passed"
+    },
+    {
+      "stem": "v58d-actual-time-1-njit",
+      "backend": "njit",
+      "metric": "time",
+      "build_id": null,
+      "median_seconds": 7.3807362918742,
+      "cpu_utilization_percent": 99.81616614741894,
+      "all13_parity": "passed"
+    },
+    {
+      "stem": "v58d-actual-time-1-cpp",
+      "backend": "cpp",
+      "metric": "time",
+      "build_id": "6a4114d3736f7967e011c5e7619172eb093685461cbacd3cbda74191de02aadb",
+      "median_seconds": 2.2453815839253366,
+      "cpu_utilization_percent": 95.13982012204097,
+      "all13_parity": "passed"
+    },
+    {
+      "stem": "v58d-actual-time-2-cpp",
+      "backend": "cpp",
+      "metric": "time",
+      "build_id": "6a4114d3736f7967e011c5e7619172eb093685461cbacd3cbda74191de02aadb",
+      "median_seconds": 2.08047266677022,
+      "cpu_utilization_percent": 99.9618996787182,
+      "all13_parity": "passed"
+    },
+    {
+      "stem": "v58d-actual-time-2-njit",
+      "backend": "njit",
+      "metric": "time",
+      "build_id": null,
+      "median_seconds": 7.437026374973357,
+      "cpu_utilization_percent": 99.90537380643103,
+      "all13_parity": "passed"
+    },
+    {
+      "stem": "v58d-actual-heap-cpp",
+      "backend": "cpp",
+      "metric": "heap",
+      "build_id": "6a4114d3736f7967e011c5e7619172eb093685461cbacd3cbda74191de02aadb",
+      "warm_peak_bytes": 834750250
+    },
+    {
+      "stem": "v58d-actual-heap-njit",
+      "backend": "njit",
+      "metric": "heap",
+      "build_id": null,
+      "warm_peak_bytes": 851456928
+    },
+    {
+      "stem": "v58d-actual-rss-cpp",
+      "backend": "cpp",
+      "metric": "rss",
+      "build_id": "6a4114d3736f7967e011c5e7619172eb093685461cbacd3cbda74191de02aadb",
+      "warm_peak_bytes": 1029275648,
+      "warm_incremental_rss_bytes": 736215040
+    },
+    {
+      "stem": "v58d-actual-rss-njit",
+      "backend": "njit",
+      "metric": "rss",
+      "build_id": null,
+      "warm_peak_bytes": 1416314880,
+      "warm_incremental_rss_bytes": 1085227008
+    }
+  ],
+  "goal_complete": false,
+  "medians": {
+    "cpp": 2.123984542209655,
+    "njit": 7.3807362918742
+  }
+}

@@ -1,0 +1,222 @@
+--- baseline/cpp/graph.cpp
++++ candidate/cpp/graph.cpp
+@@ -86,6 +86,7 @@
+   std::size_t eigen_matvec_calls = 0;
+   std::size_t eigen_covariance_calls = 0;
+   std::size_t eigen_density_calls = 0;
++  std::size_t variance_mean_reuse_calls = 0;
+   std::size_t accelerate_covchol_calls = 0;
+   std::size_t accelerate_matmul_calls = 0, matmul_zero_calls = 0;
+   std::size_t accelerate_covariance_attempts = 0;
+@@ -1045,6 +1046,30 @@
+         metadata->fused_from[i]=cached_candidate;
+         metadata->deferred_broadcast_argument[cached_candidate]=cached_argument;
+       }
++    }
++    // A short broadcast snapshot already lives until its sole pair consumer.
++    // Reusing it adds no arena lifetime, allocation or cross-request value cache.
++    metadata->variance_mean_source.assign(nodes.size(),-1);
++    std::vector<std::int32_t> saved_mean_for_input(nodes.size(),-1);
++    for(std::size_t id=0;id<nodes.size();++id) {
++      const auto &node=nodes[id];
++      if(node.kind!=NodeKind::operation) continue;
++      const auto argument=metadata->deferred_broadcast_argument[id];
++      if(argument>=0) {
++        const auto &view=nodes[node.parents[std::size_t(argument)]];
++        const auto &mean=nodes[view.parents[0]];
++        if(mean.kind==NodeKind::operation && mean.parent_count==2 &&
++            mean.opcode==static_cast<std::uint16_t>(ops::Op::mean_axis) &&
++            nodes[mean.parents[1]].kind==NodeKind::constant &&
++            nodes[mean.parents[1]].constant==0)
++          saved_mean_for_input[mean.parents[0]]=static_cast<std::int32_t>(id);
++      }
++      if(node.opcode!=static_cast<std::uint16_t>(ops::Op::variance_axis) ||
++          node.parent_count!=3 || nodes[node.parents[1]].kind!=NodeKind::constant ||
++          nodes[node.parents[1]].constant!=0) continue;
++      const auto saved=saved_mean_for_input[node.parents[0]];
++      if(saved>=0 && std::size_t(saved)<id && metadata->deferred_to[saved]>std::int32_t(id))
++        metadata->variance_mean_source[id]=saved;
+     }
+     if (apply_scopes.empty() && rolling_scopes.empty()) {
+       // Input-backed views stay live across deferred nodes. Public operation
+@@ -2124,6 +2149,7 @@
+ }
+ 
+ static void accumulate_child(Scratch &scratch, const Audit &audit) {
++  scratch.variance_mean_reuse_calls += audit.variance_mean_reuse_calls;
+   scratch.highway_vqsort_calls += audit.highway_vqsort_calls;
+   scratch.eigen_rotation_calls += audit.eigen_rotation_calls;
+   scratch.eigen_matvec_calls += audit.eigen_matvec_calls;
+@@ -3843,6 +3869,7 @@
+   scratch.eigen_matvec_calls = 0;
+   scratch.eigen_covariance_calls = 0;
+   scratch.eigen_density_calls = 0;
++  scratch.variance_mean_reuse_calls = 0;
+   scratch.accelerate_covchol_calls = 0;
+   scratch.accelerate_matmul_calls = scratch.matmul_zero_calls = 0;
+   scratch.accelerate_covariance_attempts = 0;
+@@ -4591,6 +4618,24 @@
+               accelerated = ops::try_dense_elementwise(prepared, native_output,
+                   scratch.workspace, operator_audit, private_arena);
+           }
++          if constexpr(!Observe && !DeferErrors) {
++            const auto saved=(!accelerated && fuse_pairs)
++                ? program.execution_metadata->variance_mean_source[node_index] : -1;
++            if(saved>=0 && deferred_broadcast_extent(program,std::size_t(saved),arena_shapes) &&
++                scratch.values[saved].size()!=0) {
++              const auto &first=program.nodes[saved];
++              const auto argument=std::size_t(program.execution_metadata->deferred_broadcast_argument[saved]);
++              const auto &view=program.nodes[first.parents[argument]];
++              const auto &original_mean=scratch.values[view.parents[0]];
++              auto mean=original_mean;
++              mean.data=scratch.numeric_slot(first.slot);
++              mean.set_contiguous_strides();
++              if(mean.size()<=scratch.slot_capacity(first.storage,first.slot)) {
++                accelerated=ops::try_variance_saved_mean(prepared,mean,native_output,operator_audit);
++                if(accelerated) ++scratch.variance_mean_reuse_calls;
++              }
++            }
++          }
+           if (!accelerated)
+             ops::execute(prepared, native_output, scratch.workspace,
+                          ops::Isa::automatic, operator_audit);
+@@ -4857,6 +4902,7 @@
+   audit.eigen_matvec_calls = scratch.eigen_matvec_calls;
+   audit.eigen_covariance_calls = scratch.eigen_covariance_calls;
+   audit.eigen_density_calls = scratch.eigen_density_calls;
++  audit.variance_mean_reuse_calls = scratch.variance_mean_reuse_calls;
+   audit.accelerate_covchol_calls = scratch.accelerate_covchol_calls;
+   audit.accelerate_matmul_calls = scratch.accelerate_matmul_calls;
+   audit.matmul_zero_calls = scratch.matmul_zero_calls;
+@@ -4985,6 +5031,7 @@
+         for (auto member : {&Audit::root_copy_bytes, &Audit::direct_output_bytes,
+             &Audit::state_copy_bytes, &Audit::vector_elements, &Audit::pointwise_tiles,
+             &Audit::fused_pointwise_calls, &Audit::algorithm_copy_bytes,
++          &Audit::variance_mean_reuse_calls,
+             &Audit::fused_scalar_calls, &Audit::summary_source_scans, &Audit::order_stat_sorts,
+             &Audit::highway_vqsort_calls, &Audit::eigen_rotation_calls,
+             &Audit::eigen_matvec_calls, &Audit::eigen_covariance_calls,
+@@ -5165,6 +5212,7 @@
+       for (auto member : {&Audit::root_copy_bytes, &Audit::direct_output_bytes,
+           &Audit::state_copy_bytes, &Audit::vector_elements, &Audit::pointwise_tiles,
+           &Audit::fused_pointwise_calls, &Audit::algorithm_copy_bytes,
++          &Audit::variance_mean_reuse_calls,
+           &Audit::fused_scalar_calls, &Audit::summary_source_scans, &Audit::order_stat_sorts,
+           &Audit::highway_vqsort_calls,
+           &Audit::eigen_rotation_calls, &Audit::eigen_matvec_calls,
+--- baseline/cpp/graph_bindings.cpp
++++ candidate/cpp/graph_bindings.cpp
+@@ -40,6 +40,7 @@
+   d["eigen_matvec_calls"] = a.eigen_matvec_calls;
+   d["eigen_covariance_calls"] = a.eigen_covariance_calls;
+   d["eigen_density_calls"] = a.eigen_density_calls;
++  d["variance_mean_reuse_calls"] = a.variance_mean_reuse_calls;
+   d["accelerate_covchol_calls"] = a.accelerate_covchol_calls;
+   d["accelerate_matmul_calls"] = a.accelerate_matmul_calls;
+   d["matmul_zero_calls"] = a.matmul_zero_calls;
+--- baseline/cpp/include/calmetrics_engine/graph.hpp
++++ candidate/cpp/include/calmetrics_engine/graph.hpp
+@@ -285,6 +285,8 @@
+   // Deferred pairs read persistent backing or a saved short broadcast input.
+   std::vector<std::int32_t> deferred_to, fused_from;
+   std::vector<std::int8_t> deferred_broadcast_argument;
++  // Exact-input axis-0 means already saved by a live deferred broadcast pair.
++  std::vector<std::int32_t> variance_mean_source;
+   // A private full filter can materialize only its sole, proven last-row slice.
+   std::vector<std::int32_t> filter_tail_source, filter_tail_slice;
+   // Deferred private concatenations expand persistent leaves into one C destination.
+@@ -393,6 +395,7 @@
+   std::size_t eigen_matvec_calls = 0;
+   std::size_t eigen_covariance_calls = 0;
+   std::size_t eigen_density_calls = 0;
++  std::size_t variance_mean_reuse_calls = 0;
+   std::size_t accelerate_covchol_calls = 0;
+   std::size_t accelerate_matmul_calls = 0, matmul_zero_calls = 0;
+   std::size_t accelerate_covariance_attempts = 0;
+--- baseline/cpp/include/calmetrics_engine/operators.hpp
++++ candidate/cpp/include/calmetrics_engine/operators.hpp
+@@ -393,6 +393,9 @@
+     double *em = nullptr, *alpha = nullptr, *beta = nullptr, *small = nullptr;
+     std::size_t cells = 0, small_count = 0;
+ };
++// Internal physical variance; canonical prepare and exact same-input, axis-0
++// ordered mean provenance are required before borrowing a saved short vector.
++bool try_variance_saved_mean(const Prepared &, const Value &, Output &, Audit &);
+ // Internal physical projection; the graph proves that only this last row is used.
+ void hmm_filter_tail(const Prepared &, Output &, Workspace &, Audit &);
+ void execute(const Prepared &plan, Output &output, Workspace &work, Isa isa, Audit &audit,
+--- baseline/cpp/native_process.cpp
++++ candidate/cpp/native_process.cpp
+@@ -209,7 +209,9 @@
+     &graph::Audit::accelerate_lu_fallbacks,
+     &graph::Audit::solve_residual_materialization_bytes,
+     &graph::Audit::covariance_panel_materialization_bytes,
+-    &graph::Audit::native_library_workspace_reserve_bytes};
++    &graph::Audit::native_library_workspace_reserve_bytes,
++    &graph::Audit::variance_mean_reuse_calls
++};
+ void write_audit(Writer &out, const graph::Audit &a, const graph::ResultLayout *layout) {
+   for (auto member : audit_fields)
+     out.number(a.*member);
+--- baseline/cpp/operators/column_library.hpp
++++ candidate/cpp/operators/column_library.hpp
+@@ -21,7 +21,8 @@
+ #if defined(__GNUC__) || defined(__clang__)
+ __attribute__((noinline))
+ #endif
+-bool eigen_ordered_rows(const Value &x,double divisor,Output &out,Audit &audit) {
++bool eigen_ordered_rows(const Value &x,double divisor,Output &out,Audit &audit,
++                        const double *saved_mean=nullptr) {
+   if(x.kind!=Kind::number || x.shape.rank!=2 || !x.contiguous() ||
+       x.shape.dim[0]<32 || x.shape.dim[1]<8 || x.shape.dim[1]>256) return false;
+   using Row=Eigen::Array<double,Eigen::Dynamic,1>;
+@@ -31,13 +32,18 @@
+     // Bounded stack maps, never a full input or dynamically allocated Eigen array.
+     double mean_storage[256],squared_storage[256];
+     Eigen::Map<Row,Eigen::Unaligned> mean(mean_storage,d),squared(squared_storage,d);
+-    mean.setZero();
+-    for(std::size_t i=0;i<n;++i)
+-      mean+=Eigen::Map<const Row,Eigen::Unaligned>(source+i*d,d);
+-    // Every NaN/Inf input yields a non-finite ordered column sum. Replay the
+-    // original eight-column path before writes, preserving its failure prefix.
++    if(saved_mean) {
++      mean=Eigen::Map<const Row,Eigen::Unaligned>(saved_mean,d);
++    } else {
++      mean.setZero();
++      for(std::size_t i=0;i<n;++i)
++        mean+=Eigen::Map<const Row,Eigen::Unaligned>(source+i*d,d);
++      // Every NaN/Inf input yields a non-finite ordered column sum. Replay the
++      // original eight-column path before writes, preserving its failure prefix.
++      if(!mean.isFinite().all()) return false;
++      mean/=double(n);
++    }
+     if(!mean.isFinite().all()) return false;
+-    mean/=double(n);
+     squared.setZero();
+     for(std::size_t i=0;i<n;++i) {
+       const Eigen::Map<const Row,Eigen::Unaligned> values(source+i*d,d);
+--- baseline/cpp/operators/latent.cpp
++++ candidate/cpp/operators/latent.cpp
+@@ -730,6 +730,22 @@
+   if (use_eigen) audit.isa = "eigen-array";
+ }
+ } // namespace
++
++bool try_variance_saved_mean(const Prepared &p,const Value &mean,Output &out,Audit &audit) {
++#ifdef CALMETRICS_HAVE_EIGEN_ROTATION
++  if(p.spec->op!=O::variance_axis || p.count!=3 || p.args[1].scalar!=0 ||
++      mean.kind!=Kind::number || mean.shape.rank!=1 || !mean.contiguous() ||
++      p.args[0].shape.rank!=2 || mean.size()!=p.args[0].shape.dim[1] ||
++      mean.size()==0 || !mean.data || !(out.shape==p.output_shape)) return false;
++  const auto n=p.args[0].shape.dim[0];
++  require(n>0 && p.args[2].scalar<double(n),"INSUFFICIENT_SAMPLE");
++  return eigen_ordered_rows<O::variance_axis>(p.args[0],double(n)-p.args[2].scalar,
++      out,audit,static_cast<const double *>(mean.data));
++#else
++  (void)p;(void)mean;(void)out;(void)audit;
++  return false;
++#endif
++}
+ 
+ void hmm_filter_tail(const Prepared &p, Output &out, Workspace &work, Audit &audit) {
+   require(p.spec->op == O::hmm_filter && !p.borrowed, "FILTER_TAIL_CONTRACT");

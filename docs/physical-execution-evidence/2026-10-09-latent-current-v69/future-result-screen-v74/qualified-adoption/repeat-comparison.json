@@ -1,0 +1,86 @@
+{
+  "status": "completed_repeat_analysis",
+  "rows": [
+    {
+      "n": 500000,
+      "time_groups": {
+        "current": [
+          0.8251587499980815,
+          0.8224045419992763,
+          0.8695361660065828
+        ],
+        "candidate": [
+          0.8458999160066014,
+          0.8562032079935307,
+          0.8455701659986516
+        ],
+        "njit": [
+          1.8891513340058737,
+          1.8985315409954637,
+          2.0036469580008998
+        ]
+      },
+      "time_median": {
+        "current": 0.8251587499980815,
+        "candidate": 0.8458999160066014,
+        "njit": 1.8985315409954637
+      },
+      "heap_bytes": {
+        "candidate": 122534582,
+        "njit": 110503392,
+        "current": 131534582
+      },
+      "rss_increment_bytes": {
+        "candidate": 111820800,
+        "njit": 141983744,
+        "current": 120307712
+      },
+      "heap_saved_vs_current": 9000000,
+      "heap_excess_vs_njit": 12031190,
+      "candidate_time_change_percent": 2.5135970513029404,
+      "candidate_time_saved_vs_njit_percent": 55.44451605143901
+    },
+    {
+      "n": 2000000,
+      "time_groups": {
+        "current": [
+          3.226994167001976,
+          3.2000587500006077
+        ],
+        "candidate": [
+          3.181717125000432,
+          3.260920624998107
+        ],
+        "njit": [
+          7.578710250003496,
+          7.655283833002613
+        ]
+      },
+      "time_median": {
+        "current": 3.213526458501292,
+        "candidate": 3.2213188749992696,
+        "njit": 7.616997041503055
+      },
+      "heap_bytes": {
+        "candidate": 490034582,
+        "njit": 442003392,
+        "current": 526034582
+      },
+      "rss_increment_bytes": {
+        "njit": 448233472,
+        "current": 448774144,
+        "candidate": 412729344
+      },
+      "heap_saved_vs_current": 36000000,
+      "heap_excess_vs_njit": 48031190,
+      "candidate_time_change_percent": 0.24248801429229694,
+      "candidate_time_saved_vs_njit_percent": 57.70880758588808
+    }
+  ],
+  "repeat_measurements": 21,
+  "initial_measurements": 30,
+  "full_math_and_ownership_checks": true,
+  "all_paired_input_hashes_equal": true,
+  "actual_adopted": false,
+  "goal_complete": false
+}

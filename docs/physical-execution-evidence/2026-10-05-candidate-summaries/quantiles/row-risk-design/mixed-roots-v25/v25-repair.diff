@@ -1,0 +1,46 @@
+--- a/cpp/operators/registry.cpp
++++ b/cpp/operators/registry.cpp
+@@ -556,7 +556,8 @@
+   require(out.shape.rank == 0 || out.shape.size() == 0 || out.data,
+           "NULL_OUTPUT");
+   require(out.order == MemoryOrder::c || out.shape.rank < 2 || p.borrowed ||
+-          p.spec->family == Family::elementwise || p.spec->op == Op::affine_contract ||
++          p.spec->family == Family::elementwise || p.spec->op == Op::matmul ||
++          p.spec->op == Op::affine_contract ||
+           axis_path_operator(p.spec->op),
+           "UNSUPPORTED_OUTPUT_ORDER");
+   require(supports_isa(isa), "UNSUPPORTED_ISA");
+--- a/tests/test_nonnegative_matmul_accelerate.py
++++ b/tests/test_nonnegative_matmul_accelerate.py
+@@ -149,13 +149,9 @@
+     bounds = np.zeros(1, np.int64)
+     with AdaptiveScheduler(cpu_budget=1) as scheduler:
+         result = scheduler.execute(graph, {"a": a, "b": b}, bounds, bounds)
+-    if fault == "mixed_sign" and ACCELERATE:
+-        assert chunks(result)[0]["accelerate_matmul_calls"] == 1
+-        assert_ieee_classes_and_close(result.outputs[0].values[0], op.matmul(a, b))
+-    else:
+-        no_library(result)
+-        np.testing.assert_array_equal(result.outputs[0].values[0].view(np.uint64),
+-                                      op.matmul(a, b).view(np.uint64))
++    no_library(result)
++    np.testing.assert_array_equal(result.outputs[0].values[0].view(np.uint64),
++                                  op.matmul(a, b).view(np.uint64))
+ 
+ 
+ @active
+--- a/tests/test_matmul_root_layout.py
++++ b/tests/test_matmul_root_layout.py
+@@ -178,7 +178,11 @@
+     a, b = matrices("ff", (512, 256, 512))
+     expr = {"isolate": "matmul(a,b)", "discrete": "matmul(a,b)>0",
+             "trace": "trace(matmul(a,b))", "shared": ["matmul(a,b)", "trace(matmul(a,b))"]}[mode]
+-    compiled = GraphCompiler(declarations()).compile(expr, output_order="F", error_policy="isolate" if mode == "isolate" else "raise")
++    types = declarations()
++    if mode in {"trace", "shared"}:
++        # The trace contract requires the same symbolic axes and dimensions.
++        types["b"]["shape"] = ["K", "M"]
++    compiled = GraphCompiler(types).compile(expr, output_order="F", error_policy="isolate" if mode == "isolate" else "raise")
+     bounds = np.zeros(1, np.int64)
+     with AdaptiveScheduler(cpu_budget=1) as scheduler:
+         result = scheduler.execute(compiled, {"a": a, "b": b}, bounds, bounds)

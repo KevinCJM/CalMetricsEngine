@@ -1,0 +1,19 @@
+{
+  "status": "corrected_and_18_passed",
+  "failure_evidence": [
+    "boundary-off.xml",
+    "boundary-off.log"
+  ],
+  "tests": 18,
+  "passed": 8,
+  "failed": 10,
+  "failure_scope": "Only SGEMM algorithm_copy_bytes assertions; mathematical, ownership and input checks passed before the assertions.",
+  "reason": "Supplemental OFF driver omitted CME_EXPECT_ACCELERATE=0 and mode flags; the test module inferred the enabled macOS lane. Same OFF environment as the passing4807 main qualification now applied.",
+  "production_source_change": false,
+  "test_or_budget_change": false,
+  "required_action": "Rerun18 with the same OFF environment flags as the passing4807 qualification after the isolated performance campaign ends.",
+  "corrected_evidence": [
+    "boundary-off-corrected.xml",
+    "boundary-off-corrected.log"
+  ]
+}

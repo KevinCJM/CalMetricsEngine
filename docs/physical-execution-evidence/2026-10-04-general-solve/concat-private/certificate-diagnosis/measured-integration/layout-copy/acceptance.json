@@ -1,0 +1,45 @@
+{
+  "source_build_id": "670720df09e608c3ad832e2370a4eaeb540c5e87121e317d0b976d24989d4d10",
+  "quality": {
+    "production-related": 274,
+    "production-native": 9
+  },
+  "candidate_quality": {
+    "related-initial": 274,
+    "native": 9,
+    "asan-related": 274,
+    "asan-native": 9,
+    "off-related": 274,
+    "off-native": 9
+  },
+  "actual_jobs": 10,
+  "isolated_jobs": 12,
+  "timings": {
+    "c": {
+      "new": 4.9449165625,
+      "njit": 5.444061188
+    },
+    "f": {
+      "new": 4.971662,
+      "njit": 5.455426479
+    }
+  },
+  "memory": [
+    {
+      "backend": "new",
+      "requested_heap_peak_bytes": 1639639223,
+      "rss_delta_median_bytes": 1674772480,
+      "rss_absolute_peak_median_bytes": 1822523392
+    },
+    {
+      "backend": "njit",
+      "requested_heap_peak_bytes": 2147898640,
+      "rss_delta_median_bytes": 2687156224,
+      "rss_absolute_peak_median_bytes": 2827403264
+    }
+  ],
+  "production_adopted": true,
+  "full_suite_rerun": false,
+  "whole_goal_complete": false,
+  "no_git_operations": true
+}

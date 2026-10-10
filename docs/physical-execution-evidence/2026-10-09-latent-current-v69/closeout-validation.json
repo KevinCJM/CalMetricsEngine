@@ -1,0 +1,99 @@
+{
+  "status": "terminal_evidence_verified",
+  "actual_build_id": "a87f2c25ae40a633f3f22ae0bfc66ecdefb721294e349d2ae21d74687eb960a2",
+  "full_current_processes": 40,
+  "metric_processes": {
+    "time": 24,
+    "heap": 8,
+    "rss": 8
+  },
+  "smokes_separate": 2,
+  "controlled_view_processes": 8,
+  "all_full_output_checks_passed": true,
+  "maximum_absolute_tail_across_current_smoke_and_views": 1.3877787807814457e-13,
+  "input_hashes_paired_equal": true,
+  "source_and_binary_guards_passed": true,
+  "engine_implementation_changed": false,
+  "optimization_adopted": false,
+  "goal_complete": false,
+  "controlled_view_verdict": "not adopted: large GMM heap and numeric arena increase about40MiB",
+  "controlled_view_rows": [
+    {
+      "case": "hmm12",
+      "actual_heap_bytes": 265576238,
+      "controlled_heap_bytes": 249577134,
+      "heap_delta_bytes": -15999104,
+      "actual_audit": {
+        "numeric_arena_bytes": 77002464,
+        "operator_workspace_capacity_bytes": 16023872,
+        "algorithm_copy_bytes": 77011328,
+        "direct_output_bytes": 76000480
+      },
+      "controlled_audit": {
+        "numeric_arena_bytes": 65003616,
+        "operator_workspace_capacity_bytes": 12023872,
+        "algorithm_copy_bytes": 205011360,
+        "direct_output_bytes": 76000480
+      },
+      "controlled_single_process_time_seconds": 4.268085374998918
+    },
+    {
+      "case": "hmm3-default60",
+      "actual_heap_bytes": 79795726,
+      "controlled_heap_bytes": 73795758,
+      "heap_delta_bytes": -5999968,
+      "actual_audit": {
+        "numeric_arena_bytes": 20500448,
+        "operator_workspace_capacity_bytes": 9007432,
+        "algorithm_copy_bytes": 47000536,
+        "direct_output_bytes": 20000120
+      },
+      "controlled_audit": {
+        "numeric_arena_bytes": 14500736,
+        "operator_workspace_capacity_bytes": 9007432,
+        "algorithm_copy_bytes": 47000568,
+        "direct_output_bytes": 20000120
+      },
+      "controlled_single_process_time_seconds": 0.8225185420014895
+    },
+    {
+      "case": "gmm16",
+      "actual_heap_bytes": 834750338,
+      "controlled_heap_bytes": 876693202,
+      "heap_delta_bytes": 41942864,
+      "actual_audit": {
+        "numeric_arena_bytes": 128628384,
+        "operator_workspace_capacity_bytes": 27136,
+        "algorithm_copy_bytes": 584422064,
+        "direct_output_bytes": 301991616
+      },
+      "controlled_audit": {
+        "numeric_arena_bytes": 170571504,
+        "operator_workspace_capacity_bytes": 27136,
+        "algorithm_copy_bytes": 584422064,
+        "direct_output_bytes": 301991616
+      },
+      "controlled_single_process_time_seconds": 2.038740208998206
+    },
+    {
+      "case": "gmm3-default60",
+      "actual_heap_bytes": 131534582,
+      "controlled_heap_bytes": 132534326,
+      "heap_delta_bytes": 999744,
+      "actual_audit": {
+        "numeric_arena_bytes": 22000376,
+        "operator_workspace_capacity_bytes": 9000096,
+        "algorithm_copy_bytes": 4000280,
+        "direct_output_bytes": 40000120
+      },
+      "controlled_audit": {
+        "numeric_arena_bytes": 23000376,
+        "operator_workspace_capacity_bytes": 9000096,
+        "algorithm_copy_bytes": 4000280,
+        "direct_output_bytes": 40000120
+      },
+      "controlled_single_process_time_seconds": 0.8191439580041333
+    }
+  ],
+  "documentation_impact": "Current performance evidence/index only. Public math, types, operators, ownership, execution/Excel interfaces unchanged; no user-guide, registry or Excel recipe change needed."
+}

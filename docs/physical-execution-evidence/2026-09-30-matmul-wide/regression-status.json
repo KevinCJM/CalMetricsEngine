@@ -1,0 +1,120 @@
+[
+  {
+    "name": "native-test",
+    "rc": 0,
+    "seconds": 3.4134579999372363,
+    "command": [
+      "/opt/homebrew/bin/ctest",
+      "--test-dir",
+      "/private/tmp/calmetrics-matmul-wide-square-build",
+      "--output-on-failure"
+    ]
+  },
+  {
+    "name": "asan-configure",
+    "rc": 0,
+    "seconds": 0.43276733299717307,
+    "command": [
+      "/opt/homebrew/bin/cmake",
+      "-S",
+      "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine",
+      "-B",
+      "/private/tmp/calmetrics-dense-asan",
+      "-G",
+      "Ninja",
+      "-DCMAKE_MAKE_PROGRAM=/private/tmp/calmetrics-perf-followup-deps/bin/ninja",
+      "-DCALMETRICS_ENGINE_BUILD_PYTHON=OFF",
+      "-DCALMETRICS_ENGINE_BUILD_TESTS=ON",
+      "-DCMAKE_BUILD_TYPE=Release",
+      "-DCALMETRICS_ENGINE_SANITIZE=ON",
+      "-DCMAKE_BUILD_TYPE=RelWithDebInfo"
+    ]
+  },
+  {
+    "name": "asan-build",
+    "rc": 0,
+    "seconds": 3.6821342499461025,
+    "command": [
+      "/opt/homebrew/bin/cmake",
+      "--build",
+      "/private/tmp/calmetrics-dense-asan",
+      "-j",
+      "3"
+    ]
+  },
+  {
+    "name": "asan-test",
+    "rc": 0,
+    "seconds": 3.950381665956229,
+    "command": [
+      "/opt/homebrew/bin/ctest",
+      "--test-dir",
+      "/private/tmp/calmetrics-dense-asan",
+      "--output-on-failure"
+    ]
+  },
+  {
+    "name": "off-configure",
+    "rc": 0,
+    "seconds": 0.07996704196557403,
+    "command": [
+      "/opt/homebrew/bin/cmake",
+      "-S",
+      "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine",
+      "-B",
+      "/private/tmp/calmetrics-dense-off",
+      "-G",
+      "Ninja",
+      "-DCMAKE_MAKE_PROGRAM=/private/tmp/calmetrics-perf-followup-deps/bin/ninja",
+      "-DCALMETRICS_ENGINE_BUILD_PYTHON=OFF",
+      "-DCALMETRICS_ENGINE_BUILD_TESTS=ON",
+      "-DCMAKE_BUILD_TYPE=Release",
+      "-DCALMETRICS_ENGINE_USE_EIGEN=OFF"
+    ]
+  },
+  {
+    "name": "off-build",
+    "rc": 0,
+    "seconds": 1.4220577499363571,
+    "command": [
+      "/opt/homebrew/bin/cmake",
+      "--build",
+      "/private/tmp/calmetrics-dense-off",
+      "-j",
+      "3"
+    ]
+  },
+  {
+    "name": "off-test",
+    "rc": 0,
+    "seconds": 2.9239546668250114,
+    "command": [
+      "/opt/homebrew/bin/ctest",
+      "--test-dir",
+      "/private/tmp/calmetrics-dense-off",
+      "--output-on-failure"
+    ]
+  },
+  {
+    "name": "all-operators",
+    "rc": 0,
+    "seconds": 5.261599959107116,
+    "command": [
+      "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+      "tools/check_all_operator_cases.py",
+      "--fixtures",
+      "/private/tmp/calmetrics-reaccept-20260929/direct-fixtures.pkl",
+      "--output",
+      "/private/tmp/calmetrics-matmul-wide/all-operators.json"
+    ]
+  },
+  {
+    "name": "excel-snapshot",
+    "rc": 0,
+    "seconds": 43.662088207900524,
+    "command": [
+      "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+      "/private/tmp/calmetrics-matmul-wide/verify_excel_snapshot.py"
+    ]
+  }
+]

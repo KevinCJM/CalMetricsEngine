@@ -1,0 +1,170 @@
+{
+  "build_id": "2ebc5d22f827d240a99a0507b8153213b9fd9216290c22e0bec01f96285567a0",
+  "production_changed_vs_baseline": 7,
+  "python": {
+    "passed": 10333,
+    "log": "logs/python-final.log"
+  },
+  "native": {
+    "passed": 9,
+    "total": 9,
+    "log": "logs/native-final.log"
+  },
+  "sanitizers": {
+    "passed": 9,
+    "total": 9,
+    "log": "logs/asan.log",
+    "address": true,
+    "undefined": true,
+    "leak_sanitizer": false
+  },
+  "both_libraries_off": {
+    "native_passed": 9,
+    "native_total": 9,
+    "python_passed": 540,
+    "python_skipped": 164,
+    "native_log": "logs/off-native.log",
+    "python_log": "logs/off-python-final.log",
+    "skip_reason": "requires enabled macOS15 arm64 Accelerate path"
+  },
+  "strengthened_non_diagonal_budget_test": {
+    "native": {
+      "passed": 1,
+      "total": 1,
+      "log": "logs/native-budget-final.log"
+    },
+    "asan": {
+      "passed": 1,
+      "total": 1,
+      "log": "logs/asan-budget-final.log"
+    },
+    "off": {
+      "passed": 1,
+      "total": 1,
+      "log": "logs/off-budget-final.log"
+    }
+  },
+  "direct_fixture_operators": 185,
+  "direct_fixture_isa": [
+    "scalar",
+    "auto"
+  ],
+  "excel": {
+    "status": "PASS_AGAINST_RECALCULATED_SNAPSHOT",
+    "checked_values": 3056,
+    "failures": [],
+    "newly_recalculated": false,
+    "cases": 469,
+    "snapshot_engine": "Microsoft Excel 16.89.1 (16.89.24091630), macOS desktop full dependency rebuild",
+    "snapshot_sha256": "eab3361371bfff228fe3e6c1ea458fcb3e3d0a7a9b29cbda438c6e5604fb32b1",
+    "current_source_sha256": "0a2b0ccec2aa6e9f066e42a30ad5e2775f2d74d424661f5786e473d15219573d",
+    "source_identity_differences": 938,
+    "allowed_identity_changes": "Only Readme B4 export identity and B9 build identity; formula and input cells unchanged.",
+    "engine_build_id": "2ebc5d22f827d240a99a0507b8153213b9fd9216290c22e0bec01f96285567a0",
+    "historical_snapshot": "/private/tmp/calmetrics-reaccept-20260929/excel-ms"
+  },
+  "timing_cases": 49,
+  "original_memory_children": 66,
+  "repaired_rss_children": 33,
+  "input_repair": {
+    "exact_inputs_unchanged": true,
+    "verified_cases": [
+      {
+        "name": "median_where",
+        "n": 4194304,
+        "layout": "c",
+        "entry": "ordinary",
+        "pattern": "random"
+      },
+      {
+        "name": "quantile_where",
+        "n": 4194304,
+        "layout": "c",
+        "entry": "ordinary",
+        "pattern": "random"
+      },
+      {
+        "name": "exp",
+        "n": 4096,
+        "d": 4096,
+        "layout": "f",
+        "order": "F",
+        "entry": "ordinary",
+        "pattern": "late_outlier",
+        "baseline": "vector"
+      },
+      {
+        "name": "log",
+        "n": 4096,
+        "d": 4096,
+        "layout": "f",
+        "order": "F",
+        "entry": "ordinary",
+        "pattern": "late_outlier",
+        "baseline": "vector"
+      },
+      {
+        "name": "cholesky",
+        "n": 4096,
+        "layout": "f",
+        "order": "F",
+        "entry": "ordinary"
+      }
+    ],
+    "preserved_logical_c_sha256": true,
+    "preparation_temporary_limit_bytes": 65536
+  },
+  "heap_probe": {
+    "path": "/private/tmp/calmetrics-reaccept-20260929/heap_probe.dylib",
+    "sha256": "74421dbfff14b56b730553c7b0b0ce9b38a136de053f132069e1b948decd3382",
+    "controls": "previous frozen heap probe controls; not newly rerun",
+    "coverage": "tracked malloc-family allocations, not mmap/Python arena internals/process tree"
+  },
+  "self_review": {
+    "p2_prebound_arena_budget": "fixed and tested",
+    "independent_review": "order selection, vForce root replay, F Cholesky and prebound/observer metadata",
+    "remaining_actionable_findings_in_scoped_change": 0,
+    "documentation_layout_statement": "corrected: observer public F output; iterate prebound state remains internal C"
+  },
+  "scope": "three optimizations; macOS arm64; no whole-engine performance acceptance",
+  "committed": false,
+  "pushed": false,
+  "affected_test_sha256": {
+    "tests/test_order_selection_library.py": "1da821a0d92500172d8f7726e21d685040fc9605734038567c44456e5e726c07",
+    "tests/test_transcendental_block_replay.py": "7440294946b11e96f0ab36e1e4f3a34abf6fda8ab70ee7c47b330118d81a3813",
+    "tests/test_cholesky_f_root.py": "a066b1c3391fdeab71885c469fdc4ba60149bf5b6584f56abd50ee223b818d81",
+    "tests/test_transcendental_accelerate.py": "597e06436c101989b8172f97f680e6d7ceaf3905ce2702278d00030de1c4325b",
+    "tests/test_transcendental_cross_layout.py": "8b7d7c536734a0e47e4cead82ae28853352d105170eb8274a30bc6f44dd9a753",
+    "tests/compiler_native_tests.cpp": "1ebed3efb0d17666ff4529bd390c5f03c4dc19f0e7d78e20006999d3c3c5f512",
+    "tests/operator_native_tests.cpp": "4099441dc07676043988ac3ba0075628f7a6b2862e88170a5b87c08ce6afcc08",
+    "tests/result_native_tests.cpp": "961a77a2159b5f2ba18719b6810557c9db276eb6c1ab3a9aad9df96bb031c322"
+  },
+  "documentation": {
+    "updated": [
+      "docs/README.md",
+      "docs/execution-guide.md",
+      "docs/physical-execution-optimization.md",
+      "docs/physical-layout-design.md"
+    ],
+    "unchanged_authorities": {
+      "docs/user-guide.md": "public signatures, mathematical types and input/result contract unchanged",
+      "docs/operator-reference.md": "canonical registry and mathematical semantics unchanged"
+    },
+    "scoped_links_report": "documentation-check.json"
+  },
+  "static_checks": {
+    "ruff": {
+      "passed": true,
+      "log": "logs/scoped-ruff-final.log"
+    },
+    "git_diff_check": {
+      "passed": true,
+      "log": "logs/git-diff-check-final.log"
+    },
+    "markdown_links": {
+      "passed": true,
+      "checked": 176,
+      "report": "documentation-check.json"
+    }
+  }
+}

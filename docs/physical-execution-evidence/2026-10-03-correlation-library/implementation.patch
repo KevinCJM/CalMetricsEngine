@@ -1,0 +1,534 @@
+--- a/cpp/graph.cpp
++++ b/cpp/graph.cpp
+@@ -625,7 +625,8 @@
+     return false;
+   const auto &node = program.nodes[index];
+   if (node.kind != NodeKind::operation || node.parent_count != 1 ||
+-      node.opcode != static_cast<std::uint16_t>(ops::Op::covariance)) return false;
++      (node.opcode != static_cast<std::uint16_t>(ops::Op::covariance) &&
++       node.opcode != static_cast<std::uint16_t>(ops::Op::correlation))) return false;
+   for (const auto &consumer : program.nodes)
+     for (std::size_t j = 0; j < consumer.parent_count; ++j)
+       if (consumer.parents[j] == index) return false;
+@@ -829,7 +830,7 @@
+   for (std::size_t r=0;r<root_outputs.size();++r) {
+     if (root_outputs[r].rank < 2 || root_outputs[r].order != OutputOrder::f) continue;
+     const auto id=roots[r];
+-    // An independent covariance is bitwise symmetric after its canonical
++    // Independent covariance/correlation is bitwise symmetric after its canonical
+     // upper-triangle finish. Its C bytes already represent the same square F
+     // matrix; no arena, transpose or alternative numerical kernel is needed.
+     // The admitted covariance/Cholesky pair instead transposes its own result
+@@ -974,7 +975,7 @@
+       limit = std::max(limit, ops::matmul_scratch_doubles(a, b));
+       if (independent_matmul_root(program, index))
+         limit = std::max(limit, ops::matmul_accelerate_reserve_doubles(a, b));
+-    } else if (op == ops::Op::covariance && independent_covariance_root(program, index)) {
++    } else if (independent_covariance_root(program, index)) {
+       const auto shape = shapes.empty() ? ops::matrix_shape(capacity, capacity) : shapes.at(node.parents[0]);
+       limit = std::max(limit, ops::covariance_accelerate_reserve_doubles(shape));
+     } else if ((op == ops::Op::exp || op == ops::Op::log) &&
+@@ -2600,11 +2601,11 @@
+           native_output.order = program.roots[destination_root] == node_index
+               ? layout->order(destination_root) : ops::MemoryOrder::c;
+           symmetric_f_root = native_output.order == ops::MemoryOrder::f &&
+-              spec.op == ops::Op::covariance;
++              (spec.op == ops::Op::covariance || spec.op == ops::Op::correlation);
+           if (symmetric_f_root) {
+             ops::require(prepared.output_shape.rank == 2 &&
+                 prepared.output_shape.dim[0] == prepared.output_shape.dim[1], "RESULT_CAPACITY_MISMATCH");
+-            // Only the independent, single-argument covariance survived F-root
++            // Only independent single-argument covariance/correlation survived F-root
+             // admission above. Keep the existing C writer and publish F strides
+             // after it has completed its bit-identical symmetric mirror.
+             native_output.order = ops::MemoryOrder::c;
+@@ -2680,7 +2681,7 @@
+               accelerated = ops::try_accelerate_sign_consistent_matmul(
+                   prepared, native_output, scratch.workspace, operator_audit);
+             if (!prebound_inputs && !scratch.isolate_errors && !input_failures &&
+-                spec.op == ops::Op::covariance && independent_covariance_root(program, node_index))
++                independent_covariance_root(program, node_index))
+               accelerated = ops::try_accelerate_covariance(
+                   prepared, native_output, scratch.workspace, operator_audit);
+             if (!prebound_inputs && !scratch.isolate_errors && !input_failures &&
+--- a/cpp/operators/covariance_accelerate.cpp
++++ b/cpp/operators/covariance_accelerate.cpp
+@@ -49,7 +49,7 @@
+     ~ThreadLimit() { if (active) BLASSetThreading(previous); }
+ };
+ bool guarded(const Value &input, int layout, int block, double *result, Workspace &work,
+-             Audit &audit, bool &centered_ready) {
++             Audit &audit, bool &centered_ready, bool correlation) {
+     const auto n = input.shape.dim[0], d = input.shape.dim[1];
+     const auto *x = static_cast<const double *>(input.data);
+     if (n < 32 || d < 256 || n > 1000000 || d > 4096) return false;
+@@ -96,10 +96,12 @@
+         }
+         audit.covariance_panel_materialization_bytes += count * d * sizeof(double);
+         // Controlled centered exponents exclude overflow/subnormal products.
+-        // Large-amplitude inputs use canonical native execution; no truncation.
++        // Covariance's absolute tolerance rejects large amplitudes early.
++        // Correlation checks normalized error; the existing input cap bounds
++        // centered squares safely, so amplitude alone need not force replay.
+         for (std::size_t i = 0; i < count * d; ++i) {
+             const double value = std::abs(panel[i]);
+-            if (value > 8.0) {
++            if (!correlation && value > 8.0) {
+                 centered_ready = layout && first == 0 && count == n && d % 2 == 0;
+                 return false;
+             }
+@@ -139,6 +141,12 @@
+             covariance_library_pair(input, j, j, means) / denominator :
+             total[j] / denominator;
+         if (layout) ++audit.covariance_replayed_cells;
++        if (correlation) {
++            // The canonical diagonal fixes the exact normalization denominator.
++            // Block norms are dead now; no additional D-sized buffer is needed.
++            norm[j] = std::sqrt(result[j * d + j]);
++            if (!(norm[j] > 0.0) || !std::isfinite(norm[j])) return false;
++        }
+         // Positive norm folds have a deterministic relative error bound.
+         total[j] = std::sqrt(total[j] / (1.0 - norm_guard)) * padding;
+     }
+@@ -155,9 +163,16 @@
+             else
+                 bound = result[k * d + j] + (layout ? old_eta * products : 0.0);
+             const double error = (bound / denominator + eps * std::abs(value)) * padding;
+-            const double tolerance = (1e-12 + 1e-12 * std::max(0.0, std::abs(value) - error)) /
++            double checked_value = value, checked_error = error;
++            if (correlation) {
++                const double scale = norm[j] * norm[k];
++                if (!(scale > 0.0) || !std::isfinite(scale)) return false;
++                checked_value = value / scale;
++                checked_error = (error / scale + eps * std::abs(checked_value)) * padding;
++            }
++            const double tolerance = (1e-12 + 1e-12 * std::max(0.0, std::abs(checked_value) - checked_error)) /
+                                      (1.0 + 64.0 * eps);
+-            const bool replay = error > tolerance || std::abs(value) <= error;
++            const bool replay = checked_error > tolerance || std::abs(value) <= error;
+             uncertain += replay;
+             result[j * d + k] = value;
+             result[k * d + j] = replay ? -1.0 : 0.0;
+@@ -200,7 +215,8 @@
+ #if defined(CALMETRICS_HAVE_ACCELERATE_COVCHOL) && defined(CALMETRICS_HAVE_EIGEN_ROTATION) && defined(__APPLE__) && defined(__aarch64__)
+     if (__builtin_available(macOS 15.0, *)) {
+         const auto discard = [&] { std::vector<double>().swap(work.doubles); };
+-        if (p.spec->op != Op::covariance || p.count != 1 || output.kind != Kind::number ||
++        const bool correlation = p.spec->op == Op::correlation;
++        if ((!correlation && p.spec->op != Op::covariance) || p.count != 1 || output.kind != Kind::number ||
+             output.order != MemoryOrder::c || !output.data) return false;
+         const auto &input = p.args[0];
+         const auto reserve = covariance_accelerate_reserve_doubles(input.shape);
+@@ -230,7 +246,7 @@
+             // means, centered products, sums and sample division in both
+             // canonical layouts. Signed-zero inputs retain that layout's
+             // original reduction, without a futile DSYRK attempt.
+-            if (!positive_zero) return false;
++            if (!positive_zero || correlation) return false;
+             std::fill_n(static_cast<double *>(output.data), d * d, 0.0);
+             audit = {};
+             audit.covariance_zero_calls = 1;
+@@ -245,17 +261,19 @@
+         audit.native_library_workspace_reserve_bytes = reserve * sizeof(double);
+         bool centered_ready = false;
+         const bool accepted = guarded(input, layout, static_cast<int>(panel_rows(input.shape)),
+-                                      static_cast<double *>(output.data), work, audit, centered_ready);
++                                      static_cast<double *>(output.data), work, audit, centered_ready, correlation);
+         threads.restore();
+         if (accepted) {
++            if (correlation) finish_covariance_matrix(output, true);
+             audit.accelerate_covariance_calls = 1;
+             audit.vector_elements = output.shape.size();
+-            audit.isa = "accelerate-guarded-covariance";
++            audit.isa = correlation ? "accelerate-guarded-correlation" : "accelerate-guarded-covariance";
+         } else {
+             const auto attempted = audit;
+             if (centered_ready) {
+                 covariance_library_centered(input, output, work, audit);
+                 discard();
++                if (correlation) finish_covariance_matrix(output, true);
+             } else {
+                 discard();
+                 execute(p, output, work, Isa::automatic, audit);
+--- a/docs/execution-guide.md
++++ b/docs/execution-guide.md
+@@ -58,11 +58,13 @@
+ 
+ 直接算子和普通 canonical 路径的单参数矩阵 `covariance/correlation` 复用独立结果的最后一行暂存均值和标准差，数值 scratch 为 0；输入、旧结果均不写入。macOS 15+ arm64、至少 32 行时，行方向连续且至少 8 列使用 Eigen Array 的 4×4 特征块和 128 行时间块，各结果格沿原顺序继续累加；均值仍按 Welford 顺序更新，尾部单独完成。列方向连续且至少 8 列、有限且在原溢出界限内、列 stride 不小于行数时，使用固定 8 列 Eigen Array 做 Welford 均值扫描，并将 2×2 列对的居中乘积合并计算，共享读取、保持原 Eigen 两包归约分组；不足块的列保留完整内积。其他列连续布局保持原逐列均值与 Eigen Map 内积。极值溢出风险的列归约、小样本、其他 strides/平台、显式 scalar 或禁用 Eigen 时使用原生标量路径。`eigen_covariance_calls` 记录成功完成的库协方差内核次数，相关矩阵也计一次，贯通子作用域和 worker。该字段不是 CPU 指令数；上三角完成后才归一化、镜像，样本除数、零方差错误和独立结果契约不变。Planner 的保守图容量、框架分配及 RSS 仍须单独计量。
+ 
+-单一 typed float64 矩阵根 `covariance(X)` 在相同平台、Eigen/Accelerate 均启用、`32≤T≤1,000,000`、`256≤D≤4096` 时，可采用守卫 Accelerate DSYRK。限定无内部消费者、非 isolate、无子作用域和观察器的图；逐次检查正向 C/F leading-dimension 输入、有限值与受控中心化尺度、标准舍入环境，不按地址缓存数值准入。共用 canonical 均值和局部重放接口，以确定性舍入模型检查原 1e-12 容差、对角位模式及正负/零分类；不确定格局部重放，过密或尺度不合格时完整原生重放。模型假设及适用构建见[设计与验收](physical-execution-evidence/2026-10-01-covariance-syrk-integration/README.md)，不能外推成所有厂商库版本的形式化保证。
+-
+-该图路径借用输入，复用本次独占 C 结果下三角承载暂时界和标记，无额外 D×D 矩阵；同一独立根显式 F 可直接写最终独立结果，完成位级对称镜像后公布 F strides；不产生 C arena 或根转换。中心化面板由 Workspace 管理，实际大小 `(B+3)*D*8`，默认 B=512，T/D 均≤2048 时 B=T；按区间内所有可能面板大小预留，另加 32MiB 库工作区估算。该库估算不是厂商硬上界，也不等于实际分配；原 Planner 保守容量仍存在。恢复调用线程原 BLAS 策略后才完成或重放，仍只占一个 Scheduler CPU token。拒绝后释放无用面板，prepared 重读当前值，快照保持独立。若首次幅度拒绝时已完整生成本次 F 中心化面板且 D 为偶数，先复用现有 Eigen 固定归约树消费面板，再释放；省去重复均值和减法，保留原 N−1 除法、尾部及逐位镜像。tiny 首先拒绝、部分面板、奇 D、C 布局及 DSYRK 后的拒绝继续原重放；这项复用不扩大 DSYRK 数值准入域，原面板分配峰值仍计入审计。
+-
+-同一已准入的独立根中，实际输入全为 +0 时，标准舍入下 canonical 的均值、居中乘积、累加与样本除法均精确为 +0，可由标准库直接写独占结果并释放旧面板。`covariance_zero_calls` 标记这一精确特例，库尝试/调用数为 0；全零数据只要含 -0 就沿 canonical 原布局归约，不进行无用的 DSYRK 尝试。输入改变时重新检查，不缓存零资格；未准入图继续原逻辑。
++单一 typed float64 矩阵根 `covariance(X)` 或 `correlation(X)` 在相同平台、Eigen/Accelerate 均启用、`32≤T≤1,000,000`、`256≤D≤4096` 时，可采用守卫 Accelerate DSYRK。限定无内部消费者、非 isolate、无子作用域和观察器的图；逐次检查正向 C/F leading-dimension 输入、有限值与受控中心化尺度、标准舍入环境，不按地址缓存数值准入。共用 canonical 均值和局部重放接口，以确定性舍入模型检查原 1e-12 容差、对角位模式及正负/零分类；不确定格局部重放，过密或尺度不合格时完整原生重放。模型假设及适用构建见[设计与验收](physical-execution-evidence/2026-10-01-covariance-syrk-integration/README.md)，不能外推成所有厂商库版本的形式化保证。
++
++相关矩阵使用独立的归一化误差检查：保留 canonical 对角，按原标准差乘积归一化后再检查原 1e-12 容差，不能用协方差的小绝对误差代替相关系数误差。协方差仍以中心值幅度8筛除预计大额重放；相关矩阵不沿用这项绝对尺度启发式，而保留原有限输入幅度≤1e4、非零中心值下界、标准舍入及归一化误差/符号检查。整体放大不再单独触发相关矩阵回退；超出原源数据范围或误差不合格仍走canonical。复用已不再使用的块范数向量保存标准差，不新增向量；局部重放后沿唯一原规则归一化与镜像，不强设对角为1或截断到[-1,1]。零方差/非有限分母拒绝候选并执行原错误路径，全零相关矩阵不能使用下文的协方差零成功特例。原审计字段统计两种算子共享的协方差计算阶段，不新增IPC字段。
++
++该图路径借用输入，复用本次独占 C 结果下三角承载暂时界和标记，无额外 D×D 矩阵；同一独立根显式 F 可直接写最终独立结果，完成位级对称镜像后公布 F strides；不产生 C arena 或根转换。中心化面板由 Workspace 管理，实际大小 `(B+3)*D*8`，默认 B=512，T/D 均≤2048 时 B=T；按区间内所有可能面板大小预留，另加 32MiB 库工作区估算。该库估算不是厂商硬上界，也不等于实际分配；原 Planner 保守容量仍存在。恢复调用线程原 BLAS 策略后才完成或重放，仍只占一个 Scheduler CPU token。拒绝后释放无用面板，prepared 重读当前值，快照保持独立。协方差若首次中心幅度拒绝时已完整生成本次 F 中心化面板且 D 为偶数，先复用现有 Eigen 固定归约树消费面板，再释放；省去重复均值和减法，保留原 N−1 除法、尾部及逐位镜像。tiny 首先拒绝、部分面板、奇 D、C 布局及 DSYRK 后的拒绝继续原重放；这项复用不扩大 DSYRK 数值准入域，原面板分配峰值仍计入审计。
++
++同一已准入的独立 `covariance(X)` 根中，实际输入全为 +0 时，标准舍入下 canonical 的均值、居中乘积、累加与样本除法均精确为 +0，可由标准库直接写独占结果并释放旧面板。`covariance_zero_calls` 标记这一精确特例，库尝试/调用数为 0；全零数据只要含 -0 就沿 canonical 原布局归约，不进行无用的 DSYRK 尝试。输入改变时重新检查，不缓存零资格；未准入图继续原逻辑。
+ 
+ `native_chunks` 的 `accelerate_covariance_attempts/calls` 分别记录开始尝试和成功；`covariance_syrk_calls` 为实际 DSYRK 块数，`covariance_replayed_cells` 为实际 canonical 重放格数（含 F 对角及完整回退），`covariance_fallbacks` 为尝试后完整重放次数，`covariance_panel_materialization_bytes` 为所有已写中心化面板字节。完整重放保留之前工作计数，避免审计重置掩盖成本；这些字段和精确零计数通过 IPC19 传输。面板属于计算物化，不能用 `input_copy_bytes=0` 宣称整个请求零分配或零写入。共享/比较/状态消费、直接算子、Excel 观察器和未准入布局继续上段 canonical 逻辑；逻辑 AST/DAG、数学与 Excel 公式不变。
+ 
+@@ -108,7 +110,7 @@
+ 
+ 错误隔离请求的 auto 保守采用 C，因为逐位置状态仍按 C 写入；显式 F 不受此策略限制。auto 当前覆盖稠密身份根、C 输入转置根、单一私有 `transpose(matmul(a,b))` 根、私有特征分解双投影、F 逐元素图及受限列算术融合；其他路径保守采用 C。该私有转置根把 MatMul 的 C 顺序字节直接写入最终 F 结果，省去整块中间矩阵和根复制；显式 C、隔离及共享乘积图不采用此直写。其他不支持直写的显式 F 内核仍使用已规划 C arena 后转换，并计入根复制审计。中间节点及迭代状态仍遵循现有内核布局；直接算子入口暂未新增 order 参数。实际布局见 `outputs[r].order` 与值数组 strides，状态数组保持逻辑 C。详见[布局设计与验收](physical-layout-design.md)。
+ 
+-独立单参数 `covariance(X)` 的 typed float64 矩阵根也支持显式 F 直写：仅一个根、无消费者、非 isolate、无 apply/rolling scope。既有 C 内核写入本次独立结果，在完成上三角的逐位镜像后按实际 F strides 返回；同一对称方阵的物理字节保持全部逻辑值，不分配 C 根 arena 或执行最终转换。auto 继续返回 C，直接算子接口保持原契约；observer 使用 canonical 数学路径，同样可观察完成后的 F 值。该存储优化独立于 DSYRK 准入，覆盖 canonical、局部/全量重放和零数据；未准入图保持原有 F 物化和预算。详见[设计与证据](physical-execution-evidence/2026-10-01-covariance-f-root/README.md)。
++独立单参数 `covariance(X)` 或 `correlation(X)` 的 typed float64 矩阵根也支持显式 F 直写：仅一个根、无消费者、非 isolate、无 apply/rolling scope。既有 C 内核写入本次独立结果，在完成上三角的逐位镜像后按实际 F strides 返回；同一对称方阵的物理字节保持全部逻辑值，不分配 C 根 arena 或执行最终转换。auto 继续返回 C，直接算子接口保持原契约；observer 使用 canonical 数学路径，同样可观察完成后的 F 值。该存储优化独立于 DSYRK 准入，覆盖 canonical、局部/全量重放和协方差零数据；相关矩阵零方差仍按原规则报错。未准入图保持原有 F 物化和预算。详见[协方差历史证据](physical-execution-evidence/2026-10-01-covariance-f-root/README.md)及[相关矩阵验收](physical-execution-evidence/2026-10-03-correlation-library/README.md)。
+ 
+ 同一个私有 `symmetric_eigh` 的 `eigenvalues/eigenvectors` 两个紧邻typed float64根，可在macOS 15+ arm64、Eigen开启、N≥512且为256倍数时直接写独立特征值向量及F特征向量矩阵。图必须恰有这两个根，无其他消费者、作用域或isolate，且输出策略为auto/F；根顺序和名称可交换。复用唯一有界Jacobi及Eigen公开旋转，补边连续前缀工作区为N(N+1) doubles及N个排序索引，按共享几何进入Planner与Scratch。累计上下三角搬运和排序计入`algorithm_copy_bytes`；两根计入`direct_output_bytes`，不留记录arena或根复制。auto在这类图选择F；未准入形状仍沿记录物化同一F结果，明确C、观察器、隔离、库关闭等沿原计算链。进程按原logical program重新finalize，不新增IPC字段；prepared每次重读输入，快照保持独立。数学与Excel公式不变，性能结论限于[实测设计与证据](physical-execution-evidence/2026-10-01-jacobi-direct/README.md)，不能据此宣称有界Jacobi已经领先NJIT/LAPACK。
+ 
+--- a/docs/physical-execution-optimization.md
++++ b/docs/physical-execution-optimization.md
+@@ -1,4 +1,14 @@
+ # 物理执行优化（性能验收未闭环）
++
++## 2026-10-03 独立相关矩阵：复用 DSYRK 与 F 根缓冲
++
++相关矩阵复用已有 Accelerate/Eigen 协方差阶段，按 canonical 标准差乘积检查归一化误差，保留原均值、对角、局部重放和错误规则。独立对称 F 根直接使用最终结果缓冲，省去额外方阵及根复制；不新增算子、线程、依赖或 Excel 公式。构建 `de5d4068db78f42ee1521faa1eb95d81031e3622e6dcc4218a777a79165a330d`。
++
++实际旧/新 wheel、普通 Scheduler、1 CPU、9轮：4096阶 C/F 完整调用 **5290.420/5344.058→593.983/602.165 ms**，紧凑 NJIT为 **730.008/672.609 ms**。2048 C为 **592.608→92.355 ms**，NJIT109.723ms；2048 F及放大32倍组比NJIT多4.219/6.313ms，不单独否决。超过私有源幅度上限的回退仍为607ms对96ms，属于待解决的实质差距。全部12类通过原1e-12差分，未放宽精度。
++
++18个fresh内存子进程、54个heap阶段无追踪错误。4096 F冷/暖申请峰 **256.008/384.008→150.101/278.102 MiB**，NJIT390.000/518.001MiB；RSS增量384.750→308.875MiB。2048 C新增约44.046MiB面板/库成本，仍比NJIT少约25.946MiB，结合约6.4倍旧版提速采用，不能称为零内存增加。512×256新版本暖峰2.014MiB，比旧版多1.006MiB、低于NI4.001MiB。RSS单次监控及heap的覆盖限制均保留。
++
++Python **10663通过**；原生、ASan/UBSan、三库OFF各 **9/9**；专项315通过，OFF176通过/139预期跳过。185直接夹具、469案例/3056值历史Excel快照及77项源码/wheel/worker身份通过，无新的Excel应用重算。执行指南和布局设计同步，自审核及[详细设计、完整正负证据](physical-execution-evidence/2026-10-03-correlation-library/README.md)已归档。未提交推送；全算子性能目标继续开放。
+ 
+ ## 2026-10-03 单右端 solve：复用已有 Eigen 消元内核
+ 
+--- a/docs/physical-layout-design.md
++++ b/docs/physical-layout-design.md
+@@ -305,3 +305,10 @@
+ 独立结果暂按 C 存储完成原 covariance、Cholesky、守卫库调用及失败重放；仅在成功后用标准库交换原地转置并发布实际 F strides。两条数值后端共用同一转换出口，不改变 DPOTRF 的 U 三角、算式、计算顺序或失败优先级。去除额外 D² arena 和最终根复制；转置仍产生 D(D-1)*8 写入字节，单列算法搬运，不宣称整链零复制。共享/公开协方差、临时源、多根等路径不扩展。
+ 
+ observer、prebound 和继承错误继续恢复原 C arena；Planner 的 prebound 子图预算与执行降级使用同一判据。面板/库工作区、独立结果寿命、进程传输和直接算子别名规则保持不变。完整验证及未闭环项见[本轮证据](physical-execution-evidence/2026-10-02-covchol-f-root/README.md)。
++
++
++## 19. 独立相关矩阵 F 根复用（2026-10-03）
++
++第13节的严格对称存储规则扩展到单参数 correlation：仅一个 typed float64 矩阵根、无消费者/作用域/isolate。canonical 和守卫 DSYRK 路径都在本次独立结果的 C 描述中完成原上三角归一化与逐位镜像，再按真实 F strides 发布，省去额外 D² arena 和根复制；auto 仍为 C。零方差失败仍失败，未发布的中间内容不成为成功输出。直接算子、已有协方差/相关矩阵多根复用规则及Excel公式不变；相同资格用于finalize、容量、执行及worker重建，不新增布局协议。
++
++相关系数守卫必须按标准差归一化后的误差检查，不能直接沿用协方差绝对容差；详见[执行指南](execution-guide.md)及[本轮验收](physical-execution-evidence/2026-10-03-correlation-library/README.md)。多根、内部消费者和作用域继续原F物化，不把单根存储复用外推到这些路径。
+--- a/tests/operator_native_tests.cpp
++++ b/tests/operator_native_tests.cpp
+@@ -1487,6 +1487,40 @@
+                   "covariance rejected environment wrote output");
+             check(x==before,"covariance changed borrowed input");
+         }
++        {
++            constexpr std::size_t n=65,d=256;
++            std::vector<double> x(n*d),storage(d*d+2,-993.);
++            for (std::size_t i=0;i<n;++i) for (std::size_t j=0;j<d;++j)
++                x[i*d+j]=std::ldexp(double((i*17+j*13)%71)-35.,-202);
++            const auto before=x;
++            const std::array<ops::Value,8> args{matrix(x.data(),n,d)};
++            const auto plan=ops::prepare(ops::lookup("correlation"),args.data(),1);
++            ops::Output out;out.shape=plan.output_shape;out.data=storage.data()+1;
++            ops::Workspace work;ops::Audit audit;
++            const bool handled=ops::try_accelerate_covariance(plan,out,work,audit);
++            check(handled==(ops::covariance_accelerate_reserve_doubles(args[0].shape)!=0),
++                  "correlation platform admission mismatch");
++            if (handled) {
++                const auto expected=run(ops::lookup("correlation"),args,1,ops::Isa::automatic);
++                for (std::size_t i=0;i<d*d;++i) {
++                    const auto a=storage[i+1],b=expected.values[i];
++                    check(std::abs(a-b)<=1e-12+1e-12*std::abs(b),"correlation normalized tolerance changed");
++                    check((a>0)==(b>0) && (a==0)==(b==0) && std::signbit(a)==std::signbit(b),
++                          "correlation sign or zero changed");
++                }
++                for (std::size_t i=0;i<d;++i)
++                    check(std::memcmp(storage.data()+1+i*d+i,expected.values.data()+i*d+i,8)==0,
++                          "correlation diagonal bits changed");
++                check(x==before,"correlation changed borrowed input");
++                const auto rounding=std::fegetround();
++                check(std::fesetround(FE_UPWARD)==0,"cannot set correlation rounding");
++                check(!ops::try_accelerate_covariance(plan,out,work,audit),"correlation accepted non-nearest rounding");
++                check(std::fegetround()==FE_UPWARD && std::fesetround(rounding)==0,"correlation changed rounding");
++                std::fill(x.begin(),x.end(),0.);
++                check(!ops::try_accelerate_covariance(plan,out,work,audit),"zero correlation bypassed canonical error");
++            }
++            check(storage.front()==-993. && storage.back()==-993.,"correlation crossed output bounds");
++        }
+         for (std::size_t n=32;n<36;++n) {
+             constexpr std::size_t d=256;
+             const auto leading=n+3;
+--- a/tests/result_native_tests.cpp
++++ b/tests/result_native_tests.cpp
+@@ -635,7 +635,8 @@
+   constexpr std::size_t rows=33, cols=9;
+   constexpr std::uint64_t sentinel=0x5a7f31be19d04c62ULL;
+   for (auto order : {o::MemoryOrder::c, o::MemoryOrder::f}) {
+-    for (int pattern=0;pattern<3;++pattern) {
++    for (const auto *name : {"covariance", "correlation"}) for (int pattern=0;pattern<3;++pattern) {
++      if (std::strcmp(name,"correlation")==0 && pattern==1) continue; // zero variance is an error
+       std::vector<double> source(rows*cols);
+       o::Value input; input.data=source.data(); input.shape=o::matrix_shape(rows,cols);
+       input.set_contiguous_strides(order);
+@@ -643,12 +644,12 @@
+         source[input.offset(i)]=pattern==1 ? -0. : double(int((i*7)%19)-9);
+       if (pattern==2) source[input.offset(7)]=std::numeric_limits<double>::quiet_NaN();
+       const auto before=source;
+-      auto prepared=o::prepare(o::lookup("covariance"),&input,1);
++      auto prepared=o::prepare(o::lookup(name),&input,1);
+       std::vector<double> expected(cols*cols);
+       o::Output direct; direct.kind=prepared.output_kind; direct.shape=prepared.output_shape;
+       direct.data=expected.data(); o::Workspace work; o::Audit direct_audit;
+       o::execute(prepared,direct,work,o::Isa::automatic,direct_audit);
+-      auto compiled=c::compile({"covariance(x)"},std::vector<t::Variable>{{"x",t::ValueType::matrix()}},
++      auto compiled=c::compile({std::string(name)+"(x)"},std::vector<t::Variable>{{"x",t::ValueType::matrix()}},
+           false,{}, {},0,100000000,true,{},g::OutputOrder::f);
+       auto program=c::decode_program(c::encode_program(compiled->program));
+       const std::int64_t start=0,end=rows;
+@@ -657,7 +658,7 @@
+       std::size_t observed=0;
+       const auto audit=g::execute_observed(program,{input},nullptr,0,&start,&end,1,storage.data()+1,1,&layout,
+           [&](std::optional<o::Op> op,const o::Value &value,bool result) {
+-            if (!result || op!=o::Op::covariance) return;
++            if (!result || op!=prepared.spec->op) return;
+             check(value.shape==o::matrix_shape(cols,cols) && value.f_contiguous(),
+                   "covariance observer did not receive actual F strides");
+             for (std::size_t i=0;i<expected.size();++i) {
+--- a/tests/test_result_layout.py
++++ b/tests/test_result_layout.py
+@@ -190,8 +190,9 @@
+     compiler = GraphCompiler({'x': dict(kind='matrix')})
+     b, e = np.zeros(1, np.int64), np.array([len(x)], np.int64)
+     with AdaptiveScheduler(cpu_budget=1) as engine:
+-        cgraph = compiler.compile('correlation(x)', output_order='C')
+-        fgraph = compiler.compile('correlation(x)', output_order='F')
++        # Isolated graphs still require the original C arena and F copy.
++        cgraph = compiler.compile('correlation(x)', output_order='C', error_policy='isolate')
++        fgraph = compiler.compile('correlation(x)', output_order='F', error_policy='isolate')
+         cp = engine.plan(cgraph, {'x': x}, b, e)
+         fp = engine.plan(fgraph, {'x': x}, b, e)
+         assert fp.estimated_worker_scratch_bytes >= cp.estimated_worker_scratch_bytes + 17*17*8
+--- /dev/null
++++ b/tests/test_correlation_accelerate.py
+@@ -0,0 +1,226 @@
++"""Correlation-specific normalization bounds and symmetric independent roots."""
++import ctypes
++import pickle
++
++import numpy as np
++import pytest
++
++from calmetrics_engine import AdaptiveScheduler, GraphCompiler
++from calmetrics_engine import operators as op
++
++from .test_covariance_accelerate import ACTIVE, MATRIX, active, compare, counts, inputs
++from .test_matmul_library import settings
++
++
++def graph(order="C", expression="correlation(x)", isolate=False):
++    return GraphCompiler({"x": MATRIX}).compile(
++        expression, output_order=order, error_policy="isolate" if isolate else "raise",
++    )
++
++
++def execute(scheduler, compiled, x, rows=1):
++    return scheduler.execute(compiled, {"x": x}, np.zeros(rows, np.int64),
++                             np.full(rows, len(x), np.int64))
++
++
++@pytest.mark.parametrize("layout", ["c", "f", "padded_c", "padded_f"])
++@pytest.mark.parametrize("order", ["C", "F", "auto"])
++@pytest.mark.parametrize("lane", ["single", "thread", "process_inline", "process_shared"])
++def test_correlation_complete_result_transport_layout_and_budget(layout, order, lane):
++    x = inputs(layout, n=129, d=257)
++    before = x.view(np.uint64).copy()
++    transported = np.array(x, order="C") if lane.startswith("process") and layout == "padded_f" else x
++    expected = op.correlation(transported)
++    compiled = pickle.loads(pickle.dumps(graph(order)))
++    with AdaptiveScheduler(cpu_budget=2, config=settings(lane)) as scheduler:
++        first = execute(scheduler, compiled, x, 2)
++        second = execute(scheduler, compiled, x, 2)
++    assert first.plan.lane == ("process" if lane.startswith("process") else lane)
++    if lane.startswith("process"):
++        assert first.plan.use_shared_memory == (lane == "process_shared")
++    assert counts(first, "accelerate_covariance_calls") == (2 if ACTIVE else 0)
++    for actual in first.outputs[0].values:
++        compare(actual, expected)
++        np.testing.assert_allclose(actual, np.corrcoef(x.T), rtol=1e-12, atol=1e-12)
++        np.testing.assert_array_equal(actual.view(np.uint64), actual.T.view(np.uint64))
++        assert actual.flags.f_contiguous if order == "F" else actual.flags.c_contiguous
++        assert not actual.flags.writeable and not np.shares_memory(actual, x)
++    assert not np.shares_memory(*first.outputs[0].values)
++    assert not np.shares_memory(first.outputs[0].values[0], second.outputs[0].values[0])
++    np.testing.assert_array_equal(before, x.view(np.uint64))
++    for chunk in first.audit["native_chunks"]:
++        assert chunk["numeric_arena_bytes"] == chunk["root_copy_bytes"] == 0
++        assert chunk["direct_output_bytes"] == chunk["rows"] * expected.nbytes
++        if ACTIVE:
++            reserve = (len(x) + 3) * x.shape[1] * 8 + 32 * 1024 * 1024
++            assert chunk["native_library_workspace_reserve_bytes"] == reserve
++            assert first.plan.estimated_worker_scratch_bytes >= reserve
++
++
++@pytest.mark.parametrize("layout", ["c", "f"])
++@pytest.mark.parametrize("pattern", ["small", "heterogeneous", "signed", "orthogonal", "scaled", "large_scale", "source_reject", "nan", "inf", "reverse", "tiny"])
++def test_normalized_error_not_covariance_absolute_tolerance(layout, pattern):
++    x = inputs(layout, n=1024 if pattern == "orthogonal" else 513, d=256).copy(order=layout.upper())
++    if pattern == "small":
++        x *= 2.0**-200
++    elif pattern in {"heterogeneous", "signed"}:
++        x *= np.exp2(np.linspace(-380, 0, x.shape[1]))
++        if pattern == "signed":
++            x[:, ::2] *= -1
++    elif pattern == "orthogonal":
++        x[:, 0] = np.tile([1., 1., -1., -1.], len(x)//4)
++        x[:, 1] = np.tile([1., -1., 1., -1.], len(x)//4)
++        x[:, :2] *= 2.0**-200
++    elif pattern in {"scaled", "large_scale", "source_reject"}:
++        x *= {"scaled": 32., "large_scale": 1024., "source_reject": 16384.}[pattern]
++    elif pattern == "nan":
++        x[3, -1] = np.nan
++    elif pattern == "inf":
++        x[3, -1] = np.inf
++    elif pattern == "reverse":
++        x = x[::-1]
++    else:
++        x *= 2.0**-450
++    x.flags.writeable = False
++    expected = op.correlation(x)
++    with AdaptiveScheduler(cpu_budget=1) as scheduler:
++        result = execute(scheduler, graph("F"), x)
++    actual = result.outputs[0].values[0]
++    compare(actual, expected)
++    if pattern not in {"nan", "inf"}:
++        np.testing.assert_allclose(actual, np.corrcoef(x.T), rtol=1e-12, atol=1e-12)
++    if ACTIVE and pattern in {"small", "heterogeneous", "signed", "orthogonal", "scaled", "large_scale"}:
++        assert counts(result, "accelerate_covariance_calls") == 1
++    if pattern in {"source_reject", "tiny", "nan", "inf", "reverse"}:
++        np.testing.assert_array_equal(actual.view(np.uint64), expected.view(np.uint64))
++    assert counts(result, "covariance_zero_calls") == 0
++
++
++@pytest.mark.parametrize("layout", ["c", "f"])
++@pytest.mark.parametrize("pattern", ["all_zero", "signed_zero", "constant_column"])
++def test_invalid_variance_retains_error_and_prepared_recovery(layout, pattern):
++    x = inputs(layout, n=65, d=256)
++    with AdaptiveScheduler(cpu_budget=1) as scheduler:
++        prepared = scheduler.prepare_execution(graph("F"), {"x": x}, np.zeros(1, np.int64), np.array([len(x)], np.int64))
++        first = prepared.run_snapshot()
++        saved, original = first.outputs[0].values[0].copy(), x.copy()
++        x.setflags(write=True)
++        if pattern == "constant_column":
++            x[:, -1] = 2
++        else:
++            x.fill(-0. if pattern == "signed_zero" else 0.)
++        x.setflags(write=False)
++        with pytest.raises((ValueError, RuntimeError), match="NON_FINITE_RESULT"):
++            op.correlation(x)
++        with pytest.raises((ValueError, RuntimeError), match="NON_FINITE_RESULT"):
++            prepared.run_snapshot()
++        x.setflags(write=True)
++        x[:] = original
++        x.setflags(write=False)
++        recovered = prepared.run_snapshot()
++    compare(recovered.outputs[0].values[0], op.correlation(x))
++    np.testing.assert_array_equal(first.outputs[0].values[0].view(np.uint64), saved.view(np.uint64))
++    assert not np.shares_memory(first.outputs[0].values[0], recovered.outputs[0].values[0])
++
++
++@pytest.mark.parametrize("mode", ["comparison", "multiple", "isolate", "iterate"])
++def test_nonindependent_graphs_remain_canonical(mode):
++    x = inputs(n=65, d=256)
++    expected = op.correlation(x)
++    expr = "correlation(x)>0" if mode == "comparison" else "correlation(x)"
++    if mode == "multiple":
++        expr = [expr, f"trace({expr})"]
++    elif mode == "iterate":
++        expr = f"iterate({expr},{expr},0,1)"
++    with AdaptiveScheduler(cpu_budget=1) as scheduler:
++        result = execute(scheduler, graph("F", expr, mode == "isolate"), x)
++    assert counts(result, "accelerate_covariance_attempts") == 0
++    actual = result.outputs[0].values[0]
++    np.testing.assert_array_equal(actual if mode == "comparison" else actual.view(np.uint64),
++                                  expected > 0 if mode == "comparison" else expected.view(np.uint64))
++
++
++@active
++@pytest.mark.parametrize("layout", ["c", "f"])
++@pytest.mark.parametrize("correlated", [False, True])
++def test_long_normalization_bounds_replay_and_tail(layout, correlated):
++    x = inputs(layout, n=8193, d=256)
++    if correlated:
++        x.setflags(write=True)
++        x[:] = x*.1 + x[:, :1]
++        x.setflags(write=False)
++    expected = op.correlation(x)
++    with AdaptiveScheduler(cpu_budget=1) as scheduler:
++        result = execute(scheduler, graph(), x)
++    compare(result.outputs[0].values[0], expected)
++    assert counts(result, "covariance_syrk_calls") == (len(x)+511)//512
++    assert counts(result, "accelerate_covariance_calls") + counts(result, "covariance_fallbacks") == 1
++
++
++@active
++def test_correlation_budget_and_thread_policy_after_error():
++    x = inputs(n=4096, d=256)
++    starts, ends = np.array([0, 1], np.int64), np.array([4096, 1042], np.int64)
++    compiled = graph("F")
++    reserve = (2048+3)*256*8 + 32*1024*1024
++    library = ctypes.CDLL("/System/Library/Frameworks/Accelerate.framework/Accelerate")
++    getter, setter = library.BLASGetThreading, library.BLASSetThreading
++    getter.restype = ctypes.c_uint
++    setter.argtypes, setter.restype = (ctypes.c_uint,), ctypes.c_int
++    previous = getter()
++    try:
++        assert setter(0) == 0
++        with AdaptiveScheduler(cpu_budget=1) as scheduler:
++            plan = scheduler.plan(compiled, {"x": x}, starts, ends)
++            assert plan.estimated_worker_scratch_bytes >= reserve
++            with pytest.raises((ValueError, RuntimeError, MemoryError), match="memory|MEMORY|bad_alloc"):
++                scheduler.execute(compiled, {"x": x}, starts, ends, memory_budget_bytes=reserve-1)
++            result = scheduler.execute(compiled, {"x": x}, starts, ends)
++            for first, last, actual in zip(starts, ends, result.outputs[0].values, strict=True):
++                compare(actual, op.correlation(x[first:last]))
++            x.setflags(write=True)
++            x[:, -1] = 2
++            x.setflags(write=False)
++            with pytest.raises((ValueError, RuntimeError), match="NON_FINITE_RESULT"):
++                execute(scheduler, compiled, x)
++            assert getter() == 0
++    finally:
++        assert setter(previous) == 0
++
++
++@active
++@pytest.mark.parametrize("layout", ["c", "f"])
++def test_power_of_two_scaling_keeps_normalized_certificate(layout):
++    x = inputs(layout, n=32769, d=256).copy(order=layout.upper())
++    x[:] = x*.1 + x[:, :1]
++    x.flags.writeable = False
++    scaled = np.array(x*2.0**-200, order=layout.upper())
++    scaled.flags.writeable = False
++    with AdaptiveScheduler(cpu_budget=1) as scheduler:
++        original = execute(scheduler, graph(), x)
++        small = execute(scheduler, graph(), scaled)
++    # A covariance-only absolute bound would wrongly accept the tiny input.
++    for result, data in ((original, x), (small, scaled)):
++        assert counts(result, "covariance_fallbacks") == 1
++        assert counts(result, "accelerate_covariance_calls") == 0
++        np.testing.assert_array_equal(result.outputs[0].values[0].view(np.uint64),
++                                      op.correlation(data).view(np.uint64))
++    assert counts(original, "covariance_replayed_cells") == counts(small, "covariance_replayed_cells")
++
++
++@pytest.mark.parametrize("d", [0, 1, 17])
++def test_small_symmetric_f_root_uses_same_budget_as_c(d):
++    x = inputs("f", n=17, d=d)
++    starts, ends = np.zeros(1, np.int64), np.array([len(x)], np.int64)
++    with AdaptiveScheduler(cpu_budget=1) as scheduler:
++        c = scheduler.plan(graph("C"), {"x": x}, starts, ends)
++        f = scheduler.plan(graph("F"), {"x": x}, starts, ends)
++        assert c.estimated_total_memory_bytes == f.estimated_total_memory_bytes
++        assert c.estimated_worker_scratch_bytes == f.estimated_worker_scratch_bytes
++        with pytest.raises(MemoryError):
++            scheduler.plan(graph("F"), {"x": x}, starts, ends,
++                           memory_budget_bytes=f.estimated_total_memory_bytes-1)
++        result = execute(scheduler, graph("F"), x)
++    np.testing.assert_array_equal(result.outputs[0].values[0].view(np.uint64),
++                                  op.correlation(x).view(np.uint64))
++    assert counts(result, "numeric_arena_bytes") == counts(result, "root_copy_bytes") == 0

@@ -1,0 +1,7 @@
+{
+  "phase": "actual_runner_preparation",
+  "failure": "An exact-string replacement expected relative stage/root paths but the G normal build runner contains absolute paths.",
+  "effect": "Preparation stopped before applying source or building; no runtime/test/performance result invalidated.",
+  "fix": "prepare_actual_v57.py now validates and replaces the observed exact literals once, then AST-parses both runners.",
+  "status": "fixed"
+}

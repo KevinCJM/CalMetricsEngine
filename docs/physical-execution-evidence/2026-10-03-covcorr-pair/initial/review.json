@@ -1,0 +1,39 @@
+{
+  "method": "root self-review; no subagents",
+  "status": "CORRECT_WITH_MEMORY_GAP",
+  "checks": [
+    "Both roots must be terminal typed float64 matrices in execution order with identical parent identity; all consumers of either root excluded",
+    "Covariance library candidate satisfies both covariance and normalized correlation tolerances using canonical diagonals, with unchanged sign/zero and dense replay",
+    "F bytes are copied only from completed bitwise symmetric covariance; independent output slots, exact observer descriptors and copy audit retained",
+    "One shared qualification for finalization, workspace reserve, execution and worker reconstruction; no protocol or persistent numeric cache added",
+    "Planner DAG-branch parallelism is scalar-only; typed paired roots remain together, so it cannot fork away this reuse",
+    "NI baseline computes covariance once, writes its independent correlation directly and uses F views, without imposing a needless copy"
+  ],
+  "verification": {
+    "python": 10755,
+    "focused": 432,
+    "native": "9/9",
+    "timing_cases": 12,
+    "rounds": 9,
+    "asan_ubsan": "9/9",
+    "native_off": "9/9",
+    "focused_off": {
+      "passed": 291,
+      "skipped": 141
+    },
+    "direct_operators": 185,
+    "historical_excel": {
+      "cases": 469,
+      "values": 3056,
+      "new_recalculation": false
+    }
+  },
+  "limits": [
+    "No universal time or memory superiority claim",
+    "Canonical/scaled/negative/dense-replay cases remain behind NI",
+    "Allocation probe and RSS have separate coverage; vendor workspace estimate is not hard upper bound",
+    "2048 C cold/warm heap exceeds compact NI by about 6 MiB; evaluate a smaller existing panel",
+    "Four native memory children reach 5 untracked frees each; one NI child has 1 after warm peak. Preserve the original data and disclose incomplete lifecycle tracking."
+  ],
+  "delivery": "No commit or push"
+}

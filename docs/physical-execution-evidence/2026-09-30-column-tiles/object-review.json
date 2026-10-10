@@ -1,0 +1,39 @@
+{
+  "scope": "arm64 Release own normal frames; system/runtime/exception stacks not exhaustively bounded",
+  "old_library_own_peak_bytes": 368,
+  "new_library_own_peak_bytes": 256,
+  "outer_wrapper_bytes": 48,
+  "admission_bytes": 64,
+  "driver_bytes": 48,
+  "bulk_bytes": 208,
+  "edges_bytes": 176,
+  "scalar_math_bytes": 48,
+  "scalar_fallback_bytes": 480,
+  "tail_calls_verified": [
+    [
+      "000069e4",
+      "eigen_column_pair"
+    ],
+    [
+      "00006a04",
+      "scalar_elementwise_pair"
+    ],
+    [
+      "00006ca8",
+      "eigen_column_pair_tiles"
+    ],
+    [
+      "00006ce0",
+      "column_pair_edges"
+    ]
+  ],
+  "fma_new_helpers": 0,
+  "numeric_heap_added": 0,
+  "prototype_rejections": {
+    "2x4": "own frame432B; smaller benefit",
+    "4x4_monolithic": "own frame384B plus scalar48B, replaced by split",
+    "8x4": "own frame384B; split4x4 preferred",
+    "4x8": "own frame480B",
+    "8x8": "own frame1696B and slower"
+  }
+}

@@ -1,0 +1,1693 @@
+{
+  "candidate": "V57G",
+  "source_build_id": "db14f515428e1f822a87b304a65b9c2c0ad6da134c54c71787f7edc6c590e1e1",
+  "scope": "Private arithmetic retention and column take/scatter fusion; HMM history route preserved",
+  "not_claimed": [
+    "all major matrix/NJIT gaps closed",
+    "new dependency speedup",
+    "Git delivery"
+  ],
+  "goal_complete": false,
+  "files": {
+    "raw/adopt_v57g.py.txt": {
+      "sha256": "27da4f6ad440cec90db34adc9af6574e6b4cafab00ab3902d5db920106bc5465",
+      "bytes": 2498,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/adopt_v57g.py"
+    },
+    "raw/archive_v57g.py.txt": {
+      "sha256": "8d615996ba031fcec5d3fb88827c1894be69a65aabba07e8d24eebd54f3b113c",
+      "bytes": 3976,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/archive_v57g.py"
+    },
+    "raw/asan_python_bootstrap.py.txt": {
+      "sha256": "946ff913a36d69080ebba291e601c5e716546d8c7c3f578da1b49c1e22686cd4",
+      "bytes": 1127,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/asan_python_bootstrap.py"
+    },
+    "raw/build_actual_v57.py.txt": {
+      "sha256": "e5049543a7cb88be6f50f041461a66768eb0aa7f38da8d968a7dd21abf1c6424",
+      "bytes": 3537,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/build_actual_v57.py"
+    },
+    "raw/build_candidate.py.txt": {
+      "sha256": "911d9684cece647cc5ea708deb200665ea912801fd09a6299cf9d8005ebc49b3",
+      "bytes": 3548,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/build_candidate.py"
+    },
+    "raw/build_candidate_refined.py.txt": {
+      "sha256": "00434b9bebd94089dbf03f07c906b0312acf4f0ccff0990bfc6b30461db08cdb",
+      "bytes": 3548,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/build_candidate_refined.py"
+    },
+    "raw/build_candidate_scatter.py.txt": {
+      "sha256": "b3b674f1c5373d0699a6bd12a761c3269b166eb7f9479387b8f062aaacdfe41c",
+      "bytes": 3548,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/build_candidate_scatter.py"
+    },
+    "raw/build_candidate_scatter_refined.py.txt": {
+      "sha256": "599c3a86964cdc6777811e03cbd97710304b80fbbe43b23e7877c65b42b2f426",
+      "bytes": 3548,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/build_candidate_scatter_refined.py"
+    },
+    "raw/build_companion_asan.py.txt": {
+      "sha256": "5989c777e2ed9126c7349a7b11e4bba093ca284256c6af1b160bb66b5486dff5",
+      "bytes": 4192,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/build_companion_asan.py"
+    },
+    "raw/build_companion_off.py.txt": {
+      "sha256": "a0c8c7a4d9022671507c21782ba879f85626836fcbcbaa4d2dfb113035aaff23",
+      "bytes": 3664,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/build_companion_off.py"
+    },
+    "raw/build_v57e.py.txt": {
+      "sha256": "cc7556ca92b8c408f953241cf60307589f8b07115e069ac3152518c81c05977c",
+      "bytes": 3548,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/build_v57e.py"
+    },
+    "raw/build_v57e_asan.py.txt": {
+      "sha256": "5ade47f5c97f90d0714c8cbe56593302d54ba21ae03c36016d8103e30a86edf1",
+      "bytes": 4192,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/build_v57e_asan.py"
+    },
+    "raw/build_v57e_off.py.txt": {
+      "sha256": "9990ff8665a80249a395721f3bfd8eeac76627e474b98651b9e905c743245a78",
+      "bytes": 3664,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/build_v57e_off.py"
+    },
+    "raw/build_v57f.py.txt": {
+      "sha256": "47177fb72570dc28c0bc850b8eba9f2cf45e77331fa7ff2fc68b05579530ab0c",
+      "bytes": 3548,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/build_v57f.py"
+    },
+    "raw/build_v57f_asan.py.txt": {
+      "sha256": "a430698de19e4018c07253cd18c1c1ece86c1ddcf0a4954dcad64a05d458dbc1",
+      "bytes": 4192,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/build_v57f_asan.py"
+    },
+    "raw/build_v57f_off.py.txt": {
+      "sha256": "e621ce9a3c1185611e2f238a258e97bfc0db10a50fcd90059ba36f0af99d6d0f",
+      "bytes": 3664,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/build_v57f_off.py"
+    },
+    "raw/build_v57g.py.txt": {
+      "sha256": "a338b805d0506201115521ae325d4464fe60d76395a0d84ba0b776450d471886",
+      "bytes": 3548,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/build_v57g.py"
+    },
+    "raw/build_v57g_asan.py.txt": {
+      "sha256": "8753ca856f62805cc88d0ae5603b7ca873cb6e7ea0a06b203dd94321e519ca43",
+      "bytes": 4192,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/build_v57g_asan.py"
+    },
+    "raw/build_v57g_off.py.txt": {
+      "sha256": "170f7ae2320010eb82c6f32773043107c503a782541550c9a71f989e59062351",
+      "bytes": 3664,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/build_v57g_off.py"
+    },
+    "raw/chain_benchmark.py.txt": {
+      "sha256": "f5722c846f80f1bc2b6ed3d438e1d790c5d01a70532bcd6274bb57fd1dd96319",
+      "bytes": 8739,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/chain_benchmark.py"
+    },
+    "raw/companion-admission-diagnosis.json": {
+      "sha256": "0b9959366f9e6298b42776bad1b544731fd4e6627b75949f1576bb830e3898da",
+      "bytes": 4010,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/companion-admission-diagnosis.json"
+    },
+    "raw/companion-focused-admission.log": {
+      "sha256": "37de02af3379508415d8f279b2f35ddd8dd3e52a3d4419f03ce4d68784c445bd",
+      "bytes": 610,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/companion-focused-admission.log"
+    },
+    "raw/companion-focused-admission.xml": {
+      "sha256": "59907bade93ed7cfb27c5d0d07c3207781e6846eddc2cb8b649b45db2fd99b2c",
+      "bytes": 63837,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/companion-focused-admission.xml"
+    },
+    "raw/companion-focused-corrected.log": {
+      "sha256": "ff90e4ed2b04528df09cbe4cee162d4fd57c5cb4f80a5c7c14b141ed36d57de8",
+      "bytes": 39504,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/companion-focused-corrected.log"
+    },
+    "raw/companion-focused-corrected.xml": {
+      "sha256": "c4e13610d917f8ced00140fc65b96a68a3b6986c812bd98dbb97806bb959529c",
+      "bytes": 107751,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/companion-focused-corrected.xml"
+    },
+    "raw/companion-focused-fixtures.log": {
+      "sha256": "eb2da75b395139d5e161cbf652c16c15c88ac9cdf9b0e47245179730135b2ef9",
+      "bytes": 24590,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/companion-focused-fixtures.log"
+    },
+    "raw/companion-focused-fixtures.xml": {
+      "sha256": "f8aceb0c87bfb4954c5636952351c421b11e701b4d77adc89549727996fa0615",
+      "bytes": 87212,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/companion-focused-fixtures.xml"
+    },
+    "raw/companion-focused.log": {
+      "sha256": "d15cc638bc2fe89df67c627ade95abdf111bb825b4e0190fe8dc98956e0e34e4",
+      "bytes": 2454,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/companion-focused.log"
+    },
+    "raw/companion-focused.xml": {
+      "sha256": "5cda50024d7b2d36cf305cc27ef1e12afdceb24ef973d5fd2af45beefaec62f4",
+      "bytes": 2412,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/companion-focused.xml"
+    },
+    "raw/companion-quality-asan-native.log": {
+      "sha256": "1a05a2fbab7d87b12054776938a5e4b2ea705ebc82660c3a70bbf49ac9e34bed",
+      "bytes": 1212,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/companion-quality-asan-native.log"
+    },
+    "raw/companion-quality-asan-native.xml": {
+      "sha256": "1048572115150671aede7c58c635799f5917f0a43e6b82f4f4a4b82860831333",
+      "bytes": 2242,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/companion-quality-asan-native.xml"
+    },
+    "raw/companion-quality-asan-related.log": {
+      "sha256": "4d0c852bd106e88bce793cf5487d923442c810c039b74f3ac32c3f70967b685e",
+      "bytes": 2816,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/companion-quality-asan-related.log"
+    },
+    "raw/companion-quality-asan-related.xml": {
+      "sha256": "8a030118cdc47f560ac2c139f2fd473bab9a18951b3d0cd3a3a309153b2979c6",
+      "bytes": 192713,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/companion-quality-asan-related.xml"
+    },
+    "raw/companion-quality-asan.json": {
+      "sha256": "804cb15ebb038540865bbb864a0dfc1ff371eb2a9c03c38c67695f426d1afe46",
+      "bytes": 4806,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/companion-quality-asan.json"
+    },
+    "raw/companion-quality-normal-full.log": {
+      "sha256": "61924ba368c8004fe0820f3232a851970ec01cc089fed283b625d619ce3bd45a",
+      "bytes": 19598,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/companion-quality-normal-full.log"
+    },
+    "raw/companion-quality-normal-full.xml": {
+      "sha256": "89d0fe29a644182083203b883591d140cf0a6b9fa6a2d91ab0871283de0ef6a9",
+      "bytes": 2360485,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/companion-quality-normal-full.xml"
+    },
+    "raw/companion-quality-normal.json": {
+      "sha256": "d9fd169bd0d119cdd44b196595747ffc3501590eb476101e09e44d418d711ede",
+      "bytes": 6946,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/companion-quality-normal.json"
+    },
+    "raw/companion-quality-off-native.log": {
+      "sha256": "d5ba85870cc618a67d9d99fa08fbeadbd817f071a218bb99550715fed3b2b325",
+      "bytes": 1211,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/companion-quality-off-native.log"
+    },
+    "raw/companion-quality-off-native.xml": {
+      "sha256": "7b95c1f4511288ef522302b5729f1aee4deb86ed0483fb64572c889642f2846b",
+      "bytes": 2242,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/companion-quality-off-native.xml"
+    },
+    "raw/companion-quality-off-related.log": {
+      "sha256": "d6966b3d2021f1697324743ec1f8915b3b408c9cc2227dc59230dc850e86290c",
+      "bytes": 2815,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/companion-quality-off-related.log"
+    },
+    "raw/companion-quality-off-related.xml": {
+      "sha256": "73f4fa48b9a8784b07ade649d84bd6b33f7d952c68aaf474e94e7b52c03706c2",
+      "bytes": 192685,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/companion-quality-off-related.xml"
+    },
+    "raw/companion-quality-off.json": {
+      "sha256": "717b36fdb0582c6eadc9aa985c61446c5cf843b07fd9080bf4fd2ca56f30430b",
+      "bytes": 4427,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/companion-quality-off.json"
+    },
+    "raw/companion-related-native.log": {
+      "sha256": "a784665f6a2c7fc0507fb072b39e074540a0b8b875bb60395aa4a36c14713729",
+      "bytes": 1207,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/companion-related-native.log"
+    },
+    "raw/companion-related-native.xml": {
+      "sha256": "0de528b29d2405139073100d25b13a3ccd6382b5994861fedd0ef85c6a1f4398",
+      "bytes": 2242,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/companion-related-native.xml"
+    },
+    "raw/companion-related-python.log": {
+      "sha256": "143f09a70a35afcddf4b821279dcc76f77b71e547eea876ae21bf2c99664b3f8",
+      "bytes": 1659,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/companion-related-python.log"
+    },
+    "raw/companion-related-python.xml": {
+      "sha256": "dd8f1f8fc6cb8f00b6e164f32528940275fa7e3e8aab570cdbe0852731d8fb27",
+      "bytes": 190890,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/companion-related-python.xml"
+    },
+    "raw/companion-related-state.json": {
+      "sha256": "b8edab3696beb3e1b1753854f724c2d625e16c6b10e3c70e236ee08c4adc71af",
+      "bytes": 1905,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/companion-related-state.json"
+    },
+    "raw/companion-screen-heap-baseline.json": {
+      "sha256": "a9346ea05675465aee5eb0bffe65828b0b900d96dbfe7f984134ad6170ed9eee",
+      "bytes": 8691,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/companion-screen-heap-baseline.json"
+    },
+    "raw/companion-screen-heap-baseline.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/companion-screen-heap-baseline.stderr"
+    },
+    "raw/companion-screen-heap-candidate.json": {
+      "sha256": "0758b4cd06344d6dbe7783ecbded8b43105748316f352cac486222d8de5127b1",
+      "bytes": 8688,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/companion-screen-heap-candidate.json"
+    },
+    "raw/companion-screen-heap-candidate.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/companion-screen-heap-candidate.stderr"
+    },
+    "raw/companion-screen-heap-njit.json": {
+      "sha256": "1b4477e077a403acd675555ca233b5321aa1ea4c71ce6483b1442892995cb308",
+      "bytes": 4183,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/companion-screen-heap-njit.json"
+    },
+    "raw/companion-screen-heap-njit.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/companion-screen-heap-njit.stderr"
+    },
+    "raw/companion-screen-state.json": {
+      "sha256": "e4d04d96b903d6fa595a562120bf975dbf0b4334e2f83b743c4318801abd1503",
+      "bytes": 1835,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/companion-screen-state.json"
+    },
+    "raw/companion-screen-time-baseline.json": {
+      "sha256": "12d33be35cda6122629334b0a430782cc20f6ac627bad17ab1859d8d68157055",
+      "bytes": 10865,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/companion-screen-time-baseline.json"
+    },
+    "raw/companion-screen-time-baseline.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/companion-screen-time-baseline.stderr"
+    },
+    "raw/companion-screen-time-candidate.json": {
+      "sha256": "6811ae1915dcf6e793a58634d0d0c2c3ca98dedf8325a281765d943ee788af46",
+      "bytes": 10855,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/companion-screen-time-candidate.json"
+    },
+    "raw/companion-screen-time-candidate.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/companion-screen-time-candidate.stderr"
+    },
+    "raw/companion-screen-time-njit.json": {
+      "sha256": "007a69f0f5351e7199dd98f29398f1598af745d21eefe2807cf85402e97aba3e",
+      "bytes": 6406,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/companion-screen-time-njit.json"
+    },
+    "raw/companion-screen-time-njit.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/companion-screen-time-njit.stderr"
+    },
+    "raw/create_benchmark.py.txt": {
+      "sha256": "5773209ac4d1d127d4f058fbdf12b0d972c06dc264e4692aaa973bfae89549ad",
+      "bytes": 1926,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/create_benchmark.py"
+    },
+    "raw/create_candidate.py.txt": {
+      "sha256": "6980ae822e8feb25fed23caaa3ddb609a213dfdd71f0948efdd14fd4c8166cb7",
+      "bytes": 7701,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/create_candidate.py"
+    },
+    "raw/create_scatter_candidate.py.txt": {
+      "sha256": "cfdc1aeceec7b07aa3b1fbe82dd03ae5f8011268eac47b6504ae25ee671e6acf",
+      "bytes": 11468,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/create_scatter_candidate.py"
+    },
+    "raw/create_v57e.py.txt": {
+      "sha256": "b234918b02a1de8a6e52ff30860d938a74bc535f4b539197381740031ab128c6",
+      "bytes": 5821,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/create_v57e.py"
+    },
+    "raw/create_v57g.py.txt": {
+      "sha256": "ea06726e29aae434709747038c5aed8a5c95da127f7f0b6167a262c4823bbe01",
+      "bytes": 4540,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/create_v57g.py"
+    },
+    "raw/design.md.txt": {
+      "sha256": "1caa4b12dbe148b3b1ca8a4dfc49440c05afbbc05f7e51a8acd65890f5b4f9df",
+      "bytes": 3712,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/design.md"
+    },
+    "raw/f-root-diagnosis.json": {
+      "sha256": "79ecdbb2e7504908b732193ca278a5619950c84e81b754d42230776980297eef",
+      "bytes": 7660,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/f-root-diagnosis.json"
+    },
+    "raw/final-new-tests-sha.json": {
+      "sha256": "49380b8217b329def38bc1d48aa5e3560be7ee9164d673679fdc3ebb0314f2a6",
+      "bytes": 219,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/final-new-tests-sha.json"
+    },
+    "raw/first-focused-failure.json": {
+      "sha256": "0318ab2eed26d560cb775991eb5ab5fe3f3c599849bbda3c2e7203bc90db73fa",
+      "bytes": 436,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/first-focused-failure.json"
+    },
+    "raw/focused-corrected.log": {
+      "sha256": "6b3dc006545b86dc8e3a3a7c45868915319213944898016378b82cb08ef08ce5",
+      "bytes": 2516,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/focused-corrected.log"
+    },
+    "raw/focused-corrected.xml": {
+      "sha256": "2e59bc15113075011a35912a02997a1a1dc74d900c8a5e74b50f96a739be14e6",
+      "bytes": 45184,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/focused-corrected.xml"
+    },
+    "raw/focused-fixtures-corrected.log": {
+      "sha256": "28a225f23ea94c24a28ec109d6eb35e69e5a2f049b6dc4e6fa09808cdd34bfbc",
+      "bytes": 449,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/focused-fixtures-corrected.log"
+    },
+    "raw/focused-fixtures-corrected.xml": {
+      "sha256": "e56f9c526a646544a10ec7b5404d46c97b8d3eeca9663b2e7a9de7ec3d5f5fad",
+      "bytes": 43382,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/focused-fixtures-corrected.xml"
+    },
+    "raw/focused.log": {
+      "sha256": "e6da26dfb583cef201a6ea21d9412158950e1042c34368d889b805fc7221f9df",
+      "bytes": 79760,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/focused.log"
+    },
+    "raw/focused.xml": {
+      "sha256": "f4825f90dc0c6dd42653122fef0c4e4c5fa192359b0a7744145bc5fd948866de",
+      "bytes": 113740,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/focused.xml"
+    },
+    "raw/fresh-heap-baseline.json": {
+      "sha256": "79d29889842410a4aea3c2d7ad26fb54deacdd2de8a553929c5432fb9c1f5692",
+      "bytes": 8690,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/fresh-heap-baseline.json"
+    },
+    "raw/fresh-heap-baseline.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/fresh-heap-baseline.stderr"
+    },
+    "raw/fresh-heap-candidate.json": {
+      "sha256": "13598aad47ae40cc4db2098ea36d6c3548eb58c3179a1714c07c56f8f6a51eae",
+      "bytes": 8692,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/fresh-heap-candidate.json"
+    },
+    "raw/fresh-heap-candidate.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/fresh-heap-candidate.stderr"
+    },
+    "raw/fresh-heap-njit.json": {
+      "sha256": "1b4477e077a403acd675555ca233b5321aa1ea4c71ce6483b1442892995cb308",
+      "bytes": 4183,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/fresh-heap-njit.json"
+    },
+    "raw/fresh-heap-njit.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/fresh-heap-njit.stderr"
+    },
+    "raw/fresh-rss-baseline.json": {
+      "sha256": "55e4f006de613a5033f46b096fea1263d67d18d6c99fb1ed8f0e75635a5cddbc",
+      "bytes": 8482,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/fresh-rss-baseline.json"
+    },
+    "raw/fresh-rss-baseline.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/fresh-rss-baseline.stderr"
+    },
+    "raw/fresh-rss-candidate.json": {
+      "sha256": "c0787a7dcd4ffad12e60f0e57cfbd95a37a705c10723d9ef51937b581ef452b8",
+      "bytes": 8483,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/fresh-rss-candidate.json"
+    },
+    "raw/fresh-rss-candidate.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/fresh-rss-candidate.stderr"
+    },
+    "raw/fresh-rss-njit.json": {
+      "sha256": "fe9dcb7640bec88453398e189d08812956f50bc13c65c360cf6884bd42d7ba38",
+      "bytes": 3983,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/fresh-rss-njit.json"
+    },
+    "raw/fresh-rss-njit.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/fresh-rss-njit.stderr"
+    },
+    "raw/initial-state.json": {
+      "sha256": "41d8dcf18a83a094c0dff9a15048f697761dbe693a345a8663053d95e951e9a9",
+      "bytes": 17405,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/initial-state.json"
+    },
+    "raw/installed-blas-research.json": {
+      "sha256": "07c4501a3421f2830cdcd565b1a87c31c22c9584e5c07c7b11a35ab02a351c07",
+      "bytes": 4212,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/installed-blas-research.json"
+    },
+    "raw/library-method.json": {
+      "sha256": "67c541c049a393bb5bb716579d319042d11fc693fb31cd9217e8300e27b9c5c9",
+      "bytes": 788,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/library-method.json"
+    },
+    "raw/library-research-followup.json": {
+      "sha256": "03e75b81ec6b92a9cd9f5126eecc559a5c1d2b756128ec87acc5712f1d4538bb",
+      "bytes": 1151,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/library-research-followup.json"
+    },
+    "raw/lifetime-memory-research.json": {
+      "sha256": "df8889d719da7abc1bba7b401ec30f4cd07881ed5f56cd25a54480160ff04cb2",
+      "bytes": 1381,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/lifetime-memory-research.json"
+    },
+    "raw/native-take-storage-diagnosis.log": {
+      "sha256": "11ac1f43b287b063432659dca3b13c24204a89d7c826b3d4e13611b8323670ec",
+      "bytes": 170,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/native-take-storage-diagnosis.log"
+    },
+    "raw/native_take_storage_probe.cpp.txt": {
+      "sha256": "86f200f4f013d5f3a608e2ec63bd3d34331b94d42785eca6d4191d8f94449dcc",
+      "bytes": 2457,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/native_take_storage_probe.cpp"
+    },
+    "raw/paired-0-baseline.json": {
+      "sha256": "6b264d0dd3854050866478ae5b5d2e0a8fe4c2aba997aa2dc37b1eb0917ca079",
+      "bytes": 10856,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/paired-0-baseline.json"
+    },
+    "raw/paired-0-baseline.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/paired-0-baseline.stderr"
+    },
+    "raw/paired-0-candidate.json": {
+      "sha256": "5ecbeee181a733db73e43196af4f16254352b2a86e70dd0cfed8b85af35f2c7d",
+      "bytes": 10866,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/paired-0-candidate.json"
+    },
+    "raw/paired-0-candidate.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/paired-0-candidate.stderr"
+    },
+    "raw/paired-0-njit.json": {
+      "sha256": "93f33193ed3e617cf74d902c8cce457ccdd2d1c9799341b379c6125e424eba96",
+      "bytes": 6396,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/paired-0-njit.json"
+    },
+    "raw/paired-0-njit.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/paired-0-njit.stderr"
+    },
+    "raw/paired-1-baseline.json": {
+      "sha256": "88918c7f7b8bfa72797ffd89a93466a334e92b0f3f9c2e5b439c5fff7f6eba9a",
+      "bytes": 10851,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/paired-1-baseline.json"
+    },
+    "raw/paired-1-baseline.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/paired-1-baseline.stderr"
+    },
+    "raw/paired-1-candidate.json": {
+      "sha256": "27b09bc1e3317af490f72c6830e108512561ffa36984b03c6b448083002024b0",
+      "bytes": 10866,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/paired-1-candidate.json"
+    },
+    "raw/paired-1-candidate.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/paired-1-candidate.stderr"
+    },
+    "raw/paired-1-njit.json": {
+      "sha256": "441b6a1965131bc74e2da90d206898ee4ffce94090c7fd23e9ac128ba6ffda03",
+      "bytes": 6409,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/paired-1-njit.json"
+    },
+    "raw/paired-1-njit.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/paired-1-njit.stderr"
+    },
+    "raw/paired-2-baseline.json": {
+      "sha256": "77929a8a0674b808e862c8fc4093d88ccde26e3e41bd95b35d37c64533585e6a",
+      "bytes": 10863,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/paired-2-baseline.json"
+    },
+    "raw/paired-2-baseline.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/paired-2-baseline.stderr"
+    },
+    "raw/paired-2-candidate.json": {
+      "sha256": "23f3672533077fd8a4794ab24e3caf847c624e29bec612b43191d7299bdfd840",
+      "bytes": 10867,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/paired-2-candidate.json"
+    },
+    "raw/paired-2-candidate.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/paired-2-candidate.stderr"
+    },
+    "raw/paired-2-njit.json": {
+      "sha256": "f3c68eda693023ac95daf5da38e27bed3f5a5a48486452d005993c187790c943",
+      "bytes": 6407,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/paired-2-njit.json"
+    },
+    "raw/paired-2-njit.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/paired-2-njit.stderr"
+    },
+    "raw/paired-3-baseline.json": {
+      "sha256": "652f034f52c1895fdec7f4f49a0c7395dc11080ca0f70163264666ae7a4c1520",
+      "bytes": 10855,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/paired-3-baseline.json"
+    },
+    "raw/paired-3-baseline.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/paired-3-baseline.stderr"
+    },
+    "raw/paired-3-candidate.json": {
+      "sha256": "10d4c604ba58212fd2c9146f97e7b58256f6cee567430503eab14dfe803fa7dd",
+      "bytes": 10866,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/paired-3-candidate.json"
+    },
+    "raw/paired-3-candidate.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/paired-3-candidate.stderr"
+    },
+    "raw/paired-3-njit.json": {
+      "sha256": "04f2038226bd39ca784fc52fa9bdcddb4a5de768759df80fcb7da70491c81954",
+      "bytes": 6404,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/paired-3-njit.json"
+    },
+    "raw/paired-3-njit.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/paired-3-njit.stderr"
+    },
+    "raw/paired-4-baseline.json": {
+      "sha256": "e33c8480b299f426069f1888846aa02c3e3e218ebf62c32ccc572af181642bd1",
+      "bytes": 10856,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/paired-4-baseline.json"
+    },
+    "raw/paired-4-baseline.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/paired-4-baseline.stderr"
+    },
+    "raw/paired-4-candidate.json": {
+      "sha256": "b91a8fe22df270483bdc0657d27eacd537a8e4b0acd7d2a5ff1faa9d01d8d24e",
+      "bytes": 10863,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/paired-4-candidate.json"
+    },
+    "raw/paired-4-candidate.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/paired-4-candidate.stderr"
+    },
+    "raw/paired-4-njit.json": {
+      "sha256": "ca0333e06b2853c20c04eed5954359d07d80b95b73ba485c1ea1a947e649e27e",
+      "bytes": 6395,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/paired-4-njit.json"
+    },
+    "raw/paired-4-njit.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/paired-4-njit.stderr"
+    },
+    "raw/paired-5-baseline.json": {
+      "sha256": "f2f04924b945f67249d6d1ac1a42836c93a3ff864dc25a5c27025b72d2c61a8e",
+      "bytes": 10858,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/paired-5-baseline.json"
+    },
+    "raw/paired-5-baseline.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/paired-5-baseline.stderr"
+    },
+    "raw/paired-5-candidate.json": {
+      "sha256": "d3c1af8c0fd166ae7478f79dd8b252e92562b8d9bc44a2c9dad28799611a7819",
+      "bytes": 10866,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/paired-5-candidate.json"
+    },
+    "raw/paired-5-candidate.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/paired-5-candidate.stderr"
+    },
+    "raw/paired-5-njit.json": {
+      "sha256": "13251c6d55effd8e096f379d45a451561fe7be376e2c24282c5fee8d6e4a0068",
+      "bytes": 6395,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/paired-5-njit.json"
+    },
+    "raw/paired-5-njit.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/paired-5-njit.stderr"
+    },
+    "raw/paired-state.json": {
+      "sha256": "e69178a1f5f430f77c9c9f361b94bca4f742fffcb77b8b647ba0b34f9fa7a743",
+      "bytes": 7776,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/paired-state.json"
+    },
+    "raw/prepare_actual_v57.py.txt": {
+      "sha256": "fff8a5dafc6d07b62bdccfd05ad1c3accb1bb7795439be86a1422a974f857cd1",
+      "bytes": 1366,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/prepare_actual_v57.py"
+    },
+    "raw/preservation-baseline.json": {
+      "sha256": "563147f12e4c2836d3559636f0715dbde46bd720c7310a8ae285844e75f518c7",
+      "bytes": 34215,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/preservation-baseline.json"
+    },
+    "raw/refine_candidate.py.txt": {
+      "sha256": "49a8bf1107dceedde14b75d593da6bfbab99274dd02911455824a661f23b5934",
+      "bytes": 5039,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/refine_candidate.py"
+    },
+    "raw/refine_scatter_admission.py.txt": {
+      "sha256": "0cc57ba887331033e39649fafd264ed7b6a47d1c65261ff0c64dedac775b6d05",
+      "bytes": 2725,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/refine_scatter_admission.py"
+    },
+    "raw/refine_v57f.py.txt": {
+      "sha256": "06fe54b481f80f306e12430db6524a785597cdbc9007f190f56e3a206a4aff6f",
+      "bytes": 4207,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/refine_v57f.py"
+    },
+    "raw/refined-admission-failures.json": {
+      "sha256": "4e668ed70615d16ec2c21db3ea6f6175a71d17abefaa018faa84d88b6351f6a0",
+      "bytes": 471,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/refined-admission-failures.json"
+    },
+    "raw/related-native.log": {
+      "sha256": "2857957028ab41b6a445a4b5998c9fd7205ad5c22d0b76c955df58c382eaecaf",
+      "bytes": 1207,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/related-native.log"
+    },
+    "raw/related-native.xml": {
+      "sha256": "a0db5cbaa4f1d292d2685eb68142895d2202d6a2dd77027b45d31a9f5d845c1c",
+      "bytes": 2240,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/related-native.xml"
+    },
+    "raw/related-python.log": {
+      "sha256": "a8da9634f294ac91a5fa6b9d0fcf4c70c83185b0a62bc441ed687a1c39d63a7e",
+      "bytes": 1569,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/related-python.log"
+    },
+    "raw/related-python.xml": {
+      "sha256": "4df43e825722e390f016ed315b5be9c2f9f4b0180e96f5839c2efaffed109bdb",
+      "bytes": 176320,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/related-python.xml"
+    },
+    "raw/related-state.json": {
+      "sha256": "ec7217735bb70d62f21ef68c5899033db7b06fbd2041234e321f78800136d3ae",
+      "bytes": 1847,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/related-state.json"
+    },
+    "raw/run_actual_v57_confirmation.py.txt": {
+      "sha256": "54e30da874f46630c9629cf28f797bbb6222d9e9dc043b1b3b0c97598d00bf7c",
+      "bytes": 3715,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/run_actual_v57_confirmation.py"
+    },
+    "raw/run_actual_v57_quality.py.txt": {
+      "sha256": "676342a2d22a74bdef18b5166ccc4c08dd2546de938173fe77ccfdda5a2bef5e",
+      "bytes": 3501,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/run_actual_v57_quality.py"
+    },
+    "raw/run_companion_admission.py.txt": {
+      "sha256": "166cf0c28ea9bb0ef5718db3a15e7889877779b9cc05ee75b0b649d15b71fb3d",
+      "bytes": 951,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/run_companion_admission.py"
+    },
+    "raw/run_companion_fixtures.py.txt": {
+      "sha256": "3d4ef7b544a6e943b511d87b7f3dbc657beca8d2508afecb0ca8ea6d921acae2",
+      "bytes": 240,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/run_companion_fixtures.py"
+    },
+    "raw/run_companion_focused.py.txt": {
+      "sha256": "4c1e85c5933e5cc8ba34101b2b208be9208f68efb156ca53f2681f173bb620c4",
+      "bytes": 951,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/run_companion_focused.py"
+    },
+    "raw/run_companion_paired.py.txt": {
+      "sha256": "045b03cc4e6398d50bff13b5c3fd038bb06c2dafca3a013e8074249fb7fc5650",
+      "bytes": 2764,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/run_companion_paired.py"
+    },
+    "raw/run_companion_quality.py.txt": {
+      "sha256": "e380a3e4ee7ac22d2fd91f7149dc4548a64d7c5249847b50363c9b5791673b8b",
+      "bytes": 3498,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/run_companion_quality.py"
+    },
+    "raw/run_companion_related.py.txt": {
+      "sha256": "ed61acb990c1661fde01b9e742230ef49d314c1603e534d7e19259d0686a476f",
+      "bytes": 2415,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/run_companion_related.py"
+    },
+    "raw/run_companion_screen.py.txt": {
+      "sha256": "c7153ab647e2dde8513b9b7918ce997d1995a456f3b57c1985de19b180d5467e",
+      "bytes": 2146,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/run_companion_screen.py"
+    },
+    "raw/run_paired.py.txt": {
+      "sha256": "316134fc580f252ba1d108cf50223338620788a7c6669a3bf6840e3f55db2f57",
+      "bytes": 2678,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/run_paired.py"
+    },
+    "raw/run_related.py.txt": {
+      "sha256": "9309ae9b3e194cb66ef62e61744ce8030197366976a007a414a734b86087856f",
+      "bytes": 2327,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/run_related.py"
+    },
+    "raw/run_v57e_focused.py.txt": {
+      "sha256": "ffcf4780bca4e3b9d52d093a2e0411d772d18089c37859df1a0778ef49abf2bb",
+      "bytes": 906,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/run_v57e_focused.py"
+    },
+    "raw/run_v57e_paired.py.txt": {
+      "sha256": "d522a5f9719db0ad4ec32e39f9e52137136ddd2f2df0364f89e62ced135e910e",
+      "bytes": 2744,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/run_v57e_paired.py"
+    },
+    "raw/run_v57e_quality.py.txt": {
+      "sha256": "7788e08a31a489e6ff46aeb77ab1cb8dec8eb7bda595c4ddd9d6956151d6ceea",
+      "bytes": 3493,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/run_v57e_quality.py"
+    },
+    "raw/run_v57f_focused.py.txt": {
+      "sha256": "5c7a15b04a8fb57784edaa04ecc0c85ea585e21bfafad465e974155f102e9966",
+      "bytes": 906,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/run_v57f_focused.py"
+    },
+    "raw/run_v57f_paired.py.txt": {
+      "sha256": "b33b0c295faa1829cd10f80fab8e0f4fd1388cb2dbc0c7b04585e54bc204ad26",
+      "bytes": 2744,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/run_v57f_paired.py"
+    },
+    "raw/run_v57f_quality.py.txt": {
+      "sha256": "209f35cb34e4604959e3039397725a9d349de7bd8463673f474bc71a6e2b7bdf",
+      "bytes": 3493,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/run_v57f_quality.py"
+    },
+    "raw/run_v57g_focused.py.txt": {
+      "sha256": "d4b773b5ad96aa6bd34759e1fa4e8f2c95243e3eacc673f8470c4fd958a7f74d",
+      "bytes": 939,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/run_v57g_focused.py"
+    },
+    "raw/run_v57g_paired.py.txt": {
+      "sha256": "5fc63e86d9231e4b79932c5ec461344e130b7cef587544502f75b91ba3594005",
+      "bytes": 2744,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/run_v57g_paired.py"
+    },
+    "raw/run_v57g_quality.py.txt": {
+      "sha256": "e2470108483e330d40fe11ed34bad97833f5a19c1b72d364d40080c9cd5b5329",
+      "bytes": 3549,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/run_v57g_quality.py"
+    },
+    "raw/scatter-companion-design.md.txt": {
+      "sha256": "28a13447f0009e9698355b23dcf65a51646133359697dd6b70ecabba994d30c6",
+      "bytes": 2304,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/scatter-companion-design.md"
+    },
+    "raw/second-focused-failure.json": {
+      "sha256": "606889ee4083a1b8250b394c30c530f664b2bbe3c7373619d8a5eb69efbeb556",
+      "bytes": 449,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/second-focused-failure.json"
+    },
+    "raw/self-review-prebuild.json": {
+      "sha256": "503f9c08833c427f3f2534ffc8a3b8a3be5265488d9f023368d66cf94d42cdd3",
+      "bytes": 526,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/self-review-prebuild.json"
+    },
+    "raw/self-review-v57d.json": {
+      "sha256": "390e0a495a9c2dfd97b2f50e1f2a1821ae3c84ad2c32f639eef2cdb309f8545a",
+      "bytes": 1600,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/self-review-v57d.json"
+    },
+    "raw/self-review-v57g.json": {
+      "sha256": "7715e6957510580a90848cf249a747cb7feeb3f0731e9d42a891efc53bbe3b0d",
+      "bytes": 7228,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/self-review-v57g.json"
+    },
+    "raw/v57e-before-final-root-proof.graph.cpp.txt": {
+      "sha256": "fa2d60d898ac87886f1b2e09a095e2c6b0a777e204505c395804167c989d0d12",
+      "bytes": 297372,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57e-before-final-root-proof.graph.cpp.txt"
+    },
+    "raw/v57e-focused.log": {
+      "sha256": "cfb4307aca910f96f6a7c2c3ff84973235c838ad47a8f3ca146823229b154c8b",
+      "bytes": 1745,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57e-focused.log"
+    },
+    "raw/v57e-focused.xml": {
+      "sha256": "f069175bc666081764a3d330079012af02be81fd4923c0cff8ffeb9be4600825",
+      "bytes": 65631,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57e-focused.xml"
+    },
+    "raw/v57e-native-graph.log": {
+      "sha256": "314f1b14bd90a1b976cbdbcce4e22cb90e015fd0c39a73f8ee84d426e5e75320",
+      "bytes": 281,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57e-native-graph.log"
+    },
+    "raw/v57e-refinement-design.md.txt": {
+      "sha256": "f9af935c6811fcfea505d4bd9f5f7bacc8cb7ecde150767bbd458436b1683a6b",
+      "bytes": 1361,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57e-refinement-design.md"
+    },
+    "raw/v57f-before-history-guard.graph.cpp.txt": {
+      "sha256": "c1909a12320e9efb14cc836eead817652cf5cbca635c3df8f5c10c3a61fe82fb",
+      "bytes": 298360,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57f-before-history-guard.graph.cpp.txt"
+    },
+    "raw/v57f-final-root-proof.md.txt": {
+      "sha256": "185460952acbec2eda3820319956134660131e476a7e6242db1655bc546e0fa2",
+      "bytes": 1201,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57f-final-root-proof.md"
+    },
+    "raw/v57f-focused.log": {
+      "sha256": "f1a4e6600faee4f50545e1161d06bfb0f1d6483b54f324a77cc755390c99d58d",
+      "bytes": 595,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57f-focused.log"
+    },
+    "raw/v57f-focused.xml": {
+      "sha256": "8c4d73f6933bb8ef7c9b0896225715c2cd31ed97ebcb03e2584235b25e016e9a",
+      "bytes": 64315,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57f-focused.xml"
+    },
+    "raw/v57f-native-graph.log": {
+      "sha256": "c638f0892c9e9171dbaa2f53e1052f2cdb9ba750fb45da897a424a9ba7fa3b95",
+      "bytes": 281,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57f-native-graph.log"
+    },
+    "raw/v57g-actual-confirmation.json": {
+      "sha256": "88ba1bc17eb76ef6c40f25352f538b2038576508717d4257db2c5f634e821900",
+      "bytes": 2781,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-actual-confirmation.json"
+    },
+    "raw/v57g-actual-heap-cpp.json": {
+      "sha256": "2796dcbbd6563b218154fb0003104afe39c95ea05943822ee379b38406c5c30e",
+      "bytes": 8688,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-actual-heap-cpp.json"
+    },
+    "raw/v57g-actual-heap-cpp.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-actual-heap-cpp.stderr"
+    },
+    "raw/v57g-actual-heap-njit.json": {
+      "sha256": "1b4477e077a403acd675555ca233b5321aa1ea4c71ce6483b1442892995cb308",
+      "bytes": 4183,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-actual-heap-njit.json"
+    },
+    "raw/v57g-actual-heap-njit.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-actual-heap-njit.stderr"
+    },
+    "raw/v57g-actual-quality-native.log": {
+      "sha256": "f0086264c6545c28e1f0d1b88cef91793979a1e49d6068be09a308e8165bac2f",
+      "bytes": 1203,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-actual-quality-native.log"
+    },
+    "raw/v57g-actual-quality-native.xml": {
+      "sha256": "c554234c5dc1d30063386b42c19af2db0129ed94ebefe3a26b7b12cb85b7d91e",
+      "bytes": 2243,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-actual-quality-native.xml"
+    },
+    "raw/v57g-actual-quality-related.log": {
+      "sha256": "de01394f75d9fbf6c89dab935ed3745d98436be0c101897ea3992f06f05cb45c",
+      "bytes": 1662,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-actual-quality-related.log"
+    },
+    "raw/v57g-actual-quality-related.xml": {
+      "sha256": "1447d4f77e4c0efb1ed94957a5ec0f7b59b7fdac838520b73518c9d5a7bbc558",
+      "bytes": 193304,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-actual-quality-related.xml"
+    },
+    "raw/v57g-actual-quality.json": {
+      "sha256": "3207449865a1ad84346ab0574910798dd1314d05b6dd2fc6a310e92f75c619bb",
+      "bytes": 558,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-actual-quality.json"
+    },
+    "raw/v57g-actual-rss-cpp.json": {
+      "sha256": "ce428e460179d8d198962f3fe16f1175b42a2c52d298858b3d64aaf6fb76b5ba",
+      "bytes": 8484,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-actual-rss-cpp.json"
+    },
+    "raw/v57g-actual-rss-cpp.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-actual-rss-cpp.stderr"
+    },
+    "raw/v57g-actual-rss-njit.json": {
+      "sha256": "2a15d3528da9d63efdc93821f6f598165483530334867070c08e65c37b1626a8",
+      "bytes": 3983,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-actual-rss-njit.json"
+    },
+    "raw/v57g-actual-rss-njit.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-actual-rss-njit.stderr"
+    },
+    "raw/v57g-actual-time-0-cpp.json": {
+      "sha256": "ebcb7a78ce8c661af964d7e3941177ad9a883a44fa9ec17ba7c8b99778a5e53e",
+      "bytes": 10853,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-actual-time-0-cpp.json"
+    },
+    "raw/v57g-actual-time-0-cpp.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-actual-time-0-cpp.stderr"
+    },
+    "raw/v57g-actual-time-0-njit.json": {
+      "sha256": "4e3a9da403179e8f9e18821ad11e7ac451c313ec28b4d84a941553fa293805db",
+      "bytes": 6396,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-actual-time-0-njit.json"
+    },
+    "raw/v57g-actual-time-0-njit.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-actual-time-0-njit.stderr"
+    },
+    "raw/v57g-actual-time-1-cpp.json": {
+      "sha256": "1cfdc6ddd534162b445753346ab74ffa5ba0be4ea17acd41535fa7b5f22d0f8d",
+      "bytes": 10855,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-actual-time-1-cpp.json"
+    },
+    "raw/v57g-actual-time-1-cpp.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-actual-time-1-cpp.stderr"
+    },
+    "raw/v57g-actual-time-1-njit.json": {
+      "sha256": "5c7447d39bd628c2e7b686a0dd397ec8acd79685e3b1d5e6ac02f88fb7d16b3c",
+      "bytes": 6406,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-actual-time-1-njit.json"
+    },
+    "raw/v57g-actual-time-1-njit.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-actual-time-1-njit.stderr"
+    },
+    "raw/v57g-actual-time-2-cpp.json": {
+      "sha256": "4b7a093a63935a3be963b37b77cdf1e160127fc60b31f0d1b83f263afef0cd27",
+      "bytes": 10863,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-actual-time-2-cpp.json"
+    },
+    "raw/v57g-actual-time-2-cpp.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-actual-time-2-cpp.stderr"
+    },
+    "raw/v57g-actual-time-2-njit.json": {
+      "sha256": "5532b16e66446b99199a73a2660c00bfffeded5616bd3500069a8598a3eb4f6a",
+      "bytes": 6404,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-actual-time-2-njit.json"
+    },
+    "raw/v57g-actual-time-2-njit.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-actual-time-2-njit.stderr"
+    },
+    "raw/v57g-adoption.json": {
+      "sha256": "57c169177c91162d4dbd651495fe73b902be6971db1eec9c28483174175fcb85",
+      "bytes": 3159,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-adoption.json"
+    },
+    "raw/v57g-benefit-review.json": {
+      "sha256": "a068f964d36addd7fafce7139055391f3efb8a250df19f33323c1e593ae25bd0",
+      "bytes": 1127,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-benefit-review.json"
+    },
+    "raw/v57g-codegraph-sync.json": {
+      "sha256": "44c83772ad11cac6808c5485b6136d83471c0e59794a795b03fbcf415406c3a9",
+      "bytes": 1178,
+      "original": "v57g-codegraph-sync.json"
+    },
+    "raw/v57g-final-test-sha.json": {
+      "sha256": "abe904ef13a3af0be9bc3c73e61ec0c27a34a97894f81f252885b5dd64c66b0d",
+      "bytes": 430,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-final-test-sha.json"
+    },
+    "raw/v57g-focused.log": {
+      "sha256": "ab80857774623d9d067c9a89421a90949fda119001ebbd0c84b822fa9c423bc9",
+      "bytes": 595,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-focused.log"
+    },
+    "raw/v57g-focused.xml": {
+      "sha256": "1dc441957231305d18150fbbf5763a9605e877f342f5c38194bf0bcacdbf8a1f",
+      "bytes": 64595,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-focused.xml"
+    },
+    "raw/v57g-fresh-heap-baseline.json": {
+      "sha256": "47db02be3576343529361c4517674c460776a67b34f6739a856fc40e3b546ae2",
+      "bytes": 8691,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-fresh-heap-baseline.json"
+    },
+    "raw/v57g-fresh-heap-baseline.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-fresh-heap-baseline.stderr"
+    },
+    "raw/v57g-fresh-heap-candidate.json": {
+      "sha256": "6b2f0311990d33a85bd195eec929d67e9cc3ccce0fc0ce48cbff83c1b74c4f69",
+      "bytes": 8691,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-fresh-heap-candidate.json"
+    },
+    "raw/v57g-fresh-heap-candidate.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-fresh-heap-candidate.stderr"
+    },
+    "raw/v57g-fresh-heap-njit.json": {
+      "sha256": "1b4477e077a403acd675555ca233b5321aa1ea4c71ce6483b1442892995cb308",
+      "bytes": 4183,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-fresh-heap-njit.json"
+    },
+    "raw/v57g-fresh-heap-njit.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-fresh-heap-njit.stderr"
+    },
+    "raw/v57g-fresh-rss-baseline.json": {
+      "sha256": "9372eaa39bda0eb9f47e4d65fae3b4ce91956e4b26396c916b028e5688205adf",
+      "bytes": 8483,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-fresh-rss-baseline.json"
+    },
+    "raw/v57g-fresh-rss-baseline.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-fresh-rss-baseline.stderr"
+    },
+    "raw/v57g-fresh-rss-candidate.json": {
+      "sha256": "e25863982daa130fb7686b5c354009cced6b0a9dc788140792e5c5b205009217",
+      "bytes": 8481,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-fresh-rss-candidate.json"
+    },
+    "raw/v57g-fresh-rss-candidate.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-fresh-rss-candidate.stderr"
+    },
+    "raw/v57g-fresh-rss-njit.json": {
+      "sha256": "933cc50370a33b7305064995631b7779649f4997fe721d9576171b5d0c1a5fd4",
+      "bytes": 3983,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-fresh-rss-njit.json"
+    },
+    "raw/v57g-fresh-rss-njit.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-fresh-rss-njit.stderr"
+    },
+    "raw/v57g-history-decision.md.txt": {
+      "sha256": "661fd527acb938af8a3a49e2d1ca7bba8d9e9e25ac0701698fdb33fecb3096ba",
+      "bytes": 1559,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-history-decision.md"
+    },
+    "raw/v57g-native-graph.log": {
+      "sha256": "75782a127c0c0b3196b2566d426a67b8323eae31f625362df609b0dd4d374248",
+      "bytes": 281,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-native-graph.log"
+    },
+    "raw/v57g-normal-native.json": {
+      "sha256": "c40b942cd5de91d5d8b0b60970c6feb4da68cb0102e7efe166079838879fce13",
+      "bytes": 191,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-normal-native.json"
+    },
+    "raw/v57g-normal-native.xml": {
+      "sha256": "f358bf6f2f51db095a312d10731072f3b02c3ee07d41c99d48bb712258c9ea19",
+      "bytes": 2243,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-normal-native.xml"
+    },
+    "raw/v57g-paired-0-baseline.json": {
+      "sha256": "c2839fbe5ea14a890f85f8aaa7ab26ac422bded964d10bb9af586fa80ded8b00",
+      "bytes": 10868,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-paired-0-baseline.json"
+    },
+    "raw/v57g-paired-0-baseline.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-paired-0-baseline.stderr"
+    },
+    "raw/v57g-paired-0-candidate.json": {
+      "sha256": "b6b6fd6c2833c902f06bfb4c98a082ff0e5d87bc07eff674d177e5a9691db1d3",
+      "bytes": 10865,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-paired-0-candidate.json"
+    },
+    "raw/v57g-paired-0-candidate.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-paired-0-candidate.stderr"
+    },
+    "raw/v57g-paired-0-njit.json": {
+      "sha256": "df1436629048b4b083edf1adfc433d41d28aa1c3c779712e4eee1168b12ed1c9",
+      "bytes": 6397,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-paired-0-njit.json"
+    },
+    "raw/v57g-paired-0-njit.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-paired-0-njit.stderr"
+    },
+    "raw/v57g-paired-1-baseline.json": {
+      "sha256": "45547cee845fc0ca0fb006aa7d3d61f53ec08ffa4cc10473e31c2f6225da9f23",
+      "bytes": 10867,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-paired-1-baseline.json"
+    },
+    "raw/v57g-paired-1-baseline.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-paired-1-baseline.stderr"
+    },
+    "raw/v57g-paired-1-candidate.json": {
+      "sha256": "ede5cbbf31c2eaafa905569e612c1ddd6c69d94dc63e43b6ab8e528d674e0df0",
+      "bytes": 10856,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-paired-1-candidate.json"
+    },
+    "raw/v57g-paired-1-candidate.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-paired-1-candidate.stderr"
+    },
+    "raw/v57g-paired-1-njit.json": {
+      "sha256": "cbf38c44f7950dd0f22d3f4329d251515d5da0b3ea00491836432686bbf6ed15",
+      "bytes": 6406,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-paired-1-njit.json"
+    },
+    "raw/v57g-paired-1-njit.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-paired-1-njit.stderr"
+    },
+    "raw/v57g-paired-2-baseline.json": {
+      "sha256": "61b9dbb930b5a96aab9b2d5c22d6b0cc575605410468f143799d6257beed0639",
+      "bytes": 10853,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-paired-2-baseline.json"
+    },
+    "raw/v57g-paired-2-baseline.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-paired-2-baseline.stderr"
+    },
+    "raw/v57g-paired-2-candidate.json": {
+      "sha256": "09dec6a99c2121b48a379a6c0eec51c80d61fd500392173ac82673bb65abc6ad",
+      "bytes": 10866,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-paired-2-candidate.json"
+    },
+    "raw/v57g-paired-2-candidate.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-paired-2-candidate.stderr"
+    },
+    "raw/v57g-paired-2-njit.json": {
+      "sha256": "d523d1b863125ccfb36311480a327103e92dd66bc042bc2cbfb3ac1b3addf803",
+      "bytes": 6396,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-paired-2-njit.json"
+    },
+    "raw/v57g-paired-2-njit.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-paired-2-njit.stderr"
+    },
+    "raw/v57g-paired-3-baseline.json": {
+      "sha256": "24e38ab749cff8cbf95a802cf33e0603ce4fe2c8b70f008f0bc46afbd1d15439",
+      "bytes": 10850,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-paired-3-baseline.json"
+    },
+    "raw/v57g-paired-3-baseline.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-paired-3-baseline.stderr"
+    },
+    "raw/v57g-paired-3-candidate.json": {
+      "sha256": "e12956264d9d388c389ec9ae3d8b54c9e0ca0f0c9919fa43c517aa805376bf16",
+      "bytes": 10857,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-paired-3-candidate.json"
+    },
+    "raw/v57g-paired-3-candidate.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-paired-3-candidate.stderr"
+    },
+    "raw/v57g-paired-3-njit.json": {
+      "sha256": "bf4492c1d47fe63270db6dced28bcd092b619127a02690f4d52062aa74bcb57e",
+      "bytes": 6397,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-paired-3-njit.json"
+    },
+    "raw/v57g-paired-3-njit.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-paired-3-njit.stderr"
+    },
+    "raw/v57g-paired-4-baseline.json": {
+      "sha256": "4d75ce61a563d55f2d4a5ff22c7201b41791658094d370031c77cfa8c3227d8d",
+      "bytes": 10866,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-paired-4-baseline.json"
+    },
+    "raw/v57g-paired-4-baseline.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-paired-4-baseline.stderr"
+    },
+    "raw/v57g-paired-4-candidate.json": {
+      "sha256": "1b76c53a2f992448f656125d7a01e978f4593bb3492146a697641fc85ea5a899",
+      "bytes": 10855,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-paired-4-candidate.json"
+    },
+    "raw/v57g-paired-4-candidate.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-paired-4-candidate.stderr"
+    },
+    "raw/v57g-paired-4-njit.json": {
+      "sha256": "a38b573ef635929cc4ac697aa394e807fed233334c9309b8dc64c91700032953",
+      "bytes": 6405,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-paired-4-njit.json"
+    },
+    "raw/v57g-paired-4-njit.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-paired-4-njit.stderr"
+    },
+    "raw/v57g-paired-5-baseline.json": {
+      "sha256": "b236343b56882816fdc075ea2a9a5a2c9b9645cde9148486ccd4163a912e7087",
+      "bytes": 10866,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-paired-5-baseline.json"
+    },
+    "raw/v57g-paired-5-baseline.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-paired-5-baseline.stderr"
+    },
+    "raw/v57g-paired-5-candidate.json": {
+      "sha256": "b5eb88bdcaa3466f6140dffaa465f6f4aaabc1065e34e8e627b975e2522257db",
+      "bytes": 10865,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-paired-5-candidate.json"
+    },
+    "raw/v57g-paired-5-candidate.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-paired-5-candidate.stderr"
+    },
+    "raw/v57g-paired-5-njit.json": {
+      "sha256": "7820a6034faa18ded33cf784d9fbe1e92cae18fdc1c1fba762245473871a2f04",
+      "bytes": 6408,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-paired-5-njit.json"
+    },
+    "raw/v57g-paired-5-njit.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-paired-5-njit.stderr"
+    },
+    "raw/v57g-paired-state.json": {
+      "sha256": "87107d4be350bd3bc5a82649098423535d7bfbcd06246d89e39c7a0d1c6fb83c",
+      "bytes": 7900,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-paired-state.json"
+    },
+    "raw/v57g-performance-design.json": {
+      "sha256": "6172fa97f304d60efeeee689f00ba103f16d2d229b4257e5f6cf408b2333bb61",
+      "bytes": 1107,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-performance-design.json"
+    },
+    "raw/v57g-quality-asan-native.log": {
+      "sha256": "4397750882a7fc7655d377861a46ed553ac280e958d3ca9905e4a4f03acb2991",
+      "bytes": 1212,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-quality-asan-native.log"
+    },
+    "raw/v57g-quality-asan-native.xml": {
+      "sha256": "8f13bfa8b013d788623292a873bb875c858ce1185fbee3bad80a4c19d77a382c",
+      "bytes": 2241,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-quality-asan-native.xml"
+    },
+    "raw/v57g-quality-asan-related.log": {
+      "sha256": "e6682e0777ab07eea25fba803a2b995b58fd7ff2d64963e9b6578b35785b7863",
+      "bytes": 1661,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-quality-asan-related.log"
+    },
+    "raw/v57g-quality-asan-related.xml": {
+      "sha256": "0815465ffb6df1efe686f30a85918f3b715dde86ae4446ed2b3e0ee8dbb7ba14",
+      "bytes": 193334,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-quality-asan-related.xml"
+    },
+    "raw/v57g-quality-asan.json": {
+      "sha256": "11403cbc4fc75dc451318e9ba9cfb77b093008be471ee3eb6a532d3904317061",
+      "bytes": 557,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-quality-asan.json"
+    },
+    "raw/v57g-quality-normal-full.log": {
+      "sha256": "a540d4e9e6867c469ece3158feb95a0db11978c968d212d1240aea54363768bf",
+      "bytes": 18062,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-quality-normal-full.log"
+    },
+    "raw/v57g-quality-normal-full.xml": {
+      "sha256": "ff3e966cce5317c8cb9588803a3c70151155b5f2f1eab288747b12373df4c3cd",
+      "bytes": 2358905,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-quality-normal-full.xml"
+    },
+    "raw/v57g-quality-normal.json": {
+      "sha256": "f362ea5b21133c9118557716fe425bf4103405fec0e885a6710bb54100542dcf",
+      "bytes": 383,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-quality-normal.json"
+    },
+    "raw/v57g-quality-off-native.log": {
+      "sha256": "caa2765bc828c6ad830e651a2ae3bc98d80f458637c809a03f4a00a68813bae5",
+      "bytes": 1211,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-quality-off-native.log"
+    },
+    "raw/v57g-quality-off-native.xml": {
+      "sha256": "6a980434ce8b2a536d0d68b7a4983ea816bef97db29594ca9f3ff35e7cd691cf",
+      "bytes": 2244,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-quality-off-native.xml"
+    },
+    "raw/v57g-quality-off-related.log": {
+      "sha256": "2e25f2728d07e70ae02467008b741927cf310cea17833c0ea29eff28c7b0f07b",
+      "bytes": 1660,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-quality-off-related.log"
+    },
+    "raw/v57g-quality-off-related.xml": {
+      "sha256": "e5da0136cf755c8ae6ec4f9674cf87872f1955506bb2ec2d447a2d805acbc186",
+      "bytes": 193305,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-quality-off-related.xml"
+    },
+    "raw/v57g-quality-off.json": {
+      "sha256": "838bba0997c6d22ceb3228bc04e5fc3a1e39b313321a0e17663c657d27ad5b5c",
+      "bytes": 557,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-quality-off.json"
+    },
+    "raw/v57g-reviewed-diff.txt": {
+      "sha256": "b8fe23dc9d1f884963be25c163d7165af52ba1ffe09bfc1aaf724764e15e368e",
+      "bytes": 22035,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-reviewed-diff.txt"
+    },
+    "raw/v57g-runner-prepare-failure.json": {
+      "sha256": "6b66638038517e4d156305b6a6985061461ecc1a83ce6a34ad5c9c2f659d3d4d",
+      "bytes": 442,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57g-runner-prepare-failure.json"
+    },
+    "builds/actual-v57/identity.json": {
+      "sha256": "a2da5a9b06747f5275fb2d0cc0d8eab798c42f9b7d6daaa2776fc54e13344cc3",
+      "bytes": 12057,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/actual-v57/identity.json"
+    },
+    "builds/actual-v57/build.log": {
+      "sha256": "23b9e458711ff33252753a5035d7f0a5c9be835267f3c45094309aee96604070",
+      "bytes": 1081,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/actual-v57/build.log"
+    },
+    "builds/actual-v57/install.log": {
+      "sha256": "5559201584bcc141d15bd89f25ad5b013b7537d9e6d40de0c094c6aca066cbb2",
+      "bytes": 464,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/actual-v57/install.log"
+    },
+    "builds/candidate-v57a/identity.json": {
+      "sha256": "9a86fe9f4f3933dbf628e4d20e4d873017b5ffa6bd5043a00aed12515a336bcb",
+      "bytes": 12069,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/candidate-v57a/identity.json"
+    },
+    "builds/candidate-v57a/build.log": {
+      "sha256": "e83f3c4feef93c9b5ce2d189dc57f59b8b2cf70466b533193aaa1910b3e7d231",
+      "bytes": 1084,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/candidate-v57a/build.log"
+    },
+    "builds/candidate-v57a/install.log": {
+      "sha256": "0d4a6902e234685e21843042fed9ead93d97e51126b8cd40c06d9ccaebb1aa89",
+      "bytes": 520,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/candidate-v57a/install.log"
+    },
+    "builds/candidate-v57b/identity.json": {
+      "sha256": "2f735b382dc7f002fe9e6df8cb90118375491cb4a47a099de589110539aebce4",
+      "bytes": 12069,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/candidate-v57b/identity.json"
+    },
+    "builds/candidate-v57b/build.log": {
+      "sha256": "f983e00b4e8d3220227dea1d249ba335879882dd51c115a23fb1dd32de153bf4",
+      "bytes": 1084,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/candidate-v57b/build.log"
+    },
+    "builds/candidate-v57b/install.log": {
+      "sha256": "dae44a74308ab3cce79287c746578988f825f43f2df852d7f9805b1a03befb18",
+      "bytes": 520,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/candidate-v57b/install.log"
+    },
+    "builds/candidate-v57c/identity.json": {
+      "sha256": "3a3ab3bc82c9dff74a330a3843131a55851992ba0f569ee4acdbffa77e6d5411",
+      "bytes": 12069,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/candidate-v57c/identity.json"
+    },
+    "builds/candidate-v57c/build.log": {
+      "sha256": "d99d673f3da7890ea21acaf3e5a3b6da836fe6ac80fab2103a388f886b09013b",
+      "bytes": 1084,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/candidate-v57c/build.log"
+    },
+    "builds/candidate-v57c/install.log": {
+      "sha256": "c0692bde18c1e71e60d5a2f27f4613d348f43943989b63a8dbc9a1297d41f029",
+      "bytes": 468,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/candidate-v57c/install.log"
+    },
+    "builds/candidate-v57d/identity.json": {
+      "sha256": "b27b279015f2c6427eafa020e80583415fd3c5e4e2a907ae7c6af2dbcdda25f0",
+      "bytes": 12069,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/candidate-v57d/identity.json"
+    },
+    "builds/candidate-v57d/build.log": {
+      "sha256": "99ad4bfb5ff9e7e45b0d998b22583646e890f6d38efc1b19d287c99ba646ef76",
+      "bytes": 1084,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/candidate-v57d/build.log"
+    },
+    "builds/candidate-v57d/install.log": {
+      "sha256": "dc9d93321569c6e3e70ddb40aa115fc5ce67a2634d969c4319e8ef5618a96f03",
+      "bytes": 468,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/candidate-v57d/install.log"
+    },
+    "builds/candidate-v57d-asan/identity.json": {
+      "sha256": "4c3ac059184e963759af8a3b161ef2a98cf860550b391e902a5ac1b3281c9a55",
+      "bytes": 12261,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/candidate-v57d-asan/identity.json"
+    },
+    "builds/candidate-v57d-asan/build.log": {
+      "sha256": "745ec9388c2a952f3166d24ad4fdb5a3d4b0d5a8f066ba46dcefdd784c9c5972",
+      "bytes": 1381,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/candidate-v57d-asan/build.log"
+    },
+    "builds/candidate-v57d-asan/install.log": {
+      "sha256": "43983bfe2efa9e7856bc4276b01c7a8701702370299c7ef78327e5e62225afdd",
+      "bytes": 473,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/candidate-v57d-asan/install.log"
+    },
+    "builds/candidate-v57d-off/identity.json": {
+      "sha256": "6f8bee95e8febef1fe3e286828825a059379efe6c10037b281c1c89449595791",
+      "bytes": 12084,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/candidate-v57d-off/identity.json"
+    },
+    "builds/candidate-v57d-off/build.log": {
+      "sha256": "6206941ca3f27079da87be5fbe594f64eaba6ec02479b32e624236a35b874810",
+      "bytes": 1158,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/candidate-v57d-off/build.log"
+    },
+    "builds/candidate-v57d-off/install.log": {
+      "sha256": "251313ff28e103eda47ab4ee57bf9ddaa8d2f10736cbca4f4c48ddab499e69d8",
+      "bytes": 472,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/candidate-v57d-off/install.log"
+    },
+    "builds/candidate-v57e/identity.json": {
+      "sha256": "2a1c4a39630d2784f234cca27689116721b692ccf80cef220307b44170c67f3f",
+      "bytes": 12069,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/candidate-v57e/identity.json"
+    },
+    "builds/candidate-v57e/build.log": {
+      "sha256": "98b728b02015c23a547fa5ca356e3764c21d32e2e368fe6e55bf016029d87330",
+      "bytes": 1084,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/candidate-v57e/build.log"
+    },
+    "builds/candidate-v57e/install.log": {
+      "sha256": "bdd4d8fd73002a0e7bb063c63fb48723fee30dfa5ece9e5e423e3009dc7bbe97",
+      "bytes": 468,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/candidate-v57e/install.log"
+    },
+    "builds/candidate-v57f/identity.json": {
+      "sha256": "0de0cedc10a3f010195d3f27b928b94eaacbeb0fb5e75b54ee28b969e66316c9",
+      "bytes": 12069,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/candidate-v57f/identity.json"
+    },
+    "builds/candidate-v57f/build.log": {
+      "sha256": "86de159c2c0988be89676aeaddd25b9f031f5e7ddc9c2fd1298ffc5902af2255",
+      "bytes": 1084,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/candidate-v57f/build.log"
+    },
+    "builds/candidate-v57f/install.log": {
+      "sha256": "3ee7a902186acf670d1ae8e30555fac44ccad7c1ee6d9fcdb6da96d215f8c7da",
+      "bytes": 468,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/candidate-v57f/install.log"
+    },
+    "builds/candidate-v57g/identity.json": {
+      "sha256": "3f32bb2c3b68580f3d062a29df8b86aa7648d586ffcd1430d23170f2845dd478",
+      "bytes": 12069,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/candidate-v57g/identity.json"
+    },
+    "builds/candidate-v57g/build.log": {
+      "sha256": "cf48256d21309bb1e9ce1c666b520c0412bb7def7f9012898057d21e3016f5e5",
+      "bytes": 1084,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/candidate-v57g/build.log"
+    },
+    "builds/candidate-v57g/install.log": {
+      "sha256": "a50a68687693c92f8a9520c7e949d186b184e2f9c54bda25cad426fe0bd04bdd",
+      "bytes": 468,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/candidate-v57g/install.log"
+    },
+    "builds/candidate-v57g-asan/identity.json": {
+      "sha256": "999fcb238ace62dd781570600f8d8e1f6abf71f5948ed0b499d5e7a750b01d74",
+      "bytes": 12261,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/candidate-v57g-asan/identity.json"
+    },
+    "builds/candidate-v57g-asan/build.log": {
+      "sha256": "a32aa018f438493f905f6d31fd8e334161a3ce045a2d6ce212e9c7b4535528d3",
+      "bytes": 1381,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/candidate-v57g-asan/build.log"
+    },
+    "builds/candidate-v57g-asan/install.log": {
+      "sha256": "9bac07ce16cb0b1bb8f9219338a24147b85bd03a9ba87fcf997a13d3a86eef22",
+      "bytes": 473,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/candidate-v57g-asan/install.log"
+    },
+    "builds/candidate-v57g-off/identity.json": {
+      "sha256": "27631c7eba144c630499e56e006c5b9d6fd090eb297e2479bbcaadcfa78298c9",
+      "bytes": 12084,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/candidate-v57g-off/identity.json"
+    },
+    "builds/candidate-v57g-off/build.log": {
+      "sha256": "995e0a03ee48932efd39c323c6ee0e64d15a0f67bbcc490c275745ec763c3d73",
+      "bytes": 1158,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/candidate-v57g-off/build.log"
+    },
+    "builds/candidate-v57g-off/install.log": {
+      "sha256": "bf6d339c07aa6c0a3b3c6cea42a8f0eb9f9a847d34a4fc3dfdf7e7da87c6f6fc",
+      "bytes": 472,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/candidate-v57g-off/install.log"
+    },
+    "interim-source/v57b-pre-companion-source/cpp__graph.cpp.txt": {
+      "sha256": "e363f1b83534d39b706d114e55ab80eb81a2f8f875768b28af913bf337fe2d1d",
+      "bytes": 291783,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57b-pre-companion-source/cpp__graph.cpp.txt"
+    },
+    "interim-source/v57b-pre-companion-source/cpp__include__calmetrics_engine__graph.hpp.txt": {
+      "sha256": "fdc188ccce3c23384ecc3f5258fd652d86c05dc9c7af5e84cf2916279f7a68dd",
+      "bytes": 20169,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57b-pre-companion-source/cpp__include__calmetrics_engine__graph.hpp.txt"
+    },
+    "interim-source/v57c-pre-refinement-source/cpp__graph.cpp.txt": {
+      "sha256": "f8d1dde429b80c51bd3459067227bbd07bc6ee7da5e5cf50bcaaa279ce56428b",
+      "bytes": 296244,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57c-pre-refinement-source/cpp__graph.cpp.txt"
+    },
+    "interim-source/v57c-pre-refinement-source/cpp__include__calmetrics_engine__graph.hpp.txt": {
+      "sha256": "fdc188ccce3c23384ecc3f5258fd652d86c05dc9c7af5e84cf2916279f7a68dd",
+      "bytes": 20169,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57c-pre-refinement-source/cpp__include__calmetrics_engine__graph.hpp.txt"
+    },
+    "interim-source/v57c-pre-refinement-source/cpp__include__calmetrics_engine__operators.hpp.txt": {
+      "sha256": "1121734fb7fba6a63a8964dce388242f217ae21e43d7201c999d423e30f0a642",
+      "bytes": 22838,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57c-pre-refinement-source/cpp__include__calmetrics_engine__operators.hpp.txt"
+    },
+    "interim-source/v57c-pre-refinement-source/cpp__operators__latent.cpp.txt": {
+      "sha256": "68fa89bb1dad3b1dfd97c0aac01520d87035cc9c764b61b956d389e46f679183",
+      "bytes": 64678,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/v57c-pre-refinement-source/cpp__operators__latent.cpp.txt"
+    },
+    "interim-source/failed-v57d/cpp/graph.cpp.txt": {
+      "sha256": "c9204dc96e408e8964cb734a16563cbd6e70398c7ae363cf6bc5be899cd055c3",
+      "bytes": 296510,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/source-pair/cpp/graph.cpp"
+    },
+    "interim-source/failed-v57d/cpp/include/calmetrics_engine/graph.hpp.txt": {
+      "sha256": "fdc188ccce3c23384ecc3f5258fd652d86c05dc9c7af5e84cf2916279f7a68dd",
+      "bytes": 20169,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/source-pair/cpp/include/calmetrics_engine/graph.hpp"
+    },
+    "interim-source/failed-v57d/cpp/include/calmetrics_engine/operators.hpp.txt": {
+      "sha256": "1121734fb7fba6a63a8964dce388242f217ae21e43d7201c999d423e30f0a642",
+      "bytes": 22838,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/source-pair/cpp/include/calmetrics_engine/operators.hpp"
+    },
+    "interim-source/failed-v57d/cpp/operators/latent.cpp.txt": {
+      "sha256": "68fa89bb1dad3b1dfd97c0aac01520d87035cc9c764b61b956d389e46f679183",
+      "bytes": 64678,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/source-pair/cpp/operators/latent.cpp"
+    },
+    "interim-source/failed-v57d/tests/test_private_arithmetic_pair.py.txt": {
+      "sha256": "6cc356871d37976c980a23857171f9d5b80b30b42dd3a3d1d3a0d7d409de8d3c",
+      "bytes": 9794,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/source-pair/tests/test_private_arithmetic_pair.py"
+    },
+    "interim-source/failed-v57d/tests/test_take_scatter_pair.py.txt": {
+      "sha256": "a611140463278705cc70b986a05b9274a0674e45e0a7406d94aaef81b764a83a",
+      "bytes": 10076,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/source-pair/tests/test_take_scatter_pair.py"
+    },
+    "qualified-source/cpp/graph.cpp.txt": {
+      "sha256": "26d019436246774247089aeb2b948efb7ef5cc7deff99a5935f6b2065b308cbc",
+      "bytes": 298914,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/source-v57e/cpp/graph.cpp"
+    },
+    "qualified-source/cpp/include/calmetrics_engine/graph.hpp.txt": {
+      "sha256": "fdc188ccce3c23384ecc3f5258fd652d86c05dc9c7af5e84cf2916279f7a68dd",
+      "bytes": 20169,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/source-v57e/cpp/include/calmetrics_engine/graph.hpp"
+    },
+    "qualified-source/cpp/include/calmetrics_engine/operators.hpp.txt": {
+      "sha256": "1121734fb7fba6a63a8964dce388242f217ae21e43d7201c999d423e30f0a642",
+      "bytes": 22838,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/source-v57e/cpp/include/calmetrics_engine/operators.hpp"
+    },
+    "qualified-source/cpp/operators/latent.cpp.txt": {
+      "sha256": "68fa89bb1dad3b1dfd97c0aac01520d87035cc9c764b61b956d389e46f679183",
+      "bytes": 64678,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/source-v57e/cpp/operators/latent.cpp"
+    },
+    "qualified-source/tests/test_private_arithmetic_pair.py.txt": {
+      "sha256": "6cc356871d37976c980a23857171f9d5b80b30b42dd3a3d1d3a0d7d409de8d3c",
+      "bytes": 9794,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/source-v57e/tests/test_private_arithmetic_pair.py"
+    },
+    "qualified-source/tests/test_take_scatter_pair.py.txt": {
+      "sha256": "a611140463278705cc70b986a05b9274a0674e45e0a7406d94aaef81b764a83a",
+      "bytes": 10076,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/source-v57e/tests/test_take_scatter_pair.py"
+    },
+    "qualified-source/tests/graph_native_tests.cpp.txt": {
+      "sha256": "5e4f7daf5f77065da229544032f7b8c55e3e988f9199feec0ced6113de361dfe",
+      "bytes": 15966,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/source-v57e/tests/graph_native_tests.cpp"
+    },
+    "qualified-source/tests/take_scatter_native_cases.hpp.txt": {
+      "sha256": "636e190c1e75a8a129ffd0a0681c2822d681ab509a783a5a4e3a586e44bb9d9b",
+      "bytes": 2676,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/source-v57e/tests/take_scatter_native_cases.hpp"
+    },
+    "raw/validate_v57g_closeout.py.txt": {
+      "sha256": "77b397c1b6ce8bf191c3386f9c78d26072007f787c0dcbcbdd1e43bbebf73e86",
+      "bytes": 3073,
+      "original": "validate_v57g_closeout.py"
+    },
+    "raw/v57g-closeout-validation.json": {
+      "sha256": "a14899467f34f1e6c2537f8266a69761f8d8c41febf598bb1b2486f77b4fd3ef",
+      "bytes": 640,
+      "original": "v57g-closeout-validation.json"
+    }
+  }
+}

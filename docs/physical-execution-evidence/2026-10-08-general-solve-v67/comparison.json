@@ -1,0 +1,141 @@
+{
+  "status": "complete_screen_not_adopted",
+  "actual_build_id": "199d11357c76f2f77daefe4d0e8735664b7dd41ef4c711ef7967fc6b9f232ccc",
+  "vendor_build_id": "56c12ede847d9ff9796dd5f08037b224d0315fafec1cfbab2c468aa1bd4d3dc8",
+  "actual_adopted": false,
+  "goal_complete": false,
+  "measurements": 56,
+  "time_processes": 32,
+  "heap_processes": 12,
+  "rss_processes": 12,
+  "corrected_smoke_processes": 4,
+  "original_failed_smoke_retained": true,
+  "native_passed": 9,
+  "related_passed": 1107,
+  "cases": [
+    {
+      "coefficient_dimension": 4112,
+      "variables": 4096,
+      "layout": "C",
+      "time_median_of_two_fresh_process_medians": {
+        "current": 0.6876249789984286,
+        "vendor": 0.7089663954993739,
+        "njit": 0.5584140210012265,
+        "njit-c": 0.674445853999714
+      },
+      "strongest_njit": "njit",
+      "memory": {
+        "current": {
+          "heap": 288293620,
+          "rss": 179961856
+        },
+        "vendor": {
+          "heap": 302066420,
+          "rss": 177192960
+        },
+        "njit": {
+          "heap": 406531696,
+          "rss": 272433152
+        }
+      },
+      "current_vs_njit_time_ratio": 1.2313891720797574,
+      "vendor_vs_current_time_ratio": 1.0310364183279532,
+      "vendor_added_peak_bytes": 13772800,
+      "current_saved_peak_vs_njit_bytes": 118238076
+    },
+    {
+      "coefficient_dimension": 4112,
+      "variables": 4096,
+      "layout": "F",
+      "time_median_of_two_fresh_process_medians": {
+        "current": 0.7286092920003284,
+        "vendor": 0.7494557500012888,
+        "njit": 0.5271001669989346,
+        "njit-c": 0.70581897899865
+      },
+      "strongest_njit": "njit",
+      "memory": {
+        "current": {
+          "heap": 288326516,
+          "rss": 180584448
+        },
+        "vendor": {
+          "heap": 302099316,
+          "rss": 177537024
+        },
+        "njit": {
+          "heap": 406531696,
+          "rss": 272711680
+        }
+      },
+      "current_vs_njit_time_ratio": 1.382297592787143,
+      "vendor_vs_current_time_ratio": 1.0286112985791445,
+      "vendor_added_peak_bytes": 13772800,
+      "current_saved_peak_vs_njit_bytes": 118205180
+    },
+    {
+      "coefficient_dimension": 8192,
+      "variables": 8176,
+      "layout": "C",
+      "time_median_of_two_fresh_process_medians": {
+        "current": 4.842530292000447,
+        "vendor": 4.767241333500351,
+        "njit": 5.293234542001301,
+        "njit-c": 5.00268429100106
+      },
+      "strongest_njit": "njit-c",
+      "memory": {
+        "current": {
+          "heap": 1103672500,
+          "rss": 606240768
+        },
+        "vendor": {
+          "heap": 1134156980,
+          "rss": 640892928
+        },
+        "njit-c": {
+          "heap": 1612008496,
+          "rss": 1077248000
+        }
+      },
+      "current_vs_njit_time_ratio": 0.9679863869705506,
+      "vendor_vs_current_time_ratio": 0.9844525580718683,
+      "vendor_added_peak_bytes": 30484480,
+      "current_saved_peak_vs_njit_bytes": 508335996
+    },
+    {
+      "coefficient_dimension": 8192,
+      "variables": 8176,
+      "layout": "F",
+      "time_median_of_two_fresh_process_medians": {
+        "current": 5.043837375000294,
+        "vendor": 4.868337958499978,
+        "njit": 4.865516332998595,
+        "njit-c": 5.096755000000485
+      },
+      "strongest_njit": "njit",
+      "memory": {
+        "current": {
+          "heap": 1103738036,
+          "rss": 606928896
+        },
+        "vendor": {
+          "heap": 1134222516,
+          "rss": 633962496
+        },
+        "njit": {
+          "heap": 1612008496,
+          "rss": 1077510144
+        }
+      },
+      "current_vs_njit_time_ratio": 1.036649972951956,
+      "vendor_vs_current_time_ratio": 0.9652051794195079,
+      "vendor_added_peak_bytes": 30484480,
+      "current_saved_peak_vs_njit_bytes": 508270460
+    }
+  ],
+  "full_output_maximum_absolute_error": 3.228528555609955e-13,
+  "decision": "Vendor driver only1.6/3.5percent faster at8192, slightly slower at4112, with13.8/30.5MB extra allocation peak. No stable material complete benefit; retain current mature bounded-panel library path. Small deltas are diagnostics, not standalone vetoes.",
+  "scope": "Complete CPU1 coefficient construction and solve, identical owned readonly preparation, ordinary scheduler, two retained independent float64 result generations. Stronger direct C/F tiled NJIT references warmed; static fixture/JIT/graph/compilation/post-checks excluded equally. Heap and incrementalRSS independently measured. KKT is not completeQP or platform migration.",
+  "remaining": "Direct F coefficient fill isolated; general solver and longK, important actual platform chains and complete allocation/copy audit still open."
+}

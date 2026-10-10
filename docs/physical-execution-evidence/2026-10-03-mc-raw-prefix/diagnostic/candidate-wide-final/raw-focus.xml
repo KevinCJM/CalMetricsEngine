@@ -1,0 +1,465 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="8" skipped="0" tests="63" time="17.934" timestamp="2026-10-03T19:17:15.054523+08:00" hostname="chenjunmingdeMacBook-Pro-2.local"><testcase classname="tests.test_raw_factor_prefix" name="test_raw_factor_complete_roots_match_independent_oracle_and_public_ast[C-C-False]" time="0.119" /><testcase classname="tests.test_raw_factor_prefix" name="test_raw_factor_complete_roots_match_independent_oracle_and_public_ast[C-C-True]" time="0.107" /><testcase classname="tests.test_raw_factor_prefix" name="test_raw_factor_complete_roots_match_independent_oracle_and_public_ast[C-F-False]" time="0.100" /><testcase classname="tests.test_raw_factor_prefix" name="test_raw_factor_complete_roots_match_independent_oracle_and_public_ast[C-F-True]" time="0.106" /><testcase classname="tests.test_raw_factor_prefix" name="test_raw_factor_complete_roots_match_independent_oracle_and_public_ast[C-negative-False]" time="0.098" /><testcase classname="tests.test_raw_factor_prefix" name="test_raw_factor_complete_roots_match_independent_oracle_and_public_ast[C-negative-True]" time="0.106" /><testcase classname="tests.test_raw_factor_prefix" name="test_raw_factor_complete_roots_match_independent_oracle_and_public_ast[C-strided-False]" time="0.098" /><testcase classname="tests.test_raw_factor_prefix" name="test_raw_factor_complete_roots_match_independent_oracle_and_public_ast[C-strided-True]" time="0.106" /><testcase classname="tests.test_raw_factor_prefix" name="test_raw_factor_complete_roots_match_independent_oracle_and_public_ast[F-C-False]" time="0.100" /><testcase classname="tests.test_raw_factor_prefix" name="test_raw_factor_complete_roots_match_independent_oracle_and_public_ast[F-C-True]" time="0.105" /><testcase classname="tests.test_raw_factor_prefix" name="test_raw_factor_complete_roots_match_independent_oracle_and_public_ast[F-F-False]" time="0.100" /><testcase classname="tests.test_raw_factor_prefix" name="test_raw_factor_complete_roots_match_independent_oracle_and_public_ast[F-F-True]" time="0.107" /><testcase classname="tests.test_raw_factor_prefix" name="test_raw_factor_complete_roots_match_independent_oracle_and_public_ast[F-negative-False]" time="0.099" /><testcase classname="tests.test_raw_factor_prefix" name="test_raw_factor_complete_roots_match_independent_oracle_and_public_ast[F-negative-True]" time="0.106" /><testcase classname="tests.test_raw_factor_prefix" name="test_raw_factor_complete_roots_match_independent_oracle_and_public_ast[F-strided-False]" time="0.100" /><testcase classname="tests.test_raw_factor_prefix" name="test_raw_factor_complete_roots_match_independent_oracle_and_public_ast[F-strided-True]" time="0.106" /><testcase classname="tests.test_raw_factor_prefix" name="test_raw_prefix_two_intervals_transport_counters_and_result_owners[single-False]" time="0.102" /><testcase classname="tests.test_raw_factor_prefix" name="test_raw_prefix_two_intervals_transport_counters_and_result_owners[single-True]" time="0.106" /><testcase classname="tests.test_raw_factor_prefix" name="test_raw_prefix_two_intervals_transport_counters_and_result_owners[thread-False]" time="0.102" /><testcase classname="tests.test_raw_factor_prefix" name="test_raw_prefix_two_intervals_transport_counters_and_result_owners[thread-True]" time="0.106" /><testcase classname="tests.test_raw_factor_prefix" name="test_raw_prefix_two_intervals_transport_counters_and_result_owners[process_inline-False]" time="0.508" /><testcase classname="tests.test_raw_factor_prefix" name="test_raw_prefix_two_intervals_transport_counters_and_result_owners[process_inline-True]" time="0.112" /><testcase classname="tests.test_raw_factor_prefix" name="test_raw_prefix_two_intervals_transport_counters_and_result_owners[process_shared-False]" time="0.108" /><testcase classname="tests.test_raw_factor_prefix" name="test_raw_prefix_two_intervals_transport_counters_and_result_owners[process_shared-True]" time="0.111" /><testcase classname="tests.test_raw_factor_prefix" name="test_prepared_raw_prefix_reads_current_same_address_inputs_and_parameters[C-False]" time="0.793" /><testcase classname="tests.test_raw_factor_prefix" name="test_prepared_raw_prefix_reads_current_same_address_inputs_and_parameters[C-True]" time="1.098" /><testcase classname="tests.test_raw_factor_prefix" name="test_prepared_raw_prefix_reads_current_same_address_inputs_and_parameters[F-False]" time="0.794" /><testcase classname="tests.test_raw_factor_prefix" name="test_prepared_raw_prefix_reads_current_same_address_inputs_and_parameters[F-True]" time="1.113" /><testcase classname="tests.test_raw_factor_prefix" name="test_public_transformed_factor_root_preserves_the_full_canonical_budget[False]" time="0.010" /><testcase classname="tests.test_raw_factor_prefix" name="test_public_transformed_factor_root_preserves_the_full_canonical_budget[True]" time="0.014" /><testcase classname="tests.test_raw_factor_prefix" name="test_short_many_combinations_decline_prefix_fusion_before_full_canonical_execution[False]" time="1.629" /><testcase classname="tests.test_raw_factor_prefix" name="test_short_many_combinations_decline_prefix_fusion_before_full_canonical_execution[True]" time="1.739" /><testcase classname="tests.test_raw_factor_prefix" name="test_short_wide_factor_prefix_full_batch_reuses_rotation_across_all_combinations[False-C-single]" time="0.739"><failure message="AssertionError: assert 0 &gt; 0&#10; +  where 0 = chunk_sum(&lt;calmetrics_engine._native.graph.GraphExecutionResult object at 0x10698e770&gt;, 'compact_path_groups')">student = False, order = 'C', lane = 'single'
+
+    @pytest.mark.parametrize("student,order,lane", [
+        (False, "C", "single"),
+        (True, "F", "single"),
+        (False, "F", "thread"),
+        (True, "C", "thread"),
+        (False, "C", "process_inline"),
+        (True, "F", "process_inline"),
+        (False, "F", "process_shared"),
+        (True, "C", "process_shared"),
+    ])
+    def test_short_wide_factor_prefix_full_batch_reuses_rotation_across_all_combinations(student, order, lane):
+        # Keep the small-F refusal fixture above: full-batch admission must depend
+        # on proved shape/cost, not merely on a short period or many combinations.
+        spec = raw_factor_spec(5, 7, 32, 32, student)
+        inputs = small_raw_tape(steps=5, paths=7, factors=32, innovations=4,
+                                assets=32, combinations=32, student=student, layout=order)
+        originals = {name: value.copy() for name, value in inputs.items()}
+        graph = compile_compact(spec, order=order)
+        canonical = compile_compact(public_factor_spec(spec), order=order)
+        parameters = raw_parameters(spec)
+        expected = expected_raw_named(spec, inputs)
+        # The planner needs two intervals for the real thread/process lanes. Two
+        # identical [0,5) requests keep the tape itself at the requested T=5 and
+        # prove one rotation per T*P and one full batch independently per interval.
+        rows = 1 if lane == "single" else 2
+        starts, ends = np.zeros(rows, np.int64), np.full(rows, 5, np.int64)
+        bundle = SharedInputBundle.from_inputs(inputs) if lane == "process_shared" else None
+        transported = bundle.arrays if bundle is not None else inputs
+        try:
+            with AdaptiveScheduler(cpu_budget=2, config=config(lane)) as scheduler:
+                reference = execute(scheduler, canonical, transported, starts, ends, parameters,
+                                    timeout=20.)
+                assert_canonical(reference)
+                first = execute(scheduler, graph, transported, starts, ends, parameters, timeout=20.)
+                saved = saved_outputs(first)
+                later = execute(scheduler, graph, transported, starts, ends, parameters, timeout=20.)
+                for result in (first, later):
+                    assert result.plan.lane == ("process" if lane.startswith("process") else lane)
+                    assert result.audit["cpu_tokens"] &lt;= 2
+&gt;                   assert_raw_private(result, steps=5, paths=7, groups=32, rows=rows, student=student)
+
+tests/test_raw_factor_prefix.py:374: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_raw_factor_prefix.py:155: in assert_raw_private
+    assert_private(result)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = &lt;calmetrics_engine._native.graph.GraphExecutionResult object at 0x10698e770&gt;
+
+    def assert_private(result):
+        # Dedicated counters cover direct-period and tape paths alike; a direct
+        # period chain need not execute an affine pointwise tile at all.
+&gt;       assert chunk_sum(result, "compact_path_groups") &gt; 0
+E       AssertionError: assert 0 &gt; 0
+E        +  where 0 = chunk_sum(&lt;calmetrics_engine._native.graph.GraphExecutionResult object at 0x10698e770&gt;, 'compact_path_groups')
+
+tests/test_compact_path_execution.py:53: AssertionError</failure></testcase><testcase classname="tests.test_raw_factor_prefix" name="test_short_wide_factor_prefix_full_batch_reuses_rotation_across_all_combinations[True-F-single]" time="0.857"><failure message="AssertionError: assert 0 &gt; 0&#10; +  where 0 = chunk_sum(&lt;calmetrics_engine._native.graph.GraphExecutionResult object at 0x107fc98f0&gt;, 'compact_path_groups')">student = True, order = 'F', lane = 'single'
+
+    @pytest.mark.parametrize("student,order,lane", [
+        (False, "C", "single"),
+        (True, "F", "single"),
+        (False, "F", "thread"),
+        (True, "C", "thread"),
+        (False, "C", "process_inline"),
+        (True, "F", "process_inline"),
+        (False, "F", "process_shared"),
+        (True, "C", "process_shared"),
+    ])
+    def test_short_wide_factor_prefix_full_batch_reuses_rotation_across_all_combinations(student, order, lane):
+        # Keep the small-F refusal fixture above: full-batch admission must depend
+        # on proved shape/cost, not merely on a short period or many combinations.
+        spec = raw_factor_spec(5, 7, 32, 32, student)
+        inputs = small_raw_tape(steps=5, paths=7, factors=32, innovations=4,
+                                assets=32, combinations=32, student=student, layout=order)
+        originals = {name: value.copy() for name, value in inputs.items()}
+        graph = compile_compact(spec, order=order)
+        canonical = compile_compact(public_factor_spec(spec), order=order)
+        parameters = raw_parameters(spec)
+        expected = expected_raw_named(spec, inputs)
+        # The planner needs two intervals for the real thread/process lanes. Two
+        # identical [0,5) requests keep the tape itself at the requested T=5 and
+        # prove one rotation per T*P and one full batch independently per interval.
+        rows = 1 if lane == "single" else 2
+        starts, ends = np.zeros(rows, np.int64), np.full(rows, 5, np.int64)
+        bundle = SharedInputBundle.from_inputs(inputs) if lane == "process_shared" else None
+        transported = bundle.arrays if bundle is not None else inputs
+        try:
+            with AdaptiveScheduler(cpu_budget=2, config=config(lane)) as scheduler:
+                reference = execute(scheduler, canonical, transported, starts, ends, parameters,
+                                    timeout=20.)
+                assert_canonical(reference)
+                first = execute(scheduler, graph, transported, starts, ends, parameters, timeout=20.)
+                saved = saved_outputs(first)
+                later = execute(scheduler, graph, transported, starts, ends, parameters, timeout=20.)
+                for result in (first, later):
+                    assert result.plan.lane == ("process" if lane.startswith("process") else lane)
+                    assert result.audit["cpu_tokens"] &lt;= 2
+&gt;                   assert_raw_private(result, steps=5, paths=7, groups=32, rows=rows, student=student)
+
+tests/test_raw_factor_prefix.py:374: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_raw_factor_prefix.py:155: in assert_raw_private
+    assert_private(result)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = &lt;calmetrics_engine._native.graph.GraphExecutionResult object at 0x107fc98f0&gt;
+
+    def assert_private(result):
+        # Dedicated counters cover direct-period and tape paths alike; a direct
+        # period chain need not execute an affine pointwise tile at all.
+&gt;       assert chunk_sum(result, "compact_path_groups") &gt; 0
+E       AssertionError: assert 0 &gt; 0
+E        +  where 0 = chunk_sum(&lt;calmetrics_engine._native.graph.GraphExecutionResult object at 0x107fc98f0&gt;, 'compact_path_groups')
+
+tests/test_compact_path_execution.py:53: AssertionError</failure></testcase><testcase classname="tests.test_raw_factor_prefix" name="test_short_wide_factor_prefix_full_batch_reuses_rotation_across_all_combinations[False-F-thread]" time="0.728"><failure message="AssertionError: assert 0 &gt; 0&#10; +  where 0 = chunk_sum(&lt;calmetrics_engine._native.graph.GraphExecutionResult object at 0x10b22bfb0&gt;, 'compact_path_groups')">student = False, order = 'F', lane = 'thread'
+
+    @pytest.mark.parametrize("student,order,lane", [
+        (False, "C", "single"),
+        (True, "F", "single"),
+        (False, "F", "thread"),
+        (True, "C", "thread"),
+        (False, "C", "process_inline"),
+        (True, "F", "process_inline"),
+        (False, "F", "process_shared"),
+        (True, "C", "process_shared"),
+    ])
+    def test_short_wide_factor_prefix_full_batch_reuses_rotation_across_all_combinations(student, order, lane):
+        # Keep the small-F refusal fixture above: full-batch admission must depend
+        # on proved shape/cost, not merely on a short period or many combinations.
+        spec = raw_factor_spec(5, 7, 32, 32, student)
+        inputs = small_raw_tape(steps=5, paths=7, factors=32, innovations=4,
+                                assets=32, combinations=32, student=student, layout=order)
+        originals = {name: value.copy() for name, value in inputs.items()}
+        graph = compile_compact(spec, order=order)
+        canonical = compile_compact(public_factor_spec(spec), order=order)
+        parameters = raw_parameters(spec)
+        expected = expected_raw_named(spec, inputs)
+        # The planner needs two intervals for the real thread/process lanes. Two
+        # identical [0,5) requests keep the tape itself at the requested T=5 and
+        # prove one rotation per T*P and one full batch independently per interval.
+        rows = 1 if lane == "single" else 2
+        starts, ends = np.zeros(rows, np.int64), np.full(rows, 5, np.int64)
+        bundle = SharedInputBundle.from_inputs(inputs) if lane == "process_shared" else None
+        transported = bundle.arrays if bundle is not None else inputs
+        try:
+            with AdaptiveScheduler(cpu_budget=2, config=config(lane)) as scheduler:
+                reference = execute(scheduler, canonical, transported, starts, ends, parameters,
+                                    timeout=20.)
+                assert_canonical(reference)
+                first = execute(scheduler, graph, transported, starts, ends, parameters, timeout=20.)
+                saved = saved_outputs(first)
+                later = execute(scheduler, graph, transported, starts, ends, parameters, timeout=20.)
+                for result in (first, later):
+                    assert result.plan.lane == ("process" if lane.startswith("process") else lane)
+                    assert result.audit["cpu_tokens"] &lt;= 2
+&gt;                   assert_raw_private(result, steps=5, paths=7, groups=32, rows=rows, student=student)
+
+tests/test_raw_factor_prefix.py:374: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_raw_factor_prefix.py:155: in assert_raw_private
+    assert_private(result)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = &lt;calmetrics_engine._native.graph.GraphExecutionResult object at 0x10b22bfb0&gt;
+
+    def assert_private(result):
+        # Dedicated counters cover direct-period and tape paths alike; a direct
+        # period chain need not execute an affine pointwise tile at all.
+&gt;       assert chunk_sum(result, "compact_path_groups") &gt; 0
+E       AssertionError: assert 0 &gt; 0
+E        +  where 0 = chunk_sum(&lt;calmetrics_engine._native.graph.GraphExecutionResult object at 0x10b22bfb0&gt;, 'compact_path_groups')
+
+tests/test_compact_path_execution.py:53: AssertionError</failure></testcase><testcase classname="tests.test_raw_factor_prefix" name="test_short_wide_factor_prefix_full_batch_reuses_rotation_across_all_combinations[True-C-thread]" time="0.859"><failure message="AssertionError: assert 0 &gt; 0&#10; +  where 0 = chunk_sum(&lt;calmetrics_engine._native.graph.GraphExecutionResult object at 0x10edb20f0&gt;, 'compact_path_groups')">student = True, order = 'C', lane = 'thread'
+
+    @pytest.mark.parametrize("student,order,lane", [
+        (False, "C", "single"),
+        (True, "F", "single"),
+        (False, "F", "thread"),
+        (True, "C", "thread"),
+        (False, "C", "process_inline"),
+        (True, "F", "process_inline"),
+        (False, "F", "process_shared"),
+        (True, "C", "process_shared"),
+    ])
+    def test_short_wide_factor_prefix_full_batch_reuses_rotation_across_all_combinations(student, order, lane):
+        # Keep the small-F refusal fixture above: full-batch admission must depend
+        # on proved shape/cost, not merely on a short period or many combinations.
+        spec = raw_factor_spec(5, 7, 32, 32, student)
+        inputs = small_raw_tape(steps=5, paths=7, factors=32, innovations=4,
+                                assets=32, combinations=32, student=student, layout=order)
+        originals = {name: value.copy() for name, value in inputs.items()}
+        graph = compile_compact(spec, order=order)
+        canonical = compile_compact(public_factor_spec(spec), order=order)
+        parameters = raw_parameters(spec)
+        expected = expected_raw_named(spec, inputs)
+        # The planner needs two intervals for the real thread/process lanes. Two
+        # identical [0,5) requests keep the tape itself at the requested T=5 and
+        # prove one rotation per T*P and one full batch independently per interval.
+        rows = 1 if lane == "single" else 2
+        starts, ends = np.zeros(rows, np.int64), np.full(rows, 5, np.int64)
+        bundle = SharedInputBundle.from_inputs(inputs) if lane == "process_shared" else None
+        transported = bundle.arrays if bundle is not None else inputs
+        try:
+            with AdaptiveScheduler(cpu_budget=2, config=config(lane)) as scheduler:
+                reference = execute(scheduler, canonical, transported, starts, ends, parameters,
+                                    timeout=20.)
+                assert_canonical(reference)
+                first = execute(scheduler, graph, transported, starts, ends, parameters, timeout=20.)
+                saved = saved_outputs(first)
+                later = execute(scheduler, graph, transported, starts, ends, parameters, timeout=20.)
+                for result in (first, later):
+                    assert result.plan.lane == ("process" if lane.startswith("process") else lane)
+                    assert result.audit["cpu_tokens"] &lt;= 2
+&gt;                   assert_raw_private(result, steps=5, paths=7, groups=32, rows=rows, student=student)
+
+tests/test_raw_factor_prefix.py:374: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_raw_factor_prefix.py:155: in assert_raw_private
+    assert_private(result)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = &lt;calmetrics_engine._native.graph.GraphExecutionResult object at 0x10edb20f0&gt;
+
+    def assert_private(result):
+        # Dedicated counters cover direct-period and tape paths alike; a direct
+        # period chain need not execute an affine pointwise tile at all.
+&gt;       assert chunk_sum(result, "compact_path_groups") &gt; 0
+E       AssertionError: assert 0 &gt; 0
+E        +  where 0 = chunk_sum(&lt;calmetrics_engine._native.graph.GraphExecutionResult object at 0x10edb20f0&gt;, 'compact_path_groups')
+
+tests/test_compact_path_execution.py:53: AssertionError</failure></testcase><testcase classname="tests.test_raw_factor_prefix" name="test_short_wide_factor_prefix_full_batch_reuses_rotation_across_all_combinations[False-C-process_inline]" time="0.775"><failure message="AssertionError: assert 0 &gt; 0&#10; +  where 0 = chunk_sum(&lt;calmetrics_engine._native.graph.GraphExecutionResult object at 0x107a91830&gt;, 'compact_path_groups')">student = False, order = 'C', lane = 'process_inline'
+
+    @pytest.mark.parametrize("student,order,lane", [
+        (False, "C", "single"),
+        (True, "F", "single"),
+        (False, "F", "thread"),
+        (True, "C", "thread"),
+        (False, "C", "process_inline"),
+        (True, "F", "process_inline"),
+        (False, "F", "process_shared"),
+        (True, "C", "process_shared"),
+    ])
+    def test_short_wide_factor_prefix_full_batch_reuses_rotation_across_all_combinations(student, order, lane):
+        # Keep the small-F refusal fixture above: full-batch admission must depend
+        # on proved shape/cost, not merely on a short period or many combinations.
+        spec = raw_factor_spec(5, 7, 32, 32, student)
+        inputs = small_raw_tape(steps=5, paths=7, factors=32, innovations=4,
+                                assets=32, combinations=32, student=student, layout=order)
+        originals = {name: value.copy() for name, value in inputs.items()}
+        graph = compile_compact(spec, order=order)
+        canonical = compile_compact(public_factor_spec(spec), order=order)
+        parameters = raw_parameters(spec)
+        expected = expected_raw_named(spec, inputs)
+        # The planner needs two intervals for the real thread/process lanes. Two
+        # identical [0,5) requests keep the tape itself at the requested T=5 and
+        # prove one rotation per T*P and one full batch independently per interval.
+        rows = 1 if lane == "single" else 2
+        starts, ends = np.zeros(rows, np.int64), np.full(rows, 5, np.int64)
+        bundle = SharedInputBundle.from_inputs(inputs) if lane == "process_shared" else None
+        transported = bundle.arrays if bundle is not None else inputs
+        try:
+            with AdaptiveScheduler(cpu_budget=2, config=config(lane)) as scheduler:
+                reference = execute(scheduler, canonical, transported, starts, ends, parameters,
+                                    timeout=20.)
+                assert_canonical(reference)
+                first = execute(scheduler, graph, transported, starts, ends, parameters, timeout=20.)
+                saved = saved_outputs(first)
+                later = execute(scheduler, graph, transported, starts, ends, parameters, timeout=20.)
+                for result in (first, later):
+                    assert result.plan.lane == ("process" if lane.startswith("process") else lane)
+                    assert result.audit["cpu_tokens"] &lt;= 2
+&gt;                   assert_raw_private(result, steps=5, paths=7, groups=32, rows=rows, student=student)
+
+tests/test_raw_factor_prefix.py:374: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_raw_factor_prefix.py:155: in assert_raw_private
+    assert_private(result)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = &lt;calmetrics_engine._native.graph.GraphExecutionResult object at 0x107a91830&gt;
+
+    def assert_private(result):
+        # Dedicated counters cover direct-period and tape paths alike; a direct
+        # period chain need not execute an affine pointwise tile at all.
+&gt;       assert chunk_sum(result, "compact_path_groups") &gt; 0
+E       AssertionError: assert 0 &gt; 0
+E        +  where 0 = chunk_sum(&lt;calmetrics_engine._native.graph.GraphExecutionResult object at 0x107a91830&gt;, 'compact_path_groups')
+
+tests/test_compact_path_execution.py:53: AssertionError</failure></testcase><testcase classname="tests.test_raw_factor_prefix" name="test_short_wide_factor_prefix_full_batch_reuses_rotation_across_all_combinations[True-F-process_inline]" time="0.905"><failure message="AssertionError: assert 0 &gt; 0&#10; +  where 0 = chunk_sum(&lt;calmetrics_engine._native.graph.GraphExecutionResult object at 0x1187af5f0&gt;, 'compact_path_groups')">student = True, order = 'F', lane = 'process_inline'
+
+    @pytest.mark.parametrize("student,order,lane", [
+        (False, "C", "single"),
+        (True, "F", "single"),
+        (False, "F", "thread"),
+        (True, "C", "thread"),
+        (False, "C", "process_inline"),
+        (True, "F", "process_inline"),
+        (False, "F", "process_shared"),
+        (True, "C", "process_shared"),
+    ])
+    def test_short_wide_factor_prefix_full_batch_reuses_rotation_across_all_combinations(student, order, lane):
+        # Keep the small-F refusal fixture above: full-batch admission must depend
+        # on proved shape/cost, not merely on a short period or many combinations.
+        spec = raw_factor_spec(5, 7, 32, 32, student)
+        inputs = small_raw_tape(steps=5, paths=7, factors=32, innovations=4,
+                                assets=32, combinations=32, student=student, layout=order)
+        originals = {name: value.copy() for name, value in inputs.items()}
+        graph = compile_compact(spec, order=order)
+        canonical = compile_compact(public_factor_spec(spec), order=order)
+        parameters = raw_parameters(spec)
+        expected = expected_raw_named(spec, inputs)
+        # The planner needs two intervals for the real thread/process lanes. Two
+        # identical [0,5) requests keep the tape itself at the requested T=5 and
+        # prove one rotation per T*P and one full batch independently per interval.
+        rows = 1 if lane == "single" else 2
+        starts, ends = np.zeros(rows, np.int64), np.full(rows, 5, np.int64)
+        bundle = SharedInputBundle.from_inputs(inputs) if lane == "process_shared" else None
+        transported = bundle.arrays if bundle is not None else inputs
+        try:
+            with AdaptiveScheduler(cpu_budget=2, config=config(lane)) as scheduler:
+                reference = execute(scheduler, canonical, transported, starts, ends, parameters,
+                                    timeout=20.)
+                assert_canonical(reference)
+                first = execute(scheduler, graph, transported, starts, ends, parameters, timeout=20.)
+                saved = saved_outputs(first)
+                later = execute(scheduler, graph, transported, starts, ends, parameters, timeout=20.)
+                for result in (first, later):
+                    assert result.plan.lane == ("process" if lane.startswith("process") else lane)
+                    assert result.audit["cpu_tokens"] &lt;= 2
+&gt;                   assert_raw_private(result, steps=5, paths=7, groups=32, rows=rows, student=student)
+
+tests/test_raw_factor_prefix.py:374: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_raw_factor_prefix.py:155: in assert_raw_private
+    assert_private(result)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = &lt;calmetrics_engine._native.graph.GraphExecutionResult object at 0x1187af5f0&gt;
+
+    def assert_private(result):
+        # Dedicated counters cover direct-period and tape paths alike; a direct
+        # period chain need not execute an affine pointwise tile at all.
+&gt;       assert chunk_sum(result, "compact_path_groups") &gt; 0
+E       AssertionError: assert 0 &gt; 0
+E        +  where 0 = chunk_sum(&lt;calmetrics_engine._native.graph.GraphExecutionResult object at 0x1187af5f0&gt;, 'compact_path_groups')
+
+tests/test_compact_path_execution.py:53: AssertionError</failure></testcase><testcase classname="tests.test_raw_factor_prefix" name="test_short_wide_factor_prefix_full_batch_reuses_rotation_across_all_combinations[False-F-process_shared]" time="0.760"><failure message="AssertionError: assert 0 &gt; 0&#10; +  where 0 = chunk_sum(&lt;calmetrics_engine._native.graph.GraphExecutionResult object at 0x106c027f0&gt;, 'compact_path_groups')">student = False, order = 'F', lane = 'process_shared'
+
+    @pytest.mark.parametrize("student,order,lane", [
+        (False, "C", "single"),
+        (True, "F", "single"),
+        (False, "F", "thread"),
+        (True, "C", "thread"),
+        (False, "C", "process_inline"),
+        (True, "F", "process_inline"),
+        (False, "F", "process_shared"),
+        (True, "C", "process_shared"),
+    ])
+    def test_short_wide_factor_prefix_full_batch_reuses_rotation_across_all_combinations(student, order, lane):
+        # Keep the small-F refusal fixture above: full-batch admission must depend
+        # on proved shape/cost, not merely on a short period or many combinations.
+        spec = raw_factor_spec(5, 7, 32, 32, student)
+        inputs = small_raw_tape(steps=5, paths=7, factors=32, innovations=4,
+                                assets=32, combinations=32, student=student, layout=order)
+        originals = {name: value.copy() for name, value in inputs.items()}
+        graph = compile_compact(spec, order=order)
+        canonical = compile_compact(public_factor_spec(spec), order=order)
+        parameters = raw_parameters(spec)
+        expected = expected_raw_named(spec, inputs)
+        # The planner needs two intervals for the real thread/process lanes. Two
+        # identical [0,5) requests keep the tape itself at the requested T=5 and
+        # prove one rotation per T*P and one full batch independently per interval.
+        rows = 1 if lane == "single" else 2
+        starts, ends = np.zeros(rows, np.int64), np.full(rows, 5, np.int64)
+        bundle = SharedInputBundle.from_inputs(inputs) if lane == "process_shared" else None
+        transported = bundle.arrays if bundle is not None else inputs
+        try:
+            with AdaptiveScheduler(cpu_budget=2, config=config(lane)) as scheduler:
+                reference = execute(scheduler, canonical, transported, starts, ends, parameters,
+                                    timeout=20.)
+                assert_canonical(reference)
+                first = execute(scheduler, graph, transported, starts, ends, parameters, timeout=20.)
+                saved = saved_outputs(first)
+                later = execute(scheduler, graph, transported, starts, ends, parameters, timeout=20.)
+                for result in (first, later):
+                    assert result.plan.lane == ("process" if lane.startswith("process") else lane)
+                    assert result.audit["cpu_tokens"] &lt;= 2
+&gt;                   assert_raw_private(result, steps=5, paths=7, groups=32, rows=rows, student=student)
+
+tests/test_raw_factor_prefix.py:374: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_raw_factor_prefix.py:155: in assert_raw_private
+    assert_private(result)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = &lt;calmetrics_engine._native.graph.GraphExecutionResult object at 0x106c027f0&gt;
+
+    def assert_private(result):
+        # Dedicated counters cover direct-period and tape paths alike; a direct
+        # period chain need not execute an affine pointwise tile at all.
+&gt;       assert chunk_sum(result, "compact_path_groups") &gt; 0
+E       AssertionError: assert 0 &gt; 0
+E        +  where 0 = chunk_sum(&lt;calmetrics_engine._native.graph.GraphExecutionResult object at 0x106c027f0&gt;, 'compact_path_groups')
+
+tests/test_compact_path_execution.py:53: AssertionError</failure></testcase><testcase classname="tests.test_raw_factor_prefix" name="test_short_wide_factor_prefix_full_batch_reuses_rotation_across_all_combinations[True-C-process_shared]" time="0.901"><failure message="AssertionError: assert 0 &gt; 0&#10; +  where 0 = chunk_sum(&lt;calmetrics_engine._native.graph.GraphExecutionResult object at 0x10ed99570&gt;, 'compact_path_groups')">student = True, order = 'C', lane = 'process_shared'
+
+    @pytest.mark.parametrize("student,order,lane", [
+        (False, "C", "single"),
+        (True, "F", "single"),
+        (False, "F", "thread"),
+        (True, "C", "thread"),
+        (False, "C", "process_inline"),
+        (True, "F", "process_inline"),
+        (False, "F", "process_shared"),
+        (True, "C", "process_shared"),
+    ])
+    def test_short_wide_factor_prefix_full_batch_reuses_rotation_across_all_combinations(student, order, lane):
+        # Keep the small-F refusal fixture above: full-batch admission must depend
+        # on proved shape/cost, not merely on a short period or many combinations.
+        spec = raw_factor_spec(5, 7, 32, 32, student)
+        inputs = small_raw_tape(steps=5, paths=7, factors=32, innovations=4,
+                                assets=32, combinations=32, student=student, layout=order)
+        originals = {name: value.copy() for name, value in inputs.items()}
+        graph = compile_compact(spec, order=order)
+        canonical = compile_compact(public_factor_spec(spec), order=order)
+        parameters = raw_parameters(spec)
+        expected = expected_raw_named(spec, inputs)
+        # The planner needs two intervals for the real thread/process lanes. Two
+        # identical [0,5) requests keep the tape itself at the requested T=5 and
+        # prove one rotation per T*P and one full batch independently per interval.
+        rows = 1 if lane == "single" else 2
+        starts, ends = np.zeros(rows, np.int64), np.full(rows, 5, np.int64)
+        bundle = SharedInputBundle.from_inputs(inputs) if lane == "process_shared" else None
+        transported = bundle.arrays if bundle is not None else inputs
+        try:
+            with AdaptiveScheduler(cpu_budget=2, config=config(lane)) as scheduler:
+                reference = execute(scheduler, canonical, transported, starts, ends, parameters,
+                                    timeout=20.)
+                assert_canonical(reference)
+                first = execute(scheduler, graph, transported, starts, ends, parameters, timeout=20.)
+                saved = saved_outputs(first)
+                later = execute(scheduler, graph, transported, starts, ends, parameters, timeout=20.)
+                for result in (first, later):
+                    assert result.plan.lane == ("process" if lane.startswith("process") else lane)
+                    assert result.audit["cpu_tokens"] &lt;= 2
+&gt;                   assert_raw_private(result, steps=5, paths=7, groups=32, rows=rows, student=student)
+
+tests/test_raw_factor_prefix.py:374: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_raw_factor_prefix.py:155: in assert_raw_private
+    assert_private(result)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = &lt;calmetrics_engine._native.graph.GraphExecutionResult object at 0x10ed99570&gt;
+
+    def assert_private(result):
+        # Dedicated counters cover direct-period and tape paths alike; a direct
+        # period chain need not execute an affine pointwise tile at all.
+&gt;       assert chunk_sum(result, "compact_path_groups") &gt; 0
+E       AssertionError: assert 0 &gt; 0
+E        +  where 0 = chunk_sum(&lt;calmetrics_engine._native.graph.GraphExecutionResult object at 0x10ed99570&gt;, 'compact_path_groups')
+
+tests/test_compact_path_execution.py:53: AssertionError</failure></testcase><testcase classname="tests.test_raw_factor_prefix" name="test_selected_raw_consumers_keep_only_requested_roots_and_prove_actual_prefix_use[fan-False]" time="0.004" /><testcase classname="tests.test_raw_factor_prefix" name="test_selected_raw_consumers_keep_only_requested_roots_and_prove_actual_prefix_use[fan-True]" time="0.004" /><testcase classname="tests.test_raw_factor_prefix" name="test_selected_raw_consumers_keep_only_requested_roots_and_prove_actual_prefix_use[mixed-False]" time="0.006" /><testcase classname="tests.test_raw_factor_prefix" name="test_selected_raw_consumers_keep_only_requested_roots_and_prove_actual_prefix_use[mixed-True]" time="0.006" /><testcase classname="tests.test_raw_factor_prefix" name="test_selected_raw_consumers_keep_only_requested_roots_and_prove_actual_prefix_use[complete_first-False]" time="0.012" /><testcase classname="tests.test_raw_factor_prefix" name="test_selected_raw_consumers_keep_only_requested_roots_and_prove_actual_prefix_use[complete_first-True]" time="0.013" /><testcase classname="tests.test_raw_factor_prefix" name="test_student_zero_and_negative_chi_follow_cme_canonical_errors[raise-0.0-DIVIDE_BY_ZERO]" time="0.025" /><testcase classname="tests.test_raw_factor_prefix" name="test_student_zero_and_negative_chi_follow_cme_canonical_errors[raise--1.0-DOMAIN_ERROR]" time="0.025" /><testcase classname="tests.test_raw_factor_prefix" name="test_student_zero_and_negative_chi_follow_cme_canonical_errors[isolate-0.0-DIVIDE_BY_ZERO]" time="0.035" /><testcase classname="tests.test_raw_factor_prefix" name="test_student_zero_and_negative_chi_follow_cme_canonical_errors[isolate--1.0-DOMAIN_ERROR]" time="0.035" /><testcase classname="tests.test_raw_factor_prefix" name="test_student_extreme_chi_matches_public_canonical_errors_and_ieee_results[raise-min_subnormal]" time="0.024" /><testcase classname="tests.test_raw_factor_prefix" name="test_student_extreme_chi_matches_public_canonical_errors_and_ieee_results[raise-nan]" time="0.025" /><testcase classname="tests.test_raw_factor_prefix" name="test_student_extreme_chi_matches_public_canonical_errors_and_ieee_results[raise-positive_inf]" time="0.035" /><testcase classname="tests.test_raw_factor_prefix" name="test_student_extreme_chi_matches_public_canonical_errors_and_ieee_results[raise-negative_inf]" time="0.025" /><testcase classname="tests.test_raw_factor_prefix" name="test_student_extreme_chi_matches_public_canonical_errors_and_ieee_results[isolate-min_subnormal]" time="0.035" /><testcase classname="tests.test_raw_factor_prefix" name="test_student_extreme_chi_matches_public_canonical_errors_and_ieee_results[isolate-nan]" time="0.039" /><testcase classname="tests.test_raw_factor_prefix" name="test_student_extreme_chi_matches_public_canonical_errors_and_ieee_results[isolate-positive_inf]" time="0.035" /><testcase classname="tests.test_raw_factor_prefix" name="test_student_extreme_chi_matches_public_canonical_errors_and_ieee_results[isolate-negative_inf]" time="0.036" /><testcase classname="tests.test_raw_factor_prefix" name="test_student_scalar_configuration_keeps_canonical_math_without_business_df_gate[0.0-DIVIDE_BY_ZERO]" time="0.024" /><testcase classname="tests.test_raw_factor_prefix" name="test_student_scalar_configuration_keeps_canonical_math_without_business_df_gate[1.0-DOMAIN_ERROR]" time="0.024" /><testcase classname="tests.test_raw_factor_prefix" name="test_student_scalar_configuration_keeps_canonical_math_without_business_df_gate[2.0-None]" time="0.035" /><testcase classname="tests.test_raw_factor_prefix" name="test_raw_prefix_exact_budget_rejects_one_byte_less_and_preserves_two_results[False]" time="0.225" /><testcase classname="tests.test_raw_factor_prefix" name="test_raw_prefix_exact_budget_rejects_one_byte_less_and_preserves_two_results[True]" time="0.235" /></testsuite></testsuites>

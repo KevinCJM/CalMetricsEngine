@@ -1,0 +1,148 @@
+[
+  {
+    "n": 4096,
+    "input_layout": "C",
+    "output_order": "F",
+    "cpu_budget": 1,
+    "scope": "isolated ABI including input scan/output allocation, not Scheduler acceptance",
+    "threads": {
+      "environment": {
+        "OPENBLAS_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "NUMBA_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1"
+      },
+      "accelerate_thread_local": {
+        "prior": 0,
+        "active": 1
+      },
+      "pools": [
+        {
+          "user_api": "blas",
+          "internal_api": "openblas",
+          "num_threads": 1,
+          "prefix": "libopenblas",
+          "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+          "version": "0.3.23.dev",
+          "threading_layer": "pthreads",
+          "architecture": "armv8"
+        }
+      ]
+    },
+    "samples_ms": {
+      "old": [
+        1189.152041,
+        1192.167708,
+        1227.701542,
+        1195.187916,
+        1194.908667,
+        1194.3435
+      ],
+      "g8w4": [
+        1171.977208,
+        1173.111542,
+        1208.72825,
+        1179.357709,
+        1180.185709,
+        1174.646958
+      ],
+      "njit": [
+        377.85025,
+        373.470834,
+        397.076,
+        379.215334,
+        380.920791,
+        379.507625
+      ]
+    },
+    "median_ms": {
+      "old": 1194.6260834999998,
+      "g8w4": 1177.0023335,
+      "njit": 379.3614795
+    },
+    "input_sha256": "bdcfde05a0a7907962eb1a219ab8e1ccf4a007cd090a0744942059db1d4200aa",
+    "output_sha256": {
+      "old": "b0d352971184a268be779d9a2e67a68fc4199adbdc453f395cbd7198c84cd880",
+      "g8w4": "b0d352971184a268be779d9a2e67a68fc4199adbdc453f395cbd7198c84cd880",
+      "njit": "77a7158009d633753d2a9f10868292eca674400ddc39dd37d2fb2f436bf6db16"
+    },
+    "bit_parity_old_candidate": true,
+    "parity_scope": "warmup and final timed outputs",
+    "status_checked_every_timed_call": true,
+    "workspace_bytes": 527488
+  },
+  {
+    "n": 4096,
+    "input_layout": "F",
+    "output_order": "F",
+    "cpu_budget": 1,
+    "scope": "isolated ABI including input scan/output allocation, not Scheduler acceptance",
+    "threads": {
+      "environment": {
+        "OPENBLAS_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "NUMBA_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1"
+      },
+      "accelerate_thread_local": {
+        "prior": 0,
+        "active": 1
+      },
+      "pools": [
+        {
+          "user_api": "blas",
+          "internal_api": "openblas",
+          "num_threads": 1,
+          "prefix": "libopenblas",
+          "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+          "version": "0.3.23.dev",
+          "threading_layer": "pthreads",
+          "architecture": "armv8"
+        }
+      ]
+    },
+    "samples_ms": {
+      "old": [
+        1296.585709,
+        1295.27175,
+        1432.734,
+        1304.747959,
+        1336.393958,
+        1280.219792
+      ],
+      "g8w4": [
+        1283.746,
+        1282.0005,
+        1340.667542,
+        1257.346416,
+        1257.370291,
+        1268.662166
+      ],
+      "njit": [
+        436.216708,
+        430.821041,
+        441.246958,
+        430.663209,
+        445.565209,
+        433.346833
+      ]
+    },
+    "median_ms": {
+      "old": 1300.666834,
+      "g8w4": 1275.331333,
+      "njit": 434.7817705
+    },
+    "input_sha256": "cd22522394d35a176a65a7324e60a11e4a4158b0bea7b983bca9b3ac0bdce2c7",
+    "output_sha256": {
+      "old": "5e85f51ab1bcf04ac2541252d2685f9393d808880a93dc04d9745c551c4b1575",
+      "g8w4": "5e85f51ab1bcf04ac2541252d2685f9393d808880a93dc04d9745c551c4b1575",
+      "njit": "ab845bc9cca16b96d3f511cc43763b4e298741cf1a75531741bc19ade45c5985"
+    },
+    "bit_parity_old_candidate": true,
+    "parity_scope": "warmup and final timed outputs",
+    "status_checked_every_timed_call": true,
+    "workspace_bytes": 527488
+  }
+]

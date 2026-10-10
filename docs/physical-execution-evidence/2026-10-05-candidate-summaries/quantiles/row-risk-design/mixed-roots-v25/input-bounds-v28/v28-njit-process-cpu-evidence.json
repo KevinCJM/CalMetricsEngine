@@ -1,0 +1,320 @@
+{
+  "status": "prior_v26_actual_samples_inspected",
+  "scope": "CPU1 matrix complete calls; warmed NJIT samples include both outputs and request prep",
+  "observations": [
+    {
+      "report": "v26-matmul-time/rejected-scale-FF-F-cpu1-njit_direct.json",
+      "source_sha256": "eb1cb5d0e9700d6af74d16dcc7aabd87e7fd0a9d2083552972025009e3b4209b",
+      "shape": [
+        2048,
+        2048,
+        2048
+      ],
+      "layout": "FF",
+      "output_order": "F",
+      "cpu_budget": 1,
+      "process_cpu_to_wall_median": 0.999486734374188
+    },
+    {
+      "report": "v26-matmul-time/dense-4096-FF-C-cpu1-njit_copy.json",
+      "source_sha256": "7cc7e2956ddc4ae1cdd0fd1bc9c7b552c82ac14d602d083d2894926e31d82dcc",
+      "shape": [
+        4096,
+        4096,
+        4096
+      ],
+      "layout": "FF",
+      "output_order": "C",
+      "cpu_budget": 1,
+      "process_cpu_to_wall_median": 0.9987227550257867
+    },
+    {
+      "report": "v26-matmul-time/rejected-scale-FF-F-cpu1-njit_copy.json",
+      "source_sha256": "cfa15c7c8263ca80cf43ea12f1a125bcae233d17aa065cade4dfafcda8712bac",
+      "shape": [
+        2048,
+        2048,
+        2048
+      ],
+      "layout": "FF",
+      "output_order": "F",
+      "cpu_budget": 1,
+      "process_cpu_to_wall_median": 0.99954073075991
+    },
+    {
+      "report": "v26-matmul-time/dense-4096-FF-F-cpu1-njit_copy.json",
+      "source_sha256": "e680c79636433d403375623a760abac6161f10248a6b22a707075673651e86e4",
+      "shape": [
+        4096,
+        4096,
+        4096
+      ],
+      "layout": "FF",
+      "output_order": "F",
+      "cpu_budget": 1,
+      "process_cpu_to_wall_median": 0.9922846237175413
+    },
+    {
+      "report": "v26-matmul-time/dense-4096-CC-C-cpu1-njit_direct.json",
+      "source_sha256": "bb26b30f81037beafc35fef2082389a3392730d4ccf703f86786dec373753e9f",
+      "shape": [
+        4096,
+        4096,
+        4096
+      ],
+      "layout": "CC",
+      "output_order": "C",
+      "cpu_budget": 1,
+      "process_cpu_to_wall_median": 0.9986689789627345
+    },
+    {
+      "report": "v26-matmul-time/dense-2048-FF-C-cpu1-njit_copy.json",
+      "source_sha256": "1f209836ee5cddcbeb879ab782ce621118c6272fe507a8f59efa5ce5146aa4a0",
+      "shape": [
+        2048,
+        2048,
+        2048
+      ],
+      "layout": "FF",
+      "output_order": "C",
+      "cpu_budget": 1,
+      "process_cpu_to_wall_median": 0.9987756188697254
+    },
+    {
+      "report": "v26-matmul-time/small-diagnostic-CC-C-cpu1-njit_copy.json",
+      "source_sha256": "20c1d4a67dde76b2971f49d0c4603861408ddf4f53a5a202d03ca326934a7dfe",
+      "shape": [
+        63,
+        63,
+        63
+      ],
+      "layout": "CC",
+      "output_order": "C",
+      "cpu_budget": 1,
+      "process_cpu_to_wall_median": 1.0606693151271624
+    },
+    {
+      "report": "v26-matmul-time/dense-2048-FF-F-cpu1-njit_direct.json",
+      "source_sha256": "00251324b6784c0598ee0d6d96fb5a1e3e35a7aabc692c4b59e92d97d5d728a4",
+      "shape": [
+        2048,
+        2048,
+        2048
+      ],
+      "layout": "FF",
+      "output_order": "F",
+      "cpu_budget": 1,
+      "process_cpu_to_wall_median": 0.9990528495958423
+    },
+    {
+      "report": "v26-matmul-time/dense-2048-FF-F-cpu1-njit_copy.json",
+      "source_sha256": "c62a25a58f6ab6ee96ddce1d31306e6a1cb270f58a813c80237a245800b34aed",
+      "shape": [
+        2048,
+        2048,
+        2048
+      ],
+      "layout": "FF",
+      "output_order": "F",
+      "cpu_budget": 1,
+      "process_cpu_to_wall_median": 0.9987337684355502
+    },
+    {
+      "report": "v26-matmul-time/dense-2048-CC-C-cpu1-njit_direct.json",
+      "source_sha256": "05e6580b20d872e7c2ab14868364df1a4ee5fe08ae01e09e8256b811a9aeddc0",
+      "shape": [
+        2048,
+        2048,
+        2048
+      ],
+      "layout": "CC",
+      "output_order": "C",
+      "cpu_budget": 1,
+      "process_cpu_to_wall_median": 0.999861065755755
+    },
+    {
+      "report": "v26-matmul-time/small-diagnostic-CC-F-cpu1-njit_copy.json",
+      "source_sha256": "04e75e361223402e718782d15f6961f5de63b42dfbd59f7298f0a898883cb719",
+      "shape": [
+        63,
+        63,
+        63
+      ],
+      "layout": "CC",
+      "output_order": "F",
+      "cpu_budget": 1,
+      "process_cpu_to_wall_median": 1.0617763157894737
+    },
+    {
+      "report": "v26-matmul-time/dense-4096-FF-F-cpu1-njit_direct.json",
+      "source_sha256": "d35d16e6c19a27473f394bc2adcf7d883c02d317473f51008cee49d2a104c6a5",
+      "shape": [
+        4096,
+        4096,
+        4096
+      ],
+      "layout": "FF",
+      "output_order": "F",
+      "cpu_budget": 1,
+      "process_cpu_to_wall_median": 0.9955183165598667
+    },
+    {
+      "report": "v26-matmul-time/small-diagnostic-CC-F-cpu1-njit_direct.json",
+      "source_sha256": "eae740fcdbe2b44b99e9927a457d26472736e54790cd37ff93cc33a0223b6be1",
+      "shape": [
+        63,
+        63,
+        63
+      ],
+      "layout": "CC",
+      "output_order": "F",
+      "cpu_budget": 1,
+      "process_cpu_to_wall_median": 1.0735736067573594
+    },
+    {
+      "report": "v26-matmul-time/dense-4096-CC-F-cpu1-njit_direct.json",
+      "source_sha256": "df9a8b675672b903d2108e92b782f3211587ad3a635d2c3b6de8d8862371e522",
+      "shape": [
+        4096,
+        4096,
+        4096
+      ],
+      "layout": "CC",
+      "output_order": "F",
+      "cpu_budget": 1,
+      "process_cpu_to_wall_median": 0.9993560507888005
+    },
+    {
+      "report": "v26-matmul-time/dense-4096-CC-C-cpu1-njit_copy.json",
+      "source_sha256": "1873877bf5a608e6f06cf4073e321131e63aa397d084e7d4ef165002f3c15b3a",
+      "shape": [
+        4096,
+        4096,
+        4096
+      ],
+      "layout": "CC",
+      "output_order": "C",
+      "cpu_budget": 1,
+      "process_cpu_to_wall_median": 0.9988699504220191
+    },
+    {
+      "report": "v26-matmul-time/dense-2048-FF-C-cpu1-njit_direct.json",
+      "source_sha256": "fb73e6072f56dbba6077f50eafddba3ece25c1edf5e6fa45c29a40eeb3ae9c41",
+      "shape": [
+        2048,
+        2048,
+        2048
+      ],
+      "layout": "FF",
+      "output_order": "C",
+      "cpu_budget": 1,
+      "process_cpu_to_wall_median": 0.999676589945609
+    },
+    {
+      "report": "v26-matmul-time/dense-4096-CC-F-cpu1-njit_copy.json",
+      "source_sha256": "677a5cb66ff8b94c396bd87df74d22d57b80d32c3c9eefd4486c8b0d0f2b144d",
+      "shape": [
+        4096,
+        4096,
+        4096
+      ],
+      "layout": "CC",
+      "output_order": "F",
+      "cpu_budget": 1,
+      "process_cpu_to_wall_median": 0.9988119520645198
+    },
+    {
+      "report": "v26-matmul-time/dense-2048-CC-F-cpu1-njit_direct.json",
+      "source_sha256": "17c2d492929f85e571083df5300edf21c1f4cadc2e5b5a8fc5fcd4835baee36d",
+      "shape": [
+        2048,
+        2048,
+        2048
+      ],
+      "layout": "CC",
+      "output_order": "F",
+      "cpu_budget": 1,
+      "process_cpu_to_wall_median": 0.9997710035676171
+    },
+    {
+      "report": "v26-matmul-time/small-diagnostic-CC-C-cpu1-njit_direct.json",
+      "source_sha256": "411437872181575287d03c20a78cf2dd35a5e49956e4152263eeede4d0efc6a4",
+      "shape": [
+        63,
+        63,
+        63
+      ],
+      "layout": "CC",
+      "output_order": "C",
+      "cpu_budget": 1,
+      "process_cpu_to_wall_median": 1.0701966476614364
+    },
+    {
+      "report": "v26-matmul-time/dense-4096-FF-C-cpu1-njit_direct.json",
+      "source_sha256": "4f400a6e2368a2592ddd7e6189f8250473aa782a148a76f35073a9f45e18c517",
+      "shape": [
+        4096,
+        4096,
+        4096
+      ],
+      "layout": "FF",
+      "output_order": "C",
+      "cpu_budget": 1,
+      "process_cpu_to_wall_median": 0.9991126823552482
+    },
+    {
+      "report": "v26-matmul-time/rejected-scale-CC-F-cpu1-njit_copy.json",
+      "source_sha256": "1ff7ab88c467305bd20652d6d59cafabc635ae424ffd7136983a46f64da8df52",
+      "shape": [
+        2048,
+        2048,
+        2048
+      ],
+      "layout": "CC",
+      "output_order": "F",
+      "cpu_budget": 1,
+      "process_cpu_to_wall_median": 0.9983563417498291
+    },
+    {
+      "report": "v26-matmul-time/dense-2048-CC-C-cpu1-njit_copy.json",
+      "source_sha256": "c32ae180458a8e163954b18111df62b31411b3d2f78caa545d9e2ebc43ddd129",
+      "shape": [
+        2048,
+        2048,
+        2048
+      ],
+      "layout": "CC",
+      "output_order": "C",
+      "cpu_budget": 1,
+      "process_cpu_to_wall_median": 0.9994122839686637
+    },
+    {
+      "report": "v26-matmul-time/rejected-scale-CC-F-cpu1-njit_direct.json",
+      "source_sha256": "f8753b4f82865a26477cbd1b99af202249769dc0fc2620bdf2a951baf1309d00",
+      "shape": [
+        2048,
+        2048,
+        2048
+      ],
+      "layout": "CC",
+      "output_order": "F",
+      "cpu_budget": 1,
+      "process_cpu_to_wall_median": 0.9994164589980381
+    },
+    {
+      "report": "v26-matmul-time/dense-2048-CC-F-cpu1-njit_copy.json",
+      "source_sha256": "5feda0831537e5a54240734eb5bede15f2dd644a595986050a6631bbb9881b57",
+      "shape": [
+        2048,
+        2048,
+        2048
+      ],
+      "layout": "CC",
+      "output_order": "F",
+      "cpu_budget": 1,
+      "process_cpu_to_wall_median": 0.9992667158758801
+    }
+  ],
+  "caveat": "CPU/wall ratio supports the actual CPU usage observation; it does not establish a per-thread vendor API mode or replace native thread controls",
+  "whole_goal_complete": false
+}

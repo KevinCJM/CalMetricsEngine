@@ -1,0 +1,119 @@
+{
+  "kind": "guarded-adaptive-isolated-screening",
+  "candidate_installed": false,
+  "baseline_build_id": "33c2f2b95e374d396dc283c78d2ca5a43ad51a7a97995c3534ffdbae61ff7d39",
+  "baseline_source_identity_current": true,
+  "candidate_dylib": "/private/tmp/calmetrics-covariance-syrk-20261001/adaptive-candidate.dylib",
+  "candidate_dylib_sha256": "94f5bfea47052506fbad2717082021a5f1786556b1186a1b8c66d80a8de67031",
+  "source_sha256": {
+    "docs/physical-execution-evidence/2026-10-01-covariance-syrk/guarded_candidate.cpp": "756d59acc74ef31ffee32a6ca46442f0cefc11c615814d77f9841306fe09bef6",
+    "docs/physical-execution-evidence/2026-10-01-covariance-syrk/guarded_screen.py": "36fe1bef52affd2421b23984dd4c6f4329e40b55204d173c90f9d94930d277be",
+    "docs/physical-execution-evidence/2026-10-01-covariance-syrk/screen.py": "077352e23c16dd49c0f07347b6f7adfb226139734a98e92486b479f78d884607",
+    "cpp/operators/matrix_backend.cpp": "7965f58807820cce5394c2b392d6e44f3126b303c690ca17275ba5b44379cc43",
+    "docs/physical-execution-evidence/2026-10-01-covariance-syrk/guarded_native_check.cpp": "953e0b70b65743717b8d928dcddf170aa598cd7436c23e94554de8d23a28e972"
+  },
+  "compile_defines": [
+    "CME_SCREEN_ADAPTIVE_PANEL=1",
+    "CALMETRICS_HAVE_EIGEN_ROTATION=1",
+    "CALMETRICS_HAVE_ACCELERATE_COVCHOL=1"
+  ],
+  "compile_flags": [
+    "-std=c++17",
+    "-O3",
+    "-DNDEBUG",
+    "-fno-fast-math",
+    "-ffp-contract=off",
+    "-mmacosx-version-min=15.0"
+  ],
+  "correctness_cases": 260,
+  "timing_cases": 10,
+  "balanced_rounds": 6,
+  "memory_fresh_children": 24,
+  "audit_scope": "dsyrk_calls counts blocks; replayed_cells counts completed sparse replay and accepted F diagonal only; centered_bytes counts panels fed to DSYRK, not every rejected centering write",
+  "artifact_sha256": {
+    "README.md": "6081a74fa8fb3ad63798f99bba08a1f3d47ed28746d61e657bb55c8fc80d8ae0",
+    "candidate-counters.jsonl": "768e680dec62826b14feca3b469d956f241e587afe0f5a0fe6a102c16694dbaf",
+    "candidate.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "correctness.json": "38cc5955ecda37a3d207f59f74a0c9c51b68db9c6dd8baeab813bfc6b39c522d",
+    "guarded-correctness.json": "0d0ccb3250d4c0e80ccb996cc3e53014964eb572bebfd227a893f9dc22e9eb86",
+    "memory-2048-candidate-c-heap.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "memory-2048-candidate-c-rss.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "memory-2048-candidate-f-heap.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "memory-2048-candidate-f-rss.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "memory-2048-native-c-heap.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "memory-2048-native-c-rss.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "memory-2048-native-f-heap.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "memory-2048-native-f-rss.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "memory-2048-njit-c-heap.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "memory-2048-njit-c-rss.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "memory-2048-njit-f-heap.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "memory-2048-njit-f-rss.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "memory-2048.json": "80b67794767a91f0f811f82897c448fef23e2ad8688b5b8cca7e262d685bcb81",
+    "memory-candidate-c-heap.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "memory-candidate-c-rss.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "memory-candidate-f-heap.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "memory-candidate-f-rss.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "memory-native-c-heap.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "memory-native-c-rss.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "memory-native-f-heap.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "memory-native-f-rss.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "memory-njit-c-heap.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "memory-njit-c-rss.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "memory-njit-f-heap.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "memory-njit-f-rss.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "memory.json": "97053fa3ba2bfb9b253d8b102b6d154c94f345395e865fb830411fe655a7b80c",
+    "native.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "njit.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sanitizer-initial-384.json": "ff72ab9732c65a7017a507f55b5c86628915800ab5759ad1216c814bd33e410b",
+    "sanitizer-initial-384.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sanitizer-initial-unsupported-lsan.json": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sanitizer-initial-unsupported-lsan.log": "223e5c7f761191b3fe9e3ef3c0aa7b0df5ebd98721bc6fbffa17cdbeb1581ff5",
+    "sanitizer.json": "8bbaf445e97d041c43a92dedd18e381f7ce95a9881c23dddd8b51903bea03127",
+    "sanitizer.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "timing.json": "1abce96d5ebc4dd9dd3d4b6ecd8ea63d66ed6596ca825c51804719803ed48328"
+  },
+  "external_generated_output_snapshots": {
+    "/private/tmp/calmetrics-covariance-syrk-20261001/adaptive-output-snapshots/native.npy": {
+      "sha256": "fe32fe502851300ac004a4d63220c6981ad7dcea289424450bc88be04793bb8f",
+      "bytes": 134217856,
+      "generated": true,
+      "tracked_evidence": false
+    },
+    "/private/tmp/calmetrics-covariance-syrk-20261001/adaptive-output-snapshots/candidate.npy": {
+      "sha256": "83454cfb09c8c9a0d5cb0fff2b7cbd5b5a8ffa9e760958d6a935d6c84e3b0a09",
+      "bytes": 134217856,
+      "generated": true,
+      "tracked_evidence": false
+    },
+    "/private/tmp/calmetrics-covariance-syrk-20261001/adaptive-output-snapshots/njit.npy": {
+      "sha256": "d599824e5a07f3ad4e69d62cc55c57f55d657a2a0952126dcb7801b93fda04b9",
+      "bytes": 134217856,
+      "generated": true,
+      "tracked_evidence": false
+    }
+  },
+  "measured_at": "2026-09-30T19:02:44.348905+00:00",
+  "committed": false,
+  "pushed": false,
+  "sanitizer": {
+    "result": {
+      "calls": 416,
+      "accepted": 184,
+      "fallbacks": 232,
+      "sparse_replays": 44,
+      "passed": true
+    },
+    "instrumented_candidate": true,
+    "native_static_libraries_sanitized": true,
+    "system_accelerate_instrumented": false,
+    "leak_sanitizer_available": false,
+    "dylib": null,
+    "executable": "/private/tmp/calmetrics-covariance-syrk-20261001/adaptive-sanitizer-check",
+    "executable_sha256": "f7ef044ff96a5b791c40b904d9776b6f6efceb85dc315f24f93ab1a5f813cc9e",
+    "options": {
+      "ASAN_OPTIONS": "detect_leaks=0:halt_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1"
+    }
+  },
+  "design_sha256": "715cedda44f8c928415f26b015512ca6662dcf5813991da07d07e162490fb26e"
+}

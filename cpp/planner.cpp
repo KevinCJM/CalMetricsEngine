@@ -1,6 +1,10 @@
 #include "calmetrics_engine/planner.hpp"
+#include "calmetrics_engine/matrix_backend.hpp"
+#include "calmetrics_engine/affine_projection.hpp"
+#include "calmetrics_engine/compact_path.hpp"
 #include "calmetrics_engine/pointwise.hpp"
 #include "calmetrics_engine/native_process.hpp"
+#include "operators/numeric_line_sort.hpp"
 #include <algorithm>
 #include <cmath>
 #include <limits>
@@ -28,6 +32,17 @@ double geometry_work(const compiler::PhysicalCost &cost, const Geometry &g) {
          cost.linear_per_observation * static_cast<double>(g.observations) +
          cost.sort_nlogn * g.sort_work;
 }
+bool may_sort_numeric_line(const graph::Program &program) {
+  for (const auto &node : program.nodes)
+    if (node.kind == graph::NodeKind::operation &&
+        node.opcode == static_cast<std::uint16_t>(ops::Op::quantiles_axis))
+      return true;
+  for (const auto &scope : program.rolling_scopes)
+    if (scope.body && may_sort_numeric_line(*scope.body)) return true;
+  for (const auto &scope : program.apply_scopes)
+    if (scope.body && may_sort_numeric_line(*scope.body)) return true;
+  return false;
+}
 // A scope can have a constant body with no array captures. Its selector or
 // containing interval still determines the extent of nested materialized work.
 std::size_t apply_observation_bound(const graph::ApplyScope &scope,
@@ -42,6 +57,10 @@ std::size_t apply_observation_bound(const graph::ApplyScope &scope,
 // native shape walk owns both arena capacity and these materialized extents;
 // coefficients and scheduler thresholds remain unchanged. This is an operation
 // count estimate, not a hardware performance claim.
+// Direct replay is counted at the top-level call separately and here for
+// recursively weighted child bodies, including healthy children of isolation.
+double gaussian_stream_extra_work(const graph::Program &,
+    const std::vector<ops::Value> &, std::size_t);
 double typed_array_extra_work(const graph::Program &program,
                               const std::vector<ops::Value> &inputs,
                               std::size_t observations, bool full_work = false) {
@@ -112,7 +131,7 @@ double typed_array_extra_work(const graph::Program &program,
         op == ops::Op::continuous_state_pending)
       continue; // Field projections borrow storage without scanning it.
     // Segment projections borrow too, but first scan both boundary columns.
-    if (op == ops::Op::transpose || (op == ops::Op::diag && lhs.rank == 2))
+    if (op == ops::Op::transpose || ops::foundation_view(op) || ops::latent_view(op) || (op == ops::Op::diag && lhs.rank == 2))
       continue; // Borrowed views have no materialized array traversal.
     const bool sort = op == ops::Op::median || op == ops::Op::quantile ||
         op == ops::Op::median_where || op == ops::Op::quantile_where ||
@@ -138,12 +157,56 @@ double typed_array_extra_work(const graph::Program &program,
     else if (spec.family == ops::Family::matrix || spec.family == ops::Family::rolling)
       factor = 2.0;
     else if (spec.family == ops::Family::regression) factor = 3.5;
-    if (op == ops::Op::matmul)
+    if (ops::latent_operator(op)) {
+      if(op==ops::Op::gaussian_log_density || op==ops::Op::gaussian_mixture_em || op==ops::Op::gaussian_hmm_em) {
+        const bool hmm=op==ops::Op::gaussian_hmm_em, fit=op!=ops::Op::gaussian_log_density;
+        const auto &means=shapes[node.parents[fit?(hmm?3:2):1]];
+        extent=double(lhs.dim[0])*means.dim[0]*(lhs.dim[1]+(hmm?means.dim[0]:0));
+        if(fit){double iterations=100;const auto i=hmm?5u:4u;
+          if(node.parent_count>i){const auto &p=program.nodes[node.parents[i]];
+            iterations=p.kind==graph::NodeKind::constant&&p.constant>=1&&p.constant<=10000?p.constant:10000;}
+          extent*=iterations;
+        }
+      } else if(op==ops::Op::hmm_filter || op==ops::Op::hmm_smooth)
+        extent=double(lhs.dim[0])*lhs.dim[1]*lhs.dim[1];
+      else if(op==ops::Op::sample_unique_indices)extent*=extent;
+      else if(op==ops::Op::partition_mean || op==ops::Op::scatter_rows)extent+=sorting(double(rhs.size()));
+    }
+    else if (op == ops::Op::quantiles_axis) {
+      const auto &axis_node = program.nodes[node.parents[2]];
+      if (axis_node.kind == graph::NodeKind::constant && axis_node.constant >= 0 &&
+          axis_node.constant < lhs.rank && axis_node.constant == std::floor(axis_node.constant)) {
+        const auto axis = static_cast<std::size_t>(axis_node.constant);
+        const auto n = static_cast<double>(lhs.dim[axis]);
+        double lines = 1;
+        for (int dimension = 0; dimension < lhs.rank; ++dimension)
+          if (static_cast<std::size_t>(dimension) != axis) lines *= lhs.dim[dimension];
+        extent = shapes[index].size() ? lines * (sorting(n) + rhs.size()) : 0;
+      }
+    }
+    else if (op == ops::Op::affine_contract)
+      extent = static_cast<double>(shapes[index].size()) * lhs.dim[lhs.rank - 1];
+    else if (op == ops::Op::matmul)
       extent = static_cast<double>(lhs.dim[0]) * lhs.dim[1] * rhs.dim[1];
     else if ((op == ops::Op::covariance || op == ops::Op::correlation) && lhs.rank == 2)
       extent = static_cast<double>(lhs.dim[0]) * lhs.dim[1] * lhs.dim[1];
     else if (op == ops::Op::solve)
       extent = static_cast<double>(lhs.dim[0]) * lhs.dim[0] * lhs.dim[0];
+    else if (op == ops::Op::cholesky || op == ops::Op::solve_multi ||
+             op == ops::Op::triangular_solve || op == ops::Op::symmetric_eigh) {
+      const double n=static_cast<double>(lhs.dim[0]);
+      extent=n*n*(op==ops::Op::triangular_solve ? (rhs.rank==2 ? rhs.dim[1] : 1)
+           : n+(op==ops::Op::solve_multi ? rhs.dim[1] : 0));
+      if (op==ops::Op::symmetric_eigh) {
+        double sweeps=32;
+        if (node.parent_count>2) {
+          const auto &option=program.nodes[node.parents[2]];
+          sweeps=option.kind==graph::NodeKind::constant && option.constant>=1 && option.constant<=128
+              ? option.constant : 128;
+        }
+        extent*=sweeps;
+      }
+    }
     else if (op == ops::Op::trace)
       extent = static_cast<double>(std::min(lhs.dim[0], lhs.dim[1]));
     else if (op == ops::Op::ps_filter)
@@ -160,7 +223,28 @@ double typed_array_extra_work(const graph::Program &program,
     }
     extra += factor * std::max(0.0, extent - baseline);
   }
+  if (full_work) extra += gaussian_stream_extra_work(program, inputs, observations);
   if (!std::isfinite(extra)) throw std::overflow_error("typed array work estimate overflow");
+  return extra;
+}
+// The second density pass is physical work only. Use the executor's geometry
+// proof, including the same static backing-slot stability metadata.
+double gaussian_stream_extra_work(const graph::Program &program,
+                                 const std::vector<ops::Value> &inputs,
+                                 std::size_t observations) {
+  if (program.isolate_errors || !program.execution_metadata ||
+      program.execution_metadata->gaussian_filter_source.empty()) return 0;
+  std::vector<ops::Shape> shapes;
+  graph::required_array_capacity(program, inputs, observations, &shapes);
+  double extra = 0;
+  for (std::size_t filter = 0; filter < program.nodes.size(); ++filter) {
+    if (!graph::gaussian_filter_stream_geometry(program, filter, shapes)) continue;
+    const auto source = static_cast<std::size_t>(
+        program.execution_metadata->gaussian_filter_source[filter]);
+    const auto &x = shapes[program.nodes[source].parents[0]];
+    extra += double(x.dim[0]) * shapes[filter].dim[1] * (4.0 * x.dim[1] + 4.0);
+  }
+  if (!std::isfinite(extra)) throw std::overflow_error("Gaussian streaming work estimate overflow");
   return extra;
 }
 bool requires_typed_work(const graph::Program &program) {
@@ -175,9 +259,94 @@ std::size_t scratch_estimate(const graph::Program &program,
                              std::size_t window,
                              const std::vector<ops::Value> *inputs = nullptr,
                              std::size_t logical_window = 0,
-                             bool inherited_isolation = false) {
+                             bool inherited_isolation = false,
+                             bool prebound_inputs = false,
+                             bool allow_physical_fusion = true,
+                             bool expanded_matmul_roots = true,
+                             bool row_subviews = false) {
   const bool isolate_errors = program.isolate_errors || inherited_isolation;
-  if (!inherited_isolation && inputs && program.execution_metadata && program.execution_metadata->pointwise) {
+  if (allow_physical_fusion && !isolate_errors && !prebound_inputs && inputs &&
+      program.execution_metadata && program.execution_metadata->row_batch) {
+    std::vector<ops::Value> blocked;
+    std::size_t batch = 0, count = 0;
+    if (graph::row_batch_inputs(program, *inputs, logical_window, blocked, batch, count)) {
+      auto canonical = program;
+      canonical.execution_metadata = program.execution_metadata->row_batch->canonical_metadata;
+      std::vector<ops::Shape> shapes;
+      const auto capacity = graph::required_array_capacity(canonical, blocked, logical_window, &shapes);
+      const auto child = scratch_estimate(canonical, capacity, &blocked, logical_window,
+          false, false, false);
+      // Shorter intervals may increase batch width across floor(target/T).
+      // Each varying node has at most min(64*w, max(target,w)) elements for
+      // any w <= its upper width. These are arena sizing shapes only, never
+      // logical shapes or inputs used by an operator.
+      constexpr std::size_t target = 163840;
+      auto upper = shapes;
+      const auto &axes = program.execution_metadata->row_batch->axes;
+      for (std::size_t id = 0; id < upper.size(); ++id) {
+        const auto axis = axes[id];
+        if (axis < 0) continue;
+        const auto width = shapes[id].size() / batch;
+        if (!width) continue;
+        const auto bound = std::min(checked_mul(64, width), std::max(target, width));
+        upper[id].dim[axis] = checked_add(bound, width - 1) / width;
+      }
+      graph::ArrayArenaLayout current_arena, upper_arena;
+      graph::plan_array_arena(canonical, capacity, shapes, current_arena, false, false, true, true);
+      graph::plan_array_arena(canonical, capacity, upper, upper_arena, false, false, true, true);
+      const auto arena_bytes = [&](const graph::ArrayArenaLayout &arena) {
+        return checked_add(checked_mul(checked_add(arena.elements[0], arena.elements[2]), 8), arena.elements[1]);
+      };
+      const auto current_bytes = arena_bytes(current_arena);
+      const auto upper_bytes = arena_bytes(upper_arena);
+      const auto upper_gap = upper_bytes > current_bytes ? upper_bytes - current_bytes : 0;
+      // A shorter history can change a row block from fewer than 32 rows
+      // into the packed MatMul geometry. Arena shapes above are not logical
+      // operator shapes: bound the actual independent row count separately.
+      std::size_t packed_upper = 0;
+      for (const auto &node : canonical.nodes) {
+        if (node.kind != graph::NodeKind::operation ||
+            node.opcode != static_cast<std::uint16_t>(ops::Op::matmul) ||
+            node.parent_count != 2 || axes[node.parents[0]] != 0)
+          continue;
+        auto a = shapes[node.parents[0]];
+        const auto &b = shapes[node.parents[1]];
+        if (a.rank != 2 || b.rank != 2) continue;
+        a.dim[0] = std::min<std::size_t>(64, count);
+        packed_upper = std::max(packed_upper, ops::matmul_scratch_doubles(a, b));
+      }
+      // One reused Workspace holds the maximum, not a panel per interval.
+      const auto current_work = graph::matrix_workspace_doubles(canonical, shapes, capacity);
+      const auto packed_gap = checked_mul(
+          packed_upper > current_work ? packed_upper - current_work : 0, sizeof(double));
+      // F matrix roots need a bounded C block before scattering into their
+      // full leading dimensions. Reserve it for all orders so geometry-only
+      // plans remain safe if a supported input layout selects F automatically.
+      std::size_t result_block = 0;
+      bool matrix_root = false;
+      for (const auto root : program.roots) {
+        const auto &shape = shapes[root];
+        matrix_root = matrix_root || shape.rank == 2;
+        const auto width = shape.size() / batch;
+        result_block = checked_add(result_block,
+            std::min(checked_mul(64, width), std::max(target, width)));
+      }
+      const auto result_bytes = matrix_root ? checked_mul(result_block, sizeof(double)) : 0;
+      const auto descriptors = checked_add(checked_mul(inputs->size(), sizeof(ops::Value)),
+          checked_add(checked_mul(program.nodes.size(),
+              sizeof(graph::Node) + sizeof(const char *) + 3 * sizeof(ops::Shape)),
+              checked_mul(program.roots.size(), sizeof(graph::ResultSlot) + 3 * sizeof(ops::Shape))));
+      return checked_add(child, checked_add(result_bytes, checked_add(packed_gap,
+          checked_add(upper_gap, checked_add(descriptors, 4096)))));
+    }
+  }
+  if (allow_physical_fusion && !inherited_isolation && !prebound_inputs && inputs && program.execution_metadata &&
+      program.execution_metadata->affine_projection) {
+    const auto bytes = graph::affine_projection_workspace_bytes(program,
+        *program.execution_metadata->affine_projection, *inputs, logical_window);
+    if (bytes) return *bytes;
+  }
+  if (allow_physical_fusion && !inherited_isolation && inputs && program.execution_metadata && program.execution_metadata->pointwise) {
     bool compatible = true, found = false;
     ops::Shape common;
     for (std::size_t i = 0; i < inputs->size(); ++i) {
@@ -191,15 +360,39 @@ std::size_t scratch_estimate(const graph::Program &program,
     }
     if (compatible && found) return graph::pointwise_workspace_bytes(program, common.size());
   }
-  const auto numeric_slots = program.execution_metadata && program.execution_metadata->numeric_roots_only
-      ? 0 : program.numeric_slots;
-  std::size_t estimate =
-      checked_mul(window, checked_add(checked_mul(checked_add(numeric_slots, program.integer_slots), 8),
-                                      program.mask_slots));
+  std::vector<ops::Shape> shapes;
+  if (inputs && program.execution_metadata && program.execution_metadata->requires_shape_planning)
+    graph::required_array_capacity(program, *inputs, logical_window, &shapes);
+  graph::ArrayArenaLayout arena;
+  // Child execution also disables direct F Cholesky writing. Reserve its C
+  // arena using the same downgrade predicate as the executor.
+  graph::plan_array_arena(program,window,shapes,arena,
+      allow_physical_fusion && !isolate_errors,prebound_inputs, true,
+      !isolate_errors && !prebound_inputs && program.execution_metadata &&
+          (!program.execution_metadata->where_sum_to.empty() ||
+           !program.execution_metadata->scan_reductions.empty()));
+  std::size_t estimate=checked_add(checked_mul(checked_add(arena.elements[0],arena.elements[2]),8),
+                                  arena.elements[1]);
+  estimate=checked_add(estimate,checked_mul(checked_add(checked_add(program.numeric_slots,
+      program.mask_slots),program.integer_slots),sizeof(std::size_t)));
   estimate = checked_add(
       estimate, checked_mul(program.nodes.size(), sizeof(ops::Value) + 160));
+  if (row_subviews && allow_physical_fusion && !isolate_errors && !prebound_inputs &&
+      program.execution_metadata && shapes.size() == program.nodes.size() &&
+      std::any_of(program.execution_metadata->row_subview_takes.begin(),
+          program.execution_metadata->row_subview_takes.end(), [&](std::uint32_t id) {
+            return shapes[id].size() >= graph::row_subview_min_elements;
+          })) {
+    // Keep the original materialization budget: unknown/noncontiguous indices
+    // retain canonical execution. Add per-call proof tables and bounded stack.
+    estimate = checked_add(estimate, checked_add(65536,
+        checked_mul(program.nodes.size(), sizeof(std::size_t) + sizeof(std::uint32_t) + 1)));
+  }
   if (program.execution_metadata && program.execution_metadata->pointwise)
     estimate = checked_add(estimate, graph::pointwise_workspace_bytes(program, window));
+  if (allow_physical_fusion && !isolate_errors && program.execution_metadata &&
+      !program.execution_metadata->state_decisions.empty())
+    estimate = checked_add(estimate, graph::state_decision_tile_elements);
   if (isolate_errors) {
     estimate = checked_add(estimate, checked_mul(program.nodes.size(), sizeof(std::int16_t)));
     const auto positional = program.execution_metadata
@@ -214,19 +407,37 @@ std::size_t scratch_estimate(const graph::Program &program,
           program.nodes.size(), sizeof(std::vector<std::int16_t>)));
     }
   }
+  // Sequential nodes reuse one Workspace; scopes/branches account for their
+  // own copies through the existing recursive and per-worker admission.
+  estimate = checked_add(estimate, checked_mul(
+      graph::matrix_workspace_doubles(program, shapes, window, expanded_matmul_roots), sizeof(double)));
+  if (allow_physical_fusion && !isolate_errors && !prebound_inputs) {
+    const auto statistics=graph::matmul_summary_cache_doubles(program,shapes);
+    estimate=checked_add(estimate,checked_mul(statistics,sizeof(double)));
+    if (statistics) {
+      estimate=checked_add(estimate,checked_mul(
+          program.execution_metadata->matmul_summaries.size()+1,sizeof(std::size_t)));
+      // Vendor scratch is reserved even when a numerical guard selects replay.
+      estimate=checked_add(estimate,1024*1024);
+    }
+  }
   std::unordered_set<std::uint32_t> order_sources;
-  bool operator_scratch = false;
+  bool operator_scratch = false, latent_workspace = false;
   for (const auto &node : program.nodes) {
     if (node.kind != graph::NodeKind::operation)
       continue;
     const auto op = ops::lookup(node.opcode).op;
+    latent_workspace = latent_workspace || op == ops::Op::gaussian_log_density ||
+        op == ops::Op::gaussian_mixture_em || op == ops::Op::gaussian_hmm_em ||
+        op == ops::Op::hmm_smooth || op == ops::Op::partition_mean ||
+        op == ops::Op::scatter_rows;
     if (op == ops::Op::median || op == ops::Op::quantile)
       order_sources.insert(node.parents[0]);
     if (op == ops::Op::median || op == ops::Op::quantile ||
         op == ops::Op::median_where || op == ops::Op::quantile_where ||
         op == ops::Op::rolling_min || op == ops::Op::rolling_max ||
         op == ops::Op::argsort || op == ops::Op::distinct_count || op == ops::Op::ps_filter ||
-        op == ops::Op::solve || op == ops::Op::covariance ||
+        op == ops::Op::solve || op == ops::Op::solve_multi || op == ops::Op::symmetric_eigh || op == ops::Op::covariance ||
         op == ops::Op::correlation || op == ops::Op::quadratic_form)
       operator_scratch = true;
   }
@@ -236,9 +447,64 @@ std::size_t scratch_estimate(const graph::Program &program,
     estimate = checked_add(estimate, checked_mul(window, 24));
   if (!program.rolling_scopes.empty())
     estimate = checked_add(estimate, checked_mul(window + 1, sizeof(std::size_t)));
-  std::vector<ops::Shape> shapes;
-  if (inputs && (!program.rolling_scopes.empty() || !program.apply_scopes.empty()))
+  if (inputs && shapes.empty() && (latent_workspace || !program.rolling_scopes.empty() || !program.apply_scopes.empty()))
     graph::required_array_capacity(program, *inputs, logical_window, &shapes);
+  if (latent_workspace) {
+    std::size_t doubles = 0, indices = 0;
+    for (const auto &node : program.nodes) {
+      if (node.kind != graph::NodeKind::operation) continue;
+      const auto op = ops::lookup(node.opcode).op;
+      if (op == ops::Op::partition_mean || op == ops::Op::scatter_rows) {
+        indices = std::max(indices, shapes.empty() ? window : shapes[node.parents[1]].size());
+      } else if (op == ops::Op::gaussian_log_density || op == ops::Op::gaussian_mixture_em ||
+                 op == ops::Op::gaussian_hmm_em || op == ops::Op::hmm_smooth) {
+        // NK is an internal EM extent, not necessarily any DAG node's shape.
+        // In particular K>D invalidates a bound based only on max node size.
+        if (shapes.empty()) {
+          doubles = std::max(doubles, checked_add(checked_mul(checked_mul(window, window), 5),
+                                                 checked_mul(window, 4)));
+        } else {
+          std::array<ops::Value, 5> arguments{};
+          for (std::size_t i = 0; i < std::min<std::size_t>(node.parent_count, arguments.size()); ++i)
+            arguments[i].shape = shapes[node.parents[i]];
+          // Tolerance can be a runtime binding. Reserve the full-history
+          // envelope for HMM rather than infer a zero tolerance from a shape.
+          const auto scratch_for_shape = [&]() {
+            return op == ops::Op::gaussian_hmm_em ? ops::latent_hmm_full_scratch(
+                arguments[0].shape.dim[0],arguments[1].shape.size()) :
+                ops::latent_scratch(op,arguments.data());
+          };
+          auto bound = scratch_for_shape();
+          if (op == ops::Op::gaussian_mixture_em) {
+            const auto k = arguments[1].shape.size();
+            if (bound < checked_mul(arguments[0].shape.dim[0], k)) {
+              // Maximum shapes may select bounded replay while a shorter row
+              // retains NK. Cover both the cutoff and storage>=NK boundaries;
+              // derive geometry through the same primitive, never a second
+              // allocation formula or an actual unused posterior reservation.
+              arguments[0].shape.dim[0] = std::max(
+                  (ops::latent_gmm_replay_min_elements - 1) / k, bound / k);
+              bound = std::max(bound, scratch_for_shape());
+            }
+          }
+          if (op == ops::Op::gaussian_hmm_em && ops::latent_fit_matrix_count(
+                  op, arguments[0].shape.dim[0], arguments[1].shape.size()) == 2) {
+            // Shapes are upper extents, not exact lengths for every interval
+            // or child scope. The physical two-history cutoff is non-monotone:
+            // a shorter row can still require three histories. Reuse the unique
+            // primitive geometry for the peak below the cutoff; do not reserve
+            // or allocate a third history for the actual two-history execution.
+            arguments[0].shape.dim[0] = ops::latent_hmm_replay_min_rows - 1;
+            bound = std::max(bound, scratch_for_shape());
+          }
+          doubles = std::max(doubles, bound);
+        }
+      }
+    }
+    // The two reusable buffers can retain different high-water marks.
+    estimate = checked_add(estimate, checked_mul(doubles, sizeof(double)));
+    estimate = checked_add(estimate, checked_mul(indices, sizeof(std::size_t)));
+  }
   const auto scope_scratch = [&](const graph::Program &body,
                                  const std::vector<std::uint32_t> &captures,
                                  const std::vector<std::uint8_t> *preceding,
@@ -263,7 +529,7 @@ std::size_t scratch_estimate(const graph::Program &program,
     // A failed capture enables child isolation even when its compiled body is
     // strict. Admission must include the resulting node/position statuses at
     // every nesting depth before a numerical failure occurs.
-    auto bytes = scratch_estimate(body, capacity, &captured, length, child_isolation);
+    auto bytes = scratch_estimate(body, capacity, &captured, length, child_isolation, true);
     if (child_isolation) {
       bytes = checked_add(bytes, checked_mul(captures.size(), sizeof(std::int16_t)));
       bytes = checked_add(bytes, checked_mul(captures.size(), sizeof(ops::Value)));
@@ -447,6 +713,13 @@ std::size_t checked_mul(std::size_t a, std::size_t b) {
     throw std::overflow_error("execution size overflow");
   return a * b;
 }
+std::size_t canonical_child_scratch_bytes(const graph::Program &program,
+    const std::vector<ops::Value> &inputs, std::size_t logical_window) {
+  const auto capacity = graph::required_array_capacity(program, inputs, logical_window);
+  // Deferred original-node failures disable pair/pointwise fusion in the
+  // private post executor. Admission must reserve that same canonical arena.
+  return scratch_estimate(program, capacity, &inputs, logical_window, false, true, false);
+}
 void Config::validate() const {
   require(std::isfinite(thread_work_units) && thread_work_units > 0 &&
               std::isfinite(dag_branch_work_units) &&
@@ -544,6 +817,12 @@ make_plan(std::shared_ptr<compiler::CompiledGraph> graph, const Config &config,
   require(graph && sizes.size() == graph->program.input_count,
           "graph input count mismatch");
   auto geometry = typed_geometry(graph->program, sizes, inputs, starts, ends, rows, product_ids);
+  std::optional<graph::CompactPathBudget> compact;
+  if (inputs && graph->program.execution_metadata &&
+      graph->program.execution_metadata->compact_path)
+    compact = graph::compact_path_budget(graph->program,
+        *graph->program.execution_metadata->compact_path, *inputs,
+        geometry.row_lengths, canonical_child_scratch_bytes);
   const auto array_capacity = inputs ? graph::required_array_capacity(graph->program, *inputs, geometry.max_window) : geometry.max_window;
   auto p = std::make_shared<Plan>();
   p->graph = std::move(graph);
@@ -583,7 +862,8 @@ make_plan(std::shared_ptr<compiler::CompiledGraph> graph, const Config &config,
     p->estimated_result_metadata_bytes = checked_add(
         checked_mul(checked_mul(rows, p->graph->program.roots.size()),
                     sizeof(graph::ResultSlot) + sizeof(ops::Shape) + 2),
-        checked_mul(checked_add(rows, 1), 2 * sizeof(std::size_t)));
+        checked_add(checked_mul(checked_add(rows, 1), 2 * sizeof(std::size_t)),
+                    p->graph->program.roots.size() * sizeof(ops::MemoryOrder)));
     // Reject an impossible metadata budget before reserving rows * roots slots.
     if (memory_budget && p->estimated_result_metadata_bytes > *memory_budget)
       throw std::bad_alloc();
@@ -593,8 +873,10 @@ make_plan(std::shared_ptr<compiler::CompiledGraph> graph, const Config &config,
     p->estimated_status_bytes = p->graph->program.isolate_errors
         ? checked_mul(p->result_layout->status_count(), 2) : 0;
   }
-  p->estimated_worker_scratch_bytes =
-      scratch_estimate(p->graph->program, array_capacity, inputs, geometry.max_window);
+  p->estimated_worker_scratch_bytes = compact ? compact->total_bytes :
+      scratch_estimate(p->graph->program, array_capacity, inputs, geometry.max_window,
+          false, false, true, p->expanded_matmul_roots, p->row_subviews);
+  if (compact) p->reason_codes.push_back("bounded_compact_scan_consumer_closure");
   for (const auto &node : p->graph->nodes) {
     if (node.node.kind != graph::NodeKind::operation)
       continue;
@@ -621,8 +903,9 @@ make_plan(std::shared_ptr<compiler::CompiledGraph> graph, const Config &config,
     if (node.simd_eligible && array_capacity >= config.simd_min_elements)
       p->simd_nodes.push_back(node.node_id);
   }
-  p->estimated_work_units = geometry_work(p->graph->physical_cost, geometry);
-  const bool typed_arrays = inputs && requires_typed_work(p->graph->program);
+  p->estimated_work_units = compact ? compact->physical_work :
+      geometry_work(p->graph->physical_cost, geometry);
+  const bool typed_arrays = !compact && inputs && requires_typed_work(p->graph->program);
   std::map<std::size_t, double> extra_by_length;
   if (typed_arrays) {
     geometry.row_work_units.reserve(rows);
@@ -638,6 +921,21 @@ make_plan(std::shared_ptr<compiler::CompiledGraph> graph, const Config &config,
     p->estimated_logical_work_units += p->estimated_typed_array_work_units;
     if (p->estimated_typed_array_work_units > 0)
       p->reason_codes.push_back("typed_array_shape_work_accounted");
+  } else if (compact) {
+    // Keep the unfused logical comparison visible. The physical estimate
+    // includes the actual number of bounded producer batches and post work.
+    for (auto length : geometry.row_lengths) {
+      auto found = extra_by_length.find(length);
+      if (found == extra_by_length.end())
+        found = extra_by_length.emplace(length,
+            typed_array_extra_work(p->graph->program, *inputs, length)).first;
+      p->estimated_logical_work_units += found->second;
+      const auto row = graph::compact_path_budget(p->graph->program,
+          *p->graph->program.execution_metadata->compact_path, *inputs,
+          std::vector<std::size_t>{length}, canonical_child_scratch_bytes);
+      require(row.has_value(), "compact geometry admission changed");
+      geometry.row_work_units.push_back(row->physical_work);
+    }
   }
   if (p->result_layout) {
     if (geometry.row_work_units.empty())
@@ -664,15 +962,34 @@ make_plan(std::shared_ptr<compiler::CompiledGraph> graph, const Config &config,
       geometry.row_work_units[row] += roots * static_cast<double>(geometry.row_lengths[row]);
     p->reason_codes.push_back("typed_output_write_work_accounted");
   }
+  std::map<std::size_t, double> stream_by_length;
+  if (!compact && inputs && !p->graph->program.isolate_errors &&
+      !p->graph->program.execution_metadata->gaussian_filter_source.empty()) {
+    if (geometry.row_work_units.empty())
+      for (auto length : geometry.row_lengths)
+        geometry.row_work_units.push_back(row_work(p->graph->physical_cost, length));
+    double replay = 0;
+    for (std::size_t row = 0; row < rows; ++row) {
+      const auto length = geometry.row_lengths[row];
+      auto found = stream_by_length.find(length);
+      if (found == stream_by_length.end()) found = stream_by_length.emplace(length,
+          gaussian_stream_extra_work(p->graph->program, *inputs, length)).first;
+      replay += found->second;
+      geometry.row_work_units[row] += found->second;
+    }
+    p->estimated_work_units += replay;
+    if (replay > 0) p->reason_codes.push_back("gaussian_filter_stream_replay_work_accounted");
+  }
   std::vector<std::map<std::size_t, double>> branch_extra(p->graph->branches.size());
   const auto branch_work = [&](std::size_t branch, std::size_t length) {
     const auto &info = p->graph->branches[branch];
     const double base = row_work(info.cost, length);
-    if (!typed_arrays) return base;
+    if (!inputs) return base;
     auto &cache = branch_extra[branch];
     auto found = cache.find(length);
     if (found == cache.end()) found = cache.emplace(length,
-        typed_array_extra_work(info.program, *inputs, length)).first;
+        (typed_arrays ? typed_array_extra_work(info.program, *inputs, length) : 0) +
+        gaussian_stream_extra_work(info.program, *inputs, length)).first;
     return base + found->second;
   };
   const bool process =
@@ -684,7 +1001,7 @@ make_plan(std::shared_ptr<compiler::CompiledGraph> graph, const Config &config,
   std::size_t heavy_branches = 0;
   for (std::size_t branch = 0; branch < p->graph->branches.size(); ++branch) {
     double work = geometry_work(p->graph->branches[branch].cost, geometry);
-    if (typed_arrays) {
+    if (typed_arrays || !stream_by_length.empty()) {
       work = 0;
       for (auto length : geometry.row_lengths) work += branch_work(branch, length);
     }
@@ -697,6 +1014,20 @@ make_plan(std::shared_ptr<compiler::CompiledGraph> graph, const Config &config,
       p->graph->branches.size() > 1 && heavy_branches >= 2 &&
       p->estimated_work_units >= config.dag_branch_work_units &&
       branch_task_count > rows;
+
+  // Reuse the explicit independent-row proof, retaining every shared root and
+  // each row's complete time/contracting axes in the same native task.
+  std::size_t array_rows = 0, row_range_overhead = 0;
+  if (!process && rows == 1 && cpu > 1 && inputs && p->result_layout &&
+      p->graph->program.execution_metadata->row_batch) {
+    std::vector<ops::Value> blocked;
+    std::size_t batch = 0, count = 0;
+    if (graph::row_batch_inputs(p->graph->program, *inputs, geometry.max_window,
+        blocked, batch, count)) array_rows = count;
+  }
+  const auto row_workers = std::min({cpu, array_rows / 128,
+      static_cast<std::size_t>(std::min(static_cast<double>(cpu),
+          p->estimated_work_units / config.thread_work_units))});
 
   // Only a complete pointwise region may partition one tensor. Cross-element
   // kernels and recurrence states never inherit this capability by shape alone.
@@ -724,142 +1055,220 @@ make_plan(std::shared_ptr<compiler::CompiledGraph> graph, const Config &config,
   const auto tensor_workers = std::min({cpu, tensor_elements / graph::pointwise_tile_elements,
       static_cast<std::size_t>(std::min(static_cast<double>(cpu),
           p->estimated_work_units / config.thread_work_units))});
-  if (process) {
-    p->lane = "process";
-    p->reason_codes.push_back(hard_stop ? "hard_stop_requires_process_isolation"
-                              : p->estimated_input_bytes >=
-                                      config.process_input_threshold_bytes
-                                  ? "input_exceeds_process_isolation_threshold"
-                                  : "work_exceeds_process_threshold");
-    p->process_count =
-        std::min({cpu, config.max_processes,
-                  std::max<std::size_t>(1, rows / config.min_rows_per_worker)});
-  } else if (dag_branch) {
-    p->lane = "thread";
-    p->parallel_dimension = "dag_branch";
-    p->thread_count = std::min(cpu, branch_task_count);
-    p->estimated_worker_scratch_bytes = 0;
-    for (const auto &branch : p->graph->branches) {
-      const auto branch_output =
-          checked_mul(branch.root_indices.size(), sizeof(double));
-      p->estimated_worker_scratch_bytes = std::max(
+  // Retry only the explicit budget-rejection branch, not arbitrary allocation
+  // errors. Geometry and result layout stay shared with this one Plan; reset
+  // all physical lane/transport choices before considering the original domain.
+  auto base_scratch = p->estimated_worker_scratch_bytes;
+  const auto base_reasons = p->reason_codes.size();
+  const auto base_dimension = p->parallel_dimension;
+  for (;;) {
+    p->estimated_worker_scratch_bytes = base_scratch;
+    p->lane = "single"; p->parallel_dimension = base_dimension;
+    p->process_count = p->thread_count = p->threads_per_process = 1;
+    p->tensor_elements = 0; p->use_shared_memory = false;
+    p->chunks.clear(); row_range_overhead = 0;
+    p->reason_codes.resize(base_reasons);
+    if (!p->expanded_matmul_roots)
+      p->reason_codes.push_back("memory_budget_uses_original_matmul_geometry");
+    if (!p->row_subviews)
+      p->reason_codes.push_back("memory_budget_uses_original_row_geometry");
+    if (process) {
+      p->lane = "process";
+      p->reason_codes.push_back(hard_stop ? "hard_stop_requires_process_isolation"
+                                : p->estimated_input_bytes >=
+                                        config.process_input_threshold_bytes
+                                    ? "input_exceeds_process_isolation_threshold"
+                                    : "work_exceeds_process_threshold");
+      p->process_count =
+          std::min({cpu, config.max_processes,
+                    std::max<std::size_t>(1, rows / config.min_rows_per_worker)});
+    } else if (row_workers >= 2) {
+      p->lane = "thread"; p->parallel_dimension = "array_row";
+      p->tensor_elements = array_rows; p->thread_count = row_workers;
+      row_range_overhead = checked_add(checked_mul(inputs->size(), sizeof(ops::Value)),
+          checked_add(checked_mul(p->graph->program.nodes.size(), 2 * sizeof(ops::Shape)),
+              checked_add(checked_mul(p->graph->program.roots.size(),
+                  sizeof(graph::ResultSlot) + sizeof(ops::Shape) + sizeof(std::int16_t)), 4096)));
+      p->estimated_worker_scratch_bytes = checked_add(p->estimated_worker_scratch_bytes,
+          row_range_overhead);
+      p->reason_codes.push_back("independent_matrix_row_closure");
+    } else if (dag_branch) {
+      p->lane = "thread";
+      p->parallel_dimension = "dag_branch";
+      p->thread_count = std::min(cpu, branch_task_count);
+      p->estimated_worker_scratch_bytes = 0;
+      for (const auto &branch : p->graph->branches) {
+        const auto branch_output =
+            checked_mul(branch.root_indices.size(), sizeof(double));
+        p->estimated_worker_scratch_bytes = std::max(
+            p->estimated_worker_scratch_bytes,
+            checked_add(scratch_estimate(branch.program, array_capacity, inputs, geometry.max_window),
+                        branch_output));
+      }
+      p->reason_codes.push_back("heavy_independent_dag_branches");
+    } else if (tensor_workers >= 2) {
+      p->lane = "thread";
+      p->parallel_dimension = "tensor";
+      p->tensor_elements = tensor_elements;
+      p->thread_count = tensor_workers;
+      p->reason_codes.push_back("independent_pointwise_tensor_tiles");
+    } else if (p->estimated_work_units >= config.thread_work_units && rows >= 2 &&
+               cpu > 1) {
+      p->lane = "thread";
+      p->thread_count = std::min(cpu, rows);
+      p->reason_codes.push_back("work_exceeds_thread_threshold");
+    } else
+      p->reason_codes.push_back("parallel_overhead_expected_to_dominate");
+
+    if (p->lane != "single")
+      p->reason_codes.push_back("parallelize_by_" + p->parallel_dimension);
+    p->use_shared_memory = process && (hard_stop || already_shared ||
+                                       p->estimated_input_bytes >=
+                                           config.shared_memory_threshold_bytes);
+    if (p->use_shared_memory)
+      p->reason_codes.push_back(
+          hard_stop        ? "hard_stop_uses_shared_process_transport"
+          : already_shared ? "inputs_already_shared"
+                           : "process_input_exceeds_shared_memory_threshold");
+
+    // Logical consumers can have tiny scalar/compact roots while sorting a large
+    // private source. Check all scope bodies, not root sizes or numerical guards.
+    // Charge one fixed estimated library stack/TLS resource per active worker,
+    // after compact/branch scratch selection. This never allocates a fake buffer.
+    if (rows && ops::axis_path_detail::numeric_line_sort_available() &&
+        may_sort_numeric_line(p->graph->program)) {
+      p->estimated_worker_scratch_bytes = checked_add(
           p->estimated_worker_scratch_bytes,
-          checked_add(scratch_estimate(branch.program, array_capacity, inputs, geometry.max_window),
-                      branch_output));
+          ops::axis_path_detail::native_sort_library_reserve_bytes);
+      p->reason_codes.push_back("native_numeric_line_sort_resource_reserve");
     }
-    p->reason_codes.push_back("heavy_independent_dag_branches");
-  } else if (tensor_workers >= 2) {
-    p->lane = "thread";
-    p->parallel_dimension = "tensor";
-    p->tensor_elements = tensor_elements;
-    p->thread_count = tensor_workers;
-    p->reason_codes.push_back("independent_pointwise_tensor_tiles");
-  } else if (p->estimated_work_units >= config.thread_work_units && rows >= 2 &&
-             cpu > 1) {
-    p->lane = "thread";
-    p->thread_count = std::min(cpu, rows);
-    p->reason_codes.push_back("work_exceeds_thread_threshold");
-  } else
-    p->reason_codes.push_back("parallel_overhead_expected_to_dominate");
-
-  if (p->lane != "single")
-    p->reason_codes.push_back("parallelize_by_" + p->parallel_dimension);
-  p->use_shared_memory = process && (hard_stop || already_shared ||
-                                     p->estimated_input_bytes >=
-                                         config.shared_memory_threshold_bytes);
-  if (p->use_shared_memory)
-    p->reason_codes.push_back(
-        hard_stop        ? "hard_stop_uses_shared_process_transport"
-        : already_shared ? "inputs_already_shared"
-                         : "process_input_exceeds_shared_memory_threshold");
-
-  auto workers = process ? p->process_count : p->thread_count;
-  const auto check_transport = [&] {
-    if (!process) return;
-    p->chunks = partition(geometry, workers, p->parallel_dimension == "product",
-                          &p->graph->physical_cost);
-    for (const auto chunk : p->chunks) {
-      std::size_t output_bytes = 0, status_bytes = 0, slots = 0;
-      if (p->result_layout) {
-        const auto &layout = *p->result_layout;
-        output_bytes = layout.row_bytes[chunk.end] - layout.row_bytes[chunk.begin];
-        if (p->graph->program.isolate_errors)
-          status_bytes = checked_mul(layout.row_statuses[chunk.end] - layout.row_statuses[chunk.begin], 2);
-        slots = checked_mul(chunk.end - chunk.begin, p->graph->program.roots.size());
-      } else {
-        auto output_rows = chunk.end - chunk.begin;
-        if (p->graph->program.output_kind == graph::OutputKind::series) {
-          output_rows = 0;
-          for (auto row = chunk.begin; row < chunk.end; ++row)
-            output_rows = checked_add(output_rows, geometry.row_lengths[row]);
+    auto workers = process ? p->process_count : p->thread_count;
+    const auto check_transport = [&] {
+      if (!process) return;
+      p->chunks = partition(geometry, workers, p->parallel_dimension == "product",
+                            &p->graph->physical_cost);
+      for (const auto chunk : p->chunks) {
+        std::size_t output_bytes = 0, status_bytes = 0, slots = 0;
+        if (p->result_layout) {
+          const auto &layout = *p->result_layout;
+          output_bytes = layout.row_bytes[chunk.end] - layout.row_bytes[chunk.begin];
+          if (p->graph->program.isolate_errors)
+            status_bytes = checked_mul(layout.row_statuses[chunk.end] - layout.row_statuses[chunk.begin], 2);
+          slots = checked_mul(chunk.end - chunk.begin, p->graph->program.roots.size());
+        } else {
+          auto output_rows = chunk.end - chunk.begin;
+          if (p->graph->program.output_kind == graph::OutputKind::series) {
+            output_rows = 0;
+            for (auto row = chunk.begin; row < chunk.end; ++row)
+              output_rows = checked_add(output_rows, geometry.row_lengths[row]);
+          }
+          const auto count = checked_mul(output_rows, p->graph->program.roots.size());
+          output_bytes = checked_mul(count, graph::output_itemsize(p->graph->program.output_dtype));
+          if (p->graph->program.isolate_errors) status_bytes = checked_mul(count, 2);
         }
-        const auto count = checked_mul(output_rows, p->graph->program.roots.size());
-        output_bytes = checked_mul(count, graph::output_itemsize(p->graph->program.output_dtype));
-        if (p->graph->program.isolate_errors) status_bytes = checked_mul(count, 2);
+        // Statuses and actual shapes still travel in IPC on the shared path.
+        require(native::process_response_bytes(0, status_bytes, slots) <= native::max_process_frame_bytes,
+                "process result status/shape metadata exceeds IPC frame limit; reduce the interval batch");
+        if (!p->use_shared_memory &&
+            native::process_response_bytes(output_bytes, status_bytes, slots) > native::max_process_frame_bytes) {
+          p->use_shared_memory = true;
+          p->reason_codes.push_back("process_result_exceeds_ipc_frame_limit");
+        }
       }
-      // Statuses and actual shapes still travel in IPC on the shared path.
-      require(native::process_response_bytes(0, status_bytes, slots) <= native::max_process_frame_bytes,
-              "process result status/shape metadata exceeds IPC frame limit; reduce the interval batch");
-      if (!p->use_shared_memory &&
-          native::process_response_bytes(output_bytes, status_bytes, slots) > native::max_process_frame_bytes) {
-        p->use_shared_memory = true;
-        p->reason_codes.push_back("process_result_exceeds_ipc_frame_limit");
-      }
-    }
-  };
-  check_transport();
-  p->estimated_total_memory_bytes = total_memory(*p, workers);
-  bool reduced = false;
-  while (memory_budget && p->estimated_total_memory_bytes > *memory_budget &&
-         workers > 1) {
-    --workers;
-    reduced = true;
-    // Fewer workers enlarge each response; recheck before memory admission.
+    };
     check_transport();
     p->estimated_total_memory_bytes = total_memory(*p, workers);
-  }
-  if (memory_budget && p->estimated_total_memory_bytes > *memory_budget)
-    throw std::bad_alloc();
-  if (process)
-    p->process_count = workers;
-  else
-    p->thread_count = workers;
-  if (reduced)
-    p->reason_codes.push_back("memory_budget_reduced_parallelism");
-  if (!p->simd_nodes.empty())
-    p->reason_codes.push_back(
-        "eligible_nodes_use_native_runtime_simd_dispatch");
-  if (async_io)
-    p->reason_codes.push_back("coroutine_orchestration_for_async_boundary");
+    // Optional proofs must not reject the previously admissible geometry or
+    // reduce its worker budget just to reserve this new optimization's tables.
+    if (memory_budget && p->estimated_total_memory_bytes > *memory_budget &&
+        p->row_subviews && !compact) {
+      const auto original_scratch = scratch_estimate(p->graph->program,
+          array_capacity, inputs, geometry.max_window, false, false, true,
+          p->expanded_matmul_roots, false);
+      if (original_scratch < base_scratch) {
+        base_scratch = original_scratch;
+        p->row_subviews = false;
+        continue;
+      }
+    }
+    bool reduced = false;
+    while (memory_budget && p->estimated_total_memory_bytes > *memory_budget &&
+           workers > 1) {
+      --workers;
+      reduced = true;
+      // Fewer workers enlarge each response; recheck before memory admission.
+      check_transport();
+      p->estimated_total_memory_bytes = total_memory(*p, workers);
+    }
+    if (!process && row_range_overhead && workers == 1) {
+      // A constrained request must retain the old admissible single path; range
+      // descriptions are not used by that path and must not block its admission.
+      p->estimated_worker_scratch_bytes -= row_range_overhead;
+      p->lane = "single"; p->parallel_dimension = "interval";
+      p->tensor_elements = 0;
+      p->reason_codes.erase(std::remove(p->reason_codes.begin(), p->reason_codes.end(),
+          "parallelize_by_array_row"), p->reason_codes.end());
+      p->reason_codes.push_back("row_parallelism_reduced_to_single");
+      p->estimated_total_memory_bytes = total_memory(*p, 1);
+    }
+    if (memory_budget && p->estimated_total_memory_bytes > *memory_budget) {
+      if (p->expanded_matmul_roots && !compact) {
+        const auto original_scratch = scratch_estimate(p->graph->program,
+            array_capacity, inputs, geometry.max_window, false, false, true, false,
+            p->row_subviews);
+        if (original_scratch < base_scratch) {
+          base_scratch = original_scratch;
+          p->expanded_matmul_roots = false;
+          continue;
+        }
+      }
+      throw std::bad_alloc();
+    }
+    if (process)
+      p->process_count = workers;
+    else
+      p->thread_count = workers;
+    if (reduced)
+      p->reason_codes.push_back("memory_budget_reduced_parallelism");
+    if (!p->simd_nodes.empty())
+      p->reason_codes.push_back(
+          "eligible_nodes_use_native_runtime_simd_dispatch");
+    if (async_io)
+      p->reason_codes.push_back("coroutine_orchestration_for_async_boundary");
 
-  if (p->parallel_dimension == "dag_branch") {
-    struct WeightedTask {
-      BranchTask task;
-      double work = 0;
-    };
-    std::vector<WeightedTask> tasks;
-    tasks.reserve(branch_task_count);
-    for (std::size_t row = 0; row < rows; ++row)
-      for (std::uint32_t branch = 0; branch < p->graph->branches.size();
-           ++branch)
-        tasks.push_back({{row, branch},
-                         branch_work(branch, geometry.row_lengths[row])});
-    std::stable_sort(tasks.begin(), tasks.end(),
-                     [](const WeightedTask &a, const WeightedTask &b) {
-                       return a.work > b.work;
-                     });
-    for (const auto &task : tasks)
-      p->branch_tasks.push_back(task.task);
-  } else if (p->parallel_dimension == "tensor") {
-    const auto tiles = (p->tensor_elements + graph::pointwise_tile_elements - 1) / graph::pointwise_tile_elements;
-    for (std::size_t i = 0; i < workers; ++i)
-      p->chunks.push_back({(tiles * i / workers) * graph::pointwise_tile_elements,
-          std::min(p->tensor_elements, (tiles * (i + 1) / workers) * graph::pointwise_tile_elements)});
-  } else if (!process) {
-    p->chunks = partition(geometry, workers, p->parallel_dimension == "product",
-                          &p->graph->physical_cost);
+    if (p->parallel_dimension == "dag_branch") {
+      struct WeightedTask {
+        BranchTask task;
+        double work = 0;
+      };
+      std::vector<WeightedTask> tasks;
+      tasks.reserve(branch_task_count);
+      for (std::size_t row = 0; row < rows; ++row)
+        for (std::uint32_t branch = 0; branch < p->graph->branches.size();
+             ++branch)
+          tasks.push_back({{row, branch},
+                           branch_work(branch, geometry.row_lengths[row])});
+      std::stable_sort(tasks.begin(), tasks.end(),
+                       [](const WeightedTask &a, const WeightedTask &b) {
+                         return a.work > b.work;
+                       });
+      for (const auto &task : tasks)
+        p->branch_tasks.push_back(task.task);
+    } else if (p->parallel_dimension == "array_row") {
+      for (std::size_t i = 0; i < workers; ++i)
+        p->chunks.push_back({p->tensor_elements * i / workers,
+                            p->tensor_elements * (i + 1) / workers});
+    } else if (p->parallel_dimension == "tensor") {
+      const auto tiles = (p->tensor_elements + graph::pointwise_tile_elements - 1) / graph::pointwise_tile_elements;
+      for (std::size_t i = 0; i < workers; ++i)
+        p->chunks.push_back({(tiles * i / workers) * graph::pointwise_tile_elements,
+            std::min(p->tensor_elements, (tiles * (i + 1) / workers) * graph::pointwise_tile_elements)});
+    } else if (!process) {
+      p->chunks = partition(geometry, workers, p->parallel_dimension == "product",
+                            &p->graph->physical_cost);
+    }
+    return p;
   }
-  return p;
 }
 void validate_plan(const Plan &p, const std::vector<std::size_t> &sizes,
                    const std::int64_t *starts, const std::int64_t *ends,
@@ -872,5 +1281,21 @@ void validate_plan(const Plan &p, const std::vector<std::size_t> &sizes,
   const auto geometry = typed_geometry<false>(p.graph->program, sizes, inputs, starts, ends, rows, product_ids, false);
   require(geometry.signature == p.geometry_signature,
           "stale execution plan interval/product geometry");
+  if (p.parallel_dimension == "array_row") {
+    require(p.lane == "thread" && p.thread_count >= 2 && p.thread_count <= p.cpu_budget &&
+        rows == 1 && inputs && p.result_layout && p.graph->program.execution_metadata->row_batch &&
+        p.chunks.size() == p.thread_count, "invalid independent row plan");
+    std::vector<ops::Value> blocked;
+    std::size_t batch = 0, count = 0;
+    require(graph::row_batch_inputs(p.graph->program, *inputs, geometry.max_window,
+        blocked, batch, count) && count == p.tensor_elements, "stale independent row geometry");
+    std::size_t end = 0;
+    for (const auto chunk : p.chunks) {
+      require(chunk.begin == end && chunk.end >= chunk.begin && chunk.end <= count &&
+          chunk.end - chunk.begin >= 128, "invalid independent row range");
+      end = chunk.end;
+    }
+    require(end == count, "incomplete independent row ranges");
+  }
 }
 } // namespace calmetrics_engine::planner

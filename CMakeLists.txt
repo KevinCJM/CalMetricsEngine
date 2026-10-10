@@ -10,6 +10,9 @@ option(CALMETRICS_ENGINE_BUILD_PYTHON "Build the Python extension" ON)
 option(CALMETRICS_ENGINE_BUILD_TESTS "Build standalone native tests" OFF)
 option(CALMETRICS_ENGINE_BUILD_BENCHMARKS "Build local benchmark executables" OFF)
 option(CALMETRICS_ENGINE_SANITIZE "Enable address/undefined-behavior sanitizers" OFF)
+option(CALMETRICS_ENGINE_USE_EIGEN "Use eligible header-only Eigen numerical kernels" ON)
+option(CALMETRICS_ENGINE_USE_ACCELERATE "Use guarded Apple Accelerate numerical kernels" ON)
+option(CALMETRICS_ENGINE_USE_HIGHWAY "Use eligible Highway order selection kernels" ON)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -19,6 +22,10 @@ set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
 
 find_package(Threads REQUIRED)
+set(calmetrics_engine_arch "${CMAKE_SYSTEM_PROCESSOR}")
+if(APPLE AND CMAKE_OSX_ARCHITECTURES)
+    set(calmetrics_engine_arch "${CMAKE_OSX_ARCHITECTURES}")
+endif()
 
 add_library(calmetrics_engine_scheduler STATIC
     cpp/scheduler.cpp
@@ -43,36 +50,108 @@ add_library(calmetrics_engine_operators STATIC
     cpp/operators/recurrence.cpp
     cpp/operators/state_events.cpp
     cpp/operators/matrix.cpp
+    cpp/operators/matrix_backend.cpp
+    cpp/operators/covchol_accelerate.cpp
+    cpp/operators/solve_accelerate.cpp
+    cpp/operators/matmul_packed.cpp
+    cpp/operators/matmul_accelerate.cpp
+    cpp/operators/covariance_accelerate.cpp
+    cpp/operators/transcendental_accelerate.cpp
+    cpp/operators/matrix_foundation.cpp
+    cpp/operators/matmul_statistics.cpp
+    cpp/operators/axis_primitives.cpp
+    cpp/operators/numeric_line_sort.cpp
+    cpp/operators/latent.cpp
     cpp/operators/state.cpp
     cpp/operators/simd.cpp
     cpp/result_layout.cpp
     cpp/graph.cpp
+    cpp/affine_projection.cpp
+    cpp/compact_path.cpp
     cpp/pointwise.cpp
     cpp/compiler.cpp
     cpp/excel.cpp
     cpp/excel_budget.cpp
     cpp/excel_operators.cpp
     cpp/excel_state.cpp
+    cpp/excel_matrix_foundation.cpp
+    cpp/excel_axis_primitives.cpp
+    cpp/excel_latent.cpp
     cpp/excel_scopes.cpp
     cpp/typed_ir.cpp
+    cpp/typed_foundation.cpp
+    cpp/typed_latent.cpp
     cpp/planner.cpp
     cpp/shared_memory.cpp
     cpp/model_payload.cpp
     cpp/native_runtime.cpp
     cpp/native_process.cpp
 )
+# The pinned internal Eigen specialization is confined to one translation unit.
+set_source_files_properties(cpp/operators/matmul_packed.cpp PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
+if(NOT MSVC)
+    set_source_files_properties(cpp/operators/matmul_packed.cpp PROPERTIES COMPILE_OPTIONS "-fno-lto")
+endif()
 target_include_directories(calmetrics_engine_operators PUBLIC cpp/include)
 target_link_libraries(calmetrics_engine_operators PUBLIC calmetrics_engine_scheduler)
+if(APPLE AND calmetrics_engine_arch MATCHES "^(arm64|aarch64)$" AND CALMETRICS_ENGINE_USE_ACCELERATE)
+    find_library(CALMETRICS_ACCELERATE_FRAMEWORK Accelerate REQUIRED)
+    target_link_libraries(calmetrics_engine_operators PUBLIC "${CALMETRICS_ACCELERATE_FRAMEWORK}")
+    target_compile_definitions(calmetrics_engine_operators PRIVATE CALMETRICS_HAVE_ACCELERATE_COVCHOL=1)
+endif()
+if(CALMETRICS_ENGINE_USE_EIGEN)
+    # Keep offline sdist builds reproducible. The unchanged upstream archive is
+    # verified before extraction; no package import/request downloads or builds.
+    set(calmetrics_eigen_archive "${CMAKE_CURRENT_SOURCE_DIR}/third_party/eigen/eigen-3.4.0.tar.gz")
+    set(calmetrics_eigen_sha "8586084f71f9bde545ee7fa6d00288b264a2b7ac3607b974e54d13e7162c1c72")
+    file(SHA256 "${calmetrics_eigen_archive}" calmetrics_eigen_actual_sha)
+    if(NOT calmetrics_eigen_actual_sha STREQUAL calmetrics_eigen_sha)
+        message(FATAL_ERROR "Bundled Eigen archive checksum mismatch")
+    endif()
+    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${calmetrics_eigen_archive}")
+    set(calmetrics_eigen_root "${CMAKE_CURRENT_BINARY_DIR}/_deps/eigen-3.4.0")
+    file(ARCHIVE_EXTRACT INPUT "${calmetrics_eigen_archive}" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/_deps")
+    target_include_directories(calmetrics_engine_operators SYSTEM PRIVATE "${calmetrics_eigen_root}")
+    target_compile_definitions(calmetrics_engine_operators PRIVATE CALMETRICS_HAVE_EIGEN_ROTATION=1)
+endif()
+install(FILES third_party/eigen/COPYING.MPL2 third_party/eigen/COPYING.BSD
+    third_party/eigen/COPYING.README third_party/eigen/README.md
+    DESTINATION calmetrics_engine/licenses/eigen)
+if(APPLE AND calmetrics_engine_arch MATCHES "^(arm64|aarch64)$" AND CALMETRICS_ENGINE_USE_HIGHWAY)
+    # Adopt only the measured platform; other builds retain native selection.
+    set(calmetrics_highway_archive "${CMAKE_CURRENT_SOURCE_DIR}/third_party/highway/highway-1.3.0.tar.gz")
+    file(SHA256 "${calmetrics_highway_archive}" calmetrics_highway_sha)
+    if(NOT calmetrics_highway_sha STREQUAL "07b3c1ba2c1096878a85a31a5b9b3757427af963b1141ca904db2f9f4afe0bc2")
+        message(FATAL_ERROR "Bundled Highway archive checksum mismatch")
+    endif()
+    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${calmetrics_highway_archive}")
+    set(calmetrics_highway_root "${CMAKE_CURRENT_BINARY_DIR}/_deps/highway-1.3.0")
+    file(ARCHIVE_EXTRACT INPUT "${calmetrics_highway_archive}" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/_deps")
+    set(HWY_FORCE_STATIC_LIBS ON CACHE BOOL "" FORCE)
+    set(HWY_ENABLE_CONTRIB OFF CACHE BOOL "" FORCE)
+    set(HWY_ENABLE_TESTS OFF CACHE BOOL "" FORCE)
+    set(HWY_ENABLE_EXAMPLES OFF CACHE BOOL "" FORCE)
+    set(HWY_ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
+    set(HWY_CMAKE_HEADER_ONLY OFF CACHE BOOL "" FORCE)
+    add_subdirectory("${calmetrics_highway_root}" "${CMAKE_CURRENT_BINARY_DIR}/_deps/highway-build" EXCLUDE_FROM_ALL)
+    add_library(calmetrics_engine_highway_order STATIC
+        cpp/operators/mask_validation_highway.cpp
+        "${calmetrics_highway_root}/hwy/contrib/sort/vqsort.cc"
+        "${calmetrics_highway_root}/hwy/contrib/sort/vqsort_f64a.cc")
+    target_link_libraries(calmetrics_engine_highway_order PUBLIC hwy)
+    target_include_directories(calmetrics_engine_highway_order PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/cpp/operators")
+    target_compile_options(calmetrics_engine_highway_order PRIVATE $<TARGET_PROPERTY:hwy,COMPILE_OPTIONS>)
+    target_link_libraries(calmetrics_engine_operators PRIVATE calmetrics_engine_highway_order)
+    target_compile_definitions(calmetrics_engine_operators PRIVATE CALMETRICS_HAVE_HIGHWAY_ORDER=1)
+endif()
+install(FILES third_party/highway/LICENSE third_party/highway/LICENSE-BSD3 third_party/highway/README.md
+    DESTINATION calmetrics_engine/licenses/highway)
 if(UNIX AND NOT APPLE)
     target_link_libraries(calmetrics_engine_operators PUBLIC rt)
 endif()
 
 # CPU-specific flags apply only to this translation unit. Baseline code and module
 # initialization remain safe on CPUs without AVX2. The runtime checks OS YMM support.
-set(calmetrics_engine_arch "${CMAKE_SYSTEM_PROCESSOR}")
-if(APPLE AND CMAKE_OSX_ARCHITECTURES)
-    set(calmetrics_engine_arch "${CMAKE_OSX_ARCHITECTURES}")
-endif()
 if(calmetrics_engine_arch MATCHES "^(x86_64|AMD64|amd64)$")
     target_sources(calmetrics_engine_operators PRIVATE cpp/operators/simd_avx2.cpp)
     target_compile_definitions(calmetrics_engine_operators PRIVATE CALMETRICS_HAVE_AVX2=1)
@@ -93,6 +172,9 @@ endif()
 target_link_libraries(calmetrics_worker PRIVATE calmetrics_engine_operators)
 install(TARGETS calmetrics_worker RUNTIME DESTINATION calmetrics_engine)
 set(calmetrics_engine_targets calmetrics_engine_scheduler calmetrics_engine_finance calmetrics_engine_operators calmetrics_worker)
+if(TARGET calmetrics_engine_highway_order)
+    list(APPEND calmetrics_engine_targets hwy calmetrics_engine_highway_order)
+endif()
 
 if(CALMETRICS_ENGINE_BUILD_PYTHON)
     set(PYBIND11_FINDPYTHON ON)
@@ -111,6 +193,9 @@ if(CALMETRICS_ENGINE_BUILD_PYTHON)
     list(APPEND calmetrics_identity_files "${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt" "${CMAKE_CURRENT_SOURCE_DIR}/pyproject.toml")
     list(SORT calmetrics_identity_files)
     set(calmetrics_identity "${SKBUILD_PROJECT_VERSION};${CMAKE_CXX_COMPILER_ID};${CMAKE_CXX_COMPILER_VERSION};${calmetrics_engine_arch};${CMAKE_BUILD_TYPE};${CMAKE_CXX_FLAGS};${CMAKE_CXX_FLAGS_RELEASE}")
+    string(APPEND calmetrics_identity ";eigen_rotation=${CALMETRICS_ENGINE_USE_EIGEN}")
+    string(APPEND calmetrics_identity ";accelerate_covchol=${CALMETRICS_ENGINE_USE_ACCELERATE}")
+    string(APPEND calmetrics_identity ";highway_order=${CALMETRICS_ENGINE_USE_HIGHWAY}")
     foreach(source IN LISTS calmetrics_identity_files)
         file(SHA256 "${source}" source_hash)
         file(RELATIVE_PATH source_name "${CMAKE_CURRENT_SOURCE_DIR}" "${source}")
@@ -152,6 +237,19 @@ if(CALMETRICS_ENGINE_BUILD_TESTS)
     set_tests_properties(calmetrics_engine_native_tests PROPERTIES TIMEOUT 60)
     add_executable(calmetrics_engine_operator_tests tests/operator_native_tests.cpp)
     target_link_libraries(calmetrics_engine_operator_tests PRIVATE calmetrics_engine_operators)
+    if(APPLE AND calmetrics_engine_arch MATCHES "^(arm64|aarch64)$" AND CALMETRICS_ENGINE_USE_ACCELERATE)
+        target_compile_definitions(calmetrics_engine_operator_tests PRIVATE CALMETRICS_EXPECT_ACCELERATE_THREADING=1)
+    endif()
+    if(CALMETRICS_ENGINE_USE_EIGEN)
+        target_compile_definitions(calmetrics_engine_operator_tests PRIVATE CALMETRICS_EXPECT_EIGEN_INPUT_SCAN=1)
+    else()
+        target_compile_definitions(calmetrics_engine_operator_tests PRIVATE CALMETRICS_EXPECT_EIGEN_INPUT_SCAN=0)
+    endif()
+    if(TARGET calmetrics_engine_highway_order)
+        target_compile_definitions(calmetrics_engine_operator_tests PRIVATE CALMETRICS_EXPECT_HIGHWAY_ORDER=1)
+    else()
+        target_compile_definitions(calmetrics_engine_operator_tests PRIVATE CALMETRICS_EXPECT_HIGHWAY_ORDER=0)
+    endif()
     add_test(NAME calmetrics_engine_operator_tests COMMAND calmetrics_engine_operator_tests)
     add_executable(calmetrics_engine_graph_tests tests/graph_native_tests.cpp)
     target_link_libraries(calmetrics_engine_graph_tests PRIVATE calmetrics_engine_operators)

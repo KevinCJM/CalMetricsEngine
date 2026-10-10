@@ -1,0 +1,232 @@
+{
+  "candidate": "V57G",
+  "build_id": "db14f515428e1f822a87b304a65b9c2c0ad6da134c54c71787f7edc6c590e1e1",
+  "checks": [
+    "Private arithmetic only keeps proven owned canonical input across unchanged original slot lifetimes; exact-coordinate writes and operand order retained",
+    "Borrowed projections including diag/eigenvalue/eigenvector trace to actual backing or reject eligibility",
+    "Take/scatter source and int64 indices remain live; final root destination rechecked after layout finalization and runtime fallback",
+    "Take validation happens at its original node; GRAPH_STORAGE_KIND and write prefix retained for raw typed mismatches",
+    "Scatter fill/copy and argmax use existing canonical helpers without new mathematical implementation",
+    "HMM graphs retain V56 physical selection: no new private elisions until arena/history costs are jointly qualified",
+    "Observed/isolation and scope executions retain canonical materialization; no public operator/Excel/math contract changes",
+    "CPU/IPC/layout/Prepared mutation and two generations covered",
+    "Finalized F root checks and cholesky runtime fallback metadata are decided before Scratch plans physical arena capacity; shared geometry predicate sees the final destinations."
+  ],
+  "focused_python": 430,
+  "native_graph_executables": 1,
+  "full_sanitizer_library_off": "passed",
+  "repeated_whole_chain_performance": "passed with remaining NJIT malloc gap",
+  "source_adopted": true,
+  "goal_complete": false,
+  "qualification": {
+    "normal": {
+      "status": "passed",
+      "build_id": "db14f515428e1f822a87b304a65b9c2c0ad6da134c54c71787f7edc6c590e1e1",
+      "jobs": [
+        {
+          "label": "full",
+          "returncode": 0,
+          "counts": {
+            "tests": 16100,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          }
+        }
+      ],
+      "actual_adopted": false,
+      "goal_complete": false,
+      "finished": 1791326257.421254
+    },
+    "asan": {
+      "status": "passed",
+      "build_id": "25c94a5ee0b731d4fe95f91f843b2c65caa86c65ca98624764567688d40e5f89",
+      "jobs": [
+        {
+          "label": "native",
+          "returncode": 0,
+          "counts": {
+            "tests": 9,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          }
+        },
+        {
+          "label": "related",
+          "returncode": 0,
+          "counts": {
+            "tests": 1362,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          }
+        }
+      ],
+      "actual_adopted": false,
+      "goal_complete": false,
+      "finished": 1791326203.114144
+    },
+    "off": {
+      "status": "passed",
+      "build_id": "5d6b68b1f88be07a328875a4c3e60bdce429acfefd3c957fb22ff6faf58b5e99",
+      "jobs": [
+        {
+          "label": "native",
+          "returncode": 0,
+          "counts": {
+            "tests": 9,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          }
+        },
+        {
+          "label": "related",
+          "returncode": 0,
+          "counts": {
+            "tests": 1362,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          }
+        }
+      ],
+      "actual_adopted": false,
+      "goal_complete": false,
+      "finished": 1791325548.627233
+    }
+  },
+  "proof_ranges": {
+    "source-v57e/cpp/graph.cpp": [
+      "1439-1488 F finalization",
+      "1790-1821 geometry proof",
+      "5202-5228 fallback recursive execute before scratch allocation",
+      "177-187 actual arena planning"
+    ]
+  },
+  "actual_quality": {
+    "status": "passed",
+    "build_id": "db14f515428e1f822a87b304a65b9c2c0ad6da134c54c71787f7edc6c590e1e1",
+    "jobs": [
+      {
+        "label": "native",
+        "returncode": 0,
+        "counts": {
+          "tests": 9,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      },
+      {
+        "label": "related",
+        "returncode": 0,
+        "counts": {
+          "tests": 1362,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      }
+    ],
+    "actual_adopted": false,
+    "goal_complete": false,
+    "finished": 1791326771.6177769
+  },
+  "actual_confirmation": {
+    "status": "passed",
+    "build_id": "db14f515428e1f822a87b304a65b9c2c0ad6da134c54c71787f7edc6c590e1e1",
+    "samples": [
+      {
+        "stem": "v57g-actual-time-0-cpp",
+        "backend": "cpp",
+        "metric": "time",
+        "build_id": "db14f515428e1f822a87b304a65b9c2c0ad6da134c54c71787f7edc6c590e1e1",
+        "median_seconds": 2.075235666241497,
+        "cpu_utilization_percent": 99.92720507525621,
+        "all13_parity": "passed"
+      },
+      {
+        "stem": "v57g-actual-time-0-njit",
+        "backend": "njit",
+        "metric": "time",
+        "build_id": null,
+        "median_seconds": 7.310285166837275,
+        "cpu_utilization_percent": 99.73858520699072,
+        "all13_parity": "passed"
+      },
+      {
+        "stem": "v57g-actual-time-1-njit",
+        "backend": "njit",
+        "metric": "time",
+        "build_id": null,
+        "median_seconds": 7.254332916345447,
+        "cpu_utilization_percent": 99.94220121417366,
+        "all13_parity": "passed"
+      },
+      {
+        "stem": "v57g-actual-time-1-cpp",
+        "backend": "cpp",
+        "metric": "time",
+        "build_id": "db14f515428e1f822a87b304a65b9c2c0ad6da134c54c71787f7edc6c590e1e1",
+        "median_seconds": 2.084427332971245,
+        "cpu_utilization_percent": 99.95172136944632,
+        "all13_parity": "passed"
+      },
+      {
+        "stem": "v57g-actual-time-2-cpp",
+        "backend": "cpp",
+        "metric": "time",
+        "build_id": "db14f515428e1f822a87b304a65b9c2c0ad6da134c54c71787f7edc6c590e1e1",
+        "median_seconds": 2.089855291880667,
+        "cpu_utilization_percent": 99.89217952604555,
+        "all13_parity": "passed"
+      },
+      {
+        "stem": "v57g-actual-time-2-njit",
+        "backend": "njit",
+        "metric": "time",
+        "build_id": null,
+        "median_seconds": 7.252380874939263,
+        "cpu_utilization_percent": 99.923723325696,
+        "all13_parity": "passed"
+      },
+      {
+        "stem": "v57g-actual-heap-cpp",
+        "backend": "cpp",
+        "metric": "heap",
+        "build_id": "db14f515428e1f822a87b304a65b9c2c0ad6da134c54c71787f7edc6c590e1e1",
+        "warm_peak_bytes": 868304738
+      },
+      {
+        "stem": "v57g-actual-heap-njit",
+        "backend": "njit",
+        "metric": "heap",
+        "build_id": null,
+        "warm_peak_bytes": 851456928
+      },
+      {
+        "stem": "v57g-actual-rss-cpp",
+        "backend": "cpp",
+        "metric": "rss",
+        "build_id": "db14f515428e1f822a87b304a65b9c2c0ad6da134c54c71787f7edc6c590e1e1",
+        "warm_peak_bytes": 1060847616,
+        "warm_incremental_rss_bytes": 768409600
+      },
+      {
+        "stem": "v57g-actual-rss-njit",
+        "backend": "njit",
+        "metric": "rss",
+        "build_id": null,
+        "warm_peak_bytes": 1418919936,
+        "warm_incremental_rss_bytes": 1089503232
+      }
+    ],
+    "goal_complete": false,
+    "medians": {
+      "cpp": 2.084427332971245,
+      "njit": 7.254332916345447
+    }
+  }
+}

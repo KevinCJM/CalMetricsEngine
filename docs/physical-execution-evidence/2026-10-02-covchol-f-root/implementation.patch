@@ -1,0 +1,741 @@
+--- before/cpp/graph.cpp
++++ after/cpp/graph.cpp
+@@ -632,7 +632,8 @@
+   return true;
+ }
+ 
+-static bool independent_cholesky_f_root(const Program &program, std::size_t index) {
++static bool independent_cholesky_f_root(const Program &program, std::size_t index,
++                                        const ExecutionMetadata *metadata = nullptr) {
+   if (program.output_kind != OutputKind::typed || program.isolate_errors ||
+       program.roots.size() != 1 || program.roots[0] != index ||
+       !program.apply_scopes.empty() || !program.rolling_scopes.empty() ||
+@@ -641,11 +642,15 @@
+   const auto &node = program.nodes[index];
+   if (node.kind != NodeKind::operation || node.parent_count != 1 ||
+       node.opcode != static_cast<std::uint16_t>(ops::Op::cholesky)) return false;
+-  // The private covariance/Cholesky pair owns a C in-place factor and replay.
+-  // It keeps that existing route and its budgeted F materialization.
++  // Only the already-proven private pair can share this F result allocation.
++  // Finalization passes its new metadata, before Program publishes it.
+   const auto &parent = program.nodes[node.parents[0]];
+   if (parent.kind == NodeKind::operation &&
+-      parent.opcode == static_cast<std::uint16_t>(ops::Op::covariance)) return false;
++      parent.opcode == static_cast<std::uint16_t>(ops::Op::covariance)) {
++    const auto *active = metadata ? metadata : program.execution_metadata.get();
++    if (!active || index >= active->fused_from.size() ||
++        active->fused_from[index] != static_cast<std::int32_t>(node.parents[0])) return false;
++  }
+   for (const auto &consumer : program.nodes)
+     for (std::size_t j = 0; j < consumer.parent_count; ++j)
+       if (consumer.parents[j] == index) return false;
+@@ -827,8 +832,10 @@
+     // An independent covariance is bitwise symmetric after its canonical
+     // upper-triangle finish. Its C bytes already represent the same square F
+     // matrix; no arena, transpose or alternative numerical kernel is needed.
++    // The admitted covariance/Cholesky pair instead transposes its own result
++    // in place after successful C execution, with that movement audited.
+     if (static_cast<std::int32_t>(id)!=metadata->split_eigh_vectors && !independent_covariance_root(*this, id) &&
+-        !independent_cholesky_f_root(*this, id) &&
++        !independent_cholesky_f_root(*this, id, metadata.get()) &&
+         ((nodes[id].kind == NodeKind::operation && metadata->specs[id]->family != ops::Family::elementwise) ||
+          nodes[id].kind == NodeKind::apply_scope))
+       metadata->root_destinations[id] = -1;
+--- before/cpp/operators/matrix_foundation.cpp
++++ after/cpp/operators/matrix_foundation.cpp
+@@ -608,35 +608,53 @@
+                               bool independent_root) {
+     require(first.spec->op==Op::covariance && first.count==1 &&
+         second.spec->op==Op::cholesky && second.count==1 &&
+-        first.output_shape==second.output_shape && out.order==MemoryOrder::c,
++        first.output_shape==second.output_shape &&
++        (out.order==MemoryOrder::c || (out.order==MemoryOrder::f && independent_root)),
+         "INVALID_PHYSICAL_PAIR");
+     audit={};
+-    if (independent_root &&
+-        try_accelerate_covariance_cholesky(first,out,work,audit)) return;
+-    const auto collect=[&](const Audit &current) {
+-        audit.scratch_bytes=std::max(audit.scratch_bytes,current.scratch_bytes);
+-        audit.eigen_covariance_calls+=current.eigen_covariance_calls;
+-        audit.algorithm_copy_bytes+=current.algorithm_copy_bytes;
+-        audit.vector_elements+=current.vector_elements;
+-    };
+-    const auto produce=[&] {
++    // Both numerical backends and error replay keep their original C layout.
++    // The independent result is not exposed until the successful F conversion.
++    auto physical=out;
++    physical.order=MemoryOrder::c;
++    if (!(independent_root &&
++          try_accelerate_covariance_cholesky(first,physical,work,audit))) {
++        const auto collect=[&](const Audit &current) {
++            audit.scratch_bytes=std::max(audit.scratch_bytes,current.scratch_bytes);
++            audit.eigen_covariance_calls+=current.eigen_covariance_calls;
++            audit.algorithm_copy_bytes+=current.algorithm_copy_bytes;
++            audit.vector_elements+=current.vector_elements;
++        };
++        const auto produce=[&] {
++            Audit current;
++            execute(first,physical,work,Isa::automatic,current);
++            collect(current);
++        };
++        produce();
++        auto consumer=second;
++        consumer.args[0].data=physical.data;
++        consumer.args[0].set_contiguous_strides();
+         Audit current;
+-        execute(first,out,work,Isa::automatic,current);
++        try {
++            execute(consumer,physical,work,Isa::automatic,current);
++        } catch (const CholeskyReplay &) {
++            collect(current);
++            produce();
++            execute(consumer,physical,work,Isa::scalar,current);
++        }
+         collect(current);
+-    };
+-    produce();
+-    auto consumer=second;
+-    consumer.args[0].data=out.data;
+-    consumer.args[0].set_contiguous_strides();
+-    Audit current;
+-    try {
+-        execute(consumer,out,work,Isa::automatic,current);
+-    } catch (const CholeskyReplay &) {
+-        collect(current);
+-        produce();
+-        execute(consumer,out,work,Isa::scalar,current);
+-    }
+-    collect(current);
++    }
++    if (out.order==MemoryOrder::f) {
++        const auto n=first.output_shape.dim[0];
++        auto *factor=static_cast<double *>(out.data);
++        constexpr std::size_t tile=32;
++        for (std::size_t row=0;row<n;row+=tile)
++            for (std::size_t column=0;column<=row;column+=tile)
++                for (std::size_t i=row;i<std::min(row+tile,n);++i)
++                    for (std::size_t j=column;j<std::min(column+tile,i);++j)
++                        std::swap(factor[i*n+j],factor[j*n+i]);
++        // Two destination writes per off-diagonal swap; diagonal is unchanged.
++        audit.algorithm_copy_bytes+=(first.output_shape.size()-n)*sizeof(double);
++    }
+ }
+ 
+ void symmetric_eigh_values_pair(const Prepared &first, Output &out,
+--- before/tests/test_cholesky_f_root.py
++++ after/tests/test_cholesky_f_root.py
+@@ -132,7 +132,7 @@
+     assert sum(c["numeric_arena_bytes"] for c in result.audit["native_chunks"]) >= a.nbytes
+ 
+ 
+-def test_covariance_cholesky_pair_keeps_its_c_inplace_and_replay_route():
++def test_covariance_cholesky_pair_keeps_math_in_its_independent_f_root():
+     a = np.random.default_rng(81617).normal(size=(33, 17))
+     decl = {"a": dict(kind="matrix", axes=["time", "asset"], shape=["T", "N"])}
+     graph = GraphCompiler(decl).compile("cholesky(covariance(a))", output_order="F")
+@@ -140,8 +140,7 @@
+     with AdaptiveScheduler(cpu_budget=1) as scheduler:
+         result = scheduler.execute(graph, {"a": a},
+                                    np.array([0], np.int64), np.array([len(a)], np.int64))
+-    assert_bits(result.outputs[0].values[0], expected)
+-    assert sum(c["numeric_arena_bytes"] for c in result.audit["native_chunks"]) >= expected.nbytes
++    assert_direct(result, expected)
+ 
+ 
+ @pytest.mark.parametrize("case,error", [("nonfinite", "NON_FINITE_RESULT"),
+--- before/tests/test_covariance_cholesky_reuse.py
++++ after/tests/test_covariance_cholesky_reuse.py
+@@ -2,9 +2,10 @@
+ import numpy as np
+ import pytest
+ 
+-from calmetrics_engine import AdaptiveScheduler, GraphCompiler
++from calmetrics_engine import AdaptiveScheduler, GraphCompiler, excel
+ from calmetrics_engine import operators as op
+-from .test_typed_results import config, execute
++
++from .test_typed_results import execute
+ 
+ DECL = {"x": dict(kind="matrix", axes=["time", "asset"], shape=["T", "D"])}
+ EXPR = "cholesky(covariance(x))"
+@@ -43,8 +44,8 @@
+     assert not actual.flags.writeable and not np.shares_memory(actual, x)
+     assert actual.flags.c_contiguous if output_order == "C" else actual.flags.f_contiguous
+     chunk = result.audit["native_chunks"][0]
+-    # F writers still materialize through the existing C arena; C roots are direct.
+-    assert chunk["numeric_arena_bytes"] == (d*d*8 if output_order == "F" else 0)
++    assert chunk["numeric_arena_bytes"] == chunk["root_copy_bytes"] == 0
++    assert chunk["direct_output_bytes"] == expected.nbytes
+     assert chunk["fused_pointwise_calls"] == 0
+ 
+ 
+@@ -57,12 +58,18 @@
+     assert result.plan.lane == ("process" if lane.startswith("process") else lane)
+     for value, a, b in zip(result.outputs[0].values, [0, 10], [60, 90], strict=True):
+         bits(value, op.cholesky(op.covariance(x[a:b])))
++        assert not value.flags.writeable
++        assert value.flags.c_contiguous if output_order == "C" else value.flags.f_contiguous
+         assert not np.shares_memory(value, x)
+     assert not np.shares_memory(*result.outputs[0].values)
++    for chunk in result.audit["native_chunks"]:
++        assert chunk["numeric_arena_bytes"] == chunk["root_copy_bytes"] == 0
++        assert chunk["direct_output_bytes"] == chunk["rows"] * result.outputs[0].values[0].nbytes
+ 
+ 
+ @pytest.mark.parametrize("mode", ["public_covariance", "shared_covariance", "temporary_source", "isolate"])
+-def test_unproven_private_storage_keeps_original_materialization(mode):
++@pytest.mark.parametrize("output_order", ["C", "F"])
++def test_unproven_private_storage_keeps_original_materialization(mode, output_order):
+     x = data(60, 8)
+     expressions = [EXPR]
+     if mode == "public_covariance":
+@@ -71,7 +78,10 @@
+         expressions.append("trace(covariance(x))")
+     elif mode == "temporary_source":
+         expressions = ["cholesky(covariance(x*2))"]
+-    graph = GraphCompiler(DECL).compile(expressions, error_policy="isolate" if mode == "isolate" else "raise")
++    graph = GraphCompiler(DECL).compile(
++        expressions, output_order=output_order,
++        error_policy="isolate" if mode == "isolate" else "raise",
++    )
+     result = execute(graph, {"x": x})
+     bits(result.outputs[0].values[0], op.cholesky(op.covariance(x*2 if mode == "temporary_source" else x)))
+     if mode == "public_covariance":
+@@ -79,23 +89,33 @@
+         assert not np.shares_memory(result.outputs[0].values[0], result.outputs[1].values[0])
+     else:
+         assert result.audit["native_chunks"][0]["numeric_arena_bytes"] > 0
++    if output_order == "F":
++        actual = result.outputs[0].values[0]
++        assert actual.flags.f_contiguous and not actual.flags.writeable
++        assert result.audit["native_chunks"][0]["numeric_arena_bytes"] >= actual.nbytes
+ 
+ 
+ @pytest.mark.parametrize("fault", ["constant", "nan", "inf", "overflow", "panel_singular"])
+-def test_failures_match_unfused_chain_and_prepared_can_run_again(fault):
++@pytest.mark.parametrize("output_order", ["C", "F"])
++def test_failures_match_unfused_chain_and_prepared_can_run_again(fault, output_order):
+     n, d = (1041, 1024) if fault == "panel_singular" else (60, 8)
+     x = data(n, d)
+-    graph = GraphCompiler(DECL).compile(EXPR)
++    graph = GraphCompiler(DECL).compile(EXPR, output_order=output_order)
+     with AdaptiveScheduler(cpu_budget=1) as scheduler:
+         prepared = scheduler.prepare_execution(graph, {"x": x}, np.array([0], np.int64), np.array([n], np.int64))
+         first = prepared.run_snapshot()
+         saved = first.outputs[0].values[0].copy()
+         original = x.copy()
+-        if fault == "constant": x[:] = 1.
+-        elif fault == "nan": x[3, 2] = np.nan
+-        elif fault == "inf": x[3, 2] = np.inf
+-        elif fault == "overflow": x *= 1e200
+-        else: x[:, -1] = 0.
++        if fault == "constant":
++            x[:] = 1.
++        elif fault == "nan":
++            x[3, 2] = np.nan
++        elif fault == "inf":
++            x[3, 2] = np.inf
++        elif fault == "overflow":
++            x *= 1e200
++        else:
++            x[:, -1] = 0.
+         with pytest.raises((ValueError, RuntimeError)) as expected:
+             op.cholesky(op.covariance(x))
+         with pytest.raises((ValueError, RuntimeError)) as actual:
+@@ -106,6 +126,64 @@
+         second = prepared.run_snapshot()
+         bits(second.outputs[0].values[0], saved)
+         assert not np.shares_memory(first.outputs[0].values[0], second.outputs[0].values[0])
++        value = second.outputs[0].values[0]
++        assert not value.flags.writeable
++        assert value.flags.c_contiguous if output_order == "C" else value.flags.f_contiguous
++
++
++@pytest.mark.parametrize("d", [0, 1, 33, 1024])
++def test_f_pair_planner_retains_panel_budget_without_a_second_matrix(d):
++    x = data(d + 17, d)
++    bounds = np.array([0], np.int64), np.array([len(x)], np.int64)
++    with AdaptiveScheduler(cpu_budget=1) as scheduler:
++        c_graph = GraphCompiler(DECL).compile(EXPR, output_order="C")
++        f_graph = GraphCompiler(DECL).compile(EXPR, output_order="F")
++        c_plan = scheduler.plan(c_graph, {"x": x}, *bounds)
++        f_plan = scheduler.plan(f_graph, {"x": x}, *bounds)
++        assert f_plan.estimated_worker_scratch_bytes == c_plan.estimated_worker_scratch_bytes
++        assert f_plan.estimated_total_memory_bytes == c_plan.estimated_total_memory_bytes
++        with pytest.raises(MemoryError):
++            scheduler.plan(f_graph, {"x": x}, *bounds,
++                           memory_budget_bytes=f_plan.estimated_total_memory_bytes - 1)
++
++
++@pytest.mark.parametrize("layout", ["c", "f"])
++def test_f_pair_preserves_bits_and_accounts_for_inplace_layout_writes(layout):
++    x = data(80, 33, layout)
++    x.flags.writeable = False
++    c_result = execute(GraphCompiler(DECL).compile(EXPR, output_order="C"), {"x": x})
++    f_result = execute(GraphCompiler(DECL).compile(EXPR, output_order="F"), {"x": x})
++    actual = f_result.outputs[0].values[0]
++    bits(actual, c_result.outputs[0].values[0])
++    bits(np.triu(actual, 1), np.zeros_like(actual))
++    c_audit = c_result.audit["native_chunks"][0]
++    f_audit = f_result.audit["native_chunks"][0]
++    assert f_audit["algorithm_copy_bytes"] - c_audit["algorithm_copy_bytes"] == (33 * 33 - 33) * 8
++    for key in ("input_copy_bytes", "operator_workspace_capacity_bytes", "accelerate_covchol_calls"):
++        assert f_audit[key] == c_audit[key]
++    assert f_audit["numeric_arena_bytes"] == f_audit["root_copy_bytes"] == 0
++
++
++@pytest.mark.parametrize("mode", ["multiple", "iterate"])
++def test_f_pair_excluded_graphs_keep_their_c_arena(mode):
++    x = data(60, 8)
++    expression = [EXPR, "7"] if mode == "multiple" else f"iterate({EXPR},{EXPR},0,1)"
++    graph = GraphCompiler(DECL).compile(expression, output_order="F")
++    result = execute(graph, {"x": x})
++    expected = op.cholesky(op.covariance(x))
++    bits(result.outputs[0].values[0], expected)
++    assert result.outputs[0].values[0].flags.f_contiguous
++    assert result.audit["native_chunks"][0]["numeric_arena_bytes"] >= expected.nbytes
++    assert result.audit["native_chunks"][0]["root_copy_bytes"] >= expected.nbytes
++
++
++def test_f_pair_excel_observer_keeps_canonical_values():
++    x = data(10, 3, "f")
++    graph = GraphCompiler(DECL).compile(EXPR, output_order="F")
++    expected = op.cholesky(op.covariance(x))
++    reference = excel.plan(graph, {"x": x}).reference()[0]
++    assert not reference["error"]
++    bits(np.asarray(reference["values"]).reshape(expected.shape), expected)
+ 
+ 
+ def test_failed_isolate_root_retains_healthy_covariance_and_scalar():
+--- before/tests/operator_native_tests.cpp
++++ after/tests/operator_native_tests.cpp
+@@ -1294,26 +1294,44 @@
+                 const auto expected=run(ops::lookup("cholesky"),factor_args,1,ops::Isa::automatic);
+                 const auto first=ops::prepare(ops::lookup("covariance"),args.data(),1);
+                 const auto second=ops::prepare(ops::lookup("cholesky"),factor_args.data(),1);
+-                ops::Output out;out.shape=ops::matrix_shape(d,d);out.data=storage.data()+1;
+-                ops::Workspace work;ops::Audit audit;
+-                ops::covariance_cholesky_pair(first,second,out,work,audit);
+-                check(std::memcmp(storage.data()+1,expected.values.data(),d*d*8)==0,
+-                      "consumed covariance changed Cholesky arithmetic");
+-                check(x==saved,"consumed covariance modified public source");
+-                check(storage.front()==-993. && storage.back()==-993.,"consumed covariance crossed output");
+-                check(audit.eigen_covariance_calls==covariance.audit.eigen_covariance_calls,
+-                      "consumed covariance double-counted library work");
+-                check(audit.algorithm_copy_bytes==(second.scratch_doubles ? d*(d+1)*8 : 0),
+-                      "consumed covariance reported a self-copy");
+-                x[(d-1)*d+d-1]=0.;
+-                bool failed=false;
+-                try {ops::covariance_cholesky_pair(first,second,out,work,audit);}
+-                catch (const ops::Error &error) {failed=std::strcmp(error.what(),"DOMAIN_ERROR")==0;}
+-                check(failed,"consumed covariance failed to preserve singular pivot error");
+-                x[(d-1)*d+d-1]=1.;
+-                ops::covariance_cholesky_pair(first,second,out,work,audit);
+-                check(std::memcmp(storage.data()+1,expected.values.data(),d*d*8)==0,
+-                      "consumed covariance workspace did not recover from failure");
++                std::vector<double> failed_c;
++                for (bool column_output : {false,true}) {
++                    std::fill(storage.begin(),storage.end(),-993.);
++                    ops::Output out;out.shape=ops::matrix_shape(d,d);out.data=storage.data()+1;
++                    out.order=column_output ? ops::MemoryOrder::f : ops::MemoryOrder::c;
++                    ops::Workspace work;ops::Audit audit;
++                    const auto verify=[&] {
++                        for (std::size_t i=0;i<d;++i) for (std::size_t j=0;j<d;++j)
++                            check(std::memcmp(storage.data()+1+(column_output ? j*d+i : i*d+j),
++                                              expected.values.data()+i*d+j,sizeof(double))==0,
++                                  "consumed covariance changed Cholesky arithmetic or output order");
++                        check(x==saved,"consumed covariance modified public source");
++                        check(storage.front()==-993. && storage.back()==-993.,"consumed covariance crossed output");
++                        check(out.order==(column_output ? ops::MemoryOrder::f : ops::MemoryOrder::c),
++                              "consumed covariance changed output descriptor");
++                    };
++                    ops::covariance_cholesky_pair(first,second,out,work,audit,column_output);
++                    verify();
++                    check(audit.eigen_covariance_calls==covariance.audit.eigen_covariance_calls,
++                          "consumed covariance double-counted library work");
++                    check(audit.algorithm_copy_bytes==(second.scratch_doubles ? d*(d+1)*8 : 0)+
++                          (column_output ? (d*d-d)*8 : 0),
++                          "consumed covariance layout copy accounting");
++                    x[(d-1)*d+d-1]=0.;
++                    const auto bad_source=x;
++                    bool failed=false;
++                    try {ops::covariance_cholesky_pair(first,second,out,work,audit,column_output);}
++                    catch (const ops::Error &error) {failed=std::strcmp(error.what(),"DOMAIN_ERROR")==0;}
++                    check(failed,"consumed covariance failed to preserve singular pivot error");
++                    check(x==bad_source && storage.front()==-993. && storage.back()==-993.,
++                          "failed consumed covariance changed input or output canary");
++                    if (!column_output) failed_c.assign(storage.begin()+1,storage.end()-1);
++                    else check(std::memcmp(storage.data()+1,failed_c.data(),d*d*8)==0,
++                               "failed F covariance pair transposed canonical replay contents");
++                    x[(d-1)*d+d-1]=1.;
++                    ops::covariance_cholesky_pair(first,second,out,work,audit,column_output);
++                    verify();
++                }
+             }
+         }
+         {
+--- before/tests/result_native_tests.cpp
++++ after/tests/result_native_tests.cpp
+@@ -678,54 +678,85 @@
+ void cholesky_f_observer_contracts() {
+   constexpr std::size_t n=3, elements=n*n;
+   constexpr std::uint64_t sentinel=0x47a917bf80ce21d6ULL;
+-  const std::vector<double> source{4.,2.,1.,2.,5.,.5,1.,.5,3.};
+-  o::Value input; input.data=source.data(); input.shape=o::matrix_shape(n,n);
+-  input.set_contiguous_strides();
+-  const auto prepared=o::prepare(o::lookup("cholesky"),&input,1);
+-  std::vector<double> expected(elements);
+-  o::Output direct; direct.kind=prepared.output_kind; direct.shape=prepared.output_shape;
+-  direct.data=expected.data(); o::Workspace work; o::Audit direct_audit;
+-  o::execute(prepared,direct,work,o::Isa::scalar,direct_audit);
+-  const auto square=t::ValueType::matrix({"asset","asset"},{"N","N"});
+-  auto compiled=c::compile({"cholesky(x)"},std::vector<t::Variable>{{"x",square}},
+-      false,{}, {},0,100000000,true,{},g::OutputOrder::f);
+-  auto program=c::decode_program(c::encode_program(compiled->program));
+-  const std::int64_t start=0,end=0;
+-  const auto layout=g::result_layout(program,{input},&start,&end,1);
+-  std::vector<std::uint64_t> storage((layout.bytes()+7)/8+2,sentinel);
+-  std::size_t observed=0;
+-  const auto audit=g::execute_observed(program,{input},nullptr,0,&start,&end,1,storage.data()+1,1,&layout,
+-      [&](std::optional<o::Op> op,const o::Value &value,bool result) {
+-        if (!result || op!=o::Op::cholesky) return;
+-        check(value.shape==o::matrix_shape(n,n) && value.c_contiguous() && !value.f_contiguous(),
+-              "Cholesky observer did not restore the canonical C arena descriptor");
+-        for (std::size_t i=0;i<elements;++i) {
+-          const auto v=value.f(i);
+-          check(std::memcmp(&v,&expected[i],sizeof(v))==0,
+-                "Cholesky observer changed canonical C bits");
+-        }
+-        ++observed;
+-      });
+-  check(observed==1 && audit.numeric_arena_bytes>=elements*sizeof(double) &&
+-        audit.root_copy_bytes==elements*sizeof(double) && audit.direct_output_bytes==0,
+-        "F Cholesky observer did not restore its budgeted C arena and root copy");
+-  check(layout.order(0)==o::MemoryOrder::f,"Cholesky observer changed public F order");
+-  const auto *payload=reinterpret_cast<const double *>(
+-      reinterpret_cast<const unsigned char *>(storage.data()+1)+layout.slots[0].byte_offset);
+-  for (std::size_t i=0;i<n;++i) for (std::size_t j=0;j<n;++j)
+-    check(std::memcmp(payload+j*n+i,&expected[i*n+j],sizeof(double))==0,
+-          "Cholesky observer F materialization changed canonical bits");
+-  check(storage.front()==sentinel && storage.back()==sentinel,
+-        "F Cholesky observer overwrote root canary");
+-  // The downgrade owns separate metadata; the next ordinary call must still
+-  // use the original direct F root, rather than retaining the observer arena.
+-  const auto ordinary=g::execute(program,{input},nullptr,0,&start,&end,1,storage.data()+1,1,&layout);
+-  check(ordinary.numeric_arena_bytes==0 && ordinary.root_copy_bytes==0 &&
+-        ordinary.direct_output_bytes==elements*sizeof(double),
+-        "Cholesky observer downgrade leaked into later ordinary execution");
+-  for (std::size_t i=0;i<n;++i) for (std::size_t j=0;j<n;++j)
+-    check(std::memcmp(payload+j*n+i,&expected[i*n+j],sizeof(double))==0,
+-          "Cholesky ordinary F root differs after observer downgrade");
++  for (bool covariance_pair : {false,true}) {
++    const std::vector<double> source=covariance_pair
++        ? std::vector<double>{1.,0.,0.,0.,1.,0.,0.,0.,1.,0.,0.,0.}
++        : std::vector<double>{4.,2.,1.,2.,5.,.5,1.,.5,3.};
++    const auto saved=source;
++    o::Value input; input.data=source.data(); input.shape=o::matrix_shape(covariance_pair ? n+1 : n,n);
++    input.set_contiguous_strides();
++    o::Value factor_input=input;
++    std::vector<double> covariance(elements);
++    o::Workspace work; o::Audit direct_audit;
++    if (covariance_pair) {
++      const auto plan=o::prepare(o::lookup("covariance"),&input,1);
++      o::Output out; out.kind=plan.output_kind; out.shape=plan.output_shape; out.data=covariance.data();
++      o::execute(plan,out,work,o::Isa::scalar,direct_audit);
++      factor_input.data=covariance.data(); factor_input.shape=out.shape;
++      factor_input.set_contiguous_strides();
++    }
++    const auto prepared=o::prepare(o::lookup("cholesky"),&factor_input,1);
++    std::vector<double> expected(elements);
++    o::Output direct; direct.kind=prepared.output_kind; direct.shape=prepared.output_shape;
++    direct.data=expected.data();
++    o::execute(prepared,direct,work,o::Isa::scalar,direct_audit);
++    const auto type=covariance_pair ? t::ValueType::matrix({"time","asset"},{"T","N"})
++                                    : t::ValueType::matrix({"asset","asset"},{"N","N"});
++    auto compiled=c::compile({covariance_pair ? "cholesky(covariance(x))" : "cholesky(x)"},
++        std::vector<t::Variable>{{"x",type}},
++        false,{}, {},0,100000000,true,{},g::OutputOrder::f);
++    auto program=c::decode_program(c::encode_program(compiled->program));
++    const std::int64_t start=0,end=covariance_pair ? n+1 : 0;
++    const auto layout=g::result_layout(program,{input},&start,&end,1);
++    std::vector<std::uint64_t> storage((layout.bytes()+7)/8+2,sentinel);
++    std::size_t observed=0,observed_covariance=0;
++    const auto audit=g::execute_observed(program,{input},nullptr,0,&start,&end,1,storage.data()+1,1,&layout,
++        [&](std::optional<o::Op> op,const o::Value &value,bool result) {
++          if (result && op==o::Op::covariance) {
++            check(covariance_pair && value.shape==o::matrix_shape(n,n) && value.c_contiguous(),
++                  "F covariance pair observer lost its canonical covariance descriptor");
++            for (std::size_t i=0;i<elements;++i) {
++              const auto v=value.f(i);
++              check(std::memcmp(&v,&covariance[i],sizeof(v))==0,
++                    "F covariance pair observer changed covariance bits");
++            }
++            ++observed_covariance;
++          }
++          if (!result || op!=o::Op::cholesky) return;
++          check(value.shape==o::matrix_shape(n,n) && value.c_contiguous() && !value.f_contiguous(),
++                "Cholesky observer did not restore the canonical C arena descriptor");
++          for (std::size_t i=0;i<elements;++i) {
++            const auto v=value.f(i);
++            check(std::memcmp(&v,&expected[i],sizeof(v))==0,
++                  "Cholesky observer changed canonical C bits");
++          }
++          ++observed;
++        });
++    check(observed==1 && observed_covariance==std::size_t(covariance_pair) &&
++          audit.numeric_arena_bytes>=elements*sizeof(double) &&
++          audit.root_copy_bytes==elements*sizeof(double) && audit.direct_output_bytes==0,
++          "F Cholesky observer did not restore its budgeted C arena and root copy");
++    check(layout.order(0)==o::MemoryOrder::f,"Cholesky observer changed public F order");
++    const auto *payload=reinterpret_cast<const double *>(
++        reinterpret_cast<const unsigned char *>(storage.data()+1)+layout.slots[0].byte_offset);
++    for (std::size_t i=0;i<n;++i) for (std::size_t j=0;j<n;++j)
++      check(std::memcmp(payload+j*n+i,&expected[i*n+j],sizeof(double))==0,
++            "Cholesky observer F materialization changed canonical bits");
++    check(storage.front()==sentinel && storage.back()==sentinel,
++          "F Cholesky observer overwrote root canary");
++    // The downgrade owns separate metadata; the next ordinary call must still
++    // use the original direct F root, rather than retaining the observer arena.
++    const auto ordinary=g::execute(program,{input},nullptr,0,&start,&end,1,storage.data()+1,1,&layout);
++    check(ordinary.numeric_arena_bytes==0 && ordinary.root_copy_bytes==0 &&
++          ordinary.direct_output_bytes==elements*sizeof(double),
++          "Cholesky observer downgrade leaked into later ordinary execution");
++    for (std::size_t i=0;i<n;++i) for (std::size_t j=0;j<n;++j)
++      check(std::memcmp(payload+j*n+i,&expected[i*n+j],sizeof(double))==0,
++            "Cholesky ordinary F root differs after observer downgrade");
++    check(storage.front()==sentinel && storage.back()==sentinel &&
++          std::memcmp(source.data(),saved.data(),source.size()*sizeof(double))==0,
++          "F covariance pair observer recovery changed input or canary");
++  }
+ }
+ 
+ void transcendental_cross_layout_contracts() {
+--- before/tests/compiler_native_tests.cpp
++++ after/tests/compiler_native_tests.cpp
+@@ -178,71 +178,94 @@
+ 
+ void prebound_cholesky_budget_contract() {
+   constexpr std::size_t n = 33, elements = n * n, matrix_bytes = elements * sizeof(double);
+-  const std::vector<t::Variable> variables{{"x", t::ValueType::matrix({"asset", "asset"}, {"N", "N"})}};
+-  const auto compile_iteration = [&] {
+-    return c::compile({"iterate(cholesky(iterate_x),x,0,1)"}, variables,
+-        false, {}, {}, 0, 100000000, true);
+-  };
+-  auto c_graph = compile_iteration();
+-  auto f_graph = compile_iteration();
+-  auto &body = *f_graph->program.apply_scopes[0].body;
+-  body.root_outputs[0].order = g::OutputOrder::f;
+-  body.finalize();
+-  f_graph->program.finalize();
+-  // F child schemas are a valid native/wire contract even though the public
+-  // compiler currently emits C iteration bodies.
+-  f_graph->program = c::decode_program(c::encode_program(f_graph->program));
+-  const auto &decoded_body = *f_graph->program.apply_scopes[0].body;
+-  require(decoded_body.root_outputs[0].order == g::OutputOrder::f &&
+-          decoded_body.execution_metadata->root_destinations[decoded_body.roots[0]] >= 0,
+-          "native F Cholesky child schema was not preserved");
+-  std::vector<double> input(elements, 0.);
+-  for (std::size_t i = 0; i < n; ++i) input[i * n + i] = 4.;
+-  input[1] = input[n] = 2.;
+-  input[n + 1] = 5.;
+-  o::Value view; view.data = input.data(); view.shape = o::matrix_shape(n, n);
+-  view.set_contiguous_strides(o::MemoryOrder::f);
+-  const std::vector<o::Value> inputs{view};
+-  std::vector<o::Shape> shapes;
+-  g::required_array_capacity(decoded_body, inputs, elements, &shapes);
+-  g::ArrayArenaLayout ordinary, prebound;
+-  g::plan_array_arena(decoded_body, elements, shapes, ordinary, true);
+-  g::plan_array_arena(decoded_body, elements, shapes, prebound, true, true);
+-  require(ordinary.elements[0] == 0 && prebound.elements[0] == elements,
+-          "F Cholesky child downgrade must reserve exactly one C matrix");
+-  const std::int64_t start = 0, end = 0;
+-  const auto plan = [&](const std::shared_ptr<c::CompiledGraph> &graph,
+-                        std::optional<std::size_t> budget = {}) {
+-    return p::make_plan(graph, p::Config{}, {elements}, &start, &end, 1,
+-        nullptr, 1, budget, false, false, false, &inputs);
+-  };
+-  const auto c_plan = plan(c_graph), f_plan = plan(f_graph);
+-  require(f_plan->estimated_worker_scratch_bytes == c_plan->estimated_worker_scratch_bytes + matrix_bytes &&
+-          f_plan->estimated_total_memory_bytes == c_plan->estimated_total_memory_bytes + matrix_bytes,
+-          "Planner omitted the prebound F Cholesky C arena");
+-  bool rejected = false;
+-  try { (void)plan(f_graph, c_plan->estimated_total_memory_bytes); }
+-  catch (const std::bad_alloc &) { rejected = true; }
+-  require(rejected, "F child was admitted without its C arena budget");
+-  require(plan(f_graph, f_plan->estimated_total_memory_bytes)->estimated_total_memory_bytes ==
+-          f_plan->estimated_total_memory_bytes, "exact F child budget was rejected");
+-  std::vector<double> output(elements);
+-  const auto audit = g::execute(f_graph->program, inputs, nullptr, 0, &start, &end,
+-      1, output.data(), 1, f_plan->result_layout.get());
+-  // F input needs both C state buffers; the extra arena cannot hide in an
+-  // unused iteration-state reservation.
+-  require(audit.operator_workspace_capacity_bytes >= 3 * matrix_bytes &&
+-          audit.operator_workspace_capacity_bytes <= f_plan->estimated_worker_scratch_bytes &&
+-          audit.root_copy_bytes == matrix_bytes,
+-          "actual prebound Cholesky storage is not covered by Planner");
+-  for (std::size_t i = 0; i < n; ++i)
+-    for (std::size_t j = 0; j < n; ++j) {
+-      const double expected = i == j ? 2. : (i == 1 && j == 0 ? 1. : 0.);
+-      const double original = i == j ? (i == 1 ? 5. : 4.) :
+-          ((i == 0 && j == 1) || (i == 1 && j == 0) ? 2. : 0.);
+-      require(output[i * n + j] == expected, "F child changed Cholesky result or transposed its factor");
+-      require(input[i * n + j] == original, "F child modified its input");
+-    }
++  for (bool covariance_pair : {false, true}) {
++    std::vector<t::Variable> variables{{"x", t::ValueType::matrix({"asset", "asset"}, {"N", "N"})}};
++    if (covariance_pair)
++      variables.push_back({"samples", t::ValueType::matrix({"time", "asset"}, {"T", "N"})});
++    const auto compile_iteration = [&] {
++      return c::compile({covariance_pair ? "iterate(cholesky(covariance(samples)),x,0,1)"
++                                       : "iterate(cholesky(iterate_x),x,0,1)"}, variables,
++          false, {}, {}, 0, 100000000, true);
++    };
++    auto c_graph = compile_iteration();
++    auto f_graph = compile_iteration();
++    auto &body = *f_graph->program.apply_scopes[0].body;
++    body.root_outputs[0].order = g::OutputOrder::f;
++    body.finalize();
++    f_graph->program.finalize();
++    // F child schemas are a valid native/wire contract even though the public
++    // compiler currently emits C iteration bodies.
++    f_graph->program = c::decode_program(c::encode_program(f_graph->program));
++    const auto &decoded_body = *f_graph->program.apply_scopes[0].body;
++    require(decoded_body.root_outputs[0].order == g::OutputOrder::f &&
++            decoded_body.execution_metadata->root_destinations[decoded_body.roots[0]] >= 0,
++            "native F Cholesky child schema was not preserved");
++    std::vector<double> input(elements, 0.);
++    for (std::size_t i = 0; i < n; ++i) input[i * n + i] = 4.;
++    input[1] = input[n] = 2.;
++    input[n + 1] = 5.;
++    o::Value view; view.data = input.data(); view.shape = o::matrix_shape(n, n);
++    view.set_contiguous_strides(o::MemoryOrder::f);
++    std::vector<double> samples((n + 1) * n, 0.);
++    for (std::size_t i = 0; i < n; ++i) samples[i * (n + 1) + i] = 1.;
++    const auto saved_samples = samples;
++    o::Value sample_view; sample_view.data = samples.data(); sample_view.shape = o::matrix_shape(n + 1, n);
++    sample_view.set_contiguous_strides(o::MemoryOrder::f);
++    std::vector<o::Value> inputs;
++    std::vector<std::size_t> input_sizes;
++    for (const auto &name : c_graph->input_names) {
++      inputs.push_back(name == "samples" ? sample_view : view);
++      input_sizes.push_back(inputs.back().size());
++    }
++    const std::vector<o::Value> body_inputs{covariance_pair ? sample_view : view};
++    const auto capacity = covariance_pair ? samples.size() : elements;
++    std::vector<o::Shape> shapes;
++    g::required_array_capacity(decoded_body, body_inputs, capacity, &shapes);
++    g::ArrayArenaLayout ordinary, prebound;
++    g::plan_array_arena(decoded_body, capacity, shapes, ordinary, true);
++    g::plan_array_arena(decoded_body, capacity, shapes, prebound, true, true);
++    require(ordinary.elements[0] == 0 && prebound.elements[0] == elements,
++            "F Cholesky child downgrade must reserve exactly one C matrix");
++    const std::int64_t start = 0, end = covariance_pair ? n + 1 : 0;
++    const auto plan = [&](const std::shared_ptr<c::CompiledGraph> &graph,
++                          std::optional<std::size_t> budget = {}) {
++      return p::make_plan(graph, p::Config{}, input_sizes, &start, &end, 1,
++          nullptr, 1, budget, false, false, false, &inputs);
++    };
++    const auto c_plan = plan(c_graph), f_plan = plan(f_graph);
++    require(f_plan->estimated_worker_scratch_bytes == c_plan->estimated_worker_scratch_bytes + matrix_bytes &&
++            f_plan->estimated_total_memory_bytes == c_plan->estimated_total_memory_bytes + matrix_bytes,
++            "Planner omitted the prebound F Cholesky C arena");
++    bool rejected = false;
++    try { (void)plan(f_graph, c_plan->estimated_total_memory_bytes); }
++    catch (const std::bad_alloc &) { rejected = true; }
++    require(rejected, "F child was admitted without its C arena budget");
++    require(plan(f_graph, f_plan->estimated_total_memory_bytes)->estimated_total_memory_bytes ==
++            f_plan->estimated_total_memory_bytes, "exact F child budget was rejected");
++    std::vector<double> pair_expected(elements);
++    if (covariance_pair)
++      g::execute(c_graph->program, inputs, nullptr, 0, &start, &end,
++          1, pair_expected.data(), 1, c_plan->result_layout.get());
++    std::vector<double> output(elements);
++    const auto audit = g::execute(f_graph->program, inputs, nullptr, 0, &start, &end,
++        1, output.data(), 1, f_plan->result_layout.get());
++    // F input needs both C state buffers; the extra arena cannot hide in an
++    // unused iteration-state reservation.
++    require(audit.operator_workspace_capacity_bytes >= 3 * matrix_bytes &&
++            audit.operator_workspace_capacity_bytes <= f_plan->estimated_worker_scratch_bytes &&
++            audit.root_copy_bytes == matrix_bytes,
++            "actual prebound Cholesky storage is not covered by Planner");
++    for (std::size_t i = 0; i < n; ++i)
++      for (std::size_t j = 0; j < n; ++j) {
++        const double expected = covariance_pair ? pair_expected[i * n + j]
++            : i == j ? 2. : (i == 1 && j == 0 ? 1. : 0.);
++        const double original = i == j ? (i == 1 ? 5. : 4.) :
++            ((i == 0 && j == 1) || (i == 1 && j == 0) ? 2. : 0.);
++        require(output[i * n + j] == expected, "F child changed Cholesky result or transposed its factor");
++        require(input[i * n + j] == original, "F child modified its input");
++      }
++    require(samples == saved_samples, "F covariance child modified captured observations");
++  }
+ }
+ 
+ int main() {
+--- before/docs/execution-guide.md
++++ after/docs/execution-guide.md
+@@ -66,7 +66,7 @@
+ 
+ `native_chunks` 的 `accelerate_covariance_attempts/calls` 分别记录开始尝试和成功；`covariance_syrk_calls` 为实际 DSYRK 块数，`covariance_replayed_cells` 为实际 canonical 重放格数（含 F 对角及完整回退），`covariance_fallbacks` 为尝试后完整重放次数，`covariance_panel_materialization_bytes` 为所有已写中心化面板字节。完整重放保留之前工作计数，避免审计重置掩盖成本；这些字段和精确零计数通过 IPC19 传输。面板属于计算物化，不能用 `input_copy_bytes=0` 宣称整个请求零分配或零写入。共享/比较/状态消费、直接算子、Excel 观察器和未准入布局继续上段 canonical 逻辑；逻辑 AST/DAG、数学与 Excel 公式不变。
+ 
+-单一独立根 `cholesky(covariance(X))` 在 macOS 15+ arm64 且启用 `CALMETRICS_ENGINE_USE_ACCELERATE` 时，对至少 2048 列、行数不少于列数、精确连续的 C/F 输入，可将两个已融合步骤交给 Accelerate `dsyrk`/`dpotrf`。准入还检查有限值、数值幅度、接近零的协方差及分解主元；不满足条件或库分解失败时重放原路径，保留原错误契约。库线程在本次调用内限定为单线程并恢复，仍占用 Scheduler 的一个 CPU token。512 行中心化面板与均值的保守上界为 `513*D*8` 字节，计入 Planner；成功调用计入 `accelerate_covchol_calls`。直接算子、共享协方差的多根图和其他形状仍使用原实现。显式 F 根结果保留 F 连续布局，由已有结果布局步骤转换。
++单一独立根 `cholesky(covariance(X))` 在 macOS 15+ arm64 且启用 `CALMETRICS_ENGINE_USE_ACCELERATE` 时，对至少 2048 列、行数不少于列数、精确连续的 C/F 输入，可将两个已融合步骤交给 Accelerate `dsyrk`/`dpotrf`。准入还检查有限值、数值幅度、接近零的协方差及分解主元；不满足条件或库分解失败时重放原路径，保留原错误契约。库线程在本次调用内限定为单线程并恢复，仍占用 Scheduler 的一个 CPU token。512 行中心化面板与均值的保守上界为 `513*D*8` 字节，计入 Planner；成功调用计入 `accelerate_covchol_calls`。直接算子、共享协方差的多根图和其他形状仍使用原实现。显式 F 根结果保留 F 连续布局；符合下述私有根条件时，在独立结果内完成原 C 数值计算，成功后原地换位，不再分配第二块方阵。
+ 
+ 同一顶层图先计算 `covariance(X)`、后计算 `correlation(X)`，且两者都是直接矩阵输出、来自同一输入节点时，可复用本次已完成且有限的协方差结果。引擎将它复制到相关矩阵自己的输出区，再按原规则归一化；两个输出仍独立，零方差导致相关矩阵失败不会修改健康的协方差。每次共享实际复制 `D*D*8` 字节，计入 `algorithm_copy_bytes`，即使随后归一化失败也保留该计数；启用上述 Eigen 路径时，两根合计只调用一次协方差内核。不同输入节点、反向执行顺序、非直接根、子作用域、观察器或非有限结果保持各自计算。复用不跨区间或请求，prepared 每次读取当前数据；没有新数值缓存、工作区或进程协议，Planner 仍保留原保守成本。
+ 
+@@ -303,12 +303,12 @@
+ 
+ Cholesky在macOS15+arm64、Eigen开启、自动ISA、n≥1024时复用Eigen Array/Map，将16行面板的8步更新合并写回。因子完成后，每4个独立行用固定8列数组共享源读取；只更新共同三角前缀，各行不同长度的尾部继续原路径。每个元素的升序乘减、除法和平方根顺序不变；固定数组没有新增数值堆工作区，调用栈另行计量。输入按原C/F或任意受支持步长读取，现有独立C结果不改；行面板与因素表上界为 `(16*(n+17)+128)*8` 字节。Planner与准备/执行使用同一上界，顺序节点复用工作区，变阶时释放预算外旧容量，子作用域/worker分别预算。该路径审计ISA为 `eigen-array-panel-cholesky`，算法复制与绑定零拷贝分别计数。数值失败按原行序重放以保持错误优先级；边界和资源异常不捕获。其他平台、Eigen-OFF、小矩阵与显式ISA保持原路径。
+ 
+-独立明确 F 的单一 typed float64 Cholesky 根可直接写独占结果：原算法完成时三角因素已有逐位镜像，仅改变成功末尾清零的物理三角，公开逻辑下三角和原数学顺序不变。无需另一份 C arena 或最终整矩阵转换；此存储优化不依赖面板库准入。多根、消费者、isolate、作用域和 covariance→Cholesky 融合保留原路径；observer/prebound/继承错误恢复原 C arena。Planner 对 prebound 子图计入该降级的完整矩阵，直接算子 F out 仍遵守原拒绝契约。
++独立明确 F 的单一 typed float64 Cholesky 根可直接写独占结果：原算法完成时三角因素已有逐位镜像，仅改变成功末尾清零的物理三角，公开逻辑下三角和原数学顺序不变。无需另一份 C arena 或最终整矩阵转换；此存储优化不依赖面板库准入。多根、消费者、isolate 和作用域保留原路径；私有 covariance→Cholesky 融合另按下文复用 F 根缓冲。observer/prebound/继承错误恢复原 C arena。Planner 对 prebound 子图计入该降级的完整矩阵，直接算子 F out 仍遵守原拒绝契约。
+ 
+ 单个 `median/quantile` 及对应 masked 算子在至少1024个消费值、不含NaN且没有混合正负零时，复用原工作区选择排名。Apple arm64、Highway启用、自动ISA且运行时支持float64时，调用静态编入的 Highway 1.3.0 `VQSelect`，直接审计 `isa="highway_vqselect"`；显式ISA（含scalar）、库关闭或其他平台继续标准库 `nth_element`。库仅使用当前线程，没有私有线程池或跨请求数值缓存，首次线程状态/栈开销计入完整内存验收；不把消费值数量冒充精确SIMD指令处理量。`CALMETRICS_ENGINE_USE_HIGHWAY=OFF`可关闭此实现，开关纳入构建身份；sdist包含固定校验和的上游源码，wheel包含许可证，无运行期下载或编译。图与进程沿既有算子入口执行，不新增IPC字段，direct ISA标签不在图审计中单独传播。需要相邻排名时扫描较短的一端：选上排名后用 `max_element` 补下排名，高分位数则选下排名后用 `min_element` 补上排名。原中位数和插值表达式不变，输入仍只读。其他消费集继续原排序，多个图根仍共享完整排序；因此不能把单指标提速外推为所有多指标图的提速。掩码算子在已有完整结构校验中重计本次选中数量，实际工作区仅请求该数量；准备/Planner仍按源数组上界预算，足够的历史容量继续复用，显式reserve或密集转稀疏不承诺释放旧容量。计数不跨执行缓存。C连续且非标量的输入（有掩码时掩码也须C连续）直接按逻辑顺序读取；其他步长继续通用访问。掩码校验保持原顺序，打包时先判断是否消费，再读取该值，并复用实际消费计数填写算法复制审计，省去审计专用的重复扫描；不改变NaN、正负零分类、排序及插值规则。
+ 
+-`cholesky(covariance(X))` 的 typed/raise 图，在协方差是紧邻的单消费者临时节点、不是公开根且源有持久后备时，可复用消费方独占缓冲。两个既有原生算子及逻辑 DAG 都保留；C 根直接写独立结果，显式 F 根继续沿用 C arena 后物化 F 的路径。Cholesky 行面板发生数值失败时，先重算纯协方差恢复输入，再按原 canonical 顺序重放；前置校验、资源错误和普通直接算子的 out 别名限制不变。isolate、值观察器、共享协方差及不满足依赖证明的图不使用此融合。prepared 借用值仍仅有效至下一次运行，独立快照不受后续失败影响。
+-
+-该融合通过实际 `numeric_arena_bytes`、工作区和算法复制审计核验；不计为 `fused_pointwise_calls`。小矩阵原地分解跳过自复制，面板的两次下三角搬运仍照实计数。Planner 暂保留原保守 arena 上界以覆盖观察执行和继承故障的子作用域，因此实际分配减少不等于内存准入估计已经收紧。完整请求实测及剩余欠项见[物理执行优化](physical-execution-optimization.md)。
++`cholesky(covariance(X))` 的 typed/raise 图，在协方差是紧邻的单消费者临时节点、不是公开根且源有持久后备时，可复用消费方独占缓冲。两个既有原生算子及逻辑 DAG 都保留；C 根直接写独立结果。唯一 typed float64 矩阵根明确要求 F，且无消费者、apply/rolling scope 时，复用本次独立 F 结果缓冲暂存 C 计算；既有 Accelerate、canonical 和失败重放均保持原 C 数学路径。成功后以有界索引块原地换位并发布 F strides，不新增数值缓冲。换位写入的 `D*(D-1)*8` 字节计入 `algorithm_copy_bytes`；根复制为零不代表整个算法没有搬运。auto 布局和直接算子 F out 契约不变。Cholesky 行面板发生数值失败时，先重算纯协方差恢复输入，再按原 canonical 顺序重放；前置校验、资源错误和普通直接算子的 out 别名限制不变。isolate、值观察器、共享协方差及不满足依赖证明的图不使用此融合。prepared 借用值仍仅有效至下一次运行，独立快照不受后续失败影响。
++
++该融合通过实际 `numeric_arena_bytes`、工作区和算法复制审计核验；不计为 `fused_pointwise_calls`。小矩阵原地分解跳过自复制，面板的两次下三角搬运仍照实计数。符合 F 独立根资格时，普通执行不需要第二块根矩阵；观察器、prebound 和继承错误路径会取消直接目的地并恢复 C arena。Planner 对 prebound 子图采用同一判据保留该矩阵预算，面板和库工作区上界不删减；不能只凭 F 标签省略容量。完整请求实测及剩余欠项见[物理执行优化](physical-execution-optimization.md)。
+ 
+ 概率模型内核同样不新建线程池。GMM 复用 N×K 后验；HMM 复用 emission/alpha/beta 和 K×K 转移工作区，平滑借用独立根存放前向值并使用 K 级后向缓冲。多输出参数投影共享一次拟合，prepared 重读当前数值，不能按地址复用旧模型。Planner 将迭代轮数和 N/K/D 纳入成本，保守覆盖工作区；malloc/RSS 实测与估计分开。新算子的显式 SIMD 目录仍为空，不能宣称矩阵运算自动获得 SIMD 优势。见[时间与内存实测](latent-model-operators.md#验收结果)。
+--- before/docs/physical-layout-design.md
++++ after/docs/physical-layout-design.md
+@@ -1,6 +1,6 @@
+ # 连续内存布局的规划与结果协议
+ 
+-状态：分阶段实施。**C/F 输入运输、图输出策略、实际结果布局与 worker 返回协议已实现；2026-10-01新增独立Cholesky显式F根直写**。最新范围与预算修正见第17节；第9–16节保留对应阶段证据。用户明确要求按计算性能选择布局，结果返回不得无条件固定为 C。一般整图布局成本搜索仍未完成。
++状态：分阶段实施。**C/F 输入运输、图输出策略、实际结果布局与 worker 返回协议已实现；2026-10-02扩展私有协方差→Cholesky显式F根缓冲复用**。最新范围与预算修正见第18节；第9–16节保留对应阶段证据。用户明确要求按计算性能选择布局，结果返回不得无条件固定为 C。一般整图布局成本搜索仍未完成。
+ 
+ ## 1. 原则与现状
+ 
+@@ -297,3 +297,11 @@
+ 独立终端 exp/log 的最新库准入改为不超过65536消费元素的连续块：健康块调用原vForce，坏块重放原scalar_math。同序没有数值临时，跨布局仍用第15节的有界tile并审计算法搬运；窗口外不读。直接算子仍在首写前检查全部消费值，有消费者/observer/isolate等不准入路径保留原失败顺序。第14–15节的完整预检描述属于前阶段，不能套用到本节新的独立终端执行。
+ 
+ 4096阶显式F Cholesky普通C/F输入分别 **1985.702/2100.672→1819.559/1937.060ms**，申请堆冷暖峰各少约128MiB；修正数据准备后RSS请求增量分别少128/128.516MiB。NJIT对应409.036/465.107ms，仍实质更慢。普通、prepared、single/thread/process inline/shared、观察器及预算功能回归通过；时间/RSS实测是单CPU已列负载，不外推进程性能或所有驻留状态。完整证据及小正差/未闭环项见[专项记录](physical-execution-evidence/2026-10-01-order-vforce-fchol/README.md)。
++
++## 18. 私有协方差→Cholesky F 根缓冲复用（2026-10-02）
++
++第17节的 covariance 融合排除只描述当时实现。本轮仅扩大已由执行元数据证明的私有相邻组合：单一 typed float64、显式 F、无消费者/作用域/isolate，协方差输入具有持久后备。finalize 使用正在构造的元数据判断，不能从旧 metadata 或算子名称推断资格。
++
++独立结果暂按 C 存储完成原 covariance、Cholesky、守卫库调用及失败重放；仅在成功后用标准库交换原地转置并发布实际 F strides。两条数值后端共用同一转换出口，不改变 DPOTRF 的 U 三角、算式、计算顺序或失败优先级。去除额外 D² arena 和最终根复制；转置仍产生 D(D-1)*8 写入字节，单列算法搬运，不宣称整链零复制。共享/公开协方差、临时源、多根等路径不扩展。
++
++observer、prebound 和继承错误继续恢复原 C arena；Planner 的 prebound 子图预算与执行降级使用同一判据。面板/库工作区、独立结果寿命、进程传输和直接算子别名规则保持不变。完整验证及未闭环项见[本轮证据](physical-execution-evidence/2026-10-02-covchol-f-root/README.md)。
+--- before/docs/physical-execution-optimization.md
++++ after/docs/physical-execution-optimization.md
+@@ -1,4 +1,14 @@
+ # 物理执行优化（性能验收未闭环）
++
++## 2026-10-02 私有协方差→Cholesky F 根：减少完整方阵存储
++
++仅扩展已证明的私有相邻组合和单一显式 F 独立根。两个原有数值后端及失败重放仍按 C 计算，成功后在结果内原地换位；删除 D² 根 arena 和最终复制，原地搬运另计，不新增库或数学实现。observer/prebound/继承错误保留 C arena 及对应预算，公开结果、直接算子和 Excel 契约不变。
++
++普通 Scheduler、1 CPU、九轮实际旧/新 wheel 对照：4096 阶 C/F 输入、F 结果分别 **966.751→844.573 ms / 861.317→757.505 ms**；对应 NJIT **1059.897 / 1022.729 ms**。2048 C 输入增加 **3.305 ms**，记录但不独立否决。512/1024 canonical、2048 F 库根和高幅值回退仍有实质差距；高幅值两批计时方向不一致，第二批新旧增加 **56.699 ms**，不选取较好一批或简单按微小差异豁免。
++
++12 个 fresh 内存子进程：2048/4096 F 根冷暖申请峰分别减少 **32/128 MiB**。4096 cold/warm **278.040/406.041→150.040/278.041 MiB**，NJIT **391.063/519.063 MiB**；RSS 请求增量 **459.797→328.312 MiB**，NJIT **537.297 MiB**。malloc 与 RSS 范围分开，不能外推整个进程树或所有布局。
++
++新旧九类完整结果逐位一致；八组正常输入通过 NI 原 1e-12 对照，高幅值 1e8 组旧实现已有严格不等价，保留 false 及原始失败，只作性能诊断。Python **10564**；native、ASan/UBSan、三库 OFF 各 **9/9**；OFF 专项 **118**。185 直接夹具、469 案例/3056 值历史 Excel 快照通过，无新 Excel 重算。验收自审修复了临时脚本的逐组真实状态落盘；完整正负结果、第二批回退变慢、测试范围和[全部证据](physical-execution-evidence/2026-10-02-covchol-f-root/README.md)保留。源码/wheel/worker 身份一致；未提交推送，全引擎目标继续开放。
+ 
+ ## 2026-10-02 带符号无消去 GEMM：大矩阵约5.8–8.6倍提速
+ 

@@ -1,0 +1,203 @@
+**Exploration: plan_state_decisions state_decision_geometry execute_state_decision**
+
+Found 10 symbols across 1 file.
+
+**Blast radius — what depends on these (update/verify before editing)**
+
+- `plan_state_decisions` (cpp/graph.cpp:921) — 1 caller in `cpp/graph.cpp`; ⚠️ no covering tests found
+- `execute_state_decision` (cpp/graph.cpp:2309) — 1 caller in `cpp/graph.cpp`; ⚠️ no covering tests found
+- `state_decision_geometry` (cpp/graph.cpp:2290) — 2 callers in `cpp/graph.cpp`; ⚠️ no covering tests found
+- `state` (cpp/operators/state.cpp:86) — 1 caller in `cpp/graph.cpp`; ⚠️ no covering tests found
+
+**Relationships**
+
+**calls:**
+- plan_state_decisions → empty
+- plan_state_decisions → size
+- plan_state_decisions → select
+- plan_state_decisions → push_back
+- plan_state_decisions → begin
+- plan_state_decisions → end
+- plan_state_decisions → series_record_projection
+- plan_state_decisions → assign
+- finalize → plan_state_decisions
+- empty → memory_order
+- ... and 246 more
+
+**instantiates:**
+- execute_state_decision → Timeout
+
+**Source Code**
+
+> The code below is the **verbatim, current on-disk source** of these files — re-read from disk on this call and line-numbered, byte-for-byte identical to what the Read tool returns. It is NOT a summary, outline, or stale cache. Treat each block as a Read you have already performed: do not Read a file shown here.
+
+**`cpp/graph.cpp`** — calls(calls), size(calls), empty(calls), slice(calls), set_contiguous_strides(calls), state_decision_geometry(function), execute_state_decision(function), check_deadline(calls), Timeout(instantiates), prepare(calls), +7 more
+
+```cpp
+2287	         program.nodes[slice.parents[3]].constant == double(full.dim[0]);
+2288	}
+2289	
+2290	static bool state_decision_geometry(const Program &p, std::size_t id,
+2291	                                    const std::vector<ops::Shape> &shapes) {
+2292	  const auto &m=*p.execution_metadata;
+2293	  if (m.state_decision_members.empty() || m.state_decision_members[id]<0 || shapes.empty()) return false;
+2294	  const auto &region=m.state_decisions[m.state_decision_members[id]];
+2295	  const auto &shape=shapes[region.source];
+2296	  if (shape.rank!=1 || !(shapes[region.valid]==shape) ||
+2297	      m.root_destinations[region.steps.back().selection]<0) return false;
+2298	  for (const auto &step:region.steps) {
+2299	    if (!(shapes[step.comparison]==shape) || !(shapes[step.selection]==shape)) return false;
+2300	    const auto &comparison=p.nodes[step.comparison], &selection=p.nodes[step.selection];
+2301	    for (std::size_t j=0;j<2;++j)
+2302	      if (comparison.parents[j]!=region.source && shapes[comparison.parents[j]].rank!=0) return false;
+2303	    for (std::size_t j=1;j<=2;++j)
+2304	      if (static_cast<std::int8_t>(j)!=step.previous_argument && shapes[selection.parents[j]].rank!=0) return false;
+2305	  }
+2306	  return true;
+2307	}
+2308	
+2309	static void execute_state_decision(const Program &p, const StateDecisionRegion &region,
+2310	    const std::vector<ops::Value> &values, ops::Output &out, ops::Workspace &workspace,
+2311	    Audit &audit, std::chrono::steady_clock::time_point deadline, const std::atomic<bool> *cancelled) {
+2312	  std::array<std::uint8_t,state_decision_tile_elements> mask;
+2313	  const auto slice=[](ops::Value v,std::size_t first,std::size_t count) {
+2314	    if (v.shape.rank) {
+2315	      const auto offset=static_cast<std::ptrdiff_t>(first)*v.stride[0];
+2316	      if (offset) {
+2317	        if (v.kind==ops::Kind::integer) v.data=static_cast<const std::int64_t *>(v.data)+offset;
+2318	        else if (v.kind==ops::Kind::mask) v.data=static_cast<const std::uint8_t *>(v.data)+offset;
+2319	        else v.data=static_cast<const double *>(v.data)+offset;
+2320	      }
+2321	      v.shape=ops::vector_shape(count);
+2322	    }
+2323	    return v;
+2324	  };
+2325	  for (std::size_t first=0;first<out.shape.size();first+=state_decision_tile_elements) {
+2326	    native::check_deadline(deadline);
+2327	    if (cancelled && cancelled->load()) throw native::Timeout("native state decision cancelled");
+2328	    const auto count=std::min(state_decision_tile_elements,out.shape.size()-first);
+2329	    ops::Output target;
+2330	    target.kind=ops::Kind::integer; target.shape=ops::vector_shape(count);
+2331	    target.data=static_cast<std::int64_t *>(out.data)+first;
+2332	    for (const auto &step:region.steps) {
+2333	      const auto &comparison=p.nodes[step.comparison], &selection=p.nodes[step.selection];
+2334	      std::array<ops::Value,2> operands;
+2335	      for (std::size_t j=0;j<2;++j) operands[j]=slice(values[comparison.parents[j]],first,count);
+2336	      const auto predicate=ops::prepare(*p.execution_metadata->specs[step.comparison],operands.data(),2);
+2337	      ops::Output predicate_out; predicate_out.kind=ops::Kind::mask;
+2338	      predicate_out.shape=ops::vector_shape(count); predicate_out.data=mask.data();
+2339	      ops::Audit operator_audit;
+2340	      ops::elementwise(predicate,predicate_out,workspace,ops::Isa::automatic,operator_audit);
+2341	      std::array<ops::Value,4> branches;
+2342	      branches[0].kind=ops::Kind::mask; branches[0].shape=target.shape;
+2343	      branches[0].data=mask.data(); branches[0].set_contiguous_strides();
+2344	      for (std::size_t j=1;j<=2;++j) {
+2345	        if (static_cast<std::int8_t>(j)==step.previous_argument) {
+2346	          branches[j].kind=ops::Kind::integer; branches[j].shape=target.shape;
+2347	          branches[j].data=target.data; branches[j].set_contiguous_strides();
+2348	        } else branches[j]=values[selection.parents[j]];
+2349	      }
+2350	      branches[3]=slice(values[region.valid],first,count);
+2351	      // Original full preparation validated states and validity at each logical
+2352	      // node. Tile descriptors need geometry only; canonical state writes read
+2353	      // the previous state at this same coordinate before overwriting it.
+2354	      auto prepared=ops::prepare_geometry(*p.execution_metadata->specs[step.selection],branches.data(),4);
+2355	      ops::state(prepared,target,workspace,operator_audit);
+2356	      audit.vector_elements+=operator_audit.vector_elements;
+2357	    }
+2358	    ++audit.pointwise_tiles;
+2359	  }
+2360	  ++audit.fused_pointwise_calls;
+2361	  audit.pointwise_workspace_capacity_bytes=std::max(audit.pointwise_workspace_capacity_bytes,mask.size());
+2362	}
+2363	
+2364	void plan_array_arena(const Program &program, std::size_t capacity,
+2365	                     const std::vector<ops::Shape> &shapes, ArrayArenaLayout &layout,
+2366	                     bool fuse, bool prebound_inputs, bool summary_fusion,
+2367	                     bool private_where_sums) {
+2368	  const std::array<std::size_t,3> slots{program.numeric_slots,program.mask_slots,program.integer_slots};
+2369	  for (std::size_t kind=0;kind<3;++kind) layout.offsets[kind].assign(slots[kind],0);
+2370	  const auto &metadata=*program.execution_metadata;
+2371	  const bool split_eigh=fuse && metadata.split_eigh_source>=0 && !shapes.empty() &&
+2372	      ops::symmetric_eigh_split_scratch_doubles(shapes[metadata.split_eigh_source].dim[0])!=0;
+2373	  for (std::size_t i=0;i<program.nodes.size();++i) {
+2374	    const auto &node=program.nodes[i];
+2375	    if (node.storage==StorageKind::inline_value) continue;
+2376	    if (fuse && state_decision_geometry(program,i,shapes)) continue;
+2377	    if (node.kind==NodeKind::operation &&
+2378	        node.opcode==static_cast<std::uint16_t>(ops::Op::eigenvalues) &&
+2379	        !(fuse && !program.execution_metadata->fused_from.empty() &&
+2380	          program.execution_metadata->fused_from[i]>=0)) continue;
+2381	    const bool direct=program.output_kind==OutputKind::typed &&
+2382	        program.execution_metadata->root_destinations[i]>=0 &&
+2383	        !cholesky_f_root_requires_arena(program, i, prebound_inputs) &&
+2384	        (node.kind==NodeKind::operation || (node.kind==NodeKind::apply_scope &&
+2385	          program.apply_scopes[node.input_index].kind==ApplyKind::iterate));
+2386	    const bool transposed_direct_root = program.roots.size() == 1 &&
+2387	        program.roots[0] == i && node.kind == NodeKind::operation &&
+2388	        node.parent_count == 1 &&
+2389	        node.opcode == static_cast<std::uint16_t>(ops::Op::transpose) &&
+2390	        program.execution_metadata->root_destinations[node.parents[0]] == 0;
+2391	    if ((fuse && summary_fusion && !prebound_inputs && matmul_summary_geometry(program,i,shapes)) ||
+2392	        direct || transposed_direct_root ||
+2393	        (split_eigh && static_cast<std::int32_t>(i)==metadata.split_eigh_source)) continue;
+2394	    auto &count=layout.offsets[static_cast<std::size_t>(node.storage)-1][node.slot];
+2395	    if (fuse && deferred_pair_geometry(program,i,shapes)) {
+2396	      count=std::max(count,deferred_broadcast_extent(program,i,shapes));
+2397	      continue;
+2398	    }
+2399	    if (private_where_sums && !prebound_inputs && square_reduce_geometry(program, i, shapes)) {
+2400	      const auto &region = metadata.square_reductions[metadata.square_members[i]];
+2401	      if (i == region.subtraction) count = std::max(count, shapes[region.reduction].size());
+2402	      if (i != region.reduction) continue;
+2403	    }
+2404	    if (private_where_sums && !prebound_inputs && scan_reduce_geometry(program, i, shapes)) {
+2405	      const auto &region = metadata.scan_reductions[metadata.scan_members[i]];
+2406	      if (i == region.nav) count = std::max(count, shapes[region.reduction].size());
+2407	      // No other writer can occupy the cache's slot in the continuous closure.
+2408	      if (i != region.reduction) continue;
+2409	    }
+2410	    if (private_where_sums && !prebound_inputs && where_sum_geometry(program, i, shapes)) {
+2411	      count = std::max(count, shapes[i].dim[0]);
+2412	      continue;
+2413	    }
+2414	    if (fuse && filter_tail_geometry(program, i, shapes)) {
+2415	      count = std::max(count, shapes[i].dim[1]);
+2416	      continue;
+2417	    }
+2418	    count=std::max(count,shapes.empty() ? capacity : shapes[i].size());
+2419	  }
+2420	  for (std::size_t kind=0;kind<3;++kind) {
+2421	    std::size_t total=0;
+2422	    for (auto &count:layout.offsets[kind]) {
+2423	      const auto size=count;
+2424	      const auto limit=static_cast<std::size_t>(PTRDIFF_MAX)/(kind==1 ? 1 : 8);
+2425	      ops::require(size<=limit-total,"GRAPH_ARENA_OVERFLOW");
+2426	      count=total; total+=size;
+2427	    }
+2428	    layout.elements[kind]=total;
+2429	  }
+2430	}
+2431	
+2432	static void accumulate_child(Scratch &scratch, const Audit &audit) {
+2433	  scratch.highway_vqsort_calls += audit.highway_vqsort_calls;
+```
+
+**Not shown above — explore these names for their source**
+
+- docs/physical-execution-evidence/2026-10-05-candidate-summaries/quantiles/row-risk-design/mixed-roots-v25/input-bounds-v28/packed-f-successor/integration-v33/integrate-v33-actual.py: decisions:96
+- cpp/include/calmetrics_engine/operators.hpp: set_contiguous_strides:165, Error:38, require:40, f:111, u:114, set:311, set_integer:327
+- cpp/operators/state.cpp: state:86, drawdown_interval:63
+- docs/physical-execution-evidence/2026-10-04-guarded-lu/raw/initial/source/cpp/operators/state.cpp: state:86, drawdown_interval:63
+- docs/physical-execution-evidence/2026-10-05-candidate-summaries/quantiles/row-risk-design/mixed-roots-v25/input-bounds-v28/packed-f-successor/pairwise-gemm-experiment/integration-v35r2/qualified-source/cpp/operators/state.cpp: state:86, drawdown_interval:63
+- docs/physical-execution-evidence/2026-10-04-guarded-lu/source/cpp/operators/state.cpp: state:86, drawdown_interval:63
+- cpp/native_api_bindings.cpp: empty:103, SharedArrayOwner:74, memory_order:40, byte_size:20, to_model_payload:591, outputs:617, audit:707, prepare:1072, plan:1126
+- cpp/excel_budget.cpp: size:54, Value:49, mul:12
+- cpp/compiler.cpp: scope_work_factor:74, physical_cost:123, share_identical_compact_metadata:235, build_physical_metadata:285, append:506, intern:516, variable:550, finish:759, rolling_apply:1075, apply_scope:1280, compile:1548, encode_program:1676, decode_program:1777
+- docs/physical-execution-evidence/2026-10-04-guarded-lu/raw/initial/source/cpp/include/calmetrics_engine/operators.hpp: u:114, f:111, require:40, Error:38
+- ... and 16 more files
+
+---
+> **Complete source for 1 files is included above — do NOT re-read them.** If your question also needs files/symbols listed under "Not shown above" (or any area this call didn't cover), make ANOTHER codegraph_explore targeting those names — it returns the same source with line numbers and is cheaper and more complete than reading. Reserve Read for a single specific line range explore can't surface.
+
+> **Explore budget: 2 calls for this project (3,467 files indexed).** Each call covers ~6 files; if your question spans more, spend your remaining calls on the uncovered area BEFORE falling back to Read — another explore is cheaper and more complete than reading those files. Synthesize once you've used 2.

@@ -1,0 +1,57 @@
+{
+  "old": {
+    "stopped": true,
+    "threads": {
+      "environment": {
+        "OPENBLAS_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "NUMBA_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1"
+      },
+      "accelerate_thread_local": "not_applied_to_native"
+    }
+  },
+  "new": {
+    "stopped": true,
+    "threads": {
+      "environment": {
+        "OPENBLAS_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "NUMBA_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1"
+      },
+      "accelerate_thread_local": "not_applied_to_native"
+    }
+  },
+  "njit": {
+    "stopped": true,
+    "threads": {
+      "environment": {
+        "OPENBLAS_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "NUMBA_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1"
+      },
+      "accelerate_thread_local": {
+        "prior": 0,
+        "active": 1,
+        "restored": 0
+      },
+      "pools": [
+        {
+          "user_api": "blas",
+          "internal_api": "openblas",
+          "num_threads": 1,
+          "prefix": "libopenblas",
+          "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+          "version": "0.3.23.dev",
+          "threading_layer": "pthreads",
+          "architecture": "armv8"
+        }
+      ]
+    }
+  }
+}

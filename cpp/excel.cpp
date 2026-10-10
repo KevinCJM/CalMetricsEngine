@@ -6,7 +6,7 @@
 
 namespace calmetrics_engine::excel {
 namespace {
-constexpr double max_serialized_number = 1.797693134862315e308;
+constexpr double max_serialized_number = max_reproduction_number;
 F address(const F &sheet, std::size_t row, std::size_t column) {
   F col;
   for (auto n = column + 1; n; n = (n - 1) / 26)
@@ -54,6 +54,14 @@ void validate_numeric_domain(std::optional<Op> op, const ops::Value &value, bool
     const double x = value.kind == ops::Kind::fit || value.kind == ops::Kind::interval
                          ? value.record[i] : value.f(i);
     missing = missing || std::isnan(x);
+    // Finite log-emissions can still overflow the shifted exponential or
+    // alpha/beta additions in Excel. Reject before READY, not after download.
+    const bool latent_logs = op == Op::softmax_axis || op == Op::logsumexp_axis ||
+        op == Op::hmm_filter || op == Op::hmm_smooth;
+    if (!output && latent_logs && std::isfinite(x) &&
+        std::abs(x) > max_serialized_number / (8.0 * std::max<std::size_t>(count,1)))
+      throw Error("UNREPRESENTABLE_VALUE: latent log-domain intermediate exceeds Excel range");
+
     // Masked extrema deliberately return an infinity category when every
     // selected value is NaN. Their recipe represents that sentinel as text;
     // consuming it in another numeric operator still requires rejection.
@@ -493,7 +501,7 @@ Report Plan::generate(const std::function<void(const Cell &)> &sink,
     r.dtype = dtype(a.kind);
     r.shape = a.shape;
     if (!operator_)
-      r.axes = graph_.nodes.at(graph_.program.roots.at(i)).inferred_type.axes;
+      r.axes = graph_.nodes.at(graph_.program.roots.at(i)).type().axes;
     else
       for (int axis = 0; axis < a.shape.rank; ++axis)
         r.axes.push_back("axis_" + std::to_string(axis));
@@ -515,6 +523,17 @@ Report Plan::generate(const std::function<void(const Cell &)> &sink,
     b.put("Outputs", i, 3, "text",
           "Flat row-major order; Results columns: name, Excel, frozen C++, "
           "absolute error, comparison");
+    if (a.size() == 0) {
+      // Empty arrays have no element row on which to display a failure. Keep
+      // the root-level guard visible without inventing a numerical element.
+      auto state = iff(a.failure + "=\"\"", q("EMPTY"), a.failure);
+      if (!operator_)
+        state = iff("AND(LEFT(" + state + ",6)=\"ERROR:\",LEFT(" + state +
+                        ",13)<>\"ERROR:STATUS:\")",
+                    q("ERROR:STATUS:4"), state);
+      b.put("Outputs", i, 4, "formula",
+            iff(layout_valid, state, q("LAYOUT_STALE: re-export required")));
+    }
     for (std::size_t j = 0; j < a.size(); ++j) {
       const auto k = b.result++, row = k % 1000000;
       const F sheet = "Results" + std::to_string(k / 1000000);
@@ -628,6 +647,10 @@ std::vector<Reference> Plan::compute_reference(bool validate_domain) const {
             if (validate_domain)
               for (const auto &input : inputs)
                 validate_numeric_domain(*operator_, input, false);
+            if (validate_domain && *operator_ == Op::affine_contract)
+              validate_affine_excel_domain(inputs.data(), inputs.size());
+            if (validate_domain && ops::axis_path_operator(*operator_))
+              axis_path_validate(*operator_, inputs.data(), inputs.size());
             r.shape = p.output_shape;
             r.kind = p.output_kind;
             std::vector<std::uint64_t> storage(r.shape.size());
@@ -693,10 +716,48 @@ std::vector<Reference> Plan::compute_reference(bool validate_domain) const {
             break;
           }
         auto layout = graph::result_layout(program, inputs, &start, &end, 1);
-        std::vector<std::uint64_t> storage((layout.bytes() + 7) / 8);
+        // The executor requires a valid batch destination even when every
+        // typed root is empty. The sentinel is never a result element.
+        std::vector<std::uint64_t> storage(
+            std::max<std::size_t>(1, (layout.bytes() + 7) / 8));
+        std::array<ops::Value, 3> affine_arguments;
+        std::size_t affine_count = 0;
+        std::array<ops::Value, 3> axis_arguments;
+        std::size_t axis_count = 0;
+        const graph::ValueObserver observer = [&](std::optional<Op> op,
+                                                  const ops::Value &value,
+                                                  bool output) {
+          try {
+            validate_numeric_domain(op, value, output);
+          } catch (...) {
+            // An isolated argument failure has no output callback. Discard a
+            // partial triplet before the next operation's arguments arrive.
+            affine_count = axis_count = 0;
+            throw;
+          }
+          // The observed executor visits each operation's arguments in order,
+          // immediately before preparation. Only export checks the internal
+          // multiplication/addition domain; ordinary native calls never do.
+          if (op == Op::affine_contract && !output) {
+            affine_arguments[affine_count++] = value;
+            if (affine_count == affine_arguments.size()) {
+              const auto count = affine_count;
+              affine_count = 0;
+              validate_affine_excel_domain(affine_arguments.data(), count);
+            }
+          } else affine_count = 0;
+          if (op && ops::axis_path_operator(*op) && !output) {
+            axis_arguments[axis_count++] = value;
+            if (axis_count == axis_arguments.size()) {
+              const auto count = axis_count;
+              axis_count = 0;
+              axis_path_validate(*op, axis_arguments.data(), count);
+            }
+          } else axis_count = 0;
+        };
         auto audit = validate_domain
             ? graph::execute_observed(program, inputs, parameters_.data(), parameters_.size(),
-                &start, &end, 1, storage.data(), program.roots.size(), &layout, validate_numeric_domain)
+                &start, &end, 1, storage.data(), program.roots.size(), &layout, observer)
             : graph::execute(program, inputs, parameters_.data(), parameters_.size(), &start,
                 &end, 1, storage.data(), program.roots.size(), &layout);
         for (std::size_t j = 0; j < program.roots.size(); ++j) {
@@ -706,7 +767,8 @@ std::vector<Reference> Plan::compute_reference(bool validate_domain) const {
           r.kind = dtype == graph::OutputDType::int64     ? ops::Kind::integer
                    : dtype == graph::OutputDType::boolean ? ops::Kind::mask
                                                           : ops::Kind::number;
-          if (r.shape.rank < 0)
+          if (r.shape.rank < 0 ||
+              (r.shape.size() == 0 && audit.root_statuses[j] != 0))
             r.error = "STATUS:" + std::to_string(audit.root_statuses[j]);
           else {
             auto *ptr =
@@ -736,7 +798,7 @@ std::vector<Reference> Plan::compute_reference(bool validate_domain) const {
 std::vector<std::pair<std::string, std::string>> coverage() {
   std::vector<std::pair<std::string, std::string>> r;
   for (auto &s : ops::registry())
-    r.emplace_back(s.name, static_cast<std::uint16_t>(s.op) <= 146
+    r.emplace_back(s.name, static_cast<std::uint16_t>(s.op) <= ops::operator_count
                                ? "implemented_unverified"
                                : "unsupported");
   return r;

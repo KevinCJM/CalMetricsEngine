@@ -1,0 +1,81 @@
+{
+  "status": "isolated_screen_complete_actual_integration_pending",
+  "date": "2026-10-06",
+  "actual_build_id": "30722fb25c692505f924aec6755d8f3c5a6113507b9b54552fb22a895d8ab365",
+  "actual_branch": "codex/submission-policy",
+  "actual_source_modified": false,
+  "private_library_qualification": "not full engine/Graph/Planner/worker/fallback/ASan qualification",
+  "cpu_budget": 1,
+  "rounds_per_batch": 4,
+  "total_timed_requests": 108,
+  "geometries": [
+    4096,
+    8192,
+    4096
+  ],
+  "input_distribution": "fixed seed 20261005, uniform[-1024,1024]",
+  "layouts": [
+    {
+      "name": "long-k-ff-librarymerge",
+      "baseline_private_seconds": 2.1957863745,
+      "librarymerge_private_seconds": 1.915004271,
+      "actual_native_baseline_seconds": 2.2676020625,
+      "njit_seconds": 1.329661687,
+      "private_time_reduction_fraction": 0.1278731422877768
+    },
+    {
+      "name": "long-k-cc-c",
+      "baseline_private_seconds": 2.4255410834999998,
+      "librarymerge_private_seconds": 2.1079241875,
+      "actual_native_baseline_seconds": 2.421539125,
+      "njit_seconds": 1.312872521,
+      "private_time_reduction_fraction": 0.1309468217877744
+    },
+    {
+      "name": "long-k-cc-f",
+      "baseline_private_seconds": 2.3679003124999998,
+      "librarymerge_private_seconds": 2.0602363749999997,
+      "actual_native_baseline_seconds": 2.424787479,
+      "njit_seconds": 1.6701034795,
+      "private_time_reduction_fraction": 0.12993111909139976
+    },
+    {
+      "name": "long-k-ff-c",
+      "baseline_private_seconds": 2.473572521,
+      "librarymerge_private_seconds": 2.1848149164999997,
+      "actual_native_baseline_seconds": 2.474033604,
+      "njit_seconds": 1.752540958,
+      "private_time_reduction_fraction": 0.11673706836913889
+    }
+  ],
+  "control_groups": 196,
+  "rejected_input_checks": 36,
+  "control_boundary": "three 64-group private geometry screens and 4 activated odd-geometry variants; not pytest regression counts",
+  "baseline_phase_medians": {
+    "domain_seconds": 0.035757354000000005,
+    "plan_seconds": 0.032653375,
+    "dgemm_seconds": 1.307982284499995,
+    "merge_seconds": 0.6814705934999996,
+    "copy_seconds": 0.03466412149999999,
+    "finish_seconds": 0.010046207499999998,
+    "calculate_seconds": 2.0379876460000004,
+    "calls": 8192.0,
+    "chunk": 64.0,
+    "pieces": 128.0,
+    "slots": 9.0,
+    "scratch_capacity_bytes": 20972096.0
+  },
+  "rejected_candidates": [
+    "F-layout balanced-tree partials: slower",
+    "512x256 tree tiles: slower",
+    "512x256 plus DAXPY: slower than DAXPY alone"
+  ],
+  "retained_candidate": "same balanced tree, beta0 DGEMM pieces, replace only two contiguous Eigen addition sites with cblas_daxpy(alpha=1)",
+  "memory": "No fresh peak memory measured. Explicit scratch cap and private reported capacity unchanged; hidden library allocation not qualified.",
+  "source_preservation": {
+    "native_source": 93,
+    "qualified_tests": 168,
+    "preserved_existing": 294
+  },
+  "goal_complete": false
+}

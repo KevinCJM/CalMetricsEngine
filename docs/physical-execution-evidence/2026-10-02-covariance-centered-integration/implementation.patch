@@ -1,0 +1,397 @@
+--- before/cpp/operators/matrix_backend.cpp
++++ after/cpp/operators/matrix_backend.cpp
+@@ -182,8 +182,6 @@
+ using Read = Eigen::Map<const Row, Eigen::Unaligned>;
+ using Four = Eigen::Array<double, 4, 1>;
+ using Two = Eigen::Array<double, 2, 1>;
+-using ReadFour = Eigen::Map<const Four, Eigen::Unaligned>;
+-using ReadTwo = Eigen::Map<const Two, Eigen::Unaligned>;
+ template<int Width>
+ EIGEN_DONT_INLINE void gather_means(const double *input, Eigen::Index n,
+     Eigen::Index d, Eigen::Index stride, double *means) {
+@@ -213,6 +211,14 @@
+     return ((Read(left, n) - ml) * (Read(right, n) - mr)).sum();
+ }
+ 
++template<bool Centered, class Tile>
++EIGEN_ALWAYS_INLINE Tile centered_values(const double *data, double mean) {
++    const Eigen::Map<const Tile, Eigen::Unaligned> values(data);
++    if constexpr (Centered) return values;
++    else return values - mean;
++}
++
++template<bool Centered>
+ EIGEN_ALWAYS_INLINE double finish_pair(const Four &lanes,
+     const double *left, const double *right, Eigen::Index n, double ml, double mr) {
+     // Public Array spelling of the pinned arm64 two-packet reduction tree:
+@@ -220,53 +226,58 @@
+     Two merged = lanes.template head<2>() + lanes.template tail<2>();
+     const auto full = n - n % 4;
+     if (n - full >= 2)
+-        merged += (ReadTwo(left + full) - ml) * (ReadTwo(right + full) - mr);
++        merged += centered_values<Centered, Two>(left + full, ml) *
++                  centered_values<Centered, Two>(right + full, mr);
+     double result = merged.sum();
+-    if (n % 2)
+-        result += (left[n - 1] - ml) * (right[n - 1] - mr);
++    if (n % 2) {
++        if constexpr (Centered) result += left[n - 1] * right[n - 1];
++        else result += (left[n - 1] - ml) * (right[n - 1] - mr);
++    }
+     return result;
+ }
+ 
++template<bool Centered>
+ EIGEN_ALWAYS_INLINE void fused_pair_tile(const double *x, Eigen::Index n,
+     Eigen::Index d, Eigen::Index cs, Eigen::Index j, Eigen::Index k,
+     double *out, const double *means) {
+     const auto *left0 = x + j * cs, *left1 = left0 + cs;
+     const auto *right0 = x + k * cs, *right1 = right0 + cs;
+-    const double ml0 = means[j], ml1 = means[j + 1];
+-    const double mr0 = means[k], mr1 = means[k + 1];
++    const double ml0 = Centered ? 0.0 : means[j], ml1 = Centered ? 0.0 : means[j + 1];
++    const double mr0 = Centered ? 0.0 : means[k], mr1 = Centered ? 0.0 : means[k + 1];
+     Four a00, a01, a10, a11;
+     {
+-        const Four l0 = ReadFour(left0) - ml0, l1 = ReadFour(left1) - ml1;
+-        const Four r0 = ReadFour(right0) - mr0, r1 = ReadFour(right1) - mr1;
++        const Four l0 = centered_values<Centered, Four>(left0, ml0), l1 = centered_values<Centered, Four>(left1, ml1);
++        const Four r0 = centered_values<Centered, Four>(right0, mr0), r1 = centered_values<Centered, Four>(right1, mr1);
+         // Seed with the first products, not +0; preserve signed-zero behavior.
+         a00 = l0 * r0; a01 = l0 * r1; a10 = l1 * r0; a11 = l1 * r1;
+     }
+     const auto full = n - n % 4;
+     for (Eigen::Index i = 4; i < full; i += 4) {
+-        const Four l0 = ReadFour(left0 + i) - ml0, l1 = ReadFour(left1 + i) - ml1;
+-        const Four r0 = ReadFour(right0 + i) - mr0, r1 = ReadFour(right1 + i) - mr1;
++        const Four l0 = centered_values<Centered, Four>(left0 + i, ml0), l1 = centered_values<Centered, Four>(left1 + i, ml1);
++        const Four r0 = centered_values<Centered, Four>(right0 + i, mr0), r1 = centered_values<Centered, Four>(right1 + i, mr1);
+         a00 += l0 * r0; a01 += l0 * r1; a10 += l1 * r0; a11 += l1 * r1;
+     }
+     const double denominator = static_cast<double>(n - 1);
+-    out[j * d + k] = finish_pair(a00, left0, right0, n, ml0, mr0) / denominator;
+-    out[j * d + k + 1] = finish_pair(a01, left0, right1, n, ml0, mr1) / denominator;
++    out[j * d + k] = finish_pair<Centered>(a00, left0, right0, n, ml0, mr0) / denominator;
++    out[j * d + k + 1] = finish_pair<Centered>(a01, left0, right1, n, ml0, mr1) / denominator;
+     if (k != j)
+-        out[(j + 1) * d + k] = finish_pair(a10, left1, right0, n, ml1, mr0) / denominator;
+-    out[(j + 1) * d + k + 1] = finish_pair(a11, left1, right1, n, ml1, mr1) / denominator;
+-}
+-
++        out[(j + 1) * d + k] = finish_pair<Centered>(a10, left1, right0, n, ml1, mr0) / denominator;
++    out[(j + 1) * d + k + 1] = finish_pair<Centered>(a11, left1, right1, n, ml1, mr1) / denominator;
++}
++
++template<bool Centered = false>
+ EIGEN_DONT_INLINE bool upper(const Value &input, double *out, Workspace &, Audit &) {
+     const auto *x = static_cast<const double *>(input.data);
+     const auto n = static_cast<Eigen::Index>(input.shape.dim[0]);
+     const auto d = static_cast<Eigen::Index>(input.shape.dim[1]);
+     const auto cs = static_cast<Eigen::Index>(input.stride[1]);
+-    const auto *means = out + (d - 1) * d;
++    const auto *means = Centered ? nullptr : out + (d - 1) * d;
+     const auto paired = d - d % 2;
+     const double denominator = static_cast<double>(n - 1);
+     for (Eigen::Index j = 0; j < paired; j += 2) {
+         for (Eigen::Index k = j; k < paired; k += 2)
+-            fused_pair_tile(x, n, d, cs, j, k, out, means);
+-        if (paired != d) {
++            fused_pair_tile<Centered>(x, n, d, cs, j, k, out, means);
++        if (!Centered && paired != d) {
+             out[j * d + paired] = original_pair(x + j * cs, x + paired * cs, n,
+                                                 means[j], means[paired]) / denominator;
+             out[(j + 1) * d + paired] = original_pair(x + (j + 1) * cs, x + paired * cs, n,
+@@ -276,7 +287,7 @@
+     // With even D, only the final 2x2 tile writes any part of the final row:
+     // its final diagonal, after copying all four means to scalar values.
+     // With odd D, the one remaining diagonal is the final mean consumer.
+-    if (paired != d)
++    if (!Centered && paired != d)
+         out[d * d - 1] = original_pair(x + paired * cs, x + paired * cs, n,
+                                       means[paired], means[paired]) / denominator;
+     return true;
+@@ -589,6 +600,17 @@
+     else
+         covariance_f_detail::gather_means<8>(static_cast<const double *>(input.data),
+             input.shape.dim[0], input.shape.dim[1], input.stride[1], means);
++}
++void covariance_library_centered(const Value &input, Output &output, Workspace &work, Audit &audit) {
++    // Caller admits a complete centered F panel, N >= 32 and even D. Reuse
++    // the canonical fixed reduction tree without reading unpublished means.
++    auto panel = input;
++    panel.data = work.doubles.data();
++    panel.stride = {1, static_cast<std::ptrdiff_t>(input.shape.dim[0]), 1};
++    covariance_f_detail::upper<true>(panel, static_cast<double *>(output.data), work, audit);
++    finish_covariance_matrix(output, false);
++    audit.eigen_covariance_calls = 1;
++    audit.isa = "eigen-centered-covariance";
+ }
+ double covariance_library_pair(const Value &input, std::size_t j, std::size_t k,
+                                const double *means) {
+--- before/cpp/operators/covariance_accelerate.cpp
++++ after/cpp/operators/covariance_accelerate.cpp
+@@ -48,7 +48,8 @@
+     }
+     ~ThreadLimit() { if (active) BLASSetThreading(previous); }
+ };
+-bool guarded(const Value &input, int layout, int block, double *result, Workspace &work, Audit &audit) {
++bool guarded(const Value &input, int layout, int block, double *result, Workspace &work,
++             Audit &audit, bool &centered_ready) {
+     const auto n = input.shape.dim[0], d = input.shape.dim[1];
+     const auto *x = static_cast<const double *>(input.data);
+     if (n < 32 || d < 256 || n > 1000000 || d > 4096) return false;
+@@ -98,7 +99,11 @@
+         // Large-amplitude inputs use canonical native execution; no truncation.
+         for (std::size_t i = 0; i < count * d; ++i) {
+             const double value = std::abs(panel[i]);
+-            if (value > 8.0 || (value != 0.0 && value < 0x1p-400)) return false;
++            if (value > 8.0) {
++                centered_ready = layout && first == 0 && count == n && d % 2 == 0;
++                return false;
++            }
++            if (value != 0.0 && value < 0x1p-400) return false;
+         }
+         for (std::size_t j = 0; j < d; ++j)
+             norm[j] = std::sqrt(norm[j] * (1.0 + 4.0 * eta)) * padding;
+@@ -238,8 +243,9 @@
+         audit = {};
+         audit.accelerate_covariance_attempts = 1;
+         audit.native_library_workspace_reserve_bytes = reserve * sizeof(double);
++        bool centered_ready = false;
+         const bool accepted = guarded(input, layout, static_cast<int>(panel_rows(input.shape)),
+-                                      static_cast<double *>(output.data), work, audit);
++                                      static_cast<double *>(output.data), work, audit, centered_ready);
+         threads.restore();
+         if (accepted) {
+             audit.accelerate_covariance_calls = 1;
+@@ -247,8 +253,13 @@
+             audit.isa = "accelerate-guarded-covariance";
+         } else {
+             const auto attempted = audit;
+-            discard();
+-            execute(p, output, work, Isa::automatic, audit);
++            if (centered_ready) {
++                covariance_library_centered(input, output, work, audit);
++                discard();
++            } else {
++                discard();
++                execute(p, output, work, Isa::automatic, audit);
++            }
+             audit.accelerate_covariance_attempts = attempted.accelerate_covariance_attempts;
+             audit.covariance_syrk_calls = attempted.covariance_syrk_calls;
+             audit.covariance_replayed_cells = attempted.covariance_replayed_cells + d * (d + 1) / 2;
+--- before/cpp/include/calmetrics_engine/matrix_backend.hpp
++++ after/cpp/include/calmetrics_engine/matrix_backend.hpp
+@@ -39,6 +39,8 @@
+ #if defined(CALMETRICS_HAVE_EIGEN_ROTATION) && defined(__APPLE__) && defined(__aarch64__)
+ // Internal C/F-compatible finite covariance pieces. Caller admits geometry.
+ void covariance_library_means(const Value &, double *);
++// Complete centered F panel, N >= 32 and even D; consumes workspace before release.
++void covariance_library_centered(const Value &, Output &, Workspace &, Audit &);
+ double covariance_library_pair(const Value &, std::size_t, std::size_t, const double *);
+ // Admitted C/F-compatible matmul; void entries permit caller tail dispatch.
+ void library_matmul_f(const Value &, const Value &, double *, Audit &);
+--- before/tests/test_covariance_accelerate.py
++++ after/tests/test_covariance_accelerate.py
+@@ -175,9 +175,9 @@
+ 
+ 
+ @active
+-@pytest.mark.parametrize("layout", ["c", "f"])
+-def test_prepared_rereads_payload_releases_rejected_panel_and_preserves_snapshot(layout):
+-    x = inputs(layout)
++@pytest.mark.parametrize("layout,d", [("c", 257), ("f", 257), ("f", 256), ("padded_f", 256)])
++def test_prepared_rereads_payload_releases_rejected_panel_and_preserves_snapshot(layout, d):
++    x = inputs(layout, d=d)
+     graph = GraphCompiler({"x": MATRIX}).compile("covariance(x)")
+     with AdaptiveScheduler(cpu_budget=1) as scheduler:
+         prepared = scheduler.prepare_execution(graph, {"x": x}, np.zeros(1, np.int64), np.array([len(x)], np.int64))
+@@ -278,7 +278,7 @@
+     getter.restype = ctypes.c_uint
+     setter.argtypes, setter.restype = (ctypes.c_uint,), ctypes.c_int
+     previous = getter()
+-    x = inputs(layout)
++    x = inputs(layout, d=256)
+     if replay:
+         x.setflags(write=True)
+         x *= 1e3
+@@ -294,6 +294,111 @@
+         assert counts(result, "accelerate_covariance_calls") == int(not replay)
+     finally:
+         assert setter(previous) == 0 and getter() == previous
++
++
++@active
++@pytest.mark.parametrize(
++    "n,d,layout,order,lane",
++    [
++        (32, 256, "f", "C", "single"),
++        (33, 256, "padded_f", "F", "single"),
++        (34, 256, "f", "C", "thread"),
++        (35, 256, "padded_f", "F", "thread"),
++        (35, 256, "f", "C", "process_inline"),
++        (34, 256, "f", "F", "process_shared"),
++        (33, 256, "padded_f", "C", "process_inline"),
++        (35, 256, "padded_f", "F", "process_shared"),
++        (35, 2050, "f", "F", "single"),
++    ],
++)
++def test_complete_centered_replay_keeps_packet_tails_transport_and_owned_results(n, d, layout, order, lane):
++    x = inputs(layout, n=n, d=d)
++    x.setflags(write=True)
++    x *= 32.0
++    x[:, 0] = np.where(np.arange(n) % 2, -64.0, 64.0)
++    x.setflags(write=False)
++    before = x.view(np.uint64).copy()
++    # Dense F survives IPC; padded F is packed into logical C before execution.
++    transported = np.array(x, order="C") if lane.startswith("process") and layout == "padded_f" else x
++    expected = op.covariance(transported)
++    graph = GraphCompiler({"x": MATRIX}).compile("covariance(x)", output_order=order)
++    starts, ends = np.zeros(2, np.int64), np.full(2, n, np.int64)
++    with AdaptiveScheduler(cpu_budget=2, config=settings(lane)) as scheduler:
++        result = scheduler.execute(graph, {"x": x}, starts, ends)
++        again = scheduler.execute(graph, {"x": x}, starts, ends)
++    assert result.plan.lane == ("process" if lane.startswith("process") else lane)
++    if lane.startswith("process"):
++        assert result.plan.use_shared_memory == (lane == "process_shared")
++    assert counts(result, "accelerate_covariance_attempts") == 2
++    assert counts(result, "accelerate_covariance_calls") == 0
++    assert counts(result, "covariance_syrk_calls") == 0
++    assert counts(result, "covariance_fallbacks") == 2
++    assert counts(result, "eigen_covariance_calls") == 2
++    assert counts(result, "covariance_replayed_cells") == d * (d + 1)
++    assert counts(result, "covariance_panel_materialization_bytes") == 2 * x.size * 8
++    assert counts(result, "algorithm_copy_bytes") == 0
++    panel_rows = n if d <= 2048 else 512
++    reserve = (panel_rows + 3) * d * 8 + 32 * 1024 * 1024
++    assert result.plan.estimated_worker_scratch_bytes >= reserve
++    for chunk in result.audit["native_chunks"]:
++        assert chunk["native_library_workspace_reserve_bytes"] == reserve
++        assert chunk["operator_workspace_capacity_bytes"] == 0
++    for old, new in zip(result.outputs[0].values, again.outputs[0].values, strict=True):
++        np.testing.assert_array_equal(old.view(np.uint64), expected.view(np.uint64))
++        np.testing.assert_array_equal(new.view(np.uint64), expected.view(np.uint64))
++        assert old.flags.f_contiguous if order == "F" else old.flags.c_contiguous
++        assert not old.flags.writeable and not new.flags.writeable
++        assert not np.shares_memory(old, x) and not np.shares_memory(old, new)
++    assert not np.shares_memory(*result.outputs[0].values)
++    np.testing.assert_array_equal(x.view(np.uint64), before)
++    if lane == "process_shared":
++        assert result.audit["output_copy_bytes"] == 0
++
++
++@active
++@pytest.mark.parametrize("tiny_first", [False, True])
++@pytest.mark.parametrize("rounding", [0, 0x00400000, 0x00800000, 0x00C00000])
++def test_centered_replay_rejection_order_preserves_fenv_and_rounding(tiny_first, rounding):
++    # Darwin arm64 fenv.h: two uint64 fields, FE_ALL_EXCEPT=0x9f, DIVBYZERO=2.
++    libc = ctypes.CDLL(None)
++    libc.fegetenv.argtypes = libc.fesetenv.argtypes = (ctypes.c_void_p,)
++    libc.fesetround.argtypes = libc.feclearexcept.argtypes = libc.feraiseexcept.argtypes = (ctypes.c_int,)
++    libc.fetestexcept.argtypes = (ctypes.c_int,)
++    saved = (ctypes.c_uint64 * 2)()
++    assert libc.fegetenv(ctypes.byref(saved)) == 0
++    x = inputs("f", n=35, d=256)
++    x.setflags(write=True)
++    x.fill(0.0)
++    signs = np.where(np.arange(len(x)) % 2, -1.0, 1.0)
++    x[:, 0 if tiny_first else 255] = signs * 2.0**-600
++    x[:, 1 if tiny_first else 0] = signs * 64.0
++    x.setflags(write=False)
++    before = x.view(np.uint64).copy()
++    graph = GraphCompiler({"x": MATRIX}).compile("covariance(x)")
++    starts, ends = np.zeros(1, np.int64), np.array([len(x)], np.int64)
++    try:
++        with AdaptiveScheduler(cpu_budget=1, config=settings("single")) as scheduler:
++            assert libc.fesetround(rounding) == 0 and libc.fegetround() == rounding
++            assert libc.feclearexcept(0x9F) == 0 and libc.feraiseexcept(2) == 0
++            expected = op.covariance(x)
++            expected_flags = libc.fetestexcept(0x9F)
++            assert libc.fegetround() == rounding
++            assert libc.feclearexcept(0x9F) == 0 and libc.feraiseexcept(2) == 0
++            result = scheduler.execute(graph, {"x": x}, starts, ends)
++            actual_flags = libc.fetestexcept(0x9F)
++            assert libc.fegetround() == rounding
++            assert actual_flags == expected_flags and actual_flags & 2
++            actual = result.outputs[0].values[0]
++            np.testing.assert_array_equal(actual.view(np.uint64), expected.view(np.uint64))
++            attempted = int(rounding == 0)
++            assert counts(result, "accelerate_covariance_attempts") == attempted
++            assert counts(result, "covariance_fallbacks") == attempted
++            assert counts(result, "covariance_syrk_calls") == 0
++            assert counts(result, "covariance_panel_materialization_bytes") == attempted * x.size * 8
++            assert result.audit["native_chunks"][0]["operator_workspace_capacity_bytes"] == 0
++        np.testing.assert_array_equal(x.view(np.uint64), before)
++    finally:
++        assert libc.fesetenv(ctypes.byref(saved)) == 0
+ 
+ 
+ @active
+--- before/tests/operator_native_tests.cpp
++++ after/tests/operator_native_tests.cpp
+@@ -1339,6 +1339,37 @@
+                   "covariance rejected environment wrote output");
+             check(x==before,"covariance changed borrowed input");
+         }
++        for (std::size_t n=32;n<36;++n) {
++            constexpr std::size_t d=256;
++            const auto leading=n+3;
++            std::vector<double> x(leading*d,-993.),storage(d*d+2,-993.);
++            for (std::size_t j=0;j<d;++j)
++                for (std::size_t i=0;i<n;++i)
++                    x[j*leading+i]=double((i*17+j*13)%71)-35.;
++            const auto before=x;
++            auto value=matrix(x.data(),n,d);
++            value.stride={1,static_cast<std::ptrdiff_t>(leading)};
++            const std::array<ops::Value,8> args{value};
++            const auto plan=ops::prepare(ops::lookup("covariance"),args.data(),1);
++            ops::Output out;out.shape=plan.output_shape;out.data=storage.data()+1;
++            ops::Workspace work;ops::Audit audit;
++            const auto reserve=ops::covariance_accelerate_reserve_doubles(value.shape);
++            const bool handled=ops::try_accelerate_covariance(plan,out,work,audit);
++            check(handled==(reserve!=0),"centered covariance platform admission mismatch");
++            if (handled) {
++                const auto expected=run(ops::lookup("covariance"),args,1,ops::Isa::automatic);
++                check(std::memcmp(storage.data()+1,expected.values.data(),d*d*8)==0,
++                      "centered covariance changed packet or tail bits");
++                check(audit.eigen_covariance_calls==1 && audit.covariance_fallbacks==1 &&
++                      audit.covariance_syrk_calls==0 && audit.accelerate_covariance_calls==0,
++                      "centered covariance lost replay audit");
++                check(audit.scratch_bytes==(n+3)*d*8 && work.capacity_bytes()==0,
++                      "centered covariance lost peak or retained dead panel");
++            }
++            check(x==before,"centered covariance changed borrowed input");
++            check(storage.front()==-993. && storage.back()==-993.,
++                  "centered covariance crossed output bounds");
++        }
+         {
+             constexpr std::size_t n=512;
+             const auto capacity=ops::symmetric_eigh_split_scratch_doubles(n);
+--- before/docs/execution-guide.md
++++ after/docs/execution-guide.md
+@@ -60,7 +60,7 @@
+ 
+ 单一 typed float64 矩阵根 `covariance(X)` 在相同平台、Eigen/Accelerate 均启用、`32≤T≤1,000,000`、`256≤D≤4096` 时，可采用守卫 Accelerate DSYRK。限定无内部消费者、非 isolate、无子作用域和观察器的图；逐次检查正向 C/F leading-dimension 输入、有限值与受控中心化尺度、标准舍入环境，不按地址缓存数值准入。共用 canonical 均值和局部重放接口，以确定性舍入模型检查原 1e-12 容差、对角位模式及正负/零分类；不确定格局部重放，过密或尺度不合格时完整原生重放。模型假设及适用构建见[设计与验收](physical-execution-evidence/2026-10-01-covariance-syrk-integration/README.md)，不能外推成所有厂商库版本的形式化保证。
+ 
+-该图路径借用输入，复用本次独占 C 结果下三角承载暂时界和标记，无额外 D×D 矩阵；同一独立根显式 F 可直接写最终独立结果，完成位级对称镜像后公布 F strides；不产生 C arena 或根转换。中心化面板由 Workspace 管理，实际大小 `(B+3)*D*8`，默认 B=512，T/D 均≤2048 时 B=T；按区间内所有可能面板大小预留，另加 32MiB 库工作区估算。该库估算不是厂商硬上界，也不等于实际分配；原 Planner 保守容量仍存在。恢复调用线程原 BLAS 策略后才完成或重放，仍只占一个 Scheduler CPU token。拒绝后释放无用面板，prepared 重读当前值，快照保持独立。
++该图路径借用输入，复用本次独占 C 结果下三角承载暂时界和标记，无额外 D×D 矩阵；同一独立根显式 F 可直接写最终独立结果，完成位级对称镜像后公布 F strides；不产生 C arena 或根转换。中心化面板由 Workspace 管理，实际大小 `(B+3)*D*8`，默认 B=512，T/D 均≤2048 时 B=T；按区间内所有可能面板大小预留，另加 32MiB 库工作区估算。该库估算不是厂商硬上界，也不等于实际分配；原 Planner 保守容量仍存在。恢复调用线程原 BLAS 策略后才完成或重放，仍只占一个 Scheduler CPU token。拒绝后释放无用面板，prepared 重读当前值，快照保持独立。若首次幅度拒绝时已完整生成本次 F 中心化面板且 D 为偶数，先复用现有 Eigen 固定归约树消费面板，再释放；省去重复均值和减法，保留原 N−1 除法、尾部及逐位镜像。tiny 首先拒绝、部分面板、奇 D、C 布局及 DSYRK 后的拒绝继续原重放；这项复用不扩大 DSYRK 数值准入域，原面板分配峰值仍计入审计。
+ 
+ 同一已准入的独立根中，实际输入全为 +0 时，标准舍入下 canonical 的均值、居中乘积、累加与样本除法均精确为 +0，可由标准库直接写独占结果并释放旧面板。`covariance_zero_calls` 标记这一精确特例，库尝试/调用数为 0；全零数据只要含 -0 就沿 canonical 原布局归约，不进行无用的 DSYRK 尝试。输入改变时重新检查，不缓存零资格；未准入图继续原逻辑。
+ 
+--- before/docs/physical-execution-optimization.md
++++ after/docs/physical-execution-optimization.md
+@@ -1,4 +1,14 @@
+ # 物理执行优化（性能验收未闭环）
++
++## 2026-10-02 完整中心化面板复用：大幅度 F 协方差少约四分之一
++
++将已有候选接入唯一 Eigen 固定归约树，仅在首次幅度拒绝、完整 F 面板、偶 D 时消费已经中心化的数据，省去重算；结果完成后释放面板。数学、错误、AST/DAG、Planner上界、IPC19与Excel公式不变。构建 `5b31418d52e9804122fe901bb645f5291bf181a1a2fba17e77cb0fee0489a1c9`。
++
++真实旧/新wheel、同一CPU、预热NJIT、12类6轮完整请求，新旧全矩阵逐位一致。2048² F/scaled普通F输出 **620.749→471.506ms**，prepared **634.158→475.302ms**，少约24%–25%；匹配NJIT108.551/112.573ms，实质差距仍在。C/scaled与长相关矩阵未解决；既有五类scaled对NJIT的严格1e-12差异继续标为false，未改容差。
++
++3类18个fresh内存子进程、54个heap阶段无追踪错误：新旧cold/warm申请峰只增 **8B**，接受；数值工作区未增。新约 **64.054/96.055MiB**，NJIT约102.000/134.001MiB，内存优势来自前阶段。RSS新旧−96/−128/+96KiB原样保留，不按页级微差否决，也不外推全部驻留状态。
++
++Python **10414通过**，专项358；原生、ASan/UBSan、双库OFF各 **9/9**，OFF专项226通过/132跳过；185直接夹具、469案例/3056值历史Excel快照、77源/wheel/extension/worker身份通过。没有新Excel重算，未检查macOS不支持的LeakSanitizer。自审核通过，执行指南已同步，未提交或推送。[设计、原始结果及采用边界](physical-execution-evidence/2026-10-02-covariance-centered-integration/README.md)。全算子目标仍未完成；下面保留此前候选与验收记录，旧“未接入”描述仅适用于当时版本。
+ 
+ ## 2026-10-02 验收口径与短尾选择：局部采用，继续处理重型差距
+ 

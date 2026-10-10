@@ -32,9 +32,10 @@ Issues = "https://github.com/KevinCJM/CalMetricsEngine/issues"
 
 [project.optional-dependencies]
 excel = ["XlsxWriter>=3.2,<4"]
-test = ["pytest>=8,<10"]
+test = ["pytest>=8,<10", "numba>=0.63.1,<1"]
 dev = [
   "pytest>=8,<10",
+  "numba>=0.63.1,<1",
   "build>=1.2,<2",
   "twine>=6,<7",
   "ruff>=0.11,<1",
@@ -56,12 +57,20 @@ sdist.include = [
   "src/calmetrics_engine/py.typed",
   "tests/*.py",
   "tests/*.cpp",
+  "tests/*.hpp",
+  "tests/*.json",
   "tests/data/*.json",
   "tools/*.py",
   "tools/*.cpp",
   "docs/*.md",
-  "CMakeLists.txt",
-  "README.md",
+  "/CMakeLists.txt",
+  "/README.md",
+  "third_party/eigen/eigen-3.4.0.tar.gz",
+  "third_party/eigen/COPYING.*",
+  "third_party/eigen/README.md",
+  "third_party/highway/highway-1.3.0.tar.gz",
+  "third_party/highway/LICENSE*",
+  "third_party/highway/README.md",
   ".github/workflows/*.yml",
 ]
 sdist.exclude = [
@@ -72,6 +81,7 @@ sdist.exclude = [
   "dist/**",
   "wheelhouse/**",
   "docs/.ai-hermes-user-memory/**",
+  "docs/physical-execution-evidence/**",
   "**/__pycache__/**",
   ".codegraph/**",
 ]
@@ -94,7 +104,7 @@ build = "cp3{10,11,12,13,14}-*"
 skip = "*-win32 *-win_arm64 *-manylinux_i686 *-musllinux_i686"
 # Reuse the declared test dependency without passing < / > through Windows cmd.
 test-extras = ["test"]
-test-sources = ["tests"]
+test-sources = ["tests", "tools"]
 test-command = "python -m pytest tests -v --import-mode=importlib -o faulthandler_timeout=60"
 
 [tool.cibuildwheel.linux]

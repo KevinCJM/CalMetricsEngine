@@ -3,8 +3,8 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
-#include <unordered_map>
-#include <unordered_set>
+#include <iterator>
+#include <utility>
 
 namespace calmetrics_engine::typed {
 namespace {
@@ -14,15 +14,28 @@ using O = ops::Op;
   throw Error(code + ": " + message);
 }
 
-const std::unordered_set<std::string> &supported_semantics() {
-  static const std::unordered_set<std::string> values{
-      "dimensionless",          "return_decimal", "rate_decimal",
-      "adjusted_nav",           "adjusted_market_price",
-      "reported_nav",           "raw_market_price",
-      "volume",                 "currency_amount", "count",
-      "calendar_days",          "date",            "mask", "category", "index",
-      "state", "event", "phase"};
-  return values;
+bool supported_semantic(std::string_view value) {
+  static constexpr std::string_view values[]{
+      "adjusted_market_price",
+      "adjusted_nav",
+      "calendar_days",
+      "category",
+      "count",
+      "currency_amount",
+      "date",
+      "dimensionless",
+      "event",
+      "index",
+      "mask",
+      "phase",
+      "rate_decimal",
+      "raw_market_price",
+      "reported_nav",
+      "return_decimal",
+      "state",
+      "volume",
+  };
+  return std::binary_search(std::begin(values), std::end(values), value);
 }
 bool derived_semantic(const std::string &value) {
   return value.rfind("derived:", 0) == 0 || value.rfind("squared:", 0) == 0 ||
@@ -258,19 +271,30 @@ ValueType ValueType::record(std::string tag, std::vector<std::string> names) {
   return out;
 }
 void ValueType::validate() const {
-  static const std::unordered_set<std::string> axes_allowed{
-      "time", "asset", "window", "kalman_field", "state_field", "segment_field",
-      "path", "scenario", "model", "component", "factor", "month"};
+  static constexpr std::string_view axes_allowed[]{
+      "asset",
+      "component",
+      "factor",
+      "kalman_field",
+      "model",
+      "month",
+      "path",
+      "scenario",
+      "segment_field",
+      "state_field",
+      "time",
+      "window",
+  };
   if (axes.size() != shape.size())
     fail("TYPE_MISMATCH", "axes and symbolic shape ranks differ");
   for (const auto &axis : axes)
-    if (!axes_allowed.count(axis))
+    if (!std::binary_search(std::begin(axes_allowed), std::end(axes_allowed), std::string_view(axis)))
       fail("AXIS_MISMATCH", "unsupported named axis: " + axis);
   for (const auto &dimension : shape)
     if (dimension.empty())
       fail("SHAPE_MISMATCH", "symbolic dimensions cannot be empty");
   if (semantic_dimension.empty() ||
-      (!supported_semantics().count(semantic_dimension) &&
+      (!supported_semantic(semantic_dimension) &&
        !derived_semantic(semantic_dimension)))
     fail("SEMANTIC_DIMENSION_MISMATCH",
          "unsupported semantic dimension: " + semantic_dimension);
@@ -356,58 +380,67 @@ std::string display(const ValueType &value) {
   return result + "]";
 }
 std::string normalize_semantic_dimension(std::string value) {
-  static const std::unordered_map<std::string, std::string> aliases{
-      {"number", "dimensionless"}, {"return", "return_decimal"},
-      {"weight", "dimensionless"}, {"price", "raw_market_price"},
-      {"price_change", "raw_market_price"}, {"currency", "currency_amount"}};
-  if (const auto it = aliases.find(value); it != aliases.end())
+  static constexpr std::pair<std::string_view, std::string_view> aliases[]{
+      {"currency", "currency_amount"},
+      {"number", "dimensionless"},
+      {"price", "raw_market_price"},
+      {"price_change", "raw_market_price"},
+      {"return", "return_decimal"},
+      {"weight", "dimensionless"},
+  };
+  const auto it = std::lower_bound(std::begin(aliases), std::end(aliases), std::string_view(value),
+      [](const auto &entry, std::string_view candidate) { return entry.first < candidate; });
+  if (it != std::end(aliases) && it->first == value)
     value = it->second;
-  if (!supported_semantics().count(value) && !derived_semantic(value))
+  if (!supported_semantic(value) && !derived_semantic(value))
     fail("SEMANTIC_DIMENSION_MISMATCH",
          "unsupported semantic dimension: " + value);
   return value;
 }
 
 std::string canonical_operator_name(std::string_view name) {
-  static const std::unordered_map<std::string_view, std::string_view> aliases{
-      {"sub", "subtract"},
-      {"mul", "multiply"},
-      {"safe_divide", "divide"},
-      {"elementwise_min", "minimum"},
-      {"elementwise_max", "maximum"},
+  static constexpr std::pair<std::string_view, std::string_view> aliases[]{
       {"abs", "absolute"},
-      {"eq", "equal"},
-      {"ne", "not_equal"},
-      {"lt", "less_than"},
-      {"le", "less_equal"},
-      {"gt", "greater_than"},
-      {"ge", "greater_equal"},
-      {"sequence_sum", "sum"},
-      {"prod", "product"},
-      {"sequence_prod", "product"},
-      {"sequence_mean", "mean"},
-      {"min", "min_value"},
-      {"max", "max_value"},
-      {"var", "variance"},
-      {"sequence_std", "std"},
+      {"corr", "correlation"},
+      {"cov", "covariance"},
       {"cumulative_maximum", "cumulative_max"},
       {"cumulative_minimum", "cumulative_min"},
-      {"skew", "skewness"},
+      {"elementwise_max", "maximum"},
+      {"elementwise_min", "minimum"},
+      {"eq", "equal"},
+      {"ge", "greater_equal"},
+      {"gt", "greater_than"},
       {"kurtosis_excess", "excess_kurtosis"},
+      {"le", "less_equal"},
+      {"lt", "less_than"},
       {"mad", "mean_absolute_deviation"},
-      {"rms", "root_mean_square"},
-      {"masked_sum", "sum_where"},
-      {"masked_mean", "mean_where"},
-      {"masked_variance", "variance_where"},
-      {"masked_std", "std_where"},
-      {"masked_min", "min_where"},
-      {"masked_max", "max_where"},
-      {"masked_median", "median_where"},
-      {"masked_quantile", "quantile_where"},
       {"masked_count", "count_true"},
-      {"cov", "covariance"},
-      {"corr", "correlation"}};
-  if (const auto it = aliases.find(name); it != aliases.end())
+      {"masked_max", "max_where"},
+      {"masked_mean", "mean_where"},
+      {"masked_median", "median_where"},
+      {"masked_min", "min_where"},
+      {"masked_quantile", "quantile_where"},
+      {"masked_std", "std_where"},
+      {"masked_sum", "sum_where"},
+      {"masked_variance", "variance_where"},
+      {"max", "max_value"},
+      {"min", "min_value"},
+      {"mul", "multiply"},
+      {"ne", "not_equal"},
+      {"prod", "product"},
+      {"rms", "root_mean_square"},
+      {"safe_divide", "divide"},
+      {"sequence_mean", "mean"},
+      {"sequence_prod", "product"},
+      {"sequence_std", "std"},
+      {"sequence_sum", "sum"},
+      {"skew", "skewness"},
+      {"sub", "subtract"},
+      {"var", "variance"},
+  };
+  const auto it = std::lower_bound(std::begin(aliases), std::end(aliases), std::string_view(name),
+      [](const auto &entry, std::string_view candidate) { return entry.first < candidate; });
+  if (it != std::end(aliases) && it->first == name)
     return std::string(it->second);
   return std::string(name);
 }
@@ -423,10 +456,44 @@ bool same_type(const ValueType &left, const ValueType &right) noexcept {
          left.record_tag == right.record_tag && left.fields == right.fields;
 }
 
-ValueType infer(const ops::Spec &spec, const std::vector<ValueType> &v) {
+ValueType infer(const ops::Spec &spec, const std::vector<ValueType> &v,
+                const std::vector<double> &constants) {
   const auto op = spec.op;
   if (v.size() < spec.min_args || v.size() > spec.max_args)
     fail("ARITY_MISMATCH", std::string(spec.name) + " has invalid arity");
+  if (ops::latent_operator(op)) return infer_latent(spec, v, constants);
+  if (ops::matrix_foundation(op)) return infer_foundation(spec, v, constants);
+  if (ops::axis_path_operator(op)) {
+    if (!v[0].is_numeric() || v[0].rank() < 1 || v[0].rank() > 3 ||
+        !v[0].record_tag.empty() || v[0].kind == ValueKind::window)
+      fail("TYPE_MISMATCH", "axis prefix/quantiles require float64 rank 1..3 arrays");
+    const bool quantiles = op == ops::Op::quantiles_axis;
+    const auto axis_index = quantiles ? 2u : 1u;
+    require_scalar_parameter(v[axis_index], "axis");
+    if (axis_index >= constants.size() || !std::isfinite(constants[axis_index]) ||
+        constants[axis_index] < 0 || constants[axis_index] >= v[0].rank() ||
+        constants[axis_index] != std::floor(constants[axis_index]))
+      fail("CONSTANT_LAYOUT_REQUIRED", "axis must be an in-range nonnegative integer literal");
+    if (quantiles) {
+      if (!v[1].is_numeric() || v[1].rank() != 1 || !v[1].record_tag.empty() ||
+          v[1].semantic_dimension != "dimensionless")
+        fail("TYPE_MISMATCH", "probabilities must be a dimensionless float64 vector");
+      auto axes = v[0].axes, shape = v[0].shape;
+      const auto axis = static_cast<std::size_t>(constants[axis_index]);
+      axes[axis] = "component";
+      shape[axis] = v[1].shape[0];
+      return from_axes(axes, shape, v[0].semantic_dimension, v[0].price_basis);
+    }
+    if (!v[2].is_numeric() || !v[2].is_scalar())
+      fail("TYPE_MISMATCH", "prefix initial must be a float64 scalar");
+    if (op == ops::Op::cumulative_product_axis) {
+      if (v[0].semantic_dimension != "dimensionless")
+        fail("SEMANTIC_DIMENSION_MISMATCH", "cumulative product increments must be dimensionless");
+      return v[0].with_semantics(v[2].semantic_dimension, v[2].price_basis);
+    }
+    const auto semantics = compatible_semantics(spec.name, v[0], v[2]);
+    return v[0].with_semantics(semantics.first, semantics.second);
+  }
 
   const auto series = [&](const ValueType &x, DType dtype) {
     if (x.kind != ValueKind::series || x.dtype != dtype)
@@ -752,6 +819,11 @@ ValueType infer(const ops::Spec &spec, const std::vector<ValueType> &v) {
              "distribution/trigonometric input must be dimensionless");
       return v[0].with_semantics("dimensionless");
     }
+    if (op == O::expm1) {
+      if (v[0].semantic_dimension != "dimensionless")
+        fail("SEMANTIC_DIMENSION_MISMATCH", "expm1 requires dimensionless input");
+      return v[0].with_semantics("dimensionless");
+    }
     if (op == O::log || op == O::exp) {
       if (v[0].semantic_dimension != "dimensionless" &&
           v[0].semantic_dimension != "return_decimal" &&
@@ -881,6 +953,28 @@ ValueType infer(const ops::Spec &spec, const std::vector<ValueType> &v) {
     for (const auto &input : v)
       if (!input.is_numeric())
         fail("TYPE_MISMATCH", "matrix arithmetic requires float64 inputs");
+    if (op == O::affine_contract) {
+      if ((v[0].kind != ValueKind::matrix && v[0].kind != ValueKind::tensor) ||
+          v[1].kind != ValueKind::matrix || (!v[2].is_scalar() && v[2].kind != ValueKind::vector))
+        fail("TYPE_MISMATCH", "affine_contract requires rank 2/3 values, matrix coefficients and scalar/vector initial");
+      if (v[0].axes.back() != v[1].axes[0])
+        fail("AXIS_MISMATCH", "affine_contract contracted axes differ");
+      if (v[0].shape.back() != v[1].shape[0])
+        fail("SHAPE_MISMATCH", "affine_contract contracted dimensions differ");
+      if (!v[2].is_scalar()) {
+        if (v[2].axes[0] != v[1].axes[1])
+          fail("AXIS_MISMATCH", "affine_contract initial axis differs");
+        if (v[2].shape[0] != v[1].shape[1])
+          fail("SHAPE_MISMATCH", "affine_contract initial dimension differs");
+      }
+      auto axes = v[0].axes, shape = v[0].shape;
+      axes.back() = v[1].axes[1];
+      shape.back() = v[1].shape[1];
+      const auto product = product_semantics(v[1], v[0]);
+      auto out = from_axes(axes, shape, product.first, product.second);
+      const auto semantics = compatible_semantics("affine_contract initial", out, v[2]);
+      return out.with_semantics(semantics.first, semantics.second);
+    }
     if (op == O::dot) {
       require_same_one_dimensional("dot", v[0], v[1]);
       auto semantics = product_semantics(v[0], v[1]);

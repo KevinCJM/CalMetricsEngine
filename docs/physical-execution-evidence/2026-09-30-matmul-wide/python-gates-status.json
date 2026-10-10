@@ -1,0 +1,30 @@
+[
+  {
+    "name": "python-full",
+    "rc": 0,
+    "seconds": 30.000181374838576,
+    "command": [
+      "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+      "-m",
+      "pytest",
+      "tests",
+      "-q",
+      "--import-mode=importlib"
+    ]
+  },
+  {
+    "name": "phase2",
+    "rc": 0,
+    "seconds": 55.71887687500566,
+    "command": [
+      "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+      "tools/check_phase2_performance.py",
+      "--cpu-budget",
+      "4",
+      "--repeats",
+      "11",
+      "--output-dir",
+      "/private/tmp/calmetrics-matmul-wide/phase2-final"
+    ]
+  }
+]

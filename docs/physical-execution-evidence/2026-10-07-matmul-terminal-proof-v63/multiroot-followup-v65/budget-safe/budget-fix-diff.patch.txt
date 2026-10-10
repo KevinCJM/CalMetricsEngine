@@ -1,0 +1,50 @@
+--- prior-normal/cpp/graph.cpp
++++ budget-safe/cpp/graph.cpp
+@@ -1057,7 +1057,11 @@
+   std::vector<std::uint8_t> members(p.nodes.size(),0);
+   std::uint32_t producer=UINT32_MAX;
+   for (std::size_t root=0;root<p.roots.size();++root) {
+-    if (p.root_outputs[root].rank!=2 || p.root_outputs[root].dtype!=OutputDType::float64)
++    // Planner arena admission precedes runtime slots. Different declared
++    // orders cannot borrow one backing product: reserve the canonical arena
++    // already in metadata instead of rejecting only during execution.
++    if (p.root_outputs[root].rank!=2 || p.root_outputs[root].dtype!=OutputDType::float64 ||
++        p.root_outputs[root].order!=p.root_outputs[0].order)
+       return;
+     std::vector<std::uint32_t> chain;
+     auto id=p.roots[root];
+--- prior-normal/tests/matmul_shared_roots_native_cases.hpp
++++ budget-safe/tests/matmul_shared_roots_native_cases.hpp
+@@ -126,6 +126,32 @@
+      !std::all_of(right.begin(),right.end(),[](double v){return v==1.;}))
+    throw std::runtime_error("early stop changed shared inputs");
+  }
++ // Mixed declared orders are legitimate native schemas. Planner and
++ // executor must reserve the same canonical storage before admission.
++ for(auto first:{g::OutputOrder::automatic,g::OutputOrder::c,g::OutputOrder::f})
++ for(auto second:{g::OutputOrder::automatic,g::OutputOrder::c,g::OutputOrder::f})
++ for(bool reverse:{false,true}) {
++  if(first==second) continue;
++  auto p=program(first,reverse);p.root_outputs[1].order=second;p.finalize();
++  if(!p.execution_metadata->matmul_shared_chains.empty())
++   throw std::runtime_error("mixed declared root orders omitted canonical Planner arena");
++  auto direct=std::make_shared<g::ExecutionMetadata>(*p.execution_metadata);
++  direct->row_batch.reset();p.execution_metadata=std::move(direct);
++  const std::vector<o::Value> inputs{x,y,o::Value::number(.25)};
++  std::vector<o::Shape> shapes;const auto capacity=g::required_array_capacity(p,inputs,0,&shapes);
++  g::ArrayArenaLayout arena;g::plan_array_arena(p,capacity,shapes,arena,true);
++  const std::int64_t z[1]={0};const auto layout=g::result_layout(p,inputs,z,z,1);
++  std::vector<double> out(layout.bytes()/8,987.);
++  const auto audit=g::execute(p,inputs,nullptr,0,z,z,1,out.data(),2,&layout);
++  if(!arena.elements[0] || audit.numeric_arena_bytes>arena.elements[0]*sizeof(double))
++   throw std::runtime_error("mixed root layout execution exceeds planned canonical arena");
++  for(std::size_t root=0;root<2;++root) {
++   const auto value=(root==(reverse?1u:0u)) ? 32.25 : 15.875;
++   const auto *data=out.data()+layout.slots[root].byte_offset/8;
++   if(!std::all_of(data,data+m*n,[&](double v){return v==value;}))
++    throw std::runtime_error("mixed declared root orders changed canonical values");
++  }
++ }
+  // A raw interleaved backing branch cannot overwrite a still-live producer.
+  {
+   auto p=program(g::OutputOrder::c);

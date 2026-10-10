@@ -1,0 +1,19 @@
+diff --git a/cpp/graph.cpp b/cpp/graph.cpp
+index 08df2c9..f52f9e7 100644
+--- a/cpp/graph.cpp
++++ b/cpp/graph.cpp
+@@ -812,11 +812,12 @@ void Program::finalize() {
+         if (producer.kind != NodeKind::operation || producer.storage != StorageKind::numeric ||
+             uses[source] != 1 || metadata->root_destinations[source] >= 0) continue;
+         const auto op = static_cast<ops::Op>(producer.opcode);
+-        if (op != ops::Op::add && op != ops::Op::subtract && op != ops::Op::multiply) continue;
++        const bool arithmetic = op == ops::Op::add || op == ops::Op::subtract || op == ops::Op::multiply;
++        if (!arithmetic && op != ops::Op::concatenate) continue;
+         if (metadata->solve_private_source.empty())
+           metadata->solve_private_source.assign(nodes.size(), -1);
+         metadata->solve_private_source[i] = static_cast<std::int32_t>(source);
+-        bool library = root >= 0 && uses[i] == 0 &&
++        bool library = arithmetic && root >= 0 && uses[i] == 0 &&
+             root_outputs[root].dtype == OutputDType::float64 && root_outputs[root].rank == 2 &&
+             metadata->fused_from[source] < 0 && metadata->deferred_to[source] < 0;
+         for (std::size_t j = 0; j < producer.parent_count; ++j)

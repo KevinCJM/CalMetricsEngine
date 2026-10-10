@@ -1,0 +1,46 @@
+--- task-before/tests/test_order_selection_library.py
++++ tests/test_order_selection_library.py
+@@ -102,7 +102,7 @@
+     values.setflags(write=False)
+     with np.errstate(over="ignore", invalid="ignore"):
+         assert_bits(op.median(values), sorted_value(values))
+-        for probability in (.25, .5, np.nextafter(1., 0.)):
++        for probability in (.25, .5, .75, .95, np.nextafter(1., 0.)):
+             expected = (cached_sort_values(values, probability)[1] if np.isinf(values).any()
+                         else sorted_value(values, probability))
+             assert_bits(op.quantile(values, probability), expected)
+@@ -110,6 +110,34 @@
+         expected = (cached_sort_values(values[:-1], .5)[0] if np.isinf(values).any()
+                     else sorted_value(values[:-1]))
+         assert_bits(op.median(values[:-1]), expected)
++
++
++@pytest.mark.parametrize("size", [1023, 1024, 1025, 4096])
++@pytest.mark.parametrize("masked", [False, True])
++def test_neighbor_ranks_at_half_and_last_elements(size, masked):
++    # Unique ranks ensure a wrong neighboring item cannot pass through ties.
++    chosen = np.random.default_rng(31).permutation(size).astype(np.float64) / 16.
++    values = np.full(3 * size, np.nan) if masked else chosen.copy()
++    mask = np.zeros(values.shape, bool)
++    if masked:
++        values[::3], mask[::3] = chosen, True
++    values.setflags(write=False)
++    mask.setflags(write=False)
++    before = values.copy()
++    arguments = (values, mask) if masked else (values,)
++    name = "quantile_where" if masked else "quantile"
++    # Fractional ranks cross the midpoint and leave tails of only one/two items.
++    for rank in (size // 2 - .25, size // 2 + .25, size - 2.25, size - 1.25,
++                 size - 2.):
++        probability = rank / (size - 1)
++        owner = np.full(3, 912.)
++        result, audit = op.call(name, *arguments, probability,
++                                out=owner[1:2].reshape(()), audit=True)
++        assert_bits(result, sorted_value(chosen, probability))
++        assert audit["algorithm_copy_bytes"] == chosen.nbytes
++        assert audit["input_copy_bytes"] == 0
++        assert owner[0] == owner[-1] == 912.
++    assert_bits(values, before)
+ 
+ 
+ @pytest.mark.parametrize("pattern", ["mixed_zero", "nan_payload", "nan_and_infinity"])

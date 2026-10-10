@@ -1,0 +1,24 @@
+{
+  "status": "source_and_installed_binary_verified",
+  "numba_blas_wrapper": {
+    "path": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numba/_lapack.c",
+    "sha256": "5e7f2e50716058993c7958a5a356f21daceeedf1939bb02a20bc40a68025b0d6",
+    "capsule_import_lines": [
+      11,
+      20
+    ],
+    "gemm_dispatch_lines": [
+      363,
+      400
+    ]
+  },
+  "scipy_cython_blas": {
+    "path": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/scipy/linalg/cython_blas.cpython-312-darwin.so",
+    "sha256": "10f299b973bc7007f222d4be7c29f50618d092ea3d8f80dbe0ebdeecf2ad6631",
+    "linked_libraries": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/scipy/linalg/cython_blas.cpython-312-darwin.so:\n\t/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1345.120.2)\n\t/System/Library/Frameworks/Accelerate.framework/Versions/A/Accelerate (compatibility version 1.0.0, current version 4.0.0)\n",
+    "gemm_import": "_dgemm$NEWLAPACK"
+  },
+  "conclusion": "Numba GEMM imports the SciPy BLAS capsule; this installed SciPy module links Accelerate NEWLAPACK. The directly profiled NumPy OpenBLAS library is a separate provider, not the warmed NJIT provider.",
+  "threadpoolctl_boundary": "Visible NumPy OpenBLAS pool alone does not prove which BLAS Numba GEMM uses.",
+  "whole_goal_complete": false
+}

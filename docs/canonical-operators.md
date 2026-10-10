@@ -2,7 +2,7 @@
 
 ## 当前能力
 
-`calmetrics_engine.operators` 提供 146 个可执行 canonical 算子。全部经由同一 `_native` 扩展进入 C++，不依赖 Numba，不在首次调用时编译，也不回退到 Python 数值实现。
+`calmetrics_engine.operators` 提供 190 个可执行 canonical 算子。全部经由同一 `_native` 扩展进入 C++，不依赖 Numba，不在首次调用时编译，也不回退到 Python 数值实现。
 
 完整名称、签名、形状与数学逻辑见[数学算子参考](operator-reference.md)；整图类型和示例见[使用手册](user-guide.md)，调度条件见[执行指南](execution-guide.md)。本文集中说明直接调用、内存和工作区契约。
 
@@ -22,7 +22,7 @@ portfolio_gain = op.total_return(values)
 
 operator = op.get("std")                    # 名称解析一次，重复使用 handle
 assert operator(values) == volatility
-assert len(op.catalog()) == 146
+assert len(op.catalog()) == 190
 assert op.get_by_opcode(operator.spec["opcode"]).name == "std"
 ```
 
@@ -32,11 +32,19 @@ assert op.get_by_opcode(operator.spec["opcode"]).name == "std"
 
 119–125 依次是 `normal_cdf`、`aligned_shift`、`recursive_filter`、`argsort`、`gather`、`distinct_count`、`floor`，详见[数学组合设计](mathematical-composition-design.md)。126–146 详见[递推与状态设计](stateful-series-design.md)及[状态事件契约](state-event-contracts.md)；运行时 `spec` 元数据与原生 registry 是参数入口。分块/筛选/分组/求根/分段是编译器作用域，不另计为 canonical 算子。
 
+147–160 是矩阵分解、多 RHS 求解及数组轴操作，见[矩阵与数组基础](matrix-array-foundation.md)。旧 `solve` 仍仅接受向量 RHS。
+
+161–185 为[概率模型基础](latent-model-operators.md)。直接 EM 返回内部打包模型，参数投影借用只读存储并保活模型；多次调用或图根需要独立结果时使用正式执行/快照接口。GMM/HMM 的初值、训练、推断各自独立；`em_converged` 与 `em_iterations` 明确区分收敛和轮数耗尽。
+
+186–187 为[保序轴收缩与稳定指数差](mc-projection-primitives.md)：`affine_contract(X,K,initial)` 支持 rank2/3 的末轴收缩、显式初态和 IEEE 传播；`expm1` 用标准原生函数保留近零精度。直接 `out` 仍遵守 C 连续接口，typed 图根可以显式 F 独立直写。
+
+188–190 为[按轴递推与多分位数](mc-axis-primitives.md)：显式初态累乘、严格累积最大值，以及每条 line 一次排序服务全部概率。prefix 不使用数值 scratch，quantiles 只需被选轴 N 个 double；输入与结果 ownership 沿现有契约。
+
 ## 输入类型与数据准备
 
-数值数组必须是本机字节序、元素对齐的 `float64 ndarray`。掩码接受 `uint8` 0/1 或 NumPy bool。按各算子契约接受标量、一维或二维，只有明确的标量广播，不隐式进行矩阵与向量的轴广播。
+数值数组必须是本机字节序、元素对齐的 `float64 ndarray`。掩码接受 `uint8` 0/1 或 NumPy bool。按各算子契约接受标量、一维、二维或三维，只有明确的标量广播，不隐式进行矩阵与向量的轴广播。
 
-`argsort/gather/distinct_count`、整数 `equal/not_equal` 重载和状态/事件接口另接受其契约声明的本机 `int64` 数组；排序索引与类别比较保持精确，不能转为 float64。普通浮点数学仍拒绝 int64 数组。`distinct_count` 返回 float64 数量，并检查数量可精确表示；负类别 ID 只有在显式 mask 排除时才被忽略。
+`argsort/gather/distinct_count`、整数 `equal/not_equal` 重载和状态/事件接口另接受其契约声明的本机 `int64` 数组；排序索引与类别比较保持精确，不能转为 float64。数组轴操作也接受 int64/bool，保留精确值；sum_axis/mean_axis 仅接受 float64。普通浮点数学仍拒绝 int64 数组。`distinct_count` 返回 float64 数量，并检查数量可精确表示；负类别 ID 只有在显式 mask 排除时才被忽略。
 
 Python 数值标量可使用 float 或可精确表示为 float64 的整数；也支持 NumPy float64 和范围内的整数标量。NumPy bool/uint8 标量按 mask 解释。拒绝 Python list、float32/object/complex 数组、非本机字节序和不支持的 rank，不偷偷转换。
 
@@ -78,7 +86,7 @@ assert op.mean(values, out=scalar_output) is scalar_output
 
 ## 返回视图的算子
 
-`lag`、`transpose`、二维输入的 `diag` 默认返回只读 NumPy 视图，保活源 owner：
+`slice_axis`、`swap_axes`、`broadcast_like`、`eigenvalues/eigenvectors`，以及 `lag`、`transpose`、二维输入的 `diag` 默认返回只读 NumPy 视图，保活源 owner：
 
 ```python
 matrix = np.arange(12.0).reshape(4, 3)
@@ -110,6 +118,10 @@ q50 = quantile(values, 0.50, workspace=workspace)
 
 工作区可在顺序调用间复用。一个 Workspace 不得同时借给两个运行中的调用，竞争时返回 `WORKSPACE_BUSY`，不会持有 GIL 等锁。不同 Workspace 的独立调用可并发，算子执行阶段释放 GIL，但自身不新建线程。
 
+`requirements()` 可返回形状对应的保守上界；实际ISA或布局未准入时，执行可能使用更少工作区，以本次审计为准。数值scratch内容没有跨调用身份；增长时可先释放旧缓冲，已足够的容量继续复用，输出不依赖工作区地址稳定。
+
+`median_where/quantile_where` 每次在完整掩码结构校验中重计选中数量，仅请求该数量的double工作区；不缓存旧掩码的数量，也不读取未选中数值。`requirements()` 与Planner仍按源长度给出保守上界。`workspace_bytes` 是本次请求量，`workspace_capacity_bytes` 是真实保留容量：显式预留或先密集后稀疏的复用工作区仍保留高水位，不能将请求量下降称为旧容量已释放。
+
 | 算法 | 工作区含义 |
 | --- | --- |
 | 普通元素运算、严格顺序基础归约、多数 scan | 无数值 scratch |
@@ -117,7 +129,12 @@ q50 = quantile(values, 0.50, workspace=workspace)
 | rolling_min/max | 最多 `min(window, n)` 个索引的循环队列 |
 | covariance/correlation 矩阵 | 均值/标准差等辅助向量 |
 | quadratic_form | matvec 中间向量 |
+| matmul 大矩阵准入路径 | macOS15+arm64、Eigen开启、M/N≥1024、K≥256时，形状上界为 `320*K+72` 个double；仅自动ISA与C/F或正leading-dimension布局实际使用，局部面板打包计入 `algorithm_copy_bytes` |
 | solve | 可变系数矩阵和 RHS，部分主元消元所必需 |
+| solve_multi | 系数矩阵 scratch；RHS 直接复制到独立输出并就地消元 |
+| symmetric_eigh | n×n 缩放矩阵 scratch；特征向量直接在分解输出中旋转 |
+| cholesky | macOS15+arm64、Eigen开启、n≥1024时，形状上界为 `16*(n+17)+128` 个double；仅自动ISA实际使用有界行面板，输入→面板→输出两次下三角复制计入 `algorithm_copy_bytes`；其他路径无数值scratch |
+| triangular_solve | 无额外数值 scratch，直接写独立结果 |
 
 `median/quantile` 的连续排序 scratch 与 `solve` 的可修改矩阵/RHS 都属于算法必要工作区复制，并单独报告为 `algorithm_copy_bytes`。这不改变 `input_copy_bytes=0` 的绑定层零拷贝事实，也不能被宣传成“整个算法零复制”。输出不会借用随后复用的 scratch。
 
@@ -180,11 +197,11 @@ ARM64 使用 NEON，x86_64 使用 SSE2；AVX2 仅在独立 AOT 目标已构建�
 
 `simd="scalar"` 禁用显式 SIMD；`auto` 选择支持的指令集。显式请求不支持的 ISA 会报错。非单位 stride、小于向量宽度、顺序敏感的递推/归约可走 C++ scalar 路径；这不是 Python fallback。
 
-元素算子支持非向量宽度对齐的安全 load/store 和尾部处理。矩阵乘法采用 4 行×2 SIMD 向量的寄存器分块，保持 k 归约顺序且不打包复制输入；要求右矩阵沿列单位 stride 和足够的块大小，其余使用 C++ 标量路径。
+元素算子支持非向量宽度对齐的安全 load/store 和尾部处理。矩阵乘法按形状和strides选择基础SIMD、Eigen Array或受预算的Eigen pack/gebp路径，均保留k归约顺序；大矩阵路径可打包局部面板，其余路径的准入和尾部规则见[执行指南](execution-guide.md)。输入仍按原布局借用，不为绑定而整块转换。
 
-逐次审计字段包括实际 ISA、实际向量化元素/输出单元数、输入地址、绑定输入复制字节数、算法工作区初始化复制字节数和工作区需求。`vector_elements` 对 matmul 统计向量计算的输出单元，不是浮点运算次数。所有审计属于本次返回值，不共享全局 last-call 状态。
+逐次审计字段包括实际 ISA、实际向量化元素/输出单元数、输入地址、绑定输入复制字节数、算法复制字节数和工作区需求。算法复制包含工作区初始化及重复面板打包，不能仅看绑定复制计数。`vector_elements` 对 matmul 统计向量计算的输出单元，不是浮点运算次数。所有审计属于本次返回值，不共享全局 last-call 状态。
 
-**C++/SIMD 不保证所有操作比 NumPy/BLAS 更快。** 当前矩阵实现强调零输入打包和运算顺序，实测仍慢于系统 BLAS；完整基准及限制见验收记录。
+**C++/SIMD 不保证所有操作比 NumPy/BLAS 更快。** 当前大矩阵路径保留既有数值顺序，并以受预算面板换取秒级收益，实测仍慢于对应NJIT/BLAS；完整基准及限制见[验收记录](physical-execution-optimization.md)。
 
 ## 数据安全边界
 

@@ -1,0 +1,200 @@
+{
+  "status": "diagnostic_complete",
+  "production_adopted": false,
+  "baseline_build_id": "b43e2004f45427d2d9d34fbaad686d13afb97f0687c07f642efbfc12ecb0f089",
+  "probe_sha256": "f3a61029263418c14871d8078ec94cc74ef94e83fbd19ddc17df5aceb7b5bb62",
+  "tested_boundaries": [
+    {
+      "a": [
+        [
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          9.999999999999998e-15
+        ]
+      ],
+      "canonical": {
+        "status": "SINGULAR_MATRIX",
+        "error_type": "OperatorError"
+      },
+      "prototype_status": 3,
+      "raw_lapack_info": 0,
+      "min_lapack_pivot": 9.999999999999998e-15
+    },
+    {
+      "a": [
+        [
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          1e-14
+        ]
+      ],
+      "canonical": {
+        "status": "SINGULAR_MATRIX",
+        "error_type": "OperatorError"
+      },
+      "prototype_status": 3,
+      "raw_lapack_info": 0,
+      "min_lapack_pivot": 1e-14
+    },
+    {
+      "a": [
+        [
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0000000000000002e-14
+        ]
+      ],
+      "canonical": {
+        "status": "success",
+        "values": [
+          [
+            1.0
+          ],
+          [
+            99999999999999.98
+          ]
+        ]
+      },
+      "prototype_status": 0,
+      "raw_lapack_info": 0,
+      "min_lapack_pivot": 1.0000000000000002e-14
+    }
+  ],
+  "near_threshold_scanned": 8,
+  "counterexamples": [
+    {
+      "a": [
+        [
+          1.9248994688602141,
+          0.5080788550853866
+        ],
+        [
+          0.17009577202664072,
+          0.044896923971490664
+        ]
+      ],
+      "b": [
+        [
+          1.0
+        ],
+        [
+          1.0
+        ]
+      ],
+      "canonical": {
+        "status": "SINGULAR_MATRIX",
+        "error_type": "OperatorError"
+      },
+      "canonical_threshold_status": 3,
+      "prototype_status": 0,
+      "raw_lapack_info": 0,
+      "min_lapack_pivot": 1.0003023674131607e-14,
+      "row_dd_margin": -0.12519884805515005
+    },
+    {
+      "a": [
+        [
+          1.452128640053782,
+          0.7326722651827464
+        ],
+        [
+          0.13758180216374685,
+          0.06941697027304553
+        ]
+      ],
+      "b": [
+        [
+          1.0
+        ],
+        [
+          1.0
+        ]
+      ],
+      "canonical": {
+        "status": "success",
+        "values": [
+          [
+            -45647828975447.93
+          ],
+          [
+            90472265652081.62
+          ]
+        ]
+      },
+      "canonical_threshold_status": 0,
+      "prototype_status": 3,
+      "raw_lapack_info": 0,
+      "min_lapack_pivot": 9.996761408442659e-15,
+      "row_dd_margin": -0.06816483189070133
+    },
+    {
+      "a": [
+        [
+          1.0875301670621504,
+          1.392113783884756
+        ],
+        [
+          0.679986121981021,
+          0.8704292367514931
+        ]
+      ],
+      "b": [
+        [
+          1.0
+        ],
+        [
+          1.0
+        ]
+      ],
+      "canonical": {
+        "status": "SINGULAR_MATRIX",
+        "error_type": "OperatorError"
+      },
+      "canonical_threshold_status": 3,
+      "prototype_status": 0,
+      "raw_lapack_info": 0,
+      "min_lapack_pivot": 1.0042767218436955e-14,
+      "row_dd_margin": -0.3045836168226055
+    },
+    {
+      "a": [
+        [
+          1.7562786236179035,
+          1.070320570242218
+        ],
+        [
+          0.4361825612746404,
+          0.26582067414308574
+        ]
+      ],
+      "b": [
+        [
+          1.0
+        ],
+        [
+          1.0
+        ]
+      ],
+      "canonical": {
+        "status": "SINGULAR_MATRIX",
+        "error_type": "OperatorError"
+      },
+      "canonical_threshold_status": 3,
+      "prototype_status": 0,
+      "raw_lapack_info": 0,
+      "min_lapack_pivot": 1.0006709814438512e-14,
+      "row_dd_margin": -0.17036188713155465
+    }
+  ],
+  "admission_proven": false,
+  "conclusion": "INFO alone is insufficient; even applying the original threshold to reordered library pivots requires a proven guarded domain and canonical replay."
+}

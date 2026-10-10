@@ -1,0 +1,71 @@
+{
+  "scope": "static consistency check of terminal raw evidence; not a new numerical test",
+  "build_id": "5dcec3922588f4f912a2e6afa55775ac83865771e6e6e2363f46f941e3c1aa97",
+  "source_manifest_equal": true,
+  "production_performance": {
+    "large-single-shared-eigen": {
+      "source_sha256": "a9bb2c784c7a3bb2c9de0716c9ea6ce20467ec3a5efefe848f08175d19c4aa74",
+      "medians_ms": {
+        "cpp_ms": 205.02891699999998,
+        "njit_ms": 286.080521
+      },
+      "cpp_over_njit": 0.7166825489666946,
+      "native_sha256": "0a947e81b71655221d4e377108f530b4d6e7ecadadbaaa740a2748e6d07cffac"
+    },
+    "large-shared-eigen": {
+      "source_sha256": "19a7b7fffc975542ca89b149f7caa68f7a2113892a142af98a5eeb26bdd9515e",
+      "medians_ms": {
+        "cpp_ms": 366.426021,
+        "njit_ms": 656.838625
+      },
+      "cpp_over_njit": 0.5578630839500341,
+      "native_sha256": "0a947e81b71655221d4e377108f530b4d6e7ecadadbaaa740a2748e6d07cffac"
+    },
+    "wide-shared-eigen": {
+      "source_sha256": "3cee11e97eb4678173be1c565395c2d358951017d30fd6bd94453db6d0aa9eb1",
+      "medians_ms": {
+        "cpp_ms": 65.0470835,
+        "njit_ms": 145.92818749999998
+      },
+      "cpp_over_njit": 0.4457472172742501,
+      "native_sha256": "0a947e81b71655221d4e377108f530b4d6e7ecadadbaaa740a2748e6d07cffac"
+    },
+    "large-f-shared-eigen": {
+      "source_sha256": "72f00cafe1cd70adfc833739e35b5b5c3fa0bcf504164f9f03ee1204eb8b237e",
+      "medians_ms": {
+        "cpp_ms": 362.1590415,
+        "njit_ms": 659.930667
+      },
+      "cpp_over_njit": 0.5487834701580856,
+      "native_sha256": "0a947e81b71655221d4e377108f530b4d6e7ecadadbaaa740a2748e6d07cffac"
+    },
+    "large-prepared-shared-eigen": {
+      "source_sha256": "490e07be9523670c5ef1e70e338b11a0a51df3e2dc8b52a44d462322a04fafe3",
+      "medians_ms": {
+        "cpp_ms": 369.95493799999997,
+        "njit_ms": 659.1377505
+      },
+      "cpp_over_njit": 0.5612710510350294,
+      "native_sha256": "0a947e81b71655221d4e377108f530b4d6e7ecadadbaaa740a2748e6d07cffac"
+    },
+    "small-shared-eigen": {
+      "source_sha256": "b51510fcd53a4b976a88324f6ec4982e01ed0bd00f0d77f72132f8870569c0f3",
+      "medians_ms": {
+        "cpp_ms": 0.06772900000000001,
+        "njit_ms": 0.03825
+      },
+      "cpp_over_njit": 1.7706928104575166,
+      "native_sha256": "0a947e81b71655221d4e377108f530b4d6e7ecadadbaaa740a2748e6d07cffac"
+    }
+  },
+  "memory_fresh_child_pids": [
+    52417,
+    52421,
+    52381,
+    52391,
+    52466,
+    52983,
+    52439,
+    52461
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "status": "primary_source_research_not_adopted",
+  "sources": [
+    {
+      "url": "https://www.netlib.org/lapack/explore-html/d8/dc6/group__gesv__mixed_ga2dd852850de165b9150bb7ee4f4ca3e9.html",
+      "verified_utc": "2026-10-08T13:50:44.892184+00:00",
+      "facts": [
+        "DSGESV uses single precision LU plus double precision iterative refinement and falls back to double precision factorization on failure.",
+        "Requires double original A together with an independent float SWORK of N*(N+NRHS).",
+        "Successful mixed refinement leaves double A intact; double fallback overwrites it."
+      ]
+    }
+  ],
+  "engineering_inference": {
+    "n": 8192,
+    "nrhs": 1,
+    "required_float_swork_bytes": 268468224,
+    "reason_not_directly_replaced": "This standard driver requires about256MiB extra simultaneously live matrix workspace relative to the current private double coefficient path, and does not reproduce the engine original threshold/error certificate. A successful residual alone cannot authorize replacement. A bounded source-aware library orchestration would need a separate proof/admission/fallback design and full measurement."
+  },
+  "actual_source_change": false
+}

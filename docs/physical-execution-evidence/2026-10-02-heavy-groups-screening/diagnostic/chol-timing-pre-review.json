@@ -1,0 +1,779 @@
+[
+  {
+    "n": 63,
+    "input_layout": "C",
+    "output_order": "F",
+    "cpu_budget": 1,
+    "scope": "isolated ABI including input scan/output allocation, not Scheduler acceptance",
+    "threads": {
+      "environment": {
+        "OPENBLAS_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "NUMBA_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1"
+      },
+      "accelerate_thread_local": {
+        "prior": 0,
+        "active": 1
+      },
+      "pools": [
+        {
+          "user_api": "blas",
+          "internal_api": "openblas",
+          "num_threads": 1,
+          "prefix": "libopenblas",
+          "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+          "version": "0.3.23.dev",
+          "threading_layer": "pthreads",
+          "architecture": "armv8"
+        }
+      ]
+    },
+    "samples_ms": {
+      "old": [
+        0.067083,
+        0.033625,
+        0.033584,
+        0.029,
+        0.033542,
+        0.028667,
+        0.0335,
+        0.028542,
+        0.033375,
+        0.028583
+      ],
+      "g8w4": [
+        0.032667,
+        0.029833,
+        0.02925,
+        0.028792,
+        0.029167,
+        0.029292,
+        0.028625,
+        0.02875,
+        0.02875,
+        0.028584
+      ],
+      "g16w2": [
+        0.030458,
+        0.028875,
+        0.0295,
+        0.029375,
+        0.029125,
+        0.029167,
+        0.028583,
+        0.028667,
+        0.02875,
+        0.028542
+      ],
+      "g8w8": [
+        0.029666,
+        0.0345,
+        0.029208,
+        0.033667,
+        0.029041,
+        0.03325,
+        0.028666,
+        0.033167,
+        0.02875,
+        0.028709
+      ],
+      "njit": [
+        0.016708,
+        0.011833,
+        0.011167,
+        0.011125,
+        0.011166,
+        0.010917,
+        0.010833,
+        0.010917,
+        0.010792,
+        0.010792
+      ]
+    },
+    "median_ms": {
+      "old": 0.0334375,
+      "g8w4": 0.0289795,
+      "g16w2": 0.029,
+      "g8w8": 0.029437,
+      "njit": 0.011021
+    },
+    "input_sha256": "ba8b8cef92e863174c8d8330b886b5dac25cda137a25fb62ec8d9925e3a93477",
+    "output_sha256": {
+      "old": "0ef326fccbce8e0bb18263683e9be9b3ed70ae3da85b280afc6b61b0d076474f",
+      "g8w4": "0ef326fccbce8e0bb18263683e9be9b3ed70ae3da85b280afc6b61b0d076474f",
+      "g16w2": "0ef326fccbce8e0bb18263683e9be9b3ed70ae3da85b280afc6b61b0d076474f",
+      "g8w8": "0ef326fccbce8e0bb18263683e9be9b3ed70ae3da85b280afc6b61b0d076474f",
+      "njit": "6706f3d306c79df7a99efe1f039f8cbe4990cd24d170a0f66c47788d27fee90d"
+    },
+    "bit_parity_old_candidate": true,
+    "workspace_bytes": 0
+  },
+  {
+    "n": 1024,
+    "input_layout": "C",
+    "output_order": "F",
+    "cpu_budget": 1,
+    "scope": "isolated ABI including input scan/output allocation, not Scheduler acceptance",
+    "threads": {
+      "environment": {
+        "OPENBLAS_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "NUMBA_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1"
+      },
+      "accelerate_thread_local": {
+        "prior": 0,
+        "active": 1
+      },
+      "pools": [
+        {
+          "user_api": "blas",
+          "internal_api": "openblas",
+          "num_threads": 1,
+          "prefix": "libopenblas",
+          "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+          "version": "0.3.23.dev",
+          "threading_layer": "pthreads",
+          "architecture": "armv8"
+        }
+      ]
+    },
+    "samples_ms": {
+      "old": [
+        19.796375,
+        20.434333,
+        19.9175,
+        19.918792,
+        19.692584,
+        19.921375,
+        20.126667,
+        20.182,
+        19.999541,
+        20.11875
+      ],
+      "g8w4": [
+        19.08725,
+        19.183,
+        19.103917,
+        19.279375,
+        19.105875,
+        18.854833,
+        18.932375,
+        19.275666,
+        18.984083,
+        19.364292
+      ],
+      "g16w2": [
+        20.298708,
+        20.238333,
+        19.573541,
+        20.049,
+        20.165625,
+        20.634917,
+        20.141292,
+        20.569292,
+        19.942708,
+        20.519916
+      ],
+      "g8w8": [
+        24.492958,
+        24.220333,
+        23.778375,
+        24.496625,
+        24.43475,
+        27.683333,
+        24.141625,
+        25.922291,
+        24.860167,
+        24.8365
+      ],
+      "njit": [
+        12.867209,
+        12.534958,
+        11.240125,
+        11.922416,
+        10.974708,
+        12.582167,
+        11.563417,
+        12.136333,
+        11.014333,
+        11.674167
+      ]
+    },
+    "median_ms": {
+      "old": 19.960458000000003,
+      "g8w4": 19.104896,
+      "g16w2": 20.201979,
+      "g8w8": 24.4947915,
+      "njit": 11.798291500000001
+    },
+    "input_sha256": "ef565b83264d2fc7da989b3386db24a9037ecab970af0decffb6c25b2021ed72",
+    "output_sha256": {
+      "old": "7115ac84418bf39e08b5e894aea17bc6237623f3fd3fa4b26be16277dcf4c79e",
+      "g8w4": "7115ac84418bf39e08b5e894aea17bc6237623f3fd3fa4b26be16277dcf4c79e",
+      "g16w2": "7115ac84418bf39e08b5e894aea17bc6237623f3fd3fa4b26be16277dcf4c79e",
+      "g8w8": "7115ac84418bf39e08b5e894aea17bc6237623f3fd3fa4b26be16277dcf4c79e",
+      "njit": "130c1b329c5b22b6e6989fa19bc2f02edfcbacd68be90f198714df43404f4330"
+    },
+    "bit_parity_old_candidate": true,
+    "workspace_bytes": 134272
+  },
+  {
+    "n": 2048,
+    "input_layout": "C",
+    "output_order": "F",
+    "cpu_budget": 1,
+    "scope": "isolated ABI including input scan/output allocation, not Scheduler acceptance",
+    "threads": {
+      "environment": {
+        "OPENBLAS_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "NUMBA_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1"
+      },
+      "accelerate_thread_local": {
+        "prior": 0,
+        "active": 1
+      },
+      "pools": [
+        {
+          "user_api": "blas",
+          "internal_api": "openblas",
+          "num_threads": 1,
+          "prefix": "libopenblas",
+          "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+          "version": "0.3.23.dev",
+          "threading_layer": "pthreads",
+          "architecture": "armv8"
+        }
+      ]
+    },
+    "samples_ms": {
+      "old": [
+        152.531042,
+        153.711667,
+        158.406459,
+        153.715959,
+        166.275708,
+        153.313833,
+        156.887458,
+        151.888917,
+        153.585834,
+        153.002
+      ],
+      "g8w4": [
+        150.291166,
+        150.3605,
+        153.167792,
+        150.305583,
+        149.682,
+        149.23275,
+        149.058875,
+        151.220291,
+        149.338,
+        150.3185
+      ],
+      "g16w2": [
+        153.589542,
+        153.442125,
+        153.631417,
+        153.390083,
+        154.160208,
+        153.93525,
+        154.471083,
+        153.440167,
+        153.850792,
+        154.304334
+      ],
+      "g8w8": [
+        188.835459,
+        195.030625,
+        188.293208,
+        198.246375,
+        189.094833,
+        189.830208,
+        188.966834,
+        200.685,
+        189.075917,
+        189.44675
+      ],
+      "njit": [
+        66.977416,
+        67.639959,
+        67.059375,
+        67.271,
+        66.450209,
+        66.510667,
+        66.484667,
+        66.634625,
+        66.458208,
+        67.483709
+      ]
+    },
+    "median_ms": {
+      "old": 153.6487505,
+      "g8w4": 150.29837450000002,
+      "g16w2": 153.7411045,
+      "g8w8": 189.2707915,
+      "njit": 66.8060205
+    },
+    "input_sha256": "f768fada8f6148cd83bccc93fed1c7b51b3c7eb9de461c9bc58929f4c9bd9c4e",
+    "output_sha256": {
+      "old": "d8bc6643bb3475b81ed6dfaf4006c8c800fe0df4876466f31fd3c19633c1e33b",
+      "g8w4": "d8bc6643bb3475b81ed6dfaf4006c8c800fe0df4876466f31fd3c19633c1e33b",
+      "g16w2": "d8bc6643bb3475b81ed6dfaf4006c8c800fe0df4876466f31fd3c19633c1e33b",
+      "g8w8": "d8bc6643bb3475b81ed6dfaf4006c8c800fe0df4876466f31fd3c19633c1e33b",
+      "njit": "a504f393cde029211c43efa8788015e191857824714dc1ac37a584c666003a4c"
+    },
+    "bit_parity_old_candidate": true,
+    "workspace_bytes": 265344
+  },
+  {
+    "n": 2048,
+    "input_layout": "F",
+    "output_order": "F",
+    "cpu_budget": 1,
+    "scope": "isolated ABI including input scan/output allocation, not Scheduler acceptance",
+    "threads": {
+      "environment": {
+        "OPENBLAS_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "NUMBA_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1"
+      },
+      "accelerate_thread_local": {
+        "prior": 0,
+        "active": 1
+      },
+      "pools": [
+        {
+          "user_api": "blas",
+          "internal_api": "openblas",
+          "num_threads": 1,
+          "prefix": "libopenblas",
+          "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+          "version": "0.3.23.dev",
+          "threading_layer": "pthreads",
+          "architecture": "armv8"
+        }
+      ]
+    },
+    "samples_ms": {
+      "old": [
+        171.140292,
+        182.597042,
+        181.443167,
+        171.886834,
+        172.749167,
+        171.330834,
+        174.665209,
+        171.824625,
+        169.957625,
+        170.524
+      ],
+      "g8w4": [
+        167.982333,
+        167.236792,
+        169.167,
+        170.729417,
+        168.011792,
+        167.042125,
+        168.189875,
+        167.338875,
+        168.489458,
+        167.246542
+      ],
+      "g16w2": [
+        172.345333,
+        175.584792,
+        172.385125,
+        171.305625,
+        171.413417,
+        176.941542,
+        173.9645,
+        173.614417,
+        172.425167,
+        174.32575
+      ],
+      "g8w8": [
+        205.724541,
+        208.633291,
+        206.786583,
+        208.364375,
+        208.094084,
+        207.949125,
+        206.811625,
+        209.875291,
+        205.829,
+        208.014833
+      ],
+      "njit": [
+        82.128833,
+        83.101542,
+        81.01175,
+        79.470792,
+        79.418709,
+        80.516584,
+        80.269917,
+        78.991709,
+        81.057792,
+        78.705375
+      ]
+    },
+    "median_ms": {
+      "old": 171.8557295,
+      "g8w4": 167.99706250000003,
+      "g16w2": 173.019792,
+      "g8w8": 207.98197900000002,
+      "njit": 80.3932505
+    },
+    "input_sha256": "9c2d8a938bdb206e049b009de536d26ed4fafea083ac4c849b443c908d4cba22",
+    "output_sha256": {
+      "old": "af9b754db1fd44ad3c97ce658042fe099b17037c953ad20e104a75d7d836fba5",
+      "g8w4": "af9b754db1fd44ad3c97ce658042fe099b17037c953ad20e104a75d7d836fba5",
+      "g16w2": "af9b754db1fd44ad3c97ce658042fe099b17037c953ad20e104a75d7d836fba5",
+      "g8w8": "af9b754db1fd44ad3c97ce658042fe099b17037c953ad20e104a75d7d836fba5",
+      "njit": "466ccb01158aa91b128367de760d8017bc0b743c2942f85af16a447de226be3d"
+    },
+    "bit_parity_old_candidate": true,
+    "workspace_bytes": 265344
+  },
+  {
+    "n": 4096,
+    "input_layout": "C",
+    "output_order": "F",
+    "cpu_budget": 1,
+    "scope": "isolated ABI including input scan/output allocation, not Scheduler acceptance",
+    "threads": {
+      "environment": {
+        "OPENBLAS_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "NUMBA_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1"
+      },
+      "accelerate_thread_local": {
+        "prior": 0,
+        "active": 1
+      },
+      "pools": [
+        {
+          "user_api": "blas",
+          "internal_api": "openblas",
+          "num_threads": 1,
+          "prefix": "libopenblas",
+          "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+          "version": "0.3.23.dev",
+          "threading_layer": "pthreads",
+          "architecture": "armv8"
+        }
+      ]
+    },
+    "samples_ms": {
+      "old": [
+        1198.143416,
+        1192.568041,
+        1193.183167,
+        1194.606333,
+        1208.962667,
+        1196.729959,
+        1208.667708,
+        1195.555542,
+        1194.520167,
+        1197.205083
+      ],
+      "g8w4": [
+        1174.126792,
+        1175.694042,
+        1174.390042,
+        1178.075833,
+        1180.344417,
+        1174.187833,
+        1179.3275,
+        1194.015375,
+        1174.3945,
+        1173.238625
+      ],
+      "g16w2": [
+        1190.813792,
+        1188.059,
+        1195.34425,
+        1197.6775,
+        1197.459125,
+        1197.661583,
+        1193.711958,
+        1193.264,
+        1259.999334,
+        1190.723417
+      ],
+      "g8w8": [
+        1466.47775,
+        1476.694958,
+        1469.943125,
+        1483.217042,
+        1474.620834,
+        1470.858,
+        1470.353,
+        1468.940584,
+        1476.2275,
+        1482.993083
+      ],
+      "njit": [
+        384.489917,
+        380.252334,
+        376.768416,
+        378.801333,
+        408.683375,
+        376.076125,
+        382.518584,
+        377.910041,
+        389.578375,
+        383.066583
+      ]
+    },
+    "median_ms": {
+      "old": 1196.1427505000001,
+      "g8w4": 1175.0442710000002,
+      "g16w2": 1194.528104,
+      "g8w8": 1472.739417,
+      "njit": 381.38545899999997
+    },
+    "input_sha256": "bdcfde05a0a7907962eb1a219ab8e1ccf4a007cd090a0744942059db1d4200aa",
+    "output_sha256": {
+      "old": "b0d352971184a268be779d9a2e67a68fc4199adbdc453f395cbd7198c84cd880",
+      "g8w4": "b0d352971184a268be779d9a2e67a68fc4199adbdc453f395cbd7198c84cd880",
+      "g16w2": "b0d352971184a268be779d9a2e67a68fc4199adbdc453f395cbd7198c84cd880",
+      "g8w8": "b0d352971184a268be779d9a2e67a68fc4199adbdc453f395cbd7198c84cd880",
+      "njit": "77a7158009d633753d2a9f10868292eca674400ddc39dd37d2fb2f436bf6db16"
+    },
+    "bit_parity_old_candidate": true,
+    "workspace_bytes": 527488
+  },
+  {
+    "n": 4096,
+    "input_layout": "F",
+    "output_order": "F",
+    "cpu_budget": 1,
+    "scope": "isolated ABI including input scan/output allocation, not Scheduler acceptance",
+    "threads": {
+      "environment": {
+        "OPENBLAS_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "NUMBA_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1"
+      },
+      "accelerate_thread_local": {
+        "prior": 0,
+        "active": 1
+      },
+      "pools": [
+        {
+          "user_api": "blas",
+          "internal_api": "openblas",
+          "num_threads": 1,
+          "prefix": "libopenblas",
+          "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+          "version": "0.3.23.dev",
+          "threading_layer": "pthreads",
+          "architecture": "armv8"
+        }
+      ]
+    },
+    "samples_ms": {
+      "old": [
+        1294.521458,
+        1293.597708,
+        1289.468834,
+        1307.260959,
+        1311.663375,
+        1309.727375,
+        1300.846083,
+        1282.094875,
+        1478.9765,
+        1420.157416
+      ],
+      "g8w4": [
+        1261.702083,
+        1268.720542,
+        1270.891792,
+        1271.992625,
+        1304.654625,
+        1278.790833,
+        1291.290875,
+        1268.286375,
+        1400.476083,
+        1371.449583
+      ],
+      "g16w2": [
+        1279.48475,
+        1285.964416,
+        1283.293959,
+        1286.708458,
+        1334.007416,
+        1293.525959,
+        1282.411333,
+        1324.562167,
+        1493.937917,
+        1287.378791
+      ],
+      "g8w8": [
+        1582.579708,
+        1561.122291,
+        1573.415875,
+        1563.864209,
+        1719.418417,
+        1571.337334,
+        1635.205667,
+        1566.21925,
+        1562.9995,
+        1603.045459
+      ],
+      "njit": [
+        447.853083,
+        432.167458,
+        434.530791,
+        450.735667,
+        438.905458,
+        444.597542,
+        447.014125,
+        439.600209,
+        442.105,
+        449.274
+      ]
+    },
+    "median_ms": {
+      "old": 1304.0535209999998,
+      "g8w4": 1275.391729,
+      "g16w2": 1287.0436245,
+      "g8w8": 1572.3766045,
+      "njit": 443.351271
+    },
+    "input_sha256": "cd22522394d35a176a65a7324e60a11e4a4158b0bea7b983bca9b3ac0bdce2c7",
+    "output_sha256": {
+      "old": "5e85f51ab1bcf04ac2541252d2685f9393d808880a93dc04d9745c551c4b1575",
+      "g8w4": "5e85f51ab1bcf04ac2541252d2685f9393d808880a93dc04d9745c551c4b1575",
+      "g16w2": "5e85f51ab1bcf04ac2541252d2685f9393d808880a93dc04d9745c551c4b1575",
+      "g8w8": "5e85f51ab1bcf04ac2541252d2685f9393d808880a93dc04d9745c551c4b1575",
+      "njit": "ab845bc9cca16b96d3f511cc43763b4e298741cf1a75531741bc19ade45c5985"
+    },
+    "bit_parity_old_candidate": true,
+    "workspace_bytes": 527488
+  },
+  {
+    "n": 1031,
+    "input_layout": "F",
+    "output_order": "F",
+    "cpu_budget": 1,
+    "scope": "isolated ABI including input scan/output allocation, not Scheduler acceptance",
+    "threads": {
+      "environment": {
+        "OPENBLAS_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "NUMBA_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1"
+      },
+      "accelerate_thread_local": {
+        "prior": 0,
+        "active": 1
+      },
+      "pools": [
+        {
+          "user_api": "blas",
+          "internal_api": "openblas",
+          "num_threads": 1,
+          "prefix": "libopenblas",
+          "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+          "version": "0.3.23.dev",
+          "threading_layer": "pthreads",
+          "architecture": "armv8"
+        }
+      ]
+    },
+    "samples_ms": {
+      "old": [
+        22.049625,
+        20.7765,
+        20.627083,
+        20.179792,
+        20.585084,
+        20.041334,
+        20.625083,
+        20.574667,
+        20.927167,
+        19.756583
+      ],
+      "g8w4": [
+        19.641125,
+        19.428458,
+        19.400083,
+        19.358459,
+        19.66825,
+        19.447083,
+        19.566708,
+        19.800334,
+        19.498208,
+        19.07525
+      ],
+      "g16w2": [
+        20.248375,
+        20.782625,
+        20.558083,
+        20.283375,
+        20.984292,
+        20.259875,
+        20.040334,
+        20.86275,
+        20.616333,
+        20.0895
+      ],
+      "g8w8": [
+        24.466,
+        27.790667,
+        27.726,
+        27.483208,
+        27.924583,
+        26.985333,
+        24.312667,
+        27.675541,
+        27.877875,
+        24.506459
+      ],
+      "njit": [
+        6.066875,
+        6.204709,
+        6.224667,
+        6.293083,
+        6.279667,
+        6.398458,
+        6.221334,
+        6.369667,
+        6.469083,
+        6.262708
+      ]
+    },
+    "median_ms": {
+      "old": 20.6050835,
+      "g8w4": 19.4726455,
+      "g16w2": 20.420729,
+      "g8w8": 27.5793745,
+      "njit": 6.2711875
+    },
+    "input_sha256": "4a8026450469a07c17271d263533f82f3db7d5a75090df33236ec02f4d203f0c",
+    "output_sha256": {
+      "old": "443e6138b4e8dc72410e35313e26d945c54fdf40f3a4914667d113994d7da341",
+      "g8w4": "443e6138b4e8dc72410e35313e26d945c54fdf40f3a4914667d113994d7da341",
+      "g16w2": "443e6138b4e8dc72410e35313e26d945c54fdf40f3a4914667d113994d7da341",
+      "g8w8": "443e6138b4e8dc72410e35313e26d945c54fdf40f3a4914667d113994d7da341",
+      "njit": "25e156d30ba15f937132b0ba7caef59263e5b6cf37cdb2ac3af96e496b15e032"
+    },
+    "bit_parity_old_candidate": true,
+    "workspace_bytes": 135168
+  }
+]

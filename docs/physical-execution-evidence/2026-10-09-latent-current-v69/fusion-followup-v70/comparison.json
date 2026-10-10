@@ -1,0 +1,157 @@
+{
+  "status": "completed_single_group_screen",
+  "rows": [
+    {
+      "case": "hmm12",
+      "time_seconds": {
+        "current": 4.14265187500132,
+        "candidate": 4.158356749998347,
+        "njit": 8.914729416996124
+      },
+      "heap_bytes": {
+        "current": 265576238,
+        "candidate": 265576238,
+        "njit": 272514520
+      },
+      "audits": {
+        "current": {
+          "numeric_arena_bytes": 77002464,
+          "operator_workspace_capacity_bytes": 16023872,
+          "algorithm_copy_bytes": 77011328,
+          "fused_pointwise_calls": 3
+        },
+        "candidate": {
+          "numeric_arena_bytes": 77002464,
+          "operator_workspace_capacity_bytes": 16023872,
+          "algorithm_copy_bytes": 77011328,
+          "fused_pointwise_calls": 3
+        }
+      },
+      "heap_saved_vs_current_bytes": 0,
+      "heap_excess_vs_njit_bytes": -6938282
+    },
+    {
+      "case": "hmm3-default60",
+      "time_seconds": {
+        "current": 0.8229484580006101,
+        "candidate": 0.8223493749974295,
+        "njit": 1.7566257920043427
+      },
+      "heap_bytes": {
+        "current": 79795726,
+        "candidate": 73796086,
+        "njit": 64255112
+      },
+      "audits": {
+        "current": {
+          "numeric_arena_bytes": 20500448,
+          "operator_workspace_capacity_bytes": 9007432,
+          "algorithm_copy_bytes": 47000536,
+          "fused_pointwise_calls": 3
+        },
+        "candidate": {
+          "numeric_arena_bytes": 14500808,
+          "operator_workspace_capacity_bytes": 9007432,
+          "algorithm_copy_bytes": 47000568,
+          "fused_pointwise_calls": 4
+        }
+      },
+      "heap_saved_vs_current_bytes": 5999640,
+      "heap_excess_vs_njit_bytes": 9540974
+    },
+    {
+      "case": "gmm16",
+      "time_seconds": {
+        "current": 2.064927167004498,
+        "candidate": 2.0630405000047176,
+        "njit": 7.295734167004412
+      },
+      "heap_bytes": {
+        "current": 834750338,
+        "candidate": 834750338,
+        "njit": 851456912
+      },
+      "audits": {
+        "current": {
+          "numeric_arena_bytes": 128628384,
+          "operator_workspace_capacity_bytes": 27136,
+          "algorithm_copy_bytes": 584422064,
+          "fused_pointwise_calls": 5
+        },
+        "candidate": {
+          "numeric_arena_bytes": 128628384,
+          "operator_workspace_capacity_bytes": 27136,
+          "algorithm_copy_bytes": 584422064,
+          "fused_pointwise_calls": 5
+        }
+      },
+      "heap_saved_vs_current_bytes": 0,
+      "heap_excess_vs_njit_bytes": -16706574
+    },
+    {
+      "case": "gmm3-default60",
+      "time_seconds": {
+        "current": 0.8222078750040964,
+        "candidate": 0.8237620840009185,
+        "njit": 1.89679441699991
+      },
+      "heap_bytes": {
+        "current": 131534582,
+        "candidate": 131534582,
+        "njit": 110503392
+      },
+      "audits": {
+        "current": {
+          "numeric_arena_bytes": 22000376,
+          "operator_workspace_capacity_bytes": 9000096,
+          "algorithm_copy_bytes": 4000280,
+          "fused_pointwise_calls": 5
+        },
+        "candidate": {
+          "numeric_arena_bytes": 22000376,
+          "operator_workspace_capacity_bytes": 9000096,
+          "algorithm_copy_bytes": 4000280,
+          "fused_pointwise_calls": 5
+        }
+      },
+      "heap_saved_vs_current_bytes": 0,
+      "heap_excess_vs_njit_bytes": 21031190
+    },
+    {
+      "case": "hmm3-large60",
+      "time_seconds": {
+        "current": 2.4703696249998757,
+        "candidate": 2.4655593339994084,
+        "njit": 5.263783374997729
+      },
+      "heap_bytes": {
+        "current": 239295726,
+        "candidate": 221296086,
+        "njit": 192755112
+      },
+      "audits": {
+        "current": {
+          "numeric_arena_bytes": 61500448,
+          "operator_workspace_capacity_bytes": 27007432,
+          "algorithm_copy_bytes": 141000560,
+          "fused_pointwise_calls": 3
+        },
+        "candidate": {
+          "numeric_arena_bytes": 43500808,
+          "operator_workspace_capacity_bytes": 27007432,
+          "algorithm_copy_bytes": 141000592,
+          "fused_pointwise_calls": 4
+        }
+      },
+      "heap_saved_vs_current_bytes": 17999640,
+      "heap_excess_vs_njit_bytes": 28540974
+    }
+  ],
+  "time_processes": 15,
+  "heap_processes": 15,
+  "smokes_separate": 2,
+  "all_input_hashes_equal": true,
+  "all_full_output_checks_passed": true,
+  "actual_adopted": false,
+  "goal_complete": false
+}

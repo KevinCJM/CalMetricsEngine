@@ -1,0 +1,45 @@
+{
+  "status": "source_applied_actual_root_build_and_retest_passed",
+  "root": "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine",
+  "head": "d17b371abbd692e3ac839c7ba191a44d11054d7f",
+  "before_build_id": "15ea55acd6ef95431691e7ef5dcf887f328abf6c923a3a89592b45706bb60193",
+  "source_build_id": "3d7d503d48d3adfeb5156f95815e982a31cc9598e1f8e86b09f0a835373c9792",
+  "files": [
+    "cpp/graph.cpp",
+    "tests/test_concat_solve_workspace.py"
+  ],
+  "before_sha256": {
+    "cpp/graph.cpp": "40d721219beff259de57af2996aaabc83b1abfa527f93c126785380f8fe32dab"
+  },
+  "after_sha256": {
+    "cpp/graph.cpp": "148515b205232a795d225b9c5017975e9ed22fcfcd82b406af7e02b283d3f3cc",
+    "tests/test_concat_solve_workspace.py": "b767b556146ff07e3df29e9e2b720e855e9d27ce62ed0e96690e380f92e6bd0e"
+  },
+  "validated_counts": {
+    "full_normal_original_passed": 12676,
+    "omitted_eigen_supplementary": 59,
+    "full_normal_unique_passed": 12735,
+    "asan-concat": 20,
+    "asan-native": 9,
+    "off-concat": 20,
+    "off-native": 9
+  },
+  "production_adopted": true,
+  "goal_complete": false,
+  "validation_scope": "12735 distinct normal tests passed over original plus supplementary runs; original XML still records 59 skips; new-path SAN/OFF only, not full SAN/OFF",
+  "root_related": 787,
+  "root_native": 9,
+  "transport_lanes": [
+    "single",
+    "thread",
+    "process_inline",
+    "process_shared"
+  ],
+  "root_complete_seconds": {
+    "old": 2.657989854,
+    "new": 2.7144744795,
+    "njit": 0.681123125
+  },
+  "root_new_over_njit": 3.985291909594172,
+  "limitation": "KKT still about4x NJIT, requested heap near parity; full normal/SAN/OFF scopes remain those explicitly recorded in validation"
+}

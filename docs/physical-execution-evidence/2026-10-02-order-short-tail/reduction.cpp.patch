@@ -1,0 +1,31 @@
+--- task-before/cpp/operators/reduction.cpp
++++ cpp/operators/reduction.cpp
+@@ -80,8 +80,8 @@
+   // comparisons through an index array.
+   if (count >= 1024 && !has_nan && !(positive_zero && negative_zero)) {
+     // Without NaNs or mixed zero signs, equal numeric values have identical
+-    // bits. Selecting the upper rank and the maximum below it therefore keeps
+-    // both order statistics exact, including infinities and repeated values.
++    // bits. Select one rank and scan the shorter side for its neighbor; both
++    // order statistics remain exact, including infinities and repeated values.
+     std::size_t upper = count / 2;
+     bool need_lower = count % 2 == 0;
+     if (op != Op::median) {
+@@ -89,9 +89,14 @@
+       upper = static_cast<std::size_t>(std::ceil(position));
+       need_lower = std::floor(position) < static_cast<double>(upper);
+     }
+-    std::nth_element(ordered, ordered + upper, ordered + count);
+-    if (need_lower)
+-      ordered[upper - 1] = *std::max_element(ordered, ordered + upper);
++    if (need_lower && upper > count / 2) {
++      std::nth_element(ordered, ordered + upper - 1, ordered + count);
++      ordered[upper] = *std::min_element(ordered + upper, ordered + count);
++    } else {
++      std::nth_element(ordered, ordered + upper, ordered + count);
++      if (need_lower)
++        ordered[upper - 1] = *std::max_element(ordered, ordered + upper);
++    }
+   } else {
+     // NaN payloads and mixed signed zeros retain the existing sort's tie order.
+     std::sort(ordered, ordered + count, [](double a, double b) {

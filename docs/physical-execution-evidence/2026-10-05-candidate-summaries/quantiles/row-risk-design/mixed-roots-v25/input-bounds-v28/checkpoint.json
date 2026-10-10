@@ -1,0 +1,95 @@
+{
+  "status": "all_quality_and_performance_observations_closed_material_fallback_failure",
+  "completed_checks": {
+    "v28-related.xml": 2429,
+    "v28-native.xml": 9,
+    "v28-quality-full.xml": 14715,
+    "v28-quality-asan-related.xml": 2429,
+    "v28-quality-asan-native.xml": 9,
+    "v28-quality-off-related.xml": 2189,
+    "v28-quality-off-native.xml": 9
+  },
+  "candidate_build_id": "8258301bb5e894e863c7ce82e0a8b56a690365f4fa51009c81f9b03f5e844c07",
+  "numerical_source_files": 90,
+  "reviewed_source_files": 257,
+  "predecessor_source_files_changed": [
+    "cpp/operators/matrix_backend.cpp",
+    "cpp/operators/matmul_accelerate.cpp",
+    "cpp/include/calmetrics_engine/matrix_backend.hpp",
+    "tests/matmul_input_bounds_native_cases.hpp",
+    "tests/test_matmul_input_bounds.py",
+    "tests/operator_native_tests.cpp",
+    "CMakeLists.txt"
+  ],
+  "previous_failure": {
+    "candidate": "v27",
+    "passed": 2413,
+    "failed": 16,
+    "classification": "new test expectation contradicted existing MatMul IEEE return contract",
+    "baseline_v26_same_failures_verified": true,
+    "runtime_changed_to_satisfy_test": false
+  },
+  "performance_design_prepared_not_executed": false,
+  "actual_build_id": "02164eb4fd6882b06271a039617c00dd06ca352cc8d09201a97694bff0cddd40",
+  "production_adopted": false,
+  "whole_goal_complete": false,
+  "full_normal_passed": 14715,
+  "fresh_normal_wheel_extension_worker_sha_verified": true,
+  "normal_full_source_unchanged": true,
+  "SAN_OFF_not_yet_claimed": false,
+  "all_three_build_modes_source_identical": true,
+  "all_wheel_extension_worker_hashes_verified": true,
+  "performance_status_snapshot": {
+    "status": "running",
+    "jobs": [
+      {
+        "label": "screen-v28-matmul.py",
+        "pid": 96983,
+        "created": 1791219132.281404,
+        "command": [
+          "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+          "/private/tmp/calmetrics-row-risk-20261005/screen-v28-matmul.py"
+        ],
+        "started": 1791219132.2877939
+      }
+    ],
+    "verification_source_sha256": {
+      "benchmark_matmul_root_v28.py": "2bfe1b4688eea253afc9a23152e560eb8c82d504efcd1f428cc2d3a878eccf44",
+      "screen-v28-matmul.py": "959ad900f07f8b1f88c2c1eabe79b12e21565eabff47183e2cf03c73ea9c245a",
+      "memory-v28-matmul.py": "3fefd69e1d67a6e791891d29731f2300e90a2176478c4e1d57ff93c721bc7e7d",
+      "benchmark_derived_risks_v28.py": "e1b5671dcf0071c801a800e8271d85aaa947612d755d98ee39753ca5c3e599b9",
+      "screen-v28-derived.py": "2c55b2528035f148158a5d6cd37d9df9623f9cea485b5372f3794e02d3ef3876",
+      "memory-v28-derived.py": "4334f9aefc74ebf8fd3a12df8dffd605fa061486f5062a97f8ff2a639e125e72",
+      "benchmark_mixed_risks_v28.py": "681b1cc646dc1b2465ba7e65747d410fb751e8888ea2bb76a23c157317dcf84c",
+      "screen-v28-mixed.py": "9cae494f8f97afcf17eff226142371080d9596881f037c2b334bf41dda22da9e",
+      "memory-v28-mixed.py": "649134cb9e32573d5d3efeb6943834c33c33b76eaeff1728c6a6fbfa3cd0ba63",
+      "benchmark_risks_parallel_v28.py": "84fc36913072197739d46c6480113d449ef93f38f603200a3ac09b50e7b1eb8a",
+      "screen-v28-supplied.py": "85ef8f8347b46a4a5b12de36d8bab65ae08c1aa8b29e1fcd6207c271f91319ce",
+      "memory-v28-supplied.py": "dde20ba2dc75e3805dda055d9e8a2ad883b4013bc9159c4e6c665bee88c504df",
+      "risk_graphs_derived_v28.py": "2d8c4b7e44ea03311cfd0528201e9dd9efd5d277bed67dd40654300cad63f0c0",
+      "risk_graphs_mixed_v28.py": "f026607ba5b1417b2ab05d16ae542c2b6501ee6870a5097c9fdc49d85adbe1eb",
+      "risk_graphs.py": "e8a566dd3a991622f2f1d5c1f6368fca7a9cbea71f2cd3bc1be02e6b67b006d3",
+      "prepare-v28-performance.py": "7b2830254cf31c2b030ee53ac25ddc846479d93facb68b3cd21120423f48f128",
+      "run-v28-next.py": "de3feb3e002b7d48c27d812faf0bbab73f9de664b793d1ee635a2fa0911186e9"
+    },
+    "performance_design_sha256": "79bd6ec79ba2a9caae73aa3932340aed729e466d5a83f6fe48fd341adff50849",
+    "production_adopted": false,
+    "whole_goal_complete": false,
+    "current": {
+      "label": "screen-v28-matmul.py",
+      "pid": 96983,
+      "created": 1791219132.281404,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-row-risk-20261005/screen-v28-matmul.py"
+      ],
+      "started": 1791219132.2877939
+    }
+  },
+  "quality_only": true,
+  "performance_complete": true,
+  "performance_goal_met": false,
+  "time_jobs": 84,
+  "time_samples": 504,
+  "peak_jobs": 176
+}

@@ -1,0 +1,98 @@
+{
+  "setup_heap": {
+    "allocations": 0,
+    "frees": 0,
+    "allocated_bytes": 0,
+    "live_bytes": 0,
+    "peak_bytes": 0,
+    "untracked_frees": 0,
+    "table_overflows": 0
+  },
+  "cold_heap": {
+    "allocations": 8336,
+    "frees": 8272,
+    "allocated_bytes": 391768448,
+    "live_bytes": 225088,
+    "peak_bytes": 48678168,
+    "untracked_frees": 0,
+    "table_overflows": 0
+  },
+  "cold_retained_heap": {
+    "allocations": 8336,
+    "frees": 8324,
+    "allocated_bytes": 391768448,
+    "live_bytes": 304,
+    "peak_bytes": 48678168,
+    "untracked_frees": 5,
+    "table_overflows": 0
+  },
+  "warm_baseline_heap": {
+    "allocations": 49981,
+    "frees": 49967,
+    "allocated_bytes": 2350609808,
+    "live_bytes": 336,
+    "peak_bytes": 48678328,
+    "untracked_frees": 7,
+    "table_overflows": 0
+  },
+  "warm_heap": {
+    "allocations": 66646,
+    "frees": 66568,
+    "allocated_bytes": 3134146528,
+    "live_bytes": 225424,
+    "peak_bytes": 48903416,
+    "untracked_frees": 7,
+    "table_overflows": 0
+  },
+  "warm_retained_heap": {
+    "allocations": 66646,
+    "frees": 66632,
+    "allocated_bytes": 3134146528,
+    "live_bytes": 336,
+    "peak_bytes": 48903416,
+    "untracked_frees": 7,
+    "table_overflows": 0
+  },
+  "heap_schema": "continuous-live-1",
+  "cold_peak_bytes": 48678168,
+  "warm_peak_bytes": 48903416,
+  "scope": "healthy_fixed_transformed_tape_compact_projection_nav_fan_numeric_samples_contributions",
+  "backend": "controlled_frozen_njit_reference",
+  "source_sha256": "bb53056653d697c698dab4ac5e716d96dbaec9071157d755c3fbef32e9831b79",
+  "frozen_reference_sha256": "45e2ff60a55291697b55796725f79e96fff8ede8a1a3f89e758faa141d307c7f",
+  "cpu_budget": 1,
+  "n": 2000000,
+  "steps": 200,
+  "paths": 10000,
+  "factors": 4,
+  "assets": 32,
+  "combinations": 8,
+  "common_input_bytes": 64003328,
+  "common_inputs_and_tiny_signature_compilation": "outside_incremental_epoch",
+  "compact_result_contract": "fan, 14 statistics, first 12 sample paths, asset contributions",
+  "replacement_lifetime": "previous and current compact independent results coexist",
+  "input_unchanged": true,
+  "input_sha256": {
+    "x": "163289390108ca9f808e661c37771848237cf452b86ba101e541ceae78d49354",
+    "beta": "1ecc2f2de73bff02b555fa5f17fca5b2ab0d90d77217c249555af63603b7657e",
+    "initial": "b39ad27da7b84e0ed56a22c0f9c8a6371f4c6ba8a4f02c5decd33befdd87b849",
+    "weights": "d7ad8f54c236ae7d1487d6fd24e12cb949bcce360ce60e4df7226850b6978780"
+  },
+  "probe_sha256": "cb63a1888c89c28687e704e251d63146ff4ad32f77f5f482cd905ae19bdd95b0",
+  "driver_sha256": "51f9eb4eb843fa06882442418850798fbeaebe8c5075c5caa89dd1bc45154807",
+  "profile_driver_sha256": "bfa4908097a6847141ee87fa2396540fdeef9b23b283008ef1e280e815a590ad",
+  "excluded": [
+    "coverage",
+    "old_random_stream",
+    "covariance_root",
+    "factor_transform",
+    "limits",
+    "json_packaging",
+    "first_fault_cases"
+  ],
+  "blind_spots": [
+    "requested allocator bytes do not equal total RSS",
+    "Python arenas and mmap are not completely tracked",
+    "no child workers in this serial oracle"
+  ]
+}

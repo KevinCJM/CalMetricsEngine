@@ -14,6 +14,13 @@ namespace t = calmetrics_engine::typed;
 namespace calmetrics_engine::binding {
 py::dict graph_audit(const g::Audit &a) {
   py::dict d;
+  d["compact_path_groups"] = a.compact_path_groups;
+  d["compact_path_batches"] = a.compact_path_batches;
+  d["compact_path_steps"] = a.compact_path_steps;
+  d["compact_path_raw_rows"] = a.compact_path_raw_rows;
+  d["compact_path_raw_scale_elements"] = a.compact_path_raw_scale_elements;
+  d["compact_path_raw_pack_bytes"] = a.compact_path_raw_pack_bytes;
+  d["highway_vqsort_calls"] = a.highway_vqsort_calls;
   d["fused_pointwise_calls"] = a.fused_pointwise_calls;
   d["pointwise_tiles"] = a.pointwise_tiles;
   d["vector_elements"] = a.vector_elements;
@@ -29,6 +36,27 @@ py::dict graph_audit(const g::Audit &a) {
   d["operator_workspace_capacity_bytes"] = a.operator_workspace_capacity_bytes;
   d["order_scratch_capacity_bytes"] = a.order_scratch_capacity_bytes;
   d["input_copy_bytes"] = a.input_copy_bytes;
+  d["eigen_rotation_calls"] = a.eigen_rotation_calls;
+  d["eigen_matvec_calls"] = a.eigen_matvec_calls;
+  d["eigen_covariance_calls"] = a.eigen_covariance_calls;
+  d["eigen_density_calls"] = a.eigen_density_calls;
+  d["gaussian_filter_streams"] = a.gaussian_filter_streams;
+  d["accelerate_covchol_calls"] = a.accelerate_covchol_calls;
+  d["accelerate_matmul_calls"] = a.accelerate_matmul_calls;
+  d["matmul_zero_calls"] = a.matmul_zero_calls;
+  d["accelerate_covariance_attempts"] = a.accelerate_covariance_attempts;
+  d["accelerate_covariance_calls"] = a.accelerate_covariance_calls;
+  d["covariance_syrk_calls"] = a.covariance_syrk_calls;
+  d["covariance_replayed_cells"] = a.covariance_replayed_cells;
+  d["covariance_fallbacks"] = a.covariance_fallbacks;
+  d["covariance_zero_calls"] = a.covariance_zero_calls;
+  d["accelerate_vforce_calls"] = a.accelerate_vforce_calls;
+  d["accelerate_lu_attempts"] = a.accelerate_lu_attempts;
+  d["accelerate_lu_calls"] = a.accelerate_lu_calls;
+  d["accelerate_lu_fallbacks"] = a.accelerate_lu_fallbacks;
+  d["solve_residual_materialization_bytes"] = a.solve_residual_materialization_bytes;
+  d["covariance_panel_materialization_bytes"] = a.covariance_panel_materialization_bytes;
+  d["native_library_workspace_reserve_bytes"] = a.native_library_workspace_reserve_bytes;
   d["algorithm_copy_bytes"] = a.algorithm_copy_bytes;
   d["fused_scalar_calls"] = a.fused_scalar_calls;
   d["summary_source_scans"] = a.summary_source_scans;
@@ -70,6 +98,12 @@ py::dict plan_metadata(const p::Plan &x) {
   FIELD(simd_nodes);
   FIELD(reason_codes);
 #undef FIELD
+  if (x.result_layout) {
+    py::list orders;
+    for (std::size_t i=0;i<x.result_layout->columns;++i)
+      orders.append(x.result_layout->order(i) == ops::MemoryOrder::f ? "F" : "C");
+    d["output_orders"] = std::move(orders);
+  }
   d["branch_task_count"] = x.branch_tasks.size();
   py::list chunks;
   for (const auto &chunk : x.chunks)
@@ -207,8 +241,7 @@ py::list raw_nodes(const c::CompiledGraph &graph) {
         d["opcode"] = n.opcode;
       else if (n.kind == g::NodeKind::rolling_scope || n.kind == g::NodeKind::apply_scope)
         d["scope_index"] = n.input_index;
-      d["parents"] = std::vector<std::uint32_t>(
-          n.parents.begin(), n.parents.begin() + n.parent_count);
+      d["parents"] = n.parents.prefix(n.parent_count);
     } else if (n.kind == g::NodeKind::constant)
       d["constant"] = n.constant;
     else
@@ -247,7 +280,7 @@ py::dict graph_metadata(const c::CompiledGraph &graph) {
   d["variable_types"] = std::move(variable_types);
   py::list root_types;
   for (auto root : graph.program.roots)
-    root_types.append(value_type_dict(graph.nodes[root].inferred_type));
+    root_types.append(value_type_dict(graph.nodes[root].type()));
   d["root_types"] = std::move(root_types);
   std::size_t count = 0;
   for (const auto &n : graph.nodes)
@@ -303,7 +336,10 @@ public:
   compile(const py::object &expressions, const std::string &error_policy,
           const std::vector<std::map<std::string, std::string>> &root_bindings,
           const std::vector<std::string> &source_contracts, std::uint32_t minimum_observations,
-          std::uint64_t scope_work_budget, const std::string &result_format) const {
+          std::uint64_t scope_work_budget, const std::string &result_format,
+          const std::string &output_order) const {
+    if (output_order != "auto" && output_order != "C" && output_order != "F")
+      throw c::CompileError("output_order must be auto, C or F");
     if (result_format != "auto" && result_format != "typed")
       throw c::CompileError("result_format must be auto or typed");
     if (error_policy != "raise" && error_policy != "isolate")
@@ -328,7 +364,8 @@ public:
       }
     }
     py::gil_scoped_release release;
-    return c::compile(sources, variables, error_policy == "isolate", root_bindings, source_contracts, minimum_observations, scope_work_budget, result_format == "typed", output_names);
+    return c::compile(sources, variables, error_policy == "isolate", root_bindings, source_contracts, minimum_observations, scope_work_budget, result_format == "typed", output_names,
+        output_order == "auto" ? g::OutputOrder::automatic : output_order == "F" ? g::OutputOrder::f : g::OutputOrder::c);
   }
 };
 g::Program raw_program(const py::list &raw,
@@ -371,7 +408,7 @@ g::Program raw_program(const py::list &raw,
       if (parents.size() > 8)
         throw py::value_error("too many parents");
       n.parent_count = static_cast<std::uint8_t>(parents.size());
-      std::copy(parents.begin(), parents.end(), n.parents.begin());
+      for (std::size_t i = 0; i < parents.size(); ++i) n.parents[i] = parents[i];
     }
     if (d.contains("storage")) {
       auto storage = py::cast<std::string>(d["storage"]);
@@ -560,9 +597,7 @@ void register_graph(py::module_ &parent) {
       .def_property_readonly(
           "parents",
           [](const c::NodeInfo &n) {
-            return tuple(std::vector<std::uint32_t>(n.node.parents.begin(),
-                                                    n.node.parents.begin() +
-                                                        n.node.parent_count));
+            return tuple(n.node.parents.prefix(n.node.parent_count));
           })
       .def_property_readonly(
           "constant", [](const c::NodeInfo &n) { return n.node.constant; })
@@ -582,7 +617,7 @@ void register_graph(py::module_ &parent) {
                              })
       .def_property_readonly(
           "inferred_type",
-          [](const c::NodeInfo &n) { return value_type_dict(n.inferred_type); })
+          [](const c::NodeInfo &n) { return value_type_dict(n.type()); })
       .def_readonly("last_use", &c::NodeInfo::last_use)
       .def_readonly("cost_model", &c::NodeInfo::cost_model)
       .def_readonly("simd_eligible", &c::NodeInfo::simd_eligible);
@@ -632,10 +667,11 @@ void register_graph(py::module_ &parent) {
             py::dict variables;
             for (const auto &variable : g.variable_types)
               variables[py::str(variable.name)] = value_type_dict(variable.type);
-            return py::make_tuple(4, g.expressions, variables,
+            return py::make_tuple(5, g.expressions, variables,
                 g.program.isolate_errors, g.root_bindings, g.source_contracts,
                 g.program.minimum_observations, g.program.scope_work_budget,
-                g.program.output_kind == g::OutputKind::typed, g.output_names);
+                g.program.output_kind == g::OutputKind::typed, g.output_names,
+                g.program.root_outputs.empty() ? 0 : static_cast<unsigned>(g.program.root_outputs[0].order));
           },
           [](py::tuple state) {
             // Saved legacy definitions retain their original scalar/series
@@ -646,8 +682,11 @@ void register_graph(py::module_ &parent) {
                   py::cast<std::vector<std::pair<std::string, std::string>>>(state[1]));
             if (!((state.size() == 8 && py::cast<int>(state[0]) == 2) ||
                   (state.size() == 9 && py::cast<int>(state[0]) == 3) ||
-                  (state.size() == 10 && py::cast<int>(state[0]) == 4)))
+                  (state.size() == 10 && py::cast<int>(state[0]) == 4) ||
+                  (state.size() == 11 && py::cast<int>(state[0]) == 5)))
               throw py::value_error("invalid compiled graph state");
+            if (state.size() == 11 && py::cast<unsigned>(state[10]) > 2)
+              throw py::value_error("invalid output order");
             std::vector<t::Variable> variables;
             for (auto item : py::cast<py::dict>(state[2]))
               variables.push_back({py::cast<std::string>(item.first), parse_value_type(item.second)});
@@ -657,7 +696,8 @@ void register_graph(py::module_ &parent) {
                 py::cast<std::vector<std::string>>(state[5]),
                 py::cast<std::uint32_t>(state[6]), py::cast<std::uint64_t>(state[7]),
                 state.size() >= 9 && py::cast<bool>(state[8]),
-                state.size() == 10 ? py::cast<std::vector<std::string>>(state[9]) : std::vector<std::string>{});
+                state.size() >= 10 ? py::cast<std::vector<std::string>>(state[9]) : std::vector<std::string>{},
+                state.size() == 11 ? static_cast<g::OutputOrder>(py::cast<unsigned>(state[10])) : g::OutputOrder::c);
           }));
   py::class_<CompilerAPI>(module, "GraphCompiler")
       .def(py::init<const py::dict &>(), py::arg("variables"))
@@ -666,7 +706,8 @@ void register_graph(py::module_ &parent) {
            py::arg("root_bindings") = std::vector<std::map<std::string, std::string>>{},
            py::arg("source_contracts") = std::vector<std::string>{},
            py::arg("minimum_observations") = 0,
-           py::arg("scope_work_budget") = 100000000ull, py::arg("result_format") = "auto");
+           py::arg("scope_work_budget") = 100000000ull, py::arg("result_format") = "auto",
+           py::arg("output_order") = "auto");
   py::class_<p::Config>(module, "PlannerConfig")
       .def(py::init([](double thread, double process, std::size_t input,
                        std::size_t shared, std::size_t rows, std::size_t simd,

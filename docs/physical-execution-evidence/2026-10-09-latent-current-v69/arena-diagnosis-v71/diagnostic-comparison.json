@@ -1,0 +1,6361 @@
+{
+  "status": "passed_native_offline_diagnostics",
+  "rows": [
+    {
+      "graph": "gmm16-original",
+      "method": "original",
+      "numeric_arena_bytes": 114647216,
+      "mask_arena_bytes": 8,
+      "integer_arena_bytes": 13981168,
+      "numeric_slots": {
+        "0": {
+          "capacity": 8388624,
+          "nodes": [
+            {
+              "node": 6,
+              "operator": "take_axis",
+              "extent": 8388624,
+              "birth": 6,
+              "death": 22
+            },
+            {
+              "node": 23,
+              "operator": "divide",
+              "extent": 8388624,
+              "birth": 23,
+              "death": 37
+            },
+            {
+              "node": 40,
+              "operator": "gaussian_log_density",
+              "extent": 5592416,
+              "birth": 40,
+              "death": 46
+            },
+            {
+              "node": 47,
+              "operator": "softmax_axis",
+              "extent": 5592416,
+              "birth": 47,
+              "death": 109
+            }
+          ]
+        },
+        "1": {
+          "capacity": 320,
+          "nodes": [
+            {
+              "node": 7,
+              "operator": "mean_axis",
+              "extent": 8,
+              "birth": 7,
+              "death": 21
+            },
+            {
+              "node": 28,
+              "operator": "take_axis",
+              "extent": 128,
+              "birth": 28,
+              "death": 30
+            },
+            {
+              "node": 31,
+              "operator": "variance_axis",
+              "extent": 8,
+              "birth": 31,
+              "death": 33
+            },
+            {
+              "node": 37,
+              "operator": "gaussian_mixture_em",
+              "extent": 320,
+              "birth": 37,
+              "death": 115
+            }
+          ]
+        },
+        "2": {
+          "capacity": 5592416,
+          "nodes": [
+            {
+              "node": 9,
+              "operator": "subtract",
+              "extent": 8,
+              "birth": 9,
+              "death": 16
+            },
+            {
+              "node": 19,
+              "operator": "take_axis",
+              "extent": 2796208,
+              "birth": 19,
+              "death": 40
+            },
+            {
+              "node": 43,
+              "operator": "maximum",
+              "extent": 16,
+              "birth": 43,
+              "death": 44
+            },
+            {
+              "node": 46,
+              "operator": "add",
+              "extent": 5592416,
+              "birth": 46,
+              "death": 47
+            },
+            {
+              "node": 49,
+              "operator": "one_hot",
+              "extent": 5592416,
+              "birth": 49,
+              "death": 55
+            }
+          ]
+        },
+        "3": {
+          "capacity": 8,
+          "nodes": [
+            {
+              "node": 10,
+              "operator": "variance_axis",
+              "extent": 8,
+              "birth": 10,
+              "death": 11
+            },
+            {
+              "node": 14,
+              "operator": "where",
+              "extent": 8,
+              "birth": 14,
+              "death": 23
+            }
+          ]
+        },
+        "4": {
+          "capacity": 8,
+          "nodes": [
+            {
+              "node": 11,
+              "operator": "sqrt",
+              "extent": 8,
+              "birth": 11,
+              "death": 14
+            }
+          ]
+        },
+        "5": {
+          "capacity": 349526,
+          "nodes": [
+            {
+              "node": 21,
+              "operator": "subtract",
+              "extent": 8,
+              "birth": 21,
+              "death": 23
+            },
+            {
+              "node": 33,
+              "operator": "maximum",
+              "extent": 8,
+              "birth": 33,
+              "death": 37
+            },
+            {
+              "node": 44,
+              "operator": "log",
+              "extent": 16,
+              "birth": 44,
+              "death": 46
+            },
+            {
+              "node": 51,
+              "operator": "max_axis",
+              "extent": 16,
+              "birth": 51,
+              "death": 52
+            },
+            {
+              "node": 107,
+              "operator": "max_axis",
+              "extent": 349526,
+              "birth": 107,
+              "death": 108
+            }
+          ]
+        }
+      }
+    },
+    {
+      "graph": "gmm16-original",
+      "method": "size_aware",
+      "numeric_arena_bytes": 134220672,
+      "mask_arena_bytes": 8,
+      "integer_arena_bytes": 13981168,
+      "numeric_slots": {
+        "0": {
+          "capacity": 8388624,
+          "nodes": [
+            {
+              "node": 6,
+              "operator": "take_axis",
+              "extent": 8388624,
+              "birth": 6,
+              "death": 22
+            },
+            {
+              "node": 23,
+              "operator": "divide",
+              "extent": 8388624,
+              "birth": 23,
+              "death": 37
+            },
+            {
+              "node": 40,
+              "operator": "gaussian_log_density",
+              "extent": 5592416,
+              "birth": 40,
+              "death": 46
+            },
+            {
+              "node": 47,
+              "operator": "softmax_axis",
+              "extent": 5592416,
+              "birth": 47,
+              "death": 109
+            }
+          ]
+        },
+        "1": {
+          "capacity": 8,
+          "nodes": [
+            {
+              "node": 7,
+              "operator": "mean_axis",
+              "extent": 8,
+              "birth": 7,
+              "death": 21
+            }
+          ]
+        },
+        "2": {
+          "capacity": 2796208,
+          "nodes": [
+            {
+              "node": 9,
+              "operator": "subtract",
+              "extent": 8,
+              "birth": 9,
+              "death": 16
+            },
+            {
+              "node": 19,
+              "operator": "take_axis",
+              "extent": 2796208,
+              "birth": 19,
+              "death": 40
+            },
+            {
+              "node": 44,
+              "operator": "log",
+              "extent": 16,
+              "birth": 44,
+              "death": 46
+            },
+            {
+              "node": 51,
+              "operator": "max_axis",
+              "extent": 16,
+              "birth": 51,
+              "death": 52
+            }
+          ]
+        },
+        "3": {
+          "capacity": 320,
+          "nodes": [
+            {
+              "node": 10,
+              "operator": "variance_axis",
+              "extent": 8,
+              "birth": 10,
+              "death": 11
+            },
+            {
+              "node": 14,
+              "operator": "where",
+              "extent": 8,
+              "birth": 14,
+              "death": 23
+            },
+            {
+              "node": 31,
+              "operator": "variance_axis",
+              "extent": 8,
+              "birth": 31,
+              "death": 33
+            },
+            {
+              "node": 37,
+              "operator": "gaussian_mixture_em",
+              "extent": 320,
+              "birth": 37,
+              "death": 115
+            }
+          ]
+        },
+        "4": {
+          "capacity": 8,
+          "nodes": [
+            {
+              "node": 11,
+              "operator": "sqrt",
+              "extent": 8,
+              "birth": 11,
+              "death": 14
+            }
+          ]
+        },
+        "5": {
+          "capacity": 5592416,
+          "nodes": [
+            {
+              "node": 21,
+              "operator": "subtract",
+              "extent": 8,
+              "birth": 21,
+              "death": 23
+            },
+            {
+              "node": 28,
+              "operator": "take_axis",
+              "extent": 128,
+              "birth": 28,
+              "death": 30
+            },
+            {
+              "node": 33,
+              "operator": "maximum",
+              "extent": 8,
+              "birth": 33,
+              "death": 37
+            },
+            {
+              "node": 43,
+              "operator": "maximum",
+              "extent": 16,
+              "birth": 43,
+              "death": 44
+            },
+            {
+              "node": 46,
+              "operator": "add",
+              "extent": 5592416,
+              "birth": 46,
+              "death": 47
+            },
+            {
+              "node": 49,
+              "operator": "one_hot",
+              "extent": 5592416,
+              "birth": 49,
+              "death": 55
+            },
+            {
+              "node": 107,
+              "operator": "max_axis",
+              "extent": 349526,
+              "birth": 107,
+              "death": 108
+            }
+          ]
+        }
+      }
+    },
+    {
+      "graph": "gmm16-dense_views",
+      "method": "original",
+      "numeric_arena_bytes": 156590336,
+      "mask_arena_bytes": 8,
+      "integer_arena_bytes": 13981168,
+      "numeric_slots": {
+        "0": {
+          "capacity": 8388624,
+          "nodes": [
+            {
+              "node": 5,
+              "operator": "mean_axis",
+              "extent": 8,
+              "birth": 5,
+              "death": 18
+            },
+            {
+              "node": 20,
+              "operator": "divide",
+              "extent": 8388624,
+              "birth": 20,
+              "death": 35
+            },
+            {
+              "node": 38,
+              "operator": "gaussian_log_density",
+              "extent": 5592416,
+              "birth": 38,
+              "death": 44
+            },
+            {
+              "node": 45,
+              "operator": "softmax_axis",
+              "extent": 5592416,
+              "birth": 45,
+              "death": 108
+            }
+          ]
+        },
+        "1": {
+          "capacity": 320,
+          "nodes": [
+            {
+              "node": 7,
+              "operator": "subtract",
+              "extent": 8,
+              "birth": 7,
+              "death": 14
+            },
+            {
+              "node": 18,
+              "operator": "subtract",
+              "extent": 8,
+              "birth": 18,
+              "death": 20
+            },
+            {
+              "node": 25,
+              "operator": "take_axis",
+              "extent": 128,
+              "birth": 25,
+              "death": 28
+            },
+            {
+              "node": 29,
+              "operator": "variance_axis",
+              "extent": 8,
+              "birth": 29,
+              "death": 31
+            },
+            {
+              "node": 35,
+              "operator": "gaussian_mixture_em",
+              "extent": 320,
+              "birth": 35,
+              "death": 114
+            }
+          ]
+        },
+        "2": {
+          "capacity": 8,
+          "nodes": [
+            {
+              "node": 8,
+              "operator": "variance_axis",
+              "extent": 8,
+              "birth": 8,
+              "death": 9
+            },
+            {
+              "node": 12,
+              "operator": "where",
+              "extent": 8,
+              "birth": 12,
+              "death": 20
+            }
+          ]
+        },
+        "3": {
+          "capacity": 8,
+          "nodes": [
+            {
+              "node": 9,
+              "operator": "sqrt",
+              "extent": 8,
+              "birth": 9,
+              "death": 12
+            }
+          ]
+        },
+        "4": {
+          "capacity": 5592416,
+          "nodes": [
+            {
+              "node": 31,
+              "operator": "maximum",
+              "extent": 8,
+              "birth": 31,
+              "death": 35
+            },
+            {
+              "node": 41,
+              "operator": "maximum",
+              "extent": 16,
+              "birth": 41,
+              "death": 42
+            },
+            {
+              "node": 44,
+              "operator": "add",
+              "extent": 5592416,
+              "birth": 44,
+              "death": 45
+            },
+            {
+              "node": 47,
+              "operator": "one_hot",
+              "extent": 5592416,
+              "birth": 47,
+              "death": 53
+            }
+          ]
+        },
+        "5": {
+          "capacity": 5592416,
+          "nodes": [
+            {
+              "node": 42,
+              "operator": "log",
+              "extent": 16,
+              "birth": 42,
+              "death": 44
+            },
+            {
+              "node": 49,
+              "operator": "max_axis",
+              "extent": 16,
+              "birth": 49,
+              "death": 50
+            },
+            {
+              "node": 53,
+              "operator": "take_axis",
+              "extent": 5592416,
+              "birth": 53,
+              "death": 55
+            },
+            {
+              "node": 106,
+              "operator": "max_axis",
+              "extent": 349526,
+              "birth": 106,
+              "death": 107
+            }
+          ]
+        }
+      }
+    },
+    {
+      "graph": "gmm16-dense_views",
+      "method": "size_aware",
+      "numeric_arena_bytes": 156590336,
+      "mask_arena_bytes": 8,
+      "integer_arena_bytes": 13981168,
+      "numeric_slots": {
+        "0": {
+          "capacity": 8388624,
+          "nodes": [
+            {
+              "node": 5,
+              "operator": "mean_axis",
+              "extent": 8,
+              "birth": 5,
+              "death": 18
+            },
+            {
+              "node": 20,
+              "operator": "divide",
+              "extent": 8388624,
+              "birth": 20,
+              "death": 35
+            },
+            {
+              "node": 38,
+              "operator": "gaussian_log_density",
+              "extent": 5592416,
+              "birth": 38,
+              "death": 44
+            },
+            {
+              "node": 45,
+              "operator": "softmax_axis",
+              "extent": 5592416,
+              "birth": 45,
+              "death": 108
+            }
+          ]
+        },
+        "1": {
+          "capacity": 320,
+          "nodes": [
+            {
+              "node": 7,
+              "operator": "subtract",
+              "extent": 8,
+              "birth": 7,
+              "death": 14
+            },
+            {
+              "node": 18,
+              "operator": "subtract",
+              "extent": 8,
+              "birth": 18,
+              "death": 20
+            },
+            {
+              "node": 25,
+              "operator": "take_axis",
+              "extent": 128,
+              "birth": 25,
+              "death": 28
+            },
+            {
+              "node": 29,
+              "operator": "variance_axis",
+              "extent": 8,
+              "birth": 29,
+              "death": 31
+            },
+            {
+              "node": 35,
+              "operator": "gaussian_mixture_em",
+              "extent": 320,
+              "birth": 35,
+              "death": 114
+            }
+          ]
+        },
+        "2": {
+          "capacity": 8,
+          "nodes": [
+            {
+              "node": 8,
+              "operator": "variance_axis",
+              "extent": 8,
+              "birth": 8,
+              "death": 9
+            },
+            {
+              "node": 12,
+              "operator": "where",
+              "extent": 8,
+              "birth": 12,
+              "death": 20
+            }
+          ]
+        },
+        "3": {
+          "capacity": 8,
+          "nodes": [
+            {
+              "node": 9,
+              "operator": "sqrt",
+              "extent": 8,
+              "birth": 9,
+              "death": 12
+            }
+          ]
+        },
+        "4": {
+          "capacity": 5592416,
+          "nodes": [
+            {
+              "node": 31,
+              "operator": "maximum",
+              "extent": 8,
+              "birth": 31,
+              "death": 35
+            },
+            {
+              "node": 41,
+              "operator": "maximum",
+              "extent": 16,
+              "birth": 41,
+              "death": 42
+            },
+            {
+              "node": 44,
+              "operator": "add",
+              "extent": 5592416,
+              "birth": 44,
+              "death": 45
+            },
+            {
+              "node": 47,
+              "operator": "one_hot",
+              "extent": 5592416,
+              "birth": 47,
+              "death": 53
+            },
+            {
+              "node": 106,
+              "operator": "max_axis",
+              "extent": 349526,
+              "birth": 106,
+              "death": 107
+            }
+          ]
+        },
+        "5": {
+          "capacity": 5592416,
+          "nodes": [
+            {
+              "node": 42,
+              "operator": "log",
+              "extent": 16,
+              "birth": 42,
+              "death": 44
+            },
+            {
+              "node": 49,
+              "operator": "max_axis",
+              "extent": 16,
+              "birth": 49,
+              "death": 50
+            },
+            {
+              "node": 53,
+              "operator": "take_axis",
+              "extent": 5592416,
+              "birth": 53,
+              "death": 55
+            }
+          ]
+        }
+      }
+    },
+    {
+      "graph": "gmm16-shared_standardized",
+      "method": "original",
+      "numeric_arena_bytes": 159386416,
+      "mask_arena_bytes": 8,
+      "integer_arena_bytes": 13981168,
+      "numeric_slots": {
+        "0": {
+          "capacity": 8388624,
+          "nodes": [
+            {
+              "node": 6,
+              "operator": "take_axis",
+              "extent": 8388624,
+              "birth": 6,
+              "death": 10
+            },
+            {
+              "node": 11,
+              "operator": "sqrt",
+              "extent": 8,
+              "birth": 11,
+              "death": 14
+            }
+          ]
+        },
+        "1": {
+          "capacity": 5592416,
+          "nodes": [
+            {
+              "node": 7,
+              "operator": "mean_axis",
+              "extent": 8,
+              "birth": 7,
+              "death": 9
+            },
+            {
+              "node": 10,
+              "operator": "variance_axis",
+              "extent": 8,
+              "birth": 10,
+              "death": 11
+            },
+            {
+              "node": 14,
+              "operator": "where",
+              "extent": 8,
+              "birth": 14,
+              "death": 16
+            },
+            {
+              "node": 19,
+              "operator": "take_axis",
+              "extent": 2796208,
+              "birth": 19,
+              "death": 37
+            },
+            {
+              "node": 40,
+              "operator": "maximum",
+              "extent": 16,
+              "birth": 40,
+              "death": 41
+            },
+            {
+              "node": 43,
+              "operator": "add",
+              "extent": 5592416,
+              "birth": 43,
+              "death": 44
+            },
+            {
+              "node": 46,
+              "operator": "one_hot",
+              "extent": 5592416,
+              "birth": 46,
+              "death": 52
+            }
+          ]
+        },
+        "2": {
+          "capacity": 320,
+          "nodes": [
+            {
+              "node": 9,
+              "operator": "subtract",
+              "extent": 8,
+              "birth": 9,
+              "death": 16
+            },
+            {
+              "node": 25,
+              "operator": "take_axis",
+              "extent": 128,
+              "birth": 25,
+              "death": 27
+            },
+            {
+              "node": 28,
+              "operator": "variance_axis",
+              "extent": 8,
+              "birth": 28,
+              "death": 30
+            },
+            {
+              "node": 34,
+              "operator": "gaussian_mixture_em",
+              "extent": 320,
+              "birth": 34,
+              "death": 112
+            }
+          ]
+        },
+        "4": {
+          "capacity": 5592416,
+          "nodes": [
+            {
+              "node": 30,
+              "operator": "maximum",
+              "extent": 8,
+              "birth": 30,
+              "death": 34
+            },
+            {
+              "node": 37,
+              "operator": "gaussian_log_density",
+              "extent": 5592416,
+              "birth": 37,
+              "death": 43
+            },
+            {
+              "node": 44,
+              "operator": "softmax_axis",
+              "extent": 5592416,
+              "birth": 44,
+              "death": 106
+            }
+          ]
+        },
+        "5": {
+          "capacity": 349526,
+          "nodes": [
+            {
+              "node": 41,
+              "operator": "log",
+              "extent": 16,
+              "birth": 41,
+              "death": 43
+            },
+            {
+              "node": 48,
+              "operator": "max_axis",
+              "extent": 16,
+              "birth": 48,
+              "death": 49
+            },
+            {
+              "node": 104,
+              "operator": "max_axis",
+              "extent": 349526,
+              "birth": 104,
+              "death": 105
+            }
+          ]
+        }
+      }
+    },
+    {
+      "graph": "gmm16-shared_standardized",
+      "method": "size_aware",
+      "numeric_arena_bytes": 156590336,
+      "mask_arena_bytes": 8,
+      "integer_arena_bytes": 13981168,
+      "numeric_slots": {
+        "0": {
+          "capacity": 8388624,
+          "nodes": [
+            {
+              "node": 6,
+              "operator": "take_axis",
+              "extent": 8388624,
+              "birth": 6,
+              "death": 10
+            },
+            {
+              "node": 11,
+              "operator": "sqrt",
+              "extent": 8,
+              "birth": 11,
+              "death": 14
+            }
+          ]
+        },
+        "1": {
+          "capacity": 320,
+          "nodes": [
+            {
+              "node": 7,
+              "operator": "mean_axis",
+              "extent": 8,
+              "birth": 7,
+              "death": 9
+            },
+            {
+              "node": 10,
+              "operator": "variance_axis",
+              "extent": 8,
+              "birth": 10,
+              "death": 11
+            },
+            {
+              "node": 14,
+              "operator": "where",
+              "extent": 8,
+              "birth": 14,
+              "death": 16
+            },
+            {
+              "node": 25,
+              "operator": "take_axis",
+              "extent": 128,
+              "birth": 25,
+              "death": 27
+            },
+            {
+              "node": 28,
+              "operator": "variance_axis",
+              "extent": 8,
+              "birth": 28,
+              "death": 30
+            },
+            {
+              "node": 34,
+              "operator": "gaussian_mixture_em",
+              "extent": 320,
+              "birth": 34,
+              "death": 112
+            }
+          ]
+        },
+        "2": {
+          "capacity": 5592416,
+          "nodes": [
+            {
+              "node": 9,
+              "operator": "subtract",
+              "extent": 8,
+              "birth": 9,
+              "death": 16
+            },
+            {
+              "node": 19,
+              "operator": "take_axis",
+              "extent": 2796208,
+              "birth": 19,
+              "death": 37
+            },
+            {
+              "node": 40,
+              "operator": "maximum",
+              "extent": 16,
+              "birth": 40,
+              "death": 41
+            },
+            {
+              "node": 43,
+              "operator": "add",
+              "extent": 5592416,
+              "birth": 43,
+              "death": 44
+            },
+            {
+              "node": 46,
+              "operator": "one_hot",
+              "extent": 5592416,
+              "birth": 46,
+              "death": 52
+            },
+            {
+              "node": 104,
+              "operator": "max_axis",
+              "extent": 349526,
+              "birth": 104,
+              "death": 105
+            }
+          ]
+        },
+        "4": {
+          "capacity": 5592416,
+          "nodes": [
+            {
+              "node": 30,
+              "operator": "maximum",
+              "extent": 8,
+              "birth": 30,
+              "death": 34
+            },
+            {
+              "node": 37,
+              "operator": "gaussian_log_density",
+              "extent": 5592416,
+              "birth": 37,
+              "death": 43
+            },
+            {
+              "node": 44,
+              "operator": "softmax_axis",
+              "extent": 5592416,
+              "birth": 44,
+              "death": 106
+            }
+          ]
+        },
+        "5": {
+          "capacity": 16,
+          "nodes": [
+            {
+              "node": 41,
+              "operator": "log",
+              "extent": 16,
+              "birth": 41,
+              "death": 43
+            },
+            {
+              "node": 48,
+              "operator": "max_axis",
+              "extent": 16,
+              "birth": 48,
+              "death": 49
+            }
+          ]
+        }
+      }
+    },
+    {
+      "graph": "gmm3-original",
+      "method": "original",
+      "numeric_arena_bytes": 17000352,
+      "mask_arena_bytes": 4,
+      "integer_arena_bytes": 5000024,
+      "numeric_slots": {
+        "0": {
+          "capacity": 1500000,
+          "nodes": [
+            {
+              "node": 6,
+              "operator": "take_axis",
+              "extent": 1500000,
+              "birth": 6,
+              "death": 22
+            },
+            {
+              "node": 23,
+              "operator": "divide",
+              "extent": 1500000,
+              "birth": 23,
+              "death": 37
+            },
+            {
+              "node": 40,
+              "operator": "gaussian_log_density",
+              "extent": 375000,
+              "birth": 40,
+              "death": 46
+            },
+            {
+              "node": 47,
+              "operator": "softmax_axis",
+              "extent": 375000,
+              "birth": 47,
+              "death": 71
+            }
+          ]
+        },
+        "1": {
+          "capacity": 36,
+          "nodes": [
+            {
+              "node": 7,
+              "operator": "mean_axis",
+              "extent": 4,
+              "birth": 7,
+              "death": 21
+            },
+            {
+              "node": 28,
+              "operator": "take_axis",
+              "extent": 12,
+              "birth": 28,
+              "death": 30
+            },
+            {
+              "node": 31,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 31,
+              "death": 33
+            },
+            {
+              "node": 37,
+              "operator": "gaussian_mixture_em",
+              "extent": 36,
+              "birth": 37,
+              "death": 77
+            }
+          ]
+        },
+        "2": {
+          "capacity": 500000,
+          "nodes": [
+            {
+              "node": 9,
+              "operator": "subtract",
+              "extent": 4,
+              "birth": 9,
+              "death": 16
+            },
+            {
+              "node": 19,
+              "operator": "take_axis",
+              "extent": 500000,
+              "birth": 19,
+              "death": 40
+            },
+            {
+              "node": 43,
+              "operator": "maximum",
+              "extent": 3,
+              "birth": 43,
+              "death": 44
+            },
+            {
+              "node": 46,
+              "operator": "add",
+              "extent": 375000,
+              "birth": 46,
+              "death": 47
+            },
+            {
+              "node": 49,
+              "operator": "one_hot",
+              "extent": 375000,
+              "birth": 49,
+              "death": 55
+            }
+          ]
+        },
+        "3": {
+          "capacity": 4,
+          "nodes": [
+            {
+              "node": 10,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 10,
+              "death": 11
+            },
+            {
+              "node": 14,
+              "operator": "where",
+              "extent": 4,
+              "birth": 14,
+              "death": 23
+            }
+          ]
+        },
+        "4": {
+          "capacity": 4,
+          "nodes": [
+            {
+              "node": 11,
+              "operator": "sqrt",
+              "extent": 4,
+              "birth": 11,
+              "death": 14
+            }
+          ]
+        },
+        "5": {
+          "capacity": 125000,
+          "nodes": [
+            {
+              "node": 21,
+              "operator": "subtract",
+              "extent": 4,
+              "birth": 21,
+              "death": 23
+            },
+            {
+              "node": 33,
+              "operator": "maximum",
+              "extent": 4,
+              "birth": 33,
+              "death": 37
+            },
+            {
+              "node": 44,
+              "operator": "log",
+              "extent": 3,
+              "birth": 44,
+              "death": 46
+            },
+            {
+              "node": 51,
+              "operator": "max_axis",
+              "extent": 3,
+              "birth": 51,
+              "death": 52
+            },
+            {
+              "node": 69,
+              "operator": "max_axis",
+              "extent": 125000,
+              "birth": 69,
+              "death": 70
+            }
+          ]
+        }
+      }
+    },
+    {
+      "graph": "gmm3-original",
+      "method": "size_aware",
+      "numeric_arena_bytes": 19000352,
+      "mask_arena_bytes": 4,
+      "integer_arena_bytes": 5000024,
+      "numeric_slots": {
+        "0": {
+          "capacity": 1500000,
+          "nodes": [
+            {
+              "node": 6,
+              "operator": "take_axis",
+              "extent": 1500000,
+              "birth": 6,
+              "death": 22
+            },
+            {
+              "node": 23,
+              "operator": "divide",
+              "extent": 1500000,
+              "birth": 23,
+              "death": 37
+            },
+            {
+              "node": 40,
+              "operator": "gaussian_log_density",
+              "extent": 375000,
+              "birth": 40,
+              "death": 46
+            },
+            {
+              "node": 47,
+              "operator": "softmax_axis",
+              "extent": 375000,
+              "birth": 47,
+              "death": 71
+            }
+          ]
+        },
+        "1": {
+          "capacity": 4,
+          "nodes": [
+            {
+              "node": 7,
+              "operator": "mean_axis",
+              "extent": 4,
+              "birth": 7,
+              "death": 21
+            }
+          ]
+        },
+        "2": {
+          "capacity": 500000,
+          "nodes": [
+            {
+              "node": 9,
+              "operator": "subtract",
+              "extent": 4,
+              "birth": 9,
+              "death": 16
+            },
+            {
+              "node": 19,
+              "operator": "take_axis",
+              "extent": 500000,
+              "birth": 19,
+              "death": 40
+            },
+            {
+              "node": 44,
+              "operator": "log",
+              "extent": 3,
+              "birth": 44,
+              "death": 46
+            },
+            {
+              "node": 51,
+              "operator": "max_axis",
+              "extent": 3,
+              "birth": 51,
+              "death": 52
+            },
+            {
+              "node": 69,
+              "operator": "max_axis",
+              "extent": 125000,
+              "birth": 69,
+              "death": 70
+            }
+          ]
+        },
+        "3": {
+          "capacity": 36,
+          "nodes": [
+            {
+              "node": 10,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 10,
+              "death": 11
+            },
+            {
+              "node": 14,
+              "operator": "where",
+              "extent": 4,
+              "birth": 14,
+              "death": 23
+            },
+            {
+              "node": 31,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 31,
+              "death": 33
+            },
+            {
+              "node": 37,
+              "operator": "gaussian_mixture_em",
+              "extent": 36,
+              "birth": 37,
+              "death": 77
+            }
+          ]
+        },
+        "4": {
+          "capacity": 4,
+          "nodes": [
+            {
+              "node": 11,
+              "operator": "sqrt",
+              "extent": 4,
+              "birth": 11,
+              "death": 14
+            }
+          ]
+        },
+        "5": {
+          "capacity": 375000,
+          "nodes": [
+            {
+              "node": 21,
+              "operator": "subtract",
+              "extent": 4,
+              "birth": 21,
+              "death": 23
+            },
+            {
+              "node": 28,
+              "operator": "take_axis",
+              "extent": 12,
+              "birth": 28,
+              "death": 30
+            },
+            {
+              "node": 33,
+              "operator": "maximum",
+              "extent": 4,
+              "birth": 33,
+              "death": 37
+            },
+            {
+              "node": 43,
+              "operator": "maximum",
+              "extent": 3,
+              "birth": 43,
+              "death": 44
+            },
+            {
+              "node": 46,
+              "operator": "add",
+              "extent": 375000,
+              "birth": 46,
+              "death": 47
+            },
+            {
+              "node": 49,
+              "operator": "one_hot",
+              "extent": 375000,
+              "birth": 49,
+              "death": 55
+            }
+          ]
+        }
+      }
+    },
+    {
+      "graph": "gmm3-dense_views",
+      "method": "original",
+      "numeric_arena_bytes": 18000352,
+      "mask_arena_bytes": 4,
+      "integer_arena_bytes": 5000024,
+      "numeric_slots": {
+        "0": {
+          "capacity": 1500000,
+          "nodes": [
+            {
+              "node": 5,
+              "operator": "mean_axis",
+              "extent": 4,
+              "birth": 5,
+              "death": 18
+            },
+            {
+              "node": 20,
+              "operator": "divide",
+              "extent": 1500000,
+              "birth": 20,
+              "death": 35
+            },
+            {
+              "node": 38,
+              "operator": "gaussian_log_density",
+              "extent": 375000,
+              "birth": 38,
+              "death": 44
+            },
+            {
+              "node": 45,
+              "operator": "softmax_axis",
+              "extent": 375000,
+              "birth": 45,
+              "death": 70
+            }
+          ]
+        },
+        "1": {
+          "capacity": 36,
+          "nodes": [
+            {
+              "node": 7,
+              "operator": "subtract",
+              "extent": 4,
+              "birth": 7,
+              "death": 14
+            },
+            {
+              "node": 18,
+              "operator": "subtract",
+              "extent": 4,
+              "birth": 18,
+              "death": 20
+            },
+            {
+              "node": 25,
+              "operator": "take_axis",
+              "extent": 12,
+              "birth": 25,
+              "death": 28
+            },
+            {
+              "node": 29,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 29,
+              "death": 31
+            },
+            {
+              "node": 35,
+              "operator": "gaussian_mixture_em",
+              "extent": 36,
+              "birth": 35,
+              "death": 76
+            }
+          ]
+        },
+        "2": {
+          "capacity": 4,
+          "nodes": [
+            {
+              "node": 8,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 8,
+              "death": 9
+            },
+            {
+              "node": 12,
+              "operator": "where",
+              "extent": 4,
+              "birth": 12,
+              "death": 20
+            }
+          ]
+        },
+        "3": {
+          "capacity": 4,
+          "nodes": [
+            {
+              "node": 9,
+              "operator": "sqrt",
+              "extent": 4,
+              "birth": 9,
+              "death": 12
+            }
+          ]
+        },
+        "4": {
+          "capacity": 375000,
+          "nodes": [
+            {
+              "node": 31,
+              "operator": "maximum",
+              "extent": 4,
+              "birth": 31,
+              "death": 35
+            },
+            {
+              "node": 41,
+              "operator": "maximum",
+              "extent": 3,
+              "birth": 41,
+              "death": 42
+            },
+            {
+              "node": 44,
+              "operator": "add",
+              "extent": 375000,
+              "birth": 44,
+              "death": 45
+            },
+            {
+              "node": 47,
+              "operator": "one_hot",
+              "extent": 375000,
+              "birth": 47,
+              "death": 53
+            }
+          ]
+        },
+        "5": {
+          "capacity": 375000,
+          "nodes": [
+            {
+              "node": 42,
+              "operator": "log",
+              "extent": 3,
+              "birth": 42,
+              "death": 44
+            },
+            {
+              "node": 49,
+              "operator": "max_axis",
+              "extent": 3,
+              "birth": 49,
+              "death": 50
+            },
+            {
+              "node": 53,
+              "operator": "take_axis",
+              "extent": 375000,
+              "birth": 53,
+              "death": 55
+            },
+            {
+              "node": 68,
+              "operator": "max_axis",
+              "extent": 125000,
+              "birth": 68,
+              "death": 69
+            }
+          ]
+        }
+      }
+    },
+    {
+      "graph": "gmm3-dense_views",
+      "method": "size_aware",
+      "numeric_arena_bytes": 18000352,
+      "mask_arena_bytes": 4,
+      "integer_arena_bytes": 5000024,
+      "numeric_slots": {
+        "0": {
+          "capacity": 1500000,
+          "nodes": [
+            {
+              "node": 5,
+              "operator": "mean_axis",
+              "extent": 4,
+              "birth": 5,
+              "death": 18
+            },
+            {
+              "node": 20,
+              "operator": "divide",
+              "extent": 1500000,
+              "birth": 20,
+              "death": 35
+            },
+            {
+              "node": 38,
+              "operator": "gaussian_log_density",
+              "extent": 375000,
+              "birth": 38,
+              "death": 44
+            },
+            {
+              "node": 45,
+              "operator": "softmax_axis",
+              "extent": 375000,
+              "birth": 45,
+              "death": 70
+            }
+          ]
+        },
+        "1": {
+          "capacity": 36,
+          "nodes": [
+            {
+              "node": 7,
+              "operator": "subtract",
+              "extent": 4,
+              "birth": 7,
+              "death": 14
+            },
+            {
+              "node": 18,
+              "operator": "subtract",
+              "extent": 4,
+              "birth": 18,
+              "death": 20
+            },
+            {
+              "node": 25,
+              "operator": "take_axis",
+              "extent": 12,
+              "birth": 25,
+              "death": 28
+            },
+            {
+              "node": 29,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 29,
+              "death": 31
+            },
+            {
+              "node": 35,
+              "operator": "gaussian_mixture_em",
+              "extent": 36,
+              "birth": 35,
+              "death": 76
+            }
+          ]
+        },
+        "2": {
+          "capacity": 4,
+          "nodes": [
+            {
+              "node": 8,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 8,
+              "death": 9
+            },
+            {
+              "node": 12,
+              "operator": "where",
+              "extent": 4,
+              "birth": 12,
+              "death": 20
+            }
+          ]
+        },
+        "3": {
+          "capacity": 4,
+          "nodes": [
+            {
+              "node": 9,
+              "operator": "sqrt",
+              "extent": 4,
+              "birth": 9,
+              "death": 12
+            }
+          ]
+        },
+        "4": {
+          "capacity": 375000,
+          "nodes": [
+            {
+              "node": 31,
+              "operator": "maximum",
+              "extent": 4,
+              "birth": 31,
+              "death": 35
+            },
+            {
+              "node": 41,
+              "operator": "maximum",
+              "extent": 3,
+              "birth": 41,
+              "death": 42
+            },
+            {
+              "node": 44,
+              "operator": "add",
+              "extent": 375000,
+              "birth": 44,
+              "death": 45
+            },
+            {
+              "node": 47,
+              "operator": "one_hot",
+              "extent": 375000,
+              "birth": 47,
+              "death": 53
+            }
+          ]
+        },
+        "5": {
+          "capacity": 375000,
+          "nodes": [
+            {
+              "node": 42,
+              "operator": "log",
+              "extent": 3,
+              "birth": 42,
+              "death": 44
+            },
+            {
+              "node": 49,
+              "operator": "max_axis",
+              "extent": 3,
+              "birth": 49,
+              "death": 50
+            },
+            {
+              "node": 53,
+              "operator": "take_axis",
+              "extent": 375000,
+              "birth": 53,
+              "death": 55
+            },
+            {
+              "node": 68,
+              "operator": "max_axis",
+              "extent": 125000,
+              "birth": 68,
+              "death": 69
+            }
+          ]
+        }
+      }
+    },
+    {
+      "graph": "gmm3-shared_standardized",
+      "method": "original",
+      "numeric_arena_bytes": 20000288,
+      "mask_arena_bytes": 4,
+      "integer_arena_bytes": 5000024,
+      "numeric_slots": {
+        "0": {
+          "capacity": 1500000,
+          "nodes": [
+            {
+              "node": 6,
+              "operator": "take_axis",
+              "extent": 1500000,
+              "birth": 6,
+              "death": 10
+            },
+            {
+              "node": 11,
+              "operator": "sqrt",
+              "extent": 4,
+              "birth": 11,
+              "death": 14
+            }
+          ]
+        },
+        "1": {
+          "capacity": 500000,
+          "nodes": [
+            {
+              "node": 7,
+              "operator": "mean_axis",
+              "extent": 4,
+              "birth": 7,
+              "death": 9
+            },
+            {
+              "node": 10,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 10,
+              "death": 11
+            },
+            {
+              "node": 14,
+              "operator": "where",
+              "extent": 4,
+              "birth": 14,
+              "death": 16
+            },
+            {
+              "node": 19,
+              "operator": "take_axis",
+              "extent": 500000,
+              "birth": 19,
+              "death": 37
+            },
+            {
+              "node": 40,
+              "operator": "maximum",
+              "extent": 3,
+              "birth": 40,
+              "death": 41
+            },
+            {
+              "node": 43,
+              "operator": "add",
+              "extent": 375000,
+              "birth": 43,
+              "death": 44
+            },
+            {
+              "node": 46,
+              "operator": "one_hot",
+              "extent": 375000,
+              "birth": 46,
+              "death": 52
+            }
+          ]
+        },
+        "2": {
+          "capacity": 36,
+          "nodes": [
+            {
+              "node": 9,
+              "operator": "subtract",
+              "extent": 4,
+              "birth": 9,
+              "death": 16
+            },
+            {
+              "node": 25,
+              "operator": "take_axis",
+              "extent": 12,
+              "birth": 25,
+              "death": 27
+            },
+            {
+              "node": 28,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 28,
+              "death": 30
+            },
+            {
+              "node": 34,
+              "operator": "gaussian_mixture_em",
+              "extent": 36,
+              "birth": 34,
+              "death": 74
+            }
+          ]
+        },
+        "4": {
+          "capacity": 375000,
+          "nodes": [
+            {
+              "node": 30,
+              "operator": "maximum",
+              "extent": 4,
+              "birth": 30,
+              "death": 34
+            },
+            {
+              "node": 37,
+              "operator": "gaussian_log_density",
+              "extent": 375000,
+              "birth": 37,
+              "death": 43
+            },
+            {
+              "node": 44,
+              "operator": "softmax_axis",
+              "extent": 375000,
+              "birth": 44,
+              "death": 68
+            }
+          ]
+        },
+        "5": {
+          "capacity": 125000,
+          "nodes": [
+            {
+              "node": 41,
+              "operator": "log",
+              "extent": 3,
+              "birth": 41,
+              "death": 43
+            },
+            {
+              "node": 48,
+              "operator": "max_axis",
+              "extent": 3,
+              "birth": 48,
+              "death": 49
+            },
+            {
+              "node": 66,
+              "operator": "max_axis",
+              "extent": 125000,
+              "birth": 66,
+              "death": 67
+            }
+          ]
+        }
+      }
+    },
+    {
+      "graph": "gmm3-shared_standardized",
+      "method": "size_aware",
+      "numeric_arena_bytes": 20000288,
+      "mask_arena_bytes": 4,
+      "integer_arena_bytes": 5000024,
+      "numeric_slots": {
+        "0": {
+          "capacity": 1500000,
+          "nodes": [
+            {
+              "node": 6,
+              "operator": "take_axis",
+              "extent": 1500000,
+              "birth": 6,
+              "death": 10
+            },
+            {
+              "node": 11,
+              "operator": "sqrt",
+              "extent": 4,
+              "birth": 11,
+              "death": 14
+            }
+          ]
+        },
+        "1": {
+          "capacity": 36,
+          "nodes": [
+            {
+              "node": 7,
+              "operator": "mean_axis",
+              "extent": 4,
+              "birth": 7,
+              "death": 9
+            },
+            {
+              "node": 10,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 10,
+              "death": 11
+            },
+            {
+              "node": 14,
+              "operator": "where",
+              "extent": 4,
+              "birth": 14,
+              "death": 16
+            },
+            {
+              "node": 25,
+              "operator": "take_axis",
+              "extent": 12,
+              "birth": 25,
+              "death": 27
+            },
+            {
+              "node": 28,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 28,
+              "death": 30
+            },
+            {
+              "node": 34,
+              "operator": "gaussian_mixture_em",
+              "extent": 36,
+              "birth": 34,
+              "death": 74
+            }
+          ]
+        },
+        "2": {
+          "capacity": 500000,
+          "nodes": [
+            {
+              "node": 9,
+              "operator": "subtract",
+              "extent": 4,
+              "birth": 9,
+              "death": 16
+            },
+            {
+              "node": 19,
+              "operator": "take_axis",
+              "extent": 500000,
+              "birth": 19,
+              "death": 37
+            },
+            {
+              "node": 40,
+              "operator": "maximum",
+              "extent": 3,
+              "birth": 40,
+              "death": 41
+            },
+            {
+              "node": 43,
+              "operator": "add",
+              "extent": 375000,
+              "birth": 43,
+              "death": 44
+            },
+            {
+              "node": 46,
+              "operator": "one_hot",
+              "extent": 375000,
+              "birth": 46,
+              "death": 52
+            }
+          ]
+        },
+        "4": {
+          "capacity": 375000,
+          "nodes": [
+            {
+              "node": 30,
+              "operator": "maximum",
+              "extent": 4,
+              "birth": 30,
+              "death": 34
+            },
+            {
+              "node": 37,
+              "operator": "gaussian_log_density",
+              "extent": 375000,
+              "birth": 37,
+              "death": 43
+            },
+            {
+              "node": 44,
+              "operator": "softmax_axis",
+              "extent": 375000,
+              "birth": 44,
+              "death": 68
+            }
+          ]
+        },
+        "5": {
+          "capacity": 125000,
+          "nodes": [
+            {
+              "node": 41,
+              "operator": "log",
+              "extent": 3,
+              "birth": 41,
+              "death": 43
+            },
+            {
+              "node": 48,
+              "operator": "max_axis",
+              "extent": 3,
+              "birth": 48,
+              "death": 49
+            },
+            {
+              "node": 66,
+              "operator": "max_axis",
+              "extent": 125000,
+              "birth": 66,
+              "death": 67
+            }
+          ]
+        }
+      }
+    },
+    {
+      "graph": "hmm12-original",
+      "method": "original",
+      "numeric_arena_bytes": 72002368,
+      "mask_arena_bytes": 4,
+      "integer_arena_bytes": 5000096,
+      "numeric_slots": {
+        "0": {
+          "capacity": 1500000,
+          "nodes": [
+            {
+              "node": 6,
+              "operator": "take_axis",
+              "extent": 1500000,
+              "birth": 6,
+              "death": 22
+            },
+            {
+              "node": 23,
+              "operator": "divide",
+              "extent": 1500000,
+              "birth": 23,
+              "death": 55
+            },
+            {
+              "node": 58,
+              "operator": "hmm_filter",
+              "extent": 12,
+              "birth": 58,
+              "death": 61
+            },
+            {
+              "node": 62,
+              "operator": "hmm_filter",
+              "extent": 1500000,
+              "birth": 62,
+              "death": 112
+            }
+          ]
+        },
+        "1": {
+          "capacity": 144,
+          "nodes": [
+            {
+              "node": 7,
+              "operator": "mean_axis",
+              "extent": 4,
+              "birth": 7,
+              "death": 21
+            },
+            {
+              "node": 28,
+              "operator": "take_axis",
+              "extent": 48,
+              "birth": 28,
+              "death": 30
+            },
+            {
+              "node": 31,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 31,
+              "death": 33
+            },
+            {
+              "node": 37,
+              "operator": "gaussian_mixture_em",
+              "extent": 144,
+              "birth": 37,
+              "death": 115
+            }
+          ]
+        },
+        "2": {
+          "capacity": 4500000,
+          "nodes": [
+            {
+              "node": 9,
+              "operator": "subtract",
+              "extent": 4,
+              "birth": 9,
+              "death": 16
+            },
+            {
+              "node": 19,
+              "operator": "take_axis",
+              "extent": 500000,
+              "birth": 19,
+              "death": 54
+            },
+            {
+              "node": 55,
+              "operator": "gaussian_log_density",
+              "extent": 4500000,
+              "birth": 55,
+              "death": 58
+            },
+            {
+              "node": 61,
+              "operator": "sum_axis",
+              "extent": 12,
+              "birth": 61,
+              "death": 62
+            },
+            {
+              "node": 64,
+              "operator": "one_hot",
+              "extent": 1500000,
+              "birth": 64,
+              "death": 70
+            }
+          ]
+        },
+        "3": {
+          "capacity": 4,
+          "nodes": [
+            {
+              "node": 10,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 10,
+              "death": 11
+            },
+            {
+              "node": 14,
+              "operator": "where",
+              "extent": 4,
+              "birth": 14,
+              "death": 23
+            }
+          ]
+        },
+        "4": {
+          "capacity": 4,
+          "nodes": [
+            {
+              "node": 11,
+              "operator": "sqrt",
+              "extent": 4,
+              "birth": 11,
+              "death": 14
+            }
+          ]
+        },
+        "5": {
+          "capacity": 1500000,
+          "nodes": [
+            {
+              "node": 21,
+              "operator": "subtract",
+              "extent": 1500000,
+              "birth": 21,
+              "death": 23
+            },
+            {
+              "node": 33,
+              "operator": "maximum",
+              "extent": 4,
+              "birth": 33,
+              "death": 37
+            },
+            {
+              "node": 40,
+              "operator": "maximum",
+              "extent": 12,
+              "birth": 40,
+              "death": 42
+            },
+            {
+              "node": 44,
+              "operator": "sum_axis",
+              "extent": 12,
+              "birth": 44,
+              "death": 47
+            },
+            {
+              "node": 51,
+              "operator": "gaussian_hmm_em",
+              "extent": 288,
+              "birth": 51,
+              "death": 116
+            }
+          ]
+        },
+        "6": {
+          "capacity": 1500000,
+          "nodes": [
+            {
+              "node": 42,
+              "operator": "divide",
+              "extent": 12,
+              "birth": 42,
+              "death": 51
+            },
+            {
+              "node": 54,
+              "operator": "gaussian_log_density",
+              "extent": 1500000,
+              "birth": 54,
+              "death": 62
+            },
+            {
+              "node": 66,
+              "operator": "max_axis",
+              "extent": 12,
+              "birth": 66,
+              "death": 67
+            },
+            {
+              "node": 70,
+              "operator": "take_axis",
+              "extent": 1500000,
+              "birth": 70,
+              "death": 71
+            },
+            {
+              "node": 110,
+              "operator": "max_axis",
+              "extent": 125000,
+              "birth": 110,
+              "death": 111
+            },
+            {
+              "node": 112,
+              "operator": "take_axis",
+              "extent": 1500000,
+              "birth": 112,
+              "death": 113
+            }
+          ]
+        },
+        "7": {
+          "capacity": 144,
+          "nodes": [
+            {
+              "node": 47,
+              "operator": "divide",
+              "extent": 144,
+              "birth": 47,
+              "death": 51
+            }
+          ]
+        }
+      }
+    },
+    {
+      "graph": "hmm12-original",
+      "method": "size_aware",
+      "numeric_arena_bytes": 72001312,
+      "mask_arena_bytes": 4,
+      "integer_arena_bytes": 5000096,
+      "numeric_slots": {
+        "0": {
+          "capacity": 1500000,
+          "nodes": [
+            {
+              "node": 6,
+              "operator": "take_axis",
+              "extent": 1500000,
+              "birth": 6,
+              "death": 22
+            },
+            {
+              "node": 23,
+              "operator": "divide",
+              "extent": 1500000,
+              "birth": 23,
+              "death": 55
+            },
+            {
+              "node": 58,
+              "operator": "hmm_filter",
+              "extent": 12,
+              "birth": 58,
+              "death": 61
+            },
+            {
+              "node": 62,
+              "operator": "hmm_filter",
+              "extent": 1500000,
+              "birth": 62,
+              "death": 112
+            }
+          ]
+        },
+        "1": {
+          "capacity": 4,
+          "nodes": [
+            {
+              "node": 7,
+              "operator": "mean_axis",
+              "extent": 4,
+              "birth": 7,
+              "death": 21
+            }
+          ]
+        },
+        "2": {
+          "capacity": 4500000,
+          "nodes": [
+            {
+              "node": 9,
+              "operator": "subtract",
+              "extent": 4,
+              "birth": 9,
+              "death": 16
+            },
+            {
+              "node": 19,
+              "operator": "take_axis",
+              "extent": 500000,
+              "birth": 19,
+              "death": 54
+            },
+            {
+              "node": 55,
+              "operator": "gaussian_log_density",
+              "extent": 4500000,
+              "birth": 55,
+              "death": 58
+            },
+            {
+              "node": 70,
+              "operator": "take_axis",
+              "extent": 1500000,
+              "birth": 70,
+              "death": 71
+            }
+          ]
+        },
+        "3": {
+          "capacity": 144,
+          "nodes": [
+            {
+              "node": 10,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 10,
+              "death": 11
+            },
+            {
+              "node": 14,
+              "operator": "where",
+              "extent": 4,
+              "birth": 14,
+              "death": 23
+            },
+            {
+              "node": 31,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 31,
+              "death": 33
+            },
+            {
+              "node": 37,
+              "operator": "gaussian_mixture_em",
+              "extent": 144,
+              "birth": 37,
+              "death": 115
+            }
+          ]
+        },
+        "4": {
+          "capacity": 4,
+          "nodes": [
+            {
+              "node": 11,
+              "operator": "sqrt",
+              "extent": 4,
+              "birth": 11,
+              "death": 14
+            }
+          ]
+        },
+        "5": {
+          "capacity": 1500000,
+          "nodes": [
+            {
+              "node": 21,
+              "operator": "subtract",
+              "extent": 1500000,
+              "birth": 21,
+              "death": 23
+            },
+            {
+              "node": 28,
+              "operator": "take_axis",
+              "extent": 48,
+              "birth": 28,
+              "death": 30
+            },
+            {
+              "node": 33,
+              "operator": "maximum",
+              "extent": 4,
+              "birth": 33,
+              "death": 37
+            },
+            {
+              "node": 40,
+              "operator": "maximum",
+              "extent": 12,
+              "birth": 40,
+              "death": 42
+            },
+            {
+              "node": 44,
+              "operator": "sum_axis",
+              "extent": 12,
+              "birth": 44,
+              "death": 47
+            },
+            {
+              "node": 51,
+              "operator": "gaussian_hmm_em",
+              "extent": 288,
+              "birth": 51,
+              "death": 116
+            }
+          ]
+        },
+        "6": {
+          "capacity": 12,
+          "nodes": [
+            {
+              "node": 42,
+              "operator": "divide",
+              "extent": 12,
+              "birth": 42,
+              "death": 51
+            },
+            {
+              "node": 61,
+              "operator": "sum_axis",
+              "extent": 12,
+              "birth": 61,
+              "death": 62
+            },
+            {
+              "node": 66,
+              "operator": "max_axis",
+              "extent": 12,
+              "birth": 66,
+              "death": 67
+            }
+          ]
+        },
+        "7": {
+          "capacity": 1500000,
+          "nodes": [
+            {
+              "node": 47,
+              "operator": "divide",
+              "extent": 144,
+              "birth": 47,
+              "death": 51
+            },
+            {
+              "node": 54,
+              "operator": "gaussian_log_density",
+              "extent": 1500000,
+              "birth": 54,
+              "death": 62
+            },
+            {
+              "node": 64,
+              "operator": "one_hot",
+              "extent": 1500000,
+              "birth": 64,
+              "death": 70
+            },
+            {
+              "node": 110,
+              "operator": "max_axis",
+              "extent": 125000,
+              "birth": 110,
+              "death": 111
+            },
+            {
+              "node": 112,
+              "operator": "take_axis",
+              "extent": 1500000,
+              "birth": 112,
+              "death": 113
+            }
+          ]
+        }
+      }
+    },
+    {
+      "graph": "hmm12-dense_views",
+      "method": "original",
+      "numeric_arena_bytes": 60003520,
+      "mask_arena_bytes": 4,
+      "integer_arena_bytes": 5000096,
+      "numeric_slots": {
+        "0": {
+          "capacity": 1500000,
+          "nodes": [
+            {
+              "node": 5,
+              "operator": "mean_axis",
+              "extent": 4,
+              "birth": 5,
+              "death": 18
+            },
+            {
+              "node": 20,
+              "operator": "divide",
+              "extent": 1500000,
+              "birth": 20,
+              "death": 53
+            },
+            {
+              "node": 56,
+              "operator": "hmm_filter",
+              "extent": 12,
+              "birth": 56,
+              "death": 59
+            },
+            {
+              "node": 60,
+              "operator": "hmm_filter",
+              "extent": 1500000,
+              "birth": 60,
+              "death": 111
+            }
+          ]
+        },
+        "1": {
+          "capacity": 144,
+          "nodes": [
+            {
+              "node": 7,
+              "operator": "subtract",
+              "extent": 4,
+              "birth": 7,
+              "death": 14
+            },
+            {
+              "node": 18,
+              "operator": "subtract",
+              "extent": 4,
+              "birth": 18,
+              "death": 20
+            },
+            {
+              "node": 25,
+              "operator": "take_axis",
+              "extent": 48,
+              "birth": 25,
+              "death": 28
+            },
+            {
+              "node": 29,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 29,
+              "death": 31
+            },
+            {
+              "node": 35,
+              "operator": "gaussian_mixture_em",
+              "extent": 144,
+              "birth": 35,
+              "death": 114
+            }
+          ]
+        },
+        "2": {
+          "capacity": 4,
+          "nodes": [
+            {
+              "node": 8,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 8,
+              "death": 9
+            },
+            {
+              "node": 12,
+              "operator": "where",
+              "extent": 4,
+              "birth": 12,
+              "death": 20
+            }
+          ]
+        },
+        "3": {
+          "capacity": 4,
+          "nodes": [
+            {
+              "node": 9,
+              "operator": "sqrt",
+              "extent": 4,
+              "birth": 9,
+              "death": 12
+            }
+          ]
+        },
+        "4": {
+          "capacity": 288,
+          "nodes": [
+            {
+              "node": 31,
+              "operator": "maximum",
+              "extent": 4,
+              "birth": 31,
+              "death": 35
+            },
+            {
+              "node": 38,
+              "operator": "maximum",
+              "extent": 12,
+              "birth": 38,
+              "death": 40
+            },
+            {
+              "node": 42,
+              "operator": "sum_axis",
+              "extent": 12,
+              "birth": 42,
+              "death": 45
+            },
+            {
+              "node": 49,
+              "operator": "gaussian_hmm_em",
+              "extent": 288,
+              "birth": 49,
+              "death": 115
+            }
+          ]
+        },
+        "5": {
+          "capacity": 1500000,
+          "nodes": [
+            {
+              "node": 40,
+              "operator": "divide",
+              "extent": 12,
+              "birth": 40,
+              "death": 49
+            },
+            {
+              "node": 52,
+              "operator": "gaussian_log_density",
+              "extent": 1500000,
+              "birth": 52,
+              "death": 60
+            },
+            {
+              "node": 62,
+              "operator": "one_hot",
+              "extent": 1500000,
+              "birth": 62,
+              "death": 68
+            }
+          ]
+        },
+        "6": {
+          "capacity": 4500000,
+          "nodes": [
+            {
+              "node": 45,
+              "operator": "divide",
+              "extent": 144,
+              "birth": 45,
+              "death": 49
+            },
+            {
+              "node": 53,
+              "operator": "gaussian_log_density",
+              "extent": 4500000,
+              "birth": 53,
+              "death": 56
+            },
+            {
+              "node": 59,
+              "operator": "sum_axis",
+              "extent": 12,
+              "birth": 59,
+              "death": 60
+            },
+            {
+              "node": 64,
+              "operator": "max_axis",
+              "extent": 12,
+              "birth": 64,
+              "death": 65
+            },
+            {
+              "node": 68,
+              "operator": "take_axis",
+              "extent": 1500000,
+              "birth": 68,
+              "death": 70
+            },
+            {
+              "node": 109,
+              "operator": "max_axis",
+              "extent": 125000,
+              "birth": 109,
+              "death": 110
+            },
+            {
+              "node": 111,
+              "operator": "take_axis",
+              "extent": 1500000,
+              "birth": 111,
+              "death": 112
+            }
+          ]
+        }
+      }
+    },
+    {
+      "graph": "hmm12-dense_views",
+      "method": "size_aware",
+      "numeric_arena_bytes": 60003520,
+      "mask_arena_bytes": 4,
+      "integer_arena_bytes": 5000096,
+      "numeric_slots": {
+        "0": {
+          "capacity": 1500000,
+          "nodes": [
+            {
+              "node": 5,
+              "operator": "mean_axis",
+              "extent": 4,
+              "birth": 5,
+              "death": 18
+            },
+            {
+              "node": 20,
+              "operator": "divide",
+              "extent": 1500000,
+              "birth": 20,
+              "death": 53
+            },
+            {
+              "node": 56,
+              "operator": "hmm_filter",
+              "extent": 12,
+              "birth": 56,
+              "death": 59
+            },
+            {
+              "node": 60,
+              "operator": "hmm_filter",
+              "extent": 1500000,
+              "birth": 60,
+              "death": 111
+            }
+          ]
+        },
+        "1": {
+          "capacity": 144,
+          "nodes": [
+            {
+              "node": 7,
+              "operator": "subtract",
+              "extent": 4,
+              "birth": 7,
+              "death": 14
+            },
+            {
+              "node": 18,
+              "operator": "subtract",
+              "extent": 4,
+              "birth": 18,
+              "death": 20
+            },
+            {
+              "node": 25,
+              "operator": "take_axis",
+              "extent": 48,
+              "birth": 25,
+              "death": 28
+            },
+            {
+              "node": 29,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 29,
+              "death": 31
+            },
+            {
+              "node": 35,
+              "operator": "gaussian_mixture_em",
+              "extent": 144,
+              "birth": 35,
+              "death": 114
+            }
+          ]
+        },
+        "2": {
+          "capacity": 4,
+          "nodes": [
+            {
+              "node": 8,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 8,
+              "death": 9
+            },
+            {
+              "node": 12,
+              "operator": "where",
+              "extent": 4,
+              "birth": 12,
+              "death": 20
+            }
+          ]
+        },
+        "3": {
+          "capacity": 4,
+          "nodes": [
+            {
+              "node": 9,
+              "operator": "sqrt",
+              "extent": 4,
+              "birth": 9,
+              "death": 12
+            }
+          ]
+        },
+        "4": {
+          "capacity": 288,
+          "nodes": [
+            {
+              "node": 31,
+              "operator": "maximum",
+              "extent": 4,
+              "birth": 31,
+              "death": 35
+            },
+            {
+              "node": 38,
+              "operator": "maximum",
+              "extent": 12,
+              "birth": 38,
+              "death": 40
+            },
+            {
+              "node": 42,
+              "operator": "sum_axis",
+              "extent": 12,
+              "birth": 42,
+              "death": 45
+            },
+            {
+              "node": 49,
+              "operator": "gaussian_hmm_em",
+              "extent": 288,
+              "birth": 49,
+              "death": 115
+            }
+          ]
+        },
+        "5": {
+          "capacity": 4500000,
+          "nodes": [
+            {
+              "node": 40,
+              "operator": "divide",
+              "extent": 12,
+              "birth": 40,
+              "death": 49
+            },
+            {
+              "node": 53,
+              "operator": "gaussian_log_density",
+              "extent": 4500000,
+              "birth": 53,
+              "death": 56
+            },
+            {
+              "node": 59,
+              "operator": "sum_axis",
+              "extent": 12,
+              "birth": 59,
+              "death": 60
+            },
+            {
+              "node": 64,
+              "operator": "max_axis",
+              "extent": 12,
+              "birth": 64,
+              "death": 65
+            },
+            {
+              "node": 68,
+              "operator": "take_axis",
+              "extent": 1500000,
+              "birth": 68,
+              "death": 70
+            }
+          ]
+        },
+        "6": {
+          "capacity": 1500000,
+          "nodes": [
+            {
+              "node": 45,
+              "operator": "divide",
+              "extent": 144,
+              "birth": 45,
+              "death": 49
+            },
+            {
+              "node": 52,
+              "operator": "gaussian_log_density",
+              "extent": 1500000,
+              "birth": 52,
+              "death": 60
+            },
+            {
+              "node": 62,
+              "operator": "one_hot",
+              "extent": 1500000,
+              "birth": 62,
+              "death": 68
+            },
+            {
+              "node": 109,
+              "operator": "max_axis",
+              "extent": 125000,
+              "birth": 109,
+              "death": 110
+            },
+            {
+              "node": 111,
+              "operator": "take_axis",
+              "extent": 1500000,
+              "birth": 111,
+              "death": 112
+            }
+          ]
+        }
+      }
+    },
+    {
+      "graph": "hmm12-shared_standardized",
+      "method": "original",
+      "numeric_arena_bytes": 72003456,
+      "mask_arena_bytes": 4,
+      "integer_arena_bytes": 5000096,
+      "numeric_slots": {
+        "0": {
+          "capacity": 1500000,
+          "nodes": [
+            {
+              "node": 6,
+              "operator": "take_axis",
+              "extent": 1500000,
+              "birth": 6,
+              "death": 10
+            },
+            {
+              "node": 11,
+              "operator": "sqrt",
+              "extent": 4,
+              "birth": 11,
+              "death": 14
+            }
+          ]
+        },
+        "1": {
+          "capacity": 4500000,
+          "nodes": [
+            {
+              "node": 7,
+              "operator": "mean_axis",
+              "extent": 4,
+              "birth": 7,
+              "death": 9
+            },
+            {
+              "node": 10,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 10,
+              "death": 11
+            },
+            {
+              "node": 14,
+              "operator": "where",
+              "extent": 4,
+              "birth": 14,
+              "death": 16
+            },
+            {
+              "node": 19,
+              "operator": "take_axis",
+              "extent": 500000,
+              "birth": 19,
+              "death": 51
+            },
+            {
+              "node": 52,
+              "operator": "gaussian_log_density",
+              "extent": 4500000,
+              "birth": 52,
+              "death": 55
+            },
+            {
+              "node": 58,
+              "operator": "sum_axis",
+              "extent": 12,
+              "birth": 58,
+              "death": 59
+            },
+            {
+              "node": 61,
+              "operator": "one_hot",
+              "extent": 1500000,
+              "birth": 61,
+              "death": 67
+            }
+          ]
+        },
+        "2": {
+          "capacity": 144,
+          "nodes": [
+            {
+              "node": 9,
+              "operator": "subtract",
+              "extent": 4,
+              "birth": 9,
+              "death": 16
+            },
+            {
+              "node": 25,
+              "operator": "take_axis",
+              "extent": 48,
+              "birth": 25,
+              "death": 27
+            },
+            {
+              "node": 28,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 28,
+              "death": 30
+            },
+            {
+              "node": 34,
+              "operator": "gaussian_mixture_em",
+              "extent": 144,
+              "birth": 34,
+              "death": 112
+            }
+          ]
+        },
+        "4": {
+          "capacity": 288,
+          "nodes": [
+            {
+              "node": 30,
+              "operator": "maximum",
+              "extent": 4,
+              "birth": 30,
+              "death": 34
+            },
+            {
+              "node": 37,
+              "operator": "maximum",
+              "extent": 12,
+              "birth": 37,
+              "death": 39
+            },
+            {
+              "node": 41,
+              "operator": "sum_axis",
+              "extent": 12,
+              "birth": 41,
+              "death": 44
+            },
+            {
+              "node": 48,
+              "operator": "gaussian_hmm_em",
+              "extent": 288,
+              "birth": 48,
+              "death": 113
+            }
+          ]
+        },
+        "5": {
+          "capacity": 1500000,
+          "nodes": [
+            {
+              "node": 39,
+              "operator": "divide",
+              "extent": 12,
+              "birth": 39,
+              "death": 48
+            },
+            {
+              "node": 51,
+              "operator": "gaussian_log_density",
+              "extent": 1500000,
+              "birth": 51,
+              "death": 59
+            },
+            {
+              "node": 63,
+              "operator": "max_axis",
+              "extent": 12,
+              "birth": 63,
+              "death": 64
+            },
+            {
+              "node": 67,
+              "operator": "take_axis",
+              "extent": 1500000,
+              "birth": 67,
+              "death": 68
+            },
+            {
+              "node": 107,
+              "operator": "max_axis",
+              "extent": 125000,
+              "birth": 107,
+              "death": 108
+            },
+            {
+              "node": 109,
+              "operator": "take_axis",
+              "extent": 1500000,
+              "birth": 109,
+              "death": 110
+            }
+          ]
+        },
+        "6": {
+          "capacity": 1500000,
+          "nodes": [
+            {
+              "node": 44,
+              "operator": "divide",
+              "extent": 144,
+              "birth": 44,
+              "death": 48
+            },
+            {
+              "node": 55,
+              "operator": "hmm_filter",
+              "extent": 12,
+              "birth": 55,
+              "death": 58
+            },
+            {
+              "node": 59,
+              "operator": "hmm_filter",
+              "extent": 1500000,
+              "birth": 59,
+              "death": 109
+            }
+          ]
+        }
+      }
+    },
+    {
+      "graph": "hmm12-shared_standardized",
+      "method": "size_aware",
+      "numeric_arena_bytes": 72003456,
+      "mask_arena_bytes": 4,
+      "integer_arena_bytes": 5000096,
+      "numeric_slots": {
+        "0": {
+          "capacity": 1500000,
+          "nodes": [
+            {
+              "node": 6,
+              "operator": "take_axis",
+              "extent": 1500000,
+              "birth": 6,
+              "death": 10
+            },
+            {
+              "node": 11,
+              "operator": "sqrt",
+              "extent": 4,
+              "birth": 11,
+              "death": 14
+            }
+          ]
+        },
+        "1": {
+          "capacity": 144,
+          "nodes": [
+            {
+              "node": 7,
+              "operator": "mean_axis",
+              "extent": 4,
+              "birth": 7,
+              "death": 9
+            },
+            {
+              "node": 10,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 10,
+              "death": 11
+            },
+            {
+              "node": 14,
+              "operator": "where",
+              "extent": 4,
+              "birth": 14,
+              "death": 16
+            },
+            {
+              "node": 25,
+              "operator": "take_axis",
+              "extent": 48,
+              "birth": 25,
+              "death": 27
+            },
+            {
+              "node": 28,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 28,
+              "death": 30
+            },
+            {
+              "node": 34,
+              "operator": "gaussian_mixture_em",
+              "extent": 144,
+              "birth": 34,
+              "death": 112
+            }
+          ]
+        },
+        "2": {
+          "capacity": 4500000,
+          "nodes": [
+            {
+              "node": 9,
+              "operator": "subtract",
+              "extent": 4,
+              "birth": 9,
+              "death": 16
+            },
+            {
+              "node": 19,
+              "operator": "take_axis",
+              "extent": 500000,
+              "birth": 19,
+              "death": 51
+            },
+            {
+              "node": 52,
+              "operator": "gaussian_log_density",
+              "extent": 4500000,
+              "birth": 52,
+              "death": 55
+            },
+            {
+              "node": 58,
+              "operator": "sum_axis",
+              "extent": 12,
+              "birth": 58,
+              "death": 59
+            },
+            {
+              "node": 63,
+              "operator": "max_axis",
+              "extent": 12,
+              "birth": 63,
+              "death": 64
+            },
+            {
+              "node": 67,
+              "operator": "take_axis",
+              "extent": 1500000,
+              "birth": 67,
+              "death": 68
+            }
+          ]
+        },
+        "4": {
+          "capacity": 288,
+          "nodes": [
+            {
+              "node": 30,
+              "operator": "maximum",
+              "extent": 4,
+              "birth": 30,
+              "death": 34
+            },
+            {
+              "node": 37,
+              "operator": "maximum",
+              "extent": 12,
+              "birth": 37,
+              "death": 39
+            },
+            {
+              "node": 41,
+              "operator": "sum_axis",
+              "extent": 12,
+              "birth": 41,
+              "death": 44
+            },
+            {
+              "node": 48,
+              "operator": "gaussian_hmm_em",
+              "extent": 288,
+              "birth": 48,
+              "death": 113
+            }
+          ]
+        },
+        "5": {
+          "capacity": 1500000,
+          "nodes": [
+            {
+              "node": 39,
+              "operator": "divide",
+              "extent": 12,
+              "birth": 39,
+              "death": 48
+            },
+            {
+              "node": 55,
+              "operator": "hmm_filter",
+              "extent": 12,
+              "birth": 55,
+              "death": 58
+            },
+            {
+              "node": 59,
+              "operator": "hmm_filter",
+              "extent": 1500000,
+              "birth": 59,
+              "death": 109
+            }
+          ]
+        },
+        "6": {
+          "capacity": 1500000,
+          "nodes": [
+            {
+              "node": 44,
+              "operator": "divide",
+              "extent": 144,
+              "birth": 44,
+              "death": 48
+            },
+            {
+              "node": 51,
+              "operator": "gaussian_log_density",
+              "extent": 1500000,
+              "birth": 51,
+              "death": 59
+            },
+            {
+              "node": 61,
+              "operator": "one_hot",
+              "extent": 1500000,
+              "birth": 61,
+              "death": 67
+            },
+            {
+              "node": 107,
+              "operator": "max_axis",
+              "extent": 125000,
+              "birth": 107,
+              "death": 108
+            },
+            {
+              "node": 109,
+              "operator": "take_axis",
+              "extent": 1500000,
+              "birth": 109,
+              "death": 110
+            }
+          ]
+        }
+      }
+    },
+    {
+      "graph": "hmm3-original",
+      "method": "original",
+      "numeric_arena_bytes": 18000424,
+      "mask_arena_bytes": 4,
+      "integer_arena_bytes": 2500024,
+      "numeric_slots": {
+        "0": {
+          "capacity": 750000,
+          "nodes": [
+            {
+              "node": 6,
+              "operator": "take_axis",
+              "extent": 750000,
+              "birth": 6,
+              "death": 22
+            },
+            {
+              "node": 23,
+              "operator": "divide",
+              "extent": 750000,
+              "birth": 23,
+              "death": 56
+            },
+            {
+              "node": 59,
+              "operator": "hmm_filter",
+              "extent": 562500,
+              "birth": 59,
+              "death": 62
+            },
+            {
+              "node": 63,
+              "operator": "hmm_filter",
+              "extent": 187500,
+              "birth": 63,
+              "death": 87
+            }
+          ]
+        },
+        "1": {
+          "capacity": 36,
+          "nodes": [
+            {
+              "node": 7,
+              "operator": "mean_axis",
+              "extent": 4,
+              "birth": 7,
+              "death": 21
+            },
+            {
+              "node": 28,
+              "operator": "take_axis",
+              "extent": 12,
+              "birth": 28,
+              "death": 30
+            },
+            {
+              "node": 31,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 31,
+              "death": 33
+            },
+            {
+              "node": 37,
+              "operator": "gaussian_mixture_em",
+              "extent": 36,
+              "birth": 37,
+              "death": 90
+            }
+          ]
+        },
+        "2": {
+          "capacity": 562500,
+          "nodes": [
+            {
+              "node": 9,
+              "operator": "subtract",
+              "extent": 4,
+              "birth": 9,
+              "death": 16
+            },
+            {
+              "node": 19,
+              "operator": "take_axis",
+              "extent": 250000,
+              "birth": 19,
+              "death": 55
+            },
+            {
+              "node": 56,
+              "operator": "gaussian_log_density",
+              "extent": 562500,
+              "birth": 56,
+              "death": 59
+            },
+            {
+              "node": 62,
+              "operator": "sum_axis",
+              "extent": 3,
+              "birth": 62,
+              "death": 63
+            },
+            {
+              "node": 65,
+              "operator": "one_hot",
+              "extent": 187500,
+              "birth": 65,
+              "death": 71
+            }
+          ]
+        },
+        "3": {
+          "capacity": 4,
+          "nodes": [
+            {
+              "node": 10,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 10,
+              "death": 11
+            },
+            {
+              "node": 14,
+              "operator": "where",
+              "extent": 4,
+              "birth": 14,
+              "death": 23
+            }
+          ]
+        },
+        "4": {
+          "capacity": 4,
+          "nodes": [
+            {
+              "node": 11,
+              "operator": "sqrt",
+              "extent": 4,
+              "birth": 11,
+              "death": 14
+            }
+          ]
+        },
+        "5": {
+          "capacity": 750000,
+          "nodes": [
+            {
+              "node": 21,
+              "operator": "subtract",
+              "extent": 750000,
+              "birth": 21,
+              "death": 23
+            },
+            {
+              "node": 33,
+              "operator": "maximum",
+              "extent": 4,
+              "birth": 33,
+              "death": 37
+            },
+            {
+              "node": 40,
+              "operator": "maximum",
+              "extent": 3,
+              "birth": 40,
+              "death": 42
+            },
+            {
+              "node": 44,
+              "operator": "sum_axis",
+              "extent": 3,
+              "birth": 44,
+              "death": 47
+            },
+            {
+              "node": 52,
+              "operator": "gaussian_hmm_em",
+              "extent": 45,
+              "birth": 52,
+              "death": 91
+            }
+          ]
+        },
+        "6": {
+          "capacity": 187500,
+          "nodes": [
+            {
+              "node": 42,
+              "operator": "divide",
+              "extent": 3,
+              "birth": 42,
+              "death": 52
+            },
+            {
+              "node": 55,
+              "operator": "gaussian_log_density",
+              "extent": 187500,
+              "birth": 55,
+              "death": 63
+            },
+            {
+              "node": 67,
+              "operator": "max_axis",
+              "extent": 3,
+              "birth": 67,
+              "death": 68
+            },
+            {
+              "node": 71,
+              "operator": "take_axis",
+              "extent": 187500,
+              "birth": 71,
+              "death": 72
+            },
+            {
+              "node": 85,
+              "operator": "max_axis",
+              "extent": 62500,
+              "birth": 85,
+              "death": 86
+            },
+            {
+              "node": 87,
+              "operator": "take_axis",
+              "extent": 187500,
+              "birth": 87,
+              "death": 88
+            }
+          ]
+        },
+        "7": {
+          "capacity": 9,
+          "nodes": [
+            {
+              "node": 47,
+              "operator": "divide",
+              "extent": 9,
+              "birth": 47,
+              "death": 52
+            }
+          ]
+        }
+      }
+    },
+    {
+      "graph": "hmm3-original",
+      "method": "size_aware",
+      "numeric_arena_bytes": 18000376,
+      "mask_arena_bytes": 4,
+      "integer_arena_bytes": 2500024,
+      "numeric_slots": {
+        "0": {
+          "capacity": 750000,
+          "nodes": [
+            {
+              "node": 6,
+              "operator": "take_axis",
+              "extent": 750000,
+              "birth": 6,
+              "death": 22
+            },
+            {
+              "node": 23,
+              "operator": "divide",
+              "extent": 750000,
+              "birth": 23,
+              "death": 56
+            },
+            {
+              "node": 59,
+              "operator": "hmm_filter",
+              "extent": 562500,
+              "birth": 59,
+              "death": 62
+            },
+            {
+              "node": 63,
+              "operator": "hmm_filter",
+              "extent": 187500,
+              "birth": 63,
+              "death": 87
+            }
+          ]
+        },
+        "1": {
+          "capacity": 4,
+          "nodes": [
+            {
+              "node": 7,
+              "operator": "mean_axis",
+              "extent": 4,
+              "birth": 7,
+              "death": 21
+            }
+          ]
+        },
+        "2": {
+          "capacity": 562500,
+          "nodes": [
+            {
+              "node": 9,
+              "operator": "subtract",
+              "extent": 4,
+              "birth": 9,
+              "death": 16
+            },
+            {
+              "node": 19,
+              "operator": "take_axis",
+              "extent": 250000,
+              "birth": 19,
+              "death": 55
+            },
+            {
+              "node": 56,
+              "operator": "gaussian_log_density",
+              "extent": 562500,
+              "birth": 56,
+              "death": 59
+            },
+            {
+              "node": 71,
+              "operator": "take_axis",
+              "extent": 187500,
+              "birth": 71,
+              "death": 72
+            },
+            {
+              "node": 85,
+              "operator": "max_axis",
+              "extent": 62500,
+              "birth": 85,
+              "death": 86
+            },
+            {
+              "node": 87,
+              "operator": "take_axis",
+              "extent": 187500,
+              "birth": 87,
+              "death": 88
+            }
+          ]
+        },
+        "3": {
+          "capacity": 36,
+          "nodes": [
+            {
+              "node": 10,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 10,
+              "death": 11
+            },
+            {
+              "node": 14,
+              "operator": "where",
+              "extent": 4,
+              "birth": 14,
+              "death": 23
+            },
+            {
+              "node": 31,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 31,
+              "death": 33
+            },
+            {
+              "node": 37,
+              "operator": "gaussian_mixture_em",
+              "extent": 36,
+              "birth": 37,
+              "death": 90
+            }
+          ]
+        },
+        "4": {
+          "capacity": 4,
+          "nodes": [
+            {
+              "node": 11,
+              "operator": "sqrt",
+              "extent": 4,
+              "birth": 11,
+              "death": 14
+            }
+          ]
+        },
+        "5": {
+          "capacity": 750000,
+          "nodes": [
+            {
+              "node": 21,
+              "operator": "subtract",
+              "extent": 750000,
+              "birth": 21,
+              "death": 23
+            },
+            {
+              "node": 28,
+              "operator": "take_axis",
+              "extent": 12,
+              "birth": 28,
+              "death": 30
+            },
+            {
+              "node": 33,
+              "operator": "maximum",
+              "extent": 4,
+              "birth": 33,
+              "death": 37
+            },
+            {
+              "node": 40,
+              "operator": "maximum",
+              "extent": 3,
+              "birth": 40,
+              "death": 42
+            },
+            {
+              "node": 44,
+              "operator": "sum_axis",
+              "extent": 3,
+              "birth": 44,
+              "death": 47
+            },
+            {
+              "node": 52,
+              "operator": "gaussian_hmm_em",
+              "extent": 45,
+              "birth": 52,
+              "death": 91
+            }
+          ]
+        },
+        "6": {
+          "capacity": 3,
+          "nodes": [
+            {
+              "node": 42,
+              "operator": "divide",
+              "extent": 3,
+              "birth": 42,
+              "death": 52
+            },
+            {
+              "node": 62,
+              "operator": "sum_axis",
+              "extent": 3,
+              "birth": 62,
+              "death": 63
+            },
+            {
+              "node": 67,
+              "operator": "max_axis",
+              "extent": 3,
+              "birth": 67,
+              "death": 68
+            }
+          ]
+        },
+        "7": {
+          "capacity": 187500,
+          "nodes": [
+            {
+              "node": 47,
+              "operator": "divide",
+              "extent": 9,
+              "birth": 47,
+              "death": 52
+            },
+            {
+              "node": 55,
+              "operator": "gaussian_log_density",
+              "extent": 187500,
+              "birth": 55,
+              "death": 63
+            },
+            {
+              "node": 65,
+              "operator": "one_hot",
+              "extent": 187500,
+              "birth": 65,
+              "death": 71
+            }
+          ]
+        }
+      }
+    },
+    {
+      "graph": "hmm3-dense_views",
+      "method": "original",
+      "numeric_arena_bytes": 12000712,
+      "mask_arena_bytes": 4,
+      "integer_arena_bytes": 2500024,
+      "numeric_slots": {
+        "0": {
+          "capacity": 750000,
+          "nodes": [
+            {
+              "node": 5,
+              "operator": "mean_axis",
+              "extent": 4,
+              "birth": 5,
+              "death": 18
+            },
+            {
+              "node": 20,
+              "operator": "divide",
+              "extent": 750000,
+              "birth": 20,
+              "death": 54
+            },
+            {
+              "node": 57,
+              "operator": "hmm_filter",
+              "extent": 562500,
+              "birth": 57,
+              "death": 60
+            },
+            {
+              "node": 61,
+              "operator": "hmm_filter",
+              "extent": 187500,
+              "birth": 61,
+              "death": 86
+            }
+          ]
+        },
+        "1": {
+          "capacity": 36,
+          "nodes": [
+            {
+              "node": 7,
+              "operator": "subtract",
+              "extent": 4,
+              "birth": 7,
+              "death": 14
+            },
+            {
+              "node": 18,
+              "operator": "subtract",
+              "extent": 4,
+              "birth": 18,
+              "death": 20
+            },
+            {
+              "node": 25,
+              "operator": "take_axis",
+              "extent": 12,
+              "birth": 25,
+              "death": 28
+            },
+            {
+              "node": 29,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 29,
+              "death": 31
+            },
+            {
+              "node": 35,
+              "operator": "gaussian_mixture_em",
+              "extent": 36,
+              "birth": 35,
+              "death": 89
+            }
+          ]
+        },
+        "2": {
+          "capacity": 4,
+          "nodes": [
+            {
+              "node": 8,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 8,
+              "death": 9
+            },
+            {
+              "node": 12,
+              "operator": "where",
+              "extent": 4,
+              "birth": 12,
+              "death": 20
+            }
+          ]
+        },
+        "3": {
+          "capacity": 4,
+          "nodes": [
+            {
+              "node": 9,
+              "operator": "sqrt",
+              "extent": 4,
+              "birth": 9,
+              "death": 12
+            }
+          ]
+        },
+        "4": {
+          "capacity": 45,
+          "nodes": [
+            {
+              "node": 31,
+              "operator": "maximum",
+              "extent": 4,
+              "birth": 31,
+              "death": 35
+            },
+            {
+              "node": 38,
+              "operator": "maximum",
+              "extent": 3,
+              "birth": 38,
+              "death": 40
+            },
+            {
+              "node": 42,
+              "operator": "sum_axis",
+              "extent": 3,
+              "birth": 42,
+              "death": 45
+            },
+            {
+              "node": 50,
+              "operator": "gaussian_hmm_em",
+              "extent": 45,
+              "birth": 50,
+              "death": 90
+            }
+          ]
+        },
+        "5": {
+          "capacity": 187500,
+          "nodes": [
+            {
+              "node": 40,
+              "operator": "divide",
+              "extent": 3,
+              "birth": 40,
+              "death": 50
+            },
+            {
+              "node": 53,
+              "operator": "gaussian_log_density",
+              "extent": 187500,
+              "birth": 53,
+              "death": 61
+            },
+            {
+              "node": 63,
+              "operator": "one_hot",
+              "extent": 187500,
+              "birth": 63,
+              "death": 69
+            }
+          ]
+        },
+        "6": {
+          "capacity": 562500,
+          "nodes": [
+            {
+              "node": 45,
+              "operator": "divide",
+              "extent": 9,
+              "birth": 45,
+              "death": 50
+            },
+            {
+              "node": 54,
+              "operator": "gaussian_log_density",
+              "extent": 562500,
+              "birth": 54,
+              "death": 57
+            },
+            {
+              "node": 60,
+              "operator": "sum_axis",
+              "extent": 3,
+              "birth": 60,
+              "death": 61
+            },
+            {
+              "node": 65,
+              "operator": "max_axis",
+              "extent": 3,
+              "birth": 65,
+              "death": 66
+            },
+            {
+              "node": 69,
+              "operator": "take_axis",
+              "extent": 187500,
+              "birth": 69,
+              "death": 71
+            },
+            {
+              "node": 84,
+              "operator": "max_axis",
+              "extent": 62500,
+              "birth": 84,
+              "death": 85
+            },
+            {
+              "node": 86,
+              "operator": "take_axis",
+              "extent": 187500,
+              "birth": 86,
+              "death": 87
+            }
+          ]
+        }
+      }
+    },
+    {
+      "graph": "hmm3-dense_views",
+      "method": "size_aware",
+      "numeric_arena_bytes": 12000712,
+      "mask_arena_bytes": 4,
+      "integer_arena_bytes": 2500024,
+      "numeric_slots": {
+        "0": {
+          "capacity": 750000,
+          "nodes": [
+            {
+              "node": 5,
+              "operator": "mean_axis",
+              "extent": 4,
+              "birth": 5,
+              "death": 18
+            },
+            {
+              "node": 20,
+              "operator": "divide",
+              "extent": 750000,
+              "birth": 20,
+              "death": 54
+            },
+            {
+              "node": 57,
+              "operator": "hmm_filter",
+              "extent": 562500,
+              "birth": 57,
+              "death": 60
+            },
+            {
+              "node": 61,
+              "operator": "hmm_filter",
+              "extent": 187500,
+              "birth": 61,
+              "death": 86
+            }
+          ]
+        },
+        "1": {
+          "capacity": 36,
+          "nodes": [
+            {
+              "node": 7,
+              "operator": "subtract",
+              "extent": 4,
+              "birth": 7,
+              "death": 14
+            },
+            {
+              "node": 18,
+              "operator": "subtract",
+              "extent": 4,
+              "birth": 18,
+              "death": 20
+            },
+            {
+              "node": 25,
+              "operator": "take_axis",
+              "extent": 12,
+              "birth": 25,
+              "death": 28
+            },
+            {
+              "node": 29,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 29,
+              "death": 31
+            },
+            {
+              "node": 35,
+              "operator": "gaussian_mixture_em",
+              "extent": 36,
+              "birth": 35,
+              "death": 89
+            }
+          ]
+        },
+        "2": {
+          "capacity": 4,
+          "nodes": [
+            {
+              "node": 8,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 8,
+              "death": 9
+            },
+            {
+              "node": 12,
+              "operator": "where",
+              "extent": 4,
+              "birth": 12,
+              "death": 20
+            }
+          ]
+        },
+        "3": {
+          "capacity": 4,
+          "nodes": [
+            {
+              "node": 9,
+              "operator": "sqrt",
+              "extent": 4,
+              "birth": 9,
+              "death": 12
+            }
+          ]
+        },
+        "4": {
+          "capacity": 45,
+          "nodes": [
+            {
+              "node": 31,
+              "operator": "maximum",
+              "extent": 4,
+              "birth": 31,
+              "death": 35
+            },
+            {
+              "node": 38,
+              "operator": "maximum",
+              "extent": 3,
+              "birth": 38,
+              "death": 40
+            },
+            {
+              "node": 42,
+              "operator": "sum_axis",
+              "extent": 3,
+              "birth": 42,
+              "death": 45
+            },
+            {
+              "node": 50,
+              "operator": "gaussian_hmm_em",
+              "extent": 45,
+              "birth": 50,
+              "death": 90
+            }
+          ]
+        },
+        "5": {
+          "capacity": 562500,
+          "nodes": [
+            {
+              "node": 40,
+              "operator": "divide",
+              "extent": 3,
+              "birth": 40,
+              "death": 50
+            },
+            {
+              "node": 54,
+              "operator": "gaussian_log_density",
+              "extent": 562500,
+              "birth": 54,
+              "death": 57
+            },
+            {
+              "node": 60,
+              "operator": "sum_axis",
+              "extent": 3,
+              "birth": 60,
+              "death": 61
+            },
+            {
+              "node": 65,
+              "operator": "max_axis",
+              "extent": 3,
+              "birth": 65,
+              "death": 66
+            },
+            {
+              "node": 69,
+              "operator": "take_axis",
+              "extent": 187500,
+              "birth": 69,
+              "death": 71
+            }
+          ]
+        },
+        "6": {
+          "capacity": 187500,
+          "nodes": [
+            {
+              "node": 45,
+              "operator": "divide",
+              "extent": 9,
+              "birth": 45,
+              "death": 50
+            },
+            {
+              "node": 53,
+              "operator": "gaussian_log_density",
+              "extent": 187500,
+              "birth": 53,
+              "death": 61
+            },
+            {
+              "node": 63,
+              "operator": "one_hot",
+              "extent": 187500,
+              "birth": 63,
+              "death": 69
+            },
+            {
+              "node": 84,
+              "operator": "max_axis",
+              "extent": 62500,
+              "birth": 84,
+              "death": 85
+            },
+            {
+              "node": 86,
+              "operator": "take_axis",
+              "extent": 187500,
+              "birth": 86,
+              "death": 87
+            }
+          ]
+        }
+      }
+    },
+    {
+      "graph": "hmm3-shared_standardized",
+      "method": "original",
+      "numeric_arena_bytes": 16500648,
+      "mask_arena_bytes": 4,
+      "integer_arena_bytes": 2500024,
+      "numeric_slots": {
+        "0": {
+          "capacity": 750000,
+          "nodes": [
+            {
+              "node": 6,
+              "operator": "take_axis",
+              "extent": 750000,
+              "birth": 6,
+              "death": 10
+            },
+            {
+              "node": 11,
+              "operator": "sqrt",
+              "extent": 4,
+              "birth": 11,
+              "death": 14
+            }
+          ]
+        },
+        "1": {
+          "capacity": 562500,
+          "nodes": [
+            {
+              "node": 7,
+              "operator": "mean_axis",
+              "extent": 4,
+              "birth": 7,
+              "death": 9
+            },
+            {
+              "node": 10,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 10,
+              "death": 11
+            },
+            {
+              "node": 14,
+              "operator": "where",
+              "extent": 4,
+              "birth": 14,
+              "death": 16
+            },
+            {
+              "node": 19,
+              "operator": "take_axis",
+              "extent": 250000,
+              "birth": 19,
+              "death": 52
+            },
+            {
+              "node": 53,
+              "operator": "gaussian_log_density",
+              "extent": 562500,
+              "birth": 53,
+              "death": 56
+            },
+            {
+              "node": 59,
+              "operator": "sum_axis",
+              "extent": 3,
+              "birth": 59,
+              "death": 60
+            },
+            {
+              "node": 62,
+              "operator": "one_hot",
+              "extent": 187500,
+              "birth": 62,
+              "death": 68
+            }
+          ]
+        },
+        "2": {
+          "capacity": 36,
+          "nodes": [
+            {
+              "node": 9,
+              "operator": "subtract",
+              "extent": 4,
+              "birth": 9,
+              "death": 16
+            },
+            {
+              "node": 25,
+              "operator": "take_axis",
+              "extent": 12,
+              "birth": 25,
+              "death": 27
+            },
+            {
+              "node": 28,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 28,
+              "death": 30
+            },
+            {
+              "node": 34,
+              "operator": "gaussian_mixture_em",
+              "extent": 36,
+              "birth": 34,
+              "death": 87
+            }
+          ]
+        },
+        "4": {
+          "capacity": 45,
+          "nodes": [
+            {
+              "node": 30,
+              "operator": "maximum",
+              "extent": 4,
+              "birth": 30,
+              "death": 34
+            },
+            {
+              "node": 37,
+              "operator": "maximum",
+              "extent": 3,
+              "birth": 37,
+              "death": 39
+            },
+            {
+              "node": 41,
+              "operator": "sum_axis",
+              "extent": 3,
+              "birth": 41,
+              "death": 44
+            },
+            {
+              "node": 49,
+              "operator": "gaussian_hmm_em",
+              "extent": 45,
+              "birth": 49,
+              "death": 88
+            }
+          ]
+        },
+        "5": {
+          "capacity": 187500,
+          "nodes": [
+            {
+              "node": 39,
+              "operator": "divide",
+              "extent": 3,
+              "birth": 39,
+              "death": 49
+            },
+            {
+              "node": 52,
+              "operator": "gaussian_log_density",
+              "extent": 187500,
+              "birth": 52,
+              "death": 60
+            },
+            {
+              "node": 64,
+              "operator": "max_axis",
+              "extent": 3,
+              "birth": 64,
+              "death": 65
+            },
+            {
+              "node": 68,
+              "operator": "take_axis",
+              "extent": 187500,
+              "birth": 68,
+              "death": 69
+            },
+            {
+              "node": 82,
+              "operator": "max_axis",
+              "extent": 62500,
+              "birth": 82,
+              "death": 83
+            },
+            {
+              "node": 84,
+              "operator": "take_axis",
+              "extent": 187500,
+              "birth": 84,
+              "death": 85
+            }
+          ]
+        },
+        "6": {
+          "capacity": 562500,
+          "nodes": [
+            {
+              "node": 44,
+              "operator": "divide",
+              "extent": 9,
+              "birth": 44,
+              "death": 49
+            },
+            {
+              "node": 56,
+              "operator": "hmm_filter",
+              "extent": 562500,
+              "birth": 56,
+              "death": 59
+            },
+            {
+              "node": 60,
+              "operator": "hmm_filter",
+              "extent": 187500,
+              "birth": 60,
+              "death": 84
+            }
+          ]
+        }
+      }
+    },
+    {
+      "graph": "hmm3-shared_standardized",
+      "method": "size_aware",
+      "numeric_arena_bytes": 16500648,
+      "mask_arena_bytes": 4,
+      "integer_arena_bytes": 2500024,
+      "numeric_slots": {
+        "0": {
+          "capacity": 750000,
+          "nodes": [
+            {
+              "node": 6,
+              "operator": "take_axis",
+              "extent": 750000,
+              "birth": 6,
+              "death": 10
+            },
+            {
+              "node": 11,
+              "operator": "sqrt",
+              "extent": 4,
+              "birth": 11,
+              "death": 14
+            }
+          ]
+        },
+        "1": {
+          "capacity": 36,
+          "nodes": [
+            {
+              "node": 7,
+              "operator": "mean_axis",
+              "extent": 4,
+              "birth": 7,
+              "death": 9
+            },
+            {
+              "node": 10,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 10,
+              "death": 11
+            },
+            {
+              "node": 14,
+              "operator": "where",
+              "extent": 4,
+              "birth": 14,
+              "death": 16
+            },
+            {
+              "node": 25,
+              "operator": "take_axis",
+              "extent": 12,
+              "birth": 25,
+              "death": 27
+            },
+            {
+              "node": 28,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 28,
+              "death": 30
+            },
+            {
+              "node": 34,
+              "operator": "gaussian_mixture_em",
+              "extent": 36,
+              "birth": 34,
+              "death": 87
+            }
+          ]
+        },
+        "2": {
+          "capacity": 562500,
+          "nodes": [
+            {
+              "node": 9,
+              "operator": "subtract",
+              "extent": 4,
+              "birth": 9,
+              "death": 16
+            },
+            {
+              "node": 19,
+              "operator": "take_axis",
+              "extent": 250000,
+              "birth": 19,
+              "death": 52
+            },
+            {
+              "node": 53,
+              "operator": "gaussian_log_density",
+              "extent": 562500,
+              "birth": 53,
+              "death": 56
+            },
+            {
+              "node": 59,
+              "operator": "sum_axis",
+              "extent": 3,
+              "birth": 59,
+              "death": 60
+            },
+            {
+              "node": 64,
+              "operator": "max_axis",
+              "extent": 3,
+              "birth": 64,
+              "death": 65
+            },
+            {
+              "node": 68,
+              "operator": "take_axis",
+              "extent": 187500,
+              "birth": 68,
+              "death": 69
+            },
+            {
+              "node": 82,
+              "operator": "max_axis",
+              "extent": 62500,
+              "birth": 82,
+              "death": 83
+            },
+            {
+              "node": 84,
+              "operator": "take_axis",
+              "extent": 187500,
+              "birth": 84,
+              "death": 85
+            }
+          ]
+        },
+        "4": {
+          "capacity": 45,
+          "nodes": [
+            {
+              "node": 30,
+              "operator": "maximum",
+              "extent": 4,
+              "birth": 30,
+              "death": 34
+            },
+            {
+              "node": 37,
+              "operator": "maximum",
+              "extent": 3,
+              "birth": 37,
+              "death": 39
+            },
+            {
+              "node": 41,
+              "operator": "sum_axis",
+              "extent": 3,
+              "birth": 41,
+              "death": 44
+            },
+            {
+              "node": 49,
+              "operator": "gaussian_hmm_em",
+              "extent": 45,
+              "birth": 49,
+              "death": 88
+            }
+          ]
+        },
+        "5": {
+          "capacity": 562500,
+          "nodes": [
+            {
+              "node": 39,
+              "operator": "divide",
+              "extent": 3,
+              "birth": 39,
+              "death": 49
+            },
+            {
+              "node": 56,
+              "operator": "hmm_filter",
+              "extent": 562500,
+              "birth": 56,
+              "death": 59
+            },
+            {
+              "node": 60,
+              "operator": "hmm_filter",
+              "extent": 187500,
+              "birth": 60,
+              "death": 84
+            }
+          ]
+        },
+        "6": {
+          "capacity": 187500,
+          "nodes": [
+            {
+              "node": 44,
+              "operator": "divide",
+              "extent": 9,
+              "birth": 44,
+              "death": 49
+            },
+            {
+              "node": 52,
+              "operator": "gaussian_log_density",
+              "extent": 187500,
+              "birth": 52,
+              "death": 60
+            },
+            {
+              "node": 62,
+              "operator": "one_hot",
+              "extent": 187500,
+              "birth": 62,
+              "death": 68
+            }
+          ]
+        }
+      }
+    },
+    {
+      "graph": "hmm3large-original",
+      "method": "original",
+      "numeric_arena_bytes": 54000424,
+      "mask_arena_bytes": 4,
+      "integer_arena_bytes": 7500024,
+      "numeric_slots": {
+        "0": {
+          "capacity": 2250000,
+          "nodes": [
+            {
+              "node": 6,
+              "operator": "take_axis",
+              "extent": 2250000,
+              "birth": 6,
+              "death": 22
+            },
+            {
+              "node": 23,
+              "operator": "divide",
+              "extent": 2250000,
+              "birth": 23,
+              "death": 56
+            },
+            {
+              "node": 59,
+              "operator": "hmm_filter",
+              "extent": 3,
+              "birth": 59,
+              "death": 62
+            },
+            {
+              "node": 63,
+              "operator": "hmm_filter",
+              "extent": 562500,
+              "birth": 63,
+              "death": 87
+            }
+          ]
+        },
+        "1": {
+          "capacity": 36,
+          "nodes": [
+            {
+              "node": 7,
+              "operator": "mean_axis",
+              "extent": 4,
+              "birth": 7,
+              "death": 21
+            },
+            {
+              "node": 28,
+              "operator": "take_axis",
+              "extent": 12,
+              "birth": 28,
+              "death": 30
+            },
+            {
+              "node": 31,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 31,
+              "death": 33
+            },
+            {
+              "node": 37,
+              "operator": "gaussian_mixture_em",
+              "extent": 36,
+              "birth": 37,
+              "death": 90
+            }
+          ]
+        },
+        "2": {
+          "capacity": 1687500,
+          "nodes": [
+            {
+              "node": 9,
+              "operator": "subtract",
+              "extent": 4,
+              "birth": 9,
+              "death": 16
+            },
+            {
+              "node": 19,
+              "operator": "take_axis",
+              "extent": 750000,
+              "birth": 19,
+              "death": 55
+            },
+            {
+              "node": 56,
+              "operator": "gaussian_log_density",
+              "extent": 1687500,
+              "birth": 56,
+              "death": 59
+            },
+            {
+              "node": 62,
+              "operator": "sum_axis",
+              "extent": 3,
+              "birth": 62,
+              "death": 63
+            },
+            {
+              "node": 65,
+              "operator": "one_hot",
+              "extent": 562500,
+              "birth": 65,
+              "death": 71
+            }
+          ]
+        },
+        "3": {
+          "capacity": 4,
+          "nodes": [
+            {
+              "node": 10,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 10,
+              "death": 11
+            },
+            {
+              "node": 14,
+              "operator": "where",
+              "extent": 4,
+              "birth": 14,
+              "death": 23
+            }
+          ]
+        },
+        "4": {
+          "capacity": 4,
+          "nodes": [
+            {
+              "node": 11,
+              "operator": "sqrt",
+              "extent": 4,
+              "birth": 11,
+              "death": 14
+            }
+          ]
+        },
+        "5": {
+          "capacity": 2250000,
+          "nodes": [
+            {
+              "node": 21,
+              "operator": "subtract",
+              "extent": 2250000,
+              "birth": 21,
+              "death": 23
+            },
+            {
+              "node": 33,
+              "operator": "maximum",
+              "extent": 4,
+              "birth": 33,
+              "death": 37
+            },
+            {
+              "node": 40,
+              "operator": "maximum",
+              "extent": 3,
+              "birth": 40,
+              "death": 42
+            },
+            {
+              "node": 44,
+              "operator": "sum_axis",
+              "extent": 3,
+              "birth": 44,
+              "death": 47
+            },
+            {
+              "node": 52,
+              "operator": "gaussian_hmm_em",
+              "extent": 45,
+              "birth": 52,
+              "death": 91
+            }
+          ]
+        },
+        "6": {
+          "capacity": 562500,
+          "nodes": [
+            {
+              "node": 42,
+              "operator": "divide",
+              "extent": 3,
+              "birth": 42,
+              "death": 52
+            },
+            {
+              "node": 55,
+              "operator": "gaussian_log_density",
+              "extent": 562500,
+              "birth": 55,
+              "death": 63
+            },
+            {
+              "node": 67,
+              "operator": "max_axis",
+              "extent": 3,
+              "birth": 67,
+              "death": 68
+            },
+            {
+              "node": 71,
+              "operator": "take_axis",
+              "extent": 562500,
+              "birth": 71,
+              "death": 72
+            },
+            {
+              "node": 85,
+              "operator": "max_axis",
+              "extent": 187500,
+              "birth": 85,
+              "death": 86
+            },
+            {
+              "node": 87,
+              "operator": "take_axis",
+              "extent": 562500,
+              "birth": 87,
+              "death": 88
+            }
+          ]
+        },
+        "7": {
+          "capacity": 9,
+          "nodes": [
+            {
+              "node": 47,
+              "operator": "divide",
+              "extent": 9,
+              "birth": 47,
+              "death": 52
+            }
+          ]
+        }
+      }
+    },
+    {
+      "graph": "hmm3large-original",
+      "method": "size_aware",
+      "numeric_arena_bytes": 54000376,
+      "mask_arena_bytes": 4,
+      "integer_arena_bytes": 7500024,
+      "numeric_slots": {
+        "0": {
+          "capacity": 2250000,
+          "nodes": [
+            {
+              "node": 6,
+              "operator": "take_axis",
+              "extent": 2250000,
+              "birth": 6,
+              "death": 22
+            },
+            {
+              "node": 23,
+              "operator": "divide",
+              "extent": 2250000,
+              "birth": 23,
+              "death": 56
+            },
+            {
+              "node": 59,
+              "operator": "hmm_filter",
+              "extent": 3,
+              "birth": 59,
+              "death": 62
+            },
+            {
+              "node": 63,
+              "operator": "hmm_filter",
+              "extent": 562500,
+              "birth": 63,
+              "death": 87
+            }
+          ]
+        },
+        "1": {
+          "capacity": 4,
+          "nodes": [
+            {
+              "node": 7,
+              "operator": "mean_axis",
+              "extent": 4,
+              "birth": 7,
+              "death": 21
+            }
+          ]
+        },
+        "2": {
+          "capacity": 1687500,
+          "nodes": [
+            {
+              "node": 9,
+              "operator": "subtract",
+              "extent": 4,
+              "birth": 9,
+              "death": 16
+            },
+            {
+              "node": 19,
+              "operator": "take_axis",
+              "extent": 750000,
+              "birth": 19,
+              "death": 55
+            },
+            {
+              "node": 56,
+              "operator": "gaussian_log_density",
+              "extent": 1687500,
+              "birth": 56,
+              "death": 59
+            },
+            {
+              "node": 71,
+              "operator": "take_axis",
+              "extent": 562500,
+              "birth": 71,
+              "death": 72
+            },
+            {
+              "node": 85,
+              "operator": "max_axis",
+              "extent": 187500,
+              "birth": 85,
+              "death": 86
+            },
+            {
+              "node": 87,
+              "operator": "take_axis",
+              "extent": 562500,
+              "birth": 87,
+              "death": 88
+            }
+          ]
+        },
+        "3": {
+          "capacity": 36,
+          "nodes": [
+            {
+              "node": 10,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 10,
+              "death": 11
+            },
+            {
+              "node": 14,
+              "operator": "where",
+              "extent": 4,
+              "birth": 14,
+              "death": 23
+            },
+            {
+              "node": 31,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 31,
+              "death": 33
+            },
+            {
+              "node": 37,
+              "operator": "gaussian_mixture_em",
+              "extent": 36,
+              "birth": 37,
+              "death": 90
+            }
+          ]
+        },
+        "4": {
+          "capacity": 4,
+          "nodes": [
+            {
+              "node": 11,
+              "operator": "sqrt",
+              "extent": 4,
+              "birth": 11,
+              "death": 14
+            }
+          ]
+        },
+        "5": {
+          "capacity": 2250000,
+          "nodes": [
+            {
+              "node": 21,
+              "operator": "subtract",
+              "extent": 2250000,
+              "birth": 21,
+              "death": 23
+            },
+            {
+              "node": 28,
+              "operator": "take_axis",
+              "extent": 12,
+              "birth": 28,
+              "death": 30
+            },
+            {
+              "node": 33,
+              "operator": "maximum",
+              "extent": 4,
+              "birth": 33,
+              "death": 37
+            },
+            {
+              "node": 40,
+              "operator": "maximum",
+              "extent": 3,
+              "birth": 40,
+              "death": 42
+            },
+            {
+              "node": 44,
+              "operator": "sum_axis",
+              "extent": 3,
+              "birth": 44,
+              "death": 47
+            },
+            {
+              "node": 52,
+              "operator": "gaussian_hmm_em",
+              "extent": 45,
+              "birth": 52,
+              "death": 91
+            }
+          ]
+        },
+        "6": {
+          "capacity": 3,
+          "nodes": [
+            {
+              "node": 42,
+              "operator": "divide",
+              "extent": 3,
+              "birth": 42,
+              "death": 52
+            },
+            {
+              "node": 62,
+              "operator": "sum_axis",
+              "extent": 3,
+              "birth": 62,
+              "death": 63
+            },
+            {
+              "node": 67,
+              "operator": "max_axis",
+              "extent": 3,
+              "birth": 67,
+              "death": 68
+            }
+          ]
+        },
+        "7": {
+          "capacity": 562500,
+          "nodes": [
+            {
+              "node": 47,
+              "operator": "divide",
+              "extent": 9,
+              "birth": 47,
+              "death": 52
+            },
+            {
+              "node": 55,
+              "operator": "gaussian_log_density",
+              "extent": 562500,
+              "birth": 55,
+              "death": 63
+            },
+            {
+              "node": 65,
+              "operator": "one_hot",
+              "extent": 562500,
+              "birth": 65,
+              "death": 71
+            }
+          ]
+        }
+      }
+    },
+    {
+      "graph": "hmm3large-dense_views",
+      "method": "original",
+      "numeric_arena_bytes": 36000712,
+      "mask_arena_bytes": 4,
+      "integer_arena_bytes": 7500024,
+      "numeric_slots": {
+        "0": {
+          "capacity": 2250000,
+          "nodes": [
+            {
+              "node": 5,
+              "operator": "mean_axis",
+              "extent": 4,
+              "birth": 5,
+              "death": 18
+            },
+            {
+              "node": 20,
+              "operator": "divide",
+              "extent": 2250000,
+              "birth": 20,
+              "death": 54
+            },
+            {
+              "node": 57,
+              "operator": "hmm_filter",
+              "extent": 3,
+              "birth": 57,
+              "death": 60
+            },
+            {
+              "node": 61,
+              "operator": "hmm_filter",
+              "extent": 562500,
+              "birth": 61,
+              "death": 86
+            }
+          ]
+        },
+        "1": {
+          "capacity": 36,
+          "nodes": [
+            {
+              "node": 7,
+              "operator": "subtract",
+              "extent": 4,
+              "birth": 7,
+              "death": 14
+            },
+            {
+              "node": 18,
+              "operator": "subtract",
+              "extent": 4,
+              "birth": 18,
+              "death": 20
+            },
+            {
+              "node": 25,
+              "operator": "take_axis",
+              "extent": 12,
+              "birth": 25,
+              "death": 28
+            },
+            {
+              "node": 29,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 29,
+              "death": 31
+            },
+            {
+              "node": 35,
+              "operator": "gaussian_mixture_em",
+              "extent": 36,
+              "birth": 35,
+              "death": 89
+            }
+          ]
+        },
+        "2": {
+          "capacity": 4,
+          "nodes": [
+            {
+              "node": 8,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 8,
+              "death": 9
+            },
+            {
+              "node": 12,
+              "operator": "where",
+              "extent": 4,
+              "birth": 12,
+              "death": 20
+            }
+          ]
+        },
+        "3": {
+          "capacity": 4,
+          "nodes": [
+            {
+              "node": 9,
+              "operator": "sqrt",
+              "extent": 4,
+              "birth": 9,
+              "death": 12
+            }
+          ]
+        },
+        "4": {
+          "capacity": 45,
+          "nodes": [
+            {
+              "node": 31,
+              "operator": "maximum",
+              "extent": 4,
+              "birth": 31,
+              "death": 35
+            },
+            {
+              "node": 38,
+              "operator": "maximum",
+              "extent": 3,
+              "birth": 38,
+              "death": 40
+            },
+            {
+              "node": 42,
+              "operator": "sum_axis",
+              "extent": 3,
+              "birth": 42,
+              "death": 45
+            },
+            {
+              "node": 50,
+              "operator": "gaussian_hmm_em",
+              "extent": 45,
+              "birth": 50,
+              "death": 90
+            }
+          ]
+        },
+        "5": {
+          "capacity": 562500,
+          "nodes": [
+            {
+              "node": 40,
+              "operator": "divide",
+              "extent": 3,
+              "birth": 40,
+              "death": 50
+            },
+            {
+              "node": 53,
+              "operator": "gaussian_log_density",
+              "extent": 562500,
+              "birth": 53,
+              "death": 61
+            },
+            {
+              "node": 63,
+              "operator": "one_hot",
+              "extent": 562500,
+              "birth": 63,
+              "death": 69
+            }
+          ]
+        },
+        "6": {
+          "capacity": 1687500,
+          "nodes": [
+            {
+              "node": 45,
+              "operator": "divide",
+              "extent": 9,
+              "birth": 45,
+              "death": 50
+            },
+            {
+              "node": 54,
+              "operator": "gaussian_log_density",
+              "extent": 1687500,
+              "birth": 54,
+              "death": 57
+            },
+            {
+              "node": 60,
+              "operator": "sum_axis",
+              "extent": 3,
+              "birth": 60,
+              "death": 61
+            },
+            {
+              "node": 65,
+              "operator": "max_axis",
+              "extent": 3,
+              "birth": 65,
+              "death": 66
+            },
+            {
+              "node": 69,
+              "operator": "take_axis",
+              "extent": 562500,
+              "birth": 69,
+              "death": 71
+            },
+            {
+              "node": 84,
+              "operator": "max_axis",
+              "extent": 187500,
+              "birth": 84,
+              "death": 85
+            },
+            {
+              "node": 86,
+              "operator": "take_axis",
+              "extent": 562500,
+              "birth": 86,
+              "death": 87
+            }
+          ]
+        }
+      }
+    },
+    {
+      "graph": "hmm3large-dense_views",
+      "method": "size_aware",
+      "numeric_arena_bytes": 36000712,
+      "mask_arena_bytes": 4,
+      "integer_arena_bytes": 7500024,
+      "numeric_slots": {
+        "0": {
+          "capacity": 2250000,
+          "nodes": [
+            {
+              "node": 5,
+              "operator": "mean_axis",
+              "extent": 4,
+              "birth": 5,
+              "death": 18
+            },
+            {
+              "node": 20,
+              "operator": "divide",
+              "extent": 2250000,
+              "birth": 20,
+              "death": 54
+            },
+            {
+              "node": 57,
+              "operator": "hmm_filter",
+              "extent": 3,
+              "birth": 57,
+              "death": 60
+            },
+            {
+              "node": 61,
+              "operator": "hmm_filter",
+              "extent": 562500,
+              "birth": 61,
+              "death": 86
+            }
+          ]
+        },
+        "1": {
+          "capacity": 36,
+          "nodes": [
+            {
+              "node": 7,
+              "operator": "subtract",
+              "extent": 4,
+              "birth": 7,
+              "death": 14
+            },
+            {
+              "node": 18,
+              "operator": "subtract",
+              "extent": 4,
+              "birth": 18,
+              "death": 20
+            },
+            {
+              "node": 25,
+              "operator": "take_axis",
+              "extent": 12,
+              "birth": 25,
+              "death": 28
+            },
+            {
+              "node": 29,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 29,
+              "death": 31
+            },
+            {
+              "node": 35,
+              "operator": "gaussian_mixture_em",
+              "extent": 36,
+              "birth": 35,
+              "death": 89
+            }
+          ]
+        },
+        "2": {
+          "capacity": 4,
+          "nodes": [
+            {
+              "node": 8,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 8,
+              "death": 9
+            },
+            {
+              "node": 12,
+              "operator": "where",
+              "extent": 4,
+              "birth": 12,
+              "death": 20
+            }
+          ]
+        },
+        "3": {
+          "capacity": 4,
+          "nodes": [
+            {
+              "node": 9,
+              "operator": "sqrt",
+              "extent": 4,
+              "birth": 9,
+              "death": 12
+            }
+          ]
+        },
+        "4": {
+          "capacity": 45,
+          "nodes": [
+            {
+              "node": 31,
+              "operator": "maximum",
+              "extent": 4,
+              "birth": 31,
+              "death": 35
+            },
+            {
+              "node": 38,
+              "operator": "maximum",
+              "extent": 3,
+              "birth": 38,
+              "death": 40
+            },
+            {
+              "node": 42,
+              "operator": "sum_axis",
+              "extent": 3,
+              "birth": 42,
+              "death": 45
+            },
+            {
+              "node": 50,
+              "operator": "gaussian_hmm_em",
+              "extent": 45,
+              "birth": 50,
+              "death": 90
+            }
+          ]
+        },
+        "5": {
+          "capacity": 1687500,
+          "nodes": [
+            {
+              "node": 40,
+              "operator": "divide",
+              "extent": 3,
+              "birth": 40,
+              "death": 50
+            },
+            {
+              "node": 54,
+              "operator": "gaussian_log_density",
+              "extent": 1687500,
+              "birth": 54,
+              "death": 57
+            },
+            {
+              "node": 60,
+              "operator": "sum_axis",
+              "extent": 3,
+              "birth": 60,
+              "death": 61
+            },
+            {
+              "node": 65,
+              "operator": "max_axis",
+              "extent": 3,
+              "birth": 65,
+              "death": 66
+            },
+            {
+              "node": 69,
+              "operator": "take_axis",
+              "extent": 562500,
+              "birth": 69,
+              "death": 71
+            }
+          ]
+        },
+        "6": {
+          "capacity": 562500,
+          "nodes": [
+            {
+              "node": 45,
+              "operator": "divide",
+              "extent": 9,
+              "birth": 45,
+              "death": 50
+            },
+            {
+              "node": 53,
+              "operator": "gaussian_log_density",
+              "extent": 562500,
+              "birth": 53,
+              "death": 61
+            },
+            {
+              "node": 63,
+              "operator": "one_hot",
+              "extent": 562500,
+              "birth": 63,
+              "death": 69
+            },
+            {
+              "node": 84,
+              "operator": "max_axis",
+              "extent": 187500,
+              "birth": 84,
+              "death": 85
+            },
+            {
+              "node": 86,
+              "operator": "take_axis",
+              "extent": 562500,
+              "birth": 86,
+              "death": 87
+            }
+          ]
+        }
+      }
+    },
+    {
+      "graph": "hmm3large-shared_standardized",
+      "method": "original",
+      "numeric_arena_bytes": 40500648,
+      "mask_arena_bytes": 4,
+      "integer_arena_bytes": 7500024,
+      "numeric_slots": {
+        "0": {
+          "capacity": 2250000,
+          "nodes": [
+            {
+              "node": 6,
+              "operator": "take_axis",
+              "extent": 2250000,
+              "birth": 6,
+              "death": 10
+            },
+            {
+              "node": 11,
+              "operator": "sqrt",
+              "extent": 4,
+              "birth": 11,
+              "death": 14
+            }
+          ]
+        },
+        "1": {
+          "capacity": 1687500,
+          "nodes": [
+            {
+              "node": 7,
+              "operator": "mean_axis",
+              "extent": 4,
+              "birth": 7,
+              "death": 9
+            },
+            {
+              "node": 10,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 10,
+              "death": 11
+            },
+            {
+              "node": 14,
+              "operator": "where",
+              "extent": 4,
+              "birth": 14,
+              "death": 16
+            },
+            {
+              "node": 19,
+              "operator": "take_axis",
+              "extent": 750000,
+              "birth": 19,
+              "death": 52
+            },
+            {
+              "node": 53,
+              "operator": "gaussian_log_density",
+              "extent": 1687500,
+              "birth": 53,
+              "death": 56
+            },
+            {
+              "node": 59,
+              "operator": "sum_axis",
+              "extent": 3,
+              "birth": 59,
+              "death": 60
+            },
+            {
+              "node": 62,
+              "operator": "one_hot",
+              "extent": 562500,
+              "birth": 62,
+              "death": 68
+            }
+          ]
+        },
+        "2": {
+          "capacity": 36,
+          "nodes": [
+            {
+              "node": 9,
+              "operator": "subtract",
+              "extent": 4,
+              "birth": 9,
+              "death": 16
+            },
+            {
+              "node": 25,
+              "operator": "take_axis",
+              "extent": 12,
+              "birth": 25,
+              "death": 27
+            },
+            {
+              "node": 28,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 28,
+              "death": 30
+            },
+            {
+              "node": 34,
+              "operator": "gaussian_mixture_em",
+              "extent": 36,
+              "birth": 34,
+              "death": 87
+            }
+          ]
+        },
+        "4": {
+          "capacity": 45,
+          "nodes": [
+            {
+              "node": 30,
+              "operator": "maximum",
+              "extent": 4,
+              "birth": 30,
+              "death": 34
+            },
+            {
+              "node": 37,
+              "operator": "maximum",
+              "extent": 3,
+              "birth": 37,
+              "death": 39
+            },
+            {
+              "node": 41,
+              "operator": "sum_axis",
+              "extent": 3,
+              "birth": 41,
+              "death": 44
+            },
+            {
+              "node": 49,
+              "operator": "gaussian_hmm_em",
+              "extent": 45,
+              "birth": 49,
+              "death": 88
+            }
+          ]
+        },
+        "5": {
+          "capacity": 562500,
+          "nodes": [
+            {
+              "node": 39,
+              "operator": "divide",
+              "extent": 3,
+              "birth": 39,
+              "death": 49
+            },
+            {
+              "node": 52,
+              "operator": "gaussian_log_density",
+              "extent": 562500,
+              "birth": 52,
+              "death": 60
+            },
+            {
+              "node": 64,
+              "operator": "max_axis",
+              "extent": 3,
+              "birth": 64,
+              "death": 65
+            },
+            {
+              "node": 68,
+              "operator": "take_axis",
+              "extent": 562500,
+              "birth": 68,
+              "death": 69
+            },
+            {
+              "node": 82,
+              "operator": "max_axis",
+              "extent": 187500,
+              "birth": 82,
+              "death": 83
+            },
+            {
+              "node": 84,
+              "operator": "take_axis",
+              "extent": 562500,
+              "birth": 84,
+              "death": 85
+            }
+          ]
+        },
+        "6": {
+          "capacity": 562500,
+          "nodes": [
+            {
+              "node": 44,
+              "operator": "divide",
+              "extent": 9,
+              "birth": 44,
+              "death": 49
+            },
+            {
+              "node": 56,
+              "operator": "hmm_filter",
+              "extent": 3,
+              "birth": 56,
+              "death": 59
+            },
+            {
+              "node": 60,
+              "operator": "hmm_filter",
+              "extent": 562500,
+              "birth": 60,
+              "death": 84
+            }
+          ]
+        }
+      }
+    },
+    {
+      "graph": "hmm3large-shared_standardized",
+      "method": "size_aware",
+      "numeric_arena_bytes": 40500648,
+      "mask_arena_bytes": 4,
+      "integer_arena_bytes": 7500024,
+      "numeric_slots": {
+        "0": {
+          "capacity": 2250000,
+          "nodes": [
+            {
+              "node": 6,
+              "operator": "take_axis",
+              "extent": 2250000,
+              "birth": 6,
+              "death": 10
+            },
+            {
+              "node": 11,
+              "operator": "sqrt",
+              "extent": 4,
+              "birth": 11,
+              "death": 14
+            }
+          ]
+        },
+        "1": {
+          "capacity": 36,
+          "nodes": [
+            {
+              "node": 7,
+              "operator": "mean_axis",
+              "extent": 4,
+              "birth": 7,
+              "death": 9
+            },
+            {
+              "node": 10,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 10,
+              "death": 11
+            },
+            {
+              "node": 14,
+              "operator": "where",
+              "extent": 4,
+              "birth": 14,
+              "death": 16
+            },
+            {
+              "node": 25,
+              "operator": "take_axis",
+              "extent": 12,
+              "birth": 25,
+              "death": 27
+            },
+            {
+              "node": 28,
+              "operator": "variance_axis",
+              "extent": 4,
+              "birth": 28,
+              "death": 30
+            },
+            {
+              "node": 34,
+              "operator": "gaussian_mixture_em",
+              "extent": 36,
+              "birth": 34,
+              "death": 87
+            }
+          ]
+        },
+        "2": {
+          "capacity": 1687500,
+          "nodes": [
+            {
+              "node": 9,
+              "operator": "subtract",
+              "extent": 4,
+              "birth": 9,
+              "death": 16
+            },
+            {
+              "node": 19,
+              "operator": "take_axis",
+              "extent": 750000,
+              "birth": 19,
+              "death": 52
+            },
+            {
+              "node": 53,
+              "operator": "gaussian_log_density",
+              "extent": 1687500,
+              "birth": 53,
+              "death": 56
+            },
+            {
+              "node": 59,
+              "operator": "sum_axis",
+              "extent": 3,
+              "birth": 59,
+              "death": 60
+            },
+            {
+              "node": 64,
+              "operator": "max_axis",
+              "extent": 3,
+              "birth": 64,
+              "death": 65
+            },
+            {
+              "node": 68,
+              "operator": "take_axis",
+              "extent": 562500,
+              "birth": 68,
+              "death": 69
+            },
+            {
+              "node": 82,
+              "operator": "max_axis",
+              "extent": 187500,
+              "birth": 82,
+              "death": 83
+            },
+            {
+              "node": 84,
+              "operator": "take_axis",
+              "extent": 562500,
+              "birth": 84,
+              "death": 85
+            }
+          ]
+        },
+        "4": {
+          "capacity": 45,
+          "nodes": [
+            {
+              "node": 30,
+              "operator": "maximum",
+              "extent": 4,
+              "birth": 30,
+              "death": 34
+            },
+            {
+              "node": 37,
+              "operator": "maximum",
+              "extent": 3,
+              "birth": 37,
+              "death": 39
+            },
+            {
+              "node": 41,
+              "operator": "sum_axis",
+              "extent": 3,
+              "birth": 41,
+              "death": 44
+            },
+            {
+              "node": 49,
+              "operator": "gaussian_hmm_em",
+              "extent": 45,
+              "birth": 49,
+              "death": 88
+            }
+          ]
+        },
+        "5": {
+          "capacity": 562500,
+          "nodes": [
+            {
+              "node": 39,
+              "operator": "divide",
+              "extent": 3,
+              "birth": 39,
+              "death": 49
+            },
+            {
+              "node": 56,
+              "operator": "hmm_filter",
+              "extent": 3,
+              "birth": 56,
+              "death": 59
+            },
+            {
+              "node": 60,
+              "operator": "hmm_filter",
+              "extent": 562500,
+              "birth": 60,
+              "death": 84
+            }
+          ]
+        },
+        "6": {
+          "capacity": 562500,
+          "nodes": [
+            {
+              "node": 44,
+              "operator": "divide",
+              "extent": 9,
+              "birth": 44,
+              "death": 49
+            },
+            {
+              "node": 52,
+              "operator": "gaussian_log_density",
+              "extent": 562500,
+              "birth": 52,
+              "death": 60
+            },
+            {
+              "node": 62,
+              "operator": "one_hot",
+              "extent": 562500,
+              "birth": 62,
+              "death": 68
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "numerical_execution": false,
+  "performance_acceptance": false,
+  "actual_adopted": false,
+  "goal_complete": false,
+  "actual_audit_checks": [
+    {
+      "graph": "gmm16-original",
+      "actual_runtime_numeric_arena_bytes": 128628384,
+      "diagnostic_numeric_plus_integer_bytes": 128628384
+    },
+    {
+      "graph": "gmm16-dense_views",
+      "actual_runtime_numeric_arena_bytes": 170571504,
+      "diagnostic_numeric_plus_integer_bytes": 170571504
+    },
+    {
+      "graph": "gmm16-shared_standardized",
+      "actual_runtime_numeric_arena_bytes": 173367584,
+      "diagnostic_numeric_plus_integer_bytes": 173367584
+    },
+    {
+      "graph": "gmm3-original",
+      "actual_runtime_numeric_arena_bytes": 22000376,
+      "diagnostic_numeric_plus_integer_bytes": 22000376
+    },
+    {
+      "graph": "gmm3-dense_views",
+      "actual_runtime_numeric_arena_bytes": 23000376,
+      "diagnostic_numeric_plus_integer_bytes": 23000376
+    },
+    {
+      "graph": "gmm3-shared_standardized",
+      "actual_runtime_numeric_arena_bytes": 25000312,
+      "diagnostic_numeric_plus_integer_bytes": 25000312
+    },
+    {
+      "graph": "hmm12-original",
+      "actual_runtime_numeric_arena_bytes": 77002464,
+      "diagnostic_numeric_plus_integer_bytes": 77002464
+    },
+    {
+      "graph": "hmm12-dense_views",
+      "actual_runtime_numeric_arena_bytes": 65003616,
+      "diagnostic_numeric_plus_integer_bytes": 65003616
+    },
+    {
+      "graph": "hmm3-original",
+      "actual_runtime_numeric_arena_bytes": 20500448,
+      "diagnostic_numeric_plus_integer_bytes": 20500448
+    },
+    {
+      "graph": "hmm3-dense_views",
+      "actual_runtime_numeric_arena_bytes": 14500736,
+      "diagnostic_numeric_plus_integer_bytes": 14500736
+    },
+    {
+      "graph": "hmm3large-original",
+      "actual_runtime_numeric_arena_bytes": 61500448,
+      "diagnostic_numeric_plus_integer_bytes": 61500448
+    }
+  ],
+  "actual_audit_scope": "numeric_arena_bytes in current runtime combines double and int64 arena; masks reported separately",
+  "static_size_aware_verdict": "not adopted: original GMM16 combined numeric arena increases19,573,456bytes and original GMM3 increases2,000,000bytes; no meaningful HMM improvement",
+  "dense_gmm16_failure_source": {
+    "original_take_node": 55,
+    "original_next_scatter_node": 56,
+    "original_take_extent": 0,
+    "dense_take_node": 53,
+    "dense_intervening_node": 54,
+    "dense_intervening_operator": "slice_axis",
+    "dense_next_scatter_node": 55,
+    "dense_take_extent": 5592416,
+    "reason": "Program::finalize requires only input/constant/parameter kinds between private take/scatter; intervening slice fails this existing proof",
+    "new_materialized_take_bytes": 44739328,
+    "whole_combined_arena_delta_bytes": 41943120
+  }
+}

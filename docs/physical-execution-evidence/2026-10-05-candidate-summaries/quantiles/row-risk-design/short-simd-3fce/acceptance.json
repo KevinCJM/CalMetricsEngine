@@ -1,0 +1,237 @@
+{
+  "build_id": "3fce0fd2c641710d087659138bc87d57d7f0342387597a44f071e817b5a3898a",
+  "related": 1177,
+  "native": 9,
+  "new_cases": 346,
+  "timing": [
+    {
+      "load": "many-short-large",
+      "shape": [
+        262144,
+        252,
+        30
+      ],
+      "layout": "C",
+      "medians_seconds": {
+        "v13": 2.6755777500000004,
+        "candidate": 1.0757897084999999,
+        "njit64": 1.1913541245000001,
+        "njit512": 1.1613562295
+      },
+      "maximum_absolute_errors": {
+        "v13": [
+          1.734723475976807e-18,
+          4.336808689942018e-19,
+          2.220446049250313e-16
+        ],
+        "candidate": [
+          1.734723475976807e-18,
+          4.336808689942018e-19,
+          2.220446049250313e-16
+        ],
+        "njit64": [
+          1.734723475976807e-18,
+          6.505213034913027e-19,
+          2.220446049250313e-16
+        ],
+        "njit512": [
+          1.734723475976807e-18,
+          6.505213034913027e-19,
+          2.220446049250313e-16
+        ]
+      },
+      "strongest_njit_seconds": 1.1613562295
+    },
+    {
+      "load": "many-short-large",
+      "shape": [
+        262144,
+        252,
+        30
+      ],
+      "layout": "F",
+      "medians_seconds": {
+        "v13": 2.8199864165,
+        "candidate": 1.218773396,
+        "njit64": 1.249981687,
+        "njit512": 1.199774375
+      },
+      "maximum_absolute_errors": {
+        "v13": [
+          1.734723475976807e-18,
+          4.336808689942018e-19,
+          2.220446049250313e-16
+        ],
+        "candidate": [
+          1.734723475976807e-18,
+          4.336808689942018e-19,
+          2.220446049250313e-16
+        ],
+        "njit64": [
+          1.734723475976807e-18,
+          6.505213034913027e-19,
+          2.220446049250313e-16
+        ],
+        "njit512": [
+          1.734723475976807e-18,
+          6.505213034913027e-19,
+          2.220446049250313e-16
+        ]
+      },
+      "strongest_njit_seconds": 1.199774375
+    },
+    {
+      "load": "regular-history",
+      "shape": [
+        16384,
+        2520,
+        30
+      ],
+      "layout": "C",
+      "medians_seconds": {
+        "v13": 0.640983042,
+        "candidate": 0.6410922084999999,
+        "njit64": 0.423235958,
+        "njit512": 0.4255946045
+      },
+      "maximum_absolute_errors": {
+        "v13": [
+          3.469446951953614e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "candidate": [
+          3.469446951953614e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "njit64": [
+          4.336808689942018e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "njit512": [
+          4.336808689942018e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ]
+      },
+      "strongest_njit_seconds": 0.423235958
+    },
+    {
+      "load": "regular-history",
+      "shape": [
+        16384,
+        2520,
+        30
+      ],
+      "layout": "F",
+      "medians_seconds": {
+        "v13": 0.6450328544999999,
+        "candidate": 0.656574312,
+        "njit64": 0.427300958,
+        "njit512": 0.4283544585
+      },
+      "maximum_absolute_errors": {
+        "v13": [
+          3.469446951953614e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "candidate": [
+          3.469446951953614e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "njit64": [
+          4.336808689942018e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "njit512": [
+          4.336808689942018e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ]
+      },
+      "strongest_njit_seconds": 0.427300958
+    }
+  ],
+  "full_regression": 13703,
+  "sanitizers": {
+    "related": 1177,
+    "native": 9
+  },
+  "libraries_off": {
+    "related": 1177,
+    "native": 9
+  },
+  "memory": [
+    {
+      "backend": "v13",
+      "layout": "C",
+      "requested_heap_warm_peak_bytes": 138872136,
+      "rss_delta_median_bytes": 147390464,
+      "rss_absolute_median_bytes": 234078208
+    },
+    {
+      "backend": "candidate",
+      "layout": "C",
+      "requested_heap_warm_peak_bytes": 138872136,
+      "rss_delta_median_bytes": 147685376,
+      "rss_absolute_median_bytes": 234192896
+    },
+    {
+      "backend": "njit64",
+      "layout": "C",
+      "requested_heap_warm_peak_bytes": 138740128,
+      "rss_delta_median_bytes": 147603456,
+      "rss_absolute_median_bytes": 304922624
+    },
+    {
+      "backend": "njit512",
+      "layout": "C",
+      "requested_heap_warm_peak_bytes": 139750816,
+      "rss_delta_median_bytes": 155648000,
+      "rss_absolute_median_bytes": 312786944
+    },
+    {
+      "backend": "v13",
+      "layout": "F",
+      "requested_heap_warm_peak_bytes": 138872136,
+      "rss_delta_median_bytes": 147521536,
+      "rss_absolute_median_bytes": 234635264
+    },
+    {
+      "backend": "candidate",
+      "layout": "F",
+      "requested_heap_warm_peak_bytes": 138872136,
+      "rss_delta_median_bytes": 147816448,
+      "rss_absolute_median_bytes": 234455040
+    },
+    {
+      "backend": "njit64",
+      "layout": "F",
+      "requested_heap_warm_peak_bytes": 138682640,
+      "rss_delta_median_bytes": 146997248,
+      "rss_absolute_median_bytes": 304939008
+    },
+    {
+      "backend": "njit512",
+      "layout": "F",
+      "requested_heap_warm_peak_bytes": 139693328,
+      "rss_delta_median_bytes": 154353664,
+      "rss_absolute_median_bytes": 312688640
+    }
+  ],
+  "actual_direct_path_probe": {
+    "length": 252,
+    "isa": "highway_vqselect",
+    "input_copy_bytes": 0,
+    "workspace_bytes": 2016,
+    "library_reserve_bytes": 16384
+  },
+  "production_adopted": false,
+  "whole_goal_complete": false,
+  "acceptance": "qualified local physical selection; complete time materially improves previous C++, heap unchanged; stronger NJIT and other important load gaps remain; actual-directory integration verified separately"
+}

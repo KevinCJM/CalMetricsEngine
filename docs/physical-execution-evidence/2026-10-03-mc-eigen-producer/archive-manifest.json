@@ -1,0 +1,559 @@
+{
+  "schema": "calmetrics-static-evidence-archive-1",
+  "date": "2026-10-03",
+  "scope": "ordered Eigen fixed-transformed-tape projection; screen and production identities separate",
+  "notes": [
+    "Static byte-for-byte archive only; no build, import, numerical execution, testing, performance or memory task ran during archiving.",
+    "Raw test sources have .txt suffixes and are not alternate production test entry points.",
+    "Mathematical C++ implementation, wheels, native binaries, object files, cache, pickle and installation trees are not copied.",
+    "README and separately generated static evidence summaries are added after raw copying and then included in this manifest."
+  ],
+  "files": [
+    {
+      "original_path": "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/docs/physical-execution-evidence/2026-10-03-mc-eigen-producer/README.md",
+      "path": "README.md",
+      "size_bytes": 17538,
+      "sha256": "acc9e0fb2420ff69f45f8eab207a498a9853d859643722c61801401c0bc4de4b",
+      "phase": "archive-generated"
+    },
+    {
+      "original_path": "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/tests/affine_projection_native_cases.hpp",
+      "path": "affine_projection_native_cases.hpp.txt",
+      "size_bytes": 33108,
+      "sha256": "9d2e27b61707563d795b6f1a0b7a3a00eab2d73641a512be5508b25e833c961e",
+      "phase": "test-source"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/asan-build-eigen.log",
+      "path": "asan-build-eigen.log",
+      "size_bytes": 810,
+      "sha256": "c407b8abdf5dffa8bc16464eb8c23b4ac9cec3c5636f329b9659af85dbe841fc",
+      "phase": "production"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/asan-eigen.log",
+      "path": "asan-eigen.log",
+      "size_bytes": 1180,
+      "sha256": "8516d2f2d5880ca35ff4554975bc2f7cda93b000b9085148ae68ca500e836adf",
+      "phase": "production"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/bench.py",
+      "path": "bench.py",
+      "size_bytes": 17794,
+      "sha256": "6d43e5e537e12299dd141f7112202daa2e2d9b876e1cda44fcd754d02d94cb63",
+      "phase": "production"
+    },
+    {
+      "original_path": "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/tools/benchmark_memory.py",
+      "path": "benchmark-memory-helper-source.py",
+      "size_bytes": 3744,
+      "sha256": "b3862bb22e58f01f874bad0fd8466a3eb63ac4f3803186846184aafb47f4d7f8",
+      "phase": "helper"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/build-eigen-driver.log",
+      "path": "build-eigen-driver.log",
+      "size_bytes": 34,
+      "sha256": "c77488fd15734952cbdaa933d2ce010717b7e058e4230391afdb5e7b97f69e2e",
+      "phase": "production"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/build-eigen.log",
+      "path": "build-eigen.log",
+      "size_bytes": 1081,
+      "sha256": "105b9d6ea272320ac8e28c439ef78f6f2523f136ad6990f2aeb7adf1b0de3ff1",
+      "phase": "production"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/build-eigen.py",
+      "path": "build-eigen.py",
+      "size_bytes": 1447,
+      "sha256": "68eddb917e686f0449ee9b33e3030773e6813e0c8a393c56fc1ad33403552846",
+      "phase": "production"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/compact-chain-implementation-next.md",
+      "path": "compact-chain-implementation-next.md",
+      "size_bytes": 17882,
+      "sha256": "97cdb3886a4771fda6d2c5c93995885f19e79f3a67beeefb54e4820f00da713a",
+      "phase": "planned-next-design-not-implemented"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/compiler-command-eigen.txt",
+      "path": "compiler-command-eigen.txt",
+      "size_bytes": 990,
+      "sha256": "950dd790bee3450adf796e90fe96b8b5f45b1d1505fa0d357ea7c7748a0a9894",
+      "phase": "production-isa"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/eigen-extra-transport-tests.py",
+      "path": "eigen-extra-transport-tests.py.txt",
+      "size_bytes": 6389,
+      "sha256": "776710a80a029e0afe510e0643508dd267ef327543cd147b4b3d4c79646d223e",
+      "phase": "test-source"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/eigen-producer-next-design.md",
+      "path": "eigen-producer-design.md",
+      "size_bytes": 11438,
+      "sha256": "e5aa700bd7e4eac8568ee8d0b4084cee1f1d2ed20097b03040ba364c2f7076fe",
+      "phase": "design"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/eigen-production-review.md",
+      "path": "eigen-production-review.md.txt",
+      "size_bytes": 9673,
+      "sha256": "9b51826ec19880918558416d4638553e0e69eb811031d08e865fc2553f97ab00",
+      "phase": "static-review"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/eigen-transport.log",
+      "path": "eigen-transport.log",
+      "size_bytes": 99,
+      "sha256": "bed977af493238c93af025062bc9f822221e9b9a2e6b437668db045df18cb29c",
+      "phase": "production"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/focused-production-eigen.log",
+      "path": "focused-production-eigen.log",
+      "size_bytes": 340,
+      "sha256": "25f0ee6b929fc5834bb58abd422c3a09f132ce5fed4c4c51456ac1b226428a39",
+      "phase": "production"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/full-python-eigen.log",
+      "path": "full-python-eigen.log",
+      "size_bytes": 12754,
+      "sha256": "93e7f77df92e2b0e26d1fe9c8c975304a7ced6087ec6fd34f2c026ccc9ab442d",
+      "phase": "production"
+    },
+    {
+      "original_path": "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/tools/heap_probe.cpp",
+      "path": "heap-probe-source.cpp.txt",
+      "size_bytes": 5905,
+      "sha256": "4fd0d0dd27b3b7eca07a2ffce20866628540293adbaf225f397d8cb89a07d64c",
+      "phase": "helper"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/identity-eigen-final.log",
+      "path": "identity-eigen-final.log",
+      "size_bytes": 65,
+      "sha256": "714189f323a470be587ee12269544f9af827ba53b35a568ac2b0d0df5abf4685",
+      "phase": "production"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-platform-latent-closure/memory.py",
+      "path": "identity-helper-source.py",
+      "size_bytes": 12310,
+      "sha256": "5d39e66df717413189969f477c8e646e31027c032f60f087dbb966e09c76c984",
+      "phase": "helper"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/identity-eigen-final.json",
+      "path": "identity-production-final.json",
+      "size_bytes": 9494,
+      "sha256": "70e4f1065c75a496c14d444149c6193691cf1660f1e0ee48c59e3920dc16a50c",
+      "phase": "production"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/identity-eigen.json",
+      "path": "identity-production.json",
+      "size_bytes": 9494,
+      "sha256": "70e4f1065c75a496c14d444149c6193691cf1660f1e0ee48c59e3920dc16a50c",
+      "phase": "production"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/eigen-screen/identity.json",
+      "path": "identity-screen.json",
+      "size_bytes": 9528,
+      "sha256": "ba95849352c90f18a9ec6f5449b152eb67bfb9a68f7081384e5ed049ceff36a2",
+      "phase": "screen"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/install-eigen.log",
+      "path": "install-eigen.log",
+      "size_bytes": 507,
+      "sha256": "7ff786a42aa08465c9c5f9be38384aae4c94b3c7ee142a6595f561246652f5d0",
+      "phase": "production"
+    },
+    {
+      "original_path": "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/docs/physical-execution-evidence/2026-10-03-mc-eigen-producer/isa-source-evidence.md",
+      "path": "isa-source-evidence.md",
+      "size_bytes": 4751,
+      "sha256": "10cca6c2e6327e5aaec7f749a137a9d38fc4d531c7fc21c3089bc934045ce481",
+      "phase": "archive-generated"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/large-f-shared-eigen.json",
+      "path": "large-f-shared-eigen.json",
+      "size_bytes": 173340,
+      "sha256": "72f00cafe1cd70adfc833739e35b5b5c3fa0bcf504164f9f03ee1204eb8b237e",
+      "phase": "production"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/large-f-shared-eigen.log",
+      "path": "large-f-shared-eigen.log",
+      "size_bytes": 173340,
+      "sha256": "72f00cafe1cd70adfc833739e35b5b5c3fa0bcf504164f9f03ee1204eb8b237e",
+      "phase": "production"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/large-prepared-shared-eigen.json",
+      "path": "large-prepared-shared-eigen.json",
+      "size_bytes": 173346,
+      "sha256": "490e07be9523670c5ef1e70e338b11a0a51df3e2dc8b52a44d462322a04fafe3",
+      "phase": "production"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/large-prepared-shared-eigen.log",
+      "path": "large-prepared-shared-eigen.log",
+      "size_bytes": 173346,
+      "sha256": "490e07be9523670c5ef1e70e338b11a0a51df3e2dc8b52a44d462322a04fafe3",
+      "phase": "production"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/large-shared-eigen.json",
+      "path": "large-shared-eigen.json",
+      "size_bytes": 173333,
+      "sha256": "19a7b7fffc975542ca89b149f7caa68f7a2113892a142af98a5eeb26bdd9515e",
+      "phase": "production"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/large-shared-eigen.log",
+      "path": "large-shared-eigen.log",
+      "size_bytes": 173333,
+      "sha256": "19a7b7fffc975542ca89b149f7caa68f7a2113892a142af98a5eeb26bdd9515e",
+      "phase": "production"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/large-single-shared-eigen.json",
+      "path": "large-single-shared-eigen.json",
+      "size_bytes": 40080,
+      "sha256": "a9bb2c784c7a3bb2c9de0716c9ea6ce20467ec3a5efefe848f08175d19c4aa74",
+      "phase": "production"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/large-single-shared-eigen.log",
+      "path": "large-single-shared-eigen.log",
+      "size_bytes": 40080,
+      "sha256": "a9bb2c784c7a3bb2c9de0716c9ea6ce20467ec3a5efefe848f08175d19c4aa74",
+      "phase": "production"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/memory-eigen-cases.py",
+      "path": "memory-eigen-cases.py",
+      "size_bytes": 1037,
+      "sha256": "a68b8c5dd094e703d7cb80df431530f134963f343f995c9e7875ed827c70a262",
+      "phase": "production"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/memory-ordinary-eigen.json",
+      "path": "memory-ordinary-eigen.json",
+      "size_bytes": 144013,
+      "sha256": "03628b4f4c6ee2622da69c97a993bd163948d53c8c6059f88d08c5322eb9ff18",
+      "phase": "production"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/memory-ordinary-eigen.log",
+      "path": "memory-ordinary-eigen.log",
+      "size_bytes": 144013,
+      "sha256": "03628b4f4c6ee2622da69c97a993bd163948d53c8c6059f88d08c5322eb9ff18",
+      "phase": "production"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/memory-prepared-eigen.json",
+      "path": "memory-prepared-eigen.json",
+      "size_bytes": 144005,
+      "sha256": "8a1b8e0964da472a9a05c62b6b7ed53e9a61ed61ff4cffeb712553a095cb8fc1",
+      "phase": "production"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/memory-prepared-eigen.log",
+      "path": "memory-prepared-eigen.log",
+      "size_bytes": 144005,
+      "sha256": "8a1b8e0964da472a9a05c62b6b7ed53e9a61ed61ff4cffeb712553a095cb8fc1",
+      "phase": "production"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/memory-production-eigen.log",
+      "path": "memory-production-eigen.log",
+      "size_bytes": 234,
+      "sha256": "209526c8560a3e394744e165a71da7702478459a44f6a50140b4d2fe94b15f3b",
+      "phase": "production"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/memory-service-njit-eigen.json",
+      "path": "memory-service-njit-eigen.json",
+      "size_bytes": 45114,
+      "sha256": "c38f3a0ac824aa3cf4456447a69c7146d318a1bd21ced6c32dbf8ab6549d504d",
+      "phase": "production"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/memory-service-njit-eigen.log",
+      "path": "memory-service-njit-eigen.log",
+      "size_bytes": 45114,
+      "sha256": "c38f3a0ac824aa3cf4456447a69c7146d318a1bd21ced6c32dbf8ab6549d504d",
+      "phase": "production"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/memory-shared-njit-eigen.json",
+      "path": "memory-shared-njit-eigen.json",
+      "size_bytes": 45109,
+      "sha256": "a271bc29592f9efee46abac671afd2f094146a32449f8768c8f77141a595100e",
+      "phase": "production"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/memory-shared-njit-eigen.log",
+      "path": "memory-shared-njit-eigen.log",
+      "size_bytes": 45109,
+      "sha256": "a271bc29592f9efee46abac671afd2f094146a32449f8768c8f77141a595100e",
+      "phase": "production"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/memory.py",
+      "path": "memory.py",
+      "size_bytes": 9041,
+      "sha256": "249c2826ca3dfec1f763f9b8c19ff2fcaf174bd6ebd720d4d94ae190458f93d6",
+      "phase": "production"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/native-build-eigen.log",
+      "path": "native-build-eigen.log",
+      "size_bytes": 202,
+      "sha256": "ccd6653fce26281f1b4900b3442340e2497fc20b28a3aa58dcf876fad68a94fc",
+      "phase": "production"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/native-eigen.log",
+      "path": "native-eigen.log",
+      "size_bytes": 1181,
+      "sha256": "e8b02a04c78899832724e10ddeea0a54db91c3641ce45b30acacbc9ed183bc62",
+      "phase": "production"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/off-build-eigen.log",
+      "path": "off-build-eigen.log",
+      "size_bytes": 6755,
+      "sha256": "d371a6a89022202a04e9be109a91d484f505129853147a9067e9efd91dc6ad9d",
+      "phase": "production"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/off-eigen.log",
+      "path": "off-eigen.log",
+      "size_bytes": 1179,
+      "sha256": "cd04c6a1a0439e238745a7fdce09b8a70262c45376f444af61f579863c7f6c6f",
+      "phase": "production"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/perf-eigen-cases.py",
+      "path": "perf-eigen-cases.py",
+      "size_bytes": 1875,
+      "sha256": "ab87122f94bd91e91664ce9461cd1f84d4c2d17300cee322adb93999c9a8fcd4",
+      "phase": "production"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/perf-production-eigen.log",
+      "path": "perf-production-eigen.log",
+      "size_bytes": 328,
+      "sha256": "a06f1896ee0c7c23fe6aee2fb455fd3f3444d99c086f7b4a8a9ae8f5c5738338",
+      "phase": "production"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/eigen-screen/prepare-mirror.sh",
+      "path": "prepare-mirror.sh",
+      "size_bytes": 2047,
+      "sha256": "79195dfc3a15db610b2ee93f3a402bebd5a19bf33dde93661f58c06fa1920ea6",
+      "phase": "screen"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/production-affine-disassembly.txt",
+      "path": "production-affine-disassembly.txt",
+      "size_bytes": 326873,
+      "sha256": "25e75427b93a6f2ac5fa799f35dd72fcb96a97cd486261c676d9873e1720ee63",
+      "phase": "production"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/production-affine-isa.json",
+      "path": "production-affine-isa.json",
+      "size_bytes": 4607,
+      "sha256": "f931fdca1075b4d0d7d9e199072f7eab8e003782bbfb27b11497e21a4c5ab172",
+      "phase": "production-isa"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/production-eigen-consistency.json",
+      "path": "production-eigen-consistency.json",
+      "size_bytes": 2514,
+      "sha256": "5e4061cb978d499cd1334577231170cec7b8e9f524e4f74ae19294cdf886a1e1",
+      "phase": "static-consistency"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/eigen-screen/reference.py",
+      "path": "reference.py",
+      "size_bytes": 4998,
+      "sha256": "2fbe9575318b3c7432d581d8cb16047a8e2b49e24e022538564160f0f69219e5",
+      "phase": "screen"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/ruff-eigen.log",
+      "path": "ruff-eigen.log",
+      "size_bytes": 19,
+      "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "phase": "production"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/eigen-screen/affine-projection-disassembly.txt",
+      "path": "screen-affine-projection-disassembly.txt",
+      "size_bytes": 326893,
+      "sha256": "1b8bfbf8b4c4f046c68b17c4af1811face90d45f5244d083e83370c92a36a508",
+      "phase": "screen"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/eigen-screen/bench.py",
+      "path": "screen-bench.py",
+      "size_bytes": 18664,
+      "sha256": "c32450e31f9ea910fafd5460033d671fbcbaf6e03abcf4324a19a33a8ed091b5",
+      "phase": "screen"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/eigen-screen/build-driver.log",
+      "path": "screen-build-driver.log",
+      "size_bytes": 39,
+      "sha256": "894dfc8ee8b470916205f0449dcdc78d345ef1780c52c452c3e26f7158148d03",
+      "phase": "screen"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/eigen-screen/build.log",
+      "path": "screen-build.log",
+      "size_bytes": 1088,
+      "sha256": "8b88474fcd103d5790f4761fac1e53bc2fe7141afd773db489a9df15d22f8ed7",
+      "phase": "screen"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/eigen-screen/build.py",
+      "path": "screen-build.py",
+      "size_bytes": 1860,
+      "sha256": "7698ca2faa323dadab445df90ec1e40871980081f2060e122f849ba38d55c360",
+      "phase": "screen"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/eigen-screen/eigen-focused.log",
+      "path": "screen-eigen-focused.log",
+      "size_bytes": 99,
+      "sha256": "54bdb786279c3b37cca65799ed49fd7d2fc03accfb3d687cd29528c4a2956c62",
+      "phase": "screen"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/eigen-screen/install.log",
+      "path": "screen-install.log",
+      "size_bytes": 514,
+      "sha256": "0d88019047914a0a40df34c53763059db30a9bada2f2296fbb19cd5c70e62881",
+      "phase": "screen"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/eigen-screen/large-eight.json",
+      "path": "screen-large-eight.json",
+      "size_bytes": 173667,
+      "sha256": "0e2bdadcffa3ad9477fff9c99dcddc1301be2ad6e2b910748947180fffb33230",
+      "phase": "screen"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/eigen-screen/large-eight.log",
+      "path": "screen-large-eight.log",
+      "size_bytes": 173667,
+      "sha256": "0e2bdadcffa3ad9477fff9c99dcddc1301be2ad6e2b910748947180fffb33230",
+      "phase": "screen"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/eigen-screen/large-one.json",
+      "path": "screen-large-one.json",
+      "size_bytes": 40398,
+      "sha256": "510bd243a604a8361bf134524fa89982829e7c37d053568b7ff40f7e105c171e",
+      "phase": "screen"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/eigen-screen/large-one.log",
+      "path": "screen-large-one.log",
+      "size_bytes": 40398,
+      "sha256": "510bd243a604a8361bf134524fa89982829e7c37d053568b7ff40f7e105c171e",
+      "phase": "screen"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/eigen-screen/README.md",
+      "path": "screen-preparation-note.md",
+      "size_bytes": 4324,
+      "sha256": "744779b3366b33c4fcfb09fe053a42d28e921917add9146f40365eb243a2d509",
+      "phase": "screen"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/eigen-screen/wide-eight.json",
+      "path": "screen-wide-eight.json",
+      "size_bytes": 173620,
+      "sha256": "9e76c0bb6f17a4792c661ab7f7241025726a76c8395cf7fcdac5d85a7032426d",
+      "phase": "screen"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/eigen-screen/wide-eight.log",
+      "path": "screen-wide-eight.log",
+      "size_bytes": 173620,
+      "sha256": "9e76c0bb6f17a4792c661ab7f7241025726a76c8395cf7fcdac5d85a7032426d",
+      "phase": "screen"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/small-shared-eigen.json",
+      "path": "small-shared-eigen.json",
+      "size_bytes": 40008,
+      "sha256": "b51510fcd53a4b976a88324f6ec4982e01ed0bd00f0d77f72132f8870569c0f3",
+      "phase": "production"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/small-shared-eigen.log",
+      "path": "small-shared-eigen.log",
+      "size_bytes": 40008,
+      "sha256": "b51510fcd53a4b976a88324f6ec4982e01ed0bd00f0d77f72132f8870569c0f3",
+      "phase": "production"
+    },
+    {
+      "original_path": "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/tests/test_affine_projection_library.py",
+      "path": "test_affine_projection_library.py.txt",
+      "size_bytes": 15431,
+      "sha256": "f75407872c20e61c8aa2ca59096a7daea607e3d589a4e1ff0e3c4956c329a4ac",
+      "phase": "test-source"
+    },
+    {
+      "original_path": "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/tests/test_affine_projection_transport.py",
+      "path": "test_affine_projection_transport.py.txt",
+      "size_bytes": 6365,
+      "sha256": "3e610edea1b568d7a30363356d15c86ad02048d1787081037fe91f473f215168",
+      "phase": "test-source"
+    },
+    {
+      "original_path": "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/tests/test_mc_projection_excel.py",
+      "path": "test_mc_projection_excel.py.txt",
+      "size_bytes": 12706,
+      "sha256": "d556a42d9dfd0fea527e9355f3fbe58c1355c562426af960b0e3c9e70b2d11ef",
+      "phase": "test-source"
+    },
+    {
+      "original_path": "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/tests/test_mc_projection_primitives.py",
+      "path": "test_mc_projection_primitives.py.txt",
+      "size_bytes": 49981,
+      "sha256": "0c6550725008cba6b83610ea189a4d6708eeb9a25b5059a02a38847aaed6b5f6",
+      "phase": "test-source"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/wide-shared-eigen.json",
+      "path": "wide-shared-eigen.json",
+      "size_bytes": 173296,
+      "sha256": "3cee11e97eb4678173be1c565395c2d358951017d30fd6bd94453db6d0aa9eb1",
+      "phase": "production"
+    },
+    {
+      "original_path": "/private/tmp/calmetrics-mc-projection-integration/wide-shared-eigen.log",
+      "path": "wide-shared-eigen.log",
+      "size_bytes": 173296,
+      "sha256": "3cee11e97eb4678173be1c565395c2d358951017d30fd6bd94453db6d0aa9eb1",
+      "phase": "production"
+    }
+  ]
+}

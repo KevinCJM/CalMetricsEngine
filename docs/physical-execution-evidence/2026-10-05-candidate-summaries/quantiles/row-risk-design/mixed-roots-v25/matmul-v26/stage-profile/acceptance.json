@@ -1,0 +1,114 @@
+{
+  "status": "phase_observations_completed",
+  "observations": 96,
+  "summary": [
+    {
+      "n": 2048,
+      "input_order": "C",
+      "output_order": "C",
+      "qualified_accelerate_medians_seconds": {
+        "seconds": 0.121195896,
+        "scan_seconds": 0.0486371455,
+        "gemm_seconds": 0.07062977100000001,
+        "replay_seconds": 0.0019253125
+      },
+      "numpy_openblas_direct_seconds": 0.37029531299999996,
+      "numpy_openblas_is_not_njit_provider": true
+    },
+    {
+      "n": 2048,
+      "input_order": "C",
+      "output_order": "F",
+      "qualified_accelerate_medians_seconds": {
+        "seconds": 0.1322494795,
+        "scan_seconds": 0.048556875,
+        "gemm_seconds": 0.08177372899999999,
+        "replay_seconds": 0.0019203955
+      },
+      "numpy_openblas_direct_seconds": 0.37085650000000003,
+      "numpy_openblas_is_not_njit_provider": true
+    },
+    {
+      "n": 2048,
+      "input_order": "F",
+      "output_order": "C",
+      "qualified_accelerate_medians_seconds": {
+        "seconds": 0.13240972899999998,
+        "scan_seconds": 0.0476553335,
+        "gemm_seconds": 0.082870437,
+        "replay_seconds": 0.0019195624999999998
+      },
+      "numpy_openblas_direct_seconds": 0.369838062,
+      "numpy_openblas_is_not_njit_provider": true
+    },
+    {
+      "n": 2048,
+      "input_order": "F",
+      "output_order": "F",
+      "qualified_accelerate_medians_seconds": {
+        "seconds": 0.120468854,
+        "scan_seconds": 0.0480392085,
+        "gemm_seconds": 0.0705130625,
+        "replay_seconds": 0.0019211039999999999
+      },
+      "numpy_openblas_direct_seconds": 0.368028771,
+      "numpy_openblas_is_not_njit_provider": true
+    },
+    {
+      "n": 4096,
+      "input_order": "C",
+      "output_order": "C",
+      "qualified_accelerate_medians_seconds": {
+        "seconds": 0.8652133335000001,
+        "scan_seconds": 0.194654875,
+        "gemm_seconds": 0.6639212295,
+        "replay_seconds": 0.0077315000000000005
+      },
+      "numpy_openblas_direct_seconds": 2.9735257290000003,
+      "numpy_openblas_is_not_njit_provider": true
+    },
+    {
+      "n": 4096,
+      "input_order": "C",
+      "output_order": "F",
+      "qualified_accelerate_medians_seconds": {
+        "seconds": 1.225404521,
+        "scan_seconds": 0.1944784165,
+        "gemm_seconds": 1.0233136875,
+        "replay_seconds": 0.0076334585
+      },
+      "numpy_openblas_direct_seconds": 2.9977885420000003,
+      "numpy_openblas_is_not_njit_provider": true
+    },
+    {
+      "n": 4096,
+      "input_order": "F",
+      "output_order": "C",
+      "qualified_accelerate_medians_seconds": {
+        "seconds": 1.1803686455,
+        "scan_seconds": 0.1905146255,
+        "gemm_seconds": 0.9822570415,
+        "replay_seconds": 0.0077156665
+      },
+      "numpy_openblas_direct_seconds": 2.971397833,
+      "numpy_openblas_is_not_njit_provider": true
+    },
+    {
+      "n": 4096,
+      "input_order": "F",
+      "output_order": "F",
+      "qualified_accelerate_medians_seconds": {
+        "seconds": 0.9001204165000001,
+        "scan_seconds": 0.19043474999999999,
+        "gemm_seconds": 0.7011689375,
+        "replay_seconds": 0.0077491875
+      },
+      "numpy_openblas_direct_seconds": 2.9796669795,
+      "numpy_openblas_is_not_njit_provider": true
+    }
+  ],
+  "scope": "borrowed readonly mmap inputs and reused independent output; exact V26 numerical source plus chrono counters; diagnostic phase costs only",
+  "request_or_peak_acceptance": false,
+  "production_adopted": false,
+  "whole_goal_complete": false
+}

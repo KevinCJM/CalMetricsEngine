@@ -1,0 +1,78 @@
+{
+  "status": "passed",
+  "actual_adopted": false,
+  "goal_complete": false,
+  "fresh_complete_processes": 30,
+  "maximum_absolute_error": 4.757863492077519e-09,
+  "summary": {
+    "C": {
+      "v65": {
+        "seconds": 0.7591909580005449,
+        "group_medians": [
+          0.7591909580005449,
+          0.7710862919993815,
+          0.7390687910010456
+        ],
+        "heap_peak_bytes": 2288002088,
+        "incremental_rss_bytes": 2227634176
+      },
+      "v66": {
+        "seconds": 0.4714178340000217,
+        "group_medians": [
+          0.4742803749995801,
+          0.4713624579999305,
+          0.4714178340000217
+        ],
+        "heap_peak_bytes": 2288002088,
+        "incremental_rss_bytes": 2227617792
+      },
+      "njit": {
+        "seconds": 0.6456312080008502,
+        "group_medians": [
+          0.6456312080008502,
+          0.6484061249993829,
+          0.6342853330006619
+        ],
+        "heap_peak_bytes": 2281702136,
+        "incremental_rss_bytes": 2233630720
+      },
+      "new_over_njit": 0.7301658100755888,
+      "new_over_old": 0.6209476404218229
+    },
+    "F": {
+      "v65": {
+        "seconds": 0.7501848339998105,
+        "group_medians": [
+          0.7501848339998105,
+          0.7524913329998526,
+          0.7410214579995227
+        ],
+        "heap_peak_bytes": 2288002088,
+        "incremental_rss_bytes": 2233925632
+      },
+      "v66": {
+        "seconds": 0.46416320800017274,
+        "group_medians": [
+          0.47229329099900497,
+          0.4624462920000951,
+          0.46416320800017274
+        ],
+        "heap_peak_bytes": 2288002088,
+        "incremental_rss_bytes": 2227634176
+      },
+      "njit": {
+        "seconds": 0.643282958000782,
+        "group_medians": [
+          0.643282958000782,
+          0.6375635830008832,
+          0.6762978750011825
+        ],
+        "heap_peak_bytes": 2281702136,
+        "incremental_rss_bytes": 2233532416
+      },
+      "new_over_njit": 0.721553714780065,
+      "new_over_old": 0.6187317937705603
+    }
+  },
+  "interpretation": "Stable complete-request time improvement vs both V65 and strong same-core warmed NJIT; heap unchanged vs V65, no significant NI heap advantage; full/SAN/OFF and actual adoption pending"
+}

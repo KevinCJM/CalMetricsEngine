@@ -1,0 +1,25 @@
+{
+  "scope": "unique-schema construction diagnostic only; no numeric workload or NJIT comparison",
+  "common_caller_schema_outside_epoch": true,
+  "compiler_and_graph_alive_at_epoch_end": true,
+  "count": 4096,
+  "build_id": "b8dc2f16aef13017d8652575f282cc6522992fdabb08e051c68634b76b26cb4d",
+  "installed_binaries": {
+    "calmetrics_engine/_native.cpython-312-darwin.so": "7bf14689e214df2bb075b1b3369aa05555bb6378f1f130e49fff576bbd5daddb",
+    "calmetrics_engine/calmetrics_worker": "0d595fd63bcad0e8c006708fcadd853304112be78eac13f83027bf0e33ab1b23"
+  },
+  "elapsed_ms": 66.38491712510586,
+  "heap": {
+    "allocations": 240843,
+    "frees": 158898,
+    "allocated_bytes": 234898368,
+    "live_bytes": 23876664,
+    "peak_bytes": 25486864,
+    "untracked_frees": 0,
+    "table_overflows": 0
+  },
+  "limitations": [
+    "requested heap does not cover all allocators or Python arena suballocations",
+    "one sample diagnoses ownership risk, not a timing adoption gate"
+  ]
+}

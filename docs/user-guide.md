@@ -2,7 +2,9 @@
 
 [文档导航](README.md) · [全部算子](operator-reference.md) · [执行与性能](execution-guide.md)
 
-本手册对应当前 146 算子实现。使用预先构建的 AOT wheel；开发构建见根目录 [README](../README.md#install)。导入或请求期间不会编译机器码，也没有 Python 数值回退。GraphCompiler 将公式编译为原生执行图，不属于机器码 JIT。
+本手册对应当前 190 算子实现。使用预先构建的 AOT wheel；开发构建见根目录 [README](../README.md#install)。导入或请求期间不会编译机器码，也没有 Python 数值回退。GraphCompiler 将公式编译为原生执行图，不属于机器码 JIT。
+
+新增 `affine_contract` 为带显式初态的最后一轴保序收缩，`expm1` 为稳定的指数差。两者可组合成多个权重共享的投影 DAG；签名、空维/IEEE 行为、C/F 输出及 Excel 验证边界见[详细契约](mc-projection-primitives.md)。
 
 ## 1. 选择入口与职责
 
@@ -132,12 +134,28 @@ assert outputs[3].values[1].shape == (2,)
 assert all(np.all(o.root_statuses == 0) for o in outputs)
 ```
 
-`outputs[根序号].values[区间序号]` 是该根的只读 ndarray；标量为零维数组，实际形状由 C++ 执行产生。各根保留 `kind`、`dtype`、`axes`；`byte_offsets` 是底层缓冲区中的字节位置，不是日期或索引映射。时序/向量的轴标签也不等于提供了真实日期/资产标签，标签由调用方维护。
+`outputs[根序号].values[区间序号]` 是该根的只读 ndarray；标量为零维数组，实际形状由 C++ 执行产生。各根保留 `kind`、`dtype`、`axes`、`order`；值数组的 `.shape/.strides/.dtype` 描述每个区间的实际几何，`order` 为该根计划采用的 C/F 存储顺序（退化形状可能同时满足两者）；`byte_offsets` 是底层缓冲区中的字节位置，不是日期或索引映射。时序/向量的轴标签也不等于提供了真实日期/资产标签，标签由调用方维护。
 
 - isolate 下 `statuses[区间]` 与对应值同形，`root_statuses[区间]` 汇总该根的状态（取最大错误码，0 表示全部成功）；严格模式的逐元素 statuses 为 None，普通 NaN 仍按算子契约处理。
 - `shape_known[区间] == False` 表示上游失败使实际形状不可知：值和状态以空数组占位，必须读取非零 root_status。已知空数组则保留真实 rank/shape 和成功状态，二者不能混淆。
 - typed 结果不提供统一 `values/statuses` 数组，`offsets` 为 None。一次执行仍共用一个 DAG；不要为不同输出拆图重复计算。
 - `lag(x,k)`、`block_apply` 等动态输出可以公开返回，形状在每次执行中确定。需要保持输入时间长度时仍使用 aligned_shift。
+
+### 图结果的连续内存布局
+
+`compile(..., output_order="auto")` 是新图默认值，也可显式指定 `"C"` 或 `"F"`。C 按行连续、F 按列连续，逻辑 shape/axes 不变。当前接口对所有根指定同一个策略；auto 可为不同根选择不同物理顺序。scalar/vector 归一为 C。
+
+单一、未被其他节点共享的 `transpose(matmul(a,b))` 根在非隔离图中，auto 会采用 F。现有矩阵乘法核直接写入独立结果缓冲，转置只改变视图的形状和步长，避免再保留并复制一整块乘积矩阵。显式 C、错误隔离及共享乘积图保留各自原有布局与执行路径。
+
+同一私有 `symmetric_eigh(a)` 仅由特征值、特征向量两个紧邻根投影消费时，macOS 15+ arm64、Eigen开启的 auto 可为特征向量选择 F，特征值仍是连续向量。符合[执行准入](execution-guide.md)的矩阵直接写两个独立结果，不再物化完整记录；较小或不合资格形状仍从原记录物化。显式 C、额外消费者、isolate 与观察器保持原数值计算链；逻辑轴、排序、停止和所有权不变。
+
+错误隔离请求的 auto 保守采用 C，因为逐位置状态仍按 C 写入；显式 F 不受此策略限制。auto 首批保留稠密输入身份根、C 输入的转置根，以及符合条件的 F 逐元素图/列算术融合结果。列算术融合也支持第一轴反向连续、列距为正且不重叠的二维输入，结果仍返回逻辑坐标不变的正向 F 连续数组。macOS 15+ arm64、Accelerate 开启时，单一独立 typed exp/log 根也可保留直接输入的大数组连续 F 布局，详见[执行准入](execution-guide.md)。其余路径采用 C，尚不是所有算子的全局最优布局搜索。显式 F 对已支持的逐元素根直接写出；其他矩阵内核仍先在受预算约束的 C 工作区计算，再物化独立 F 结果，复制计入 `root_copy_bytes`。
+
+从 `result.outputs[r].order` 和 `result.outputs[r].values[i].strides` 读取实际布局；计划的 `metadata()["output_orders"]` 也可查询。不要无条件调用 `ascontiguousarray`。isolate 状态数组保持逻辑 C 顺序，通过相同多维坐标与值对应。普通调用和快照结果仍独立且只读，不会借用输入或后续调用的缓冲。
+
+符合[执行准入](execution-guide.md)的独立 exp/log 大矩阵、张量在显式跨 C/F 布局时，使用最多64KiB分块工作区直接写本次独立结果，避免整矩阵中间数组。auto 仍可保留原输入的高性能连续 F 布局，调用方无需先转换输入。
+
+新 auto/F typed 图使用 `typed-results-2`；显式 C 与旧保存定义保留 `typed-results-1`。旧 pickle/原生计划继续按 C 解释。输出策略进入图指纹，worker 使用父计划选定的顺序，inline/shared 均验证返回布局。
 
 ### 矩阵与静态向量
 
@@ -160,7 +178,7 @@ np.testing.assert_allclose(result.values, [[1.75, 3.], [3.75, 7.], [5.75, 11.]])
 
 ## 6. 窗口、分组和求根作用域
 
-这些由编译器拥有，不计入 146 个 canonical 算子，不通过 Python 回调计算 body。
+这些由编译器拥有，不计入 190 个 canonical 算子，不通过 Python 回调计算 body。
 
 | 结构 | 数学行为 |
 | --- | --- |
@@ -268,9 +286,15 @@ assert not retained.values.flags.writeable
 
 同 dtype 的 bool/int64 旧格式在 prepared.run 遇到失败时要求改用 run_audit/run_snapshot，避免裸数组隐藏状态。typed 的借用值、实际形状和状态只对应本轮执行；下次运行后不得继续把旧描述与已覆盖的值配对使用。NumPy 的只读标记防止误写，不是安全隔离；禁止修改底层 base 的 dtype/shape/存储。
 
+prepared 只在首次借用执行或访问 `output` 时建立借用缓冲；只调用 `run_snapshot()` 不保留额外同尺寸借用输出。已建立缓冲的防篡改检查不变，各次快照仍有独立所有权。准备成本与常驻缓冲均须计入内存比较。
+
 数据、区间或计划身份不兼容时重新绑定/规划；不要绕过 stale/prepared 检查。共享输出即使底层来自原生映射也会保活 owner；只读标志本身不能证明结果独立。
 
 普通 execute 会在复核当前布局、区间内容和请求策略后复用兼容计划；几何变化时自动重建。显式传入不兼容计划、或改变 prepared 的绑定几何仍报错。计划复用不影响每次结果的独立所有权。
+
+普通 execute 的隐式绑定缓存只保留布局元数据，不持有数组，也不注册会改变 NumPy resize 行为的弱引用。每次从当前请求取得强引用，保活输入、区间、产品索引及数组参数到结果构造或异常处理结束；数组自身保活其底层分配。缓存命中仍验证当前地址、dtype、shape、strides、分配几何及所有权边界；即使分配器复用了地址，也不能读取旧对象或旧数值。显式 prepared 继续强保活绑定输入，直到 prepared 释放；共享输入与 ModelPayload 保持各自的显式生命周期。
+
+普通缓存中的 dtype 只保存已校验的数值描述，移除可能间接持有大数组的 dtype metadata。调用方数组及其 metadata 不被修改，exact native dtype 校验保持不变；显式 prepared 的强引用契约也不变。
 
 ## 10. 常见问题
 
@@ -313,6 +337,8 @@ assert not restored.fields["values"].flags.writeable
 
 `ModelPayload.from_fields(types, fields, metadata)` 也可从数组建立载荷。最多 4096 个具名字段；字段为静态 rank-0/1/2/3 数组，不接受 time 轴、逻辑窗口或内部记录。建立时复制一次到物理只读共享存储；字段 NumPy 视图保活 owner。可用 `GraphCompiler(model.types)` 编译并将 model 直接作为 inputs；输入名必须完全匹配。混合外部数组时可使用 `model.fields` 的视图，但普通 dict 输入不携带完整模型身份。
 
+字段为 C/F 连续时保留实际存储顺序；其他 stride 按逻辑 C 顺序打包。含非退化 F 字段时使用载荷 v2 和 `model-2-` 身份，身份包含布局和物理字节；全 C（包括两种布局都成立的退化形状）保持 v1 与 `model-1-` 身份。相同逻辑数值的 C/F 模型可具有不同身份，不能跨模型复用旧计划。旧载荷可继续解码。图结果导出模型保留该结果的真实 C/F 布局。模型身份包含类型声明和物理字节；只有声明、数值及布局均一致时才可能保持原身份。
+
 六项示例 metadata 均必填非空字符串。身份覆盖字段声明顺序、精确 dtype/shape/字节以及全部 metadata，属于内容标识，不是认证签名。`to_bytes/from_bytes` 使用版本化 little-endian 协议，不使用 pickle；解码会分配新的独立载荷。算法版本、训练选项和随机版本的含义由调用方负责。失败结果和时间序列不能直接导出为模型。载荷改变后需重新规划；旧模型、旧结果不会被覆写。
 
 ## 12. 开发分支新增：有界迭代与诊断
@@ -339,3 +365,75 @@ status/count 为 int64 标量，residual 为 float64。当前产生 0（步长�
 结构错误、预算超限、取消和超时仍为执行错误；独立根的隔离行为遵循原契约。每轮复用原生子图和状态缓冲，使用同一 CPU/内存准入，不创建额外线程池。该通用接口尚不等于 QP、SQP、EM 或具体模型算法的实现。
 
 执行层可将逐元素链按缓存块融合，短标量广播链进一步使用 AOT 寄存器融合，并让 typed 根直接写本次独占输出。可证明始终有限的短迭代链复用独占结果缓冲，一般子图保留候选状态以支持失败恢复。这些优化不改变逻辑 DAG、dtype、轴、错误策略或 prepared 的借用／快照契约。只读输入与先前的独立结果均不作为工作缓冲。调度与复制审计见[执行指南](execution-guide.md#9-本轮物理执行优化与审计)。
+
+## 13. 矩阵分解与数组轴操作
+
+新增 147–160 号原语的完整签名见[算子参考](operator-reference.md#矩阵分解与数组轴操作)。`solve_multi` 解多个 RHS，旧 `solve` 仍解向量。对称分解不自动修正非对称矩阵、不加 jitter、不截断特征值；调用方需要修正时必须显式构图。
+
+```python
+import numpy as np
+from calmetrics_engine import GraphCompiler, AdaptiveScheduler
+
+a = np.array([[4., 1.], [1., 3.]])
+graph = GraphCompiler({"a": {
+    "kind": "matrix", "axes": ["asset", "asset"], "shape": ["N", "N"]
+}}).compile({
+    "lower": "cholesky(a)",
+    "values": "eigenvalues(symmetric_eigh(a))",
+    "vectors": "eigenvectors(symmetric_eigh(a))",
+    "column_sum": "sum_axis(a,0)",
+})
+with AdaptiveScheduler(cpu_budget=1) as engine:
+    result = engine.execute(graph, {"a": a}, np.array([0], np.int64), np.array([0], np.int64))
+lower = result.outputs[0].values[0]
+np.testing.assert_allclose(lower @ lower.T, a)
+```
+
+矩阵的两个轴均为静态 asset，因此 `[0,0)` 不截断它。两个特征投影通过 CSE 共用一次分解；输入内容变化后仍重新计算，不按数组地址缓存数值。公开图结果和 `run_snapshot()` 独立拥有；直接算子的切片、换轴、广播与分解投影是保活源对象的只读视图。
+
+`take_axis/slice_axis/concatenate/stack/broadcast_like/swap_axes` 保留数组 dtype，支持 float64/int64/bool；`sum_axis/mean_axis` 只接受 float64。轴、slice 的 start/stop/step 在 AST 中要求字面整数，动态下标由 int64 数组传给 `take_axis`。slice 只接受非负边界和正步长；负 stride 输入本身仍受支持。
+
+`mean_axis` 是沿轴顺序求和后除以轴长，旧 `mean` 仍为增量均值。两者在极端抵消时可能不同，不能未经验证替换。新算子的性能、内存和 Excel 验收范围见[本轮记录](matrix-array-foundation.md)。
+
+## 概率模型：初始化、训练和推断分开
+
+新增 161–185 号原语覆盖[统计、Gaussian EM、HMM 与后处理](operator-reference.md#概率模型与情景识别数学基础)。均值/方差使用 `component × factor` 轴，观测使用 `time × factor` 或其他已支持的具名轴；普通矩阵不能冒充拟合模型。以下图共享一次 EM，输出参数、迭代诊断和每行类别：
+
+```python
+import numpy as np
+from calmetrics_engine import AdaptiveScheduler, GraphCompiler
+
+types = {
+    "x": {"kind": "matrix", "axes": ["scenario", "factor"], "shape": ["N", "D"]},
+    "m": {"kind": "matrix", "axes": ["component", "factor"], "shape": ["K", "D"]},
+    "v": {"kind": "matrix", "axes": ["component", "factor"], "shape": ["K", "D"]},
+    "w": {"kind": "vector", "axes": ["component"], "shape": ["K"]},
+}
+fit = "gaussian_mixture_em(x,w,m,v,10)"
+density = f"gaussian_log_density(x,mixture_means({fit}),mixture_variances({fit}))"
+joint = f"{density}+broadcast_like(log(maximum(mixture_weights({fit}),1e-12)),{density})"
+graph = GraphCompiler(types).compile({
+    "means": f"mixture_means({fit})",
+    "iterations": f"em_iterations({fit})",
+    "converged": f"em_converged({fit})",
+    "codes": f"argmax_axis(softmax_axis({joint},1),1)",
+})
+inputs = {
+    "x": np.array([[-1., -.8], [-.8, -1.], [.9, 1.], [1., .9]]),
+    "m": np.array([[-1., -1.], [1., 1.]]),
+    "v": np.ones((2, 2)), "w": np.array([.5, .5]),
+}
+with AdaptiveScheduler(cpu_budget=1) as engine:
+    result = engine.execute(graph, inputs, np.array([0], np.int64), np.array([0], np.int64))
+assert all(output.root_statuses[0] == 0 for output in result.outputs)
+assert result.outputs[0].values[0].shape == (2, 2)
+assert result.outputs[3].values[0].dtype == np.int64
+```
+
+初值、训练样本与停止参数是算法身份的一部分。`hmm_filter` 用于因果推断，续接训练后观测时显式传最后分布并设置 `predict_first=1`；`hmm_smooth` 读取完整序列，不能用于声称无未来信息的实时推断。最多轮数耗尽仍返回参数，但 `em_converged=false`。平台的金融标签、训练窗口及有效时点仍由调用方确定。
+
+## 按轴递推和多分位数
+
+`cumulative_product_axis(values,axis,initial)` 沿选定轴逐项乘入初态；`cumulative_max_axis(values,axis,initial)` 以严格比较更新初态。两者保持输入形状。`quantiles_axis(values,probabilities,axis)` 对每条 line 排序一次，按全部概率线性插值，将该轴长度替换为概率数 Q。支持 float64 rank 1–3、明确初态和合法 strides；轴、NaN、空样本、量纲及错误规则见[算子参考](operator-reference.md#按轴递推与多分位数)。
+
+它们可构成完整路径、fan 和摘要的数学 DAG。一般执行可能需要完整中间数组；有界紧凑执行须满足[完整消费者闭包](mc-axis-primitives.md)，单算子可用不代表完整链性能已经验收。

@@ -1,0 +1,482 @@
+--- before/cpp/graph.cpp
++++ candidate/cpp/graph.cpp
+@@ -4828,8 +4828,9 @@
+           if (scratch.cancelled && scratch.cancelled->load()) throw native::Timeout("native row batch cancelled");
+           blocked = inputs;
+           auto &weights = blocked[plan.input];
+-          weights.data = static_cast<const double *>(weights.data) +
+-              std::ptrdiff_t(first) * weights.stride[0];
++          if (weights.data)
++            weights.data = static_cast<const double *>(weights.data) +
++                std::ptrdiff_t(first) * weights.stride[0];
+           const auto count = std::min(width, total_count - first);
+           weights.shape.dim[0] = count;
+           ResultLayout selected;
+@@ -4863,7 +4864,10 @@
+             }
+           }
+         }
+-        if (!failure.empty()) throw ops::Error(failure.c_str());
++        if (!failure.empty()) {
++          scratch.failed_node = earliest;
++          throw ops::Error(failure.c_str());
++        }
+         for (std::size_t root = 0; root < output_columns; ++root)
+           merged.result_shapes[row * output_columns + root] = ops::vector_shape(total_count);
+       }
+@@ -5024,6 +5028,62 @@
+   }
+   return execute_impl(program, inputs, parameters, parameter_count, starts, ends,
+                       rows, output, output_columns, root_scratch, false, nullptr, true, false, layout, result_row);
++}
++
++Audit execute_row_batch_range(const Program &program,
++    const std::vector<ops::Value> &inputs, const double *parameters,
++    std::size_t parameter_count, const std::int64_t *starts,
++    const std::int64_t *ends, void *output, const ResultLayout &layout,
++    std::size_t first, std::size_t last, bool publish_metadata,
++    std::size_t &failed_node, std::chrono::steady_clock::time_point deadline,
++    const std::atomic<bool> *cancelled, bool allow_workspace_loan) {
++  failed_node = std::numeric_limits<std::size_t>::max();
++  ops::require(program.execution_metadata && program.execution_metadata->row_batch &&
++      !program.isolate_errors && starts && ends && output && starts[0] >= 0 &&
++      ends[0] >= starts[0], "ROW_BATCH_RANGE_GEOMETRY");
++  std::vector<ops::Value> views;
++  std::size_t width = 0, count = 0;
++  ops::require(row_batch_inputs(program, inputs, std::size_t(ends[0] - starts[0]),
++      views, width, count) && first <= last && last <= count && last - first >= 128,
++      "ROW_BATCH_RANGE_GEOMETRY");
++  const auto columns = program.roots.size();
++  ops::require(layout.columns == columns && layout.slots.size() == columns &&
++      layout.row_bytes.size() == 2 && layout.row_statuses.size() == 2,
++      "ROW_BATCH_RANGE_LAYOUT");
++  ResultLayout selected;
++  selected.columns = columns; selected.orders = layout.orders;
++  // Slots have global output offsets. Zero extent prevents the normal row
++  // executor from clearing another worker's disjoint result fragments.
++  selected.row_bytes = {0, 0}; selected.row_statuses = {0, 0};
++  selected.slots.reserve(columns);
++  for (const auto &source : layout.slots) {
++    ops::require(source.capacity >= count && source.byte_offset <= layout.bytes() &&
++        count <= (layout.bytes() - source.byte_offset) / sizeof(double),
++        "ROW_BATCH_RANGE_LAYOUT");
++    auto slot = source;
++    slot.byte_offset += first * sizeof(double); slot.capacity = last - first;
++    selected.slots.push_back(slot);
++  }
++  views = inputs;
++  auto &matrix = views[program.execution_metadata->row_batch->input];
++  if (matrix.data)
++    matrix.data = static_cast<const double *>(matrix.data) +
++        std::ptrdiff_t(first) * matrix.stride[0];
++  matrix.shape.dim[0] = last - first;
++  root_scratch.failed_node = std::numeric_limits<std::size_t>::max();
++  try {
++    auto result = execute(program, views, parameters, parameter_count, starts, ends,
++        1, output, columns, &selected, 0, deadline, cancelled, allow_workspace_loan);
++    if (publish_metadata) {
++      result.result_shapes.assign(columns, ops::vector_shape(count));
++    } else {
++      result.result_shapes.clear(); result.root_statuses.clear();
++    }
++    return result;
++  } catch (const ops::Error &) {
++    failed_node = root_scratch.failed_node;
++    throw;
++  }
+ }
+ 
+ Audit execute_observed(const Program &program, const std::vector<ops::Value> &inputs,
+--- before/cpp/include/calmetrics_engine/graph.hpp
++++ candidate/cpp/include/calmetrics_engine/graph.hpp
+@@ -436,6 +436,16 @@
+               std::chrono::steady_clock::time_point deadline = std::chrono::steady_clock::time_point::max(),
+               const std::atomic<bool> *cancelled = nullptr,
+               bool allow_workspace_loan = false);
++
++// Internal range of the proved independent matrix-row closure. The normal
++// executor and original logical nodes remain the only numerical implementation.
++Audit execute_row_batch_range(const Program &, const std::vector<ops::Value> &,
++    const double *parameters, std::size_t parameter_count,
++    const std::int64_t *starts, const std::int64_t *ends, void *output,
++    const ResultLayout &, std::size_t first, std::size_t last,
++    bool publish_metadata, std::size_t &failed_node,
++    std::chrono::steady_clock::time_point deadline,
++    const std::atomic<bool> *cancelled, bool allow_workspace_loan);
+ 
+ // Explicit diagnostic replay observes canonical operands/results, including
+ // nested scopes. Ordinary execution does not scan values or invoke callbacks.
+--- before/cpp/planner.cpp
++++ candidate/cpp/planner.cpp
+@@ -908,6 +908,20 @@
+       p->graph->branches.size() > 1 && heavy_branches >= 2 &&
+       p->estimated_work_units >= config.dag_branch_work_units &&
+       branch_task_count > rows;
++
++  // Reuse the explicit independent-row proof, retaining every shared root and
++  // each row's complete time/contracting axes in the same native task.
++  std::size_t array_rows = 0, row_range_overhead = 0;
++  if (!process && rows == 1 && cpu > 1 && inputs && p->result_layout &&
++      p->graph->program.execution_metadata->row_batch) {
++    std::vector<ops::Value> blocked;
++    std::size_t batch = 0, count = 0;
++    if (graph::row_batch_inputs(p->graph->program, *inputs, geometry.max_window,
++        blocked, batch, count)) array_rows = count;
++  }
++  const auto row_workers = std::min({cpu, array_rows / 128,
++      static_cast<std::size_t>(std::min(static_cast<double>(cpu),
++          p->estimated_work_units / config.thread_work_units))});
+ 
+   // Only a complete pointwise region may partition one tensor. Cross-element
+   // kernels and recurrence states never inherit this capability by shape alone.
+@@ -945,6 +959,16 @@
+     p->process_count =
+         std::min({cpu, config.max_processes,
+                   std::max<std::size_t>(1, rows / config.min_rows_per_worker)});
++  } else if (row_workers >= 2) {
++    p->lane = "thread"; p->parallel_dimension = "array_row";
++    p->tensor_elements = array_rows; p->thread_count = row_workers;
++    row_range_overhead = checked_add(checked_mul(inputs->size(), sizeof(ops::Value)),
++        checked_add(checked_mul(p->graph->program.nodes.size(), 2 * sizeof(ops::Shape)),
++            checked_add(checked_mul(p->graph->program.roots.size(),
++                sizeof(graph::ResultSlot) + sizeof(ops::Shape) + sizeof(std::int16_t)), 4096)));
++    p->estimated_worker_scratch_bytes = checked_add(p->estimated_worker_scratch_bytes,
++        row_range_overhead);
++    p->reason_codes.push_back("independent_matrix_row_closure");
+   } else if (dag_branch) {
+     p->lane = "thread";
+     p->parallel_dimension = "dag_branch";
+@@ -1040,6 +1064,17 @@
+     check_transport();
+     p->estimated_total_memory_bytes = total_memory(*p, workers);
+   }
++  if (!process && row_range_overhead && workers == 1) {
++    // A constrained request must retain the old admissible single path; range
++    // descriptions are not used by that path and must not block its admission.
++    p->estimated_worker_scratch_bytes -= row_range_overhead;
++    p->lane = "single"; p->parallel_dimension = "interval";
++    p->tensor_elements = 0;
++    p->reason_codes.erase(std::remove(p->reason_codes.begin(), p->reason_codes.end(),
++        "parallelize_by_array_row"), p->reason_codes.end());
++    p->reason_codes.push_back("row_parallelism_reduced_to_single");
++    p->estimated_total_memory_bytes = total_memory(*p, 1);
++  }
+   if (memory_budget && p->estimated_total_memory_bytes > *memory_budget)
+     throw std::bad_alloc();
+   if (process)
+@@ -1072,6 +1107,10 @@
+                      });
+     for (const auto &task : tasks)
+       p->branch_tasks.push_back(task.task);
++  } else if (p->parallel_dimension == "array_row") {
++    for (std::size_t i = 0; i < workers; ++i)
++      p->chunks.push_back({p->tensor_elements * i / workers,
++                          p->tensor_elements * (i + 1) / workers});
+   } else if (p->parallel_dimension == "tensor") {
+     const auto tiles = (p->tensor_elements + graph::pointwise_tile_elements - 1) / graph::pointwise_tile_elements;
+     for (std::size_t i = 0; i < workers; ++i)
+@@ -1094,5 +1133,21 @@
+   const auto geometry = typed_geometry<false>(p.graph->program, sizes, inputs, starts, ends, rows, product_ids, false);
+   require(geometry.signature == p.geometry_signature,
+           "stale execution plan interval/product geometry");
++  if (p.parallel_dimension == "array_row") {
++    require(p.lane == "thread" && p.thread_count >= 2 && p.thread_count <= p.cpu_budget &&
++        rows == 1 && inputs && p.result_layout && p.graph->program.execution_metadata->row_batch &&
++        p.chunks.size() == p.thread_count, "invalid independent row plan");
++    std::vector<ops::Value> blocked;
++    std::size_t batch = 0, count = 0;
++    require(graph::row_batch_inputs(p.graph->program, *inputs, geometry.max_window,
++        blocked, batch, count) && count == p.tensor_elements, "stale independent row geometry");
++    std::size_t end = 0;
++    for (const auto chunk : p.chunks) {
++      require(chunk.begin == end && chunk.end >= chunk.begin && chunk.end <= count &&
++          chunk.end - chunk.begin >= 128, "invalid independent row range");
++      end = chunk.end;
++    }
++    require(end == count, "incomplete independent row ranges");
++  }
+ }
+ } // namespace calmetrics_engine::planner
+--- before/cpp/native_runtime.cpp
++++ candidate/cpp/native_runtime.cpp
+@@ -3,6 +3,7 @@
+ #include "calmetrics_engine/native_process.hpp"
+ #include <algorithm>
+ #include <cmath>
++#include <limits>
+ 
+ namespace calmetrics_engine::native {
+ namespace {
+@@ -207,6 +208,30 @@
+           throw std::invalid_argument("tensor plan no longer matches pointwise geometry");
+         return result;
+       });
++    } else if (!process && p.parallel_dimension == "array_row") {
++      struct Failure { std::size_t node = std::numeric_limits<std::size_t>::max(); std::string text; };
++      std::vector<Failure> failures(p.chunks.size());
++      execute_tasks(p.chunks.size(), [&](std::size_t i, const std::atomic<bool> &cancelled) {
++        const auto chunk = p.chunks[i];
++        std::size_t node = std::numeric_limits<std::size_t>::max();
++        try {
++          return graph::execute_row_batch_range(p.graph->program, batch.inputs,
++              batch.parameters, batch.parameter_count, batch.starts, batch.ends,
++              output, *p.result_layout, chunk.begin, chunk.end, i == 0, node,
++              deadline, &cancelled, allow_workspace_loan);
++        } catch (const ops::Error &error) {
++          if (node == std::numeric_limits<std::size_t>::max()) throw;
++          // Numerical failures do not cancel later ranges: a later row can
++          // fail at an earlier logical node. Resource/timeout errors still use
++          // execute_tasks' existing cancellation and drain protocol.
++          failures[i].node = node; failures[i].text = error.what();
++          return graph::Audit{};
++        }
++      });
++      const auto first = std::min_element(failures.begin(), failures.end(),
++          [](const Failure &a, const Failure &b) { return a.node < b.node; });
++      if (first != failures.end() && first->node != std::numeric_limits<std::size_t>::max())
++        throw ops::Error(first->text.c_str());
+     } else if (!process && p.parallel_dimension == "dag_branch") {
+       execute_tasks(p.branch_tasks.size(), [&](std::size_t i,
+                                                const std::atomic<bool> &cancelled) {
+--- before/cpp/native_api_bindings.cpp
++++ candidate/cpp/native_api_bindings.cpp
+@@ -1084,6 +1084,16 @@
+     else {
+       py::gil_scoped_release release;
+       plan = engine->plan(graph, bound->native);
++      if (plan->parallel_dimension == "array_row") {
++        // Prepared output still uses the documented single-lane lifetime.
++        // Automatic row threading must not reject a formerly valid prepare.
++        plan = p::make_plan(graph, engine->config(), bound->native.input_sizes(),
++            bound->native.starts, bound->native.ends, bound->native.rows,
++            bound->native.product_ids, 1, {}, false, false,
++            !bound->native.shared_inputs.empty(), &bound->native.inputs,
++            bound->native.owned_input_bytes);
++        plan->model_identity = bound->native.model_identity;
++      }
+     }
+     if (plan->lane != "single")
+       throw py::value_error(
+--- before/tests/row_batch_native_cases.hpp
++++ candidate/tests/row_batch_native_cases.hpp
+@@ -3,6 +3,7 @@
+ #include "calmetrics_engine/native_runtime.hpp"
+ #include <atomic>
+ #include <cmath>
++#include <limits>
+ #include <stdexcept>
+ #include <string>
+ #include <vector>
+@@ -54,6 +55,47 @@
+   for(std::size_t i=payload;i<output.size();++i) check(output[i]==-777,"row partition overwrote guard");
+   check(weights==original_weights && returns==original_returns,"row partition mutated input");
+ 
++  // A selected row fragment writes only its own part of the global root and
++  // keeps global metadata. Guards exercise the same entry used by threads.
++  std::size_t failed_node = 0;
++  std::fill(output.begin(),output.end(),-777);
++  const auto fragment=g::execute_row_batch_range(p,values,nullptr,0,&start,&end,
++      output.data(),layout,10,rows,true,failed_node,n::Deadline::max(),nullptr,false);
++  check(fragment.result_shapes.size()==1 && fragment.result_shapes[0]==o::vector_shape(rows),
++      "row fragment published a local shape");
++  check(fragment.root_copy_bytes==0 && fragment.direct_output_bytes==(rows-10)*8,
++      "row fragment copied or wrote the wrong result extent");
++  for(std::size_t i=0;i<output.size();++i)
++    check(output[i]==(i>=10 && i<rows ? canonical[i] : -777),
++        "row fragment wrote outside its selected range");
++  const auto reject_range=[&](std::size_t first,std::size_t last,const g::ResultLayout &destination) {
++    std::fill(output.begin(),output.end(),-777); bool rejected=false;
++    try {g::execute_row_batch_range(p,values,nullptr,0,&start,&end,output.data(),
++        destination,first,last,false,failed_node,n::Deadline::max(),nullptr,false);}
++    catch(const o::Error &) {rejected=true;}
++    check(rejected,"malformed row fragment was admitted");
++    check(failed_node==std::numeric_limits<std::size_t>::max(),
++        "malformed row fragment reported a stale numerical node");
++    for(const auto value:output) check(value==-777,"malformed row fragment wrote output");
++  };
++  reject_range(0,127,layout); reject_range(0,rows+1,layout);
++  auto range_layout=layout; --range_layout.slots[0].capacity;
++  reject_range(0,rows,range_layout);
++  // Empty contracting axes may have either a null or nonnull input pointer.
++  // Row clipping must not flatten an empty shape (which would divide by zero).
++  for (bool null_pointer : {false,true}) {
++    auto empty=values; empty[0].shape=o::matrix_shape(rows,0); empty[0].set_contiguous_strides();
++    empty[1].shape=o::matrix_shape(times,0); empty[1].set_contiguous_strides();
++    if(null_pointer) empty[0].data=empty[1].data=nullptr;
++    const auto empty_layout=g::result_layout(p,empty,&start,&end,1);
++    std::fill(output.begin(),output.end(),-777);
++    const auto part=g::execute_row_batch_range(p,empty,nullptr,0,&start,&end,
++        output.data(),empty_layout,10,rows,false,failed_node,n::Deadline::max(),nullptr,false);
++    check(part.result_shapes.empty() && part.root_statuses.empty(),"secondary fragment published metadata");
++    for(std::size_t i=0;i<rows;++i) check(output[i]==(i<10 ? -777 : 0),"empty fragment value or extent wrong");
++    for(std::size_t i=rows;i<output.size();++i) check(output[i]==-777,"empty fragment overwrote guard");
++  }
++
+   auto malformed=layout; --malformed.slots[0].capacity;
+   std::fill(output.begin(),output.end(),-777);
+   bool capacity_failed=false;
+--- before/tests/test_array_row_parallel.py
++++ candidate/tests/test_array_row_parallel.py
+@@ -0,0 +1,162 @@
++"""Independent rows retain the complete canonical graph and owned outputs."""
++import numpy as np
++import pytest
++from calmetrics_engine import AdaptiveScheduler, GraphCompiler, PlannerConfig
++from .test_row_batch_execution import TYPES, Y
++
++
++def data(n, t, k, layout='C'):
++    rng = np.random.default_rng(20120)
++    w = rng.uniform(.05, 1., size=(n, k))
++    r = rng.normal(scale=.01, size=(t, k))
++    if layout == 'F':
++        w = np.array(w, order='F'); r = np.array(r, order='F')
++    elif layout == 'negative':
++        w = w[::-1, ::-1]; r = r[::-1, ::-1]
++    elif layout == 'padded':
++        a = np.full((n, k*2), np.nan); a[:, ::2] = w; w = a[:, ::2]
++        a = np.full((t, k*2), np.nan); a[:, ::2] = r; r = a[:, ::2]
++    result = dict(w=w, r=r, p=np.array([.05]))
++    for x in result.values(): x.flags.writeable = False
++    return result
++
++
++def config():
++    return PlannerConfig(thread_work_units=1.)
++
++
++def roots():
++    # Keep shared matrix, ordered sum, product, max and nonlinear consumers.
++    return [f'sum_axis({Y},1)', f'sum_axis(multiply({Y},{Y}),1)',
++            f'max_axis(cumulative_product_axis(add({Y},1),1,1),1)']
++
++
++@pytest.mark.parametrize('n', [128, 257, 517, 4097])
++@pytest.mark.parametrize('t,k', [(0, 7), (17, 0), (129, 7), (257, 7)])
++@pytest.mark.parametrize('layout', ['C', 'F', 'negative', 'padded'])
++def test_row_ranges_keep_values_metadata_budget_and_retained_outputs(n, t, k, layout):
++    inputs = data(n, t, k, layout)
++    original = {name:x.copy() for name,x in inputs.items()}
++    expressions = roots() if t else roots()[:2]
++    graph = GraphCompiler(TYPES).compile(expressions, result_format='typed', output_order='F')
++    starts = np.array([0], np.int64); ends = np.array([t], np.int64)
++    with AdaptiveScheduler(cpu_budget=1, config=config()) as single:
++        expected = single.execute(graph, inputs, starts, ends)
++    with AdaptiveScheduler(cpu_budget=4, config=config()) as parallel:
++        first = parallel.execute(graph, inputs, starts, ends)
++        saved = [out.values[0].copy() for out in first.outputs]
++        second = parallel.execute(graph, inputs, starts, ends)
++    workers = min(4, n//128)
++    assert first.audit['cpu_tokens'] <= 4
++    if workers >= 2:
++        assert first.plan.parallel_dimension == 'array_row'
++        assert first.plan.thread_count == workers
++        chunks = first.plan.metadata()['chunks']
++        assert chunks[0][0] == 0 and chunks[-1][1] == n
++        assert all(a[1] == b[0] for a,b in zip(chunks,chunks[1:]))
++    for index,out in enumerate(first.outputs):
++        actual = out.values[0]
++        assert actual.shape == (n,) and not actual.flags.writeable
++        np.testing.assert_array_equal(actual.view(np.uint64), expected.outputs[index].values[0].view(np.uint64))
++        np.testing.assert_array_equal(actual.view(np.uint64), saved[index].view(np.uint64))
++        assert not np.shares_memory(actual, second.outputs[index].values[0])
++        assert all(not np.shares_memory(actual,x) for x in inputs.values())
++    observed = max(c['numeric_arena_bytes']+c['mask_arena_bytes']+c['operator_workspace_capacity_bytes']
++                   for c in first.audit['native_chunks'])
++    assert first.plan.estimated_worker_scratch_bytes >= observed
++    assert sum(c['root_copy_bytes'] for c in first.audit['native_chunks']) == 0
++    for name,x in inputs.items():
++        np.testing.assert_array_equal(x.view(np.uint64), original[name].view(np.uint64))
++
++
++def test_memory_budget_can_recover_the_original_single_thread_admission():
++    inputs=data(4097,257,7); graph=GraphCompiler(TYPES).compile(roots(),result_format='typed')
++    starts=np.array([0],np.int64);ends=np.array([257],np.int64)
++    with AdaptiveScheduler(cpu_budget=1,config=config()) as single:
++        budget=single.plan(graph,inputs,starts,ends).estimated_total_memory_bytes
++        expected=single.execute(graph,inputs,starts,ends)
++    with AdaptiveScheduler(cpu_budget=4,config=config()) as parallel:
++        result=parallel.execute(graph,inputs,starts,ends,memory_budget_bytes=budget)
++    assert result.plan.lane=='single' and result.audit['cpu_tokens']==1
++    assert result.plan.estimated_total_memory_bytes<=budget
++    for a,b in zip(result.outputs,expected.outputs):np.testing.assert_array_equal(a.values[0],b.values[0])
++
++
++@pytest.mark.parametrize('reverse', [False,True])
++def test_later_row_earlier_node_failure_keeps_serial_error_priority_and_cpu_release(reverse):
++    inputs=data(517,129,1)
++    w=np.full((517,1),2.); w[10]=1.; w[-5]=-1.
++    if reverse:w=w[::-1]
++    w.flags.writeable=False
++    r=np.ones((129,1));r.flags.writeable=False
++    inputs.update(w=w,r=r)
++    expressions=[f'sum_axis(log({Y}),1)',f'sum_axis(divide({Y},subtract({Y},1)),1)']
++    graph=GraphCompiler(TYPES).compile(expressions,result_format='typed')
++    starts=np.array([0],np.int64);ends=np.array([129],np.int64)
++    with AdaptiveScheduler(cpu_budget=1,config=config()) as single:
++        with pytest.raises(ValueError) as reference:single.execute(graph,inputs,starts,ends)
++    with AdaptiveScheduler(cpu_budget=4,config=config()) as parallel:
++        with pytest.raises(ValueError) as actual:parallel.execute(graph,inputs,starts,ends)
++        assert str(actual.value)==str(reference.value)
++        healthy=data(517,129,1)
++        result=parallel.execute(GraphCompiler(TYPES).compile(roots(),result_format='typed'),healthy,starts,ends)
++        assert all(np.isfinite(out.values[0]).all() for out in result.outputs)
++        assert result.audit['cpu_tokens']<=4
++
++
++def test_multiple_intervals_and_public_matrix_do_not_use_row_ranges():
++    inputs=data(517,257,7)
++    starts=np.array([0,0],np.int64);ends=np.array([257,257],np.int64)
++    compiler=GraphCompiler(TYPES)
++    with AdaptiveScheduler(cpu_budget=4,config=config()) as scheduler:
++        multiple=scheduler.execute(compiler.compile(roots(),result_format='typed'),inputs,starts,ends)
++        assert multiple.plan.parallel_dimension!='array_row'
++        for out in multiple.outputs:np.testing.assert_array_equal(out.values[0],out.values[1])
++        exposed=scheduler.execute(compiler.compile(roots()+[Y],result_format='typed'),inputs,starts[:1],ends[:1])
++        assert exposed.plan.parallel_dimension!='array_row'
++        assert exposed.outputs[-1].values[0].shape==(517,257)
++
++
++def test_timeout_drains_workers_before_next_independent_request():
++    inputs=data(65536,2520,7);compiler=GraphCompiler(TYPES)
++    graph=compiler.compile(roots(),result_format='typed')
++    starts=np.array([0],np.int64);ends=np.array([2520],np.int64)
++    with AdaptiveScheduler(cpu_budget=4,config=config()) as scheduler:
++        with pytest.raises(TimeoutError):scheduler.execute(graph,inputs,starts,ends,timeout=.001)
++        healthy=data(517,129,7)
++        result=scheduler.execute(graph,healthy,starts,np.array([129],np.int64))
++        assert all(np.isfinite(out.values[0]).all() for out in result.outputs)
++        assert result.audit['cpu_tokens']<=4
++
++
++@pytest.mark.parametrize('layout', ['C', 'F', 'negative', 'padded'])
++def test_current_parameters_inputs_and_prepared_single_snapshot_remain_independent(layout):
++    inputs = data(517, 129, 7, layout)
++    inputs['w'].flags.writeable = True
++    types = dict(TYPES, shift='scalar')
++    expression = f'sum_axis(add({Y},shift),1)'
++    graph = GraphCompiler(types).compile(expression, result_format='typed')
++    starts = np.array([0], np.int64); ends = np.array([129], np.int64)
++    parameters = np.array([.001])
++    with AdaptiveScheduler(cpu_budget=1, config=config()) as single:
++        prepared = single.prepare_execution(graph, inputs, starts, ends, parameters=parameters)
++        snapshot = prepared.run_snapshot()
++        stable = snapshot.outputs[0].values[0].copy()
++        inputs['w'] += .01
++        parameters[0] = .003
++        expected = prepared.run_snapshot()
++    with AdaptiveScheduler(cpu_budget=4, config=config()) as scheduler:
++        compatible = scheduler.prepare_execution(graph, inputs, starts, ends, parameters=parameters)
++        prepared_result = compatible.run_snapshot()
++        assert prepared_result.plan.lane == 'single'
++        np.testing.assert_array_equal(prepared_result.outputs[0].values[0], expected.outputs[0].values[0])
++        first = scheduler.execute(graph, inputs, starts, ends, parameters=parameters)
++        saved = first.outputs[0].values[0].copy()
++        parameters[0] = .005
++        second = scheduler.execute(graph, inputs, starts, ends, parameters=parameters)
++    assert first.plan.parallel_dimension == second.plan.parallel_dimension == 'array_row'
++    np.testing.assert_array_equal(snapshot.outputs[0].values[0], stable)
++    np.testing.assert_array_equal(first.outputs[0].values[0], expected.outputs[0].values[0])
++    np.testing.assert_array_equal(first.outputs[0].values[0], saved)
++    np.testing.assert_allclose(second.outputs[0].values[0] - saved, np.full(517, 129 * .002), atol=4e-5)
++    assert not np.shares_memory(first.outputs[0].values[0], second.outputs[0].values[0])

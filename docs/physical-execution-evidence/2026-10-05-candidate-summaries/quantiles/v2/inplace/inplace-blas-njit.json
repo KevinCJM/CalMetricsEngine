@@ -1,0 +1,42 @@
+{
+  "backend": "inplace-blas-njit",
+  "shape": [
+    100000,
+    2520,
+    30
+  ],
+  "layout": "C",
+  "rounds": 6,
+  "samples_seconds": [
+    12.679185292,
+    12.644274584,
+    12.642798375,
+    12.632464709,
+    12.706237125,
+    12.724244583
+  ],
+  "samples_cpu_seconds": [
+    12.598472,
+    12.610884,
+    12.612752,
+    12.599207,
+    12.659525,
+    12.679018
+  ],
+  "median_seconds": 12.661729938,
+  "input_hashes": {
+    "w": "f2ad15b7e0640d75bcaa064e406d6367b1aa85839e14ebfa8b8878ca85d201e9",
+    "r": "3e5553e01e34cc77a6d9e6948fd961ca833cf84978798d7f892b279dde5f99b1",
+    "q": "f85d1f5b033c492a1b016e9601bc11179f92bd49cf1890e5241d5f62148c2754"
+  },
+  "maximum_absolute_errors": [
+    1.6653345369377348e-16,
+    5.551115123125783e-17,
+    1.734723475976807e-18
+  ],
+  "build_id": null,
+  "audit": null,
+  "scope": "owned readonly inputs + ordinary Scheduler + all mean/std/three-VaR outputs; CPU1; two independent result generations; compilation excluded; supplied candidates, not complete search/service",
+  "production_adopted": false,
+  "whole_goal_complete": false
+}

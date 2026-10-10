@@ -1,0 +1,253 @@
+{
+  "build_id": "a3fbac2690c5a6167411604c832f9f88aa8af195c898d80d4c445c052209b815",
+  "targeted_tests": 745,
+  "native_tests": 9,
+  "initial_cases": 30,
+  "timing": [
+    {
+      "shape": [
+        16384,
+        2520,
+        30
+      ],
+      "layout": "C",
+      "medians_seconds": {
+        "old": 5.2252057285,
+        "candidate": 0.6425725835,
+        "bounded-blas-njit": 2.1479270415,
+        "bounded-select-njit": 0.4173711665
+      },
+      "maximum_absolute_errors": {
+        "old": [
+          3.469446951953614e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "candidate": [
+          3.469446951953614e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "bounded-blas-njit": [
+          4.336808689942018e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "bounded-select-njit": [
+          4.336808689942018e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ]
+      }
+    },
+    {
+      "shape": [
+        16384,
+        2520,
+        30
+      ],
+      "layout": "F",
+      "medians_seconds": {
+        "old": 3.232493146,
+        "candidate": 0.64066775,
+        "bounded-blas-njit": 2.1670118545,
+        "bounded-select-njit": 0.4210105625
+      },
+      "maximum_absolute_errors": {
+        "old": [
+          3.469446951953614e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "candidate": [
+          3.469446951953614e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "bounded-blas-njit": [
+          4.336808689942018e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "bounded-select-njit": [
+          4.336808689942018e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ]
+      }
+    }
+  ],
+  "memory": [
+    {
+      "backend": "old",
+      "requested_heap_warm_peak_bytes": 3404465467,
+      "rss_delta_median_bytes": 3423141888,
+      "rss_absolute_median_bytes": 3511025664
+    },
+    {
+      "backend": "candidate",
+      "requested_heap_warm_peak_bytes": 21335976,
+      "rss_delta_median_bytes": 39501824,
+      "rss_absolute_median_bytes": 126828544
+    },
+    {
+      "backend": "bounded-blas-njit",
+      "requested_heap_warm_peak_bytes": 20309536,
+      "rss_delta_median_bytes": 53264384,
+      "rss_absolute_median_bytes": 197574656
+    },
+    {
+      "backend": "bounded-select-njit",
+      "requested_heap_warm_peak_bytes": 20309536,
+      "rss_delta_median_bytes": 56868864,
+      "rss_absolute_median_bytes": 213712896
+    }
+  ],
+  "full_regression": true,
+  "sanitizers": true,
+  "libraries_off": true,
+  "production_adopted": false,
+  "whole_goal_complete": false,
+  "acceptance": "isolated prototype qualified: full 13271, normal/SAN/OFF related 745 and native 9; strong-NJIT time disadvantage remains; actual adoption and other important loads pending",
+  "full_tests": 13271,
+  "qualification_counts": {
+    "native": {
+      "related": 745,
+      "native": 9
+    },
+    "asan": {
+      "related": 745,
+      "native": 9
+    },
+    "off": {
+      "related": 745,
+      "native": 9
+    }
+  },
+  "important_complete_chain_timing": [
+    {
+      "load": "many-short",
+      "shape": [
+        65536,
+        252,
+        30
+      ],
+      "layout": "C",
+      "medians_seconds": {
+        "old": 1.539256667,
+        "candidate": 0.6673753335,
+        "bounded-select-njit": 0.291546354
+      },
+      "maximum_absolute_errors": {
+        "old": [
+          2.6020852139652106e-18,
+          6.505213034913027e-19,
+          1.1102230246251565e-16
+        ],
+        "candidate": [
+          2.6020852139652106e-18,
+          6.505213034913027e-19,
+          1.1102230246251565e-16
+        ],
+        "bounded-select-njit": [
+          2.6020852139652106e-18,
+          4.336808689942018e-19,
+          1.1102230246251565e-16
+        ]
+      }
+    },
+    {
+      "load": "many-short",
+      "shape": [
+        65536,
+        252,
+        30
+      ],
+      "layout": "F",
+      "medians_seconds": {
+        "old": 1.414572479,
+        "candidate": 0.6805136254999999,
+        "bounded-select-njit": 0.294720188
+      },
+      "maximum_absolute_errors": {
+        "old": [
+          2.6020852139652106e-18,
+          6.505213034913027e-19,
+          1.1102230246251565e-16
+        ],
+        "candidate": [
+          2.6020852139652106e-18,
+          6.505213034913027e-19,
+          1.1102230246251565e-16
+        ],
+        "bounded-select-njit": [
+          2.6020852139652106e-18,
+          4.336808689942018e-19,
+          1.1102230246251565e-16
+        ]
+      }
+    },
+    {
+      "load": "few-long",
+      "shape": [
+        256,
+        200000,
+        30
+      ],
+      "layout": "C",
+      "medians_seconds": {
+        "old": 12.439516103999999,
+        "candidate": 8.708273208000001,
+        "bounded-select-njit": 1.0484143750000001
+      },
+      "maximum_absolute_errors": {
+        "old": [
+          2.862293735361732e-17,
+          1.3660947373317356e-17,
+          1.887379141862766e-15
+        ],
+        "candidate": [
+          2.862293735361732e-17,
+          1.3660947373317356e-17,
+          1.887379141862766e-15
+        ],
+        "bounded-select-njit": [
+          2.7755575615628914e-17,
+          1.3660947373317356e-17,
+          2.886579864025407e-15
+        ]
+      }
+    },
+    {
+      "load": "few-long",
+      "shape": [
+        256,
+        200000,
+        30
+      ],
+      "layout": "F",
+      "medians_seconds": {
+        "old": 4.485788833,
+        "candidate": 1.053471229,
+        "bounded-select-njit": 1.5190055
+      },
+      "maximum_absolute_errors": {
+        "old": [
+          2.862293735361732e-17,
+          1.3660947373317356e-17,
+          1.887379141862766e-15
+        ],
+        "candidate": [
+          2.862293735361732e-17,
+          1.3660947373317356e-17,
+          1.887379141862766e-15
+        ],
+        "bounded-select-njit": [
+          2.7755575615628914e-17,
+          1.3660947373317356e-17,
+          2.886579864025407e-15
+        ]
+      }
+    }
+  ]
+}

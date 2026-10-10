@@ -1,0 +1,347 @@
+{
+  "samples": 40,
+  "groups": [
+    {
+      "d": 2048,
+      "input_layout": "c",
+      "output_order": "F",
+      "heap_mib": {
+        "old_ordinary": {
+          "cold_peak_bytes": 108.054026,
+          "warm_peak_bytes": 140.054569
+        },
+        "new_ordinary": {
+          "cold_peak_bytes": 76.054018,
+          "warm_peak_bytes": 108.054562
+        },
+        "old_prepared": {
+          "cold_peak_bytes": 108.05411,
+          "warm_peak_bytes": 140.05463
+        },
+        "new_prepared": {
+          "cold_peak_bytes": 76.054102,
+          "warm_peak_bytes": 108.054623
+        },
+        "njit": {
+          "cold_peak_bytes": 102.000366,
+          "warm_peak_bytes": 134.000473
+        }
+      },
+      "rss_mib": {
+        "old_ordinary": {
+          "rss_baseline": 181.125,
+          "rss_peak": 213.125,
+          "rss_delta": 32.0,
+          "rss_idle_delta": 0.03125
+        },
+        "new_ordinary": {
+          "rss_baseline": 150.171875,
+          "rss_peak": 182.171875,
+          "rss_delta": 32.0,
+          "rss_idle_delta": 0.0
+        },
+        "old_prepared": {
+          "rss_baseline": 180.390625,
+          "rss_peak": 212.421875,
+          "rss_delta": 32.03125,
+          "rss_idle_delta": 0.0
+        },
+        "new_prepared": {
+          "rss_baseline": 148.125,
+          "rss_peak": 180.15625,
+          "rss_delta": 32.03125,
+          "rss_idle_delta": 0.0
+        },
+        "njit": {
+          "rss_baseline": 313.6875,
+          "rss_peak": 357.703125,
+          "rss_delta": 44.015625,
+          "rss_idle_delta": 0.0
+        }
+      },
+      "heap_reduction_mib": {
+        "ordinary": {
+          "cold_peak_bytes": 32.000007999999994,
+          "warm_peak_bytes": 32.00000699999998
+        },
+        "prepared": {
+          "cold_peak_bytes": 32.000007999999994,
+          "warm_peak_bytes": 32.000007
+        }
+      }
+    },
+    {
+      "d": 2048,
+      "input_layout": "f",
+      "output_order": "F",
+      "heap_mib": {
+        "old_ordinary": {
+          "cold_peak_bytes": 108.054026,
+          "warm_peak_bytes": 140.054569
+        },
+        "new_ordinary": {
+          "cold_peak_bytes": 76.054018,
+          "warm_peak_bytes": 108.054562
+        },
+        "old_prepared": {
+          "cold_peak_bytes": 108.05411,
+          "warm_peak_bytes": 140.05463
+        },
+        "new_prepared": {
+          "cold_peak_bytes": 76.054102,
+          "warm_peak_bytes": 108.054623
+        },
+        "njit": {
+          "cold_peak_bytes": 102.000366,
+          "warm_peak_bytes": 134.000473
+        }
+      },
+      "rss_mib": {
+        "old_ordinary": {
+          "rss_baseline": 181.25,
+          "rss_peak": 213.25,
+          "rss_delta": 32.0,
+          "rss_idle_delta": 0.0
+        },
+        "new_ordinary": {
+          "rss_baseline": 148.25,
+          "rss_peak": 180.28125,
+          "rss_delta": 32.03125,
+          "rss_idle_delta": 0.0
+        },
+        "old_prepared": {
+          "rss_baseline": 181.171875,
+          "rss_peak": 213.203125,
+          "rss_delta": 32.03125,
+          "rss_idle_delta": 0.0
+        },
+        "new_prepared": {
+          "rss_baseline": 148.1875,
+          "rss_peak": 180.25,
+          "rss_delta": 32.0625,
+          "rss_idle_delta": 0.0
+        },
+        "njit": {
+          "rss_baseline": 318.84375,
+          "rss_peak": 350.859375,
+          "rss_delta": 32.015625,
+          "rss_idle_delta": 0.0
+        }
+      },
+      "heap_reduction_mib": {
+        "ordinary": {
+          "cold_peak_bytes": 32.000007999999994,
+          "warm_peak_bytes": 32.00000699999998
+        },
+        "prepared": {
+          "cold_peak_bytes": 32.000007999999994,
+          "warm_peak_bytes": 32.000007
+        }
+      }
+    },
+    {
+      "d": 4096,
+      "input_layout": "c",
+      "output_order": "F",
+      "heap_mib": {
+        "old_ordinary": {
+          "cold_peak_bytes": 278.100901,
+          "warm_peak_bytes": 406.101444
+        },
+        "new_ordinary": {
+          "cold_peak_bytes": 150.100893,
+          "warm_peak_bytes": 278.101437
+        },
+        "old_prepared": {
+          "cold_peak_bytes": 278.100985,
+          "warm_peak_bytes": 406.101505
+        },
+        "new_prepared": {
+          "cold_peak_bytes": 150.100977,
+          "warm_peak_bytes": 278.101498
+        },
+        "njit": {
+          "cold_peak_bytes": 390.000366,
+          "warm_peak_bytes": 518.000473
+        }
+      },
+      "rss_mib": {
+        "old_ordinary": {
+          "rss_baseline": 464.671875,
+          "rss_peak": 598.890625,
+          "rss_delta": 134.21875,
+          "rss_idle_delta": 0.0
+        },
+        "new_ordinary": {
+          "rss_baseline": 324.453125,
+          "rss_peak": 470.546875,
+          "rss_delta": 146.09375,
+          "rss_idle_delta": 0.0
+        },
+        "old_prepared": {
+          "rss_baseline": 459.0625,
+          "rss_peak": 599.203125,
+          "rss_delta": 140.140625,
+          "rss_idle_delta": 0.0
+        },
+        "new_prepared": {
+          "rss_baseline": 335.859375,
+          "rss_peak": 469.953125,
+          "rss_delta": 134.09375,
+          "rss_idle_delta": 0.0625
+        },
+        "njit": {
+          "rss_baseline": 798.828125,
+          "rss_peak": 926.84375,
+          "rss_delta": 128.015625,
+          "rss_idle_delta": 0.0
+        }
+      },
+      "heap_reduction_mib": {
+        "ordinary": {
+          "cold_peak_bytes": 128.000008,
+          "warm_peak_bytes": 128.00000700000004
+        },
+        "prepared": {
+          "cold_peak_bytes": 128.00000799999998,
+          "warm_peak_bytes": 128.00000699999998
+        }
+      }
+    },
+    {
+      "d": 4096,
+      "input_layout": "f",
+      "output_order": "F",
+      "heap_mib": {
+        "old_ordinary": {
+          "cold_peak_bytes": 278.100901,
+          "warm_peak_bytes": 406.101444
+        },
+        "new_ordinary": {
+          "cold_peak_bytes": 150.100893,
+          "warm_peak_bytes": 278.101437
+        },
+        "old_prepared": {
+          "cold_peak_bytes": 278.100985,
+          "warm_peak_bytes": 406.101505
+        },
+        "new_prepared": {
+          "cold_peak_bytes": 150.100977,
+          "warm_peak_bytes": 278.101498
+        },
+        "njit": {
+          "cold_peak_bytes": 390.000366,
+          "warm_peak_bytes": 518.000473
+        }
+      },
+      "rss_mib": {
+        "old_ordinary": {
+          "rss_baseline": 464.734375,
+          "rss_peak": 592.765625,
+          "rss_delta": 128.03125,
+          "rss_idle_delta": 0.0
+        },
+        "new_ordinary": {
+          "rss_baseline": 330.328125,
+          "rss_peak": 464.453125,
+          "rss_delta": 134.125,
+          "rss_idle_delta": 0.0
+        },
+        "old_prepared": {
+          "rss_baseline": 459.328125,
+          "rss_peak": 599.484375,
+          "rss_delta": 140.15625,
+          "rss_idle_delta": 0.0
+        },
+        "new_prepared": {
+          "rss_baseline": 337.171875,
+          "rss_peak": 471.265625,
+          "rss_delta": 134.09375,
+          "rss_idle_delta": 0.0
+        },
+        "njit": {
+          "rss_baseline": 791.953125,
+          "rss_peak": 931.96875,
+          "rss_delta": 140.015625,
+          "rss_idle_delta": 0.0
+        }
+      },
+      "heap_reduction_mib": {
+        "ordinary": {
+          "cold_peak_bytes": 128.000008,
+          "warm_peak_bytes": 128.00000700000004
+        },
+        "prepared": {
+          "cold_peak_bytes": 128.00000799999998,
+          "warm_peak_bytes": 128.00000699999998
+        }
+      }
+    }
+  ],
+  "scope": "allocation-epoch requested heap and independent warm RSS; input/import/JIT excluded from heap, vendor cache/mmap/stack not fully tracked",
+  "performance_all_closed": false,
+  "zero_samples": 20,
+  "zero_heap": [
+    {
+      "input_layout": "c",
+      "backend": "old_ordinary",
+      "cold_mib": 64.00760841369629,
+      "warm_mib": 96.00811386108398
+    },
+    {
+      "input_layout": "c",
+      "backend": "new_ordinary",
+      "cold_mib": 32.00760078430176,
+      "warm_mib": 64.00810623168945
+    },
+    {
+      "input_layout": "c",
+      "backend": "old_prepared",
+      "cold_mib": 64.00765419006348,
+      "warm_mib": 96.00817489624023
+    },
+    {
+      "input_layout": "c",
+      "backend": "new_prepared",
+      "cold_mib": 32.007646560668945,
+      "warm_mib": 64.0081672668457
+    },
+    {
+      "input_layout": "c",
+      "backend": "njit",
+      "cold_mib": 102.0003662109375,
+      "warm_mib": 134.00047302246094
+    },
+    {
+      "input_layout": "f",
+      "backend": "old_ordinary",
+      "cold_mib": 64.00760841369629,
+      "warm_mib": 96.00811386108398
+    },
+    {
+      "input_layout": "f",
+      "backend": "new_ordinary",
+      "cold_mib": 32.00760078430176,
+      "warm_mib": 64.00810623168945
+    },
+    {
+      "input_layout": "f",
+      "backend": "old_prepared",
+      "cold_mib": 64.00765419006348,
+      "warm_mib": 96.00817489624023
+    },
+    {
+      "input_layout": "f",
+      "backend": "new_prepared",
+      "cold_mib": 32.007646560668945,
+      "warm_mib": 64.0081672668457
+    },
+    {
+      "input_layout": "f",
+      "backend": "njit",
+      "cold_mib": 102.0003662109375,
+      "warm_mib": 134.00047302246094
+    }
+  ],
+  "total_fresh_children": 60
+}

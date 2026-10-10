@@ -1,0 +1,198 @@
+{
+  "status": "actual_source_adopted_rebuilt_and_complete_requests_passed",
+  "date": "2026-10-08",
+  "previous_goal_turn": "progress",
+  "current_goal_turn": "progress",
+  "actual_adopted": true,
+  "goal_complete": false,
+  "build_id": "072cba9feee2de6f3c84d4535eacfb60e0b78e3331bc17ad79036391279f7272",
+  "changed": [
+    "cpp/graph.cpp",
+    "cpp/include/calmetrics_engine/graph.hpp",
+    "tests/graph_native_tests.cpp",
+    "tests/test_matmul_shared_roots.py",
+    "tests/matmul_shared_roots_native_cases.hpp"
+  ],
+  "source_count": 93,
+  "protected_existing_files": 308,
+  "protected_thin_interface_files": 16,
+  "quality": {
+    "budget-safe-normal": {
+      "status": "passed",
+      "build_id": "072cba9feee2de6f3c84d4535eacfb60e0b78e3331bc17ad79036391279f7272",
+      "source_count": 93,
+      "jobs": [
+        {
+          "label": "native",
+          "returncode": 0,
+          "counts": {
+            "tests": 9,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "skip_reasons": []
+        },
+        {
+          "label": "full",
+          "returncode": 0,
+          "counts": {
+            "tests": 16720,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "skip_reasons": []
+        }
+      ],
+      "actual_adopted": false,
+      "goal_complete": false,
+      "sanitizer_leak_detection": null,
+      "finished": 1791442513.360838
+    },
+    "budget-safe-asan": {
+      "status": "passed",
+      "build_id": "82c3db38ffa808eac43e809e5639a4a14b80acba10576545799903d327bfa67d",
+      "source_count": 93,
+      "jobs": [
+        {
+          "label": "native",
+          "returncode": 0,
+          "counts": {
+            "tests": 9,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "skip_reasons": []
+        },
+        {
+          "label": "related",
+          "returncode": 0,
+          "counts": {
+            "tests": 4749,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "skip_reasons": []
+        }
+      ],
+      "actual_adopted": false,
+      "goal_complete": false,
+      "sanitizer_leak_detection": false,
+      "finished": 1791442096.974255
+    },
+    "budget-safe-off": {
+      "status": "passed",
+      "build_id": "59897913ce4596206f7626e9731ddbf939f705d3cc5ae0cefe3eb2331c290371",
+      "source_count": 93,
+      "jobs": [
+        {
+          "label": "native",
+          "returncode": 0,
+          "counts": {
+            "tests": 9,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "skip_reasons": []
+        },
+        {
+          "label": "related",
+          "returncode": 0,
+          "counts": {
+            "tests": 4749,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 1
+          },
+          "skip_reasons": [
+            "qualified macOS arm64 rounding environment"
+          ]
+        }
+      ],
+      "actual_adopted": false,
+      "goal_complete": false,
+      "sanitizer_leak_detection": null,
+      "finished": 1791442000.0414212
+    },
+    "shared-roots-actual": {
+      "status": "passed",
+      "build_id": "072cba9feee2de6f3c84d4535eacfb60e0b78e3331bc17ad79036391279f7272",
+      "source_count": 93,
+      "jobs": [
+        {
+          "label": "native",
+          "returncode": 0,
+          "counts": {
+            "tests": 9,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "skip_reasons": []
+        },
+        {
+          "label": "related",
+          "returncode": 0,
+          "counts": {
+            "tests": 4749,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "skip_reasons": []
+        }
+      ],
+      "actual_adopted": true,
+      "goal_complete": false,
+      "sanitizer_leak_detection": null,
+      "finished": 1791443020.282651
+    }
+  },
+  "candidate_fresh_processes": 24,
+  "actual_fresh_processes": 12,
+  "actual_summary": {
+    "C": {
+      "cpp": {
+        "seconds": 0.7558747090006364,
+        "heap_peak_bytes": 2288002088,
+        "incremental_rss_bytes": 2233958400
+      },
+      "njit": {
+        "seconds": 0.6467623339995043,
+        "heap_peak_bytes": 2281702136,
+        "incremental_rss_bytes": 2233548800
+      },
+      "cpp_njit_time_ratio": 1.168705518650713,
+      "saved_from_prior_cpp_bytes": 533205448
+    },
+    "F": {
+      "cpp": {
+        "seconds": 0.7372992090004118,
+        "heap_peak_bytes": 2288002088,
+        "incremental_rss_bytes": 2233942016
+      },
+      "njit": {
+        "seconds": 0.6431337080011872,
+        "heap_peak_bytes": 2281702136,
+        "incremental_rss_bytes": 2233565184
+      },
+      "cpp_njit_time_ratio": 1.14641667794382,
+      "saved_from_prior_cpp_bytes": 533205448
+    }
+  },
+  "maximum_absolute_error": 0.0,
+  "scope": "Existing shared-MatMul two complete matrix roots, C/F, ordinary CPU1, same owned readonly preparation, two retained independent generations; not whole-platform acceptance",
+  "limitations": [
+    "CPP is still slower than strong warmed same-core NJIT",
+    "No significant heap advantage over optimized NJIT in this output-dominated workload",
+    "Other important platform chains and complete allocation/copy audit remain open",
+    "Actual 12 supplementary processes do not replace the candidate three-group paired statistics",
+    "ASan/UBSan did not enable leak detection",
+    "No submission, push, deployment, global installation or real Microsoft Excel recalculation",
+    "Eight inactive build caches removed on explicit user request; preserved installed packages, wheels and test/build evidence; rebuilding needed before ctest again"
+  ]
+}

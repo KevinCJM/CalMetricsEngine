@@ -1,0 +1,6620 @@
+[
+  {
+    "backend": "ordinary",
+    "metric": "heap",
+    "scope": "healthy_fixed_transformed_tape_selected_assets_complete_period_and_contributions",
+    "remaining_gaps": [
+      "primitive_random_draw_generation",
+      "old_seed_equivalence",
+      "covariance_root_algorithm",
+      "ordered_first_fault_prefix_diagnostics",
+      "axis_nav_peak_drawdown",
+      "fan_tail_statistics",
+      "platform_http_business_integration"
+    ],
+    "reference": "service",
+    "cpu_budget": 1,
+    "shape": {
+      "n": 2000000,
+      "steps": 200,
+      "paths": 10000,
+      "factors": 4,
+      "assets": 32,
+      "combinations": 8
+    },
+    "fresh_pid": 35795,
+    "repeats": 2,
+    "output_order": "C",
+    "measurement": {
+      "setup_heap": {
+        "allocations": 82095,
+        "frees": 80569,
+        "allocated_bytes": 7795468,
+        "live_bytes": 1473763,
+        "peak_bytes": 1850096,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_heap": {
+        "allocations": 93532,
+        "frees": 91918,
+        "allocated_bytes": 137781605,
+        "live_bytes": 130571235,
+        "peak_bytes": 130735939,
+        "untracked_frees": 10,
+        "table_overflows": 0
+      },
+      "cold_retained_heap": {
+        "allocations": 93532,
+        "frees": 91924,
+        "allocated_bytes": 137781605,
+        "live_bytes": 2559667,
+        "peak_bytes": 130735939,
+        "untracked_frees": 10,
+        "table_overflows": 0
+      },
+      "warm_baseline_heap": {
+        "allocations": 93572,
+        "frees": 91964,
+        "allocated_bytes": 778737685,
+        "live_bytes": 2559667,
+        "peak_bytes": 130750355,
+        "untracked_frees": 10,
+        "table_overflows": 0
+      },
+      "warm_heap": {
+        "allocations": 93588,
+        "frees": 91975,
+        "allocated_bytes": 1035120117,
+        "live_bytes": 130571219,
+        "peak_bytes": 258761907,
+        "untracked_frees": 10,
+        "table_overflows": 0
+      },
+      "warm_retained_heap": {
+        "allocations": 93588,
+        "frees": 91980,
+        "allocated_bytes": 1035120117,
+        "live_bytes": 2559667,
+        "peak_bytes": 258761907,
+        "untracked_frees": 10,
+        "table_overflows": 0
+      },
+      "heap_schema": "continuous-live-1",
+      "cold_peak_bytes": 130735939,
+      "warm_peak_bytes": 258761907
+    },
+    "outputs": {
+      "native_audit": {
+        "execution_backend": "cpp_aot",
+        "audit_schema": "cpp-aot-execution-2",
+        "result_protocol": "typed-results-1",
+        "engine": "calmetrics_engine",
+        "model_identity": null,
+        "engine_version": "0.3.0",
+        "engine_build_id": "63a1dacd485576f5d148be0fb577bf2d277c91a00ab35c970e6bc88d2330a39a",
+        "operator_registry_version": "canonical-native-1",
+        "typed_ir_version": "cpp-typed-ir-1",
+        "plan_fingerprint": "native-3-73717e54cd5da2df7b3caeea855c5cec",
+        "source_contracts": [],
+        "status_result_copy_bytes": 0,
+        "status_transport_bytes": 0,
+        "native_aot": true,
+        "python_fallback": 0,
+        "python_operator_calls": 0,
+        "request_time_compilation": 0,
+        "input_dtype": "float64",
+        "input_dtypes": {
+          "x": "float64",
+          "beta": "float64",
+          "initial": "float64",
+          "w0": "float64",
+          "w1": "float64",
+          "w2": "float64",
+          "w3": "float64",
+          "w4": "float64",
+          "w5": "float64",
+          "w6": "float64",
+          "w7": "float64"
+        },
+        "output_dtype": "per_output",
+        "outputs": [
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "path",
+              "time"
+            ],
+            "shape": [
+              "P",
+              "T"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "path",
+              "time"
+            ],
+            "shape": [
+              "P",
+              "T"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "path",
+              "time"
+            ],
+            "shape": [
+              "P",
+              "T"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "path",
+              "time"
+            ],
+            "shape": [
+              "P",
+              "T"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "path",
+              "time"
+            ],
+            "shape": [
+              "P",
+              "T"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "path",
+              "time"
+            ],
+            "shape": [
+              "P",
+              "T"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "path",
+              "time"
+            ],
+            "shape": [
+              "P",
+              "T"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "path",
+              "time"
+            ],
+            "shape": [
+              "P",
+              "T"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          }
+        ],
+        "result_layout": "interval_root_aligned_8",
+        "result_capacity_bytes": 128002048,
+        "error_policy": "raise",
+        "status_contract": "indicator-status-1",
+        "result_lifetime": "independent",
+        "lane": "single",
+        "elapsed_ms": 483.779209,
+        "queue_wait_ms": 0.00075,
+        "compute_ms": 483.778459,
+        "cpu_tokens": 1,
+        "cpu_budget": 1,
+        "process_count": 1,
+        "thread_count": 1,
+        "threads_per_process": 1,
+        "async_orchestration": false,
+        "hard_stop": false,
+        "use_shared_memory": false,
+        "reason_codes": [
+          "typed_array_shape_work_accounted",
+          "typed_result_capacity_write_work_accounted",
+          "parallel_overhead_expected_to_dominate",
+          "eligible_nodes_use_native_runtime_simd_dispatch"
+        ],
+        "parallel_dimension": "interval",
+        "product_count": 1,
+        "estimated_work_units": 3049783952.0,
+        "prepared": false,
+        "prepared_cached": false,
+        "shared_memory_bytes": 0,
+        "boundary_copy_bytes": 0,
+        "output_copy_bytes": 0,
+        "scheduler_backend": "cpp",
+        "native_threads": 1,
+        "native_processes": 0,
+        "python_worker_callbacks": 0,
+        "python_native_transitions": 1,
+        "output_ownership": "numpy_owned",
+        "output_kind": "typed",
+        "native_chunks": [
+          {
+            "fused_pointwise_calls": 1,
+            "pointwise_tiles": 489,
+            "vector_elements": 0,
+            "root_copy_bytes": 0,
+            "direct_output_bytes": 128002048,
+            "state_copy_bytes": 0,
+            "pointwise_workspace_capacity_bytes": 1244960,
+            "rows": 1,
+            "nodes": 1392,
+            "max_window": 200,
+            "numeric_arena_bytes": 0,
+            "mask_arena_bytes": 0,
+            "operator_workspace_capacity_bytes": 1244960,
+            "order_scratch_capacity_bytes": 0,
+            "input_copy_bytes": 0,
+            "eigen_rotation_calls": 0,
+            "eigen_matvec_calls": 0,
+            "eigen_covariance_calls": 0,
+            "eigen_density_calls": 0,
+            "accelerate_covchol_calls": 0,
+            "accelerate_matmul_calls": 0,
+            "matmul_zero_calls": 0,
+            "accelerate_covariance_attempts": 0,
+            "accelerate_covariance_calls": 0,
+            "covariance_syrk_calls": 0,
+            "covariance_replayed_cells": 0,
+            "covariance_fallbacks": 0,
+            "covariance_zero_calls": 0,
+            "accelerate_vforce_calls": 0,
+            "covariance_panel_materialization_bytes": 0,
+            "native_library_workspace_reserve_bytes": 0,
+            "algorithm_copy_bytes": 0,
+            "fused_scalar_calls": 0,
+            "summary_source_scans": 0,
+            "order_stat_sorts": 0,
+            "python_operator_calls": 0,
+            "execution_backend": "native_graph_interpreter"
+          }
+        ]
+      },
+      "root_statuses": [
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "output_count": 264,
+      "output_bytes": 128002048,
+      "output_shapes": [
+        [
+          10000,
+          200
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [
+          10000,
+          200
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [
+          10000,
+          200
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [
+          10000,
+          200
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [
+          10000,
+          200
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [
+          10000,
+          200
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [
+          10000,
+          200
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [
+          10000,
+          200
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "output_dtypes": [
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64"
+      ]
+    },
+    "identity": {
+      "manifest_path": "/private/tmp/calmetrics-mc-projection-integration/identity-dense.json",
+      "manifest_sha256": "a66b3cdf13758466c89af4af0f9e0a02f28d7f8debbf27d8bc3d38755da89287",
+      "manifest_build_id": "63a1dacd485576f5d148be0fb577bf2d277c91a00ab35c970e6bc88d2330a39a",
+      "build_id_verified": true,
+      "native_path": "/private/tmp/calmetrics-mc-projection-integration/install-dense/calmetrics_engine/_native.cpython-312-darwin.so",
+      "native_sha256": "e0c2b463ed4ea0b2a84346fa6d1ef465866abb29d1e90c9954d9f70e91b955f8",
+      "native_matches_manifest": true,
+      "source_count": 80,
+      "source_sha256": {
+        "CMakeLists.txt": "b2f9df31871f57e3ca68a162cce13240446708cc6ae29d1f912f3eb33de55599",
+        "cpp/affine_projection.cpp": "77bb7f37ae21abdf065078a2397da0d3ed88029363bc1f3d37f489bb2699c665",
+        "cpp/bindings.cpp": "56891566e6460cdcb1d64ecb46afc318f2467de8cf48f8bccaa8c62825a8eab6",
+        "cpp/compiler.cpp": "28a474f8498f667e8ae9430efd634fa23144926df17565c6f6dcc7a6d3226ee2",
+        "cpp/excel.cpp": "9933cf9eda25c3c68c01500729843d6c6cf4a178c7662fcd0387872411c1c6b6",
+        "cpp/excel_bindings.cpp": "a2cdc38ae529a2910a31bd27560c0c15cbe3abef545d30e728f4df41d0687596",
+        "cpp/excel_budget.cpp": "e9edf85de9216f445b53ae84c1ba9c8053bb43d2ab37d1538057aa3bc9dc80a9",
+        "cpp/excel_internal.hpp": "173a43de9befe483c6e62be9ee4bb3398dbbcf6e2bdd508a3b1c8a391e0735fd",
+        "cpp/excel_latent.cpp": "013fb815a3faf558c87df78b63bea091723978a84f4141647b3dc8cfbb8047d7",
+        "cpp/excel_matrix_foundation.cpp": "0ac31f88dc47cd43a91c2b17134667d708328322982d455d77fb3b9a5157f966",
+        "cpp/excel_operators.cpp": "78853d0bd4f2bda4df92a6a19d47cd1a57ac7dd883c6c70e54819d75cabe339a",
+        "cpp/excel_scopes.cpp": "33e795fd62d4450d18b520b88de0e61117e5ea5aa2de24162af28bca5e8fd472",
+        "cpp/excel_state.cpp": "a7c2b14cb975b64683da3089c2e707d970d58974842e7a1aa16fc3ea883bf00b",
+        "cpp/finance/drawdown.cpp": "c59ac5e73bed11f9a57fc846f787be438659b584fee92530e898b523ff0b91e2",
+        "cpp/finance/rolling.cpp": "1340dc1868bf1f3b8037304c0b66900d68cc74c16cdefb8dcfe85ef366fb1815",
+        "cpp/finance/statistics.cpp": "5c3b538e48ac290f2af9a4bbf16f36fb934027a18e2293742ed6ff018b27f4a1",
+        "cpp/finance/streaks.cpp": "a2db0925b4a40cfeb94cd5aa6b536c85149a73a6db9c65016b7938ff38133541",
+        "cpp/graph.cpp": "fd9d69e4639b9f83978423ce8b58a87626dbf09e86ecf138fec67098561d6ce0",
+        "cpp/graph_binding_utils.hpp": "abbc77665218453223e1e3e10004dbf928a93c8906987cdf3822445516eecbc9",
+        "cpp/graph_bindings.cpp": "09549285724555d52bdbbdfdfee3f81df5d432a64be4802b1535cab87de081c0",
+        "cpp/include/calmetrics_engine/affine_projection.hpp": "152484867013eb55af3db4616f5764c9b651fd109da145374e81b5f688f41075",
+        "cpp/include/calmetrics_engine/array_view.hpp": "f46895eac254a1cabec74e1f7d839e619e8c1db66bd1a305a5fcec09862cd1b6",
+        "cpp/include/calmetrics_engine/calendar.hpp": "21ebc1cc568abf6dc4f2833af554922f84ddfa13e036d4f7e43fb8b15c6c8137",
+        "cpp/include/calmetrics_engine/compiler.hpp": "c066a9dd0d9b7ad128d5174d8808899fbfb90c6ab0835011326dc44819d9b577",
+        "cpp/include/calmetrics_engine/excel.hpp": "88ec2ea91baf7f51eb14030f239260a11f4d2380c568b7cd601e22adebee86a8",
+        "cpp/include/calmetrics_engine/finance.hpp": "37e197533af95ce3fd0ad6cfbfe2edf53687652c8d91ef7156919bf0877ce1b9",
+        "cpp/include/calmetrics_engine/graph.hpp": "a40eb789c734f6188bd321c4d03a71776b82e839d5a69c2b937502a117343b8f",
+        "cpp/include/calmetrics_engine/inline_vector.hpp": "541850ea3930085601380615911f08332af1987936d7fbc07b8d7403baec8997",
+        "cpp/include/calmetrics_engine/matrix_backend.hpp": "1d8e2738e77f572700af586c36354a05004b13715979c4c67c63db6ad33ff1b5",
+        "cpp/include/calmetrics_engine/model_payload.hpp": "16cea5862598270a998c9b4dbd0d5cbaf9e359cd387db484ff4e1cf3a3682361",
+        "cpp/include/calmetrics_engine/native_process.hpp": "8381a49a62cc014d9fc066cb06190207c81975746fbfc89df4f88b249e1e314c",
+        "cpp/include/calmetrics_engine/native_runtime.hpp": "3174283ec51b39616fdf9965d3c465a1fd9a70f8f6e0ddead31afd6f777331b6",
+        "cpp/include/calmetrics_engine/numeric.hpp": "adacba584014567f08ec836f4f69d4706baeaac9a103ec4a3be72e45a9d9956b",
+        "cpp/include/calmetrics_engine/operators.def": "3ee15639eb9501416248f15d1e2f76f64fa5b922db88ffcf870cf380a747764d",
+        "cpp/include/calmetrics_engine/operators.hpp": "a944548032186b2cec441dcd971e25f32cf7e785e156996c34394522d1af110d",
+        "cpp/include/calmetrics_engine/parallel.hpp": "9bcb22457b0660d719db7b7058d580df524488dba5e4847f92385997165877b3",
+        "cpp/include/calmetrics_engine/planner.hpp": "3f229b938e9db8515ce29a222eab07b83f9479fd422c8b0c504724249e9a5f8e",
+        "cpp/include/calmetrics_engine/pointwise.hpp": "aa8c0ad5af5115b604bc25203537d9dc3ea59cfea5f7428fd60644a21ac10801",
+        "cpp/include/calmetrics_engine/scheduler.hpp": "fd4fc6bf9f8765c8f221a1a1859f5b8cb2ea89a8698edf61719afff04fbbba86",
+        "cpp/include/calmetrics_engine/shared_memory.hpp": "d6defd233f4e0e44360bbd73bf8091cdac0eb0f01ab7de4eac86bc4f1243f274",
+        "cpp/include/calmetrics_engine/typed_ir.hpp": "2973e1663a5269225da9361527e6e10c216fd229eaa9401b64304d4452bfaeb0",
+        "cpp/model_payload.cpp": "d3faf97356df04a9772b8e5105078856938589fcefee711b0f96dbb3520d892b",
+        "cpp/native_api_bindings.cpp": "fce802fad12e3eca81b6a45abca895fefcdd4adeef76027e6e06328d53c22525",
+        "cpp/native_process.cpp": "e56a8b78a635e8c27c1d4b40797ac7d67c1157130c8719510edaff236e9d5e1b",
+        "cpp/native_runtime.cpp": "ea260563ec6a30704d20f0ab0bccd21777d8c5f1e1d9c9310cbae13be7a7ab49",
+        "cpp/native_worker_main.cpp": "b26e9784411d0d35d88a1d578301203e837195270af195ccc100f2158d54c61c",
+        "cpp/operator_bindings.cpp": "24ce31d0f0815e1028b02b5ef487e6da1adf8b9280df8032240ef9ba115e7fbe",
+        "cpp/operators/affine_contract.hpp": "1afc6798ff05a26e1bf3bca7768083f0e29b57b8925ca15cdd79982d293da38e",
+        "cpp/operators/cholesky_library.hpp": "d7c91b3be3e49ee3b30ab619d869b04ebe36e3a41e4204a11e4ae229bfa075a9",
+        "cpp/operators/column_library.hpp": "72f5612a7927bc404de08a46c78aa256bf2475746181a9d3bf60955283063e4d",
+        "cpp/operators/covariance_accelerate.cpp": "f3d0c03fc9b53b1a941b31fea7935541c4d7d548d4ba745b25acf7f60df621e8",
+        "cpp/operators/covchol_accelerate.cpp": "6d160cfddcc0b9df2d9e5ae5b0fe15fa5ac96cb8e33744c514137c56e8ed3e9c",
+        "cpp/operators/elementwise.cpp": "e08357a58d5ee9a7e40d02efe885ceeda0d7be6f532ab2a30c448e5b797cff73",
+        "cpp/operators/latent.cpp": "6d73858b0d6331e3b1683d7c55786ec26ff197037c3b4cb1d13eaa26583783c1",
+        "cpp/operators/matmul_accelerate.cpp": "a41894b0ca6054196f870065c0a998f6a04b5473c060db126e9a3000455c004e",
+        "cpp/operators/matmul_packed.cpp": "dc25ced878cdbb01aeca3a1fcf2677e4796239c564789bcbc55a34d9ea17e0b1",
+        "cpp/operators/matrix.cpp": "fd23159aa4e013766d58f03f416501f22d63197f1aea1919d60677d01e1abfc0",
+        "cpp/operators/matrix_backend.cpp": "f75c0d5ea8e3215d3ac56a5ad33e7588866f9d4f086a64113de7ae28f4e95b8d",
+        "cpp/operators/matrix_foundation.cpp": "329da2d08be0260d2269afe5fe54cd7706f729e868b67651e08e0bb4027d241e",
+        "cpp/operators/recurrence.cpp": "0b973d1534bdd6cef8f9e5742800a375e4b17f68772f923ce5cef2d56f281b33",
+        "cpp/operators/reduction.cpp": "623d7a1db4c992e50b29da4c5de1e7b4f134d297ea3e24c060b4a6d9fa219472",
+        "cpp/operators/registry.cpp": "6637cfe297db3afd39dfe1eece37089fbf0571abd739606578c122a0d9ac74af",
+        "cpp/operators/scalar_chain.hpp": "6d6767ce57e428634fa5252f1cb37a1e25294622a8cc266945f1062cd1031138",
+        "cpp/operators/sequence.cpp": "bf7f6a5debb78222e734f35acfefeb83df102fd730601160de8e9b0fdf05d777",
+        "cpp/operators/simd.cpp": "687b3db6b5377064050e01226921b5d299d605d460154ff0215373b964cb62cb",
+        "cpp/operators/simd_avx2.cpp": "a3a5ee6397b882615f4b5b080d8134a92247a7c1344d1d9ebc046260edbca773",
+        "cpp/operators/simd_loop.hpp": "5ebae38e939243a9ee64334b9e0082426d1afcf188a1e3e771ea302b83c7a6a1",
+        "cpp/operators/solve_multi_library.hpp": "b51fff1893ff9b78015cd4c0bcc06bde2ef2832fa33731131cdd1d60090b354f",
+        "cpp/operators/state.cpp": "e1c6cc7987787676f80ca1e6c379d9ce99c23f9b4838b5a646d2b04b9941fece",
+        "cpp/operators/state_events.cpp": "82b16052d1d05dd2c8cd6afec9331f9449ebfb20a1cb30b98d8eaa0b51c8be29",
+        "cpp/operators/transcendental_accelerate.cpp": "1e7324371ca102ec91f51857eb85568bd405b893083c88e2237547e24165ede9",
+        "cpp/planner.cpp": "8701c2471fe0434546141be2e34d65eab68eb27a0919dec00dba5e532aefb976",
+        "cpp/pointwise.cpp": "4705bbbb5b794633a386ac8c255b687fd6aa42fbeeeadd3cf12151bd841b4c7c",
+        "cpp/result_layout.cpp": "34f587b99e8e5251de5737e67ea6c1cf707c06b6c1dc5e9338fdb2178ed5c1ee",
+        "cpp/scheduler.cpp": "cb54193d46dc8d362b3a4219f92a7eecbf4f3a2991c499968c4b2b1a00653842",
+        "cpp/shared_memory.cpp": "34d1de7c955694d4a5145b8ba2c9d4512e0e01b25dae47468db148a325459d81",
+        "cpp/typed_foundation.cpp": "cf6a9d498051c94e0f9debb7f9f63f34aea26af24f055739f93deac099f0dd89",
+        "cpp/typed_ir.cpp": "e6d8196c4e5f87710177716dd69b0b55e5dcc6b162944a021408bd53e230ac15",
+        "cpp/typed_latent.cpp": "2a3100aa7732fe2d3ca42db2e4925599220a09029ff5f6c554df938b8a576412",
+        "pyproject.toml": "49ad775779f55dd9a6d6019728a69f758efc269c250af8cd0267d2bc26abafbe"
+      },
+      "source_mismatches": [],
+      "unlisted_sources": [],
+      "missing_sources": []
+    },
+    "source_unchanged": true,
+    "build_info": {
+      "version": "0.3.0",
+      "compiler": "AppleClang 17.0.0.17000603",
+      "architecture": "arm64",
+      "cpu_policy": "baseline",
+      "thread_backend": "persistent_cpp_native_scheduler",
+      "cxx_standard": 17,
+      "execution_backend": "pybind11_aot",
+      "graph_execution_backend": "native_graph_interpreter",
+      "scheduler_backend": "bounded_thread_process_pool",
+      "scheduler_scope": "process_wide_cpp_cpu_admission",
+      "legacy_finance_scheduler": "shared_native_scheduler",
+      "coroutine_backend": "asyncio_orchestration_only",
+      "process_transport": "shared_memory_or_serialized_small_input",
+      "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+      "runtime_jit": 0,
+      "compiler_backend": "cpp_restricted_ast",
+      "planner_backend": "cpp",
+      "native_scheduler_backend": "persistent_cpp_threads_processes",
+      "native_worker_runtime": "standalone_no_python",
+      "python_role": "numpy_binding_async_adapter",
+      "input_memory_policy": "exact_dtype_strided_zero_copy"
+    },
+    "threadpools": [
+      {
+        "user_api": "blas",
+        "internal_api": "openblas",
+        "num_threads": 1,
+        "prefix": "libopenblas",
+        "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+        "version": "0.3.23.dev",
+        "threading_layer": "pthreads",
+        "architecture": "armv8"
+      }
+    ],
+    "tiny_compile_and_warm_ms_excluded": 166.965125,
+    "prepare_ms": 14.275,
+    "probe_sha256": "cb63a1888c89c28687e704e251d63146ff4ad32f77f5f482cd905ae19bdd95b0",
+    "reference_sha256": "2fbe9575318b3c7432d581d8cb16047a8e2b49e24e022538564160f0f69219e5",
+    "driver_sha256": "249c2826ca3dfec1f763f9b8c19ff2fcaf174bd6ebd720d4d94ae190458f93d6",
+    "helper_sha256": "b3862bb22e58f01f874bad0fd8466a3eb63ac4f3803186846184aafb47f4d7f8",
+    "identity_helper_sha256": "5d39e66df717413189969f477c8e646e31027c032f60f087dbb966e09c76c984",
+    "notes": [
+      "Identical complete period/contribution outputs and independent previous/new replacement.",
+      "Common readonly inputs and tiny NJIT compilation are outside both observation epochs.",
+      "Heap includes graph construction, first run, five warmups and two retained-result replacements.",
+      "RSS owner/graph is constructed before baseline; first full-size execution and replacement are inside.",
+      "RSS sampled at 0.5ms; idle page control is reported without subtraction.",
+      "Heap interposition can miss Python arena suballocations, mmap and nonintercepted allocators.",
+      "CPU 1: no worker process or shared-page aggregation is claimed.",
+      "Fixed transformed tape projection is not complete MC/NAV/fan acceptance."
+    ]
+  },
+  {
+    "backend": "ordinary",
+    "metric": "rss",
+    "scope": "healthy_fixed_transformed_tape_selected_assets_complete_period_and_contributions",
+    "remaining_gaps": [
+      "primitive_random_draw_generation",
+      "old_seed_equivalence",
+      "covariance_root_algorithm",
+      "ordered_first_fault_prefix_diagnostics",
+      "axis_nav_peak_drawdown",
+      "fan_tail_statistics",
+      "platform_http_business_integration"
+    ],
+    "reference": "service",
+    "cpu_budget": 1,
+    "shape": {
+      "n": 2000000,
+      "steps": 200,
+      "paths": 10000,
+      "factors": 4,
+      "assets": 32,
+      "combinations": 8
+    },
+    "fresh_pid": 35802,
+    "repeats": 2,
+    "output_order": "C",
+    "measurement": {
+      "rss_baseline": 187351040,
+      "rss_peak": 445349888,
+      "rss_delta": 257998848,
+      "rss_idle_delta": 0,
+      "rss_schema": "warm-monitor-control-1"
+    },
+    "outputs": {
+      "native_audit": {
+        "execution_backend": "cpp_aot",
+        "audit_schema": "cpp-aot-execution-2",
+        "result_protocol": "typed-results-1",
+        "engine": "calmetrics_engine",
+        "model_identity": null,
+        "engine_version": "0.3.0",
+        "engine_build_id": "63a1dacd485576f5d148be0fb577bf2d277c91a00ab35c970e6bc88d2330a39a",
+        "operator_registry_version": "canonical-native-1",
+        "typed_ir_version": "cpp-typed-ir-1",
+        "plan_fingerprint": "native-3-73717e54cd5da2df7b3caeea855c5cec",
+        "source_contracts": [],
+        "status_result_copy_bytes": 0,
+        "status_transport_bytes": 0,
+        "native_aot": true,
+        "python_fallback": 0,
+        "python_operator_calls": 0,
+        "request_time_compilation": 0,
+        "input_dtype": "float64",
+        "input_dtypes": {
+          "x": "float64",
+          "beta": "float64",
+          "initial": "float64",
+          "w0": "float64",
+          "w1": "float64",
+          "w2": "float64",
+          "w3": "float64",
+          "w4": "float64",
+          "w5": "float64",
+          "w6": "float64",
+          "w7": "float64"
+        },
+        "output_dtype": "per_output",
+        "outputs": [
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "path",
+              "time"
+            ],
+            "shape": [
+              "P",
+              "T"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "path",
+              "time"
+            ],
+            "shape": [
+              "P",
+              "T"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "path",
+              "time"
+            ],
+            "shape": [
+              "P",
+              "T"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "path",
+              "time"
+            ],
+            "shape": [
+              "P",
+              "T"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "path",
+              "time"
+            ],
+            "shape": [
+              "P",
+              "T"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "path",
+              "time"
+            ],
+            "shape": [
+              "P",
+              "T"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "path",
+              "time"
+            ],
+            "shape": [
+              "P",
+              "T"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "path",
+              "time"
+            ],
+            "shape": [
+              "P",
+              "T"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "scalar",
+            "axes": [],
+            "shape": []
+          }
+        ],
+        "result_layout": "interval_root_aligned_8",
+        "result_capacity_bytes": 128002048,
+        "error_policy": "raise",
+        "status_contract": "indicator-status-1",
+        "result_lifetime": "independent",
+        "lane": "single",
+        "elapsed_ms": 491.104125,
+        "queue_wait_ms": 0.001166,
+        "compute_ms": 491.102959,
+        "cpu_tokens": 1,
+        "cpu_budget": 1,
+        "process_count": 1,
+        "thread_count": 1,
+        "threads_per_process": 1,
+        "async_orchestration": false,
+        "hard_stop": false,
+        "use_shared_memory": false,
+        "reason_codes": [
+          "typed_array_shape_work_accounted",
+          "typed_result_capacity_write_work_accounted",
+          "parallel_overhead_expected_to_dominate",
+          "eligible_nodes_use_native_runtime_simd_dispatch"
+        ],
+        "parallel_dimension": "interval",
+        "product_count": 1,
+        "estimated_work_units": 3049783952.0,
+        "prepared": false,
+        "prepared_cached": false,
+        "shared_memory_bytes": 0,
+        "boundary_copy_bytes": 0,
+        "output_copy_bytes": 0,
+        "scheduler_backend": "cpp",
+        "native_threads": 1,
+        "native_processes": 0,
+        "python_worker_callbacks": 0,
+        "python_native_transitions": 1,
+        "output_ownership": "numpy_owned",
+        "output_kind": "typed",
+        "native_chunks": [
+          {
+            "fused_pointwise_calls": 1,
+            "pointwise_tiles": 489,
+            "vector_elements": 0,
+            "root_copy_bytes": 0,
+            "direct_output_bytes": 128002048,
+            "state_copy_bytes": 0,
+            "pointwise_workspace_capacity_bytes": 1244960,
+            "rows": 1,
+            "nodes": 1392,
+            "max_window": 200,
+            "numeric_arena_bytes": 0,
+            "mask_arena_bytes": 0,
+            "operator_workspace_capacity_bytes": 1244960,
+            "order_scratch_capacity_bytes": 0,
+            "input_copy_bytes": 0,
+            "eigen_rotation_calls": 0,
+            "eigen_matvec_calls": 0,
+            "eigen_covariance_calls": 0,
+            "eigen_density_calls": 0,
+            "accelerate_covchol_calls": 0,
+            "accelerate_matmul_calls": 0,
+            "matmul_zero_calls": 0,
+            "accelerate_covariance_attempts": 0,
+            "accelerate_covariance_calls": 0,
+            "covariance_syrk_calls": 0,
+            "covariance_replayed_cells": 0,
+            "covariance_fallbacks": 0,
+            "covariance_zero_calls": 0,
+            "accelerate_vforce_calls": 0,
+            "covariance_panel_materialization_bytes": 0,
+            "native_library_workspace_reserve_bytes": 0,
+            "algorithm_copy_bytes": 0,
+            "fused_scalar_calls": 0,
+            "summary_source_scans": 0,
+            "order_stat_sorts": 0,
+            "python_operator_calls": 0,
+            "execution_backend": "native_graph_interpreter"
+          }
+        ]
+      },
+      "root_statuses": [
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "output_count": 264,
+      "output_bytes": 128002048,
+      "output_shapes": [
+        [
+          10000,
+          200
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [
+          10000,
+          200
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [
+          10000,
+          200
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [
+          10000,
+          200
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [
+          10000,
+          200
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [
+          10000,
+          200
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [
+          10000,
+          200
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [
+          10000,
+          200
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "output_dtypes": [
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64",
+        "float64"
+      ]
+    },
+    "identity": {
+      "manifest_path": "/private/tmp/calmetrics-mc-projection-integration/identity-dense.json",
+      "manifest_sha256": "a66b3cdf13758466c89af4af0f9e0a02f28d7f8debbf27d8bc3d38755da89287",
+      "manifest_build_id": "63a1dacd485576f5d148be0fb577bf2d277c91a00ab35c970e6bc88d2330a39a",
+      "build_id_verified": true,
+      "native_path": "/private/tmp/calmetrics-mc-projection-integration/install-dense/calmetrics_engine/_native.cpython-312-darwin.so",
+      "native_sha256": "e0c2b463ed4ea0b2a84346fa6d1ef465866abb29d1e90c9954d9f70e91b955f8",
+      "native_matches_manifest": true,
+      "source_count": 80,
+      "source_sha256": {
+        "CMakeLists.txt": "b2f9df31871f57e3ca68a162cce13240446708cc6ae29d1f912f3eb33de55599",
+        "cpp/affine_projection.cpp": "77bb7f37ae21abdf065078a2397da0d3ed88029363bc1f3d37f489bb2699c665",
+        "cpp/bindings.cpp": "56891566e6460cdcb1d64ecb46afc318f2467de8cf48f8bccaa8c62825a8eab6",
+        "cpp/compiler.cpp": "28a474f8498f667e8ae9430efd634fa23144926df17565c6f6dcc7a6d3226ee2",
+        "cpp/excel.cpp": "9933cf9eda25c3c68c01500729843d6c6cf4a178c7662fcd0387872411c1c6b6",
+        "cpp/excel_bindings.cpp": "a2cdc38ae529a2910a31bd27560c0c15cbe3abef545d30e728f4df41d0687596",
+        "cpp/excel_budget.cpp": "e9edf85de9216f445b53ae84c1ba9c8053bb43d2ab37d1538057aa3bc9dc80a9",
+        "cpp/excel_internal.hpp": "173a43de9befe483c6e62be9ee4bb3398dbbcf6e2bdd508a3b1c8a391e0735fd",
+        "cpp/excel_latent.cpp": "013fb815a3faf558c87df78b63bea091723978a84f4141647b3dc8cfbb8047d7",
+        "cpp/excel_matrix_foundation.cpp": "0ac31f88dc47cd43a91c2b17134667d708328322982d455d77fb3b9a5157f966",
+        "cpp/excel_operators.cpp": "78853d0bd4f2bda4df92a6a19d47cd1a57ac7dd883c6c70e54819d75cabe339a",
+        "cpp/excel_scopes.cpp": "33e795fd62d4450d18b520b88de0e61117e5ea5aa2de24162af28bca5e8fd472",
+        "cpp/excel_state.cpp": "a7c2b14cb975b64683da3089c2e707d970d58974842e7a1aa16fc3ea883bf00b",
+        "cpp/finance/drawdown.cpp": "c59ac5e73bed11f9a57fc846f787be438659b584fee92530e898b523ff0b91e2",
+        "cpp/finance/rolling.cpp": "1340dc1868bf1f3b8037304c0b66900d68cc74c16cdefb8dcfe85ef366fb1815",
+        "cpp/finance/statistics.cpp": "5c3b538e48ac290f2af9a4bbf16f36fb934027a18e2293742ed6ff018b27f4a1",
+        "cpp/finance/streaks.cpp": "a2db0925b4a40cfeb94cd5aa6b536c85149a73a6db9c65016b7938ff38133541",
+        "cpp/graph.cpp": "fd9d69e4639b9f83978423ce8b58a87626dbf09e86ecf138fec67098561d6ce0",
+        "cpp/graph_binding_utils.hpp": "abbc77665218453223e1e3e10004dbf928a93c8906987cdf3822445516eecbc9",
+        "cpp/graph_bindings.cpp": "09549285724555d52bdbbdfdfee3f81df5d432a64be4802b1535cab87de081c0",
+        "cpp/include/calmetrics_engine/affine_projection.hpp": "152484867013eb55af3db4616f5764c9b651fd109da145374e81b5f688f41075",
+        "cpp/include/calmetrics_engine/array_view.hpp": "f46895eac254a1cabec74e1f7d839e619e8c1db66bd1a305a5fcec09862cd1b6",
+        "cpp/include/calmetrics_engine/calendar.hpp": "21ebc1cc568abf6dc4f2833af554922f84ddfa13e036d4f7e43fb8b15c6c8137",
+        "cpp/include/calmetrics_engine/compiler.hpp": "c066a9dd0d9b7ad128d5174d8808899fbfb90c6ab0835011326dc44819d9b577",
+        "cpp/include/calmetrics_engine/excel.hpp": "88ec2ea91baf7f51eb14030f239260a11f4d2380c568b7cd601e22adebee86a8",
+        "cpp/include/calmetrics_engine/finance.hpp": "37e197533af95ce3fd0ad6cfbfe2edf53687652c8d91ef7156919bf0877ce1b9",
+        "cpp/include/calmetrics_engine/graph.hpp": "a40eb789c734f6188bd321c4d03a71776b82e839d5a69c2b937502a117343b8f",
+        "cpp/include/calmetrics_engine/inline_vector.hpp": "541850ea3930085601380615911f08332af1987936d7fbc07b8d7403baec8997",
+        "cpp/include/calmetrics_engine/matrix_backend.hpp": "1d8e2738e77f572700af586c36354a05004b13715979c4c67c63db6ad33ff1b5",
+        "cpp/include/calmetrics_engine/model_payload.hpp": "16cea5862598270a998c9b4dbd0d5cbaf9e359cd387db484ff4e1cf3a3682361",
+        "cpp/include/calmetrics_engine/native_process.hpp": "8381a49a62cc014d9fc066cb06190207c81975746fbfc89df4f88b249e1e314c",
+        "cpp/include/calmetrics_engine/native_runtime.hpp": "3174283ec51b39616fdf9965d3c465a1fd9a70f8f6e0ddead31afd6f777331b6",
+        "cpp/include/calmetrics_engine/numeric.hpp": "adacba584014567f08ec836f4f69d4706baeaac9a103ec4a3be72e45a9d9956b",
+        "cpp/include/calmetrics_engine/operators.def": "3ee15639eb9501416248f15d1e2f76f64fa5b922db88ffcf870cf380a747764d",
+        "cpp/include/calmetrics_engine/operators.hpp": "a944548032186b2cec441dcd971e25f32cf7e785e156996c34394522d1af110d",
+        "cpp/include/calmetrics_engine/parallel.hpp": "9bcb22457b0660d719db7b7058d580df524488dba5e4847f92385997165877b3",
+        "cpp/include/calmetrics_engine/planner.hpp": "3f229b938e9db8515ce29a222eab07b83f9479fd422c8b0c504724249e9a5f8e",
+        "cpp/include/calmetrics_engine/pointwise.hpp": "aa8c0ad5af5115b604bc25203537d9dc3ea59cfea5f7428fd60644a21ac10801",
+        "cpp/include/calmetrics_engine/scheduler.hpp": "fd4fc6bf9f8765c8f221a1a1859f5b8cb2ea89a8698edf61719afff04fbbba86",
+        "cpp/include/calmetrics_engine/shared_memory.hpp": "d6defd233f4e0e44360bbd73bf8091cdac0eb0f01ab7de4eac86bc4f1243f274",
+        "cpp/include/calmetrics_engine/typed_ir.hpp": "2973e1663a5269225da9361527e6e10c216fd229eaa9401b64304d4452bfaeb0",
+        "cpp/model_payload.cpp": "d3faf97356df04a9772b8e5105078856938589fcefee711b0f96dbb3520d892b",
+        "cpp/native_api_bindings.cpp": "fce802fad12e3eca81b6a45abca895fefcdd4adeef76027e6e06328d53c22525",
+        "cpp/native_process.cpp": "e56a8b78a635e8c27c1d4b40797ac7d67c1157130c8719510edaff236e9d5e1b",
+        "cpp/native_runtime.cpp": "ea260563ec6a30704d20f0ab0bccd21777d8c5f1e1d9c9310cbae13be7a7ab49",
+        "cpp/native_worker_main.cpp": "b26e9784411d0d35d88a1d578301203e837195270af195ccc100f2158d54c61c",
+        "cpp/operator_bindings.cpp": "24ce31d0f0815e1028b02b5ef487e6da1adf8b9280df8032240ef9ba115e7fbe",
+        "cpp/operators/affine_contract.hpp": "1afc6798ff05a26e1bf3bca7768083f0e29b57b8925ca15cdd79982d293da38e",
+        "cpp/operators/cholesky_library.hpp": "d7c91b3be3e49ee3b30ab619d869b04ebe36e3a41e4204a11e4ae229bfa075a9",
+        "cpp/operators/column_library.hpp": "72f5612a7927bc404de08a46c78aa256bf2475746181a9d3bf60955283063e4d",
+        "cpp/operators/covariance_accelerate.cpp": "f3d0c03fc9b53b1a941b31fea7935541c4d7d548d4ba745b25acf7f60df621e8",
+        "cpp/operators/covchol_accelerate.cpp": "6d160cfddcc0b9df2d9e5ae5b0fe15fa5ac96cb8e33744c514137c56e8ed3e9c",
+        "cpp/operators/elementwise.cpp": "e08357a58d5ee9a7e40d02efe885ceeda0d7be6f532ab2a30c448e5b797cff73",
+        "cpp/operators/latent.cpp": "6d73858b0d6331e3b1683d7c55786ec26ff197037c3b4cb1d13eaa26583783c1",
+        "cpp/operators/matmul_accelerate.cpp": "a41894b0ca6054196f870065c0a998f6a04b5473c060db126e9a3000455c004e",
+        "cpp/operators/matmul_packed.cpp": "dc25ced878cdbb01aeca3a1fcf2677e4796239c564789bcbc55a34d9ea17e0b1",
+        "cpp/operators/matrix.cpp": "fd23159aa4e013766d58f03f416501f22d63197f1aea1919d60677d01e1abfc0",
+        "cpp/operators/matrix_backend.cpp": "f75c0d5ea8e3215d3ac56a5ad33e7588866f9d4f086a64113de7ae28f4e95b8d",
+        "cpp/operators/matrix_foundation.cpp": "329da2d08be0260d2269afe5fe54cd7706f729e868b67651e08e0bb4027d241e",
+        "cpp/operators/recurrence.cpp": "0b973d1534bdd6cef8f9e5742800a375e4b17f68772f923ce5cef2d56f281b33",
+        "cpp/operators/reduction.cpp": "623d7a1db4c992e50b29da4c5de1e7b4f134d297ea3e24c060b4a6d9fa219472",
+        "cpp/operators/registry.cpp": "6637cfe297db3afd39dfe1eece37089fbf0571abd739606578c122a0d9ac74af",
+        "cpp/operators/scalar_chain.hpp": "6d6767ce57e428634fa5252f1cb37a1e25294622a8cc266945f1062cd1031138",
+        "cpp/operators/sequence.cpp": "bf7f6a5debb78222e734f35acfefeb83df102fd730601160de8e9b0fdf05d777",
+        "cpp/operators/simd.cpp": "687b3db6b5377064050e01226921b5d299d605d460154ff0215373b964cb62cb",
+        "cpp/operators/simd_avx2.cpp": "a3a5ee6397b882615f4b5b080d8134a92247a7c1344d1d9ebc046260edbca773",
+        "cpp/operators/simd_loop.hpp": "5ebae38e939243a9ee64334b9e0082426d1afcf188a1e3e771ea302b83c7a6a1",
+        "cpp/operators/solve_multi_library.hpp": "b51fff1893ff9b78015cd4c0bcc06bde2ef2832fa33731131cdd1d60090b354f",
+        "cpp/operators/state.cpp": "e1c6cc7987787676f80ca1e6c379d9ce99c23f9b4838b5a646d2b04b9941fece",
+        "cpp/operators/state_events.cpp": "82b16052d1d05dd2c8cd6afec9331f9449ebfb20a1cb30b98d8eaa0b51c8be29",
+        "cpp/operators/transcendental_accelerate.cpp": "1e7324371ca102ec91f51857eb85568bd405b893083c88e2237547e24165ede9",
+        "cpp/planner.cpp": "8701c2471fe0434546141be2e34d65eab68eb27a0919dec00dba5e532aefb976",
+        "cpp/pointwise.cpp": "4705bbbb5b794633a386ac8c255b687fd6aa42fbeeeadd3cf12151bd841b4c7c",
+        "cpp/result_layout.cpp": "34f587b99e8e5251de5737e67ea6c1cf707c06b6c1dc5e9338fdb2178ed5c1ee",
+        "cpp/scheduler.cpp": "cb54193d46dc8d362b3a4219f92a7eecbf4f3a2991c499968c4b2b1a00653842",
+        "cpp/shared_memory.cpp": "34d1de7c955694d4a5145b8ba2c9d4512e0e01b25dae47468db148a325459d81",
+        "cpp/typed_foundation.cpp": "cf6a9d498051c94e0f9debb7f9f63f34aea26af24f055739f93deac099f0dd89",
+        "cpp/typed_ir.cpp": "e6d8196c4e5f87710177716dd69b0b55e5dcc6b162944a021408bd53e230ac15",
+        "cpp/typed_latent.cpp": "2a3100aa7732fe2d3ca42db2e4925599220a09029ff5f6c554df938b8a576412",
+        "pyproject.toml": "49ad775779f55dd9a6d6019728a69f758efc269c250af8cd0267d2bc26abafbe"
+      },
+      "source_mismatches": [],
+      "unlisted_sources": [],
+      "missing_sources": []
+    },
+    "source_unchanged": true,
+    "build_info": {
+      "version": "0.3.0",
+      "compiler": "AppleClang 17.0.0.17000603",
+      "architecture": "arm64",
+      "cpu_policy": "baseline",
+      "thread_backend": "persistent_cpp_native_scheduler",
+      "cxx_standard": 17,
+      "execution_backend": "pybind11_aot",
+      "graph_execution_backend": "native_graph_interpreter",
+      "scheduler_backend": "bounded_thread_process_pool",
+      "scheduler_scope": "process_wide_cpp_cpu_admission",
+      "legacy_finance_scheduler": "shared_native_scheduler",
+      "coroutine_backend": "asyncio_orchestration_only",
+      "process_transport": "shared_memory_or_serialized_small_input",
+      "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+      "runtime_jit": 0,
+      "compiler_backend": "cpp_restricted_ast",
+      "planner_backend": "cpp",
+      "native_scheduler_backend": "persistent_cpp_threads_processes",
+      "native_worker_runtime": "standalone_no_python",
+      "python_role": "numpy_binding_async_adapter",
+      "input_memory_policy": "exact_dtype_strided_zero_copy"
+    },
+    "threadpools": [
+      {
+        "user_api": "blas",
+        "internal_api": "openblas",
+        "num_threads": 1,
+        "prefix": "libopenblas",
+        "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+        "version": "0.3.23.dev",
+        "threading_layer": "pthreads",
+        "architecture": "armv8"
+      }
+    ],
+    "tiny_compile_and_warm_ms_excluded": 157.962708,
+    "prepare_ms": 8.117459,
+    "probe_sha256": null,
+    "reference_sha256": "2fbe9575318b3c7432d581d8cb16047a8e2b49e24e022538564160f0f69219e5",
+    "driver_sha256": "249c2826ca3dfec1f763f9b8c19ff2fcaf174bd6ebd720d4d94ae190458f93d6",
+    "helper_sha256": "b3862bb22e58f01f874bad0fd8466a3eb63ac4f3803186846184aafb47f4d7f8",
+    "identity_helper_sha256": "5d39e66df717413189969f477c8e646e31027c032f60f087dbb966e09c76c984",
+    "notes": [
+      "Identical complete period/contribution outputs and independent previous/new replacement.",
+      "Common readonly inputs and tiny NJIT compilation are outside both observation epochs.",
+      "Heap includes graph construction, first run, five warmups and two retained-result replacements.",
+      "RSS owner/graph is constructed before baseline; first full-size execution and replacement are inside.",
+      "RSS sampled at 0.5ms; idle page control is reported without subtraction.",
+      "Heap interposition can miss Python arena suballocations, mmap and nonintercepted allocators.",
+      "CPU 1: no worker process or shared-page aggregation is claimed.",
+      "Fixed transformed tape projection is not complete MC/NAV/fan acceptance."
+    ]
+  }
+]

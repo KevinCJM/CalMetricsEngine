@@ -1,0 +1,3934 @@
+[
+  {
+    "kind": "heap",
+    "setup_heap": {
+      "allocations": 160,
+      "frees": 108,
+      "allocated_bytes": 15219,
+      "live_bytes": 5534,
+      "peak_bytes": 8967,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "cold_heap": {
+      "allocations": 230,
+      "frees": 144,
+      "allocated_bytes": 33576239,
+      "live_bytes": 33563554,
+      "peak_bytes": 33563708,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "cold_retained_heap": {
+      "allocations": 230,
+      "frees": 148,
+      "allocated_bytes": 33576239,
+      "live_bytes": 33562992,
+      "peak_bytes": 33563708,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "warm_baseline_heap": {
+      "allocations": 325,
+      "frees": 243,
+      "allocated_bytes": 33580699,
+      "live_bytes": 33562992,
+      "peak_bytes": 33563708,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "warm_heap": {
+      "allocations": 384,
+      "frees": 296,
+      "allocated_bytes": 33583399,
+      "live_bytes": 33563578,
+      "peak_bytes": 33564294,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "warm_retained_heap": {
+      "allocations": 384,
+      "frees": 300,
+      "allocated_bytes": 33583399,
+      "live_bytes": 33563016,
+      "peak_bytes": 33564294,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "heap_schema": "continuous-live-1",
+    "cold_peak_bytes": 33563708,
+    "warm_peak_bytes": 33564294,
+    "case": {
+      "name": "quantile",
+      "n": 4194304,
+      "layout": "c",
+      "entry": "ordinary",
+      "pattern": "random"
+    },
+    "backend": "old",
+    "input": {
+      "x": {
+        "shape": [
+          4194304
+        ],
+        "strides": [
+          8
+        ],
+        "dtype": "float64",
+        "sha256": "83bb41841c8597f7e46cc7be7b7c9df8d8032165e59e9e4a939e9415d04fd7d5",
+        "writeable": false
+      }
+    },
+    "build": {
+      "version": "0.3.0",
+      "compiler": "AppleClang 17.0.0.17000603",
+      "architecture": "arm64",
+      "cpu_policy": "baseline",
+      "thread_backend": "persistent_cpp_native_scheduler",
+      "cxx_standard": 17,
+      "execution_backend": "pybind11_aot",
+      "graph_execution_backend": "native_graph_interpreter",
+      "scheduler_backend": "bounded_thread_process_pool",
+      "scheduler_scope": "process_wide_cpp_cpu_admission",
+      "legacy_finance_scheduler": "shared_native_scheduler",
+      "coroutine_backend": "asyncio_orchestration_only",
+      "process_transport": "shared_memory_or_serialized_small_input",
+      "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+      "runtime_jit": 0,
+      "compiler_backend": "cpp_restricted_ast",
+      "planner_backend": "cpp",
+      "native_scheduler_backend": "persistent_cpp_threads_processes",
+      "native_worker_runtime": "standalone_no_python",
+      "python_role": "numpy_binding_async_adapter",
+      "input_memory_policy": "exact_dtype_strided_zero_copy"
+    },
+    "threads": {
+      "environment": {
+        "OPENBLAS_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "NUMBA_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1"
+      },
+      "accelerate_thread_local": "not_applied_to_native"
+    },
+    "audit": {
+      "execution_backend": "cpp_aot",
+      "audit_schema": "cpp-aot-execution-2",
+      "result_protocol": "typed-results-2",
+      "engine": "calmetrics_engine",
+      "model_identity": null,
+      "engine_version": "0.3.0",
+      "engine_build_id": "ccca6b67a5220ea2134a4743d281b80c5af4c096e7d41c3d5b747bb8de70e331",
+      "operator_registry_version": "canonical-native-1",
+      "typed_ir_version": "cpp-typed-ir-1",
+      "plan_fingerprint": "native-3-53e979ca73a577664612af5496917a47",
+      "source_contracts": [],
+      "status_result_copy_bytes": 0,
+      "status_transport_bytes": 0,
+      "native_aot": true,
+      "python_fallback": 0,
+      "python_operator_calls": 0,
+      "request_time_compilation": 0,
+      "input_dtype": "float64",
+      "input_dtypes": {
+        "x": "float64"
+      },
+      "output_dtype": "per_output",
+      "outputs": [
+        {
+          "dtype": "float64",
+          "kind": "scalar",
+          "axes": [],
+          "shape": []
+        }
+      ],
+      "result_layout": "interval_root_aligned_8",
+      "result_capacity_bytes": 8,
+      "error_policy": "raise",
+      "status_contract": "indicator-status-1",
+      "result_lifetime": "independent",
+      "lane": "single",
+      "elapsed_ms": 41.181208,
+      "queue_wait_ms": 0.001833,
+      "compute_ms": 41.179375,
+      "cpu_tokens": 1,
+      "cpu_budget": 1,
+      "process_count": 1,
+      "thread_count": 1,
+      "threads_per_process": 1,
+      "async_orchestration": false,
+      "hard_stop": false,
+      "use_shared_memory": false,
+      "reason_codes": [
+        "typed_result_capacity_write_work_accounted",
+        "parallel_overhead_expected_to_dominate"
+      ],
+      "parallel_dimension": "interval",
+      "product_count": 1,
+      "estimated_work_units": 184549377.0,
+      "prepared": false,
+      "prepared_cached": true,
+      "shared_memory_bytes": 0,
+      "boundary_copy_bytes": 0,
+      "output_copy_bytes": 0,
+      "scheduler_backend": "cpp",
+      "native_threads": 1,
+      "native_processes": 0,
+      "python_worker_callbacks": 0,
+      "python_native_transitions": 1,
+      "output_ownership": "numpy_owned",
+      "output_kind": "typed",
+      "native_chunks": [
+        {
+          "fused_pointwise_calls": 0,
+          "pointwise_tiles": 0,
+          "vector_elements": 0,
+          "root_copy_bytes": 8,
+          "direct_output_bytes": 0,
+          "state_copy_bytes": 0,
+          "pointwise_workspace_capacity_bytes": 0,
+          "rows": 1,
+          "nodes": 3,
+          "max_window": 4194304,
+          "numeric_arena_bytes": 0,
+          "mask_arena_bytes": 0,
+          "operator_workspace_capacity_bytes": 33554432,
+          "order_scratch_capacity_bytes": 0,
+          "input_copy_bytes": 0,
+          "eigen_rotation_calls": 0,
+          "eigen_matvec_calls": 0,
+          "eigen_covariance_calls": 0,
+          "eigen_density_calls": 0,
+          "accelerate_covchol_calls": 0,
+          "accelerate_matmul_calls": 0,
+          "matmul_zero_calls": 0,
+          "accelerate_covariance_attempts": 0,
+          "accelerate_covariance_calls": 0,
+          "covariance_syrk_calls": 0,
+          "covariance_replayed_cells": 0,
+          "covariance_fallbacks": 0,
+          "covariance_zero_calls": 0,
+          "accelerate_vforce_calls": 0,
+          "covariance_panel_materialization_bytes": 0,
+          "native_library_workspace_reserve_bytes": 0,
+          "algorithm_copy_bytes": 33554432,
+          "fused_scalar_calls": 0,
+          "summary_source_scans": 0,
+          "order_stat_sorts": 0,
+          "python_operator_calls": 0,
+          "execution_backend": "native_graph_interpreter"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "rss",
+    "rss_baseline": 75153408,
+    "rss_peak": 109330432,
+    "rss_delta": 34177024,
+    "rss_idle_delta": 0,
+    "rss_schema": "setup-through-warm-monitor-control-1",
+    "case": {
+      "name": "quantile",
+      "n": 4194304,
+      "layout": "c",
+      "entry": "ordinary",
+      "pattern": "random"
+    },
+    "backend": "old",
+    "input": {
+      "x": {
+        "shape": [
+          4194304
+        ],
+        "strides": [
+          8
+        ],
+        "dtype": "float64",
+        "sha256": "83bb41841c8597f7e46cc7be7b7c9df8d8032165e59e9e4a939e9415d04fd7d5",
+        "writeable": false
+      }
+    },
+    "build": {
+      "version": "0.3.0",
+      "compiler": "AppleClang 17.0.0.17000603",
+      "architecture": "arm64",
+      "cpu_policy": "baseline",
+      "thread_backend": "persistent_cpp_native_scheduler",
+      "cxx_standard": 17,
+      "execution_backend": "pybind11_aot",
+      "graph_execution_backend": "native_graph_interpreter",
+      "scheduler_backend": "bounded_thread_process_pool",
+      "scheduler_scope": "process_wide_cpp_cpu_admission",
+      "legacy_finance_scheduler": "shared_native_scheduler",
+      "coroutine_backend": "asyncio_orchestration_only",
+      "process_transport": "shared_memory_or_serialized_small_input",
+      "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+      "runtime_jit": 0,
+      "compiler_backend": "cpp_restricted_ast",
+      "planner_backend": "cpp",
+      "native_scheduler_backend": "persistent_cpp_threads_processes",
+      "native_worker_runtime": "standalone_no_python",
+      "python_role": "numpy_binding_async_adapter",
+      "input_memory_policy": "exact_dtype_strided_zero_copy"
+    },
+    "threads": {
+      "environment": {
+        "OPENBLAS_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "NUMBA_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1"
+      },
+      "accelerate_thread_local": "not_applied_to_native"
+    },
+    "audit": {
+      "execution_backend": "cpp_aot",
+      "audit_schema": "cpp-aot-execution-2",
+      "result_protocol": "typed-results-2",
+      "engine": "calmetrics_engine",
+      "model_identity": null,
+      "engine_version": "0.3.0",
+      "engine_build_id": "ccca6b67a5220ea2134a4743d281b80c5af4c096e7d41c3d5b747bb8de70e331",
+      "operator_registry_version": "canonical-native-1",
+      "typed_ir_version": "cpp-typed-ir-1",
+      "plan_fingerprint": "native-3-53e979ca73a577664612af5496917a47",
+      "source_contracts": [],
+      "status_result_copy_bytes": 0,
+      "status_transport_bytes": 0,
+      "native_aot": true,
+      "python_fallback": 0,
+      "python_operator_calls": 0,
+      "request_time_compilation": 0,
+      "input_dtype": "float64",
+      "input_dtypes": {
+        "x": "float64"
+      },
+      "output_dtype": "per_output",
+      "outputs": [
+        {
+          "dtype": "float64",
+          "kind": "scalar",
+          "axes": [],
+          "shape": []
+        }
+      ],
+      "result_layout": "interval_root_aligned_8",
+      "result_capacity_bytes": 8,
+      "error_policy": "raise",
+      "status_contract": "indicator-status-1",
+      "result_lifetime": "independent",
+      "lane": "single",
+      "elapsed_ms": 41.551375,
+      "queue_wait_ms": 0.001709,
+      "compute_ms": 41.549666,
+      "cpu_tokens": 1,
+      "cpu_budget": 1,
+      "process_count": 1,
+      "thread_count": 1,
+      "threads_per_process": 1,
+      "async_orchestration": false,
+      "hard_stop": false,
+      "use_shared_memory": false,
+      "reason_codes": [
+        "typed_result_capacity_write_work_accounted",
+        "parallel_overhead_expected_to_dominate"
+      ],
+      "parallel_dimension": "interval",
+      "product_count": 1,
+      "estimated_work_units": 184549377.0,
+      "prepared": false,
+      "prepared_cached": true,
+      "shared_memory_bytes": 0,
+      "boundary_copy_bytes": 0,
+      "output_copy_bytes": 0,
+      "scheduler_backend": "cpp",
+      "native_threads": 1,
+      "native_processes": 0,
+      "python_worker_callbacks": 0,
+      "python_native_transitions": 1,
+      "output_ownership": "numpy_owned",
+      "output_kind": "typed",
+      "native_chunks": [
+        {
+          "fused_pointwise_calls": 0,
+          "pointwise_tiles": 0,
+          "vector_elements": 0,
+          "root_copy_bytes": 8,
+          "direct_output_bytes": 0,
+          "state_copy_bytes": 0,
+          "pointwise_workspace_capacity_bytes": 0,
+          "rows": 1,
+          "nodes": 3,
+          "max_window": 4194304,
+          "numeric_arena_bytes": 0,
+          "mask_arena_bytes": 0,
+          "operator_workspace_capacity_bytes": 33554432,
+          "order_scratch_capacity_bytes": 0,
+          "input_copy_bytes": 0,
+          "eigen_rotation_calls": 0,
+          "eigen_matvec_calls": 0,
+          "eigen_covariance_calls": 0,
+          "eigen_density_calls": 0,
+          "accelerate_covchol_calls": 0,
+          "accelerate_matmul_calls": 0,
+          "matmul_zero_calls": 0,
+          "accelerate_covariance_attempts": 0,
+          "accelerate_covariance_calls": 0,
+          "covariance_syrk_calls": 0,
+          "covariance_replayed_cells": 0,
+          "covariance_fallbacks": 0,
+          "covariance_zero_calls": 0,
+          "accelerate_vforce_calls": 0,
+          "covariance_panel_materialization_bytes": 0,
+          "native_library_workspace_reserve_bytes": 0,
+          "algorithm_copy_bytes": 33554432,
+          "fused_scalar_calls": 0,
+          "summary_source_scans": 0,
+          "order_stat_sorts": 0,
+          "python_operator_calls": 0,
+          "execution_backend": "native_graph_interpreter"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "heap",
+    "setup_heap": {
+      "allocations": 160,
+      "frees": 108,
+      "allocated_bytes": 15227,
+      "live_bytes": 5542,
+      "peak_bytes": 8967,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "cold_heap": {
+      "allocations": 230,
+      "frees": 144,
+      "allocated_bytes": 33576247,
+      "live_bytes": 33563562,
+      "peak_bytes": 33563716,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "cold_retained_heap": {
+      "allocations": 230,
+      "frees": 148,
+      "allocated_bytes": 33576247,
+      "live_bytes": 33563000,
+      "peak_bytes": 33563716,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "warm_baseline_heap": {
+      "allocations": 325,
+      "frees": 243,
+      "allocated_bytes": 33580707,
+      "live_bytes": 33563000,
+      "peak_bytes": 33563716,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "warm_heap": {
+      "allocations": 384,
+      "frees": 296,
+      "allocated_bytes": 33583407,
+      "live_bytes": 33563586,
+      "peak_bytes": 33564302,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "warm_retained_heap": {
+      "allocations": 384,
+      "frees": 300,
+      "allocated_bytes": 33583407,
+      "live_bytes": 33563024,
+      "peak_bytes": 33564302,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "heap_schema": "continuous-live-1",
+    "cold_peak_bytes": 33563716,
+    "warm_peak_bytes": 33564302,
+    "case": {
+      "name": "quantile",
+      "n": 4194304,
+      "layout": "c",
+      "entry": "ordinary",
+      "pattern": "random"
+    },
+    "backend": "new",
+    "input": {
+      "x": {
+        "shape": [
+          4194304
+        ],
+        "strides": [
+          8
+        ],
+        "dtype": "float64",
+        "sha256": "83bb41841c8597f7e46cc7be7b7c9df8d8032165e59e9e4a939e9415d04fd7d5",
+        "writeable": false
+      }
+    },
+    "build": {
+      "version": "0.3.0",
+      "compiler": "AppleClang 17.0.0.17000603",
+      "architecture": "arm64",
+      "cpu_policy": "baseline",
+      "thread_backend": "persistent_cpp_native_scheduler",
+      "cxx_standard": 17,
+      "execution_backend": "pybind11_aot",
+      "graph_execution_backend": "native_graph_interpreter",
+      "scheduler_backend": "bounded_thread_process_pool",
+      "scheduler_scope": "process_wide_cpp_cpu_admission",
+      "legacy_finance_scheduler": "shared_native_scheduler",
+      "coroutine_backend": "asyncio_orchestration_only",
+      "process_transport": "shared_memory_or_serialized_small_input",
+      "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+      "runtime_jit": 0,
+      "compiler_backend": "cpp_restricted_ast",
+      "planner_backend": "cpp",
+      "native_scheduler_backend": "persistent_cpp_threads_processes",
+      "native_worker_runtime": "standalone_no_python",
+      "python_role": "numpy_binding_async_adapter",
+      "input_memory_policy": "exact_dtype_strided_zero_copy"
+    },
+    "threads": {
+      "environment": {
+        "OPENBLAS_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "NUMBA_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1"
+      },
+      "accelerate_thread_local": "not_applied_to_native"
+    },
+    "audit": {
+      "execution_backend": "cpp_aot",
+      "audit_schema": "cpp-aot-execution-2",
+      "result_protocol": "typed-results-2",
+      "engine": "calmetrics_engine",
+      "model_identity": null,
+      "engine_version": "0.3.0",
+      "engine_build_id": "a6841b56ae9e25c011f991df43385f47c1b5fa7285d0ec804cdf7f71366d75a2",
+      "operator_registry_version": "canonical-native-1",
+      "typed_ir_version": "cpp-typed-ir-1",
+      "plan_fingerprint": "native-3-53e979ca73a577664612af5496917a47",
+      "source_contracts": [],
+      "status_result_copy_bytes": 0,
+      "status_transport_bytes": 0,
+      "native_aot": true,
+      "python_fallback": 0,
+      "python_operator_calls": 0,
+      "request_time_compilation": 0,
+      "input_dtype": "float64",
+      "input_dtypes": {
+        "x": "float64"
+      },
+      "output_dtype": "per_output",
+      "outputs": [
+        {
+          "dtype": "float64",
+          "kind": "scalar",
+          "axes": [],
+          "shape": []
+        }
+      ],
+      "result_layout": "interval_root_aligned_8",
+      "result_capacity_bytes": 8,
+      "error_policy": "raise",
+      "status_contract": "indicator-status-1",
+      "result_lifetime": "independent",
+      "lane": "single",
+      "elapsed_ms": 35.584416,
+      "queue_wait_ms": 0.001416,
+      "compute_ms": 35.583,
+      "cpu_tokens": 1,
+      "cpu_budget": 1,
+      "process_count": 1,
+      "thread_count": 1,
+      "threads_per_process": 1,
+      "async_orchestration": false,
+      "hard_stop": false,
+      "use_shared_memory": false,
+      "reason_codes": [
+        "typed_result_capacity_write_work_accounted",
+        "parallel_overhead_expected_to_dominate"
+      ],
+      "parallel_dimension": "interval",
+      "product_count": 1,
+      "estimated_work_units": 184549377.0,
+      "prepared": false,
+      "prepared_cached": true,
+      "shared_memory_bytes": 0,
+      "boundary_copy_bytes": 0,
+      "output_copy_bytes": 0,
+      "scheduler_backend": "cpp",
+      "native_threads": 1,
+      "native_processes": 0,
+      "python_worker_callbacks": 0,
+      "python_native_transitions": 1,
+      "output_ownership": "numpy_owned",
+      "output_kind": "typed",
+      "native_chunks": [
+        {
+          "fused_pointwise_calls": 0,
+          "pointwise_tiles": 0,
+          "vector_elements": 0,
+          "root_copy_bytes": 8,
+          "direct_output_bytes": 0,
+          "state_copy_bytes": 0,
+          "pointwise_workspace_capacity_bytes": 0,
+          "rows": 1,
+          "nodes": 3,
+          "max_window": 4194304,
+          "numeric_arena_bytes": 0,
+          "mask_arena_bytes": 0,
+          "operator_workspace_capacity_bytes": 33554432,
+          "order_scratch_capacity_bytes": 0,
+          "input_copy_bytes": 0,
+          "eigen_rotation_calls": 0,
+          "eigen_matvec_calls": 0,
+          "eigen_covariance_calls": 0,
+          "eigen_density_calls": 0,
+          "accelerate_covchol_calls": 0,
+          "accelerate_matmul_calls": 0,
+          "matmul_zero_calls": 0,
+          "accelerate_covariance_attempts": 0,
+          "accelerate_covariance_calls": 0,
+          "covariance_syrk_calls": 0,
+          "covariance_replayed_cells": 0,
+          "covariance_fallbacks": 0,
+          "covariance_zero_calls": 0,
+          "accelerate_vforce_calls": 0,
+          "covariance_panel_materialization_bytes": 0,
+          "native_library_workspace_reserve_bytes": 0,
+          "algorithm_copy_bytes": 33554432,
+          "fused_scalar_calls": 0,
+          "summary_source_scans": 0,
+          "order_stat_sorts": 0,
+          "python_operator_calls": 0,
+          "execution_backend": "native_graph_interpreter"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "rss",
+    "rss_baseline": 76021760,
+    "rss_peak": 110198784,
+    "rss_delta": 34177024,
+    "rss_idle_delta": 0,
+    "rss_schema": "setup-through-warm-monitor-control-1",
+    "case": {
+      "name": "quantile",
+      "n": 4194304,
+      "layout": "c",
+      "entry": "ordinary",
+      "pattern": "random"
+    },
+    "backend": "new",
+    "input": {
+      "x": {
+        "shape": [
+          4194304
+        ],
+        "strides": [
+          8
+        ],
+        "dtype": "float64",
+        "sha256": "83bb41841c8597f7e46cc7be7b7c9df8d8032165e59e9e4a939e9415d04fd7d5",
+        "writeable": false
+      }
+    },
+    "build": {
+      "version": "0.3.0",
+      "compiler": "AppleClang 17.0.0.17000603",
+      "architecture": "arm64",
+      "cpu_policy": "baseline",
+      "thread_backend": "persistent_cpp_native_scheduler",
+      "cxx_standard": 17,
+      "execution_backend": "pybind11_aot",
+      "graph_execution_backend": "native_graph_interpreter",
+      "scheduler_backend": "bounded_thread_process_pool",
+      "scheduler_scope": "process_wide_cpp_cpu_admission",
+      "legacy_finance_scheduler": "shared_native_scheduler",
+      "coroutine_backend": "asyncio_orchestration_only",
+      "process_transport": "shared_memory_or_serialized_small_input",
+      "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+      "runtime_jit": 0,
+      "compiler_backend": "cpp_restricted_ast",
+      "planner_backend": "cpp",
+      "native_scheduler_backend": "persistent_cpp_threads_processes",
+      "native_worker_runtime": "standalone_no_python",
+      "python_role": "numpy_binding_async_adapter",
+      "input_memory_policy": "exact_dtype_strided_zero_copy"
+    },
+    "threads": {
+      "environment": {
+        "OPENBLAS_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "NUMBA_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1"
+      },
+      "accelerate_thread_local": "not_applied_to_native"
+    },
+    "audit": {
+      "execution_backend": "cpp_aot",
+      "audit_schema": "cpp-aot-execution-2",
+      "result_protocol": "typed-results-2",
+      "engine": "calmetrics_engine",
+      "model_identity": null,
+      "engine_version": "0.3.0",
+      "engine_build_id": "a6841b56ae9e25c011f991df43385f47c1b5fa7285d0ec804cdf7f71366d75a2",
+      "operator_registry_version": "canonical-native-1",
+      "typed_ir_version": "cpp-typed-ir-1",
+      "plan_fingerprint": "native-3-53e979ca73a577664612af5496917a47",
+      "source_contracts": [],
+      "status_result_copy_bytes": 0,
+      "status_transport_bytes": 0,
+      "native_aot": true,
+      "python_fallback": 0,
+      "python_operator_calls": 0,
+      "request_time_compilation": 0,
+      "input_dtype": "float64",
+      "input_dtypes": {
+        "x": "float64"
+      },
+      "output_dtype": "per_output",
+      "outputs": [
+        {
+          "dtype": "float64",
+          "kind": "scalar",
+          "axes": [],
+          "shape": []
+        }
+      ],
+      "result_layout": "interval_root_aligned_8",
+      "result_capacity_bytes": 8,
+      "error_policy": "raise",
+      "status_contract": "indicator-status-1",
+      "result_lifetime": "independent",
+      "lane": "single",
+      "elapsed_ms": 36.016375,
+      "queue_wait_ms": 0.002,
+      "compute_ms": 36.014375,
+      "cpu_tokens": 1,
+      "cpu_budget": 1,
+      "process_count": 1,
+      "thread_count": 1,
+      "threads_per_process": 1,
+      "async_orchestration": false,
+      "hard_stop": false,
+      "use_shared_memory": false,
+      "reason_codes": [
+        "typed_result_capacity_write_work_accounted",
+        "parallel_overhead_expected_to_dominate"
+      ],
+      "parallel_dimension": "interval",
+      "product_count": 1,
+      "estimated_work_units": 184549377.0,
+      "prepared": false,
+      "prepared_cached": true,
+      "shared_memory_bytes": 0,
+      "boundary_copy_bytes": 0,
+      "output_copy_bytes": 0,
+      "scheduler_backend": "cpp",
+      "native_threads": 1,
+      "native_processes": 0,
+      "python_worker_callbacks": 0,
+      "python_native_transitions": 1,
+      "output_ownership": "numpy_owned",
+      "output_kind": "typed",
+      "native_chunks": [
+        {
+          "fused_pointwise_calls": 0,
+          "pointwise_tiles": 0,
+          "vector_elements": 0,
+          "root_copy_bytes": 8,
+          "direct_output_bytes": 0,
+          "state_copy_bytes": 0,
+          "pointwise_workspace_capacity_bytes": 0,
+          "rows": 1,
+          "nodes": 3,
+          "max_window": 4194304,
+          "numeric_arena_bytes": 0,
+          "mask_arena_bytes": 0,
+          "operator_workspace_capacity_bytes": 33554432,
+          "order_scratch_capacity_bytes": 0,
+          "input_copy_bytes": 0,
+          "eigen_rotation_calls": 0,
+          "eigen_matvec_calls": 0,
+          "eigen_covariance_calls": 0,
+          "eigen_density_calls": 0,
+          "accelerate_covchol_calls": 0,
+          "accelerate_matmul_calls": 0,
+          "matmul_zero_calls": 0,
+          "accelerate_covariance_attempts": 0,
+          "accelerate_covariance_calls": 0,
+          "covariance_syrk_calls": 0,
+          "covariance_replayed_cells": 0,
+          "covariance_fallbacks": 0,
+          "covariance_zero_calls": 0,
+          "accelerate_vforce_calls": 0,
+          "covariance_panel_materialization_bytes": 0,
+          "native_library_workspace_reserve_bytes": 0,
+          "algorithm_copy_bytes": 33554432,
+          "fused_scalar_calls": 0,
+          "summary_source_scans": 0,
+          "order_stat_sorts": 0,
+          "python_operator_calls": 0,
+          "execution_backend": "native_graph_interpreter"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "heap",
+    "setup_heap": {
+      "allocations": 1,
+      "frees": 0,
+      "allocated_bytes": 16,
+      "live_bytes": 16,
+      "peak_bytes": 16,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "cold_heap": {
+      "allocations": 17,
+      "frees": 10,
+      "allocated_bytes": 75498788,
+      "live_bytes": 292,
+      "peak_bytes": 71304012,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "cold_retained_heap": {
+      "allocations": 17,
+      "frees": 10,
+      "allocated_bytes": 75498788,
+      "live_bytes": 292,
+      "peak_bytes": 71304012,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "warm_baseline_heap": {
+      "allocations": 67,
+      "frees": 60,
+      "allocated_bytes": 452991268,
+      "live_bytes": 292,
+      "peak_bytes": 71304012,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "warm_heap": {
+      "allocations": 97,
+      "frees": 90,
+      "allocated_bytes": 679486756,
+      "live_bytes": 292,
+      "peak_bytes": 71304012,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "warm_retained_heap": {
+      "allocations": 97,
+      "frees": 90,
+      "allocated_bytes": 679486756,
+      "live_bytes": 292,
+      "peak_bytes": 71304012,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "heap_schema": "continuous-live-1",
+    "cold_peak_bytes": 71304012,
+    "warm_peak_bytes": 71304012,
+    "case": {
+      "name": "quantile",
+      "n": 4194304,
+      "layout": "c",
+      "entry": "ordinary",
+      "pattern": "random"
+    },
+    "backend": "njit",
+    "input": {
+      "x": {
+        "shape": [
+          4194304
+        ],
+        "strides": [
+          8
+        ],
+        "dtype": "float64",
+        "sha256": "83bb41841c8597f7e46cc7be7b7c9df8d8032165e59e9e4a939e9415d04fd7d5",
+        "writeable": false
+      }
+    },
+    "build": {
+      "backend": "numba-numpy-linalg-scipy-blas",
+      "numba": "0.60.0",
+      "numpy": "1.26.4",
+      "scipy": "1.17.1"
+    },
+    "threads": {
+      "environment": {
+        "OPENBLAS_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "NUMBA_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1"
+      },
+      "accelerate_thread_local": {
+        "prior": 0,
+        "active": 1,
+        "restored": 0
+      },
+      "pools": [
+        {
+          "user_api": "blas",
+          "internal_api": "openblas",
+          "num_threads": 1,
+          "prefix": "libopenblas",
+          "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+          "version": "0.3.23.dev",
+          "threading_layer": "pthreads",
+          "architecture": "armv8"
+        }
+      ]
+    },
+    "audit": {}
+  },
+  {
+    "kind": "rss",
+    "rss_baseline": 192200704,
+    "rss_peak": 280412160,
+    "rss_delta": 88211456,
+    "rss_idle_delta": 0,
+    "rss_schema": "setup-through-warm-monitor-control-1",
+    "case": {
+      "name": "quantile",
+      "n": 4194304,
+      "layout": "c",
+      "entry": "ordinary",
+      "pattern": "random"
+    },
+    "backend": "njit",
+    "input": {
+      "x": {
+        "shape": [
+          4194304
+        ],
+        "strides": [
+          8
+        ],
+        "dtype": "float64",
+        "sha256": "83bb41841c8597f7e46cc7be7b7c9df8d8032165e59e9e4a939e9415d04fd7d5",
+        "writeable": false
+      }
+    },
+    "build": {
+      "backend": "numba-numpy-linalg-scipy-blas",
+      "numba": "0.60.0",
+      "numpy": "1.26.4",
+      "scipy": "1.17.1"
+    },
+    "threads": {
+      "environment": {
+        "OPENBLAS_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "NUMBA_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1"
+      },
+      "accelerate_thread_local": {
+        "prior": 0,
+        "active": 1,
+        "restored": 0
+      },
+      "pools": [
+        {
+          "user_api": "blas",
+          "internal_api": "openblas",
+          "num_threads": 1,
+          "prefix": "libopenblas",
+          "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+          "version": "0.3.23.dev",
+          "threading_layer": "pthreads",
+          "architecture": "armv8"
+        }
+      ]
+    },
+    "audit": {}
+  },
+  {
+    "kind": "heap",
+    "setup_heap": {
+      "allocations": 160,
+      "frees": 108,
+      "allocated_bytes": 15219,
+      "live_bytes": 5534,
+      "peak_bytes": 8967,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "cold_heap": {
+      "allocations": 230,
+      "frees": 144,
+      "allocated_bytes": 134239535,
+      "live_bytes": 134226850,
+      "peak_bytes": 134227004,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "cold_retained_heap": {
+      "allocations": 230,
+      "frees": 148,
+      "allocated_bytes": 134239535,
+      "live_bytes": 134226288,
+      "peak_bytes": 134227004,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "warm_baseline_heap": {
+      "allocations": 325,
+      "frees": 243,
+      "allocated_bytes": 134243995,
+      "live_bytes": 134226288,
+      "peak_bytes": 134227004,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "warm_heap": {
+      "allocations": 384,
+      "frees": 296,
+      "allocated_bytes": 134246695,
+      "live_bytes": 134226874,
+      "peak_bytes": 134227590,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "warm_retained_heap": {
+      "allocations": 384,
+      "frees": 300,
+      "allocated_bytes": 134246695,
+      "live_bytes": 134226312,
+      "peak_bytes": 134227590,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "heap_schema": "continuous-live-1",
+    "cold_peak_bytes": 134227004,
+    "warm_peak_bytes": 134227590,
+    "case": {
+      "name": "quantile",
+      "n": 16777216,
+      "layout": "c",
+      "entry": "ordinary",
+      "pattern": "random"
+    },
+    "backend": "old",
+    "input": {
+      "x": {
+        "shape": [
+          16777216
+        ],
+        "strides": [
+          8
+        ],
+        "dtype": "float64",
+        "sha256": "9b26cd0303b343fd2515d3b73b00c52642d4702e1468bfa5352a0919459174a6",
+        "writeable": false
+      }
+    },
+    "build": {
+      "version": "0.3.0",
+      "compiler": "AppleClang 17.0.0.17000603",
+      "architecture": "arm64",
+      "cpu_policy": "baseline",
+      "thread_backend": "persistent_cpp_native_scheduler",
+      "cxx_standard": 17,
+      "execution_backend": "pybind11_aot",
+      "graph_execution_backend": "native_graph_interpreter",
+      "scheduler_backend": "bounded_thread_process_pool",
+      "scheduler_scope": "process_wide_cpp_cpu_admission",
+      "legacy_finance_scheduler": "shared_native_scheduler",
+      "coroutine_backend": "asyncio_orchestration_only",
+      "process_transport": "shared_memory_or_serialized_small_input",
+      "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+      "runtime_jit": 0,
+      "compiler_backend": "cpp_restricted_ast",
+      "planner_backend": "cpp",
+      "native_scheduler_backend": "persistent_cpp_threads_processes",
+      "native_worker_runtime": "standalone_no_python",
+      "python_role": "numpy_binding_async_adapter",
+      "input_memory_policy": "exact_dtype_strided_zero_copy"
+    },
+    "threads": {
+      "environment": {
+        "OPENBLAS_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "NUMBA_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1"
+      },
+      "accelerate_thread_local": "not_applied_to_native"
+    },
+    "audit": {
+      "execution_backend": "cpp_aot",
+      "audit_schema": "cpp-aot-execution-2",
+      "result_protocol": "typed-results-2",
+      "engine": "calmetrics_engine",
+      "model_identity": null,
+      "engine_version": "0.3.0",
+      "engine_build_id": "ccca6b67a5220ea2134a4743d281b80c5af4c096e7d41c3d5b747bb8de70e331",
+      "operator_registry_version": "canonical-native-1",
+      "typed_ir_version": "cpp-typed-ir-1",
+      "plan_fingerprint": "native-3-53e979ca73a577664612af5496917a47",
+      "source_contracts": [],
+      "status_result_copy_bytes": 0,
+      "status_transport_bytes": 0,
+      "native_aot": true,
+      "python_fallback": 0,
+      "python_operator_calls": 0,
+      "request_time_compilation": 0,
+      "input_dtype": "float64",
+      "input_dtypes": {
+        "x": "float64"
+      },
+      "output_dtype": "per_output",
+      "outputs": [
+        {
+          "dtype": "float64",
+          "kind": "scalar",
+          "axes": [],
+          "shape": []
+        }
+      ],
+      "result_layout": "interval_root_aligned_8",
+      "result_capacity_bytes": 8,
+      "error_policy": "raise",
+      "status_contract": "indicator-status-1",
+      "result_lifetime": "independent",
+      "lane": "single",
+      "elapsed_ms": 171.2385,
+      "queue_wait_ms": 0.001583,
+      "compute_ms": 171.236917,
+      "cpu_tokens": 1,
+      "cpu_budget": 1,
+      "process_count": 1,
+      "thread_count": 1,
+      "threads_per_process": 1,
+      "async_orchestration": false,
+      "hard_stop": false,
+      "use_shared_memory": false,
+      "reason_codes": [
+        "typed_result_capacity_write_work_accounted",
+        "parallel_overhead_expected_to_dominate"
+      ],
+      "parallel_dimension": "interval",
+      "product_count": 1,
+      "estimated_work_units": 805306369.0,
+      "prepared": false,
+      "prepared_cached": true,
+      "shared_memory_bytes": 0,
+      "boundary_copy_bytes": 0,
+      "output_copy_bytes": 0,
+      "scheduler_backend": "cpp",
+      "native_threads": 1,
+      "native_processes": 0,
+      "python_worker_callbacks": 0,
+      "python_native_transitions": 1,
+      "output_ownership": "numpy_owned",
+      "output_kind": "typed",
+      "native_chunks": [
+        {
+          "fused_pointwise_calls": 0,
+          "pointwise_tiles": 0,
+          "vector_elements": 0,
+          "root_copy_bytes": 8,
+          "direct_output_bytes": 0,
+          "state_copy_bytes": 0,
+          "pointwise_workspace_capacity_bytes": 0,
+          "rows": 1,
+          "nodes": 3,
+          "max_window": 16777216,
+          "numeric_arena_bytes": 0,
+          "mask_arena_bytes": 0,
+          "operator_workspace_capacity_bytes": 134217728,
+          "order_scratch_capacity_bytes": 0,
+          "input_copy_bytes": 0,
+          "eigen_rotation_calls": 0,
+          "eigen_matvec_calls": 0,
+          "eigen_covariance_calls": 0,
+          "eigen_density_calls": 0,
+          "accelerate_covchol_calls": 0,
+          "accelerate_matmul_calls": 0,
+          "matmul_zero_calls": 0,
+          "accelerate_covariance_attempts": 0,
+          "accelerate_covariance_calls": 0,
+          "covariance_syrk_calls": 0,
+          "covariance_replayed_cells": 0,
+          "covariance_fallbacks": 0,
+          "covariance_zero_calls": 0,
+          "accelerate_vforce_calls": 0,
+          "covariance_panel_materialization_bytes": 0,
+          "native_library_workspace_reserve_bytes": 0,
+          "algorithm_copy_bytes": 134217728,
+          "fused_scalar_calls": 0,
+          "summary_source_scans": 0,
+          "order_stat_sorts": 0,
+          "python_operator_calls": 0,
+          "execution_backend": "native_graph_interpreter"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "rss",
+    "rss_baseline": 175734784,
+    "rss_peak": 310640640,
+    "rss_delta": 134905856,
+    "rss_idle_delta": 0,
+    "rss_schema": "setup-through-warm-monitor-control-1",
+    "case": {
+      "name": "quantile",
+      "n": 16777216,
+      "layout": "c",
+      "entry": "ordinary",
+      "pattern": "random"
+    },
+    "backend": "old",
+    "input": {
+      "x": {
+        "shape": [
+          16777216
+        ],
+        "strides": [
+          8
+        ],
+        "dtype": "float64",
+        "sha256": "9b26cd0303b343fd2515d3b73b00c52642d4702e1468bfa5352a0919459174a6",
+        "writeable": false
+      }
+    },
+    "build": {
+      "version": "0.3.0",
+      "compiler": "AppleClang 17.0.0.17000603",
+      "architecture": "arm64",
+      "cpu_policy": "baseline",
+      "thread_backend": "persistent_cpp_native_scheduler",
+      "cxx_standard": 17,
+      "execution_backend": "pybind11_aot",
+      "graph_execution_backend": "native_graph_interpreter",
+      "scheduler_backend": "bounded_thread_process_pool",
+      "scheduler_scope": "process_wide_cpp_cpu_admission",
+      "legacy_finance_scheduler": "shared_native_scheduler",
+      "coroutine_backend": "asyncio_orchestration_only",
+      "process_transport": "shared_memory_or_serialized_small_input",
+      "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+      "runtime_jit": 0,
+      "compiler_backend": "cpp_restricted_ast",
+      "planner_backend": "cpp",
+      "native_scheduler_backend": "persistent_cpp_threads_processes",
+      "native_worker_runtime": "standalone_no_python",
+      "python_role": "numpy_binding_async_adapter",
+      "input_memory_policy": "exact_dtype_strided_zero_copy"
+    },
+    "threads": {
+      "environment": {
+        "OPENBLAS_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "NUMBA_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1"
+      },
+      "accelerate_thread_local": "not_applied_to_native"
+    },
+    "audit": {
+      "execution_backend": "cpp_aot",
+      "audit_schema": "cpp-aot-execution-2",
+      "result_protocol": "typed-results-2",
+      "engine": "calmetrics_engine",
+      "model_identity": null,
+      "engine_version": "0.3.0",
+      "engine_build_id": "ccca6b67a5220ea2134a4743d281b80c5af4c096e7d41c3d5b747bb8de70e331",
+      "operator_registry_version": "canonical-native-1",
+      "typed_ir_version": "cpp-typed-ir-1",
+      "plan_fingerprint": "native-3-53e979ca73a577664612af5496917a47",
+      "source_contracts": [],
+      "status_result_copy_bytes": 0,
+      "status_transport_bytes": 0,
+      "native_aot": true,
+      "python_fallback": 0,
+      "python_operator_calls": 0,
+      "request_time_compilation": 0,
+      "input_dtype": "float64",
+      "input_dtypes": {
+        "x": "float64"
+      },
+      "output_dtype": "per_output",
+      "outputs": [
+        {
+          "dtype": "float64",
+          "kind": "scalar",
+          "axes": [],
+          "shape": []
+        }
+      ],
+      "result_layout": "interval_root_aligned_8",
+      "result_capacity_bytes": 8,
+      "error_policy": "raise",
+      "status_contract": "indicator-status-1",
+      "result_lifetime": "independent",
+      "lane": "single",
+      "elapsed_ms": 171.67625,
+      "queue_wait_ms": 0.003542,
+      "compute_ms": 171.672708,
+      "cpu_tokens": 1,
+      "cpu_budget": 1,
+      "process_count": 1,
+      "thread_count": 1,
+      "threads_per_process": 1,
+      "async_orchestration": false,
+      "hard_stop": false,
+      "use_shared_memory": false,
+      "reason_codes": [
+        "typed_result_capacity_write_work_accounted",
+        "parallel_overhead_expected_to_dominate"
+      ],
+      "parallel_dimension": "interval",
+      "product_count": 1,
+      "estimated_work_units": 805306369.0,
+      "prepared": false,
+      "prepared_cached": true,
+      "shared_memory_bytes": 0,
+      "boundary_copy_bytes": 0,
+      "output_copy_bytes": 0,
+      "scheduler_backend": "cpp",
+      "native_threads": 1,
+      "native_processes": 0,
+      "python_worker_callbacks": 0,
+      "python_native_transitions": 1,
+      "output_ownership": "numpy_owned",
+      "output_kind": "typed",
+      "native_chunks": [
+        {
+          "fused_pointwise_calls": 0,
+          "pointwise_tiles": 0,
+          "vector_elements": 0,
+          "root_copy_bytes": 8,
+          "direct_output_bytes": 0,
+          "state_copy_bytes": 0,
+          "pointwise_workspace_capacity_bytes": 0,
+          "rows": 1,
+          "nodes": 3,
+          "max_window": 16777216,
+          "numeric_arena_bytes": 0,
+          "mask_arena_bytes": 0,
+          "operator_workspace_capacity_bytes": 134217728,
+          "order_scratch_capacity_bytes": 0,
+          "input_copy_bytes": 0,
+          "eigen_rotation_calls": 0,
+          "eigen_matvec_calls": 0,
+          "eigen_covariance_calls": 0,
+          "eigen_density_calls": 0,
+          "accelerate_covchol_calls": 0,
+          "accelerate_matmul_calls": 0,
+          "matmul_zero_calls": 0,
+          "accelerate_covariance_attempts": 0,
+          "accelerate_covariance_calls": 0,
+          "covariance_syrk_calls": 0,
+          "covariance_replayed_cells": 0,
+          "covariance_fallbacks": 0,
+          "covariance_zero_calls": 0,
+          "accelerate_vforce_calls": 0,
+          "covariance_panel_materialization_bytes": 0,
+          "native_library_workspace_reserve_bytes": 0,
+          "algorithm_copy_bytes": 134217728,
+          "fused_scalar_calls": 0,
+          "summary_source_scans": 0,
+          "order_stat_sorts": 0,
+          "python_operator_calls": 0,
+          "execution_backend": "native_graph_interpreter"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "heap",
+    "setup_heap": {
+      "allocations": 160,
+      "frees": 108,
+      "allocated_bytes": 15227,
+      "live_bytes": 5542,
+      "peak_bytes": 8967,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "cold_heap": {
+      "allocations": 230,
+      "frees": 144,
+      "allocated_bytes": 134239543,
+      "live_bytes": 134226858,
+      "peak_bytes": 134227012,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "cold_retained_heap": {
+      "allocations": 230,
+      "frees": 148,
+      "allocated_bytes": 134239543,
+      "live_bytes": 134226296,
+      "peak_bytes": 134227012,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "warm_baseline_heap": {
+      "allocations": 325,
+      "frees": 243,
+      "allocated_bytes": 134244003,
+      "live_bytes": 134226296,
+      "peak_bytes": 134227012,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "warm_heap": {
+      "allocations": 384,
+      "frees": 296,
+      "allocated_bytes": 134246703,
+      "live_bytes": 134226882,
+      "peak_bytes": 134227598,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "warm_retained_heap": {
+      "allocations": 384,
+      "frees": 300,
+      "allocated_bytes": 134246703,
+      "live_bytes": 134226320,
+      "peak_bytes": 134227598,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "heap_schema": "continuous-live-1",
+    "cold_peak_bytes": 134227012,
+    "warm_peak_bytes": 134227598,
+    "case": {
+      "name": "quantile",
+      "n": 16777216,
+      "layout": "c",
+      "entry": "ordinary",
+      "pattern": "random"
+    },
+    "backend": "new",
+    "input": {
+      "x": {
+        "shape": [
+          16777216
+        ],
+        "strides": [
+          8
+        ],
+        "dtype": "float64",
+        "sha256": "9b26cd0303b343fd2515d3b73b00c52642d4702e1468bfa5352a0919459174a6",
+        "writeable": false
+      }
+    },
+    "build": {
+      "version": "0.3.0",
+      "compiler": "AppleClang 17.0.0.17000603",
+      "architecture": "arm64",
+      "cpu_policy": "baseline",
+      "thread_backend": "persistent_cpp_native_scheduler",
+      "cxx_standard": 17,
+      "execution_backend": "pybind11_aot",
+      "graph_execution_backend": "native_graph_interpreter",
+      "scheduler_backend": "bounded_thread_process_pool",
+      "scheduler_scope": "process_wide_cpp_cpu_admission",
+      "legacy_finance_scheduler": "shared_native_scheduler",
+      "coroutine_backend": "asyncio_orchestration_only",
+      "process_transport": "shared_memory_or_serialized_small_input",
+      "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+      "runtime_jit": 0,
+      "compiler_backend": "cpp_restricted_ast",
+      "planner_backend": "cpp",
+      "native_scheduler_backend": "persistent_cpp_threads_processes",
+      "native_worker_runtime": "standalone_no_python",
+      "python_role": "numpy_binding_async_adapter",
+      "input_memory_policy": "exact_dtype_strided_zero_copy"
+    },
+    "threads": {
+      "environment": {
+        "OPENBLAS_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "NUMBA_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1"
+      },
+      "accelerate_thread_local": "not_applied_to_native"
+    },
+    "audit": {
+      "execution_backend": "cpp_aot",
+      "audit_schema": "cpp-aot-execution-2",
+      "result_protocol": "typed-results-2",
+      "engine": "calmetrics_engine",
+      "model_identity": null,
+      "engine_version": "0.3.0",
+      "engine_build_id": "a6841b56ae9e25c011f991df43385f47c1b5fa7285d0ec804cdf7f71366d75a2",
+      "operator_registry_version": "canonical-native-1",
+      "typed_ir_version": "cpp-typed-ir-1",
+      "plan_fingerprint": "native-3-53e979ca73a577664612af5496917a47",
+      "source_contracts": [],
+      "status_result_copy_bytes": 0,
+      "status_transport_bytes": 0,
+      "native_aot": true,
+      "python_fallback": 0,
+      "python_operator_calls": 0,
+      "request_time_compilation": 0,
+      "input_dtype": "float64",
+      "input_dtypes": {
+        "x": "float64"
+      },
+      "output_dtype": "per_output",
+      "outputs": [
+        {
+          "dtype": "float64",
+          "kind": "scalar",
+          "axes": [],
+          "shape": []
+        }
+      ],
+      "result_layout": "interval_root_aligned_8",
+      "result_capacity_bytes": 8,
+      "error_policy": "raise",
+      "status_contract": "indicator-status-1",
+      "result_lifetime": "independent",
+      "lane": "single",
+      "elapsed_ms": 151.520666,
+      "queue_wait_ms": 0.002375,
+      "compute_ms": 151.518291,
+      "cpu_tokens": 1,
+      "cpu_budget": 1,
+      "process_count": 1,
+      "thread_count": 1,
+      "threads_per_process": 1,
+      "async_orchestration": false,
+      "hard_stop": false,
+      "use_shared_memory": false,
+      "reason_codes": [
+        "typed_result_capacity_write_work_accounted",
+        "parallel_overhead_expected_to_dominate"
+      ],
+      "parallel_dimension": "interval",
+      "product_count": 1,
+      "estimated_work_units": 805306369.0,
+      "prepared": false,
+      "prepared_cached": true,
+      "shared_memory_bytes": 0,
+      "boundary_copy_bytes": 0,
+      "output_copy_bytes": 0,
+      "scheduler_backend": "cpp",
+      "native_threads": 1,
+      "native_processes": 0,
+      "python_worker_callbacks": 0,
+      "python_native_transitions": 1,
+      "output_ownership": "numpy_owned",
+      "output_kind": "typed",
+      "native_chunks": [
+        {
+          "fused_pointwise_calls": 0,
+          "pointwise_tiles": 0,
+          "vector_elements": 0,
+          "root_copy_bytes": 8,
+          "direct_output_bytes": 0,
+          "state_copy_bytes": 0,
+          "pointwise_workspace_capacity_bytes": 0,
+          "rows": 1,
+          "nodes": 3,
+          "max_window": 16777216,
+          "numeric_arena_bytes": 0,
+          "mask_arena_bytes": 0,
+          "operator_workspace_capacity_bytes": 134217728,
+          "order_scratch_capacity_bytes": 0,
+          "input_copy_bytes": 0,
+          "eigen_rotation_calls": 0,
+          "eigen_matvec_calls": 0,
+          "eigen_covariance_calls": 0,
+          "eigen_density_calls": 0,
+          "accelerate_covchol_calls": 0,
+          "accelerate_matmul_calls": 0,
+          "matmul_zero_calls": 0,
+          "accelerate_covariance_attempts": 0,
+          "accelerate_covariance_calls": 0,
+          "covariance_syrk_calls": 0,
+          "covariance_replayed_cells": 0,
+          "covariance_fallbacks": 0,
+          "covariance_zero_calls": 0,
+          "accelerate_vforce_calls": 0,
+          "covariance_panel_materialization_bytes": 0,
+          "native_library_workspace_reserve_bytes": 0,
+          "algorithm_copy_bytes": 134217728,
+          "fused_scalar_calls": 0,
+          "summary_source_scans": 0,
+          "order_stat_sorts": 0,
+          "python_operator_calls": 0,
+          "execution_backend": "native_graph_interpreter"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "rss",
+    "rss_baseline": 175472640,
+    "rss_peak": 310345728,
+    "rss_delta": 134873088,
+    "rss_idle_delta": 0,
+    "rss_schema": "setup-through-warm-monitor-control-1",
+    "case": {
+      "name": "quantile",
+      "n": 16777216,
+      "layout": "c",
+      "entry": "ordinary",
+      "pattern": "random"
+    },
+    "backend": "new",
+    "input": {
+      "x": {
+        "shape": [
+          16777216
+        ],
+        "strides": [
+          8
+        ],
+        "dtype": "float64",
+        "sha256": "9b26cd0303b343fd2515d3b73b00c52642d4702e1468bfa5352a0919459174a6",
+        "writeable": false
+      }
+    },
+    "build": {
+      "version": "0.3.0",
+      "compiler": "AppleClang 17.0.0.17000603",
+      "architecture": "arm64",
+      "cpu_policy": "baseline",
+      "thread_backend": "persistent_cpp_native_scheduler",
+      "cxx_standard": 17,
+      "execution_backend": "pybind11_aot",
+      "graph_execution_backend": "native_graph_interpreter",
+      "scheduler_backend": "bounded_thread_process_pool",
+      "scheduler_scope": "process_wide_cpp_cpu_admission",
+      "legacy_finance_scheduler": "shared_native_scheduler",
+      "coroutine_backend": "asyncio_orchestration_only",
+      "process_transport": "shared_memory_or_serialized_small_input",
+      "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+      "runtime_jit": 0,
+      "compiler_backend": "cpp_restricted_ast",
+      "planner_backend": "cpp",
+      "native_scheduler_backend": "persistent_cpp_threads_processes",
+      "native_worker_runtime": "standalone_no_python",
+      "python_role": "numpy_binding_async_adapter",
+      "input_memory_policy": "exact_dtype_strided_zero_copy"
+    },
+    "threads": {
+      "environment": {
+        "OPENBLAS_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "NUMBA_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1"
+      },
+      "accelerate_thread_local": "not_applied_to_native"
+    },
+    "audit": {
+      "execution_backend": "cpp_aot",
+      "audit_schema": "cpp-aot-execution-2",
+      "result_protocol": "typed-results-2",
+      "engine": "calmetrics_engine",
+      "model_identity": null,
+      "engine_version": "0.3.0",
+      "engine_build_id": "a6841b56ae9e25c011f991df43385f47c1b5fa7285d0ec804cdf7f71366d75a2",
+      "operator_registry_version": "canonical-native-1",
+      "typed_ir_version": "cpp-typed-ir-1",
+      "plan_fingerprint": "native-3-53e979ca73a577664612af5496917a47",
+      "source_contracts": [],
+      "status_result_copy_bytes": 0,
+      "status_transport_bytes": 0,
+      "native_aot": true,
+      "python_fallback": 0,
+      "python_operator_calls": 0,
+      "request_time_compilation": 0,
+      "input_dtype": "float64",
+      "input_dtypes": {
+        "x": "float64"
+      },
+      "output_dtype": "per_output",
+      "outputs": [
+        {
+          "dtype": "float64",
+          "kind": "scalar",
+          "axes": [],
+          "shape": []
+        }
+      ],
+      "result_layout": "interval_root_aligned_8",
+      "result_capacity_bytes": 8,
+      "error_policy": "raise",
+      "status_contract": "indicator-status-1",
+      "result_lifetime": "independent",
+      "lane": "single",
+      "elapsed_ms": 151.295458,
+      "queue_wait_ms": 0.002708,
+      "compute_ms": 151.29275,
+      "cpu_tokens": 1,
+      "cpu_budget": 1,
+      "process_count": 1,
+      "thread_count": 1,
+      "threads_per_process": 1,
+      "async_orchestration": false,
+      "hard_stop": false,
+      "use_shared_memory": false,
+      "reason_codes": [
+        "typed_result_capacity_write_work_accounted",
+        "parallel_overhead_expected_to_dominate"
+      ],
+      "parallel_dimension": "interval",
+      "product_count": 1,
+      "estimated_work_units": 805306369.0,
+      "prepared": false,
+      "prepared_cached": true,
+      "shared_memory_bytes": 0,
+      "boundary_copy_bytes": 0,
+      "output_copy_bytes": 0,
+      "scheduler_backend": "cpp",
+      "native_threads": 1,
+      "native_processes": 0,
+      "python_worker_callbacks": 0,
+      "python_native_transitions": 1,
+      "output_ownership": "numpy_owned",
+      "output_kind": "typed",
+      "native_chunks": [
+        {
+          "fused_pointwise_calls": 0,
+          "pointwise_tiles": 0,
+          "vector_elements": 0,
+          "root_copy_bytes": 8,
+          "direct_output_bytes": 0,
+          "state_copy_bytes": 0,
+          "pointwise_workspace_capacity_bytes": 0,
+          "rows": 1,
+          "nodes": 3,
+          "max_window": 16777216,
+          "numeric_arena_bytes": 0,
+          "mask_arena_bytes": 0,
+          "operator_workspace_capacity_bytes": 134217728,
+          "order_scratch_capacity_bytes": 0,
+          "input_copy_bytes": 0,
+          "eigen_rotation_calls": 0,
+          "eigen_matvec_calls": 0,
+          "eigen_covariance_calls": 0,
+          "eigen_density_calls": 0,
+          "accelerate_covchol_calls": 0,
+          "accelerate_matmul_calls": 0,
+          "matmul_zero_calls": 0,
+          "accelerate_covariance_attempts": 0,
+          "accelerate_covariance_calls": 0,
+          "covariance_syrk_calls": 0,
+          "covariance_replayed_cells": 0,
+          "covariance_fallbacks": 0,
+          "covariance_zero_calls": 0,
+          "accelerate_vforce_calls": 0,
+          "covariance_panel_materialization_bytes": 0,
+          "native_library_workspace_reserve_bytes": 0,
+          "algorithm_copy_bytes": 134217728,
+          "fused_scalar_calls": 0,
+          "summary_source_scans": 0,
+          "order_stat_sorts": 0,
+          "python_operator_calls": 0,
+          "execution_backend": "native_graph_interpreter"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "heap",
+    "setup_heap": {
+      "allocations": 1,
+      "frees": 0,
+      "allocated_bytes": 16,
+      "live_bytes": 16,
+      "peak_bytes": 16,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "cold_heap": {
+      "allocations": 17,
+      "frees": 10,
+      "allocated_bytes": 301991204,
+      "live_bytes": 292,
+      "peak_bytes": 285213516,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "cold_retained_heap": {
+      "allocations": 17,
+      "frees": 10,
+      "allocated_bytes": 301991204,
+      "live_bytes": 292,
+      "peak_bytes": 285213516,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "warm_baseline_heap": {
+      "allocations": 67,
+      "frees": 60,
+      "allocated_bytes": 1811945764,
+      "live_bytes": 292,
+      "peak_bytes": 285213516,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "warm_heap": {
+      "allocations": 97,
+      "frees": 90,
+      "allocated_bytes": 2717918500,
+      "live_bytes": 292,
+      "peak_bytes": 285213516,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "warm_retained_heap": {
+      "allocations": 97,
+      "frees": 90,
+      "allocated_bytes": 2717918500,
+      "live_bytes": 292,
+      "peak_bytes": 285213516,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "heap_schema": "continuous-live-1",
+    "cold_peak_bytes": 285213516,
+    "warm_peak_bytes": 285213516,
+    "case": {
+      "name": "quantile",
+      "n": 16777216,
+      "layout": "c",
+      "entry": "ordinary",
+      "pattern": "random"
+    },
+    "backend": "njit",
+    "input": {
+      "x": {
+        "shape": [
+          16777216
+        ],
+        "strides": [
+          8
+        ],
+        "dtype": "float64",
+        "sha256": "9b26cd0303b343fd2515d3b73b00c52642d4702e1468bfa5352a0919459174a6",
+        "writeable": false
+      }
+    },
+    "build": {
+      "backend": "numba-numpy-linalg-scipy-blas",
+      "numba": "0.60.0",
+      "numpy": "1.26.4",
+      "scipy": "1.17.1"
+    },
+    "threads": {
+      "environment": {
+        "OPENBLAS_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "NUMBA_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1"
+      },
+      "accelerate_thread_local": {
+        "prior": 0,
+        "active": 1,
+        "restored": 0
+      },
+      "pools": [
+        {
+          "user_api": "blas",
+          "internal_api": "openblas",
+          "num_threads": 1,
+          "prefix": "libopenblas",
+          "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+          "version": "0.3.23.dev",
+          "threading_layer": "pthreads",
+          "architecture": "armv8"
+        }
+      ]
+    },
+    "audit": {}
+  },
+  {
+    "kind": "rss",
+    "rss_baseline": 291160064,
+    "rss_peak": 593231872,
+    "rss_delta": 302071808,
+    "rss_idle_delta": 0,
+    "rss_schema": "setup-through-warm-monitor-control-1",
+    "case": {
+      "name": "quantile",
+      "n": 16777216,
+      "layout": "c",
+      "entry": "ordinary",
+      "pattern": "random"
+    },
+    "backend": "njit",
+    "input": {
+      "x": {
+        "shape": [
+          16777216
+        ],
+        "strides": [
+          8
+        ],
+        "dtype": "float64",
+        "sha256": "9b26cd0303b343fd2515d3b73b00c52642d4702e1468bfa5352a0919459174a6",
+        "writeable": false
+      }
+    },
+    "build": {
+      "backend": "numba-numpy-linalg-scipy-blas",
+      "numba": "0.60.0",
+      "numpy": "1.26.4",
+      "scipy": "1.17.1"
+    },
+    "threads": {
+      "environment": {
+        "OPENBLAS_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "NUMBA_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1"
+      },
+      "accelerate_thread_local": {
+        "prior": 0,
+        "active": 1,
+        "restored": 0
+      },
+      "pools": [
+        {
+          "user_api": "blas",
+          "internal_api": "openblas",
+          "num_threads": 1,
+          "prefix": "libopenblas",
+          "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+          "version": "0.3.23.dev",
+          "threading_layer": "pthreads",
+          "architecture": "armv8"
+        }
+      ]
+    },
+    "audit": {}
+  },
+  {
+    "kind": "heap",
+    "setup_heap": {
+      "allocations": 206,
+      "frees": 132,
+      "allocated_bytes": 20249,
+      "live_bytes": 7790,
+      "peak_bytes": 8967,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "cold_heap": {
+      "allocations": 233,
+      "frees": 146,
+      "allocated_bytes": 33576407,
+      "live_bytes": 33563714,
+      "peak_bytes": 33563868,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "cold_retained_heap": {
+      "allocations": 233,
+      "frees": 150,
+      "allocated_bytes": 33576407,
+      "live_bytes": 33563152,
+      "peak_bytes": 33563868,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "warm_baseline_heap": {
+      "allocations": 323,
+      "frees": 240,
+      "allocated_bytes": 33580387,
+      "live_bytes": 33563152,
+      "peak_bytes": 33563868,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "warm_heap": {
+      "allocations": 379,
+      "frees": 290,
+      "allocated_bytes": 33582799,
+      "live_bytes": 33563738,
+      "peak_bytes": 33564454,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "warm_retained_heap": {
+      "allocations": 379,
+      "frees": 294,
+      "allocated_bytes": 33582799,
+      "live_bytes": 33563176,
+      "peak_bytes": 33564454,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "heap_schema": "continuous-live-1",
+    "cold_peak_bytes": 33563868,
+    "warm_peak_bytes": 33564454,
+    "case": {
+      "name": "quantile",
+      "n": 4194304,
+      "layout": "c",
+      "entry": "prepared",
+      "pattern": "random"
+    },
+    "backend": "old",
+    "input": {
+      "x": {
+        "shape": [
+          4194304
+        ],
+        "strides": [
+          8
+        ],
+        "dtype": "float64",
+        "sha256": "83bb41841c8597f7e46cc7be7b7c9df8d8032165e59e9e4a939e9415d04fd7d5",
+        "writeable": false
+      }
+    },
+    "build": {
+      "version": "0.3.0",
+      "compiler": "AppleClang 17.0.0.17000603",
+      "architecture": "arm64",
+      "cpu_policy": "baseline",
+      "thread_backend": "persistent_cpp_native_scheduler",
+      "cxx_standard": 17,
+      "execution_backend": "pybind11_aot",
+      "graph_execution_backend": "native_graph_interpreter",
+      "scheduler_backend": "bounded_thread_process_pool",
+      "scheduler_scope": "process_wide_cpp_cpu_admission",
+      "legacy_finance_scheduler": "shared_native_scheduler",
+      "coroutine_backend": "asyncio_orchestration_only",
+      "process_transport": "shared_memory_or_serialized_small_input",
+      "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+      "runtime_jit": 0,
+      "compiler_backend": "cpp_restricted_ast",
+      "planner_backend": "cpp",
+      "native_scheduler_backend": "persistent_cpp_threads_processes",
+      "native_worker_runtime": "standalone_no_python",
+      "python_role": "numpy_binding_async_adapter",
+      "input_memory_policy": "exact_dtype_strided_zero_copy"
+    },
+    "threads": {
+      "environment": {
+        "OPENBLAS_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "NUMBA_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1"
+      },
+      "accelerate_thread_local": "not_applied_to_native"
+    },
+    "audit": {
+      "execution_backend": "cpp_aot",
+      "audit_schema": "cpp-aot-execution-2",
+      "result_protocol": "typed-results-2",
+      "engine": "calmetrics_engine",
+      "model_identity": null,
+      "engine_version": "0.3.0",
+      "engine_build_id": "ccca6b67a5220ea2134a4743d281b80c5af4c096e7d41c3d5b747bb8de70e331",
+      "operator_registry_version": "canonical-native-1",
+      "typed_ir_version": "cpp-typed-ir-1",
+      "plan_fingerprint": "native-3-53e979ca73a577664612af5496917a47",
+      "source_contracts": [],
+      "status_result_copy_bytes": 0,
+      "status_transport_bytes": 0,
+      "native_aot": true,
+      "python_fallback": 0,
+      "python_operator_calls": 0,
+      "request_time_compilation": 0,
+      "input_dtype": "float64",
+      "input_dtypes": {
+        "x": "float64"
+      },
+      "output_dtype": "per_output",
+      "outputs": [
+        {
+          "dtype": "float64",
+          "kind": "scalar",
+          "axes": [],
+          "shape": []
+        }
+      ],
+      "result_layout": "interval_root_aligned_8",
+      "result_capacity_bytes": 8,
+      "error_policy": "raise",
+      "status_contract": "indicator-status-1",
+      "result_lifetime": "independent",
+      "lane": "single",
+      "elapsed_ms": 41.439125,
+      "queue_wait_ms": 0.000875,
+      "compute_ms": 41.43825,
+      "cpu_tokens": 1,
+      "cpu_budget": 1,
+      "process_count": 1,
+      "thread_count": 1,
+      "threads_per_process": 1,
+      "async_orchestration": false,
+      "hard_stop": false,
+      "use_shared_memory": false,
+      "reason_codes": [
+        "typed_result_capacity_write_work_accounted",
+        "parallel_overhead_expected_to_dominate"
+      ],
+      "parallel_dimension": "interval",
+      "product_count": 1,
+      "estimated_work_units": 184549377.0,
+      "prepared": true,
+      "prepared_cached": true,
+      "shared_memory_bytes": 0,
+      "boundary_copy_bytes": 0,
+      "output_copy_bytes": 0,
+      "scheduler_backend": "cpp",
+      "native_threads": 1,
+      "native_processes": 0,
+      "python_worker_callbacks": 0,
+      "python_native_transitions": 1,
+      "output_ownership": "numpy_owned",
+      "output_kind": "typed",
+      "native_chunks": [
+        {
+          "fused_pointwise_calls": 0,
+          "pointwise_tiles": 0,
+          "vector_elements": 0,
+          "root_copy_bytes": 8,
+          "direct_output_bytes": 0,
+          "state_copy_bytes": 0,
+          "pointwise_workspace_capacity_bytes": 0,
+          "rows": 1,
+          "nodes": 3,
+          "max_window": 4194304,
+          "numeric_arena_bytes": 0,
+          "mask_arena_bytes": 0,
+          "operator_workspace_capacity_bytes": 33554432,
+          "order_scratch_capacity_bytes": 0,
+          "input_copy_bytes": 0,
+          "eigen_rotation_calls": 0,
+          "eigen_matvec_calls": 0,
+          "eigen_covariance_calls": 0,
+          "eigen_density_calls": 0,
+          "accelerate_covchol_calls": 0,
+          "accelerate_matmul_calls": 0,
+          "matmul_zero_calls": 0,
+          "accelerate_covariance_attempts": 0,
+          "accelerate_covariance_calls": 0,
+          "covariance_syrk_calls": 0,
+          "covariance_replayed_cells": 0,
+          "covariance_fallbacks": 0,
+          "covariance_zero_calls": 0,
+          "accelerate_vforce_calls": 0,
+          "covariance_panel_materialization_bytes": 0,
+          "native_library_workspace_reserve_bytes": 0,
+          "algorithm_copy_bytes": 33554432,
+          "fused_scalar_calls": 0,
+          "summary_source_scans": 0,
+          "order_stat_sorts": 0,
+          "python_operator_calls": 0,
+          "execution_backend": "native_graph_interpreter"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "rss",
+    "rss_baseline": 74694656,
+    "rss_peak": 108937216,
+    "rss_delta": 34242560,
+    "rss_idle_delta": 0,
+    "rss_schema": "setup-through-warm-monitor-control-1",
+    "case": {
+      "name": "quantile",
+      "n": 4194304,
+      "layout": "c",
+      "entry": "prepared",
+      "pattern": "random"
+    },
+    "backend": "old",
+    "input": {
+      "x": {
+        "shape": [
+          4194304
+        ],
+        "strides": [
+          8
+        ],
+        "dtype": "float64",
+        "sha256": "83bb41841c8597f7e46cc7be7b7c9df8d8032165e59e9e4a939e9415d04fd7d5",
+        "writeable": false
+      }
+    },
+    "build": {
+      "version": "0.3.0",
+      "compiler": "AppleClang 17.0.0.17000603",
+      "architecture": "arm64",
+      "cpu_policy": "baseline",
+      "thread_backend": "persistent_cpp_native_scheduler",
+      "cxx_standard": 17,
+      "execution_backend": "pybind11_aot",
+      "graph_execution_backend": "native_graph_interpreter",
+      "scheduler_backend": "bounded_thread_process_pool",
+      "scheduler_scope": "process_wide_cpp_cpu_admission",
+      "legacy_finance_scheduler": "shared_native_scheduler",
+      "coroutine_backend": "asyncio_orchestration_only",
+      "process_transport": "shared_memory_or_serialized_small_input",
+      "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+      "runtime_jit": 0,
+      "compiler_backend": "cpp_restricted_ast",
+      "planner_backend": "cpp",
+      "native_scheduler_backend": "persistent_cpp_threads_processes",
+      "native_worker_runtime": "standalone_no_python",
+      "python_role": "numpy_binding_async_adapter",
+      "input_memory_policy": "exact_dtype_strided_zero_copy"
+    },
+    "threads": {
+      "environment": {
+        "OPENBLAS_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "NUMBA_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1"
+      },
+      "accelerate_thread_local": "not_applied_to_native"
+    },
+    "audit": {
+      "execution_backend": "cpp_aot",
+      "audit_schema": "cpp-aot-execution-2",
+      "result_protocol": "typed-results-2",
+      "engine": "calmetrics_engine",
+      "model_identity": null,
+      "engine_version": "0.3.0",
+      "engine_build_id": "ccca6b67a5220ea2134a4743d281b80c5af4c096e7d41c3d5b747bb8de70e331",
+      "operator_registry_version": "canonical-native-1",
+      "typed_ir_version": "cpp-typed-ir-1",
+      "plan_fingerprint": "native-3-53e979ca73a577664612af5496917a47",
+      "source_contracts": [],
+      "status_result_copy_bytes": 0,
+      "status_transport_bytes": 0,
+      "native_aot": true,
+      "python_fallback": 0,
+      "python_operator_calls": 0,
+      "request_time_compilation": 0,
+      "input_dtype": "float64",
+      "input_dtypes": {
+        "x": "float64"
+      },
+      "output_dtype": "per_output",
+      "outputs": [
+        {
+          "dtype": "float64",
+          "kind": "scalar",
+          "axes": [],
+          "shape": []
+        }
+      ],
+      "result_layout": "interval_root_aligned_8",
+      "result_capacity_bytes": 8,
+      "error_policy": "raise",
+      "status_contract": "indicator-status-1",
+      "result_lifetime": "independent",
+      "lane": "single",
+      "elapsed_ms": 41.23925,
+      "queue_wait_ms": 0.000875,
+      "compute_ms": 41.238375,
+      "cpu_tokens": 1,
+      "cpu_budget": 1,
+      "process_count": 1,
+      "thread_count": 1,
+      "threads_per_process": 1,
+      "async_orchestration": false,
+      "hard_stop": false,
+      "use_shared_memory": false,
+      "reason_codes": [
+        "typed_result_capacity_write_work_accounted",
+        "parallel_overhead_expected_to_dominate"
+      ],
+      "parallel_dimension": "interval",
+      "product_count": 1,
+      "estimated_work_units": 184549377.0,
+      "prepared": true,
+      "prepared_cached": true,
+      "shared_memory_bytes": 0,
+      "boundary_copy_bytes": 0,
+      "output_copy_bytes": 0,
+      "scheduler_backend": "cpp",
+      "native_threads": 1,
+      "native_processes": 0,
+      "python_worker_callbacks": 0,
+      "python_native_transitions": 1,
+      "output_ownership": "numpy_owned",
+      "output_kind": "typed",
+      "native_chunks": [
+        {
+          "fused_pointwise_calls": 0,
+          "pointwise_tiles": 0,
+          "vector_elements": 0,
+          "root_copy_bytes": 8,
+          "direct_output_bytes": 0,
+          "state_copy_bytes": 0,
+          "pointwise_workspace_capacity_bytes": 0,
+          "rows": 1,
+          "nodes": 3,
+          "max_window": 4194304,
+          "numeric_arena_bytes": 0,
+          "mask_arena_bytes": 0,
+          "operator_workspace_capacity_bytes": 33554432,
+          "order_scratch_capacity_bytes": 0,
+          "input_copy_bytes": 0,
+          "eigen_rotation_calls": 0,
+          "eigen_matvec_calls": 0,
+          "eigen_covariance_calls": 0,
+          "eigen_density_calls": 0,
+          "accelerate_covchol_calls": 0,
+          "accelerate_matmul_calls": 0,
+          "matmul_zero_calls": 0,
+          "accelerate_covariance_attempts": 0,
+          "accelerate_covariance_calls": 0,
+          "covariance_syrk_calls": 0,
+          "covariance_replayed_cells": 0,
+          "covariance_fallbacks": 0,
+          "covariance_zero_calls": 0,
+          "accelerate_vforce_calls": 0,
+          "covariance_panel_materialization_bytes": 0,
+          "native_library_workspace_reserve_bytes": 0,
+          "algorithm_copy_bytes": 33554432,
+          "fused_scalar_calls": 0,
+          "summary_source_scans": 0,
+          "order_stat_sorts": 0,
+          "python_operator_calls": 0,
+          "execution_backend": "native_graph_interpreter"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "heap",
+    "setup_heap": {
+      "allocations": 206,
+      "frees": 132,
+      "allocated_bytes": 20257,
+      "live_bytes": 7798,
+      "peak_bytes": 8967,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "cold_heap": {
+      "allocations": 233,
+      "frees": 146,
+      "allocated_bytes": 33576415,
+      "live_bytes": 33563722,
+      "peak_bytes": 33563876,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "cold_retained_heap": {
+      "allocations": 233,
+      "frees": 150,
+      "allocated_bytes": 33576415,
+      "live_bytes": 33563160,
+      "peak_bytes": 33563876,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "warm_baseline_heap": {
+      "allocations": 323,
+      "frees": 240,
+      "allocated_bytes": 33580395,
+      "live_bytes": 33563160,
+      "peak_bytes": 33563876,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "warm_heap": {
+      "allocations": 379,
+      "frees": 290,
+      "allocated_bytes": 33582807,
+      "live_bytes": 33563746,
+      "peak_bytes": 33564462,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "warm_retained_heap": {
+      "allocations": 379,
+      "frees": 294,
+      "allocated_bytes": 33582807,
+      "live_bytes": 33563184,
+      "peak_bytes": 33564462,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "heap_schema": "continuous-live-1",
+    "cold_peak_bytes": 33563876,
+    "warm_peak_bytes": 33564462,
+    "case": {
+      "name": "quantile",
+      "n": 4194304,
+      "layout": "c",
+      "entry": "prepared",
+      "pattern": "random"
+    },
+    "backend": "new",
+    "input": {
+      "x": {
+        "shape": [
+          4194304
+        ],
+        "strides": [
+          8
+        ],
+        "dtype": "float64",
+        "sha256": "83bb41841c8597f7e46cc7be7b7c9df8d8032165e59e9e4a939e9415d04fd7d5",
+        "writeable": false
+      }
+    },
+    "build": {
+      "version": "0.3.0",
+      "compiler": "AppleClang 17.0.0.17000603",
+      "architecture": "arm64",
+      "cpu_policy": "baseline",
+      "thread_backend": "persistent_cpp_native_scheduler",
+      "cxx_standard": 17,
+      "execution_backend": "pybind11_aot",
+      "graph_execution_backend": "native_graph_interpreter",
+      "scheduler_backend": "bounded_thread_process_pool",
+      "scheduler_scope": "process_wide_cpp_cpu_admission",
+      "legacy_finance_scheduler": "shared_native_scheduler",
+      "coroutine_backend": "asyncio_orchestration_only",
+      "process_transport": "shared_memory_or_serialized_small_input",
+      "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+      "runtime_jit": 0,
+      "compiler_backend": "cpp_restricted_ast",
+      "planner_backend": "cpp",
+      "native_scheduler_backend": "persistent_cpp_threads_processes",
+      "native_worker_runtime": "standalone_no_python",
+      "python_role": "numpy_binding_async_adapter",
+      "input_memory_policy": "exact_dtype_strided_zero_copy"
+    },
+    "threads": {
+      "environment": {
+        "OPENBLAS_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "NUMBA_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1"
+      },
+      "accelerate_thread_local": "not_applied_to_native"
+    },
+    "audit": {
+      "execution_backend": "cpp_aot",
+      "audit_schema": "cpp-aot-execution-2",
+      "result_protocol": "typed-results-2",
+      "engine": "calmetrics_engine",
+      "model_identity": null,
+      "engine_version": "0.3.0",
+      "engine_build_id": "a6841b56ae9e25c011f991df43385f47c1b5fa7285d0ec804cdf7f71366d75a2",
+      "operator_registry_version": "canonical-native-1",
+      "typed_ir_version": "cpp-typed-ir-1",
+      "plan_fingerprint": "native-3-53e979ca73a577664612af5496917a47",
+      "source_contracts": [],
+      "status_result_copy_bytes": 0,
+      "status_transport_bytes": 0,
+      "native_aot": true,
+      "python_fallback": 0,
+      "python_operator_calls": 0,
+      "request_time_compilation": 0,
+      "input_dtype": "float64",
+      "input_dtypes": {
+        "x": "float64"
+      },
+      "output_dtype": "per_output",
+      "outputs": [
+        {
+          "dtype": "float64",
+          "kind": "scalar",
+          "axes": [],
+          "shape": []
+        }
+      ],
+      "result_layout": "interval_root_aligned_8",
+      "result_capacity_bytes": 8,
+      "error_policy": "raise",
+      "status_contract": "indicator-status-1",
+      "result_lifetime": "independent",
+      "lane": "single",
+      "elapsed_ms": 36.380375,
+      "queue_wait_ms": 0.000959,
+      "compute_ms": 36.379416,
+      "cpu_tokens": 1,
+      "cpu_budget": 1,
+      "process_count": 1,
+      "thread_count": 1,
+      "threads_per_process": 1,
+      "async_orchestration": false,
+      "hard_stop": false,
+      "use_shared_memory": false,
+      "reason_codes": [
+        "typed_result_capacity_write_work_accounted",
+        "parallel_overhead_expected_to_dominate"
+      ],
+      "parallel_dimension": "interval",
+      "product_count": 1,
+      "estimated_work_units": 184549377.0,
+      "prepared": true,
+      "prepared_cached": true,
+      "shared_memory_bytes": 0,
+      "boundary_copy_bytes": 0,
+      "output_copy_bytes": 0,
+      "scheduler_backend": "cpp",
+      "native_threads": 1,
+      "native_processes": 0,
+      "python_worker_callbacks": 0,
+      "python_native_transitions": 1,
+      "output_ownership": "numpy_owned",
+      "output_kind": "typed",
+      "native_chunks": [
+        {
+          "fused_pointwise_calls": 0,
+          "pointwise_tiles": 0,
+          "vector_elements": 0,
+          "root_copy_bytes": 8,
+          "direct_output_bytes": 0,
+          "state_copy_bytes": 0,
+          "pointwise_workspace_capacity_bytes": 0,
+          "rows": 1,
+          "nodes": 3,
+          "max_window": 4194304,
+          "numeric_arena_bytes": 0,
+          "mask_arena_bytes": 0,
+          "operator_workspace_capacity_bytes": 33554432,
+          "order_scratch_capacity_bytes": 0,
+          "input_copy_bytes": 0,
+          "eigen_rotation_calls": 0,
+          "eigen_matvec_calls": 0,
+          "eigen_covariance_calls": 0,
+          "eigen_density_calls": 0,
+          "accelerate_covchol_calls": 0,
+          "accelerate_matmul_calls": 0,
+          "matmul_zero_calls": 0,
+          "accelerate_covariance_attempts": 0,
+          "accelerate_covariance_calls": 0,
+          "covariance_syrk_calls": 0,
+          "covariance_replayed_cells": 0,
+          "covariance_fallbacks": 0,
+          "covariance_zero_calls": 0,
+          "accelerate_vforce_calls": 0,
+          "covariance_panel_materialization_bytes": 0,
+          "native_library_workspace_reserve_bytes": 0,
+          "algorithm_copy_bytes": 33554432,
+          "fused_scalar_calls": 0,
+          "summary_source_scans": 0,
+          "order_stat_sorts": 0,
+          "python_operator_calls": 0,
+          "execution_backend": "native_graph_interpreter"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "rss",
+    "rss_baseline": 75563008,
+    "rss_peak": 109740032,
+    "rss_delta": 34177024,
+    "rss_idle_delta": 0,
+    "rss_schema": "setup-through-warm-monitor-control-1",
+    "case": {
+      "name": "quantile",
+      "n": 4194304,
+      "layout": "c",
+      "entry": "prepared",
+      "pattern": "random"
+    },
+    "backend": "new",
+    "input": {
+      "x": {
+        "shape": [
+          4194304
+        ],
+        "strides": [
+          8
+        ],
+        "dtype": "float64",
+        "sha256": "83bb41841c8597f7e46cc7be7b7c9df8d8032165e59e9e4a939e9415d04fd7d5",
+        "writeable": false
+      }
+    },
+    "build": {
+      "version": "0.3.0",
+      "compiler": "AppleClang 17.0.0.17000603",
+      "architecture": "arm64",
+      "cpu_policy": "baseline",
+      "thread_backend": "persistent_cpp_native_scheduler",
+      "cxx_standard": 17,
+      "execution_backend": "pybind11_aot",
+      "graph_execution_backend": "native_graph_interpreter",
+      "scheduler_backend": "bounded_thread_process_pool",
+      "scheduler_scope": "process_wide_cpp_cpu_admission",
+      "legacy_finance_scheduler": "shared_native_scheduler",
+      "coroutine_backend": "asyncio_orchestration_only",
+      "process_transport": "shared_memory_or_serialized_small_input",
+      "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+      "runtime_jit": 0,
+      "compiler_backend": "cpp_restricted_ast",
+      "planner_backend": "cpp",
+      "native_scheduler_backend": "persistent_cpp_threads_processes",
+      "native_worker_runtime": "standalone_no_python",
+      "python_role": "numpy_binding_async_adapter",
+      "input_memory_policy": "exact_dtype_strided_zero_copy"
+    },
+    "threads": {
+      "environment": {
+        "OPENBLAS_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "NUMBA_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1"
+      },
+      "accelerate_thread_local": "not_applied_to_native"
+    },
+    "audit": {
+      "execution_backend": "cpp_aot",
+      "audit_schema": "cpp-aot-execution-2",
+      "result_protocol": "typed-results-2",
+      "engine": "calmetrics_engine",
+      "model_identity": null,
+      "engine_version": "0.3.0",
+      "engine_build_id": "a6841b56ae9e25c011f991df43385f47c1b5fa7285d0ec804cdf7f71366d75a2",
+      "operator_registry_version": "canonical-native-1",
+      "typed_ir_version": "cpp-typed-ir-1",
+      "plan_fingerprint": "native-3-53e979ca73a577664612af5496917a47",
+      "source_contracts": [],
+      "status_result_copy_bytes": 0,
+      "status_transport_bytes": 0,
+      "native_aot": true,
+      "python_fallback": 0,
+      "python_operator_calls": 0,
+      "request_time_compilation": 0,
+      "input_dtype": "float64",
+      "input_dtypes": {
+        "x": "float64"
+      },
+      "output_dtype": "per_output",
+      "outputs": [
+        {
+          "dtype": "float64",
+          "kind": "scalar",
+          "axes": [],
+          "shape": []
+        }
+      ],
+      "result_layout": "interval_root_aligned_8",
+      "result_capacity_bytes": 8,
+      "error_policy": "raise",
+      "status_contract": "indicator-status-1",
+      "result_lifetime": "independent",
+      "lane": "single",
+      "elapsed_ms": 36.199166,
+      "queue_wait_ms": 0.000916,
+      "compute_ms": 36.19825,
+      "cpu_tokens": 1,
+      "cpu_budget": 1,
+      "process_count": 1,
+      "thread_count": 1,
+      "threads_per_process": 1,
+      "async_orchestration": false,
+      "hard_stop": false,
+      "use_shared_memory": false,
+      "reason_codes": [
+        "typed_result_capacity_write_work_accounted",
+        "parallel_overhead_expected_to_dominate"
+      ],
+      "parallel_dimension": "interval",
+      "product_count": 1,
+      "estimated_work_units": 184549377.0,
+      "prepared": true,
+      "prepared_cached": true,
+      "shared_memory_bytes": 0,
+      "boundary_copy_bytes": 0,
+      "output_copy_bytes": 0,
+      "scheduler_backend": "cpp",
+      "native_threads": 1,
+      "native_processes": 0,
+      "python_worker_callbacks": 0,
+      "python_native_transitions": 1,
+      "output_ownership": "numpy_owned",
+      "output_kind": "typed",
+      "native_chunks": [
+        {
+          "fused_pointwise_calls": 0,
+          "pointwise_tiles": 0,
+          "vector_elements": 0,
+          "root_copy_bytes": 8,
+          "direct_output_bytes": 0,
+          "state_copy_bytes": 0,
+          "pointwise_workspace_capacity_bytes": 0,
+          "rows": 1,
+          "nodes": 3,
+          "max_window": 4194304,
+          "numeric_arena_bytes": 0,
+          "mask_arena_bytes": 0,
+          "operator_workspace_capacity_bytes": 33554432,
+          "order_scratch_capacity_bytes": 0,
+          "input_copy_bytes": 0,
+          "eigen_rotation_calls": 0,
+          "eigen_matvec_calls": 0,
+          "eigen_covariance_calls": 0,
+          "eigen_density_calls": 0,
+          "accelerate_covchol_calls": 0,
+          "accelerate_matmul_calls": 0,
+          "matmul_zero_calls": 0,
+          "accelerate_covariance_attempts": 0,
+          "accelerate_covariance_calls": 0,
+          "covariance_syrk_calls": 0,
+          "covariance_replayed_cells": 0,
+          "covariance_fallbacks": 0,
+          "covariance_zero_calls": 0,
+          "accelerate_vforce_calls": 0,
+          "covariance_panel_materialization_bytes": 0,
+          "native_library_workspace_reserve_bytes": 0,
+          "algorithm_copy_bytes": 33554432,
+          "fused_scalar_calls": 0,
+          "summary_source_scans": 0,
+          "order_stat_sorts": 0,
+          "python_operator_calls": 0,
+          "execution_backend": "native_graph_interpreter"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "heap",
+    "setup_heap": {
+      "allocations": 1,
+      "frees": 0,
+      "allocated_bytes": 16,
+      "live_bytes": 16,
+      "peak_bytes": 16,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "cold_heap": {
+      "allocations": 17,
+      "frees": 10,
+      "allocated_bytes": 75498788,
+      "live_bytes": 292,
+      "peak_bytes": 71304012,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "cold_retained_heap": {
+      "allocations": 17,
+      "frees": 10,
+      "allocated_bytes": 75498788,
+      "live_bytes": 292,
+      "peak_bytes": 71304012,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "warm_baseline_heap": {
+      "allocations": 67,
+      "frees": 60,
+      "allocated_bytes": 452991268,
+      "live_bytes": 292,
+      "peak_bytes": 71304012,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "warm_heap": {
+      "allocations": 97,
+      "frees": 90,
+      "allocated_bytes": 679486756,
+      "live_bytes": 292,
+      "peak_bytes": 71304012,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "warm_retained_heap": {
+      "allocations": 97,
+      "frees": 90,
+      "allocated_bytes": 679486756,
+      "live_bytes": 292,
+      "peak_bytes": 71304012,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "heap_schema": "continuous-live-1",
+    "cold_peak_bytes": 71304012,
+    "warm_peak_bytes": 71304012,
+    "case": {
+      "name": "quantile",
+      "n": 4194304,
+      "layout": "c",
+      "entry": "prepared",
+      "pattern": "random"
+    },
+    "backend": "njit",
+    "input": {
+      "x": {
+        "shape": [
+          4194304
+        ],
+        "strides": [
+          8
+        ],
+        "dtype": "float64",
+        "sha256": "83bb41841c8597f7e46cc7be7b7c9df8d8032165e59e9e4a939e9415d04fd7d5",
+        "writeable": false
+      }
+    },
+    "build": {
+      "backend": "numba-numpy-linalg-scipy-blas",
+      "numba": "0.60.0",
+      "numpy": "1.26.4",
+      "scipy": "1.17.1"
+    },
+    "threads": {
+      "environment": {
+        "OPENBLAS_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "NUMBA_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1"
+      },
+      "accelerate_thread_local": {
+        "prior": 0,
+        "active": 1,
+        "restored": 0
+      },
+      "pools": [
+        {
+          "user_api": "blas",
+          "internal_api": "openblas",
+          "num_threads": 1,
+          "prefix": "libopenblas",
+          "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+          "version": "0.3.23.dev",
+          "threading_layer": "pthreads",
+          "architecture": "armv8"
+        }
+      ]
+    },
+    "audit": {}
+  },
+  {
+    "kind": "rss",
+    "rss_baseline": 189825024,
+    "rss_peak": 282247168,
+    "rss_delta": 92422144,
+    "rss_idle_delta": 0,
+    "rss_schema": "setup-through-warm-monitor-control-1",
+    "case": {
+      "name": "quantile",
+      "n": 4194304,
+      "layout": "c",
+      "entry": "prepared",
+      "pattern": "random"
+    },
+    "backend": "njit",
+    "input": {
+      "x": {
+        "shape": [
+          4194304
+        ],
+        "strides": [
+          8
+        ],
+        "dtype": "float64",
+        "sha256": "83bb41841c8597f7e46cc7be7b7c9df8d8032165e59e9e4a939e9415d04fd7d5",
+        "writeable": false
+      }
+    },
+    "build": {
+      "backend": "numba-numpy-linalg-scipy-blas",
+      "numba": "0.60.0",
+      "numpy": "1.26.4",
+      "scipy": "1.17.1"
+    },
+    "threads": {
+      "environment": {
+        "OPENBLAS_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "NUMBA_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1"
+      },
+      "accelerate_thread_local": {
+        "prior": 0,
+        "active": 1,
+        "restored": 0
+      },
+      "pools": [
+        {
+          "user_api": "blas",
+          "internal_api": "openblas",
+          "num_threads": 1,
+          "prefix": "libopenblas",
+          "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+          "version": "0.3.23.dev",
+          "threading_layer": "pthreads",
+          "architecture": "armv8"
+        }
+      ]
+    },
+    "audit": {}
+  },
+  {
+    "kind": "heap",
+    "setup_heap": {
+      "allocations": 196,
+      "frees": 139,
+      "allocated_bytes": 17858,
+      "live_bytes": 6103,
+      "peak_bytes": 9536,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "cold_heap": {
+      "allocations": 270,
+      "frees": 176,
+      "allocated_bytes": 1364478,
+      "live_bytes": 1349475,
+      "peak_bytes": 1349629,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "cold_retained_heap": {
+      "allocations": 270,
+      "frees": 180,
+      "allocated_bytes": 1364478,
+      "live_bytes": 1348913,
+      "peak_bytes": 1349629,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "warm_baseline_heap": {
+      "allocations": 365,
+      "frees": 275,
+      "allocated_bytes": 1368938,
+      "live_bytes": 1348913,
+      "peak_bytes": 1349629,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "warm_heap": {
+      "allocations": 424,
+      "frees": 328,
+      "allocated_bytes": 1371638,
+      "live_bytes": 1349499,
+      "peak_bytes": 1350215,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "warm_retained_heap": {
+      "allocations": 424,
+      "frees": 332,
+      "allocated_bytes": 1371638,
+      "live_bytes": 1348937,
+      "peak_bytes": 1350215,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "heap_schema": "continuous-live-1",
+    "cold_peak_bytes": 1349629,
+    "warm_peak_bytes": 1350215,
+    "case": {
+      "name": "quantile_where",
+      "n": 16777216,
+      "layout": "c",
+      "entry": "ordinary",
+      "pattern": "random",
+      "density": 0.01
+    },
+    "backend": "old",
+    "input": {
+      "x": {
+        "shape": [
+          16777216
+        ],
+        "strides": [
+          8
+        ],
+        "dtype": "float64",
+        "sha256": "37fd903a541bde040550b10f635e58aa65d64e2944780801af2c00555e4c15dc",
+        "writeable": false
+      },
+      "m": {
+        "shape": [
+          16777216
+        ],
+        "strides": [
+          1
+        ],
+        "dtype": "bool",
+        "sha256": "e68816516fddf801c8017f8208678dc2fc878e809131579606ccd3ad2b0be092",
+        "writeable": false
+      }
+    },
+    "build": {
+      "version": "0.3.0",
+      "compiler": "AppleClang 17.0.0.17000603",
+      "architecture": "arm64",
+      "cpu_policy": "baseline",
+      "thread_backend": "persistent_cpp_native_scheduler",
+      "cxx_standard": 17,
+      "execution_backend": "pybind11_aot",
+      "graph_execution_backend": "native_graph_interpreter",
+      "scheduler_backend": "bounded_thread_process_pool",
+      "scheduler_scope": "process_wide_cpp_cpu_admission",
+      "legacy_finance_scheduler": "shared_native_scheduler",
+      "coroutine_backend": "asyncio_orchestration_only",
+      "process_transport": "shared_memory_or_serialized_small_input",
+      "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+      "runtime_jit": 0,
+      "compiler_backend": "cpp_restricted_ast",
+      "planner_backend": "cpp",
+      "native_scheduler_backend": "persistent_cpp_threads_processes",
+      "native_worker_runtime": "standalone_no_python",
+      "python_role": "numpy_binding_async_adapter",
+      "input_memory_policy": "exact_dtype_strided_zero_copy"
+    },
+    "threads": {
+      "environment": {
+        "OPENBLAS_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "NUMBA_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1"
+      },
+      "accelerate_thread_local": "not_applied_to_native"
+    },
+    "audit": {
+      "execution_backend": "cpp_aot",
+      "audit_schema": "cpp-aot-execution-2",
+      "result_protocol": "typed-results-2",
+      "engine": "calmetrics_engine",
+      "model_identity": null,
+      "engine_version": "0.3.0",
+      "engine_build_id": "ccca6b67a5220ea2134a4743d281b80c5af4c096e7d41c3d5b747bb8de70e331",
+      "operator_registry_version": "canonical-native-1",
+      "typed_ir_version": "cpp-typed-ir-1",
+      "plan_fingerprint": "native-3-9ed4e7354dce46cfd497bd9b456a1216",
+      "source_contracts": [],
+      "status_result_copy_bytes": 0,
+      "status_transport_bytes": 0,
+      "native_aot": true,
+      "python_fallback": 0,
+      "python_operator_calls": 0,
+      "request_time_compilation": 0,
+      "input_dtype": "mixed",
+      "input_dtypes": {
+        "x": "float64",
+        "m": "bool"
+      },
+      "output_dtype": "per_output",
+      "outputs": [
+        {
+          "dtype": "float64",
+          "kind": "scalar",
+          "axes": [],
+          "shape": []
+        }
+      ],
+      "result_layout": "interval_root_aligned_8",
+      "result_capacity_bytes": 8,
+      "error_policy": "raise",
+      "status_contract": "indicator-status-1",
+      "result_lifetime": "independent",
+      "lane": "single",
+      "elapsed_ms": 20.282334,
+      "queue_wait_ms": 0.001667,
+      "compute_ms": 20.280667,
+      "cpu_tokens": 1,
+      "cpu_budget": 1,
+      "process_count": 1,
+      "thread_count": 1,
+      "threads_per_process": 1,
+      "async_orchestration": false,
+      "hard_stop": false,
+      "use_shared_memory": false,
+      "reason_codes": [
+        "typed_result_capacity_write_work_accounted",
+        "parallel_overhead_expected_to_dominate"
+      ],
+      "parallel_dimension": "interval",
+      "product_count": 1,
+      "estimated_work_units": 805306369.0,
+      "prepared": false,
+      "prepared_cached": true,
+      "shared_memory_bytes": 0,
+      "boundary_copy_bytes": 0,
+      "output_copy_bytes": 0,
+      "scheduler_backend": "cpp",
+      "native_threads": 1,
+      "native_processes": 0,
+      "python_worker_callbacks": 0,
+      "python_native_transitions": 1,
+      "output_ownership": "numpy_owned",
+      "output_kind": "typed",
+      "native_chunks": [
+        {
+          "fused_pointwise_calls": 0,
+          "pointwise_tiles": 0,
+          "vector_elements": 0,
+          "root_copy_bytes": 8,
+          "direct_output_bytes": 0,
+          "state_copy_bytes": 0,
+          "pointwise_workspace_capacity_bytes": 0,
+          "rows": 1,
+          "nodes": 4,
+          "max_window": 16777216,
+          "numeric_arena_bytes": 0,
+          "mask_arena_bytes": 0,
+          "operator_workspace_capacity_bytes": 1339240,
+          "order_scratch_capacity_bytes": 0,
+          "input_copy_bytes": 0,
+          "eigen_rotation_calls": 0,
+          "eigen_matvec_calls": 0,
+          "eigen_covariance_calls": 0,
+          "eigen_density_calls": 0,
+          "accelerate_covchol_calls": 0,
+          "accelerate_matmul_calls": 0,
+          "matmul_zero_calls": 0,
+          "accelerate_covariance_attempts": 0,
+          "accelerate_covariance_calls": 0,
+          "covariance_syrk_calls": 0,
+          "covariance_replayed_cells": 0,
+          "covariance_fallbacks": 0,
+          "covariance_zero_calls": 0,
+          "accelerate_vforce_calls": 0,
+          "covariance_panel_materialization_bytes": 0,
+          "native_library_workspace_reserve_bytes": 0,
+          "algorithm_copy_bytes": 1339240,
+          "fused_scalar_calls": 0,
+          "summary_source_scans": 0,
+          "order_stat_sorts": 0,
+          "python_operator_calls": 0,
+          "execution_backend": "native_graph_interpreter"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "rss",
+    "rss_baseline": 192020480,
+    "rss_peak": 194117632,
+    "rss_delta": 2097152,
+    "rss_idle_delta": 32768,
+    "rss_schema": "setup-through-warm-monitor-control-1",
+    "case": {
+      "name": "quantile_where",
+      "n": 16777216,
+      "layout": "c",
+      "entry": "ordinary",
+      "pattern": "random",
+      "density": 0.01
+    },
+    "backend": "old",
+    "input": {
+      "x": {
+        "shape": [
+          16777216
+        ],
+        "strides": [
+          8
+        ],
+        "dtype": "float64",
+        "sha256": "37fd903a541bde040550b10f635e58aa65d64e2944780801af2c00555e4c15dc",
+        "writeable": false
+      },
+      "m": {
+        "shape": [
+          16777216
+        ],
+        "strides": [
+          1
+        ],
+        "dtype": "bool",
+        "sha256": "e68816516fddf801c8017f8208678dc2fc878e809131579606ccd3ad2b0be092",
+        "writeable": false
+      }
+    },
+    "build": {
+      "version": "0.3.0",
+      "compiler": "AppleClang 17.0.0.17000603",
+      "architecture": "arm64",
+      "cpu_policy": "baseline",
+      "thread_backend": "persistent_cpp_native_scheduler",
+      "cxx_standard": 17,
+      "execution_backend": "pybind11_aot",
+      "graph_execution_backend": "native_graph_interpreter",
+      "scheduler_backend": "bounded_thread_process_pool",
+      "scheduler_scope": "process_wide_cpp_cpu_admission",
+      "legacy_finance_scheduler": "shared_native_scheduler",
+      "coroutine_backend": "asyncio_orchestration_only",
+      "process_transport": "shared_memory_or_serialized_small_input",
+      "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+      "runtime_jit": 0,
+      "compiler_backend": "cpp_restricted_ast",
+      "planner_backend": "cpp",
+      "native_scheduler_backend": "persistent_cpp_threads_processes",
+      "native_worker_runtime": "standalone_no_python",
+      "python_role": "numpy_binding_async_adapter",
+      "input_memory_policy": "exact_dtype_strided_zero_copy"
+    },
+    "threads": {
+      "environment": {
+        "OPENBLAS_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "NUMBA_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1"
+      },
+      "accelerate_thread_local": "not_applied_to_native"
+    },
+    "audit": {
+      "execution_backend": "cpp_aot",
+      "audit_schema": "cpp-aot-execution-2",
+      "result_protocol": "typed-results-2",
+      "engine": "calmetrics_engine",
+      "model_identity": null,
+      "engine_version": "0.3.0",
+      "engine_build_id": "ccca6b67a5220ea2134a4743d281b80c5af4c096e7d41c3d5b747bb8de70e331",
+      "operator_registry_version": "canonical-native-1",
+      "typed_ir_version": "cpp-typed-ir-1",
+      "plan_fingerprint": "native-3-9ed4e7354dce46cfd497bd9b456a1216",
+      "source_contracts": [],
+      "status_result_copy_bytes": 0,
+      "status_transport_bytes": 0,
+      "native_aot": true,
+      "python_fallback": 0,
+      "python_operator_calls": 0,
+      "request_time_compilation": 0,
+      "input_dtype": "mixed",
+      "input_dtypes": {
+        "x": "float64",
+        "m": "bool"
+      },
+      "output_dtype": "per_output",
+      "outputs": [
+        {
+          "dtype": "float64",
+          "kind": "scalar",
+          "axes": [],
+          "shape": []
+        }
+      ],
+      "result_layout": "interval_root_aligned_8",
+      "result_capacity_bytes": 8,
+      "error_policy": "raise",
+      "status_contract": "indicator-status-1",
+      "result_lifetime": "independent",
+      "lane": "single",
+      "elapsed_ms": 16.745917,
+      "queue_wait_ms": 0.003208,
+      "compute_ms": 16.742709,
+      "cpu_tokens": 1,
+      "cpu_budget": 1,
+      "process_count": 1,
+      "thread_count": 1,
+      "threads_per_process": 1,
+      "async_orchestration": false,
+      "hard_stop": false,
+      "use_shared_memory": false,
+      "reason_codes": [
+        "typed_result_capacity_write_work_accounted",
+        "parallel_overhead_expected_to_dominate"
+      ],
+      "parallel_dimension": "interval",
+      "product_count": 1,
+      "estimated_work_units": 805306369.0,
+      "prepared": false,
+      "prepared_cached": true,
+      "shared_memory_bytes": 0,
+      "boundary_copy_bytes": 0,
+      "output_copy_bytes": 0,
+      "scheduler_backend": "cpp",
+      "native_threads": 1,
+      "native_processes": 0,
+      "python_worker_callbacks": 0,
+      "python_native_transitions": 1,
+      "output_ownership": "numpy_owned",
+      "output_kind": "typed",
+      "native_chunks": [
+        {
+          "fused_pointwise_calls": 0,
+          "pointwise_tiles": 0,
+          "vector_elements": 0,
+          "root_copy_bytes": 8,
+          "direct_output_bytes": 0,
+          "state_copy_bytes": 0,
+          "pointwise_workspace_capacity_bytes": 0,
+          "rows": 1,
+          "nodes": 4,
+          "max_window": 16777216,
+          "numeric_arena_bytes": 0,
+          "mask_arena_bytes": 0,
+          "operator_workspace_capacity_bytes": 1339240,
+          "order_scratch_capacity_bytes": 0,
+          "input_copy_bytes": 0,
+          "eigen_rotation_calls": 0,
+          "eigen_matvec_calls": 0,
+          "eigen_covariance_calls": 0,
+          "eigen_density_calls": 0,
+          "accelerate_covchol_calls": 0,
+          "accelerate_matmul_calls": 0,
+          "matmul_zero_calls": 0,
+          "accelerate_covariance_attempts": 0,
+          "accelerate_covariance_calls": 0,
+          "covariance_syrk_calls": 0,
+          "covariance_replayed_cells": 0,
+          "covariance_fallbacks": 0,
+          "covariance_zero_calls": 0,
+          "accelerate_vforce_calls": 0,
+          "covariance_panel_materialization_bytes": 0,
+          "native_library_workspace_reserve_bytes": 0,
+          "algorithm_copy_bytes": 1339240,
+          "fused_scalar_calls": 0,
+          "summary_source_scans": 0,
+          "order_stat_sorts": 0,
+          "python_operator_calls": 0,
+          "execution_backend": "native_graph_interpreter"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "heap",
+    "setup_heap": {
+      "allocations": 196,
+      "frees": 139,
+      "allocated_bytes": 17866,
+      "live_bytes": 6111,
+      "peak_bytes": 9536,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "cold_heap": {
+      "allocations": 270,
+      "frees": 176,
+      "allocated_bytes": 1364486,
+      "live_bytes": 1349483,
+      "peak_bytes": 1349637,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "cold_retained_heap": {
+      "allocations": 270,
+      "frees": 180,
+      "allocated_bytes": 1364486,
+      "live_bytes": 1348921,
+      "peak_bytes": 1349637,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "warm_baseline_heap": {
+      "allocations": 365,
+      "frees": 275,
+      "allocated_bytes": 1368946,
+      "live_bytes": 1348921,
+      "peak_bytes": 1349637,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "warm_heap": {
+      "allocations": 424,
+      "frees": 328,
+      "allocated_bytes": 1371646,
+      "live_bytes": 1349507,
+      "peak_bytes": 1350223,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "warm_retained_heap": {
+      "allocations": 424,
+      "frees": 332,
+      "allocated_bytes": 1371646,
+      "live_bytes": 1348945,
+      "peak_bytes": 1350223,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "heap_schema": "continuous-live-1",
+    "cold_peak_bytes": 1349637,
+    "warm_peak_bytes": 1350223,
+    "case": {
+      "name": "quantile_where",
+      "n": 16777216,
+      "layout": "c",
+      "entry": "ordinary",
+      "pattern": "random",
+      "density": 0.01
+    },
+    "backend": "new",
+    "input": {
+      "x": {
+        "shape": [
+          16777216
+        ],
+        "strides": [
+          8
+        ],
+        "dtype": "float64",
+        "sha256": "37fd903a541bde040550b10f635e58aa65d64e2944780801af2c00555e4c15dc",
+        "writeable": false
+      },
+      "m": {
+        "shape": [
+          16777216
+        ],
+        "strides": [
+          1
+        ],
+        "dtype": "bool",
+        "sha256": "e68816516fddf801c8017f8208678dc2fc878e809131579606ccd3ad2b0be092",
+        "writeable": false
+      }
+    },
+    "build": {
+      "version": "0.3.0",
+      "compiler": "AppleClang 17.0.0.17000603",
+      "architecture": "arm64",
+      "cpu_policy": "baseline",
+      "thread_backend": "persistent_cpp_native_scheduler",
+      "cxx_standard": 17,
+      "execution_backend": "pybind11_aot",
+      "graph_execution_backend": "native_graph_interpreter",
+      "scheduler_backend": "bounded_thread_process_pool",
+      "scheduler_scope": "process_wide_cpp_cpu_admission",
+      "legacy_finance_scheduler": "shared_native_scheduler",
+      "coroutine_backend": "asyncio_orchestration_only",
+      "process_transport": "shared_memory_or_serialized_small_input",
+      "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+      "runtime_jit": 0,
+      "compiler_backend": "cpp_restricted_ast",
+      "planner_backend": "cpp",
+      "native_scheduler_backend": "persistent_cpp_threads_processes",
+      "native_worker_runtime": "standalone_no_python",
+      "python_role": "numpy_binding_async_adapter",
+      "input_memory_policy": "exact_dtype_strided_zero_copy"
+    },
+    "threads": {
+      "environment": {
+        "OPENBLAS_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "NUMBA_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1"
+      },
+      "accelerate_thread_local": "not_applied_to_native"
+    },
+    "audit": {
+      "execution_backend": "cpp_aot",
+      "audit_schema": "cpp-aot-execution-2",
+      "result_protocol": "typed-results-2",
+      "engine": "calmetrics_engine",
+      "model_identity": null,
+      "engine_version": "0.3.0",
+      "engine_build_id": "a6841b56ae9e25c011f991df43385f47c1b5fa7285d0ec804cdf7f71366d75a2",
+      "operator_registry_version": "canonical-native-1",
+      "typed_ir_version": "cpp-typed-ir-1",
+      "plan_fingerprint": "native-3-9ed4e7354dce46cfd497bd9b456a1216",
+      "source_contracts": [],
+      "status_result_copy_bytes": 0,
+      "status_transport_bytes": 0,
+      "native_aot": true,
+      "python_fallback": 0,
+      "python_operator_calls": 0,
+      "request_time_compilation": 0,
+      "input_dtype": "mixed",
+      "input_dtypes": {
+        "x": "float64",
+        "m": "bool"
+      },
+      "output_dtype": "per_output",
+      "outputs": [
+        {
+          "dtype": "float64",
+          "kind": "scalar",
+          "axes": [],
+          "shape": []
+        }
+      ],
+      "result_layout": "interval_root_aligned_8",
+      "result_capacity_bytes": 8,
+      "error_policy": "raise",
+      "status_contract": "indicator-status-1",
+      "result_lifetime": "independent",
+      "lane": "single",
+      "elapsed_ms": 17.2385,
+      "queue_wait_ms": 0.0015,
+      "compute_ms": 17.237,
+      "cpu_tokens": 1,
+      "cpu_budget": 1,
+      "process_count": 1,
+      "thread_count": 1,
+      "threads_per_process": 1,
+      "async_orchestration": false,
+      "hard_stop": false,
+      "use_shared_memory": false,
+      "reason_codes": [
+        "typed_result_capacity_write_work_accounted",
+        "parallel_overhead_expected_to_dominate"
+      ],
+      "parallel_dimension": "interval",
+      "product_count": 1,
+      "estimated_work_units": 805306369.0,
+      "prepared": false,
+      "prepared_cached": true,
+      "shared_memory_bytes": 0,
+      "boundary_copy_bytes": 0,
+      "output_copy_bytes": 0,
+      "scheduler_backend": "cpp",
+      "native_threads": 1,
+      "native_processes": 0,
+      "python_worker_callbacks": 0,
+      "python_native_transitions": 1,
+      "output_ownership": "numpy_owned",
+      "output_kind": "typed",
+      "native_chunks": [
+        {
+          "fused_pointwise_calls": 0,
+          "pointwise_tiles": 0,
+          "vector_elements": 0,
+          "root_copy_bytes": 8,
+          "direct_output_bytes": 0,
+          "state_copy_bytes": 0,
+          "pointwise_workspace_capacity_bytes": 0,
+          "rows": 1,
+          "nodes": 4,
+          "max_window": 16777216,
+          "numeric_arena_bytes": 0,
+          "mask_arena_bytes": 0,
+          "operator_workspace_capacity_bytes": 1339240,
+          "order_scratch_capacity_bytes": 0,
+          "input_copy_bytes": 0,
+          "eigen_rotation_calls": 0,
+          "eigen_matvec_calls": 0,
+          "eigen_covariance_calls": 0,
+          "eigen_density_calls": 0,
+          "accelerate_covchol_calls": 0,
+          "accelerate_matmul_calls": 0,
+          "matmul_zero_calls": 0,
+          "accelerate_covariance_attempts": 0,
+          "accelerate_covariance_calls": 0,
+          "covariance_syrk_calls": 0,
+          "covariance_replayed_cells": 0,
+          "covariance_fallbacks": 0,
+          "covariance_zero_calls": 0,
+          "accelerate_vforce_calls": 0,
+          "covariance_panel_materialization_bytes": 0,
+          "native_library_workspace_reserve_bytes": 0,
+          "algorithm_copy_bytes": 1339240,
+          "fused_scalar_calls": 0,
+          "summary_source_scans": 0,
+          "order_stat_sorts": 0,
+          "python_operator_calls": 0,
+          "execution_backend": "native_graph_interpreter"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "rss",
+    "rss_baseline": 193052672,
+    "rss_peak": 195018752,
+    "rss_delta": 1966080,
+    "rss_idle_delta": 0,
+    "rss_schema": "setup-through-warm-monitor-control-1",
+    "case": {
+      "name": "quantile_where",
+      "n": 16777216,
+      "layout": "c",
+      "entry": "ordinary",
+      "pattern": "random",
+      "density": 0.01
+    },
+    "backend": "new",
+    "input": {
+      "x": {
+        "shape": [
+          16777216
+        ],
+        "strides": [
+          8
+        ],
+        "dtype": "float64",
+        "sha256": "37fd903a541bde040550b10f635e58aa65d64e2944780801af2c00555e4c15dc",
+        "writeable": false
+      },
+      "m": {
+        "shape": [
+          16777216
+        ],
+        "strides": [
+          1
+        ],
+        "dtype": "bool",
+        "sha256": "e68816516fddf801c8017f8208678dc2fc878e809131579606ccd3ad2b0be092",
+        "writeable": false
+      }
+    },
+    "build": {
+      "version": "0.3.0",
+      "compiler": "AppleClang 17.0.0.17000603",
+      "architecture": "arm64",
+      "cpu_policy": "baseline",
+      "thread_backend": "persistent_cpp_native_scheduler",
+      "cxx_standard": 17,
+      "execution_backend": "pybind11_aot",
+      "graph_execution_backend": "native_graph_interpreter",
+      "scheduler_backend": "bounded_thread_process_pool",
+      "scheduler_scope": "process_wide_cpp_cpu_admission",
+      "legacy_finance_scheduler": "shared_native_scheduler",
+      "coroutine_backend": "asyncio_orchestration_only",
+      "process_transport": "shared_memory_or_serialized_small_input",
+      "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+      "runtime_jit": 0,
+      "compiler_backend": "cpp_restricted_ast",
+      "planner_backend": "cpp",
+      "native_scheduler_backend": "persistent_cpp_threads_processes",
+      "native_worker_runtime": "standalone_no_python",
+      "python_role": "numpy_binding_async_adapter",
+      "input_memory_policy": "exact_dtype_strided_zero_copy"
+    },
+    "threads": {
+      "environment": {
+        "OPENBLAS_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "NUMBA_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1"
+      },
+      "accelerate_thread_local": "not_applied_to_native"
+    },
+    "audit": {
+      "execution_backend": "cpp_aot",
+      "audit_schema": "cpp-aot-execution-2",
+      "result_protocol": "typed-results-2",
+      "engine": "calmetrics_engine",
+      "model_identity": null,
+      "engine_version": "0.3.0",
+      "engine_build_id": "a6841b56ae9e25c011f991df43385f47c1b5fa7285d0ec804cdf7f71366d75a2",
+      "operator_registry_version": "canonical-native-1",
+      "typed_ir_version": "cpp-typed-ir-1",
+      "plan_fingerprint": "native-3-9ed4e7354dce46cfd497bd9b456a1216",
+      "source_contracts": [],
+      "status_result_copy_bytes": 0,
+      "status_transport_bytes": 0,
+      "native_aot": true,
+      "python_fallback": 0,
+      "python_operator_calls": 0,
+      "request_time_compilation": 0,
+      "input_dtype": "mixed",
+      "input_dtypes": {
+        "x": "float64",
+        "m": "bool"
+      },
+      "output_dtype": "per_output",
+      "outputs": [
+        {
+          "dtype": "float64",
+          "kind": "scalar",
+          "axes": [],
+          "shape": []
+        }
+      ],
+      "result_layout": "interval_root_aligned_8",
+      "result_capacity_bytes": 8,
+      "error_policy": "raise",
+      "status_contract": "indicator-status-1",
+      "result_lifetime": "independent",
+      "lane": "single",
+      "elapsed_ms": 18.136583,
+      "queue_wait_ms": 0.001667,
+      "compute_ms": 18.134916,
+      "cpu_tokens": 1,
+      "cpu_budget": 1,
+      "process_count": 1,
+      "thread_count": 1,
+      "threads_per_process": 1,
+      "async_orchestration": false,
+      "hard_stop": false,
+      "use_shared_memory": false,
+      "reason_codes": [
+        "typed_result_capacity_write_work_accounted",
+        "parallel_overhead_expected_to_dominate"
+      ],
+      "parallel_dimension": "interval",
+      "product_count": 1,
+      "estimated_work_units": 805306369.0,
+      "prepared": false,
+      "prepared_cached": true,
+      "shared_memory_bytes": 0,
+      "boundary_copy_bytes": 0,
+      "output_copy_bytes": 0,
+      "scheduler_backend": "cpp",
+      "native_threads": 1,
+      "native_processes": 0,
+      "python_worker_callbacks": 0,
+      "python_native_transitions": 1,
+      "output_ownership": "numpy_owned",
+      "output_kind": "typed",
+      "native_chunks": [
+        {
+          "fused_pointwise_calls": 0,
+          "pointwise_tiles": 0,
+          "vector_elements": 0,
+          "root_copy_bytes": 8,
+          "direct_output_bytes": 0,
+          "state_copy_bytes": 0,
+          "pointwise_workspace_capacity_bytes": 0,
+          "rows": 1,
+          "nodes": 4,
+          "max_window": 16777216,
+          "numeric_arena_bytes": 0,
+          "mask_arena_bytes": 0,
+          "operator_workspace_capacity_bytes": 1339240,
+          "order_scratch_capacity_bytes": 0,
+          "input_copy_bytes": 0,
+          "eigen_rotation_calls": 0,
+          "eigen_matvec_calls": 0,
+          "eigen_covariance_calls": 0,
+          "eigen_density_calls": 0,
+          "accelerate_covchol_calls": 0,
+          "accelerate_matmul_calls": 0,
+          "matmul_zero_calls": 0,
+          "accelerate_covariance_attempts": 0,
+          "accelerate_covariance_calls": 0,
+          "covariance_syrk_calls": 0,
+          "covariance_replayed_cells": 0,
+          "covariance_fallbacks": 0,
+          "covariance_zero_calls": 0,
+          "accelerate_vforce_calls": 0,
+          "covariance_panel_materialization_bytes": 0,
+          "native_library_workspace_reserve_bytes": 0,
+          "algorithm_copy_bytes": 1339240,
+          "fused_scalar_calls": 0,
+          "summary_source_scans": 0,
+          "order_stat_sorts": 0,
+          "python_operator_calls": 0,
+          "execution_backend": "native_graph_interpreter"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "heap",
+    "setup_heap": {
+      "allocations": 2,
+      "frees": 0,
+      "allocated_bytes": 32,
+      "live_bytes": 32,
+      "peak_bytes": 32,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "cold_heap": {
+      "allocations": 19,
+      "frees": 11,
+      "allocated_bytes": 4353974,
+      "live_bytes": 308,
+      "peak_bytes": 4186097,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "cold_retained_heap": {
+      "allocations": 19,
+      "frees": 11,
+      "allocated_bytes": 4353974,
+      "live_bytes": 308,
+      "peak_bytes": 4186097,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "warm_baseline_heap": {
+      "allocations": 74,
+      "frees": 66,
+      "allocated_bytes": 26122304,
+      "live_bytes": 308,
+      "peak_bytes": 4186097,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "warm_heap": {
+      "allocations": 107,
+      "frees": 99,
+      "allocated_bytes": 39183302,
+      "live_bytes": 308,
+      "peak_bytes": 4186097,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "warm_retained_heap": {
+      "allocations": 107,
+      "frees": 99,
+      "allocated_bytes": 39183302,
+      "live_bytes": 308,
+      "peak_bytes": 4186097,
+      "untracked_frees": 0,
+      "table_overflows": 0
+    },
+    "heap_schema": "continuous-live-1",
+    "cold_peak_bytes": 4186097,
+    "warm_peak_bytes": 4186097,
+    "case": {
+      "name": "quantile_where",
+      "n": 16777216,
+      "layout": "c",
+      "entry": "ordinary",
+      "pattern": "random",
+      "density": 0.01
+    },
+    "backend": "njit",
+    "input": {
+      "x": {
+        "shape": [
+          16777216
+        ],
+        "strides": [
+          8
+        ],
+        "dtype": "float64",
+        "sha256": "37fd903a541bde040550b10f635e58aa65d64e2944780801af2c00555e4c15dc",
+        "writeable": false
+      },
+      "m": {
+        "shape": [
+          16777216
+        ],
+        "strides": [
+          1
+        ],
+        "dtype": "bool",
+        "sha256": "e68816516fddf801c8017f8208678dc2fc878e809131579606ccd3ad2b0be092",
+        "writeable": false
+      }
+    },
+    "build": {
+      "backend": "numba-numpy-linalg-scipy-blas",
+      "numba": "0.60.0",
+      "numpy": "1.26.4",
+      "scipy": "1.17.1"
+    },
+    "threads": {
+      "environment": {
+        "OPENBLAS_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "NUMBA_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1"
+      },
+      "accelerate_thread_local": {
+        "prior": 0,
+        "active": 1,
+        "restored": 0
+      },
+      "pools": [
+        {
+          "user_api": "blas",
+          "internal_api": "openblas",
+          "num_threads": 1,
+          "prefix": "libopenblas",
+          "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+          "version": "0.3.23.dev",
+          "threading_layer": "pthreads",
+          "architecture": "armv8"
+        }
+      ]
+    },
+    "audit": {}
+  },
+  {
+    "kind": "rss",
+    "rss_baseline": 307101696,
+    "rss_peak": 315179008,
+    "rss_delta": 8077312,
+    "rss_idle_delta": 0,
+    "rss_schema": "setup-through-warm-monitor-control-1",
+    "case": {
+      "name": "quantile_where",
+      "n": 16777216,
+      "layout": "c",
+      "entry": "ordinary",
+      "pattern": "random",
+      "density": 0.01
+    },
+    "backend": "njit",
+    "input": {
+      "x": {
+        "shape": [
+          16777216
+        ],
+        "strides": [
+          8
+        ],
+        "dtype": "float64",
+        "sha256": "37fd903a541bde040550b10f635e58aa65d64e2944780801af2c00555e4c15dc",
+        "writeable": false
+      },
+      "m": {
+        "shape": [
+          16777216
+        ],
+        "strides": [
+          1
+        ],
+        "dtype": "bool",
+        "sha256": "e68816516fddf801c8017f8208678dc2fc878e809131579606ccd3ad2b0be092",
+        "writeable": false
+      }
+    },
+    "build": {
+      "backend": "numba-numpy-linalg-scipy-blas",
+      "numba": "0.60.0",
+      "numpy": "1.26.4",
+      "scipy": "1.17.1"
+    },
+    "threads": {
+      "environment": {
+        "OPENBLAS_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "VECLIB_MAXIMUM_THREADS": "1",
+        "NUMBA_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1"
+      },
+      "accelerate_thread_local": {
+        "prior": 0,
+        "active": 1,
+        "restored": 0
+      },
+      "pools": [
+        {
+          "user_api": "blas",
+          "internal_api": "openblas",
+          "num_threads": 1,
+          "prefix": "libopenblas",
+          "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+          "version": "0.3.23.dev",
+          "threading_layer": "pthreads",
+          "architecture": "armv8"
+        }
+      ]
+    },
+    "audit": {}
+  }
+]

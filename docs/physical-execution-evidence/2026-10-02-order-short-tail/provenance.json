@@ -1,0 +1,30 @@
+{
+  "measured_local_date": "2026-10-02",
+  "stage": "/private/tmp/calmetrics-order-short-tail-next",
+  "runtime_build": "a6841b56ae9e25c011f991df43385f47c1b5fa7285d0ec804cdf7f71366d75a2",
+  "baseline_install": "/private/tmp/calmetrics-mask-consumed-next/install",
+  "new_install": "/private/tmp/calmetrics-order-short-tail-next/install",
+  "new_off_install": "/private/tmp/calmetrics-order-short-tail-next/install-off",
+  "heap_probe": "/private/tmp/calmetrics-reaccept-20260929/heap_probe.dylib",
+  "heap_probe_sha256": "74421dbfff14b56b730553c7b0b0ce9b38a136de053f132069e1b948decd3382",
+  "timing_rounds": 9,
+  "memory_selection_env": "CME_ORDER_MEMORY_CASES=1",
+  "thread_env": {
+    "OPENBLAS_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "VECLIB_MAXIMUM_THREADS": "1",
+    "NUMBA_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1"
+  },
+  "offs_actual_config": {
+    "CALMETRICS_ENGINE_USE_EIGEN": "OFF",
+    "CALMETRICS_ENGINE_USE_ACCELERATE": "OFF",
+    "CMAKE_OSX_DEPLOYMENT_TARGET": "11.0"
+  },
+  "off_build_command_note": "two initial CALMETRICS_USE_* arguments were unused; actual existing CALMETRICS_ENGINE_USE_* cache values are OFF and verified by final identity. Reproduce with actual option names.",
+  "source_scope": "77 hashed native files; only reduction.cpp differs from baseline",
+  "commit": false,
+  "push": false,
+  "excel_scope": "469 cases /3056 values against previous recalculated workbook; no new Microsoft Excel recalculation",
+  "initial_verifier_failure": "missing output argv and refusal to overwrite old snapshot; final new-stage reruns passed; original logs retained"
+}

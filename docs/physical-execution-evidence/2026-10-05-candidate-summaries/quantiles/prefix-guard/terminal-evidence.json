@@ -1,0 +1,119 @@
+{
+  "build_id": "e76ab11578a2952492ab7c95b1fc33e74abacf4aaa8f7771e33dd927cabaa7af",
+  "source_files": 89,
+  "source_adopted": true,
+  "actual_package_and_worker_identity_verified": true,
+  "adopted_files": [
+    "cpp/graph.cpp",
+    "cpp/include/calmetrics_engine/matrix_backend.hpp",
+    "cpp/operators/matmul_statistics.cpp",
+    "tests/test_matmul_quantile_statistics.py",
+    "tests/matmul_statistics_native_cases.hpp"
+  ],
+  "full_passed": 13205,
+  "skipped": 0,
+  "related": {
+    "normal": 679,
+    "asan_ubsan": 679,
+    "libraries_off": 679
+  },
+  "native": {
+    "normal": 9,
+    "asan_ubsan": 9,
+    "libraries_off": 9
+  },
+  "actual_package_related": 679,
+  "actual_package_native": 9,
+  "actual_timing": [
+    {
+      "shape": [
+        262144,
+        257,
+        7
+      ],
+      "layout": "C",
+      "medians_seconds": {
+        "old": 2.299565896,
+        "candidate": 2.2282860835,
+        "bounded-blas-njit": 2.5005750625000003
+      },
+      "maximum_absolute_errors": {
+        "old": [
+          1.1102230246251565e-16,
+          4.163336342344337e-17,
+          3.469446951953614e-18
+        ],
+        "candidate": [
+          1.1102230246251565e-16,
+          4.163336342344337e-17,
+          3.469446951953614e-18
+        ],
+        "bounded-blas-njit": [
+          1.1102230246251565e-16,
+          4.163336342344337e-17,
+          3.469446951953614e-18
+        ]
+      }
+    },
+    {
+      "shape": [
+        262144,
+        257,
+        7
+      ],
+      "layout": "F",
+      "medians_seconds": {
+        "old": 2.4286001875,
+        "candidate": 2.1848155205,
+        "bounded-blas-njit": 2.6831164579999998
+      },
+      "maximum_absolute_errors": {
+        "old": [
+          1.1102230246251565e-16,
+          4.163336342344337e-17,
+          3.469446951953614e-18
+        ],
+        "candidate": [
+          1.1102230246251565e-16,
+          4.163336342344337e-17,
+          3.469446951953614e-18
+        ],
+        "bounded-blas-njit": [
+          1.1102230246251565e-16,
+          4.163336342344337e-17,
+          3.469446951953614e-18
+        ]
+      }
+    }
+  ],
+  "actual_memory": [
+    {
+      "backend": "old",
+      "requested_heap_warm_peak_bytes": 3248192011,
+      "rss_delta_median_bytes": 3257516032,
+      "rss_absolute_median_bytes": 3343679488
+    },
+    {
+      "backend": "candidate",
+      "requested_heap_warm_peak_bytes": 2224192123,
+      "rss_delta_median_bytes": 2233696256,
+      "rss_absolute_median_bytes": 2319269888
+    },
+    {
+      "backend": "bounded-blas-njit",
+      "requested_heap_warm_peak_bytes": 2192165200,
+      "rss_delta_median_bytes": 2208415744,
+      "rss_absolute_median_bytes": 2350645248
+    }
+  ],
+  "mathematical_scope": "128 raw quantile roots with annual mean/sample deviation; intermediate tail guard regressions",
+  "performance_scope": "same data/outputs/CPU1/owned readonly preparation/ordinary Scheduler/two generations; compilation excluded",
+  "memory_conclusion": "large duplicate cache removed; still no lower warm-peak claim versus bounded NJIT",
+  "whole_goal_complete": false,
+  "git_actions": false,
+  "remaining": [
+    "actual updated long-history and other principal-load reacceptance",
+    "CVaR/downside/drawdown graphs and error/discrete/ownership contracts",
+    "complete sampling/repair/Pareto/frontier and other heavy workloads"
+  ]
+}

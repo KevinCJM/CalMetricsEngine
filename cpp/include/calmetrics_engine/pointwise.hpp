@@ -28,7 +28,7 @@ bool execute_pointwise(const Program &, const std::vector<ops::Value> &,
     std::chrono::steady_clock::time_point, const std::atomic<bool> *, bool prebound = false,
     std::size_t tile_begin = 0, std::size_t tile_end = SIZE_MAX,
     const double *previous = nullptr, double *residual = nullptr, bool *finite = nullptr,
-    InplacePointwiseChain *capture = nullptr);
+    InplacePointwiseChain *capture = nullptr, bool collect_shapes = true);
 // Reuse within one proven finite-preserving iteration scope only, after its
 // first full execution validated all geometry, parameters and output bounds.
 void execute_inplace_pointwise_chain(const InplacePointwiseChain &, Audit &,

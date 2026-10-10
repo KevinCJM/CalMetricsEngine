@@ -1,0 +1,179 @@
+{
+  "status": "complete_measurements_support_qualification",
+  "summary": {
+    "C": {
+      "baseline": {
+        "group_medians_seconds": [
+          2.650623207911849,
+          2.745567583013326,
+          2.662087125238031
+        ],
+        "median_seconds": 2.662087125238031,
+        "cpu_utilization_percent": [
+          98.38208980260178,
+          96.85872289056391,
+          99.04623707849385
+        ],
+        "warm_peak_bytes": 69364338,
+        "warm_incremental_rss_bytes": 3735552,
+        "rss_baseline_bytes": 275070976,
+        "eigen_matvec_calls": [
+          0,
+          0,
+          0
+        ],
+        "max_error": 0.0
+      },
+      "candidate": {
+        "group_medians_seconds": [
+          1.4989411672577262,
+          1.5258966656401753,
+          1.6588055421598256
+        ],
+        "median_seconds": 1.5258966656401753,
+        "cpu_utilization_percent": [
+          99.58897756224196,
+          98.36315251452584,
+          92.2896652064645
+        ],
+        "warm_peak_bytes": 69364338,
+        "warm_incremental_rss_bytes": 2490368,
+        "rss_baseline_bytes": 274825216,
+        "eigen_matvec_calls": [
+          512,
+          512,
+          512
+        ],
+        "max_error": 0.0
+      },
+      "njit": {
+        "group_medians_seconds": [
+          2.4149632500484586,
+          2.4248987501487136,
+          2.4738984587602317
+        ],
+        "median_seconds": 2.4248987501487136,
+        "cpu_utilization_percent": [
+          99.58119858242121,
+          99.62526959296574,
+          97.91658055401211
+        ],
+        "warm_peak_bytes": 68195106,
+        "warm_incremental_rss_bytes": 2179072,
+        "rss_baseline_bytes": 265273344,
+        "eigen_matvec_calls": [],
+        "max_error": 0.0
+      },
+      "njit_columns": {
+        "group_medians_seconds": [
+          11.551763541996479,
+          11.941975667141378,
+          12.122783333063126
+        ],
+        "median_seconds": 11.941975667141378,
+        "cpu_utilization_percent": [
+          98.01908704288567,
+          97.32034609530542,
+          95.8692396262666
+        ],
+        "warm_peak_bytes": 68195106,
+        "warm_incremental_rss_bytes": 2768896,
+        "rss_baseline_bytes": 264781824,
+        "eigen_matvec_calls": [],
+        "max_error": 0.0
+      }
+    },
+    "F": {
+      "baseline": {
+        "group_medians_seconds": [
+          25.643019958864897,
+          23.810692416038364,
+          18.35266862483695
+        ],
+        "median_seconds": 23.810692416038364,
+        "cpu_utilization_percent": [
+          98.44472073886134,
+          97.73154392059017,
+          98.07410274651608
+        ],
+        "warm_peak_bytes": 69364338,
+        "warm_incremental_rss_bytes": 2031616,
+        "rss_baseline_bytes": 275103744,
+        "eigen_matvec_calls": [
+          0,
+          0,
+          0
+        ],
+        "max_error": 0.0
+      },
+      "candidate": {
+        "group_medians_seconds": [
+          1.6265045003965497,
+          1.875071708112955,
+          1.5399544169194996
+        ],
+        "median_seconds": 1.6265045003965497,
+        "cpu_utilization_percent": [
+          95.31616200785224,
+          85.49736278046021,
+          99.37520601881651
+        ],
+        "warm_peak_bytes": 69364338,
+        "warm_incremental_rss_bytes": 2736128,
+        "rss_baseline_bytes": 273874944,
+        "eigen_matvec_calls": [
+          512,
+          512,
+          512
+        ],
+        "max_error": 0.0
+      },
+      "njit": {
+        "group_medians_seconds": [
+          12.87142650038004,
+          12.600902707781643,
+          13.100519375409931
+        ],
+        "median_seconds": 12.87142650038004,
+        "cpu_utilization_percent": [
+          98.14381888578528,
+          97.96878204592025,
+          98.0730518734903
+        ],
+        "warm_peak_bytes": 68195106,
+        "warm_incremental_rss_bytes": 3244032,
+        "rss_baseline_bytes": 263159808,
+        "eigen_matvec_calls": [],
+        "max_error": 0.0
+      },
+      "njit_columns": {
+        "group_medians_seconds": [
+          1.321840750053525,
+          1.2615181668661535,
+          1.3339694580063224
+        ],
+        "median_seconds": 1.321840750053525,
+        "cpu_utilization_percent": [
+          96.55922064171084,
+          99.59891391339892,
+          94.90319679160918
+        ],
+        "warm_peak_bytes": 68195106,
+        "warm_incremental_rss_bytes": 2211840,
+        "rss_baseline_bytes": 264421376,
+        "eigen_matvec_calls": [],
+        "max_error": 0.0
+      }
+    }
+  },
+  "large_processes": 40,
+  "screen_processes": 10,
+  "small_smoke_processes": 5,
+  "candidate_vs_actual_time": "material improvement C and F",
+  "candidate_vs_actual_heap": "identical requested peaks",
+  "strong_njit_remaining": "F candidate slower; no material memory lead over NJIT",
+  "rss_boundary": "incremental since warmed fixture/definition baseline; fixture allocator residency prevents interpreting incremental bytes as entire task memory",
+  "qualification_started": false,
+  "actual_adopted": false,
+  "goal_complete": false
+}

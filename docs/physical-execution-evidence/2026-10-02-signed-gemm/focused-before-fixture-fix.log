@@ -1,0 +1,26 @@
+........................................................................ [ 22%]
+........................................................................ [ 45%]
+........................................................................ [ 68%]
+........................................................................ [ 91%]
+.....................F......                                             [100%]
+=================================== FAILURES ===================================
+_ test_packed_shape_change_drops_old_panel_capacity_even_when_arena_size_stays _
+
+    def test_packed_shape_change_drops_old_panel_capacity_even_when_arena_size_stays():
+        graph = GraphCompiler(declarations()).compile("matmul(a,b)")
+        bounds = np.zeros(1, np.int64)
+        capacities = []
+        with AdaptiveScheduler(cpu_budget=1, config=settings("single")) as scheduler:
+            for k in (512, 256):
+                a, b, expected = integer_inputs(m=1024, k=k, n=1024)
+                result = scheduler.execute(graph, {"a": a, "b": b}, bounds, bounds)
+                np.testing.assert_array_equal(result.outputs[0].values[0], expected)
+                capacities.append(result.audit["native_chunks"][0]["operator_workspace_capacity_bytes"])
+        if PACKING_PLATFORM and os.environ.get("CME_EXPECT_EIGEN") == "1":
+>           assert capacities[0] - capacities[1] == (512 - 256) * 320 * 8
+E           assert (0 - 0) == (((512 - 256) * 320) * 8)
+
+tests/test_matmul_packed_library.py:164: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_matmul_packed_library.py::test_packed_shape_change_drops_old_panel_capacity_even_when_arena_size_stays
+1 failed, 315 passed in 15.11s

@@ -1,0 +1,454 @@
+--- a/cpp/graph.cpp
++++ b/cpp/graph.cpp
+@@ -1645,9 +1645,17 @@
+ static void execute_square_reduce_rows(const ops::Prepared &subtraction,
+     const ops::Value &mask, double otherwise, double *totals, Scratch &scratch) {
+   const auto rows = subtraction.output_shape.dim[0], count = subtraction.output_shape.dim[1];
+-  for (std::size_t row = 0; row < rows; ++row) {
+-    native::check_deadline(scratch.deadline);
+-    if (scratch.cancelled && scratch.cancelled->load()) throw native::Timeout("native square reduction cancelled");
++  const auto checkpoint = [](void *context) {
++    auto &state = *static_cast<Scratch *>(context);
++    native::check_deadline(state.deadline);
++    if (state.cancelled && state.cancelled->load()) throw native::Timeout("native square reduction cancelled");
++  };
++  for (std::size_t row = 0; row < rows;) {
++    if (ops::library_square_sum_quad(subtraction, mask, otherwise, row, totals, &scratch, checkpoint)) {
++      row += 4;
++      continue;
++    }
++    checkpoint(&scratch);
+     double total = 0;
+     if (count) {
+       const auto &a = subtraction.args[0], &b = subtraction.args[1];
+@@ -1664,6 +1672,7 @@
+       }
+     }
+     totals[row] = total;
++    ++row;
+   }
+ }
+ 
+@@ -1721,9 +1730,14 @@
+ 
+ // Selection and left-fold sum use the original arithmetic and original order.
+ // All operands are already checked by the producer's canonical prepare.
+-static void execute_where_sum_rows(const ops::Prepared &where, double *totals) {
++static void execute_where_sum_rows(const ops::Prepared &where, double *totals, Scratch &scratch) {
+   ops::validate_payload_structure(where);
+   const auto rows = where.output_shape.dim[0], count = where.output_shape.dim[1];
++  const auto checkpoint = [](void *context) {
++    auto &state = *static_cast<Scratch *>(context);
++    native::check_deadline(state.deadline);
++    if (state.cancelled && state.cancelled->load()) throw native::Timeout("native selection reduction cancelled");
++  };
+   const auto scalar_bits = [](double value) {
+     std::uint64_t bits = 0;
+     std::memcpy(&bits, &value, sizeof(bits));
+@@ -1739,6 +1753,7 @@
+   if ((count_true || count_false) && count <= (UINT64_C(1) << 53)) {
+     const auto &mask = where.args[0];
+     for (std::size_t row = 0; row < rows; ++row) {
++      checkpoint(&scratch);
+       std::size_t selected = 0;
+       if (count) {
+         const auto *condition = static_cast<const std::uint8_t *>(mask.data) + mask.offset(row * count);
+@@ -1753,7 +1768,12 @@
+     }
+     return;
+   }
+-  for (std::size_t row = 0; row < rows; ++row) {
++  for (std::size_t row = 0; row < rows;) {
++    if (ops::library_where_sum_quad(where, row, totals, &scratch, checkpoint)) {
++      row += 4;
++      continue;
++    }
++    checkpoint(&scratch);
+     double total = 0;
+     if (count) {
+       const auto &mask = where.args[0];
+@@ -1776,6 +1796,7 @@
+       }
+     }
+     totals[row] = total;
++    ++row;
+   }
+ }
+ 
+@@ -4098,7 +4119,7 @@
+           ops::require(prepared.output_shape.dim[0] <= scratch.slot_capacity(node.storage, node.slot),
+                        "GRAPH_OUTPUT_TOO_LARGE");
+           auto *cache = scratch.numeric_slot(node.slot);
+-          execute_where_sum_rows(prepared, cache);
++          execute_where_sum_rows(prepared, cache, scratch);
+           ops::Value geometry;
+           geometry.kind = prepared.output_kind; geometry.shape = prepared.output_shape;
+           geometry.set_contiguous_strides(); geometry.data = cache;
+--- a/cpp/include/calmetrics_engine/matrix_backend.hpp
++++ b/cpp/include/calmetrics_engine/matrix_backend.hpp
+@@ -90,6 +90,12 @@
+ bool library_scan_reduce_quad(const Value &, std::size_t row, double initial,
+     double peak_initial, double subtraction, double *totals, unsigned &errors,
+     void *context, void (*checkpoint)(void *));
++// Graph-only canonical left folds across four independent rows. Operands are
++// already prepared/validated; rejection writes nothing, and no buffer is owned.
++bool library_where_sum_quad(const Prepared &, std::size_t row, double *totals,
++    void *context, void (*checkpoint)(void *));
++bool library_square_sum_quad(const Prepared &, const Value &mask, double otherwise,
++    std::size_t row, double *totals, void *context, void (*checkpoint)(void *));
+ #if defined(CALMETRICS_HAVE_EIGEN_ROTATION) && defined(__APPLE__) && defined(__aarch64__)
+ // Internal C/F-compatible finite covariance pieces. Caller admits geometry.
+ void covariance_library_means(const Value &, double *);
+--- a/cpp/operators/matrix_backend.cpp
++++ b/cpp/operators/matrix_backend.cpp
+@@ -732,6 +732,93 @@
+     audit.isa = "matmul-repeated-rows";
+ }
+ #endif
++
++namespace {
++#if defined(CALMETRICS_HAVE_EIGEN_ROTATION) && defined(__APPLE__) && defined(__aarch64__)
++template<bool Square>
++bool masked_sum_quad(const Shape &shape, const Value &mask, const Value &left,
++    const Value &right, double otherwise, std::size_t row, double *totals,
++    void *context, void (*checkpoint)(void *)) {
++    if (__builtin_available(macOS 15.0, *)) {
++        const auto compatible = [&](const Value &v, Kind kind) {
++            return v.kind == kind && (!v.shape.rank || (v.shape == shape && v.data));
++        };
++        if (shape.rank != 2 || row > shape.dim[0] || shape.dim[0] - row < 4 ||
++            shape.dim[1] < 128 || !totals || !compatible(mask, Kind::mask) ||
++            !compatible(left, Kind::number) || !compatible(right, Kind::number))
++            return false;
++        using namespace Eigen::internal;
++        using Packet = Packet2d;
++        const auto zero = pset1<Packet>(0.0), one = pset1<Packet>(1.0);
++        const auto fallback = pset1<Packet>(otherwise);
++        Packet total[2]{zero, zero};
++        const auto count = shape.dim[1];
++        const auto *a = left.shape.rank
++            ? static_cast<const double *>(left.data) + left.offset(row * count) : &left.scalar;
++        const auto *b = right.shape.rank
++            ? static_cast<const double *>(right.data) + right.offset(row * count) : &right.scalar;
++        const auto scalar_mask = std::uint8_t(mask.scalar);
++        const auto *condition = mask.shape.rank
++            ? static_cast<const std::uint8_t *>(mask.data) + mask.offset(row * count) : &scalar_mask;
++        const auto ar = left.shape.rank ? left.stride[0] : 0;
++        const auto ac = left.shape.rank ? left.stride[1] : 0;
++        const auto br = right.shape.rank ? right.stride[0] : 0;
++        const auto bc = right.shape.rank ? right.stride[1] : 0;
++        const auto mr = mask.shape.rank ? mask.stride[0] : 0;
++        const auto mc = mask.shape.rank ? mask.stride[1] : 0;
++        for (std::size_t j = 0; j < count; ++j) {
++            if ((j & 1023) == 0 && checkpoint) checkpoint(context);
++            for (int half = 0; half < 2; ++half) {
++                const auto i = std::ptrdiff_t(2 * half);
++                const auto *m = condition + i * mr + std::ptrdiff_t(j) * mc;
++                const double flags[2]{double(m[0] != 0), double(m[mr] != 0)};
++                const auto selected = pcmp_eq(ploadu<Packet>(flags), one);
++                const auto av = pgather<double, Packet>(a + i * ar + std::ptrdiff_t(j) * ac, ar);
++                const auto bv = pgather<double, Packet>(b + i * br + std::ptrdiff_t(j) * bc, br);
++                Packet value;
++                if constexpr (Square) {
++                    const auto delta = psub(av, bv);
++                    value = pselect(selected, pmul(delta, delta), fallback);
++                } else {
++                    value = pselect(selected, av, bv);
++                }
++                // No horizontal reduction: every lane keeps ascending-j order.
++                total[half] = padd(total[half], value);
++            }
++        }
++        pstoreu<double>(totals + row, total[0]);
++        pstoreu<double>(totals + row + 2, total[1]);
++        return true;
++    }
++    return false;
++}
++#endif
++}
++
++bool library_where_sum_quad(const Prepared &where, std::size_t row, double *totals,
++    void *context, void (*checkpoint)(void *)) {
++#if defined(CALMETRICS_HAVE_EIGEN_ROTATION) && defined(__APPLE__) && defined(__aarch64__)
++    if (where.count == 3)
++        return masked_sum_quad<false>(where.output_shape, where.args[0], where.args[1],
++            where.args[2], 0.0, row, totals, context, checkpoint);
++#else
++    (void)where; (void)row; (void)totals; (void)context; (void)checkpoint;
++#endif
++    return false;
++}
++
++bool library_square_sum_quad(const Prepared &subtraction, const Value &mask, double otherwise,
++    std::size_t row, double *totals, void *context, void (*checkpoint)(void *)) {
++#if defined(CALMETRICS_HAVE_EIGEN_ROTATION) && defined(__APPLE__) && defined(__aarch64__)
++    if (subtraction.count == 2)
++        return masked_sum_quad<true>(subtraction.output_shape, mask, subtraction.args[0],
++            subtraction.args[1], otherwise, row, totals, context, checkpoint);
++#else
++    (void)subtraction; (void)mask; (void)otherwise; (void)row; (void)totals;
++    (void)context; (void)checkpoint;
++#endif
++    return false;
++}
+ 
+ bool library_scan_reduce_quad(const Value &input, std::size_t row, double initial,
+     double peak_initial, double subtraction, double *totals, unsigned &errors,
+--- a/tests/graph_native_tests.cpp
++++ b/tests/graph_native_tests.cpp
+@@ -5,6 +5,7 @@
+ #include "compact_path_native_cases.hpp"
+ #include "matmul_statistics_native_cases.hpp"
+ #include "row_batch_native_cases.hpp"
++#include "masked_reduce_native_cases.hpp"
+ 
+ #include <algorithm>
+ #include <cmath>
+@@ -127,6 +128,7 @@
+ }
+ 
+ int main() {
++  masked_reduce_native_cases::run();
+   test_scan_packet_exception_and_lifetime();
+   row_batch_native_cases::run();
+   matmul_statistics_cases::run();
+--- a/tests/masked_reduce_native_cases.hpp
++++ b/tests/masked_reduce_native_cases.hpp
+@@ -0,0 +1,162 @@
++#pragma once
++#include "calmetrics_engine/matrix_backend.hpp"
++#include <algorithm>
++#include <cmath>
++#include <cstdint>
++#include <cstdlib>
++#include <cstring>
++#include <limits>
++#include <stdexcept>
++#include <vector>
++
++namespace masked_reduce_native_cases {
++inline void check(bool ok, const char *message) {
++  if (!ok) throw std::runtime_error(message);
++}
++inline void run() {
++  namespace o = calmetrics_engine::ops;
++  constexpr std::size_t rows = 7, count = 129;
++  const auto same = [](double a, double b) {
++    return std::memcmp(&a, &b, sizeof(double)) == 0 || (std::isnan(a) && std::isnan(b));
++  };
++  const auto expected_dispatch = [](bool used) {
++#if defined(__APPLE__) && defined(__aarch64__)
++    if (__builtin_available(macOS 15.0, *)) {
++      const auto expected = std::getenv("CALMETRICS_TEST_EXPECT_EIGEN");
++      if (expected) check(used == (std::strcmp(expected, "1") == 0), "masked sum actual dispatch");
++    }
++#else
++    check(!used, "unsupported masked sum dispatch");
++#endif
++  };
++  for (int layout = 0; layout < 5; ++layout) {
++    std::vector<double> left(rows * count * 2), right(rows * count * 2);
++    std::vector<std::uint8_t> masks(rows * count * 2);
++    for (std::size_t i = 0; i < left.size(); ++i) {
++      const double values[]{1e16, 1.0, -1e16, 2.0, -0.0};
++      left[i] = values[i % 5]; right[i] = double(int(i % 7) - 3) / 8;
++      masks[i] = i % 3 == 0 ? 0 : i % 3 == 1 ? 1 : 255;
++    }
++    const auto view = [&](const void *data, o::Kind kind) {
++      o::Value v; v.kind = kind; v.shape = o::matrix_shape(rows, count); v.data = data;
++      v.stride[0] = layout == 1 ? 1 : layout == 4 ? 0 : (layout == 3 ? 2 : 1) * count;
++      v.stride[1] = layout == 1 ? rows : layout == 3 ? 2 : 1;
++      if (layout == 2) { v.stride[0] = -std::ptrdiff_t(count); v.stride[1] = -1; }
++      return v;
++    };
++    const auto offset = layout == 2 ? rows * count - 1 : 0;
++    auto av = view(left.data() + offset, o::Kind::number);
++    auto bv = view(right.data() + offset, o::Kind::number);
++    auto mask = view(masks.data() + offset, o::Kind::mask);
++    const auto left_before = left, right_before = right;
++    const auto mask_before = masks;
++    for (int broadcast = 0; broadcast < 5; ++broadcast) {
++      o::Prepared where; where.count = 3; where.output_shape = av.shape;
++      where.args[0] = mask; where.args[1] = av; where.args[2] = bv;
++      if (broadcast == 1 || broadcast == 3) where.args[1] = o::Value::number(-0.0);
++      if (broadcast == 2 || broadcast == 3) where.args[2] = o::Value::number(.5);
++      if (broadcast == 4) { where.args[0].shape = {}; where.args[0].data = nullptr; where.args[0].scalar = 1; }
++      o::Prepared subtraction; subtraction.count = 2; subtraction.output_shape = av.shape;
++      subtraction.args[0] = where.args[1]; subtraction.args[1] = where.args[2];
++      const auto value = [&](const o::Value &v, std::size_t i) {
++        return v.shape.rank ? static_cast<const double *>(v.data)[v.offset(i)] : v.scalar;
++      };
++      const auto selected = [&](std::size_t i) {
++        const auto &v = where.args[0];
++        return v.shape.rank ? static_cast<const std::uint8_t *>(v.data)[v.offset(i)] != 0 : v.scalar != 0;
++      };
++      for (bool square : {false, true}) {
++        std::vector<double> output(rows + 2, -987);
++        std::size_t calls = 0;
++        const auto checkpoint = [](void *p) { ++*static_cast<std::size_t *>(p); };
++        const bool used = square
++            ? o::library_square_sum_quad(subtraction, where.args[0], .25, 2, output.data(), &calls, checkpoint)
++            : o::library_where_sum_quad(where, 2, output.data(), &calls, checkpoint);
++        expected_dispatch(used);
++        for (std::size_t row = 0; row < output.size(); ++row) {
++          if (!used || row < 2 || row >= 6) {
++            check(output[row] == -987, "masked sum wrote outside four rows"); continue;
++          }
++          double total = 0;
++          for (std::size_t j = 0; j < count; ++j) {
++            const auto i = row * count + j;
++            const auto a = value(where.args[1], i), b = value(where.args[2], i);
++            const auto delta = a - b;
++            total += square ? (selected(i) ? delta * delta : .25) : (selected(i) ? a : b);
++          }
++          check(same(output[row], total), "masked sum changed canonical left fold");
++        }
++        check(calls == (used ? 1u : 0u), "masked sum checkpoint count");
++        if (used) {
++          std::fill(output.begin(), output.end(), -987);
++          try {
++            const auto fail = [](void *) { throw std::runtime_error("masked-checkpoint"); };
++            if (square) o::library_square_sum_quad(subtraction, where.args[0], .25, 2, output.data(), nullptr, fail);
++            else o::library_where_sum_quad(where, 2, output.data(), nullptr, fail);
++            check(false, "masked sum lost cancellation");
++          } catch (const std::runtime_error &e) {
++            check(std::strcmp(e.what(), "masked-checkpoint") == 0, "masked sum changed cancellation");
++          }
++          for (auto x : output) check(x == -987, "masked sum wrote cancelled result");
++        }
++        std::fill(output.begin(), output.end(), -987);
++        calls = 0;
++        for (std::size_t row : {std::size_t(4), rows + 1}) {
++          const bool rejected = square
++              ? !o::library_square_sum_quad(subtraction, where.args[0], .25, row, output.data(), &calls, checkpoint)
++              : !o::library_where_sum_quad(where, row, output.data(), &calls, checkpoint);
++          check(rejected, "masked sum admitted short or invalid row range");
++        }
++        auto short_where = where; short_where.output_shape = o::matrix_shape(rows, 127);
++        auto short_subtraction = subtraction; short_subtraction.output_shape = short_where.output_shape;
++        check(!o::library_where_sum_quad(short_where, 0, output.data(), &calls, checkpoint), "masked sum admitted short axis");
++        check(!o::library_square_sum_quad(short_subtraction, where.args[0], .25, 0, output.data(), &calls, checkpoint), "square sum admitted short axis");
++        for (auto x : output) check(x == -987, "masked sum rejection wrote output");
++        check(calls == 0, "masked sum rejection called checkpoint");
++      }
++    }
++    check(left == left_before && right == right_before && masks == mask_before, "masked sum mutated borrowed input");
++  }
++  // Selection must not perform arithmetic on its unselected NaN/Inf branch.
++  std::vector<double> data(rows * count, std::numeric_limits<double>::quiet_NaN());
++  std::vector<std::uint8_t> mask(rows * count, 0);
++  o::Prepared where; where.count = 3; where.output_shape = o::matrix_shape(rows, count);
++  where.args[0].kind = o::Kind::mask; where.args[0].shape = where.output_shape;
++  where.args[0].data = mask.data(); where.args[0].set_contiguous_strides();
++  where.args[1].shape = where.output_shape; where.args[1].data = data.data();
++  where.args[1].set_contiguous_strides(); where.args[2] = o::Value::number(.5);
++  double output[rows]{};
++  const bool used = o::library_where_sum_quad(where, 1, output, nullptr, nullptr);
++  expected_dispatch(used);
++  if (used) for (std::size_t row = 1; row < 5; ++row)
++    check(output[row] == double(count) / 2, "unselected NaN contaminated masked sum");
++
++  // Cancellation after arithmetic has started still cannot publish this quad.
++  constexpr std::size_t long_count = 2049;
++  data.assign(rows * long_count, .125); mask.assign(rows * long_count, 1);
++  where.output_shape = o::matrix_shape(rows, long_count);
++  where.args[0].shape = where.output_shape; where.args[0].data = mask.data();
++  where.args[0].set_contiguous_strides();
++  where.args[1].shape = where.output_shape; where.args[1].data = data.data();
++  where.args[1].set_contiguous_strides();
++  o::Prepared subtraction; subtraction.count = 2; subtraction.output_shape = where.output_shape;
++  subtraction.args[0] = where.args[1]; subtraction.args[1] = o::Value::number(.0625);
++  for (bool square : {false, true}) {
++    std::fill_n(output, rows, -987);
++    std::size_t checkpoints = 0;
++    const auto cancel = [](void *p) {
++      if (++*static_cast<std::size_t *>(p) == 2) throw std::runtime_error("masked-midpoint");
++    };
++    try {
++      const bool active = square
++          ? o::library_square_sum_quad(subtraction, where.args[0], 0, 1, output, &checkpoints, cancel)
++          : o::library_where_sum_quad(where, 1, output, &checkpoints, cancel);
++      check(!active, "masked sum missed midpoint cancellation");
++    } catch (const std::runtime_error &e) {
++      check(std::strcmp(e.what(), "masked-midpoint") == 0 && checkpoints == 2,
++          "masked sum midpoint cancellation changed");
++    }
++    for (auto x : output) check(x == -987, "masked sum published cancelled quad");
++  }
++}
++}
+--- a/tests/test_masked_reduce_packets.py
++++ b/tests/test_masked_reduce_packets.py
+@@ -0,0 +1,71 @@
++"""Independent row packets preserve selected folds and full graph ownership."""
++import numpy as np
++import pytest
++from calmetrics_engine import AdaptiveScheduler, GraphCompiler, PlannerConfig
++from .test_array_row_parallel import data
++from .test_row_batch_execution import TYPES, Y
++
++
++@pytest.mark.parametrize('rows', [128, 129, 517])
++@pytest.mark.parametrize('length', [127, 128, 257])
++@pytest.mark.parametrize('layout', ['C', 'F', 'negative', 'padded'])
++@pytest.mark.parametrize('cpu', [1, 4])
++def test_masked_packets_keep_canonical_steps_tail_and_owned_generations(rows, length, layout, cpu):
++    inputs = data(rows, length, 7, layout)
++    saved = {name: x.copy() for name, x in inputs.items()}
++    predicate = f'less_than({Y},0)'
++    delta = f'subtract({Y},.001)'
++    selections = [f'where({predicate},{Y},-0.)',
++                  f'where({predicate},0,add(1,{Y}))',
++                  f'where({predicate},add(1,{Y}),subtract(0,{Y}))',
++                  f'where({predicate},multiply({delta},{delta}),.1)']
++    roots = [f'sum_axis({x},1)' for x in selections]
++    compiler = GraphCompiler(TYPES)
++    graph = compiler.compile(roots, result_format='typed')
++    # Public selections prevent their removal; the public subtraction also
++    # prevents the private square closure. Reference keeps every original node.
++    canonical = compiler.compile(roots + selections + [delta, Y], result_format='typed')
++    starts = np.array([0], np.int64); ends = np.array([length], np.int64)
++    with AdaptiveScheduler(cpu_budget=cpu, config=PlannerConfig(thread_work_units=1.)) as scheduler:
++        first = scheduler.execute(graph, inputs, starts, ends)
++        reference = scheduler.execute(canonical, inputs, starts, ends)
++        second = scheduler.execute(graph, inputs, starts, ends)
++    for actual, expected, again in zip(first.outputs, reference.outputs[:4], second.outputs, strict=True):
++        a = actual.values[0]; b = expected.values[0]
++        np.testing.assert_array_equal(a.view(np.uint64), b.view(np.uint64))
++        np.testing.assert_array_equal(a.view(np.uint64), again.values[0].view(np.uint64))
++        assert a.shape == (rows,) and not a.flags.writeable
++        assert not np.shares_memory(a, again.values[0])
++        assert all(not np.shares_memory(a, x) for x in inputs.values())
++        assert actual.root_statuses[0] == 0
++    for name, x in inputs.items():
++        np.testing.assert_array_equal(x.view(np.uint64), saved[name].view(np.uint64))
++    observed = max(c['numeric_arena_bytes'] + c['mask_arena_bytes'] +
++                   c['operator_workspace_capacity_bytes'] for c in first.audit['native_chunks'])
++    assert first.plan.metadata()['estimated_worker_scratch_bytes'] >= observed
++
++
++@pytest.mark.parametrize('length', [0, 1, 128, 257])
++@pytest.mark.parametrize('mode', ['positive', 'negative', 'zero'])
++def test_masked_packets_keep_empty_and_unselected_nonfinite_values(length, mode):
++    inputs = data(129, length, 1)
++    inputs['w'] = np.full((129, 1), .25)
++    inputs['r'] = np.full((length, 1), 1. if mode == 'positive' else -1. if mode == 'negative' else -0.)
++    for x in inputs.values(): x.flags.writeable = False
++    overflow = f'multiply(1e308,add(2,{Y}))'
++    nan = f'subtract({overflow},{overflow})'
++    predicate = f'greater_equal({Y},0)' if mode != 'negative' else f'less_than({Y},0)'
++    selection = f'where({predicate},{Y},{nan})'
++    unselected_delta = f'subtract({Y},{nan})'
++    square = f'where(logical_not({predicate}),multiply({unselected_delta},{unselected_delta}),.5)'
++    roots = [f'sum_axis({selection},1)', f'sum_axis({square},1)']
++    compiler = GraphCompiler(TYPES)
++    graph = compiler.compile(roots, result_format='typed')
++    canonical = compiler.compile(roots + [selection, square, unselected_delta, Y], result_format='typed')
++    starts = np.array([0], np.int64); ends = np.array([length], np.int64)
++    with AdaptiveScheduler(cpu_budget=1) as scheduler:
++        actual = scheduler.execute(graph, inputs, starts, ends)
++        expected = scheduler.execute(canonical, inputs, starts, ends)
++    for a, b in zip(actual.outputs, expected.outputs[:2], strict=True):
++        np.testing.assert_array_equal(a.values[0].view(np.uint64), b.values[0].view(np.uint64))
++    np.testing.assert_array_equal(actual.outputs[1].values[0], np.full(129, length * .5))

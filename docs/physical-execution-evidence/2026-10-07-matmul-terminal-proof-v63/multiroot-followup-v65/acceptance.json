@@ -1,0 +1,74 @@
+{
+  "status": "baseline_qualified_measured_design_pending",
+  "goal_complete": false,
+  "production_code_changed": false,
+  "build_id": "74bd1460606d2a6a8e4bfab8e2a4725cf46945c2420ef61b29c41945f4a146bf",
+  "source_count": 93,
+  "test_fixture_count": 186,
+  "native_passed": 9,
+  "related_python_passed": 206,
+  "fresh_measurements": 24,
+  "full_parity": "passed",
+  "max_full_absolute_error": 5.551115123125783e-17,
+  "summary": {
+    "C": {
+      "cpp": {
+        "median_group_seconds": 6.484162541999922,
+        "group_medians_seconds": [
+          6.484162541999922,
+          6.414665000000014,
+          6.48669479199998
+        ],
+        "heap": 2821207536,
+        "rss": 2754576384,
+        "single_root_seconds": 0.6438713329998791
+      },
+      "njit": {
+        "median_group_seconds": 0.6351380420001078,
+        "group_medians_seconds": [
+          0.6351380420001078,
+          0.6276722500001597,
+          0.6415058330001102
+        ],
+        "heap": 2281702136,
+        "rss": 2221080576,
+        "single_root_seconds": 0.5851304580000942
+      }
+    },
+    "F": {
+      "cpp": {
+        "median_group_seconds": 6.747785000000022,
+        "group_medians_seconds": [
+          6.747785000000022,
+          6.87077479200002,
+          6.6940117079998345
+        ],
+        "heap": 2821207536,
+        "rss": 2752036864,
+        "single_root_seconds": 0.6801592920000985
+      },
+      "njit": {
+        "median_group_seconds": 0.63133737499993,
+        "group_medians_seconds": [
+          0.629958957999861,
+          0.63133737499993,
+          0.6317712919999394
+        ],
+        "heap": 2281702136,
+        "rss": 2227306496,
+        "single_root_seconds": 0.585378750000018
+      }
+    }
+  },
+  "native_extra_heap_bytes": 539505400,
+  "unnecessary_product_arena_bytes": 536870912,
+  "candidate_implemented": false,
+  "full_regression_san_off_rerun": false,
+  "scope": "generic existing shared-MatMul multiroot complete task; not full platform scenario/frontier/attribution business acceptance",
+  "limitations": [
+    "Shared-risk experiments from earlier temporary directories were not archived and are absent; they are not promoted to verified current evidence.",
+    "One heap and one RSS process per backend/layout; time uses three rotated independent groups.",
+    "No new candidate or actual optimization adoption; current source is V64.",
+    "Global goal and other important platform workloads remain open."
+  ]
+}

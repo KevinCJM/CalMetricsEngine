@@ -1,0 +1,90 @@
+{
+  "status": "passed",
+  "source_build_id": "fafa1da26cdab07fbf59f519ac76dc1524f1a689fc7622c5e14d818297450f98",
+  "production_adopted": true,
+  "jobs": [
+    {
+      "label": "root-related",
+      "pid": 39864,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/test_concat_tree.py",
+        "tests/test_concat_solve_workspace.py",
+        "tests/test_private_solve_pair.py",
+        "tests/test_lu_panel_workspace.py",
+        "tests/test_dense_elementwise_f_graph.py",
+        "tests/test_retained_solve_library.py",
+        "tests/test_guarded_lu_graph.py",
+        "tests/test_private_solve_workspace.py",
+        "tests/test_solve_pair_reuse.py",
+        "tests/test_triangular_library.py",
+        "tests/test_solve_library.py",
+        "tests/test_solve_grouped_library.py",
+        "tests/test_single_solve_library.py",
+        "--junitxml=/private/tmp/calmetrics-concat-tree-20261004/integration/root-related.xml"
+      ],
+      "started": 1791107759.8604422,
+      "exit_code": 0,
+      "elapsed_seconds": 67.30257368087769
+    },
+    {
+      "label": "root-native-config",
+      "pid": 40187,
+      "command": [
+        "/opt/homebrew/bin/cmake",
+        "-S",
+        "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine",
+        "-B",
+        "/private/tmp/calmetrics-concat-tree-20261004/integration/native-build",
+        "-DCALMETRICS_ENGINE_BUILD_TESTS=ON"
+      ],
+      "started": 1791107827.169224,
+      "exit_code": 0,
+      "elapsed_seconds": 0.6193439960479736
+    },
+    {
+      "label": "root-native-build",
+      "pid": 40218,
+      "command": [
+        "/opt/homebrew/bin/cmake",
+        "--build",
+        "/private/tmp/calmetrics-concat-tree-20261004/integration/native-build",
+        "-j",
+        "3"
+      ],
+      "started": 1791107827.7939079,
+      "exit_code": 0,
+      "elapsed_seconds": 6.518774032592773
+    },
+    {
+      "label": "root-native",
+      "pid": 40288,
+      "command": [
+        "/opt/homebrew/bin/ctest",
+        "--test-dir",
+        "/private/tmp/calmetrics-concat-tree-20261004/integration/native-build",
+        "--output-on-failure",
+        "--output-junit",
+        "/private/tmp/calmetrics-concat-tree-20261004/integration/root-native.xml"
+      ],
+      "started": 1791107834.318356,
+      "exit_code": 0,
+      "elapsed_seconds": 6.5991339683532715
+    },
+    {
+      "label": "root-transport",
+      "pid": 40343,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-concat-tree-20261004/integration/transport-probe.py"
+      ],
+      "started": 1791107840.926485,
+      "exit_code": 0,
+      "elapsed_seconds": 1.464561939239502
+    }
+  ],
+  "goal_complete": false
+}

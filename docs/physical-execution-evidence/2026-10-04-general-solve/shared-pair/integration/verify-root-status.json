@@ -1,0 +1,200 @@
+{
+  "status": "passed",
+  "source_build_id": "15ea55acd6ef95431691e7ef5dcf887f328abf6c923a3a89592b45706bb60193",
+  "production_adopted": true,
+  "jobs": [
+    {
+      "label": "root-related",
+      "pid": 11198,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/test_private_solve_pair.py",
+        "tests/test_lu_panel_workspace.py",
+        "tests/test_dense_elementwise_f_graph.py",
+        "tests/test_retained_solve_library.py",
+        "tests/test_guarded_lu_graph.py",
+        "tests/test_private_solve_workspace.py",
+        "tests/test_solve_pair_reuse.py",
+        "tests/test_triangular_library.py",
+        "tests/test_solve_library.py",
+        "tests/test_solve_grouped_library.py",
+        "tests/test_single_solve_library.py",
+        "--junitxml=/private/tmp/calmetrics-private-solve-pair-20261004/integration/root-related.xml"
+      ],
+      "started": 1791096122.048386,
+      "exit_code": 0,
+      "elapsed_seconds": 75.76202392578125
+    },
+    {
+      "label": "root-native-config",
+      "pid": 15724,
+      "command": [
+        "/opt/homebrew/bin/cmake",
+        "-S",
+        "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine",
+        "-B",
+        "/private/tmp/calmetrics-private-solve-pair-20261004/integration/build",
+        "-DCALMETRICS_ENGINE_BUILD_TESTS=ON"
+      ],
+      "started": 1791096197.83409,
+      "exit_code": 0,
+      "elapsed_seconds": 0.7890019416809082
+    },
+    {
+      "label": "root-native-build",
+      "pid": 15759,
+      "command": [
+        "/opt/homebrew/bin/cmake",
+        "--build",
+        "/private/tmp/calmetrics-private-solve-pair-20261004/integration/build",
+        "-j",
+        "3"
+      ],
+      "started": 1791096198.628342,
+      "exit_code": 0,
+      "elapsed_seconds": 8.848359107971191
+    },
+    {
+      "label": "root-native",
+      "pid": 15832,
+      "command": [
+        "/opt/homebrew/bin/ctest",
+        "--test-dir",
+        "/private/tmp/calmetrics-private-solve-pair-20261004/integration/build",
+        "--output-on-failure",
+        "--output-junit",
+        "/private/tmp/calmetrics-private-solve-pair-20261004/integration/root-native.xml"
+      ],
+      "started": 1791096207.483228,
+      "exit_code": 0,
+      "elapsed_seconds": 6.979434967041016
+    },
+    {
+      "label": "root-complete",
+      "pid": 15927,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-private-solve-pair-20261004/integration/bench-root.py",
+        "--case",
+        "private",
+        "--n",
+        "4096",
+        "--layout",
+        "f",
+        "--output-order",
+        "f",
+        "--rounds",
+        "6",
+        "--label",
+        "root-complete"
+      ],
+      "started": 1791096214.473082,
+      "exit_code": 0,
+      "elapsed_seconds": 28.264928817749023
+    },
+    {
+      "label": "root-heap-new",
+      "pid": 15990,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-private-solve-pair-20261004/integration/bench-root.py",
+        "--case",
+        "private",
+        "--n",
+        "4096",
+        "--layout",
+        "f",
+        "--output-order",
+        "f",
+        "--mode",
+        "memory",
+        "--backend",
+        "new",
+        "--metric",
+        "heap"
+      ],
+      "started": 1791096242.743482,
+      "exit_code": 0,
+      "elapsed_seconds": 8.904744863510132
+    },
+    {
+      "label": "root-heap-njit",
+      "pid": 16011,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-private-solve-pair-20261004/integration/bench-root.py",
+        "--case",
+        "private",
+        "--n",
+        "4096",
+        "--layout",
+        "f",
+        "--output-order",
+        "f",
+        "--mode",
+        "memory",
+        "--backend",
+        "njit",
+        "--metric",
+        "heap"
+      ],
+      "started": 1791096251.653537,
+      "exit_code": 0,
+      "elapsed_seconds": 10.03211498260498
+    },
+    {
+      "label": "root-rss-new",
+      "pid": 16020,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-private-solve-pair-20261004/integration/bench-root.py",
+        "--case",
+        "private",
+        "--n",
+        "4096",
+        "--layout",
+        "f",
+        "--output-order",
+        "f",
+        "--mode",
+        "memory",
+        "--backend",
+        "new",
+        "--metric",
+        "rss"
+      ],
+      "started": 1791096261.6924548,
+      "exit_code": 0,
+      "elapsed_seconds": 5.031604051589966
+    },
+    {
+      "label": "root-rss-njit",
+      "pid": 16532,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-private-solve-pair-20261004/integration/bench-root.py",
+        "--case",
+        "private",
+        "--n",
+        "4096",
+        "--layout",
+        "f",
+        "--output-order",
+        "f",
+        "--mode",
+        "memory",
+        "--backend",
+        "njit",
+        "--metric",
+        "rss"
+      ],
+      "started": 1791096266.731364,
+      "exit_code": 0,
+      "elapsed_seconds": 5.781132221221924
+    }
+  ],
+  "goal_complete": false
+}

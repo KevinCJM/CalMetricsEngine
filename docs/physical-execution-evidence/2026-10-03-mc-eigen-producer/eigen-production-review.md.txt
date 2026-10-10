@@ -1,0 +1,78 @@
+# Eigen affine projection 静态复审
+
+日期：2026-10-03。结论：在以下源码快照中，未发现已确认的生产正确性、越界、所有权或预算缺陷。本报告是静态审核；未运行编译、测试、数值、性能或内存任务，不替代根代理的同源 AOT/ASan/完整回归证据。
+
+## 审核身份及依据
+
+只读目标仓库：`/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine`。Git HEAD `d17b371abbd692e3ac839c7ba191a44d11054d7f`，共享工作区含其他修改及未跟踪文件，因此 HEAD 不代表本轮实际构建身份。
+
+| 实际读取文件 | SHA-256 |
+| --- | --- |
+| `cpp/affine_projection.cpp` | `ff0119105ae53af372cb74f4426ef517f588a3404bf5eb481def15f451011003` |
+| `cpp/operators/affine_contract.hpp` | `1afc6798ff05a26e1bf3bca7768083f0e29b57b8925ca15cdd79982d293da38e` |
+| `tests/affine_projection_native_cases.hpp` | `9d2e27b61707563d795b6f1a0b7a3a00eab2d73641a512be5508b25e833c961e` |
+| `tests/test_affine_projection_library.py` | `f75407872c20e61c8aa2ca59096a7daea607e3d589a4e1ff0e3c4956c329a4ac` |
+
+先读 AGENTS 和数学/Excel 纪律，再以 CodeGraph 定位 `produce_asset_row`、`bind_geometry`、`execute_affine_projection`、Planner `scratch_estimate`，核对实际源码和测试。适用规则为 D1/D2 的依赖及失效、D5 的求值顺序与 scratch 所有权、D6 的布局及统一 CPU、D7 的恢复、D8 的完整负载证据，以及 X10 对纯物理优化的语义复核要求。
+
+## 数学、IEEE 与布局
+
+- `cpp/affine_projection.cpp:33` 的 Eigen 分组只沿相互独立的资产轴，8 资产一组，其余资产走同一标量 fold；没有横向归约、因子分组小计或因素顺序交换。
+- 两条路径实例化 `affine_contract_detail::ordered_fold`：显式 initial 起始、factor 递增、coefficient-first 的独立乘法后加法。具名 `Accumulator product` 物化后再加；GCC/Clang 目标使用 `-fno-fast-math -ffp-contract=off`，MSVC 使用现有 `/fp:precise`。未加入全局主机 ISA 要求。
+- 每个资产最终调用相同 `std::expm1`；零系数和零权重仍参与乘法。NaN/Inf、取消性抵消及 signed-zero 继续由原 IEEE 运算传播。测试精确比较所有非 NaN IEEE 位及状态，NaN 仅比较类别；不声称 NaN payload 保真。
+- 周期与贡献仍使用原 `ordered_weighted_sum` 的 weight-first 乘积，按资产递增求和；贡献状态按 time/path 原顺序跨 tile 累加，不合并 tile 小计。
+- 输入 offset、factor_stride、系数 factor stride 均为带符号 `ptrdiff_t`。资产 stride 为 1 时直接借用 K；否则读取 `coefficients.at(factor, asset)` 打包，因而负步长和 transpose 保留逻辑顺序。前置边界仍由既有 bindings/owner/geometry 验证承担，未扩大原生裸指针 API 的安全承诺。
+- F 结果使用既有 `Output::set` 和逻辑坐标映射，独立结果直接写入其 C/F 布局；新分支没有结果出口强制转换。
+
+## pack 尾区不重叠的证明
+
+设贡献数为 C，第 i 区间 tile 容量为 q_i，资产数为 A。可写 tile/状态区大小：
+
+```text
+B_i = q_i * A + 3 * C
+R = F * A             (Eigen 候选非空区间；其余为 0)
+M = max_i(B_i + R_i)
+```
+
+`cpp/affine_projection.cpp:209` 将 reserve 加入 geometry bound，`:419` 在所有区间准入后取最大 M 并一次分配。系数输入仅允许静态 input 或其 transpose（`:321`），且切片只改变 time 维；F/A 及候选非空区间的 R 在同次调用中保持不变。
+
+实际 pack 地址为 `workspace.doubles.data() + M - R`（`:467`），范围 `[M-R, M)`。每个候选区间有 `B_i + R <= M`，所以 tile/total/weight/divisor 的范围 `[0, B_i)` 不会与 pack 相交。最后一个 divisor 位于 `B_i-1`；pack 最后一项位于 `M-1`。短/长区间的展示顺序不影响这个不等式。空区间不执行 producer/pack，不会破坏已存 pack。
+
+R 最大 16,384 double（128 KiB）；用 `F <= 16384/A` 判定，避免先乘后溢出。A17/F4 的 R=68 double=544B。`affine_projection_workspace_bytes` 使用同一 `bind_geometry`，Planner scratch 包含此保守 reserve，即使 K 可直接借用或本构建 Eigen=OFF 也不低估。现有 vector scratch 在容量不等于 M 时释放后重新建立，indices 也释放，不保留更大的旧容量逃逸新计划。
+
+## 空轴、生命周期、失败和 CPU
+
+- F=0：候选 false，ordered fold 不读取 source/K，保留显式 initial，经相同 expm1；不形成空输入 offset。A=0：producer 不执行，周期 fold 返回既有 +0；路径/外轴为空时不 pack。空样本带贡献仍按原 `INSUFFICIENT_SAMPLE`，不造结果。
+- `packed_ready` 和 packed descriptor 都是 `execute_affine_projection` 的调用内变量（`:447`）。复用仅限同调用的静态 K，各次 ordinary/prepared 执行都重新读当前内容；故障后不会留下跨调用数值 cache。可变输入允许在调用之间改变内容，仍须遵守原契约，在执行中保持有效且不被并发修改。
+- 所有区间 geometry/layout 先检查，再写任一结果；超出硬 tile 几何时返回 false，继续现有通用原生路径。isolate/额外消费者/公开中间值等无法证明的闭包保持退准入。
+- `checkpoint` 调用既有 `native::check_deadline`，并检查 cancellation；发生在入口、每区间和每 tile。入口预取消不写结果；算术故障和后续取消可能留下本次未完成存储，异常阻止其作为成功结果交付。下一次调用重新绑定、重建必要 pack 和贡献状态。128 KiB 的有界 pack 不是无限检查点区域。
+- 输入、历史独立结果和结果槽不充当 scratch；结果数据不指向 pack/tile。workspace 仍依原调用方独占/锁定，工作结束前由原 Scheduler 保活输入与输出。
+- `EIGEN_DONT_PARALLELIZE` 禁止 Eigen 私有并行；本分支没有 BLAS/新线程池或全局线程设置。实际执行仍在 Scheduler 获准的线程/worker。`vector_elements` 计真实 Eigen-array producer lane 数，并不证明每种目标架构使用了何种 SIMD 指令。
+- 只在当前执行线程 `fegetround()==FE_TONEAREST` 时选 Eigen，其他舍入模式走原标量路径；实现不更改调用方舍入模式。
+
+## 已存在的测试设计覆盖（本审核未运行）
+
+| 范围 | 源码中的覆盖 |
+| --- | --- |
+| 8/9/17 资产，8 lane packet 与尾部 | Python `test_packet_assets_strides_tail_and_canonical_scalar_R`，C/F/strided/negative，C/F root，显式 packet/copy 计数 |
+| 长短 interval、pack 与状态不重叠 | Python 259×17/A17 多区间；原生 4102×2/A17、2 与 4099 时间点换序，4 tile、544B 一次 pack、131232 lane 元素 |
+| 初态/零乘积/极端 IEEE | scalar/vector initial，1+1e16-1e16，NaN/Inf/tiny/signed zero；原生 packet/tail 初态与 0×Inf；公开 R 迫使 canonical 图退准入 |
+| 精确 pack 几何边界 | F2048/A8 正好 128 KiB，F2049/A8 回标量，A7；F/A/time/path=0 |
+| mutable prepared 内容 | 同对象 K、initial、x 改内容后 run_snapshot，当前结果比 canonical，旧结果保持且新旧 noalias |
+| 故障/取消/所有权 | 原生预取消零写入/guard canary、实际打包后的 divide-zero 与 K 改值恢复、两代独立结果；结构失败与正常调用恢复 |
+| 舍入 | Python macOS arm64 4 种 SDK 舍入、CPU1、fallback bits/计数，finally 恢复；原生 nearest RAII 恢复原模式，测试 env 强制 ON/OFF 命中 |
+
+`tests/test_affine_projection_library.py` 整个模块只有显式 `CALMETRICS_TEST_EXPECT_EIGEN=1` 时执行；通用环境的 skip 不是新路径通过。原生 header 的 `CALMETRICS_TEST_EXPECT_EIGEN=1/0` 分别要求命中/不命中，未设仅允许精确 lane 值或零，数学/canary 校验仍执行。
+
+## 补充验收缺口及本轮准备
+
+之前 `test_mc_projection_primitives.py` 中强制 thread/process/shared 与总预算 ±1 的测试使用 A3，不能证明 A≥8 的新分支命中。这是测试覆盖缺口，不是已确认生产 bug。按根代理后续指令准备了 [eigen-extra-transport-tests.py](eigen-extra-transport-tests.py)，建议复制为 `tests/test_affine_projection_transport.py` 后由根代理串行运行，共 16 参数用例：
+
+- 12 项：A17/F4、padded strided/negative、C/F root，分别强制 thread/inline process/shared process；全部 worker chunk 要求 Eigen lane 与 544B transpose pack、完整 outputs/status、同预算 CPU≤2、无 Python worker callback、两个独立结果及 scheduler close/源释放后的寿命。
+- 4 项：相同布局/order 下 A17 完整图，短/长窗都达到 tile 容量、scratch 上界不随窗增长，总预算减 1 必须拒绝、恰好预算准入；执行实际 pack 与 scratch≤Planner、两代 ownership/canonical bits。
+
+此片段仅生成文本，尚未执行；不能把覆盖准备写成通过。若实际运行失败，应核实 API/fixture、实际同源 worker 与源码逻辑，不能仅改断言适配结果。
+
+保留的未验收范围：Linux/Windows directed-rounds，以及 worker 继承/执行 directed-rounds；Eigen 分支 mid-flight cancellation 的运行时见证（当前原生覆盖预取消与打包后算术故障）。本次不扩展生产舍入 API，也不作这些范围已通过的声明。
+
+纯物理 producer 变化没有新增数学算子、签名或 Excel recipe；按 X10 可保留当前公式，但仍需受影响 canonical 图差分证据。此审核不宣称新增 Microsoft Excel 重算或平台完整 Monte Carlo 链已迁移。性能、heap/RSS 和 build/source/worker 身份继续由根代理分别核验，不由静态证明或片段计数推出。

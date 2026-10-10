@@ -1,0 +1,61 @@
+{
+  "status": "diagnostic_passed",
+  "build_id": "3fce0fd2c641710d087659138bc87d57d7f0342387597a44f071e817b5a3898a",
+  "text_equal": true,
+  "native_text_sha256": "5922f0e531898c1f653df50a27a20f1e66ae3984e9a7ab3654938a582dc32aa9",
+  "shape": [
+    16384,
+    2520,
+    30
+  ],
+  "layout": "C",
+  "ranked": [
+    {
+      "symbol": "calmetrics_engine::graph::execute_where_sum_rows(calmetrics_engine::ops::Prepared const&, double*)",
+      "samples": 807
+    },
+    {
+      "symbol": "calmetrics_engine::ops::library_matmul_f(calmetrics_engine::ops::Value const&, calmetrics_engine::ops::Value const&, double*, calmetrics_engine::ops::Audit&)",
+      "samples": 576
+    },
+    {
+      "symbol": "calmetrics_engine::graph::execute_scan_reduce_rows(calmetrics_engine::ops::Prepared const&, double, double, double*, calmetrics_engine::graph::(anonymous namespace)::Scratch&)",
+      "samples": 459
+    },
+    {
+      "symbol": "void hwy::N_NEON::detail::Recurse<(hwy::N_NEON::detail::RecurseMode)1, hwy::N_NEON::Simd<double, 2ul, 0>, hwy::N_NEON::detail::SharedTraits<hwy::N_NEON::detail::TraitsLane<hwy::N_NEON::detail::OrderAscending<double>>>, double>(hwy::N_NEON::Simd<double, 2ul, 0>, hwy::N_NEON::detail::SharedTraits<hwy::N_NEON::detail::TraitsLane<hwy::N_NEON::detail::OrderAscending<double>>>, double*, unsigned long, double*, unsigned long long*, unsigned long, unsigned long)",
+      "samples": 341
+    },
+    {
+      "symbol": "calmetrics_engine::ops::validate_data_structure(calmetrics_engine::ops::Prepared const&, bool)",
+      "samples": 183
+    },
+    {
+      "symbol": "calmetrics_engine::graph::execute_square_reduce_rows(calmetrics_engine::ops::Prepared const&, calmetrics_engine::ops::Value const&, double, double*, calmetrics_engine::graph::(anonymous namespace)::Scratch&)",
+      "samples": 159
+    },
+    {
+      "symbol": "calmetrics_engine::ops::elementwise_span(calmetrics_engine::ops::Prepared const&, calmetrics_engine::ops::Output&, std::__1::array<unsigned long, 2ul> const&)",
+      "samples": 94
+    },
+    {
+      "symbol": "calmetrics_engine::ops::simd_transform(calmetrics_engine::ops::Op, calmetrics_engine::ops::Value const&, calmetrics_engine::ops::Value const&, calmetrics_engine::ops::Output&, unsigned long, calmetrics_engine::ops::Isa, calmetrics_engine::ops::Audit&)",
+      "samples": 77
+    },
+    {
+      "symbol": "void hwy::N_NEON::VQSelectStatic<double, hwy::SortAscending>(double*, unsigned long, unsigned long, hwy::SortAscending)",
+      "samples": 33
+    },
+    {
+      "symbol": "calmetrics_engine::ops::axis_path_detail::partition_quantile_line(double*, unsigned long, double, calmetrics_engine::ops::Isa, calmetrics_engine::ops::Audit*)",
+      "samples": 22
+    },
+    {
+      "symbol": "calmetrics_engine::ops::axis_path_execute(calmetrics_engine::ops::Prepared const&, calmetrics_engine::ops::Output&, calmetrics_engine::ops::Workspace&, calmetrics_engine::ops::Isa, calmetrics_engine::ops::Audit&)",
+      "samples": 18
+    }
+  ],
+  "production_adopted": false,
+  "whole_goal_complete": false,
+  "finding": "conditional where/sum top-frame samples807, MatMul576, scan459; prioritize conditional statistics, no whole-request CPU percentages or formal timing inferred"
+}

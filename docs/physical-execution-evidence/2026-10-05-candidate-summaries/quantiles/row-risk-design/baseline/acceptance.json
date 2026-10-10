@@ -1,0 +1,90 @@
+{
+  "build_id": "e76ab11578a2952492ab7c95b1fc33e74abacf4aaa8f7771e33dd927cabaa7af",
+  "actual_source": true,
+  "measurement_status": "passed",
+  "performance_acceptance": "not passed: material time and memory regressions",
+  "timing": [
+    {
+      "shape": [
+        16384,
+        2520,
+        30
+      ],
+      "layout": "C",
+      "medians_seconds": {
+        "engine": 5.254852979,
+        "stream-njit": 2.423277542,
+        "bounded-blas-njit": 2.1346858964999997
+      },
+      "maximum_absolute_errors": {
+        "engine": [
+          3.469446951953614e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "stream-njit": [
+          3.469446951953614e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "bounded-blas-njit": [
+          4.336808689942018e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ]
+      }
+    },
+    {
+      "shape": [
+        16384,
+        2520,
+        30
+      ],
+      "layout": "F",
+      "medians_seconds": {
+        "engine": 3.228386125,
+        "stream-njit": 3.281426917,
+        "bounded-blas-njit": 2.156414104
+      },
+      "maximum_absolute_errors": {
+        "engine": [
+          3.469446951953614e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "stream-njit": [
+          3.469446951953614e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "bounded-blas-njit": [
+          4.336808689942018e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ]
+      }
+    }
+  ],
+  "memory": [
+    {
+      "backend": "engine",
+      "requested_heap_warm_peak_bytes": 3404465467,
+      "rss_delta_median_bytes": 3431137280,
+      "rss_absolute_median_bytes": 3518545920
+    },
+    {
+      "backend": "stream-njit",
+      "requested_heap_warm_peak_bytes": 18554608,
+      "rss_delta_median_bytes": 34291712,
+      "rss_absolute_median_bytes": 173768704
+    },
+    {
+      "backend": "bounded-blas-njit",
+      "requested_heap_warm_peak_bytes": 20309536,
+      "rss_delta_median_bytes": 50266112,
+      "rss_absolute_median_bytes": 193986560
+    }
+  ],
+  "whole_goal_complete": false,
+  "remaining": "closed independent-axis native batching, mature-library admission, full semantic and performance reacceptance"
+}

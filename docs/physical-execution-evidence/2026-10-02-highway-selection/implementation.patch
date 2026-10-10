@@ -1,0 +1,482 @@
+--- before/CMakeLists.txt
++++ after/CMakeLists.txt
+@@ -12,6 +12,7 @@
+ option(CALMETRICS_ENGINE_SANITIZE "Enable address/undefined-behavior sanitizers" OFF)
+ option(CALMETRICS_ENGINE_USE_EIGEN "Use eligible header-only Eigen numerical kernels" ON)
+ option(CALMETRICS_ENGINE_USE_ACCELERATE "Use guarded Apple Accelerate numerical kernels" ON)
++option(CALMETRICS_ENGINE_USE_HIGHWAY "Use eligible Highway order selection kernels" ON)
+ 
+ set(CMAKE_CXX_STANDARD 17)
+ set(CMAKE_CXX_STANDARD_REQUIRED ON)
+@@ -109,6 +110,33 @@
+ install(FILES third_party/eigen/COPYING.MPL2 third_party/eigen/COPYING.BSD
+     third_party/eigen/COPYING.README third_party/eigen/README.md
+     DESTINATION calmetrics_engine/licenses/eigen)
++if(APPLE AND calmetrics_engine_arch MATCHES "^(arm64|aarch64)$" AND CALMETRICS_ENGINE_USE_HIGHWAY)
++    # Adopt only the measured platform; other builds retain native selection.
++    set(calmetrics_highway_archive "${CMAKE_CURRENT_SOURCE_DIR}/third_party/highway/highway-1.3.0.tar.gz")
++    file(SHA256 "${calmetrics_highway_archive}" calmetrics_highway_sha)
++    if(NOT calmetrics_highway_sha STREQUAL "07b3c1ba2c1096878a85a31a5b9b3757427af963b1141ca904db2f9f4afe0bc2")
++        message(FATAL_ERROR "Bundled Highway archive checksum mismatch")
++    endif()
++    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${calmetrics_highway_archive}")
++    set(calmetrics_highway_root "${CMAKE_CURRENT_BINARY_DIR}/_deps/highway-1.3.0")
++    file(ARCHIVE_EXTRACT INPUT "${calmetrics_highway_archive}" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/_deps")
++    set(HWY_FORCE_STATIC_LIBS ON CACHE BOOL "" FORCE)
++    set(HWY_ENABLE_CONTRIB OFF CACHE BOOL "" FORCE)
++    set(HWY_ENABLE_TESTS OFF CACHE BOOL "" FORCE)
++    set(HWY_ENABLE_EXAMPLES OFF CACHE BOOL "" FORCE)
++    set(HWY_ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
++    set(HWY_CMAKE_HEADER_ONLY OFF CACHE BOOL "" FORCE)
++    add_subdirectory("${calmetrics_highway_root}" "${CMAKE_CURRENT_BINARY_DIR}/_deps/highway-build" EXCLUDE_FROM_ALL)
++    add_library(calmetrics_engine_highway_order STATIC
++        "${calmetrics_highway_root}/hwy/contrib/sort/vqsort.cc"
++        "${calmetrics_highway_root}/hwy/contrib/sort/vqsort_f64a.cc")
++    target_link_libraries(calmetrics_engine_highway_order PUBLIC hwy)
++    target_compile_options(calmetrics_engine_highway_order PRIVATE $<TARGET_PROPERTY:hwy,COMPILE_OPTIONS>)
++    target_link_libraries(calmetrics_engine_operators PRIVATE calmetrics_engine_highway_order)
++    target_compile_definitions(calmetrics_engine_operators PRIVATE CALMETRICS_HAVE_HIGHWAY_ORDER=1)
++endif()
++install(FILES third_party/highway/LICENSE third_party/highway/LICENSE-BSD3 third_party/highway/README.md
++    DESTINATION calmetrics_engine/licenses/highway)
+ if(UNIX AND NOT APPLE)
+     target_link_libraries(calmetrics_engine_operators PUBLIC rt)
+ endif()
+@@ -135,6 +163,9 @@
+ target_link_libraries(calmetrics_worker PRIVATE calmetrics_engine_operators)
+ install(TARGETS calmetrics_worker RUNTIME DESTINATION calmetrics_engine)
+ set(calmetrics_engine_targets calmetrics_engine_scheduler calmetrics_engine_finance calmetrics_engine_operators calmetrics_worker)
++if(TARGET calmetrics_engine_highway_order)
++    list(APPEND calmetrics_engine_targets hwy calmetrics_engine_highway_order)
++endif()
+ 
+ if(CALMETRICS_ENGINE_BUILD_PYTHON)
+     set(PYBIND11_FINDPYTHON ON)
+@@ -155,6 +186,7 @@
+     set(calmetrics_identity "${SKBUILD_PROJECT_VERSION};${CMAKE_CXX_COMPILER_ID};${CMAKE_CXX_COMPILER_VERSION};${calmetrics_engine_arch};${CMAKE_BUILD_TYPE};${CMAKE_CXX_FLAGS};${CMAKE_CXX_FLAGS_RELEASE}")
+     string(APPEND calmetrics_identity ";eigen_rotation=${CALMETRICS_ENGINE_USE_EIGEN}")
+     string(APPEND calmetrics_identity ";accelerate_covchol=${CALMETRICS_ENGINE_USE_ACCELERATE}")
++    string(APPEND calmetrics_identity ";highway_order=${CALMETRICS_ENGINE_USE_HIGHWAY}")
+     foreach(source IN LISTS calmetrics_identity_files)
+         file(SHA256 "${source}" source_hash)
+         file(RELATIVE_PATH source_name "${CMAKE_CURRENT_SOURCE_DIR}" "${source}")
+--- before/cpp/include/calmetrics_engine/operators.hpp
++++ after/cpp/include/calmetrics_engine/operators.hpp
+@@ -386,7 +386,7 @@
+ // Additional bounded panel for the private, independent covariance/Cholesky root.
+ std::size_t covariance_cholesky_accelerate_scratch_doubles(std::size_t dimension);
+ bool try_accelerate_covariance_cholesky(const Prepared &, Output &, Workspace &, Audit &);
+-void reduction(const Prepared &, Output &, Workspace &, Audit &);
++void reduction(const Prepared &, Output &, Workspace &, Isa, Audit &);
+ void sequence(const Prepared &, Output &, Workspace &, Audit &);
+ void recurrence(const Prepared &, Output &, Workspace &, Audit &);
+ void prepare_state_events(Prepared &);
+--- before/cpp/operators/reduction.cpp
++++ after/cpp/operators/reduction.cpp
+@@ -1,6 +1,10 @@
+ #include "calmetrics_engine/operators.hpp"
+ #include <algorithm>
+ #include <cmath>
++#if defined(CALMETRICS_HAVE_HIGHWAY_ORDER)
++#include "hwy/contrib/sort/vqsort.h"
++#include "hwy/per_target.h"
++#endif
+ 
+ namespace calmetrics_engine::ops {
+ namespace {
+@@ -36,7 +40,8 @@
+   return mapping[index];
+ }
+ double ordered_stat(Op op, const Value &x, const Value *mask,
+-                    double probability, Workspace &work, Audit *audit = nullptr) {
++                    double probability, Workspace &work, Audit *audit = nullptr,
++                    Isa requested = Isa::scalar) {
+   auto *ordered = work.doubles.data();
+   const auto n = x.size();
+   std::size_t count = 0;
+@@ -89,11 +94,24 @@
+       upper = static_cast<std::size_t>(std::ceil(position));
+       need_lower = std::floor(position) < static_cast<double>(upper);
+     }
++    const auto select_rank = [&](std::size_t rank) {
++#if defined(CALMETRICS_HAVE_HIGHWAY_ORDER)
++      if (requested == Isa::automatic && hwy::HaveFloat64()) {
++        hwy::VQSelect(ordered, count, rank, hwy::SortAscending{});
++        if (audit)
++          audit->isa = "highway_vqselect";
++        return;
++      }
++#else
++      (void)requested;
++#endif
++      std::nth_element(ordered, ordered + rank, ordered + count);
++    };
+     if (need_lower && upper > count / 2) {
+-      std::nth_element(ordered, ordered + upper - 1, ordered + count);
++      select_rank(upper - 1);
+       ordered[upper] = *std::min_element(ordered + upper, ordered + count);
+     } else {
+-      std::nth_element(ordered, ordered + upper, ordered + count);
++      select_rank(upper);
+       if (need_lower)
+         ordered[upper - 1] = *std::max_element(ordered, ordered + upper);
+     }
+@@ -213,7 +231,8 @@
+   return (n - 1) / ((n - 2) * (n - 3)) * ((n + 1) * excess + 6.0);
+ }
+ 
+-void reduction(const Prepared &p, Output &out, Workspace &work, Audit &audit) {
++void reduction(const Prepared &p, Output &out, Workspace &work, Isa requested,
++               Audit &audit) {
+   const auto op = p.spec->op;
+   const auto &x = p.args[0];
+   if (op == Op::distinct_count) {
+@@ -264,7 +283,7 @@
+   if (op == Op::median || op == Op::quantile || op == Op::median_where ||
+       op == Op::quantile_where) {
+     out.set(0, ordered_stat(unmasked_op(op), x, masked ? &p.args[1] : nullptr,
+-                            q, work, &audit));
++                            q, work, &audit, requested));
+     return;
+   }
+   out.set(0, reduce_value(op, x, masked ? &p.args[1] : nullptr, ddof, q, work));
+--- before/cpp/operators/registry.cpp
++++ after/cpp/operators/registry.cpp
+@@ -571,7 +571,7 @@
+     elementwise(p, out, work, isa, audit);
+     break;
+   case Family::reduction:
+-    reduction(p, out, work, audit);
++    reduction(p, out, work, isa, audit);
+     break;
+   case Family::sequence:
+   case Family::rolling:
+--- before/docs/execution-guide.md
++++ after/docs/execution-guide.md
+@@ -305,7 +305,7 @@
+ 
+ 独立明确 F 的单一 typed float64 Cholesky 根可直接写独占结果：原算法完成时三角因素已有逐位镜像，仅改变成功末尾清零的物理三角，公开逻辑下三角和原数学顺序不变。无需另一份 C arena 或最终整矩阵转换；此存储优化不依赖面板库准入。多根、消费者、isolate、作用域和 covariance→Cholesky 融合保留原路径；observer/prebound/继承错误恢复原 C arena。Planner 对 prebound 子图计入该降级的完整矩阵，直接算子 F out 仍遵守原拒绝契约。
+ 
+-单个 `median/quantile` 及对应 masked 算子在至少1024个消费值、不含NaN且没有混合正负零时，复用原工作区调用标准库 `nth_element`；需要相邻排名时扫描较短的一端：选上排名后用 `max_element` 补下排名，高分位数则选下排名后用 `min_element` 补上排名。原中位数和插值表达式不变，输入仍只读。其他消费集继续原排序，多个图根仍共享完整排序；因此不能把单指标提速外推为所有多指标图的提速。掩码算子在已有完整结构校验中重计本次选中数量，实际工作区仅请求该数量；准备/Planner仍按源数组上界预算，足够的历史容量继续复用，显式reserve或密集转稀疏不承诺释放旧容量。计数不跨执行缓存。C连续且非标量的输入（有掩码时掩码也须C连续）直接按逻辑顺序读取；其他步长继续通用访问。掩码校验保持原顺序，打包时先判断是否消费，再读取该值，并复用实际消费计数填写算法复制审计，省去审计专用的重复扫描；不改变NaN、正负零分类、排序及插值规则。
++单个 `median/quantile` 及对应 masked 算子在至少1024个消费值、不含NaN且没有混合正负零时，复用原工作区选择排名。Apple arm64、Highway启用、自动ISA且运行时支持float64时，调用静态编入的 Highway 1.3.0 `VQSelect`，直接审计 `isa="highway_vqselect"`；显式ISA（含scalar）、库关闭或其他平台继续标准库 `nth_element`。库仅使用当前线程，没有私有线程池或跨请求数值缓存，首次线程状态/栈开销计入完整内存验收；不把消费值数量冒充精确SIMD指令处理量。`CALMETRICS_ENGINE_USE_HIGHWAY=OFF`可关闭此实现，开关纳入构建身份；sdist包含固定校验和的上游源码，wheel包含许可证，无运行期下载或编译。图与进程沿既有算子入口执行，不新增IPC字段，direct ISA标签不在图审计中单独传播。需要相邻排名时扫描较短的一端：选上排名后用 `max_element` 补下排名，高分位数则选下排名后用 `min_element` 补上排名。原中位数和插值表达式不变，输入仍只读。其他消费集继续原排序，多个图根仍共享完整排序；因此不能把单指标提速外推为所有多指标图的提速。掩码算子在已有完整结构校验中重计本次选中数量，实际工作区仅请求该数量；准备/Planner仍按源数组上界预算，足够的历史容量继续复用，显式reserve或密集转稀疏不承诺释放旧容量。计数不跨执行缓存。C连续且非标量的输入（有掩码时掩码也须C连续）直接按逻辑顺序读取；其他步长继续通用访问。掩码校验保持原顺序，打包时先判断是否消费，再读取该值，并复用实际消费计数填写算法复制审计，省去审计专用的重复扫描；不改变NaN、正负零分类、排序及插值规则。
+ 
+ `cholesky(covariance(X))` 的 typed/raise 图，在协方差是紧邻的单消费者临时节点、不是公开根且源有持久后备时，可复用消费方独占缓冲。两个既有原生算子及逻辑 DAG 都保留；C 根直接写独立结果，显式 F 根继续沿用 C arena 后物化 F 的路径。Cholesky 行面板发生数值失败时，先重算纯协方差恢复输入，再按原 canonical 顺序重放；前置校验、资源错误和普通直接算子的 out 别名限制不变。isolate、值观察器、共享协方差及不满足依赖证明的图不使用此融合。prepared 借用值仍仅有效至下一次运行，独立快照不受后续失败影响。
+ 
+--- before/docs/physical-execution-optimization.md
++++ after/docs/physical-execution-optimization.md
+@@ -1,4 +1,14 @@
+ # 物理执行优化（性能验收未闭环）
++
++## 2026-10-02 Highway 顺序统计：随机大样本提速，微小代价保留
++
++Apple arm64自动ISA的单根median/quantile及masked路径复用静态Highway1.3.0 VQSelect，原消费/排名/插值、独占工作区、共享多根缓存和scalar契约保持不变；源码固定归档并携带许可证，无Homebrew运行依赖。构建 `c9f75aed3f4d38fd44caf893b9faba83619c1a094f006870ce6062f814a238ec`。
++
++实际旧/新wheel、同一CPU、warmed NJIT、16类9轮完整普通请求全部逐位一致。16M q95 **157.790→60.190ms**（NJIT137.264）；median **143.838→69.202ms**（NJIT136.624）；50% masked q95 **128.684→87.392ms**（NJIT177.491）。4M sorted/reverse分别增加**11.90/12.70ms**，如实保留，不单独否决，不声称所有分布均大幅领先。
++
++12个fresh内存子进程、36个heap阶段无追踪错误。新旧约128MiB申请峰、差−8B，基本持平；quantile低于NI约272MiB，优势来自原工作区设计，非新增节约。median比NI多约7KiB申请峰、0.594MiB采样RSS；新旧RSS +32/−48KiB。按完整请求与预算评估，这些小额差异不是独立门禁。
++
++Python **10428通过**；专项ON/OFF各132；原生、ASan/UBSan、三库OFF各 **9/9**；185直接夹具、469案例/3056值历史Excel快照及源/wheel/extension/worker身份通过。没有新Excel重算，无macOS LeakSanitizer结果；自审核通过，执行指南及分发检查同步，未提交推送。其他平台保持原实现，全算子性能目标仍开放。[设计、完整正负证据与采用边界](physical-execution-evidence/2026-10-02-highway-selection/README.md)。
+ 
+ ## 2026-10-02 完整中心化面板复用：大幅度 F 协方差少约四分之一
+ 
+--- before/pyproject.toml
++++ after/pyproject.toml
+@@ -65,6 +65,9 @@
+   "third_party/eigen/eigen-3.4.0.tar.gz",
+   "third_party/eigen/COPYING.*",
+   "third_party/eigen/README.md",
++  "third_party/highway/highway-1.3.0.tar.gz",
++  "third_party/highway/LICENSE*",
++  "third_party/highway/README.md",
+   ".github/workflows/*.yml",
+ ]
+ sdist.exclude = [
+--- before/tests/operator_native_tests.cpp
++++ after/tests/operator_native_tests.cpp
+@@ -97,6 +97,78 @@
+     for (std::size_t i = 0; i < a.record.size(); ++i)
+         equal(a.record[i], b.record[i]);
+ }
++void order_selection_contracts() {
++    std::fenv_t environment;
++    check(std::fegetenv(&environment)==0,"cannot save order selection floating environment");
++    const int original_rounding=std::fegetround(),original_flags=std::fetestexcept(FE_ALL_EXCEPT);
++    struct RestoreEnvironment {
++        const std::fenv_t *saved;
++        ~RestoreEnvironment() { std::fesetenv(saved); }
++    } restore{&environment};
++    for (std::size_t n : {1024u,1025u}) {
++        std::vector<double> input(2*n+2,std::numeric_limits<double>::quiet_NaN());
++        std::vector<std::uint8_t> selected(2*n+2,0);
++        input.front()=input.back()=-713.;
++        for (std::size_t i=0;i<n;++i) {
++            input[1+2*i]=double(static_cast<std::ptrdiff_t>((i*37)%n)-std::ptrdiff_t(n/2))/16.;
++            selected[1+2*i]=1;
++        }
++        input[1]=std::numeric_limits<double>::denorm_min();
++        input[3]=std::numeric_limits<double>::min();
++        input[5]=std::nextafter(1.0,2.0);
++        input[7]=std::numeric_limits<double>::max();
++        input[9]=-std::numeric_limits<double>::max();
++        const auto before=input;
++        const auto mask_before=selected;
++        for (bool masked : {false,true}) for (double q : {
++                 -1.0,std::nextafter(0.0,1.0),0.95,std::nextafter(1.0,0.0)}) {
++            const bool quantile=q>=0.0;
++            const char *name=masked ? (quantile ? "quantile_where" : "median_where")
++                                    : (quantile ? "quantile" : "median");
++            std::array<ops::Value,8> args{};
++            args[0]=vector(input.data()+1,masked ? 2*n : n,masked ? 1 : 2);
++            std::size_t count=1;
++            if (masked) args[count++]=mask(selected.data()+1,2*n);
++            if (quantile) args[count++]=ops::Value::number(q);
++            const auto plan=ops::prepare(ops::lookup(name),args.data(),count);
++            ops::Workspace workspace;
++            for (int rounding : {FE_TONEAREST,FE_DOWNWARD,FE_UPWARD,FE_TOWARDZERO}) {
++                check(std::fesetround(rounding)==0,"cannot set order selection rounding");
++                double reference=0.0;
++                int reference_flags=0;
++                for (auto isa : {ops::Isa::scalar,ops::Isa::automatic}) {
++                    check(std::feclearexcept(FE_ALL_EXCEPT)==0,"cannot clear order selection flags");
++                    check(std::feraiseexcept(FE_DIVBYZERO)==0,"cannot seed order selection flags");
++                    std::array<double,3> storage{-919.,0.,-919.};
++                    ops::Output output; output.kind=plan.output_kind;
++                    output.shape=plan.output_shape; output.data=storage.data()+1;
++                    ops::Audit audit;
++                    ops::execute(plan,output,workspace,isa,audit);
++                    const int flags=std::fetestexcept(FE_ALL_EXCEPT);
++                    check(std::fegetround()==rounding,"order selection changed rounding mode");
++                    if (isa==ops::Isa::scalar) {
++                        reference=storage[1];
++                        reference_flags=flags;
++                        check(std::strcmp(audit.isa,"highway_vqselect")!=0,
++                              "explicit scalar order selection used Highway");
++                    } else check(flags==reference_flags && (flags&FE_DIVBYZERO) &&
++                                 std::memcmp(&reference,&storage[1],sizeof(double))==0,
++                                 "order selection changed result bits");
++                    check(storage.front()==-919. && storage.back()==-919.,
++                          "order selection crossed output boundary");
++                    check(audit.algorithm_copy_bytes==n*sizeof(double) &&
++                          audit.scratch_bytes==n*sizeof(double),
++                          "order selection ignored actual mask consumption");
++                    check(std::memcmp(input.data(),before.data(),input.size()*sizeof(double))==0 &&
++                          selected==mask_before,"order selection mutated input or canaries");
++                }
++            }
++        }
++    }
++    check(std::fesetenv(&environment)==0 && std::fegetround()==original_rounding &&
++          std::fetestexcept(FE_ALL_EXCEPT)==original_flags,
++          "order selection test did not restore rounding and flags");
++}
+ void density_state_contracts() {
+     constexpr std::size_t n=4096,d=32,k=8;
+     std::vector<double> x(n*d),m(k*d),v(k*d,1.0);
+@@ -151,6 +223,7 @@
+ int main() {
+     try {
+         density_state_contracts();
++        order_selection_contracts();
+         double x[]{0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8};
+         double y[]{0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1};
+         double m[]{4.0, 1.0, 0.2, 1.0, 3.0, 0.1, 0.2, 0.1, 2.0};
+--- before/tests/test_order_selection_library.py
++++ after/tests/test_order_selection_library.py
+@@ -1,4 +1,8 @@
+ """Exact order statistics, exceptional ties and native result ownership."""
++
++import os
++from concurrent.futures import ThreadPoolExecutor
++from threading import Barrier, get_ident
+ 
+ import numpy as np
+ import pytest
+@@ -47,9 +51,22 @@
+     return tuple(field.values[0] for field in result.outputs)
+ 
+ 
++@pytest.fixture(scope="module")
++def eligible_auto_isa():
++    # CI can require ON/OFF explicitly; local runs still check every result.
++    expected = os.environ.get("CME_EXPECT_HIGHWAY")
++    assert expected in (None, "0", "1")
++    actual, audit = op.call("median", finite_values(1024), audit=True)
++    assert_bits(actual, sorted_value(finite_values(1024)))
++    assert audit["isa"] in ("highway_vqselect", "scalar")
++    if expected is not None:
++        assert audit["isa"] == ("highway_vqselect" if expected == "1" else "scalar")
++    return audit["isa"]
++
++
+ @pytest.mark.parametrize("size", [1, 2, 31, 1023, 1024, 1025, 4096, 4097])
+ @pytest.mark.parametrize("masked", [False, True])
+-def test_selection_threshold_odd_even_and_exact_interpolation(size, masked):
++def test_selection_threshold_odd_even_and_exact_interpolation(size, masked, eligible_auto_isa):
+     chosen = finite_values(size)
+     values = np.full(2 * size, np.nan) if masked else chosen.copy()
+     mask = np.zeros(values.shape, bool)
+@@ -77,6 +94,8 @@
+             assert owner[0] == owner[-1] == 912.
+             assert audit["algorithm_copy_bytes"] == size * 8
+             assert audit["input_copy_bytes"] == 0
++            assert audit["isa"] == (eligible_auto_isa if simd == "auto" and size >= 1024
++                                    else "scalar")
+     assert_bits(values, before)
+ 
+ 
+@@ -286,6 +305,12 @@
+         saved = prepared.run_snapshot()
+         preserved = saved.outputs[0].values[0].copy()
+         values.setflags(write=True)
++        values.view(np.uint64)[:] = 0x7FF8000000000013
++        values.setflags(write=False)
++        nan_fallback = prepared.run_snapshot()
++        _, expected_nan = cached_sort_values(values, .5)
++        assert_bits(nan_fallback.outputs[0].values[0], expected_nan)
++        values.setflags(write=True)
+         values[::2], values[1::2] = -0., 0.
+         values.setflags(write=False)
+         fallback = prepared.run_snapshot()
+@@ -297,6 +322,8 @@
+         borrowed = prepared.run()
+         assert_bits(borrowed.outputs[0].values[0], sorted_value(values, .5))
+         assert_bits(saved.outputs[0].values[0], preserved)
++        assert_bits(nan_fallback.outputs[0].values[0], expected_nan)
++        assert not np.shares_memory(nan_fallback.outputs[0].values[0], borrowed.outputs[0].values[0])
+         assert not np.shares_memory(saved.outputs[0].values[0], borrowed.outputs[0].values[0])
+         assert not np.shares_memory(fallback.outputs[0].values[0], borrowed.outputs[0].values[0])
+ 
+@@ -321,3 +348,97 @@
+     with pytest.raises(ValueError, match="OUTPUT_ALIASES_INPUT"):
+         op.quantile(values, .95, out=values[:1].reshape(()))
+     assert_bits(values, before)
++
++
++@pytest.mark.parametrize("size", [1024, 1025])
++@pytest.mark.parametrize("pattern", ["wide_exponents", "tiny", "infinities"])
++@pytest.mark.parametrize("masked", [False, True])
++def test_highway_exact_extreme_values_and_explicit_isa(size, pattern, masked, eligible_auto_isa):
++    if pattern == "wide_exponents":
++        powers = np.resize(np.arange(-1022, 1024, 17), size)
++        chosen = np.ldexp(np.ones(size), powers)
++        chosen[1::2] *= -1.
++        chosen[:2] = [-np.finfo(float).max, np.finfo(float).max]
++    elif pattern == "tiny":
++        chosen = np.resize(np.array([1, 2, 3, 0x000FFFFFFFFFFFFF,
++                                     0x0010000000000000, 0x8000000000000001,
++                                     0x8000000000000002, 0x800FFFFFFFFFFFFF],
++                                    np.uint64), size).view(np.float64)
++    else:
++        chosen = finite_values(size)
++        chosen[::7], chosen[::13] = -np.inf, np.inf
++    # Ineligible values outside the mask must not disable selected VQSelect.
++    values = np.full(size * 2, np.nan) if masked else chosen.copy()
++    mask = np.zeros(values.shape, bool)
++    if masked:
++        values[::2], mask[::2] = chosen, True
++    values.setflags(write=False)
++    mask.setflags(write=False)
++    before = values.copy()
++    arguments = (values, mask) if masked else (values,)
++    names = ("median_where", "quantile_where") if masked else ("median", "quantile")
++    workspace = op.Workspace()
++    explicit = [isa for isa in op.available_simd() if isa not in ("auto", "scalar")]
++    for probability in (.25, .5, .95, np.nextafter(1., 0.)):
++        with np.errstate(over="ignore", invalid="ignore", under="ignore"):
++            # Native cached full sort also fixes NaN results from Inf arithmetic.
++            expected = (cached_sort_values(chosen, probability) if pattern == "infinities"
++                        else (sorted_value(chosen), sorted_value(chosen, probability)))
++        for name, wanted in zip(names, expected, strict=True):
++            extra = () if name.startswith("median") else (probability,)
++            for isa in ("auto", "scalar", *explicit):
++                owner = np.full(3, 912.)
++                actual, audit = op.call(name, *arguments, *extra,
++                                       out=owner[1:2].reshape(()), workspace=workspace,
++                                       simd=isa, audit=True)
++                assert_bits(actual, wanted)
++                assert audit["isa"] == (eligible_auto_isa if isa == "auto" else "scalar")
++                assert audit["algorithm_copy_bytes"] == chosen.nbytes
++                assert audit["input_copy_bytes"] == 0
++                assert owner[0] == owner[-1] == 912.
++    assert_bits(values, before)
++
++
++@pytest.mark.parametrize("masked", [False, True])
++def test_highway_actual_threads_keep_workspaces_and_results_independent(masked, eligible_auto_isa):
++    workers = 4
++    barrier = Barrier(workers)
++    workspaces = [op.Workspace() for _ in range(workers)]
++
++    def run(index):
++        chosen = finite_values(65537) + index
++        values = np.full(chosen.size * 2, np.nan) if masked else chosen.copy()
++        mask = np.zeros(values.shape, bool)
++        if masked:
++            values[::2], mask[::2] = chosen, True
++        values.setflags(write=False)
++        mask.setflags(write=False)
++        before = values.copy()
++        arguments = (values, mask) if masked else (values,)
++        name = "quantile_where" if masked else "quantile"
++        barrier.wait(timeout=30)
++        first, first_audit = op.call(name, *arguments, .25, out=np.empty(()),
++                                    workspace=workspaces[index], audit=True)
++        saved = first.copy()
++        barrier.wait(timeout=30)
++        second, second_audit = op.call(name, *arguments, .95, out=np.empty(()),
++                                      workspace=workspaces[index], audit=True)
++        assert_bits(first, sorted_value(chosen, .25))
++        assert_bits(second, sorted_value(chosen, .95))
++        assert_bits(first, saved)
++        assert_bits(values, before)
++        assert not np.shares_memory(first, second)
++        assert not np.shares_memory(first, values)
++        assert not np.shares_memory(second, values)
++        for audit in (first_audit, second_audit):
++            assert audit["isa"] == eligible_auto_isa
++            assert audit["algorithm_copy_bytes"] == chosen.nbytes
++        return get_ident(), first, second
++
++    with ThreadPoolExecutor(max_workers=workers) as pool:
++        results = list(pool.map(run, range(workers)))
++    assert len({identity for identity, _, _ in results}) == workers
++    for i, (_, first, second) in enumerate(results):
++        for _, other_first, other_second in results[i + 1:]:
++            assert not any(np.shares_memory(a, b) for a in (first, second)
++                           for b in (other_first, other_second))
+--- before/tools/check_dist.py
++++ after/tools/check_dist.py
+@@ -17,6 +17,9 @@
+ EIGEN_ARCHIVE = "third_party/eigen/eigen-3.4.0.tar.gz"
+ EIGEN_SHA256 = "8586084f71f9bde545ee7fa6d00288b264a2b7ac3607b974e54d13e7162c1c72"
+ EIGEN_NOTICES = {"COPYING.MPL2", "COPYING.BSD", "COPYING.README", "README.md"}
++HIGHWAY_ARCHIVE = "third_party/highway/highway-1.3.0.tar.gz"
++HIGHWAY_SHA256 = "07b3c1ba2c1096878a85a31a5b9b3757427af963b1141ca904db2f9f4afe0bc2"
++HIGHWAY_NOTICES = {"LICENSE", "LICENSE-BSD3", "README.md"}
+ PYTHON_FILES = {
+     f"{PACKAGE}/__init__.py",
+     f"{PACKAGE}/_api.py",
+@@ -46,6 +49,9 @@
+         for notice in EIGEN_NOTICES:
+             if not archive.read(f"{PACKAGE}/licenses/eigen/{notice}").strip():
+                 raise ValueError(f"{path.name}: empty Eigen notice {notice}")
++        for notice in HIGHWAY_NOTICES:
++            if not archive.read(f"{PACKAGE}/licenses/highway/{notice}").strip():
++                raise ValueError(f"{path.name}: empty Highway notice {notice}")
+ 
+         extensions = [name for name in names if name.endswith((".so", ".pyd"))]
+         if len(extensions) != 1 or not extensions[0].startswith(f"{PACKAGE}/_native."):
+@@ -89,6 +95,13 @@
+             content = archive.extractfile(prefix + f"third_party/eigen/{notice}")
+             if content is None or not content.read().strip():
+                 raise ValueError(f"{path.name}: empty Eigen notice {notice}")
++        highway = archive.extractfile(prefix + HIGHWAY_ARCHIVE)
++        if highway is None or hashlib.sha256(highway.read()).hexdigest() != HIGHWAY_SHA256:
++            raise ValueError(f"{path.name}: missing or modified Highway release archive")
++        for notice in HIGHWAY_NOTICES:
++            content = archive.extractfile(prefix + f"third_party/highway/{notice}")
++            if content is None or not content.read().strip():
++                raise ValueError(f"{path.name}: empty Highway notice {notice}")
+ 
+     required = {
+         "pyproject.toml",

@@ -1,0 +1,78 @@
+{
+  "status": "passed",
+  "actual_adopted": false,
+  "goal_complete": false,
+  "fresh_complete_processes": 30,
+  "summary": {
+    "C": {
+      "v65": {
+        "seconds": 0.779352249999647,
+        "group_medians": [
+          0.779352249999647,
+          0.9708964999990712,
+          0.7576556250023714
+        ],
+        "heap_peak_bytes": 2288002088,
+        "incremental_rss_bytes": 2227634176
+      },
+      "v66": {
+        "seconds": 0.4758227500024077,
+        "group_medians": [
+          0.49494133299958776,
+          0.4758227500024077,
+          0.4605854580004234
+        ],
+        "heap_peak_bytes": 2288002088,
+        "incremental_rss_bytes": 2233958400
+      },
+      "njit": {
+        "seconds": 0.6597500830030185,
+        "group_medians": [
+          0.6597500830030185,
+          0.7088438329992641,
+          0.6556463339984475
+        ],
+        "heap_peak_bytes": 2281702136,
+        "incremental_rss_bytes": 2233565184
+      },
+      "new_over_njit": 0.7212166580359956,
+      "new_over_old": 0.6105361856626746
+    },
+    "F": {
+      "v65": {
+        "seconds": 0.769521000001987,
+        "group_medians": [
+          0.7729514170023322,
+          0.7434607499999402,
+          0.769521000001987
+        ],
+        "heap_peak_bytes": 2288002088,
+        "incremental_rss_bytes": 2233876480
+      },
+      "v66": {
+        "seconds": 0.4894578339990403,
+        "group_medians": [
+          0.4894578339990403,
+          0.5138250419986434,
+          0.467988874999719
+        ],
+        "heap_peak_bytes": 2288002088,
+        "incremental_rss_bytes": 2233925632
+      },
+      "njit": {
+        "seconds": 0.645249999997759,
+        "group_medians": [
+          0.727986707999662,
+          0.6447669170011068,
+          0.645249999997759
+        ],
+        "heap_peak_bytes": 2281702136,
+        "incremental_rss_bytes": 2227240960
+      },
+      "new_over_njit": 0.7585553413417129,
+      "new_over_old": 0.6360552005699344
+    }
+  },
+  "maximum_absolute_error": 4.757863492077519e-09,
+  "interpretation": "R2 full-request time gains stable vs warmed same-core NI and currentV65; allocation peak unchanged vsV65. Page-level RSS deltas are reported, not a significant NI memory advantage. Normal full and actual adoption still pending."
+}

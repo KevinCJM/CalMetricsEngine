@@ -1,0 +1,26 @@
+{
+  "compile_command": [
+    "/usr/bin/clang++",
+    "-O3",
+    "-std=c++17",
+    "-mmacosx-version-min=15.0",
+    "-fno-fast-math",
+    "-ffp-contract=off",
+    "-I/private/tmp/calmetrics-multiroot-matmul-v65-20261008/budget-safe-source/cpp/include",
+    "-I/private/tmp/calmetrics-multiroot-matmul-v65-20261008/budget-safe-source/tests",
+    "/private/tmp/calmetrics-multiroot-matmul-v65-20261008/mixed-root-budget-probe.cpp",
+    "/private/tmp/calmetrics-multiroot-matmul-v65-20261008/budget-safe-normal-build/libcalmetrics_engine_operators.a",
+    "/private/tmp/calmetrics-multiroot-matmul-v65-20261008/budget-safe-normal-build/libcalmetrics_engine_scheduler.a",
+    "-framework",
+    "Accelerate",
+    "/private/tmp/calmetrics-multiroot-matmul-v65-20261008/budget-safe-normal-build/libcalmetrics_engine_highway_order.a",
+    "/private/tmp/calmetrics-multiroot-matmul-v65-20261008/budget-safe-normal-build/_deps/highway-build/libhwy.a",
+    "-o",
+    "/private/tmp/calmetrics-multiroot-matmul-v65-20261008/mixed-root-budget-probe-fixed"
+  ],
+  "returncode": 0,
+  "stdout": "shared_chains=0 planned_arena=524288 actual_arena=524288 first=32.25 last=15.875\n",
+  "stderr": "",
+  "source_build_id": "072cba9feee2de6f3c84d4535eacfb60e0b78e3331bc17ad79036391279f7272",
+  "production_adopted": false
+}

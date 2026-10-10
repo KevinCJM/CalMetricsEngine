@@ -1,0 +1,1190 @@
+{
+  "build_id": "953b125ec194453b72a962b1f22cdf40ba88da94450a9466332b6f17f35dbee7",
+  "targeted_tests": 685,
+  "native_tests": 9,
+  "initial_cases": 30,
+  "timing": [
+    {
+      "shape": [
+        16384,
+        2520,
+        30
+      ],
+      "layout": "C",
+      "medians_seconds": {
+        "old": 5.3104786455,
+        "candidate": 1.9968295624999999,
+        "bounded-blas-njit": 2.156448458
+      },
+      "maximum_absolute_errors": {
+        "old": [
+          3.469446951953614e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "candidate": [
+          3.469446951953614e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "bounded-blas-njit": [
+          4.336808689942018e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ]
+      }
+    },
+    {
+      "shape": [
+        16384,
+        2520,
+        30
+      ],
+      "layout": "F",
+      "medians_seconds": {
+        "old": 3.225283333,
+        "candidate": 2.0186221460000002,
+        "bounded-blas-njit": 2.1500983125
+      },
+      "maximum_absolute_errors": {
+        "old": [
+          3.469446951953614e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "candidate": [
+          3.469446951953614e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "bounded-blas-njit": [
+          4.336808689942018e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ]
+      }
+    }
+  ],
+  "memory": [
+    {
+      "backend": "old",
+      "requested_heap_warm_peak_bytes": 3404465467,
+      "rss_delta_median_bytes": 3415769088,
+      "rss_absolute_median_bytes": 3503767552
+    },
+    {
+      "backend": "candidate",
+      "requested_heap_warm_peak_bytes": 25260288,
+      "rss_delta_median_bytes": 42893312,
+      "rss_absolute_median_bytes": 129925120
+    },
+    {
+      "backend": "bounded-blas-njit",
+      "requested_heap_warm_peak_bytes": 20309536,
+      "rss_delta_median_bytes": 55558144,
+      "rss_absolute_median_bytes": 199966720
+    }
+  ],
+  "budget_probe": {
+    "build_id": "953b125ec194453b72a962b1f22cdf40ba88da94450a9466332b6f17f35dbee7",
+    "cases": [
+      {
+        "layout": "C",
+        "shape": [
+          4,
+          1,
+          128
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "shape": [
+          4,
+          1,
+          129
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "shape": [
+          4,
+          1,
+          257
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "shape": [
+          4,
+          7,
+          128
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "shape": [
+          4,
+          7,
+          129
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "shape": [
+          4,
+          7,
+          257
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "shape": [
+          4,
+          30,
+          128
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "shape": [
+          4,
+          30,
+          129
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "shape": [
+          4,
+          30,
+          257
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "shape": [
+          4,
+          32,
+          128
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "shape": [
+          4,
+          32,
+          129
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "shape": [
+          4,
+          32,
+          257
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "shape": [
+          4,
+          128,
+          128
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "shape": [
+          4,
+          128,
+          129
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "shape": [
+          4,
+          128,
+          257
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "shape": [
+          7,
+          1,
+          128
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "shape": [
+          7,
+          1,
+          129
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "shape": [
+          7,
+          1,
+          257
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "shape": [
+          7,
+          7,
+          128
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "shape": [
+          7,
+          7,
+          129
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "shape": [
+          7,
+          7,
+          257
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "shape": [
+          7,
+          30,
+          128
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "shape": [
+          7,
+          30,
+          129
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "shape": [
+          7,
+          30,
+          257
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "shape": [
+          7,
+          32,
+          128
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "shape": [
+          7,
+          32,
+          129
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "shape": [
+          7,
+          32,
+          257
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "shape": [
+          7,
+          128,
+          128
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "shape": [
+          7,
+          128,
+          129
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "shape": [
+          7,
+          128,
+          257
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "shape": [
+          64,
+          1,
+          128
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "shape": [
+          64,
+          1,
+          129
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "shape": [
+          64,
+          1,
+          257
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "shape": [
+          64,
+          7,
+          128
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "shape": [
+          64,
+          7,
+          129
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "shape": [
+          64,
+          7,
+          257
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "shape": [
+          64,
+          30,
+          128
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "shape": [
+          64,
+          30,
+          129
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "shape": [
+          64,
+          30,
+          257
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "shape": [
+          64,
+          32,
+          128
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "shape": [
+          64,
+          32,
+          129
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "shape": [
+          64,
+          32,
+          257
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "shape": [
+          64,
+          128,
+          128
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "shape": [
+          64,
+          128,
+          129
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "shape": [
+          64,
+          128,
+          257
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "C",
+        "special_values": true,
+        "canonical_classes": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          4,
+          1,
+          128
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          4,
+          1,
+          129
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          4,
+          1,
+          257
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          4,
+          7,
+          128
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          4,
+          7,
+          129
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          4,
+          7,
+          257
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          4,
+          30,
+          128
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          4,
+          30,
+          129
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          4,
+          30,
+          257
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          4,
+          32,
+          128
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          4,
+          32,
+          129
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          4,
+          32,
+          257
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          4,
+          128,
+          128
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          4,
+          128,
+          129
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          4,
+          128,
+          257
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          7,
+          1,
+          128
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          7,
+          1,
+          129
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          7,
+          1,
+          257
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          7,
+          7,
+          128
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          7,
+          7,
+          129
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          7,
+          7,
+          257
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          7,
+          30,
+          128
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          7,
+          30,
+          129
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          7,
+          30,
+          257
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          7,
+          32,
+          128
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          7,
+          32,
+          129
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          7,
+          32,
+          257
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          7,
+          128,
+          128
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          7,
+          128,
+          129
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          7,
+          128,
+          257
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          64,
+          1,
+          128
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          64,
+          1,
+          129
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          64,
+          1,
+          257
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          64,
+          7,
+          128
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          64,
+          7,
+          129
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          64,
+          7,
+          257
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          64,
+          30,
+          128
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          64,
+          30,
+          129
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          64,
+          30,
+          257
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          64,
+          32,
+          128
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          64,
+          32,
+          129
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          64,
+          32,
+          257
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          64,
+          128,
+          128
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          64,
+          128,
+          129
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "shape": [
+          64,
+          128,
+          257
+        ],
+        "isa": "eigen-packed-matmul",
+        "bitwise": true
+      },
+      {
+        "layout": "F",
+        "special_values": true,
+        "canonical_classes": true
+      },
+      {
+        "wide_q": 8193,
+        "estimated": 2042144,
+        "observed": 1464054,
+        "chunk": {
+          "compact_path_groups": 0,
+          "compact_path_batches": 0,
+          "compact_path_steps": 0,
+          "compact_path_raw_rows": 0,
+          "compact_path_raw_scale_elements": 0,
+          "compact_path_raw_pack_bytes": 0,
+          "highway_vqsort_calls": 0,
+          "fused_pointwise_calls": 0,
+          "pointwise_tiles": 0,
+          "vector_elements": 290090,
+          "root_copy_bytes": 0,
+          "direct_output_bytes": 6176,
+          "state_copy_bytes": 0,
+          "pointwise_workspace_capacity_bytes": 0,
+          "rows": 1,
+          "nodes": 48,
+          "max_window": 257,
+          "numeric_arena_bytes": 1440656,
+          "mask_arena_bytes": 4902,
+          "operator_workspace_capacity_bytes": 18496,
+          "order_scratch_capacity_bytes": 0,
+          "input_copy_bytes": 0,
+          "eigen_rotation_calls": 0,
+          "eigen_matvec_calls": 0,
+          "eigen_covariance_calls": 0,
+          "eigen_density_calls": 0,
+          "accelerate_covchol_calls": 0,
+          "accelerate_matmul_calls": 0,
+          "matmul_zero_calls": 0,
+          "accelerate_covariance_attempts": 0,
+          "accelerate_covariance_calls": 0,
+          "covariance_syrk_calls": 0,
+          "covariance_replayed_cells": 0,
+          "covariance_fallbacks": 0,
+          "covariance_zero_calls": 0,
+          "accelerate_vforce_calls": 0,
+          "accelerate_lu_attempts": 0,
+          "accelerate_lu_calls": 0,
+          "accelerate_lu_fallbacks": 0,
+          "solve_residual_materialization_bytes": 0,
+          "covariance_panel_materialization_bytes": 0,
+          "native_library_workspace_reserve_bytes": 0,
+          "algorithm_copy_bytes": 943696,
+          "fused_scalar_calls": 0,
+          "summary_source_scans": 0,
+          "order_stat_sorts": 0,
+          "python_operator_calls": 0,
+          "execution_backend": "native_graph_interpreter"
+        }
+      }
+    ],
+    "production_adopted": false,
+    "whole_goal_complete": false
+  },
+  "production_adopted": false,
+  "whole_goal_complete": false,
+  "acceptance": "rejected: no substantive complete-time improvement over prior candidate; shorter interval newly admits panel workspace and violates planned scratch bound",
+  "scratch_budget_probe": {
+    "build_id": "953b125ec194453b72a962b1f22cdf40ba88da94450a9466332b6f17f35dbee7",
+    "records": [
+      {
+        "ends": [
+          163840
+        ],
+        "estimated": 1317376,
+        "observed": 1310720,
+        "chunks": [
+          {
+            "compact_path_groups": 0,
+            "compact_path_batches": 0,
+            "compact_path_steps": 0,
+            "compact_path_raw_rows": 0,
+            "compact_path_raw_scale_elements": 0,
+            "compact_path_raw_pack_bytes": 0,
+            "highway_vqsort_calls": 0,
+            "fused_pointwise_calls": 0,
+            "pointwise_tiles": 0,
+            "vector_elements": 0,
+            "root_copy_bytes": 0,
+            "direct_output_bytes": 1024,
+            "state_copy_bytes": 0,
+            "pointwise_workspace_capacity_bytes": 0,
+            "rows": 1,
+            "nodes": 6,
+            "max_window": 163840,
+            "numeric_arena_bytes": 1310720,
+            "mask_arena_bytes": 0,
+            "operator_workspace_capacity_bytes": 0,
+            "order_scratch_capacity_bytes": 0,
+            "input_copy_bytes": 0,
+            "eigen_rotation_calls": 0,
+            "eigen_matvec_calls": 0,
+            "eigen_covariance_calls": 0,
+            "eigen_density_calls": 0,
+            "accelerate_covchol_calls": 0,
+            "accelerate_matmul_calls": 0,
+            "matmul_zero_calls": 0,
+            "accelerate_covariance_attempts": 0,
+            "accelerate_covariance_calls": 0,
+            "covariance_syrk_calls": 0,
+            "covariance_replayed_cells": 0,
+            "covariance_fallbacks": 0,
+            "covariance_zero_calls": 0,
+            "accelerate_vforce_calls": 0,
+            "accelerate_lu_attempts": 0,
+            "accelerate_lu_calls": 0,
+            "accelerate_lu_fallbacks": 0,
+            "solve_residual_materialization_bytes": 0,
+            "covariance_panel_materialization_bytes": 0,
+            "native_library_workspace_reserve_bytes": 0,
+            "algorithm_copy_bytes": 0,
+            "fused_scalar_calls": 0,
+            "summary_source_scans": 0,
+            "order_stat_sorts": 0,
+            "python_operator_calls": 0,
+            "execution_backend": "native_graph_interpreter"
+          }
+        ],
+        "budget_pass": true
+      },
+      {
+        "ends": [
+          163840,
+          40960
+        ],
+        "estimated": 1317376,
+        "observed": 1638976,
+        "chunks": [
+          {
+            "compact_path_groups": 0,
+            "compact_path_batches": 0,
+            "compact_path_steps": 0,
+            "compact_path_raw_rows": 0,
+            "compact_path_raw_scale_elements": 0,
+            "compact_path_raw_pack_bytes": 0,
+            "highway_vqsort_calls": 0,
+            "fused_pointwise_calls": 0,
+            "pointwise_tiles": 0,
+            "vector_elements": 5242368,
+            "root_copy_bytes": 0,
+            "direct_output_bytes": 2048,
+            "state_copy_bytes": 0,
+            "pointwise_workspace_capacity_bytes": 0,
+            "rows": 2,
+            "nodes": 6,
+            "max_window": 163840,
+            "numeric_arena_bytes": 1310720,
+            "mask_arena_bytes": 0,
+            "operator_workspace_capacity_bytes": 328256,
+            "order_scratch_capacity_bytes": 0,
+            "input_copy_bytes": 0,
+            "eigen_rotation_calls": 0,
+            "eigen_matvec_calls": 0,
+            "eigen_covariance_calls": 0,
+            "eigen_density_calls": 0,
+            "accelerate_covchol_calls": 0,
+            "accelerate_matmul_calls": 0,
+            "matmul_zero_calls": 0,
+            "accelerate_covariance_attempts": 0,
+            "accelerate_covariance_calls": 0,
+            "covariance_syrk_calls": 0,
+            "covariance_replayed_cells": 0,
+            "covariance_fallbacks": 0,
+            "covariance_zero_calls": 0,
+            "accelerate_vforce_calls": 0,
+            "accelerate_lu_attempts": 0,
+            "accelerate_lu_calls": 0,
+            "accelerate_lu_fallbacks": 0,
+            "solve_residual_materialization_bytes": 0,
+            "covariance_panel_materialization_bytes": 0,
+            "native_library_workspace_reserve_bytes": 0,
+            "algorithm_copy_bytes": 1342177280,
+            "fused_scalar_calls": 0,
+            "summary_source_scans": 0,
+            "order_stat_sorts": 0,
+            "python_operator_calls": 0,
+            "execution_backend": "native_graph_interpreter"
+          }
+        ],
+        "budget_pass": false
+      }
+    ]
+  },
+  "full_san_off": "not performed"
+}

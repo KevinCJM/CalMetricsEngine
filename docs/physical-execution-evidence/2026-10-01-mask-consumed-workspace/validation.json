@@ -1,0 +1,54 @@
+{
+  "build_id": "ccca6b67a5220ea2134a4743d281b80c5af4c096e7d41c3d5b747bb8de70e331",
+  "baseline_build_id": "850871ebcff4f6f2e089ae96029f736ccc0c94282cd06824193f839a410906b3",
+  "production_sources_changed": 1,
+  "python_passed": 10387,
+  "new_regressions": 4,
+  "final_affected_python_passed": 38,
+  "native_passed": 9,
+  "native_total": 9,
+  "asan_ubsan_passed": 9,
+  "asan_ubsan_total": 9,
+  "leak_sanitizer": false,
+  "off_native_passed": 9,
+  "off_python_passed": 147,
+  "direct_fixture_operators": 185,
+  "excel": {
+    "status": "PASS_AGAINST_RECALCULATED_SNAPSHOT",
+    "checked_values": 3056,
+    "failures": [],
+    "newly_recalculated": false,
+    "cases": 469,
+    "snapshot_engine": "Microsoft Excel 16.89.1 (16.89.24091630), macOS desktop full dependency rebuild",
+    "snapshot_sha256": "eab3361371bfff228fe3e6c1ea458fcb3e3d0a7a9b29cbda438c6e5604fb32b1",
+    "current_source_sha256": "ada5d29a8d79fd55e61ae63ac6aca6eb53fa4a695b0cf73109a33c973432a151",
+    "source_identity_differences": 938,
+    "allowed_identity_changes": "Only Readme B4 export identity and B9 build identity; formula and input cells unchanged.",
+    "engine_build_id": "ccca6b67a5220ea2134a4743d281b80c5af4c096e7d41c3d5b747bb8de70e331",
+    "historical_snapshot": "/private/tmp/calmetrics-reaccept-20260929/excel-ms"
+  },
+  "timing_cases": 30,
+  "rounds": 9,
+  "memory_cases": 12,
+  "memory_children": 72,
+  "heap_stages": 216,
+  "heap_table_overflows": 0,
+  "heap_probe": {
+    "sha256": "74421dbfff14b56b730553c7b0b0ce9b38a136de053f132069e1b948decd3382",
+    "controls": "prior frozen controls, not newly rerun",
+    "coverage": "malloc family, not mmap/Python arena internals/process tree"
+  },
+  "self_review": {
+    "unresolved_scoped_findings": 0,
+    "masked_capacity": "explicit reserve and dense-to-sparse preserve high water",
+    "initial_sandbox_errors": "focused process/shared-memory test failures retained; full suite passed with local process permission",
+    "initial_sanitizer_error": "macOS detect_leaks unsupported, retained; ASan/UBSan rerun with detect_leaks=0"
+  },
+  "source_and_test_sha256": {
+    "cpp/operators/registry.cpp": "bc8d665ddd45862f71f66f77bb89c0e4bfca43fc1a273b225c004357872b115b",
+    "tests/test_order_linear_packing.py": "d2b7605884dbfd7a2866fc811f50ca14491e0601e946a8c212f77b7eaae7a14c"
+  },
+  "whole_engine_objective_complete": false,
+  "committed": false,
+  "pushed": false
+}

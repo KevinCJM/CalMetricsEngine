@@ -1,0 +1,93 @@
+{
+  "status": "actual_adopted_rebuilt_qualified_and_confirmed",
+  "cpp_files": [
+    "cpp/operators/latent.cpp",
+    "cpp/planner.cpp",
+    "cpp/graph.cpp",
+    "cpp/include/calmetrics_engine/operators.hpp"
+  ],
+  "new_tests": "tests/test_gmm_replay.py",
+  "preserved_existing_files": 312,
+  "qualified_source_build_id": "2744d7e24c146eb873a1db3be0a3d90715de797116e4485eb6276b1cad194d80",
+  "goal_complete": false,
+  "submitted": false,
+  "actual_build_id": "2744d7e24c146eb873a1db3be0a3d90715de797116e4485eb6276b1cad194d80",
+  "source_files_verified": 93,
+  "qualification": {
+    "v56-normal-corrected-quality.json": {
+      "native": {
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "related": {
+        "tests": 654,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "full": {
+        "tests": 15898,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    },
+    "v56-asan-quality.json": {
+      "native": {
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "related": {
+        "tests": 654,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    },
+    "v56-off-quality.json": {
+      "native": {
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "related": {
+        "tests": 654,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    },
+    "actual-v56-normal-quality.json": {
+      "native": {
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "related": {
+        "tests": 654,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    }
+  },
+  "actual_confirmation": "actual-confirmation-state.json",
+  "protected_baseline_entries": 316,
+  "protected_unchanged_entries": 310,
+  "protection_scope": "Explicit existing source/test/tool/config/protocol files from preservation-baseline.json; not a whole-repository snapshot",
+  "documentation_edits": [
+    "docs/execution-guide.md",
+    "docs/latent-model-operators.md",
+    "docs/physical-execution-optimization.md"
+  ],
+  "branch": "codex/submission-policy",
+  "head": "d17b371abbd692e3ac839c7ba191a44d11054d7f",
+  "git_delivery_authorized_this_phase": false,
+  "full_chain_memory_beats_njit": false
+}

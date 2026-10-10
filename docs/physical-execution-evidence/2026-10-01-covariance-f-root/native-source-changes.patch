@@ -1,0 +1,94 @@
+--- before/cpp/graph.cpp
++++ after/cpp/graph.cpp
+@@ -599,6 +599,21 @@
+     ops::require(root < nodes.size(), "GRAPH_ROOT_INDEX");
+ }
+ 
++static bool independent_covariance_root(const Program &program, std::size_t index) {
++  if (program.output_kind != OutputKind::typed || program.isolate_errors ||
++      program.roots.size() != 1 || program.roots[0] != index ||
++      !program.apply_scopes.empty() || !program.rolling_scopes.empty() ||
++      program.root_outputs[0].rank != 2 || program.root_outputs[0].dtype != OutputDType::float64)
++    return false;
++  const auto &node = program.nodes[index];
++  if (node.kind != NodeKind::operation || node.parent_count != 1 ||
++      node.opcode != static_cast<std::uint16_t>(ops::Op::covariance)) return false;
++  for (const auto &consumer : program.nodes)
++    for (std::size_t j = 0; j < consumer.parent_count; ++j)
++      if (consumer.parents[j] == index) return false;
++  return true;
++}
++
+ void Program::finalize() {
+   validate();
+   auto metadata = std::make_shared<ExecutionMetadata>();
+@@ -735,8 +750,12 @@
+   for (std::size_t r=0;r<root_outputs.size();++r) {
+     if (root_outputs[r].rank < 2 || root_outputs[r].order != OutputOrder::f) continue;
+     const auto id=roots[r];
+-    if ((nodes[id].kind == NodeKind::operation && metadata->specs[id]->family != ops::Family::elementwise) ||
+-        nodes[id].kind == NodeKind::apply_scope)
++    // An independent covariance is bitwise symmetric after its canonical
++    // upper-triangle finish. Its C bytes already represent the same square F
++    // matrix; no arena, transpose or alternative numerical kernel is needed.
++    if (!independent_covariance_root(*this, id) &&
++        ((nodes[id].kind == NodeKind::operation && metadata->specs[id]->family != ops::Family::elementwise) ||
++         nodes[id].kind == NodeKind::apply_scope))
+       metadata->root_destinations[id] = -1;
+   }
+   if (metadata->pointwise) plan_pointwise_regions(*this, *metadata);
+@@ -859,21 +878,6 @@
+   return true;
+ }
+ 
+-static bool independent_covariance_root(const Program &program, std::size_t index) {
+-  if (program.output_kind != OutputKind::typed || program.isolate_errors ||
+-      program.roots.size() != 1 || program.roots[0] != index ||
+-      !program.apply_scopes.empty() || !program.rolling_scopes.empty() ||
+-      program.root_outputs[0].rank != 2 || program.root_outputs[0].dtype != OutputDType::float64)
+-    return false;
+-  const auto &node = program.nodes[index];
+-  if (node.kind != NodeKind::operation || node.parent_count != 1 ||
+-      node.opcode != static_cast<std::uint16_t>(ops::Op::covariance)) return false;
+-  for (const auto &consumer : program.nodes)
+-    for (std::size_t j = 0; j < consumer.parent_count; ++j)
+-      if (consumer.parents[j] == index) return false;
+-  return true;
+-}
+-
+ std::size_t matrix_workspace_doubles(const Program &program,
+                                      const std::vector<ops::Shape> &shapes,
+                                      std::size_t capacity) {
+@@ -2435,6 +2439,7 @@
+ 
+         // Root storage belongs to this call; downstream consumers borrow it.
+         const auto destination_root = program.execution_metadata->root_destinations[node_index];
++        bool symmetric_f_root = false;
+         if (typed_output && prepared.output_shape.rank > 0 && destination_root >= 0) {
+           const auto &schema = program.root_outputs[destination_root];
+           const auto &slot = layout->slots[(result_row + row) * output_columns + destination_root];
+@@ -2446,6 +2451,16 @@
+           native_output.data = static_cast<std::uint8_t *>(output) + slot.byte_offset;
+           native_output.order = program.roots[destination_root] == node_index
+               ? layout->order(destination_root) : ops::MemoryOrder::c;
++          symmetric_f_root = native_output.order == ops::MemoryOrder::f &&
++              spec.op == ops::Op::covariance;
++          if (symmetric_f_root) {
++            ops::require(prepared.output_shape.rank == 2 &&
++                prepared.output_shape.dim[0] == prepared.output_shape.dim[1], "RESULT_CAPACITY_MISMATCH");
++            // Only the independent, single-argument covariance survived F-root
++            // admission above. Keep the existing C writer and publish F strides
++            // after it has completed its bit-identical symmetric mirror.
++            native_output.order = ops::MemoryOrder::c;
++          }
+           audit.direct_output_bytes += prepared.output_shape.size() * output_itemsize(schema.dtype);
+         }
+         bool fused = false;
+@@ -2535,6 +2550,7 @@
+           scratch.algorithm_copy_bytes += operator_audit.algorithm_copy_bytes;
+           audit.vector_elements += operator_audit.vector_elements;
+         }
++        if (symmetric_f_root) native_output.order = ops::MemoryOrder::f;
+         scratch.values[node_index] =
+             output_value(prepared, native_output, max_window);
+         if constexpr (Observe)

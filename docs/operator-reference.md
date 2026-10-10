@@ -2,7 +2,7 @@
 
 [文档导航](README.md) · [使用手册](user-guide.md) · [直接调用契约](canonical-operators.md)
 
-本页覆盖当前 `canonical-native-1` 的 **146 个算子**，不是历史 opcode 的外部映射表。名称、opcode 和重载参数经当前原生 `operators.catalog()` 与 [operators.def](../cpp/include/calmetrics_engine/operators.def) 核对；计算逻辑按 C++ 内核整理。运行包可能与源码不同，使用者应查询所安装包的目录。
+本页覆盖当前 `canonical-native-1` 的 **190 个算子**，不是历史 opcode 的外部映射表。名称、opcode 和重载参数经当前原生 `operators.catalog()` 与 [operators.def](../cpp/include/calmetrics_engine/operators.def) 核对；计算逻辑按 C++ 内核整理。运行包可能与源码不同，使用者应查询所安装包的目录。
 
 上述算子均有独立的原生 Excel 展开实现，数学签名沿用本页；Excel 的资源、数值域和目标版本限制另见[导出说明](excel-export.md)。`excel.coverage()` 的实现登记不等于真实 Excel 验收，最新差分证据见[验收记录](excel-reproduction-design.md#10-原生实现与验收)。
 
@@ -177,6 +177,86 @@
 | 71 · `regression_standard_error(values)` / `regression_standard_error(x,y)` | L 或 L,L → S | sqrt(RSS/(n−2))，要求 n>2；不是斜率标准误。 | — |
 | 112 · `linear_fit(values)` / `linear_fit(x,y)` | L 或 L,L → 拟合记录 | 一次 OLS 得 slope/intercept/RSS/TSS/n；有限输入、n>=2、Sxx>0；多个投影可共享一次计算。 | — |
 
+## 矩阵分解与数组轴操作
+
+内核：[matrix_foundation.cpp](../cpp/operators/matrix_foundation.cpp)；完整定义、失败类别和性能状态见[设计与验收](matrix-array-foundation.md)。轴从 0 开始；AST 轴参数、切片边界与步长必须为字面整数。直接 API 每次检查实际值。以下算法内部单线程；没有新增显式 SIMD 标记。
+
+| ID / 调用签名 | 输入 → 输出 | 数学逻辑与边界 | SIMD |
+| --- | --- | --- | --- |
+| 147 · `cholesky(matrix)` | M[n,n] → M[n,n] | 有限、严格对称、正定；输出下三角 L，A=LLᵀ；不隐式修复矩阵。 | — |
+| 148 · `solve_multi(matrix,rhs)` | M[n,n],M[n,k] → M[n,k] | 一次部分主元消元解全部 RHS；abs(pivot)<=1e−14 为奇异。 | — |
+| 149 · `triangular_solve(matrix,rhs[,lower,unit_diagonal])` | M[n,n],L[n]/M[n,k] → RHS 形状 | 前代/回代；只读取指定三角，单位对角模式忽略原对角；默认 lower=1、unit_diagonal=0。 | — |
+| 150 · `symmetric_eigh(matrix[,tolerance,max_sweeps])` | M[n,n] → 名义分解 | 最大绝对值缩放的有界循环 Jacobi；tolerance=1e−12，范围[1e−15,1e−3]；max_sweeps=32，整数[1,128]；未收敛报错。 | — |
+| 151 · `eigenvalues(decomposition)` | 名义分解 → L[n] | 特征值升序稳定排列；直接 API 借用共享分解，独立图值路径可消除死去的向量计算，公开根仍独立拥有。 | — |
+| 152 · `eigenvectors(decomposition)` | 名义分解 → M[n,n] | 列为特征向量；最大绝对分量首位置取正；借用共享分解。 | — |
+| 153 · `take_axis(values,indices,axis)` | rank 1–3,I[k],S → 同 rank | 改变选定轴长度，重复/顺序保留；负或越界下标拒绝。 | — |
+| 154 · `slice_axis(values,axis,start,stop,step)` | rank 1–3 → 同 rank | 借用半开切片；0<=start<=stop<=轴长，step 为正整数；不夹紧。 | — |
+| 155 · `concatenate(lhs,rhs,axis)` | 两个同 rank/dtype 数组 → 同 rank | 其他轴必须相同；仅沿指定轴拼接。 | — |
+| 156 · `stack(lhs,rhs,axis)` | 两个同形 rank 0–2 值 → rank+1 | 插入长度 2 的 component 轴，最高三维。 | — |
+| 157 · `broadcast_like(values,template)` | rank 1–3 → 模板形状 | 同 dtype，右对齐单位/相同维度；零 stride 只读视图；模板计算失败仍传播。 | — |
+| 158 · `sum_axis(values,axis)` | float64 rank 1–3 → rank−1 | 按轴顺序相加，移除轴；空轴结果为 0；不跳过 NaN/Inf。 | — |
+| 159 · `mean_axis(values,axis)` | float64 rank 1–3 → rank−1 | 顺序和除以轴长，区别于旧 mean 的增量算法；非空输出的空轴报短样本。 | — |
+| 160 · `swap_axes(values,axis1,axis2)` | rank 1–3 → 同 rank | 交换形状及 stride，保活输入；不物化转置。 | — |
+
+数组选择/重排支持 float64、int64 和 bool；分解/求解只接受 float64。直接掩码输出仍遵守 uint8/bool out 契约。`symmetric_eigh` 的内部载荷不能直接作为图根，两个投影共享一次分解，公开图结果独立拥有。
+
+## 概率模型与情景识别数学基础
+
+内核：[latent.cpp](../cpp/operators/latent.cpp)；数学顺序、名义模型载荷及完整边界见[设计与验收](latent-model-operators.md)。以下新增内核内部单线程，无新增显式 SIMD 标记；独立任务由统一 Scheduler 调度。数据 X[N,D]、参数 M[K,D]、概率 P[K]，均为 float64；编码与索引为 int64。所有算子均有原生 Excel recipe。
+
+| ID / 调用签名 | 输入 → 输出 | 数学逻辑与边界 | SIMD |
+| --- | --- | --- | --- |
+| 161 · `variance_axis(values,axis[,ddof])` | rank 1–3 → rank−1 | 两遍顺序方差，默认 ddof=0；有限输入、非负整数 ddof<轴长。 | — |
+| 162 · `max_axis(values,axis)` | rank 1–3 → rank−1 | 有限输入的轴最大值。 | — |
+| 163 · `argmax_axis(values,axis)` | rank 1–3 → int64 rank−1 | 首个最大值的零基索引；同值不跳过首位置。 | — |
+| 164 · `logsumexp_axis(values,axis)` | rank 1–3 → rank−1 | max+log(sum(exp(x−max)))，拒绝非有限输入。 | — |
+| 165 · `softmax_axis(values,axis)` | rank 1–3 → 同形 | exp(x−max)/sum(exp(x−max))，保留轴。 | — |
+| 166 · `gaussian_log_density(values,means,variances)` | X[N,D],M[K,D],M[K,D] → M[N,K] | 对角高斯 log 密度；方差非负，实际分母下限 1e−12。 | — |
+| 167 · `gaussian_mixture_em(values,weights,means,variances[,max_iterations,tolerance])` | X,P,M,M → 名义 GMM | 显式初始化的 EM；默认 100 轮、1e−6；最大 10000 轮；参数、推断分离。 | — |
+| 168 · `gaussian_hmm_em(values,initial,transition,means,variances[,max_iterations,tolerance])` | X,P,M[K,K],M,M → 名义 HMM | 显式初始化的 Baum–Welch；默认 100 轮、1e−5；不内置 GMM 预训练。 | — |
+| 169 · `mixture_weights(model)` | 名义 GMM → P[K] | 共享拟合的只读权重投影。 | — |
+| 170 · `mixture_means(model)` | 名义 GMM → M[K,D] | 只读均值投影。 | — |
+| 171 · `mixture_variances(model)` | 名义 GMM → M[K,D] | 只读对角方差投影。 | — |
+| 172 · `em_iterations(model)` | 名义 GMM/HMM → int64 标量 | 已完成 M 步次数。 | — |
+| 173 · `em_log_likelihood(model)` | 名义 GMM/HMM → S | 最后 E 步 log 似然；不是更新后重新评价的值。 | — |
+| 174 · `em_converged(model)` | 名义 GMM/HMM → bool 标量 | 完成 M 步后相邻 E 步差<tolerance；轮数耗尽不冒充收敛；tolerance=0 不提前停止。 | — |
+| 175 · `hmm_initial(model)` | 名义 HMM → P[K] | 只读初始分布投影。 | — |
+| 176 · `hmm_transition(model)` | 名义 HMM → M[K,K] | 只读转移概率投影，行是来源、列是目标。 | — |
+| 177 · `hmm_means(model)` | 名义 HMM → M[K,D] | 只读状态均值投影。 | — |
+| 178 · `hmm_variances(model)` | 名义 HMM → M[K,D] | 只读状态方差投影。 | — |
+| 179 · `hmm_filter(log_emissions,initial,transition[,predict_first])` | M[N,K],P,M[K,K] → M[N,K] | 因果前向过滤；默认首行直接消费 initial；predict_first=1 首行先转移，续接观测时显式使用。 | — |
+| 180 · `hmm_smooth(log_emissions,initial,transition)` | M[N,K],P,M[K,K] → M[N,K] | log 域前向/后向平滑，依赖完整输入；不得标为实时过滤。 | — |
+| 181 · `transition_counts(codes,states)` | I[N],S → M[K,K] | 相邻有效状态计数；−1 未知，不跨缺口连边；不内置平滑或归一化。 | — |
+| 182 · `one_hot(codes,states)` | I[N],S → M[N,K] | 零基编码展开；−1 行全零，其余越界拒绝。 | — |
+| 183 · `partition_mean(values,order,partitions)` | X[N,D],I[N],K → M[K,D] | order 必须为完整排列；边界 floor(N*c/K)；排序单独构造。 | — |
+| 184 · `sample_unique_indices(template,count[,seed])` | rank 1–3 模板 → I[count] | count<=第一轴长；默认 seed=0；局部 Park–Miller，重复线性前探；不读模板数值。 | — |
+| 185 · `scatter_rows(values,indices,length[,fill])` | rank 1–3,I[N],S → 同 rank | 回填第一轴，默认缺位 NaN；下标必须唯一且在界内；保留被复制数值。 | — |
+
+拟合输入及概率必须有限，概率非负且各分布总量正。EM 有效数下限 1e−8、方差更新下限 1e−5；HMM 初始/转移更新下限 1e−8 后归一化。axis、states、partitions、count、length 在 AST 中为字面整数。公开图根通过投影获得独立结果；内部模型不是可直接导出的普通矩阵根。直接 API 的布尔输出延续 uint8 掩码约定，typed 图根恢复 bool。
+
+## 保序收缩与稳定指数差
+
+新增的两项通用数学原语保持原 IDs 1–185 不变；[契约、共享图与验收范围](mc-projection-primitives.md)。
+
+| ID / 调用签名 | 输入 → 输出 | 数学逻辑与边界 | SIMD |
+| --- | --- | --- | --- |
+| 186 · `affine_contract(values,coefficients,initial)` | X[...,F]（rank2/3）,M[F,A],S/L[A] → X 前置轴+[A] | 每个输出以显式 initial 起步，按 f 升序先计算 coefficients[f,a]*X[...,f] 再相加；不跳过零、不改为 matmul 后加初态。空 F 返回初态，空输出返回空值；IEEE NaN/Inf/溢出传播。 | — |
+| 187 · `expm1(values)` | S/rank1–3 → 同形同轴 | 逐项 `std::expm1(x)`，近零稳定；保留负零，NaN/+Inf 传播，−Inf→−1，有限正溢出→+Inf。Typed IR 要求无量纲输入；原 exp 的 DOMAIN_ERROR 规则不变。 | — |
+
+`affine_contract` 的收缩轴及初态向量轴须明确匹配，Typed IR 保留量纲相容性校验。两项都支持只读合法 stride 输入，不创建线程池；逻辑步骤和独立中间输出仍可编辑、选择。新增 Excel recipe 已登记，具体输入域、预算和真实重算证据按链接的验收状态判断。
+
+## 按轴递推与多分位数
+
+内核：[axis_primitives.cpp](../cpp/operators/axis_primitives.cpp)；[组合、预算和验收范围](mc-axis-primitives.md)。轴在 AST 中必须为非负、范围内的整数字面量；直接调用可以传入运行时标量轴。三项无隐式可选参数，支持 float64 rank 1–3 的只读 C/F/合法 signed stride 输入。
+
+| ID / 调用签名 | 输入 → 输出 | 数学逻辑与边界 | SIMD |
+| --- | --- | --- | --- |
+| 188 · `cumulative_product_axis(values,axis,initial)` | A,S,S → 同形 A | 每条独立 line 从 initial 开始，按轴升序 `state*=current`，逐位置输出更新后状态。NaN/Inf/负零按 IEEE 传播，不跳过、重置或重排。图中 increments 无量纲，输出继承 initial 量纲。 | — |
+| 189 · `cumulative_max_axis(values,axis,initial)` | A,S,S → 同形 A | 仅在 `current>state` 时更新；相等保留前状态，当前 NaN 不更新，NaN 初态一直保留。无隐式零初态；图中 values/initial 量纲须相容。 | — |
+| 190 · `quantiles_axis(values,probabilities,axis)` | A,L[Q],S → 同 rank A | 每条 line 复制 N 项并进行一次 NaN-last `std::sort`，服务全部 Q；不剔除 NaN。概率有限且在 [0,1]；整数 rank/单样本直接返回值，否则 `lo*(1-f)+hi*f`。被选轴替换为 Q/component 轴；同值/NaN payload 顺序不作稳定排序承诺。 | — |
+
+空 prefix 返回同形空结果。quantiles 的 Q=0 或外部 line 数=0 返回空结果且无 sort scratch；仍检查概率配置。N=0 且确有输出时报 `INSUFFICIENT_SAMPLE`。prefix 无数值工作区；quantiles 使用一条 line 的 N 个 double 工作区，并记实际排序复制字节。typed 图根可直接写独立 C/F 连续结果；直接 `out` 继续原 C 连续契约。它们不自动启用进程或线程，也不表示完整情景模拟已完成有界融合或性能验收。
+
 ## 投影、状态与事件
 
 内核：[源文件](../cpp/operators/state.cpp)；形状/参数校验：[registry.cpp](../cpp/operators/registry.cpp)。 状态机和事件内核另见 [state_events.cpp](../cpp/operators/state_events.cpp)、[完整状态契约](state-event-contracts.md)。
@@ -256,6 +336,10 @@
 | `drawdown_cycle_reference` | all required; 0<stress<1; completed decline<=-stress marks stress and following rise recovery; membership (left,right] |
 | `state_select` | all required; scalar branch finite integer [-1,2^53-1], int64 branch values>=-1; -1 is explicit unknown/no proposal; validity stays separate |
 
+| `symmetric_eigh` | tolerance=1e-12 in [1e-15,1e-3]; max_sweeps=32 integer [1,128] |
+| `triangular_solve` | lower=1, unit_diagonal=0; both integer 0/1 |
+| `slice_axis` | all required; 0<=start<=stop<=axis extent; step>=1; no negative indices/clamping |
+
 ## 递推策略与共享求解
 
 - recursive_filter：seed 0 从 initial 开始并消费首行；seed 1 第0行输出 initial 不消费；seed 2 以首个有限且 mask=true 的观测为种子。emit 0 停更时保持输出，emit 1 输出 NaN；未得到 seed 时 NaN。缺失期间保留内部状态。
@@ -277,7 +361,7 @@ import numpy as np
 from calmetrics_engine import operators as op
 
 catalog = op.catalog()
-assert len(catalog) == 146
+assert len(catalog) == 190
 spec = op.get("std").spec
 assert spec["parameters"] == ["values", "ddof"]
 x = np.array([1., 2., 3.])

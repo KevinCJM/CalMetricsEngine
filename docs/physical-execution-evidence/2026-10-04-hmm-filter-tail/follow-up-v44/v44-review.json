@@ -1,0 +1,142 @@
+{
+  "status": "PROGRESS",
+  "candidate_status": "cost-aware history measured; planner boundary defect prevents adoption",
+  "production_build_id": "83ea5357f58345479081b18a9514dce0f025e2fd456b5ac6ce2f6add3a64847a",
+  "candidate_build_id": "259f4692f0dd74748e1a719fbeb32ce16d3c9af74624c904bb77f083d05b6a87",
+  "actual_numerical_source_changed": false,
+  "production_numerical_source_unchanged": true,
+  "candidate_isolated": true,
+  "goal_complete": false,
+  "submission": false,
+  "tests": {
+    "selected_python": 785,
+    "native": 9,
+    "old_actual_bitwise_differential_cases": 16,
+    "candidate_full_regression_passed": 15191,
+    "candidate_asan_ubsan": true,
+    "candidate_library_off": true,
+    "variant_python_each": 785,
+    "variant_native_each": 9
+  },
+  "time": {
+    "training": {
+      "cpp_actual": 5.145851874956861,
+      "cpp_candidate": 5.2977365627884865,
+      "njit_hoisted": 10.806039791554213
+    },
+    "chain": {
+      "cpp_actual": 5.328000313136727,
+      "cpp_candidate": 5.328209312399849,
+      "njit_hoisted": 10.822913707932457
+    }
+  },
+  "memory": {
+    "training": {
+      "cpp_actual": {
+        "warm_heap_peak": 152602521,
+        "rss_deltas": [
+          177586176,
+          177078272,
+          173588480
+        ],
+        "rss_delta_median": 177078272
+      },
+      "cpp_candidate": {
+        "warm_heap_peak": 116614809,
+        "rss_deltas": [
+          137019392,
+          137068544,
+          137052160
+        ],
+        "rss_delta_median": 137052160
+      },
+      "njit_hoisted": {
+        "warm_heap_peak": 176512336,
+        "rss_deltas": [
+          172113920,
+          176668672,
+          172113920
+        ],
+        "rss_delta_median": 172113920
+      }
+    },
+    "chain": {
+      "cpp_actual": {
+        "warm_heap_peak": 275677220,
+        "rss_deltas": [
+          276168704,
+          271646720,
+          276119552
+        ],
+        "rss_delta_median": 276119552
+      },
+      "cpp_candidate": {
+        "warm_heap_peak": 275689508,
+        "rss_deltas": [
+          275709952,
+          275660800,
+          272138240
+        ],
+        "rss_delta_median": 275660800
+      },
+      "njit_hoisted": {
+        "warm_heap_peak": 272514528,
+        "rss_deltas": [
+          336379904,
+          340443136,
+          338427904
+        ],
+        "rss_delta_median": 338427904
+      }
+    }
+  },
+  "planner_defect": {
+    "status": "reproduced",
+    "priority": "P2",
+    "candidate_build_id": "259f4692f0dd74748e1a719fbeb32ce16d3c9af74624c904bb77f083d05b6a87",
+    "production_unchanged": true,
+    "input_shape": [
+      4096,
+      1
+    ],
+    "components": 256,
+    "expression": "hmm_initial(gaussian_hmm_em(x,w,a,m,v,1))",
+    "observations": [
+      {
+        "ends": [
+          4095
+        ],
+        "estimated_worker_scratch_bytes": 26756360
+      },
+      {
+        "ends": [
+          4096
+        ],
+        "estimated_worker_scratch_bytes": 18639112
+      },
+      {
+        "ends": [
+          4095,
+          4096
+        ],
+        "estimated_worker_scratch_bytes": 18639112
+      }
+    ],
+    "smaller_window_hmm_minimum_bytes": 26217472,
+    "reason": "Primitive scratch is non-monotone at the two/three-history boundary. Planner applies the maximum row bound to latent_scratch, and must take the maximum of both regimes rather than assume primitive scratch grows monotonically.",
+    "scope": "Metadata-only plan calls, no numerical fit; current V44 candidate must not be adopted before repairing the planner upper envelope.",
+    "goal_complete": false
+  },
+  "reasons": [
+    "Complete training removes an actually allocated NK matrix; malloc peak reduces 35,987,712 bytes.",
+    "Complete chain uses the available third history, eliminating unnecessary density replay without new significant allocation benefit.",
+    "Additional audit reproduced a non-monotone primitive scratch boundary; mixed intervals can under-reserve planner memory.",
+    "Do not adopt V44 despite passed full/sanitizer tests and significant training memory benefit."
+  ],
+  "next": [
+    "Repair planner upper envelope and add negative/positive boundary coverage in isolated V45.",
+    "Requalify corrected source, then build/replay the actual checkout if qualified.",
+    "Large matrix FF and platform complete-request gaps remain open."
+  ],
+  "limitations": "Malloc probe excludes CPython arena suballocations, some zones/mmap/stack/process-tree; RSS 0.5ms sampling; no complete allocation audit or Excel desktop recalculation claim."
+}

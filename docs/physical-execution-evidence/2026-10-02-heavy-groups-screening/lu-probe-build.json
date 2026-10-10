@@ -1,0 +1,33 @@
+{
+  "scope": "temporary standalone ABI screening only; repository unchanged",
+  "build_command": "xcrun clang++ -std=c++20 -O3 -DNDEBUG -arch arm64 -mmacosx-version-min=15.0 -dynamiclib -fno-fast-math -ffp-contract=off -DCALMETRICS_HAVE_EIGEN_ROTATION=1 -I/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/cpp/include -I/private/tmp/calmetrics-heavy-groups-next -isystem /private/tmp/calmetrics-covchol-next/wheel-build/_deps/eigen-3.4.0 /private/tmp/calmetrics-heavy-groups-next/lu-probe.cpp -o /private/tmp/calmetrics-heavy-groups-next/lu-probe.dylib",
+  "compiler": "Apple clang 17.0.0 (clang-1700.6.3.2), arm64",
+  "build_exit_code": 0,
+  "build_diagnostics": "none",
+  "numeric_execution": "NOT_RUN; dylib not loaded; Python scripts AST-parsed without imports",
+  "mode_map": {
+    "0": "current production 4 rows x 8 columns",
+    "1": "G8W4, shared const Tile",
+    "2": "G16W2, shared const Tile",
+    "3": "G8W8, shared const Tile; spill control"
+  },
+  "sha256": {
+    "lu-baseline.hpp": "82172b94c7ef651144f4de0d6b38107e9b508b28573f3cb659c493e00a260499",
+    "lu-g8w4.hpp": "329d5d704179b238a81a8069b7b04ad0b6e10fa06693495e5e745412cf87989a",
+    "lu-g16w2.hpp": "4206d06b8e6a909a19d341ff6cf776b5209b0e748006cb6ad8b47f3d3a800d4b",
+    "lu-g8w8.hpp": "8224fc0a4b18d65c50060a453330b7670c29df23929fe8dc8ed9fe9a39d1454b",
+    "lu-probe.cpp": "ce57e5088b74dec3e47cb095646828bee7cfeedd6f6937a9253ba46d07dfbfc9",
+    "lu-probe.dylib": "2b43b8501804859ebbb7742145cc12b5e60468f12dcd65fccb0f2721e6800f48",
+    "lu-screen.py": "4a5a39df7b96dcc06bee218e65361fdf12084cfc9db3bff137781a78489dcbc0",
+    "lu-timing.py": "50b466fdfc94262edb90191760b78a6c8af055b29ec4a325f388f8d40795c78b",
+    "lu-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "provenance_sha256": {
+    "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/cpp/operators/solve_multi_library.hpp": "82172b94c7ef651144f4de0d6b38107e9b508b28573f3cb659c493e00a260499",
+    "/private/tmp/calmetrics-lu-register-next/candidate.cpp": "cbc329a15a5be9d15c7a08b890479d547ee75d5a04c8e55e08405e53f3115920",
+    "/private/tmp/calmetrics-lu-register-next/screen.py": "3d0c447358a86e83f0e33da6c8a3d9b65f5e96b9e39985f9b2707d7e27c82eca",
+    "/private/tmp/calmetrics-lu-register-next/timing.py": "7d5c584d8c6a7d0dab6b0089897d3685874ef97771e59600fdd0c1a309e4a947",
+    "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/tools/check_large_matrix_performance.py": "2f99bf41adac0926e30aa2045fa0f6bb67ea938826bf6a4c69ed6cf278c10518"
+  },
+  "timing_static_audit": "five thread env before imports; baseline_threads only sets NJIT TLS; metadata collected after restoration; independent retained holders per backend; default10 rotate+reverse balanced positions"
+}

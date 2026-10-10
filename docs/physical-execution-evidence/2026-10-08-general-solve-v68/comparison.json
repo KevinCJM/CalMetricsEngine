@@ -1,0 +1,541 @@
+{
+  "status": "completed_r3_complete_request_screen",
+  "actual_adopted": true,
+  "goal_complete": false,
+  "time_processes": 48,
+  "heap_processes": 12,
+  "rss_processes": 12,
+  "smokes_separate": 4,
+  "rows": [
+    {
+      "dimension": 4112,
+      "layout": "C",
+      "median_of_three_fresh_process_medians_seconds": {
+        "current": 0.7404499590011255,
+        "candidate": 0.7191962910001166,
+        "njit": 0.5874313329986762,
+        "njit-c": 0.6891929170014919
+      },
+      "strongest_warmed_direct_fill_njit": "njit",
+      "gain_vs_current": 0.02870371960001228,
+      "gain_vs_strongest_njit": -0.2243069965791855,
+      "heap_peak_bytes": {
+        "current": 288293620,
+        "njit": 406531696,
+        "candidate": 288293620
+      },
+      "incremental_rss_bytes": {
+        "current": 188563456,
+        "njit": 273580032,
+        "candidate": 179175424
+      },
+      "physical_copy_bytes_saved": 0,
+      "calls_per_cpp_request": 1,
+      "fallbacks_per_cpp_request": 0
+    },
+    {
+      "dimension": 4112,
+      "layout": "F",
+      "median_of_three_fresh_process_medians_seconds": {
+        "current": 0.7663313329976518,
+        "candidate": 0.7428444999968633,
+        "njit": 0.5773489169987442,
+        "njit-c": 0.7588525000028312
+      },
+      "strongest_warmed_direct_fill_njit": "njit",
+      "gain_vs_current": 0.030648404925471606,
+      "gain_vs_strongest_njit": -0.2866474295274013,
+      "heap_peak_bytes": {
+        "current": 288326516,
+        "njit": 406531696,
+        "candidate": 288326516
+      },
+      "incremental_rss_bytes": {
+        "current": 180027392,
+        "njit": 273285120,
+        "candidate": 175357952
+      },
+      "physical_copy_bytes_saved": 135268352,
+      "calls_per_cpp_request": 1,
+      "fallbacks_per_cpp_request": 0
+    },
+    {
+      "dimension": 8192,
+      "layout": "C",
+      "median_of_three_fresh_process_medians_seconds": {
+        "current": 5.240698541998427,
+        "candidate": 5.178218832999846,
+        "njit": 5.649634791996505,
+        "njit-c": 5.517239458000404
+      },
+      "strongest_warmed_direct_fill_njit": "njit-c",
+      "gain_vs_current": 0.011922019268590711,
+      "gain_vs_strongest_njit": 0.06144750967967372,
+      "heap_peak_bytes": {
+        "current": 1103672500,
+        "njit-c": 1612008496,
+        "candidate": 1103672500
+      },
+      "incremental_rss_bytes": {
+        "current": 604274688,
+        "njit-c": 1080524800,
+        "candidate": 613089280
+      },
+      "physical_copy_bytes_saved": 0,
+      "calls_per_cpp_request": 1,
+      "fallbacks_per_cpp_request": 0
+    },
+    {
+      "dimension": 8192,
+      "layout": "F",
+      "median_of_three_fresh_process_medians_seconds": {
+        "current": 5.395890625000902,
+        "candidate": 5.020614249999198,
+        "njit": 5.408482416998595,
+        "njit-c": 5.706038749998697
+      },
+      "strongest_warmed_direct_fill_njit": "njit",
+      "gain_vs_current": 0.06954855112572655,
+      "gain_vs_strongest_njit": 0.07171478745689286,
+      "heap_peak_bytes": {
+        "current": 1103738036,
+        "njit": 1612008496,
+        "candidate": 1103738036
+      },
+      "incremental_rss_bytes": {
+        "current": 599654400,
+        "njit": 1076838400,
+        "candidate": 603619328
+      },
+      "physical_copy_bytes_saved": 536870912,
+      "calls_per_cpp_request": 1,
+      "fallbacks_per_cpp_request": 0
+    }
+  ],
+  "r4_status": "completed_native9_related1119_and_complete84_measurements",
+  "verdict": "R3 stable F-only incremental gains and unchanged exact heap. Medium requests remain22-29percent slower than strongest warmed NJIT. C construction unchanged; its measured timing differences are not claimed as an algorithmic gain. Continue R4 contiguous certificate packing before possible full/SAN/OFF/actual adoption.",
+  "r4_comparison": {
+    "status": "passed",
+    "timing_processes": 60,
+    "heap_processes": 12,
+    "rss_processes": 12,
+    "smokes_separate": 4,
+    "rows": [
+      {
+        "dimension": 4112,
+        "layout": "C",
+        "median_of_three_fresh_process_medians_seconds": {
+          "current": 0.6646336669946322,
+          "previous": 0.6681420829991112,
+          "candidate": 0.6633013339960598,
+          "njit": 0.5574215000015101,
+          "njit-c": 0.6986430000033579
+        },
+        "strongest_warmed_direct_fill_njit": "njit",
+        "gain_vs_current": 0.002004612562882868,
+        "gain_vs_previous": 0.0072450892201288974,
+        "gain_vs_strongest_njit": -0.18994573046476115,
+        "heap_peak_bytes": {
+          "current": 288293620,
+          "njit": 406531696,
+          "candidate": 288293620
+        },
+        "incremental_rss_bytes": {
+          "current": 174407680,
+          "njit": 272400384,
+          "candidate": 176619520
+        },
+        "cpu_wall_ratio": {
+          "current": [
+            0.9993852353582923,
+            0.9994212345631365,
+            0.9976277697766699
+          ],
+          "previous": [
+            0.999528347442541,
+            0.9993817437793211,
+            0.9988496025215543
+          ],
+          "candidate": [
+            0.9995592742226238,
+            0.999656893102618,
+            0.9958263501127186
+          ],
+          "njit": [
+            0.9993530646639268,
+            0.9995506093656065,
+            0.9977161643599278
+          ],
+          "njit-c": [
+            0.999271444781734,
+            1.0000008694587048,
+            0.990792274965234
+          ]
+        }
+      },
+      {
+        "dimension": 4112,
+        "layout": "F",
+        "median_of_three_fresh_process_medians_seconds": {
+          "current": 0.7132597499949043,
+          "previous": 0.6834637499996461,
+          "candidate": 0.6760950829993817,
+          "njit": 0.5052859580027871,
+          "njit-c": 0.8526455410028575
+        },
+        "strongest_warmed_direct_fill_njit": "njit",
+        "gain_vs_current": 0.05210537534998727,
+        "gain_vs_previous": 0.010781357460828311,
+        "gain_vs_strongest_njit": -0.33804447222666023,
+        "heap_peak_bytes": {
+          "current": 288326516,
+          "njit": 406531696,
+          "candidate": 288326516
+        },
+        "incremental_rss_bytes": {
+          "current": 170819584,
+          "njit": 272105472,
+          "candidate": 171835392
+        },
+        "cpu_wall_ratio": {
+          "current": [
+            0.998174928565766,
+            0.9997039106664467,
+            0.9994389224633514
+          ],
+          "previous": [
+            0.9994789741564435,
+            0.999610312010798,
+            0.9998350314853618
+          ],
+          "candidate": [
+            0.9992751271060758,
+            0.9997087393575712,
+            0.9990223811723832
+          ],
+          "njit": [
+            0.998610695261637,
+            0.9991253309224469,
+            0.9993471977751387
+          ],
+          "njit-c": [
+            0.999226476922542,
+            0.9991244387137228,
+            0.9993362451396209
+          ]
+        }
+      },
+      {
+        "dimension": 8192,
+        "layout": "C",
+        "median_of_three_fresh_process_medians_seconds": {
+          "current": 4.722236749999865,
+          "previous": 4.694950541997969,
+          "candidate": 4.630488875001902,
+          "njit": 6.071312874999421,
+          "njit-c": 5.600570375005191
+        },
+        "strongest_warmed_direct_fill_njit": "njit-c",
+        "gain_vs_current": 0.019428901991829672,
+        "gain_vs_previous": 0.013729999159615147,
+        "gain_vs_strongest_njit": 0.1732111972617414,
+        "heap_peak_bytes": {
+          "current": 1103672500,
+          "njit-c": 1612008496,
+          "candidate": 1103672500
+        },
+        "incremental_rss_bytes": {
+          "current": 613662720,
+          "njit-c": 1076903936,
+          "candidate": 606928896
+        },
+        "cpu_wall_ratio": {
+          "current": [
+            0.9897730361501935,
+            0.998999256019964,
+            0.9971194585669574
+          ],
+          "previous": [
+            0.9992090349057462,
+            0.9991404524742805,
+            0.998183106583365
+          ],
+          "candidate": [
+            0.9996067639830146,
+            0.9996471034373162,
+            0.9993369472502862
+          ],
+          "njit": [
+            0.9984539389185052,
+            0.9995306943051536,
+            0.9988533163843211
+          ],
+          "njit-c": [
+            0.9976572178352133,
+            0.9966240539811265,
+            0.9971737923201837
+          ]
+        }
+      },
+      {
+        "dimension": 8192,
+        "layout": "F",
+        "median_of_three_fresh_process_medians_seconds": {
+          "current": 4.84037299999909,
+          "previous": 4.569183084000542,
+          "candidate": 4.465384542003449,
+          "njit": 4.514630582998507,
+          "njit-c": 5.028004917003273
+        },
+        "strongest_warmed_direct_fill_njit": "njit",
+        "gain_vs_current": 0.07747098374354866,
+        "gain_vs_previous": 0.02271708970484343,
+        "gain_vs_strongest_njit": 0.010908099807880656,
+        "heap_peak_bytes": {
+          "current": 1103738036,
+          "njit": 1612008496,
+          "candidate": 1103738036
+        },
+        "incremental_rss_bytes": {
+          "current": 603996160,
+          "njit": 1077215232,
+          "candidate": 607830016
+        },
+        "cpu_wall_ratio": {
+          "current": [
+            0.9990870538284773,
+            0.9982393192947903,
+            0.9991347299683846
+          ],
+          "previous": [
+            0.9990803579493251,
+            0.9979574978676566,
+            0.997966576556524
+          ],
+          "candidate": [
+            0.9993047637342021,
+            0.998079999175255,
+            0.9983887448827392
+          ],
+          "njit": [
+            0.9988918374632076,
+            0.9960874798781928,
+            0.9974482163480582
+          ],
+          "njit-c": [
+            0.9988571000190662,
+            0.9967212765685796,
+            0.9805859543467891
+          ]
+        }
+      }
+    ],
+    "verdict": "Packing alone is insufficient: medium remains slower than NI; F8192 NI advantage about1percent in this epoch despite about8percent actual gain. CPU/wall ratios about1 verify same-core execution. No actual adoption. Do not combine prior-epoch NI timings."
+  },
+  "r5_comparison": {
+    "status": "completed",
+    "candidate_build_id": "a87f2c25ae40a633f3f22ae0bfc66ecdefb721294e349d2ae21d74687eb960a2",
+    "time_processes": 60,
+    "heap_processes": 12,
+    "rss_processes": 12,
+    "smokes_separate": 4,
+    "rows": [
+      {
+        "dimension": 4112,
+        "layout": "C",
+        "median_of_three_fresh_process_medians_seconds": {
+          "current": 0.6764482910002698,
+          "previous": 0.665764791003312,
+          "candidate": 0.4595940840008552,
+          "njit": 0.5445356249983888,
+          "njit-c": 0.6762474580027629
+        },
+        "strongest_warmed_direct_fill_njit": "njit",
+        "gain_vs_current": 0.32057765520961023,
+        "gain_vs_strongest_njit": 0.15598895113204925,
+        "heap_peak_bytes": {
+          "current": 288293620,
+          "candidate": 282027252,
+          "njit": 406531696
+        },
+        "incremental_rss_bytes": {
+          "current": 179519488,
+          "candidate": 170049536,
+          "njit": 272089088
+        }
+      },
+      {
+        "dimension": 4112,
+        "layout": "F",
+        "median_of_three_fresh_process_medians_seconds": {
+          "current": 0.7063743749968125,
+          "previous": 0.6817982089996804,
+          "candidate": 0.4674239580053836,
+          "njit": 0.5037765419983771,
+          "njit-c": 0.719259207995492
+        },
+        "strongest_warmed_direct_fill_njit": "njit",
+        "gain_vs_current": 0.3382773008894996,
+        "gain_vs_strongest_njit": 0.07216013641443153,
+        "heap_peak_bytes": {
+          "current": 288326516,
+          "candidate": 282060148,
+          "njit": 406531696
+        },
+        "incremental_rss_bytes": {
+          "current": 172457984,
+          "candidate": 164249600,
+          "njit": 272793600
+        }
+      },
+      {
+        "dimension": 8192,
+        "layout": "C",
+        "median_of_three_fresh_process_medians_seconds": {
+          "current": 4.646204500000749,
+          "previous": 4.572807542004739,
+          "candidate": 3.5352502500027185,
+          "njit": 4.844752124998195,
+          "njit-c": 4.889725124994584
+        },
+        "strongest_warmed_direct_fill_njit": "njit",
+        "gain_vs_current": 0.23911006284761072,
+        "gain_vs_strongest_njit": 0.2702928532171218,
+        "heap_peak_bytes": {
+          "current": 1103672500,
+          "candidate": 1097413812,
+          "njit": 1612008496
+        },
+        "incremental_rss_bytes": {
+          "current": 609173504,
+          "candidate": 585793536,
+          "njit": 1077297152
+        }
+      },
+      {
+        "dimension": 8192,
+        "layout": "F",
+        "median_of_three_fresh_process_medians_seconds": {
+          "current": 4.778842540996266,
+          "previous": 4.454002042002685,
+          "candidate": 3.390466666998691,
+          "njit": 4.620899958004884,
+          "njit-c": 5.119295332995534
+        },
+        "strongest_warmed_direct_fill_njit": "njit",
+        "gain_vs_current": 0.29052555343414477,
+        "gain_vs_strongest_njit": 0.2662756827000089,
+        "heap_peak_bytes": {
+          "current": 1103738036,
+          "candidate": 1097479348,
+          "njit": 1612008496
+        },
+        "incremental_rss_bytes": {
+          "current": 602030080,
+          "candidate": 584187904,
+          "njit": 1077657600
+        }
+      }
+    ],
+    "verdict": "Stable complete-block-request gain; full/SAN/OFF and actual rebuild/replay qualify adoption separately. This is KKT construction/solve, not complete QP or whole-platform acceptance."
+  },
+  "r5_actual_comparison": {
+    "status": "completed_actual52_screen",
+    "actual_build_id": "a87f2c25ae40a633f3f22ae0bfc66ecdefb721294e349d2ae21d74687eb960a2",
+    "rows": [
+      {
+        "dimension": 4112,
+        "layout": "C",
+        "seconds": {
+          "actual": 0.46126975000515813,
+          "njit": 0.5457090420022723,
+          "njit-c": 0.7012830000021495
+        },
+        "strongest_njit": "njit",
+        "time_saved_vs_njit": 0.15473317372073636,
+        "memory": {
+          "heap": {
+            "actual": 282027252,
+            "njit": 406531696
+          },
+          "rss": {
+            "actual": 167215104,
+            "njit": 272367616
+          }
+        },
+        "heap_saved_MiB": 118.73669052124023,
+        "rss_saved_MiB": 100.28125
+      },
+      {
+        "dimension": 4112,
+        "layout": "F",
+        "seconds": {
+          "actual": 0.46641695799917215,
+          "njit": 0.4997765839943895,
+          "njit-c": 0.6775568329976522
+        },
+        "strongest_njit": "njit",
+        "time_saved_vs_njit": 0.06674907761503257,
+        "memory": {
+          "heap": {
+            "actual": 282060148,
+            "njit": 406531696
+          },
+          "rss": {
+            "actual": 163364864,
+            "njit": 271826944
+          }
+        },
+        "heap_saved_MiB": 118.70531845092773,
+        "rss_saved_MiB": 103.4375
+      },
+      {
+        "dimension": 8192,
+        "layout": "C",
+        "seconds": {
+          "actual": 3.5234705000038957,
+          "njit": 4.818061833000684,
+          "njit-c": 4.898362542000541
+        },
+        "strongest_njit": "njit",
+        "time_saved_vs_njit": 0.2686954584371778,
+        "memory": {
+          "heap": {
+            "actual": 1097413812,
+            "njit": 1612008496
+          },
+          "rss": {
+            "actual": 586645504,
+            "njit": 1076346880
+          }
+        },
+        "heap_saved_MiB": 490.75573348999023,
+        "rss_saved_MiB": 467.015625
+      },
+      {
+        "dimension": 8192,
+        "layout": "F",
+        "seconds": {
+          "actual": 3.362938625003153,
+          "njit": 4.578300834000402,
+          "njit-c": 5.037846208004339
+        },
+        "strongest_njit": "njit",
+        "time_saved_vs_njit": 0.2654614131014401,
+        "memory": {
+          "heap": {
+            "actual": 1097479348,
+            "njit": 1612008496
+          },
+          "rss": {
+            "actual": 592773120,
+            "njit": 1078394880
+          }
+        },
+        "heap_saved_MiB": 490.69323348999023,
+        "rss_saved_MiB": 463.125
+      }
+    ],
+    "goal_complete": false
+  }
+}

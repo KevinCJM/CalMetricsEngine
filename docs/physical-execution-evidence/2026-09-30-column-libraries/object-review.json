@@ -1,0 +1,31 @@
+{
+  "scope": "arm64 Release object, own frames only; system/runtime and exception frames not exhaustively bounded",
+  "dispatcher_frames_old_new": {
+    "latent": [
+      1088,
+      1088
+    ],
+    "foundation": [
+      752,
+      752
+    ]
+  },
+  "column_leaves_bytes": {
+    "variance": 224,
+    "mean": 32,
+    "sum": 128
+  },
+  "column_leaf_dispatch": "tail branch after complete dispatcher frame restore",
+  "arithmetic_bytes": {
+    "old_pair": 480,
+    "new_wrapper": 48,
+    "admission": 64,
+    "library_executor": 320,
+    "scalar_executor": 480,
+    "scalar_math_tail_callee": 48
+  },
+  "arithmetic_call_graph": "wrapper+admission=112; wrapper restored before tail branch to320B Eigen or480B scalar executor; Eigen tail rows may call48B scalar_math, giving368B own normal arithmetic frames",
+  "numeric_heap_added_bytes": 0,
+  "new_helpers_fma_count": 0,
+  "v1_rejected": "ordinary calls retained1088B+224B and496B+320B frames; V2 separates admission and uses tail calls"
+}

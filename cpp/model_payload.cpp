@@ -10,6 +10,7 @@ namespace calmetrics_engine::native {
 namespace {
 constexpr std::size_t max_fields = 4096, max_text = 4096;
 constexpr std::uint64_t magic = 0x434d454d00000001ull;
+constexpr std::uint64_t layout_magic = 0x434d454d00000002ull;
 using Bytes = std::vector<std::uint8_t>;
 void put(Bytes &out, std::uint64_t value) {
   for (unsigned i = 0; i < 8; ++i) out.push_back(static_cast<std::uint8_t>(value >> (i * 8)));
@@ -42,11 +43,17 @@ bool identifier(const std::string &s) {
     return c == '_' || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9');
   });
 }
+bool has_f_layout(const std::vector<ops::Value> &fields) {
+  return std::any_of(fields.begin(), fields.end(), [](const ops::Value &field) {
+    return field.packed_order() == ops::MemoryOrder::f;
+  });
+}
 Bytes header(const std::vector<typed::Variable> &schema,
              const std::vector<ops::Value> &fields,
              const std::map<std::string, std::string> &metadata) {
   Bytes out;
-  put(out, magic);
+  const auto with_layout = has_f_layout(fields);
+  put(out, with_layout ? layout_magic : magic);
   put(out, metadata.size());
   for (const auto &entry : metadata) { text(out, entry.first); text(out, entry.second); }
   put(out, schema.size());
@@ -61,6 +68,7 @@ Bytes header(const std::vector<typed::Variable> &schema,
       text(out, type.axes[axis]);
       put(out, fields[i].shape.dim[axis]);
     }
+    if (with_layout) put(out, static_cast<unsigned>(fields[i].packed_order()));
   }
   return out;
 }
@@ -98,6 +106,8 @@ std::shared_ptr<ModelPayload> ModelPayload::create(
         type.dtype == typed::DType::int64 ? ops::Kind::integer : ops::Kind::mask;
     ops::require(field.kind == kind, "MODEL_FIELD_DTYPE");
     ops::require(field.shape.rank == 0 || field.size() == 0 || field.data != nullptr, "MODEL_NULL_FIELD");
+    auto geometry = field;
+    geometry.set_contiguous_strides(field.packed_order()); // validate before allocating
     if (type.is_scalar()) type.kind = typed::ValueKind::value;
     for (std::size_t axis = 0; axis < type.rank(); ++axis) {
       const auto &dimension = type.shape[axis];
@@ -118,8 +128,15 @@ std::shared_ptr<ModelPayload> ModelPayload::create(
   result->fields_.reserve(fields.size());
   for (std::size_t i = 0; i < fields.size(); ++i) {
     auto field = fields[i];
+    const auto order = field.packed_order();
     auto *destination = static_cast<std::uint8_t *>(owner->data()) + offsets[i];
-    for (std::size_t j = 0; j < field.size(); ++j) {
+    if (field.shape.rank > 0 && field.dense_contiguous()) {
+      const auto count = field.size();
+      if (field.kind == ops::Kind::mask)
+        for (std::size_t j = 0; j < count; ++j)
+          ops::require(static_cast<const std::uint8_t *>(field.data)[j] <= 1, "INVALID_MASK");
+      if (count) std::memcpy(destination, field.data, planner::checked_mul(count, field.kind == ops::Kind::mask ? 1 : 8));
+    } else for (std::size_t j = 0; j < field.size(); ++j) {
       if (field.kind == ops::Kind::mask) {
         const auto value = field.u(j); ops::require(value <= 1, "INVALID_MASK");
         destination[j] = value;
@@ -130,7 +147,7 @@ std::shared_ptr<ModelPayload> ModelPayload::create(
       }
     }
     field.data = destination;
-    field.set_contiguous_strides();
+    field.set_contiguous_strides(order);
     result->fields_.push_back(field);
   }
   // Stable content identity, not an authentication signature. Hash all metadata,
@@ -141,7 +158,8 @@ std::shared_ptr<ModelPayload> ModelPayload::create(
   for (auto x : prefix) consume(x);
   for (std::size_t i = 0; i < bytes; ++i) consume(static_cast<const std::uint8_t *>(owner->data())[i]);
   std::ostringstream id;
-  id << "model-1-" << std::hex << std::setfill('0') << std::setw(16) << a << std::setw(16) << b;
+  id << (has_f_layout(result->fields_) ? "model-2-" : "model-1-")
+     << std::hex << std::setfill('0') << std::setw(16) << a << std::setw(16) << b;
   result->identity_ = id.str();
   owner->make_readonly();
   result->owner_ = std::move(owner);
@@ -158,7 +176,8 @@ std::vector<std::uint8_t> ModelPayload::encode() const {
 
 std::shared_ptr<ModelPayload> ModelPayload::decode(const std::vector<std::uint8_t> &bytes) {
   Reader in{bytes};
-  ops::require(in.get() == magic, "MODEL_PROTOCOL_VERSION");
+  const auto version = in.get();
+  ops::require(version == magic || version == layout_magic, "MODEL_PROTOCOL_VERSION");
   const auto metadata_count = in.get();
   ops::require(metadata_count <= 32, "MODEL_METADATA_LIMIT");
   std::map<std::string, std::string> metadata;
@@ -190,12 +209,16 @@ std::shared_ptr<ModelPayload> ModelPayload::decode(const std::vector<std::uint8_
       variable.type.shape.push_back(std::to_string(field.shape.dim[axis]));
     }
     variable.type.validate();
-    field.set_contiguous_strides();
+    const auto order = version == layout_magic ? in.get() : 0;
+    ops::require(order <= static_cast<unsigned>(ops::MemoryOrder::f), "MODEL_MEMORY_ORDER");
+    field.set_contiguous_strides(static_cast<ops::MemoryOrder>(order));
+    ops::require(static_cast<unsigned>(field.packed_order()) == order, "MODEL_NONCANONICAL_ORDER");
     offsets.push_back(size);
     const auto raw = planner::checked_mul(field.size(), dtype == 1 ? 1 : 8);
     size = planner::checked_add(size, planner::checked_mul(planner::checked_add(raw, 7) / 8, 8));
     schema.push_back(std::move(variable)); fields.push_back(field);
   }
+  ops::require((version == layout_magic) == has_f_layout(fields), "MODEL_NONCANONICAL_VERSION");
   ops::require(in.get() == size && size == bytes.size() - in.cursor, "MODEL_PAYLOAD_SIZE");
   // The encoded header is not necessarily aligned. Copy to aligned storage
   // before constructing typed views, including scalar fields.

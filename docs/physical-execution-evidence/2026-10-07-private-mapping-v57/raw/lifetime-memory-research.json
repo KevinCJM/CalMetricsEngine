@@ -1,0 +1,18 @@
+{
+  "scope": "method research and next-step design; no implementation or performance result",
+  "primary_sources": [
+    "https://docs.pytorch.org/executorch/stable/compiler-memory-planning.html",
+    "https://github.com/pytorch/executorch/blob/main/exir/memory_planning.py",
+    "https://openxla.org/xla/hlo_to_thunks"
+  ],
+  "verified_methods": [
+    "Propagate shape upper bounds before static memory planning",
+    "Use actual tensor liveness and alias/backing analysis, then reuse compatible nonoverlapping buffer slices",
+    "Exclude caller-owned inputs and independent returned results from scratch reuse",
+    "Treat schedule, kernel workspace and borrowed history as a joint peak/copy cost rather than optimizing each arena count alone"
+  ],
+  "relevance_to_current_code": "plan_array_arena currently accumulates each original logical slot high-water capacity. V57D showed that deleting private capacity can regress HMM beta copying. Explore physical lifetime allocation with explicit loaned-history costs after V57G is independently qualified.",
+  "decision": "Reference public planning methods in the existing native planner; do not introduce a second graph runtime solely for this memory bottleneck.",
+  "important_boundary": "Current repeated complete-chain benchmark is GMM only; public methods do not demonstrate a gain in this engine.",
+  "goal_complete": false
+}

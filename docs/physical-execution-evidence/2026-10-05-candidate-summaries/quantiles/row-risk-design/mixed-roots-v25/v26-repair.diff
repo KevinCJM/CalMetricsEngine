@@ -1,0 +1,35 @@
+--- a/cpp/graph.cpp
++++ b/cpp/graph.cpp
+@@ -711,7 +711,9 @@
+     const auto &node = program.nodes[id];
+     if (node.kind != NodeKind::operation || node.opcode != std::uint16_t(ops::Op::matmul)) continue;
+     if (producer != UINT32_MAX || node.parent_count != 2 ||
+-        metadata->root_destinations[id] >= 0) return nullptr;
++        metadata->root_destinations[id] >= 0 ||
++        std::find(program.roots.begin(), program.roots.end(), id) != program.roots.end())
++      return nullptr;
+     producer = id;
+   }
+   if (producer == UINT32_MAX) return nullptr;
+--- a/tests/test_matmul_root_layout.py
++++ b/tests/test_matmul_root_layout.py
+@@ -182,7 +182,7 @@
+     if mode in {"trace", "shared"}:
+         # The trace contract requires the same symbolic axes and dimensions.
+         types["b"]["shape"] = ["K", "M"]
+-    compiled = GraphCompiler(types).compile(expr, output_order="F", error_policy="isolate" if mode == "isolate" else "raise")
++    compiled = GraphCompiler(types).compile(expr, result_format="typed", output_order="F", error_policy="isolate" if mode == "isolate" else "raise")
+     bounds = np.zeros(1, np.int64)
+     with AdaptiveScheduler(cpu_budget=1) as scheduler:
+         result = scheduler.execute(compiled, {"a": a, "b": b}, bounds, bounds)
+--- a/tests/test_mixed_row_batch.py
++++ b/tests/test_mixed_row_batch.py
+@@ -7,7 +7,7 @@
+ from .test_row_batch_execution import TYPES, Y, ROOTS, TAIL_COUNT, NEGATIVE_COUNT, arena
+ from .test_array_row_parallel import data, config
+ 
+-MIXED_TYPES = dict(TYPES, q=dict(kind='vector', axes=['channel'], shape=['3']))
++MIXED_TYPES = dict(TYPES, q=dict(kind='vector', axes=['component'], shape=['3']))
+ 
+ 
+ def roots():

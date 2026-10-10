@@ -1,6 +1,9 @@
+#include "mask_validation.hpp"
 #include "calmetrics_engine/operators.hpp"
+#include "calmetrics_engine/matrix_backend.hpp"
 #include <algorithm>
 #include <cmath>
+#include <numeric>
 
 namespace calmetrics_engine::ops {
 
@@ -45,9 +48,20 @@ const std::array<Spec, operator_count> &registry() {
   return table;
 }
 const Spec &lookup(std::string_view name) {
-  for (const auto &spec : registry())
-    if (name == spec.name)
-      return spec;
+  // Immutable canonical names use a fixed index, without per-name heap nodes.
+  // Keep registry/opcode order untouched; the standard library sorts only IDs.
+  static const auto by_name = [] {
+    std::array<std::uint16_t, operator_count> ids{};
+    std::iota(ids.begin(), ids.end(), std::uint16_t(0));
+    std::sort(ids.begin(), ids.end(), [](auto left, auto right) {
+      return std::string_view(registry()[left].name) < std::string_view(registry()[right].name);
+    });
+    return ids;
+  }();
+  const auto it = std::lower_bound(by_name.begin(), by_name.end(), name,
+      [](auto id, std::string_view candidate) { return std::string_view(registry()[id].name) < candidate; });
+  if (it != by_name.end() && name == registry()[*it].name)
+    return registry()[*it];
   throw Error("UNKNOWN_OPERATOR");
 }
 const Spec &lookup(std::uint16_t id) {
@@ -292,7 +306,25 @@ void rolling_shape(Prepared &p) {
     p.scratch_indices = std::min(a[0].size(), static_cast<std::size_t>(a[1].scalar));
 }
 void infer_matrix_shape(Prepared &p) {
+  if (axis_path_operator(p.spec->op)) { axis_path_prepare(p); return; }
+  if (latent_operator(p.spec->op)) { prepare_latent(p); return; }
+  if (matrix_foundation(p.spec->op)) { prepare_foundation(p); return; }
   auto &a = p.args; const auto o = p.spec->op;
+  if (o == Op::affine_contract) {
+    numeric_arg(p, 0, 2, 3);
+    numeric_arg(p, 1, 2, 2);
+    numeric_arg(p, 2, 0, 1);
+    if (p.geometry(0) && p.geometry(1))
+      require(a[0].shape.dim[a[0].shape.rank - 1] == a[1].shape.dim[0], "SHAPE_MISMATCH");
+    if (p.geometry(1) && p.geometry(2) && a[2].shape.rank == 1)
+      require(a[2].shape.dim[0] == a[1].shape.dim[1], "SHAPE_MISMATCH");
+    p.output_geometry_known = p.geometry(0) && p.geometry(1);
+    if (p.output_geometry_known) {
+      p.output_shape = a[0].shape;
+      p.output_shape.dim[p.output_shape.rank - 1] = a[1].shape.dim[1];
+    }
+    return;
+  }
   numeric_arg(p, 0, 1, 2);
   if (o == Op::transpose) {
     numeric_arg(p, 0, 2, 2); p.output_geometry_known = p.geometry(0);
@@ -320,7 +352,7 @@ void infer_matrix_shape(Prepared &p) {
   if (o == Op::trace) { numeric_arg(p, 0, 2, 2); return; }
   if ((o == Op::covariance || o == Op::correlation) && p.count == 1) {
     numeric_arg(p, 0, 2, 2); p.output_geometry_known = p.geometry(0);
-    if (p.geometry(0)) { const auto cols = a[0].shape.dim[1]; p.output_shape = matrix_shape(cols, cols); p.scratch_doubles = cols * 2; }
+    if (p.geometry(0)) { const auto cols = a[0].shape.dim[1]; p.output_shape = matrix_shape(cols, cols); }
     return;
   }
   numeric_arg(p, 1, 1, 2);
@@ -338,6 +370,7 @@ void infer_matrix_shape(Prepared &p) {
     if (p.output_geometry_known) {
       require(a[0].shape.dim[1] == a[1].shape.dim[0], "SHAPE_MISMATCH");
       p.output_shape = matrix_shape(a[0].shape.dim[0], a[1].shape.dim[1]);
+      p.scratch_doubles = matmul_scratch_doubles(a[0].shape, a[1].shape);
     }
     return;
   }
@@ -405,16 +438,45 @@ void composite_shape(Prepared &p) {
 }
 } // namespace
 
-static void validate_data_structure(const Prepared &p) {
+static std::size_t validate_data_structure(const Prepared &p,
+                                         bool count_selected = false) {
+  std::size_t selected = 0;
   for (std::size_t arg = 0; arg < p.count; ++arg) {
     if (!p.payload(arg)) continue;
     const auto &value = p.args[arg];
     if (value.kind != Kind::mask) continue;
     if (value.shape.rank == 0)
       require(value.scalar == 0.0 || value.scalar == 1.0, "INVALID_MASK");
-    else
-      for (std::size_t i = 0; i < value.size(); ++i)
-        require(value.u(i) <= 1, "INVALID_MASK");
+#if defined(CALMETRICS_HAVE_HIGHWAY_ORDER)
+    else if (value.size() >= 128 && value.c_contiguous()) {
+      std::size_t count = 0;
+      const bool counting = count_selected && arg == 1;
+      require(mask_detail::validate_mask_bytes_highway(
+          static_cast<const std::uint8_t *>(value.data), value.size(),
+          counting ? &count : nullptr), "INVALID_MASK");
+      selected += count;
+    }
+#endif
+    else if (count_selected && arg == 1) {
+      const auto *data = value.c_contiguous()
+          ? static_cast<const std::uint8_t *>(value.data) : nullptr;
+      const auto n = value.size();
+      for (std::size_t i = 0; i < n; ++i) {
+        const auto byte = data ? data[i] : value.u(i);
+        require(byte <= 1, "INVALID_MASK");
+        selected += byte;
+      }
+    } else {
+      const auto n = value.size();
+      if (n && value.c_contiguous()) {
+        const auto *data = static_cast<const std::uint8_t *>(value.data);
+        require(std::all_of(data, data + n,
+            [](std::uint8_t byte) { return byte <= 1; }), "INVALID_MASK");
+      } else {
+        for (std::size_t i = 0; i < n; ++i)
+          require(value.u(i) <= 1, "INVALID_MASK");
+      }
+    }
   }
   if (p.spec->op == Op::gather && p.payload(1) &&
       p.args[1].kind == Kind::integer && p.args[1].shape.rank == 1) {
@@ -425,6 +487,7 @@ static void validate_data_structure(const Prepared &p) {
         require(static_cast<std::uint64_t>(indices.i(i)) < p.args[0].size(), "INDEX_OUT_OF_BOUNDS");
     }
   }
+  return selected;
 }
 
 static Prepared prepare_impl(const Spec &spec, const Value *args, std::size_t count,
@@ -478,6 +541,10 @@ static Prepared prepare_impl(const Spec &spec, const Value *args, std::size_t co
   return p;
 }
 
+void validate_payload_structure(const Prepared &p) {
+  (void)validate_data_structure(p);
+}
+
 Prepared prepare(const Spec &spec, const Value *args, std::size_t count) {
   return prepare_impl(spec, args, count, UINT32_MAX, UINT32_MAX, false);
 }
@@ -494,16 +561,46 @@ StructureResult validate_structure(const Spec &spec, const Value *args, std::siz
 }
 
 void execute(const Prepared &p, Output &out, Workspace &work, Isa isa,
-             Audit &audit) {
+             Audit &audit, const LatentFitScratch *fit_scratch) {
   require(p.spec && out.kind == p.output_kind && out.shape == p.output_shape,
           "OUTPUT_MISMATCH");
   require(out.shape.rank == 0 || out.shape.size() == 0 || out.data,
           "NULL_OUTPUT");
+  require(out.order == MemoryOrder::c || out.shape.rank < 2 || p.borrowed ||
+          p.spec->family == Family::elementwise || p.spec->op == Op::matmul ||
+          p.spec->op == Op::affine_contract ||
+          axis_path_operator(p.spec->op),
+          "UNSUPPORTED_OUTPUT_ORDER");
   require(supports_isa(isa), "UNSUPPORTED_ISA");
   audit = {};
-  validate_data_structure(p);
-  work.ensure(p.scratch_doubles, p.scratch_indices);
-  audit.scratch_bytes = p.scratch_doubles * sizeof(double) +
+  const bool masked_order = p.spec->op == Op::median_where ||
+                            p.spec->op == Op::quantile_where;
+  const auto selected = validate_data_structure(p, masked_order);
+  const bool skip_panels =
+      (p.spec->op == Op::matmul &&
+       (isa != Isa::automatic || !matmul_packed_eligible(p.args[0], p.args[1]))) ||
+      (p.spec->op == Op::cholesky && isa != Isa::automatic);
+  const auto doubles = skip_panels ? 0 : masked_order ? selected : p.scratch_doubles;
+  if (fit_scratch) {
+    require(!p.borrowed && (p.spec->op == Op::gaussian_mixture_em ||
+        p.spec->op == Op::gaussian_hmm_em), "FIT_SCRATCH_CONTRACT");
+    const auto cells = p.args[0].shape.dim[0] * p.args[1].size();
+    const auto matrices = latent_fit_matrix_count(p.spec->op, p.args[0].shape.dim[0], p.args[1].size());
+    const auto full_scratch = p.spec->op == Op::gaussian_hmm_em ?
+        latent_hmm_full_scratch(p.args[0].shape.dim[0],p.args[1].size()) : p.scratch_doubles;
+    require(fit_scratch->cells >= cells && fit_scratch->em && fit_scratch->alpha &&
+        fit_scratch->beta && fit_scratch->small &&
+        fit_scratch->small_count >= full_scratch - matrices * cells &&
+        p.scratch_indices == 0, "FIT_SCRATCH_CONTRACT");
+    if (p.spec->op == Op::gaussian_hmm_em)
+      require(fit_scratch->alpha != fit_scratch->em &&
+          fit_scratch->beta != fit_scratch->alpha &&
+          (matrices == 2 || fit_scratch->beta != fit_scratch->em),
+          "FIT_SCRATCH_CONTRACT");
+    // Graph reserved the live-value saves, missing matrices and small scratch
+    // together before acquiring pointers. Never resize it within this fit.
+  } else work.ensure(doubles, p.scratch_indices);
+  audit.scratch_bytes = doubles * sizeof(double) +
                         p.scratch_indices * sizeof(std::size_t);
   if (p.borrowed) {
     for (std::size_t i = 0; i < p.view.size(); ++i) {
@@ -514,6 +611,12 @@ void execute(const Prepared &p, Output &out, Workspace &work, Isa isa,
       else
         out.set(i, p.view.f(i));
     }
+    return;
+  }
+  if (latent_operator(p.spec->op)) { latent_execute(p, out, work, isa, audit, fit_scratch); return; }
+  if (axis_path_operator(p.spec->op)) { axis_path_execute(p, out, work, isa, audit); return; }
+  if (matrix_foundation(p.spec->op)) {
+    matrix_foundation_execute(p, out, work, isa, audit);
     return;
   }
   if (is_between(p.spec->op, Op::recursive_filter_adaptive, Op::scalar_kalman)) {
@@ -529,7 +632,7 @@ void execute(const Prepared &p, Output &out, Workspace &work, Isa isa,
     elementwise(p, out, work, isa, audit);
     break;
   case Family::reduction:
-    reduction(p, out, work, audit);
+    reduction(p, out, work, isa, audit);
     break;
   case Family::sequence:
   case Family::rolling:
@@ -551,7 +654,54 @@ void execute(const Prepared &p, Output &out, Workspace &work, Isa isa,
 }
 
 const char *shape_rule(const Spec &s) {
+  if (s.op == Op::quantiles_axis)
+    return "float64 rank 1..3 values, float64 rank 1 probabilities, explicit axis -> same rank with that axis replaced by probability count";
+  if (axis_path_operator(s.op))
+    return "float64 rank 1..3 values, explicit axis, float64 scalar initial -> same shape; ascending inclusive prefix on each independent line";
+  if (latent_operator(s.op)) {
+    if(s.op>=Op::variance_axis && s.op<=Op::softmax_axis) return "rank 1..3; explicit axis; reduction removes axis, softmax preserves shape; argmax int64";
+    if(s.op==Op::gaussian_log_density) return "X[N,D], means/variances[K,D] -> log density[N,K]";
+    if(s.op==Op::gaussian_mixture_em) return "X[N,D], weights[K], means/variances[K,D] -> nominal Gaussian mixture[K,2D+4]";
+    if(s.op==Op::gaussian_hmm_em) return "X[N,D], initial[K], transition[K,K], means/variances[K,D] -> nominal Gaussian HMM[K,2D+K+4]";
+    if(latent_view(s.op)) return "nominal fitted model -> borrowed readonly parameter vector/matrix";
+    if(s.op>=Op::em_iterations && s.op<=Op::em_converged) return "nominal fitted model -> int64 / float64 / bool scalar diagnostic";
+    if(s.op==Op::hmm_filter || s.op==Op::hmm_smooth) return "log emissions[N,K], initial[K], transition[K,K] -> posterior[N,K]";
+    if(s.op==Op::one_hot) return "int64 codes[N], literal K -> float64[N,K]";
+    if(s.op==Op::transition_counts) return "int64 codes[N], literal K -> float64[K,K]";
+    if(s.op==Op::partition_mean) return "float64[N,D], int64 permutation[N], literal K<=N -> float64[K,D]";
+    if(s.op==Op::sample_unique_indices) return "float64 rank 1..3 template, count<=axis0 -> int64[count]; template payload ignored";
+    return "float64 rank 1..3 values, unique int64 row indices, literal output length -> same trailing shape";
+  }
   switch (s.op) {
+  case Op::affine_contract:
+    return "float64 X[...,F] rank 2/3, coefficients[F,A], scalar or initial[A] -> X leading axes plus A";
+  case Op::expm1:
+    return "float64 scalar or rank 1..3 -> same shape and axes";
+  case Op::cholesky:
+    return "float64 square matrix -> same-shaped lower triangular matrix";
+  case Op::solve_multi:
+  case Op::triangular_solve:
+    return "square float64 coefficient matrix; matching RHS rows; solve_multi requires matrix RHS, triangular_solve permits vector/matrix -> RHS shape";
+  case Op::symmetric_eigh:
+    return "float64 square matrix -> shared [N,N+1] eigenpair rows; Typed IR nominal symmetric_eigh";
+  case Op::eigenvalues:
+  case Op::eigenvectors:
+    return "nominal symmetric_eigh [N,N+1] -> borrowed eigenvalues [N] / column eigenvectors [N,N]";
+  case Op::take_axis:
+    return "rank 1..3 and int64 rank 1 indices -> selected axis length equals index count";
+  case Op::slice_axis:
+    return "rank 1..3; explicit axis,start,stop,step -> borrowed strict half-open slice";
+  case Op::concatenate:
+    return "two same-dtype rank 1..3 arrays; non-concatenated dimensions equal";
+  case Op::stack:
+    return "two equal-shaped same-dtype rank 0..2 values; insert length-two axis";
+  case Op::broadcast_like:
+    return "same-dtype rank 1..3 arrays; right-aligned unit/equal dimensions -> borrowed template-shaped view";
+  case Op::sum_axis:
+  case Op::mean_axis:
+    return "float64 rank 1..3; remove explicit axis, without keepdims";
+  case Op::swap_axes:
+    return "rank 1..3; swap explicit axes -> borrowed view";
   case Op::state_select:
     return "equal-shaped rank 1 condition/valid masks; branches scalar code or equal-shaped int64 series -> int64 state series";
   case Op::equal:
@@ -638,6 +788,27 @@ const char *shape_rule(const Spec &s) {
 }
 const char *missing_policy(const Spec &s) {
   switch (s.op) {
+  case Op::cumulative_product_axis:
+    return "initial-seeded ascending inclusive multiplication; IEEE NaN/Inf/signed zero propagate; no dropping, reseeding or reassociation";
+  case Op::cumulative_max_axis:
+    return "initial-seeded strict current>state update; ties retain state, current NaN does not update, initial NaN persists; no implicit zero seed";
+  case Op::quantiles_axis:
+    return "one NaN-last sort per line, without filtering; finite probabilities in [0,1]; integer rank/singleton returns value directly, otherwise lo*(1-f)+hi*f; empty axis with real output -> INSUFFICIENT_SAMPLE";
+  case Op::affine_contract:
+    return "initial-first ascending last-axis sum; separate coefficients*values then add; IEEE NaN/Inf/overflow propagate; empty contracted axis returns initial";
+  case Op::expm1:
+    return "stable exp(x)-1 via std::expm1; signed zero preserved; NaN/+Inf preserved, -Inf -> -1; finite overflow -> +Inf";
+  case Op::cholesky:
+    return "finite exactly symmetric SPD input; no regularization; invalid symmetry/pivot -> DOMAIN_ERROR";
+  case Op::solve_multi:
+    return "finite coefficients/RHS; partial pivoting; absolute pivot<=1e-14 -> SINGULAR_MATRIX";
+  case Op::triangular_solve:
+    return "only consumed triangle is validated; unit diagonal ignores stored diagonal; finite RHS; absolute pivot<=1e-14 -> SINGULAR_MATRIX";
+  case Op::symmetric_eigh:
+    return "finite exactly symmetric input; scaled cyclic Jacobi; ascending stable eigenvalues; deterministic vector signs; exhausted sweeps -> NON_CONVERGENCE";
+  case Op::sum_axis:
+  case Op::mean_axis:
+    return "IEEE ordered sum, no drop/fill; empty sum=0; empty mean with nonempty output -> INSUFFICIENT_SAMPLE";
   case Op::state_select:
     return "valid=false emits -1; otherwise selects exact integer branch, including valid zero or explicit -1; no float-array coercion";
   case Op::cos:
@@ -691,6 +862,10 @@ const char *missing_policy(const Spec &s) {
   default:
     break;
   }
+  if (latent_operator(s.op))
+    return "finite numeric inputs required except scatter preserves values and sampling ignores template payload; category -1 unknown; Gaussian variance floor 1e-12; EM mass floor 1e-8 and variance floor 1e-5; no implicit probability normalization";
+  if (matrix_foundation(s.op))
+    return "exact dtype/value preservation; negative/out-of-range indices rejected; no implicit axis alignment or fill";
   if (s.family == Family::rolling)
     return "skip nonfinite observations, preserve positions; recursive state "
            "carries across "
@@ -766,7 +941,19 @@ std::vector<std::string> parameter_names(const Spec &spec, std::size_t arity) {
 }
 
 const char *default_rule(const Spec &s) {
+  if(s.op==Op::gaussian_mixture_em) return "max_iterations=100 [1,10000]; tolerance=1e-6 >=0; explicit initialization; zero tolerance disables early stop";
+  if(s.op==Op::gaussian_hmm_em) return "max_iterations=100 [1,10000]; tolerance=1e-5 >=0; explicit initialization; zero tolerance disables early stop";
+  if(s.op==Op::variance_axis) return "ddof=0; nonnegative integer < axis length";
+  if(s.op==Op::hmm_filter) return "predict_first=0; 0 consumes first observation directly, 1 first applies transition; subsequent observations always transition";
+  if(s.op==Op::scatter_rows) return "fill=NaN; exact row indices unique and in range";
+  if(s.op==Op::sample_unique_indices) return "seed=0; integer within +/- (2^53-1); local Park-Miller and deterministic linear collision advance";
   switch (s.op) {
+  case Op::symmetric_eigh:
+    return "tolerance=1e-12 in [1e-15,1e-3]; max_sweeps=32 integer [1,128]";
+  case Op::triangular_solve:
+    return "lower=1, unit_diagonal=0; both integer 0/1";
+  case Op::slice_axis:
+    return "all required; 0<=start<=stop<=axis extent; step>=1; no negative indices/clamping";
   case Op::state_select:
     return "all required; scalar branch finite integer [-1,2^53-1], int64 branch values>=-1; -1 is explicit unknown/no proposal; validity stays separate";
   case Op::recursive_filter_adaptive:
@@ -813,6 +1000,12 @@ const char *default_rule(const Spec &s) {
 }
 
 const char *granularity(const Spec &s) {
+  if (axis_path_operator(s.op)) return "primitive";
+  if (s.op == Op::affine_contract || s.op == Op::expm1) return "primitive";
+  if(s.op==Op::gaussian_mixture_em || s.op==Op::gaussian_hmm_em || s.op==Op::hmm_filter || s.op==Op::hmm_smooth) return "coupled_kernel";
+  if(latent_operator(s.op)) return "primitive";
+  if (s.op >= Op::cholesky && s.op <= Op::symmetric_eigh) return "coupled_kernel";
+  if (matrix_foundation(s.op)) return "primitive";
   switch (s.op) {
   case Op::recursive_filter_adaptive:
   case Op::linear_filter2:
@@ -858,6 +1051,12 @@ bool series_record_projection(Op op) noexcept {
 }
 
 const char *temporal_dependency(const Spec &s) {
+  if (axis_path_operator(s.op))
+    return s.op == Op::quantiles_axis ? "full_input" : "causal";
+  if (s.op == Op::affine_contract || s.op == Op::expm1) return "causal";
+  if(s.op==Op::hmm_filter) return "causal";
+  if(latent_operator(s.op)) return "full_input";
+  if (matrix_foundation(s.op)) return "full_input";
   if (s.op == Op::state_select) return "causal";
   if (s.op >= Op::local_extrema && s.op <= Op::drawdown_cycle_reference)
     return "full_input";

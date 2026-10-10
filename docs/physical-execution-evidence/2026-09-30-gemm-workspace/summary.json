@@ -1,0 +1,1010 @@
+{
+  "date": "2026-09-30",
+  "status": "prototype_screen_only_not_integrated",
+  "baseline_build_identity": "d6c399a4d200334b20fee44de176aa7ce31faaae77d8a4858c35fe75db8a06e3",
+  "production_code_changed": false,
+  "correctness": {
+    "fixtures": 802,
+    "calls": 4812,
+    "supported_calls": 3648,
+    "failures": 0
+  },
+  "sanitizers": {
+    "calls": 1296,
+    "failures": 0
+  },
+  "timing": [
+    {
+      "shape": [
+        1024,
+        1024,
+        1024
+      ],
+      "layout": "cc",
+      "median_ms": {
+        "current": 96.5917295,
+        "eigen48": 106.4245,
+        "eigen96": 101.264646,
+        "eigen192": 97.059375,
+        "njit": 8.2035
+      },
+      "eigen192_speedup_over_current": 0.9951818616182104,
+      "eigen192_over_njit": 11.831459133296764,
+      "saved_ms": -0.46764550000000327,
+      "all_checks": {
+        "current": {
+          "exact": true,
+          "tolerance_failures": 0,
+          "max_abs": 0.0
+        },
+        "eigen48": {
+          "exact": true,
+          "tolerance_failures": 0,
+          "max_abs": 0.0
+        },
+        "eigen96": {
+          "exact": true,
+          "tolerance_failures": 0,
+          "max_abs": 0.0
+        },
+        "eigen192": {
+          "exact": true,
+          "tolerance_failures": 0,
+          "max_abs": 0.0
+        },
+        "njit": {
+          "exact": false,
+          "tolerance_failures": 5,
+          "max_abs": 9.947598300641403e-14
+        }
+      }
+    },
+    {
+      "shape": [
+        1024,
+        1024,
+        1024
+      ],
+      "layout": "cf",
+      "median_ms": {
+        "current": 110.025646,
+        "eigen48": 99.723,
+        "eigen96": 95.6216665,
+        "eigen192": 93.40908300000001,
+        "njit": 8.3723125
+      },
+      "eigen192_speedup_over_current": 1.177890227227688,
+      "eigen192_over_njit": 11.156903543674465,
+      "saved_ms": 16.616562999999985,
+      "all_checks": {
+        "current": {
+          "exact": true,
+          "tolerance_failures": 0,
+          "max_abs": 0.0
+        },
+        "eigen48": {
+          "exact": true,
+          "tolerance_failures": 0,
+          "max_abs": 0.0
+        },
+        "eigen96": {
+          "exact": true,
+          "tolerance_failures": 0,
+          "max_abs": 0.0
+        },
+        "eigen192": {
+          "exact": true,
+          "tolerance_failures": 0,
+          "max_abs": 0.0
+        },
+        "njit": {
+          "exact": false,
+          "tolerance_failures": 5,
+          "max_abs": 9.947598300641403e-14
+        }
+      }
+    },
+    {
+      "shape": [
+        1024,
+        1024,
+        1024
+      ],
+      "layout": "fc",
+      "median_ms": {
+        "current": 103.34272899999999,
+        "eigen48": 111.1557085,
+        "eigen96": 103.104292,
+        "eigen192": 101.117417,
+        "njit": 8.540833
+      },
+      "eigen192_speedup_over_current": 1.0220072077197144,
+      "eigen192_over_njit": 11.83929213930304,
+      "saved_ms": 2.225311999999988,
+      "all_checks": {
+        "current": {
+          "exact": true,
+          "tolerance_failures": 0,
+          "max_abs": 0.0
+        },
+        "eigen48": {
+          "exact": true,
+          "tolerance_failures": 0,
+          "max_abs": 0.0
+        },
+        "eigen96": {
+          "exact": true,
+          "tolerance_failures": 0,
+          "max_abs": 0.0
+        },
+        "eigen192": {
+          "exact": true,
+          "tolerance_failures": 0,
+          "max_abs": 0.0
+        },
+        "njit": {
+          "exact": false,
+          "tolerance_failures": 5,
+          "max_abs": 9.947598300641403e-14
+        }
+      }
+    },
+    {
+      "shape": [
+        1024,
+        1024,
+        1024
+      ],
+      "layout": "ff",
+      "median_ms": {
+        "current": 222.503896,
+        "eigen48": 103.45483300000001,
+        "eigen96": 98.59385449999999,
+        "eigen192": 96.734792,
+        "njit": 9.2582495
+      },
+      "eigen192_speedup_over_current": 2.3001434271962875,
+      "eigen192_over_njit": 10.448496986390355,
+      "saved_ms": 125.769104,
+      "all_checks": {
+        "current": {
+          "exact": true,
+          "tolerance_failures": 0,
+          "max_abs": 0.0
+        },
+        "eigen48": {
+          "exact": true,
+          "tolerance_failures": 0,
+          "max_abs": 0.0
+        },
+        "eigen96": {
+          "exact": true,
+          "tolerance_failures": 0,
+          "max_abs": 0.0
+        },
+        "eigen192": {
+          "exact": true,
+          "tolerance_failures": 0,
+          "max_abs": 0.0
+        },
+        "njit": {
+          "exact": false,
+          "tolerance_failures": 5,
+          "max_abs": 9.947598300641403e-14
+        }
+      }
+    },
+    {
+      "shape": [
+        2048,
+        2048,
+        2048
+      ],
+      "layout": "cc",
+      "median_ms": {
+        "current": 1006.4052915,
+        "eigen48": 1008.9286045,
+        "eigen96": 871.934708,
+        "eigen192": 798.358875,
+        "njit": 74.1850415
+      },
+      "eigen192_speedup_over_current": 1.2605926019172768,
+      "eigen192_over_njit": 10.761723102898042,
+      "saved_ms": 208.04641649999996,
+      "all_checks": {
+        "current": {
+          "exact": true,
+          "tolerance_failures": 0,
+          "max_abs": 0.0
+        },
+        "eigen48": {
+          "exact": true,
+          "tolerance_failures": 0,
+          "max_abs": 0.0
+        },
+        "eigen96": {
+          "exact": true,
+          "tolerance_failures": 0,
+          "max_abs": 0.0
+        },
+        "eigen192": {
+          "exact": true,
+          "tolerance_failures": 0,
+          "max_abs": 0.0
+        },
+        "njit": {
+          "exact": false,
+          "tolerance_failures": 71,
+          "max_abs": 1.9895196601282805e-13
+        }
+      }
+    },
+    {
+      "shape": [
+        2048,
+        2048,
+        2048
+      ],
+      "layout": "ff",
+      "median_ms": {
+        "current": 4402.6908955,
+        "eigen48": 810.6843335,
+        "eigen96": 773.878854,
+        "eigen192": 753.314521,
+        "njit": 83.9959585
+      },
+      "eigen192_speedup_over_current": 5.844425897506362,
+      "eigen192_over_njit": 8.968461512347645,
+      "saved_ms": 3649.3763744999997,
+      "all_checks": {
+        "current": {
+          "exact": true,
+          "tolerance_failures": 0,
+          "max_abs": 0.0
+        },
+        "eigen48": {
+          "exact": true,
+          "tolerance_failures": 0,
+          "max_abs": 0.0
+        },
+        "eigen96": {
+          "exact": true,
+          "tolerance_failures": 0,
+          "max_abs": 0.0
+        },
+        "eigen192": {
+          "exact": true,
+          "tolerance_failures": 0,
+          "max_abs": 0.0
+        },
+        "njit": {
+          "exact": false,
+          "tolerance_failures": 71,
+          "max_abs": 1.9895196601282805e-13
+        }
+      }
+    },
+    {
+      "shape": [
+        4096,
+        4096,
+        4096
+      ],
+      "layout": "cc",
+      "median_ms": {
+        "current": 8443.87475,
+        "eigen48": 8921.471854,
+        "eigen96": 7356.5589585,
+        "eigen192": 6588.9099995,
+        "njit": 627.16025
+      },
+      "eigen192_speedup_over_current": 1.2815283181346786,
+      "eigen192_over_njit": 10.505943256926757,
+      "saved_ms": 1854.9647505000012,
+      "all_checks": {
+        "current": {
+          "exact": true,
+          "tolerance_failures": 0,
+          "max_abs": 0.0
+        },
+        "eigen48": {
+          "exact": true,
+          "tolerance_failures": 0,
+          "max_abs": 0.0
+        },
+        "eigen96": {
+          "exact": true,
+          "tolerance_failures": 0,
+          "max_abs": 0.0
+        },
+        "eigen192": {
+          "exact": true,
+          "tolerance_failures": 0,
+          "max_abs": 0.0
+        },
+        "njit": {
+          "exact": false,
+          "tolerance_failures": 768,
+          "max_abs": 3.126388037344441e-13
+        }
+      }
+    },
+    {
+      "shape": [
+        4096,
+        4096,
+        4096
+      ],
+      "layout": "ff",
+      "median_ms": {
+        "current": 47777.964937,
+        "eigen48": 6451.010792,
+        "eigen96": 6148.5726460000005,
+        "eigen192": 6010.5885,
+        "njit": 810.9783749999999
+      },
+      "eigen192_speedup_over_current": 7.948966218033392,
+      "eigen192_over_njit": 7.411527465205222,
+      "saved_ms": 41767.376437,
+      "all_checks": {
+        "current": {
+          "exact": true,
+          "tolerance_failures": 0,
+          "max_abs": 0.0
+        },
+        "eigen48": {
+          "exact": true,
+          "tolerance_failures": 0,
+          "max_abs": 0.0
+        },
+        "eigen96": {
+          "exact": true,
+          "tolerance_failures": 0,
+          "max_abs": 0.0
+        },
+        "eigen192": {
+          "exact": true,
+          "tolerance_failures": 0,
+          "max_abs": 0.0
+        },
+        "njit": {
+          "exact": false,
+          "tolerance_failures": 768,
+          "max_abs": 3.126388037344441e-13
+        }
+      }
+    },
+    {
+      "shape": [
+        2048,
+        256,
+        4096
+      ],
+      "layout": "cc",
+      "median_ms": {
+        "current": 302.29706250000004,
+        "eigen48": 206.9439585,
+        "eigen96": 194.47331250000002,
+        "eigen192": 188.2045205,
+        "njit": 36.5875625
+      },
+      "eigen192_speedup_over_current": 1.606215736459954,
+      "eigen192_over_njit": 5.143948042452951,
+      "saved_ms": 114.09254200000004,
+      "all_checks": {
+        "current": {
+          "exact": true,
+          "tolerance_failures": 0,
+          "max_abs": 0.0
+        },
+        "eigen48": {
+          "exact": true,
+          "tolerance_failures": 0,
+          "max_abs": 0.0
+        },
+        "eigen96": {
+          "exact": true,
+          "tolerance_failures": 0,
+          "max_abs": 0.0
+        },
+        "eigen192": {
+          "exact": true,
+          "tolerance_failures": 0,
+          "max_abs": 0.0
+        },
+        "njit": {
+          "exact": false,
+          "tolerance_failures": 0,
+          "max_abs": 4.263256414560601e-14
+        }
+      }
+    },
+    {
+      "shape": [
+        2048,
+        256,
+        4096
+      ],
+      "layout": "ff",
+      "median_ms": {
+        "current": 302.371083,
+        "eigen48": 197.2304585,
+        "eigen96": 189.905896,
+        "eigen192": 185.33241700000002,
+        "njit": 24.723021
+      },
+      "eigen192_speedup_over_current": 1.631506715848852,
+      "eigen192_over_njit": 7.4963499404057465,
+      "saved_ms": 117.03866599999998,
+      "all_checks": {
+        "current": {
+          "exact": true,
+          "tolerance_failures": 0,
+          "max_abs": 0.0
+        },
+        "eigen48": {
+          "exact": true,
+          "tolerance_failures": 0,
+          "max_abs": 0.0
+        },
+        "eigen96": {
+          "exact": true,
+          "tolerance_failures": 0,
+          "max_abs": 0.0
+        },
+        "eigen192": {
+          "exact": true,
+          "tolerance_failures": 0,
+          "max_abs": 0.0
+        },
+        "njit": {
+          "exact": false,
+          "tolerance_failures": 0,
+          "max_abs": 4.263256414560601e-14
+        }
+      }
+    }
+  ],
+  "memory": {
+    "design": {
+      "sizes": [
+        2048,
+        4096
+      ],
+      "layout": "ff",
+      "backends": [
+        "current",
+        "eigen192",
+        "njit"
+      ],
+      "kinds": [
+        "heap",
+        "rss"
+      ],
+      "cold_calls": 1,
+      "warm_calls": 2,
+      "cpu_budget": 1,
+      "scope": "full independent output ABI with actual panel allocation; prepared readonly inputs and NJIT compilation excluded; cold result released, warm previous result retained; RSS separate from heap"
+    },
+    "records": [
+      {
+        "backend": "current",
+        "size": 2048,
+        "layout": "ff",
+        "kind": "heap",
+        "measurement": {
+          "cold": {
+            "allocations": 2,
+            "frees": 0,
+            "allocated_bytes": 33554448,
+            "live_bytes": 33554448,
+            "peak_bytes": 33554448,
+            "untracked_frees": 0,
+            "table_overflows": 0
+          },
+          "released": {
+            "allocations": 2,
+            "frees": 1,
+            "allocated_bytes": 33554448,
+            "live_bytes": 16,
+            "peak_bytes": 33554448,
+            "untracked_frees": 0,
+            "table_overflows": 0
+          },
+          "warm_two_outputs_peak": {
+            "allocations": 4,
+            "frees": 2,
+            "allocated_bytes": 100663312,
+            "live_bytes": 33554448,
+            "peak_bytes": 67108880,
+            "untracked_frees": 0,
+            "table_overflows": 0
+          },
+          "warm_released": {
+            "allocations": 4,
+            "frees": 3,
+            "allocated_bytes": 100663312,
+            "live_bytes": 16,
+            "peak_bytes": 67108880,
+            "untracked_frees": 0,
+            "table_overflows": 0
+          }
+        },
+        "inputs_unchanged": true,
+        "threadpools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "limitations": "screen only: one fresh process per cell; no Scheduler/worker, mmap/stack excluded from requested heap; RSS has sampler and page noise; no new numerical acceptance claim"
+      },
+      {
+        "backend": "current",
+        "size": 2048,
+        "layout": "ff",
+        "kind": "rss",
+        "measurement": {
+          "cold_baseline": 250249216,
+          "cold_peak": 250347520,
+          "cold_delta": 98304,
+          "warm_baseline": 250347520,
+          "warm_peak": 250413056,
+          "warm_delta": 65536
+        },
+        "inputs_unchanged": true,
+        "threadpools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "limitations": "screen only: one fresh process per cell; no Scheduler/worker, mmap/stack excluded from requested heap; RSS has sampler and page noise; no new numerical acceptance claim"
+      },
+      {
+        "backend": "eigen192",
+        "size": 2048,
+        "layout": "ff",
+        "kind": "heap",
+        "measurement": {
+          "cold": {
+            "allocations": 3,
+            "frees": 1,
+            "allocated_bytes": 38797904,
+            "live_bytes": 33554448,
+            "peak_bytes": 38797904,
+            "untracked_frees": 0,
+            "table_overflows": 0
+          },
+          "released": {
+            "allocations": 3,
+            "frees": 2,
+            "allocated_bytes": 38797904,
+            "live_bytes": 16,
+            "peak_bytes": 38797904,
+            "untracked_frees": 0,
+            "table_overflows": 0
+          },
+          "warm_two_outputs_peak": {
+            "allocations": 7,
+            "frees": 5,
+            "allocated_bytes": 116393680,
+            "live_bytes": 33554448,
+            "peak_bytes": 72352336,
+            "untracked_frees": 0,
+            "table_overflows": 0
+          },
+          "warm_released": {
+            "allocations": 7,
+            "frees": 6,
+            "allocated_bytes": 116393680,
+            "live_bytes": 16,
+            "peak_bytes": 72352336,
+            "untracked_frees": 0,
+            "table_overflows": 0
+          }
+        },
+        "inputs_unchanged": true,
+        "threadpools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "limitations": "screen only: one fresh process per cell; no Scheduler/worker, mmap/stack excluded from requested heap; RSS has sampler and page noise; no new numerical acceptance claim"
+      },
+      {
+        "backend": "eigen192",
+        "size": 2048,
+        "layout": "ff",
+        "kind": "rss",
+        "measurement": {
+          "cold_baseline": 252248064,
+          "cold_peak": 257523712,
+          "cold_delta": 5275648,
+          "warm_baseline": 257523712,
+          "warm_peak": 262782976,
+          "warm_delta": 5259264
+        },
+        "inputs_unchanged": true,
+        "threadpools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "limitations": "screen only: one fresh process per cell; no Scheduler/worker, mmap/stack excluded from requested heap; RSS has sampler and page noise; no new numerical acceptance claim"
+      },
+      {
+        "backend": "njit",
+        "size": 2048,
+        "layout": "ff",
+        "kind": "heap",
+        "measurement": {
+          "cold": {
+            "allocations": 6,
+            "frees": 3,
+            "allocated_bytes": 39846188,
+            "live_bytes": 33554636,
+            "peak_bytes": 39846188,
+            "untracked_frees": 0,
+            "table_overflows": 0
+          },
+          "released": {
+            "allocations": 6,
+            "frees": 4,
+            "allocated_bytes": 39846188,
+            "live_bytes": 92,
+            "peak_bytes": 39846188,
+            "untracked_frees": 0,
+            "table_overflows": 0
+          },
+          "warm_two_outputs_peak": {
+            "allocations": 14,
+            "frees": 11,
+            "allocated_bytes": 119538380,
+            "live_bytes": 33554636,
+            "peak_bytes": 73400732,
+            "untracked_frees": 0,
+            "table_overflows": 0
+          },
+          "warm_released": {
+            "allocations": 14,
+            "frees": 12,
+            "allocated_bytes": 119538380,
+            "live_bytes": 92,
+            "peak_bytes": 73400732,
+            "untracked_frees": 0,
+            "table_overflows": 0
+          }
+        },
+        "inputs_unchanged": true,
+        "threadpools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "limitations": "screen only: one fresh process per cell; no Scheduler/worker, mmap/stack excluded from requested heap; RSS has sampler and page noise; no new numerical acceptance claim"
+      },
+      {
+        "backend": "njit",
+        "size": 2048,
+        "layout": "ff",
+        "kind": "rss",
+        "measurement": {
+          "cold_baseline": 249593856,
+          "cold_peak": 255950848,
+          "cold_delta": 6356992,
+          "warm_baseline": 255950848,
+          "warm_peak": 295878656,
+          "warm_delta": 39927808
+        },
+        "inputs_unchanged": true,
+        "threadpools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "limitations": "screen only: one fresh process per cell; no Scheduler/worker, mmap/stack excluded from requested heap; RSS has sampler and page noise; no new numerical acceptance claim"
+      },
+      {
+        "backend": "current",
+        "size": 4096,
+        "layout": "ff",
+        "kind": "heap",
+        "measurement": {
+          "cold": {
+            "allocations": 2,
+            "frees": 0,
+            "allocated_bytes": 134217744,
+            "live_bytes": 134217744,
+            "peak_bytes": 134217744,
+            "untracked_frees": 0,
+            "table_overflows": 0
+          },
+          "released": {
+            "allocations": 2,
+            "frees": 1,
+            "allocated_bytes": 134217744,
+            "live_bytes": 16,
+            "peak_bytes": 134217744,
+            "untracked_frees": 0,
+            "table_overflows": 0
+          },
+          "warm_two_outputs_peak": {
+            "allocations": 4,
+            "frees": 2,
+            "allocated_bytes": 402653200,
+            "live_bytes": 134217744,
+            "peak_bytes": 268435472,
+            "untracked_frees": 0,
+            "table_overflows": 0
+          },
+          "warm_released": {
+            "allocations": 4,
+            "frees": 3,
+            "allocated_bytes": 402653200,
+            "live_bytes": 16,
+            "peak_bytes": 268435472,
+            "untracked_frees": 0,
+            "table_overflows": 0
+          }
+        },
+        "inputs_unchanged": true,
+        "threadpools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "limitations": "screen only: one fresh process per cell; no Scheduler/worker, mmap/stack excluded from requested heap; RSS has sampler and page noise; no new numerical acceptance claim"
+      },
+      {
+        "backend": "current",
+        "size": 4096,
+        "layout": "ff",
+        "kind": "rss",
+        "measurement": {
+          "cold_baseline": 652869632,
+          "cold_peak": 653066240,
+          "cold_delta": 196608,
+          "warm_baseline": 653066240,
+          "warm_peak": 653099008,
+          "warm_delta": 32768
+        },
+        "inputs_unchanged": true,
+        "threadpools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "limitations": "screen only: one fresh process per cell; no Scheduler/worker, mmap/stack excluded from requested heap; RSS has sampler and page noise; no new numerical acceptance claim"
+      },
+      {
+        "backend": "eigen192",
+        "size": 4096,
+        "layout": "ff",
+        "kind": "heap",
+        "measurement": {
+          "cold": {
+            "allocations": 3,
+            "frees": 1,
+            "allocated_bytes": 144704080,
+            "live_bytes": 134217744,
+            "peak_bytes": 144704080,
+            "untracked_frees": 0,
+            "table_overflows": 0
+          },
+          "released": {
+            "allocations": 3,
+            "frees": 2,
+            "allocated_bytes": 144704080,
+            "live_bytes": 16,
+            "peak_bytes": 144704080,
+            "untracked_frees": 0,
+            "table_overflows": 0
+          },
+          "warm_two_outputs_peak": {
+            "allocations": 7,
+            "frees": 5,
+            "allocated_bytes": 434112208,
+            "live_bytes": 134217744,
+            "peak_bytes": 278921808,
+            "untracked_frees": 0,
+            "table_overflows": 0
+          },
+          "warm_released": {
+            "allocations": 7,
+            "frees": 6,
+            "allocated_bytes": 434112208,
+            "live_bytes": 16,
+            "peak_bytes": 278921808,
+            "untracked_frees": 0,
+            "table_overflows": 0
+          }
+        },
+        "inputs_unchanged": true,
+        "threadpools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "limitations": "screen only: one fresh process per cell; no Scheduler/worker, mmap/stack excluded from requested heap; RSS has sampler and page noise; no new numerical acceptance claim"
+      },
+      {
+        "backend": "eigen192",
+        "size": 4096,
+        "layout": "ff",
+        "kind": "rss",
+        "measurement": {
+          "cold_baseline": 653049856,
+          "cold_peak": 663601152,
+          "cold_delta": 10551296,
+          "warm_baseline": 663601152,
+          "warm_peak": 663666688,
+          "warm_delta": 65536
+        },
+        "inputs_unchanged": true,
+        "threadpools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "limitations": "screen only: one fresh process per cell; no Scheduler/worker, mmap/stack excluded from requested heap; RSS has sampler and page noise; no new numerical acceptance claim"
+      },
+      {
+        "backend": "njit",
+        "size": 4096,
+        "layout": "ff",
+        "kind": "heap",
+        "measurement": {
+          "cold": {
+            "allocations": 6,
+            "frees": 3,
+            "allocated_bytes": 140509484,
+            "live_bytes": 134217932,
+            "peak_bytes": 140509484,
+            "untracked_frees": 0,
+            "table_overflows": 0
+          },
+          "released": {
+            "allocations": 6,
+            "frees": 4,
+            "allocated_bytes": 140509484,
+            "live_bytes": 92,
+            "peak_bytes": 140509484,
+            "untracked_frees": 0,
+            "table_overflows": 0
+          },
+          "warm_two_outputs_peak": {
+            "allocations": 14,
+            "frees": 11,
+            "allocated_bytes": 421528268,
+            "live_bytes": 134217932,
+            "peak_bytes": 274727324,
+            "untracked_frees": 0,
+            "table_overflows": 0
+          },
+          "warm_released": {
+            "allocations": 14,
+            "frees": 12,
+            "allocated_bytes": 421528268,
+            "live_bytes": 92,
+            "peak_bytes": 274727324,
+            "untracked_frees": 0,
+            "table_overflows": 0
+          }
+        },
+        "inputs_unchanged": true,
+        "threadpools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "limitations": "screen only: one fresh process per cell; no Scheduler/worker, mmap/stack excluded from requested heap; RSS has sampler and page noise; no new numerical acceptance claim"
+      },
+      {
+        "backend": "njit",
+        "size": 4096,
+        "layout": "ff",
+        "kind": "rss",
+        "measurement": {
+          "cold_baseline": 653541376,
+          "cold_peak": 659898368,
+          "cold_delta": 6356992,
+          "warm_baseline": 659898368,
+          "warm_peak": 794132480,
+          "warm_delta": 134234112
+        },
+        "inputs_unchanged": true,
+        "threadpools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "limitations": "screen only: one fresh process per cell; no Scheduler/worker, mmap/stack excluded from requested heap; RSS has sampler and page noise; no new numerical acceptance claim"
+      }
+    ],
+    "status": "completed"
+  },
+  "scope": "Single compute thread, independent output ABI, no Scheduler/worker acceptance. Minor increases alone are not an adoption veto; actual resource budget remains mandatory. All fixed variants retained."
+}

@@ -1,0 +1,181 @@
+{
+  "status": "corrected_source_adopted_actual_rebuilt_passed",
+  "production_adopted": true,
+  "goal_complete": false,
+  "current_project_build_id": "fafa1da26cdab07fbf59f519ac76dc1524f1a689fc7622c5e14d818297450f98",
+  "measured_candidate_build_id": "c5ff52b0c544b22c26ce453f7bafeb1319e05eb61600391fb302fe25df0636db",
+  "corrected_candidate_build_id": "fafa1da26cdab07fbf59f519ac76dc1524f1a689fc7622c5e14d818297450f98",
+  "predecessor_complete_normal": 12891,
+  "predecessor_san_off": {
+    "full": 12891,
+    "native": 9,
+    "asan-tree": 156,
+    "asan-native": 9,
+    "off-tree": 156,
+    "off-native": 9
+  },
+  "latest_native": 9,
+  "latest_full": 12891,
+  "latest_validation_is_snapshot": false,
+  "original_unblocked_timing": {
+    "old": 2.6560939165,
+    "new": 3.031904208,
+    "njit": 0.817494813
+  },
+  "bounded_copy_complete_timing": {
+    "old": 2.652469167,
+    "new": 2.4572804795,
+    "njit": 0.894347458
+  },
+  "bounded_copy_heap": {
+    "old": 540179319,
+    "new": 404976825,
+    "njit": 541308880
+  },
+  "fresh_rss_samples": {
+    "new": [
+      406519808,
+      406454272,
+      406978560
+    ],
+    "njit": [
+      678608896,
+      677871616,
+      677920768
+    ]
+  },
+  "fresh_rss_medians": {
+    "new": 406519808,
+    "njit": 677920768
+  },
+  "numerical_scope": "KKT construction+solve complete task, CPU1, same data/preparation/output retention, warmed NJIT; not full QP/platform acceptance",
+  "first_error_issue": "C5 numeric-storage inner concat with raw int/mask inputs delayed GRAPH_STORAGE_KIND past independent DOMAIN_ERROR; repaired by same-position storage guard in fafa",
+  "native_fixture_repair": "Original caller output is initialized on failure; compare canonical failure bytes instead of demanding unchanged sentinel. Runtime source unchanged by this test correction.",
+  "remaining": [
+    "KKT remains 3.1-3.4 times slower than warmed NJIT",
+    "safe mature LU admission for important non-DD/general solve workloads",
+    "current-build complete-task coverage of other important medium/large platform workloads"
+  ],
+  "latest_san_off": {
+    "native": 9,
+    "full": 12891,
+    "asan-tree": 156,
+    "asan-native": 9,
+    "off-tree": 156,
+    "off-native": 9
+  },
+  "actual_root_related": 943,
+  "actual_root_native": 9,
+  "actual_transports": 4,
+  "actual_complete_measurement_jobs": 26,
+  "actual_complete_measurements": {
+    "f": {
+      "timing_seconds": {
+        "old": 2.6677543955,
+        "new": 2.470214437,
+        "njit": 0.729268229
+      },
+      "warm_heap_bytes": {
+        "old": 540179319,
+        "new": 404976825,
+        "njit": 541308880
+      },
+      "fresh_rss_bytes": {
+        "old": [
+          542261248,
+          542556160,
+          542294016
+        ],
+        "new": [
+          406913024,
+          407306240,
+          407240704
+        ],
+        "njit": [
+          679608320,
+          678150144,
+          678887424
+        ]
+      },
+      "fresh_rss_pids": {
+        "old": [
+          42113,
+          42288,
+          42336
+        ],
+        "new": [
+          42159,
+          42187,
+          42390
+        ],
+        "njit": [
+          42176,
+          42243,
+          42329
+        ]
+      },
+      "rss_medians_bytes": {
+        "old": 542294016,
+        "new": 407240704,
+        "njit": 678887424
+      },
+      "new_over_njit": 3.3872508615756525,
+      "new_old_bitwise": true,
+      "max_absolute_new_njit_difference": 1.4510614931850796e-13
+    },
+    "c": {
+      "timing_seconds": {
+        "old": 2.511664271,
+        "new": 2.4258811875,
+        "njit": 0.791439146
+      },
+      "warm_heap_bytes": {
+        "old": 540179293,
+        "new": 404943903,
+        "njit": 541308880
+      },
+      "fresh_rss_bytes": {
+        "old": [
+          541261824,
+          542785536,
+          541655040
+        ],
+        "new": [
+          407011328,
+          406994944,
+          406405120
+        ],
+        "njit": [
+          678805504,
+          678903808,
+          679149568
+        ]
+      },
+      "fresh_rss_pids": {
+        "old": [
+          45089,
+          45338,
+          45436
+        ],
+        "new": [
+          45127,
+          45241,
+          45930
+        ],
+        "njit": [
+          45187,
+          45300,
+          45389
+        ]
+      },
+      "rss_medians_bytes": {
+        "old": 541655040,
+        "new": 406994944,
+        "njit": 678903808
+      },
+      "new_over_njit": 3.0651518815572967,
+      "new_old_bitwise": true,
+      "max_absolute_new_njit_difference": 1.4510614931850796e-13
+    }
+  }
+}

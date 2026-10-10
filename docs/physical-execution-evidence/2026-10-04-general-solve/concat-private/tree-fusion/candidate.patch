@@ -1,0 +1,242 @@
+--- a/cpp/graph.cpp
++++ b/cpp/graph.cpp
+@@ -792,6 +792,54 @@
+       }
+     }
+     if (apply_scopes.empty() && rolling_scopes.empty()) {
++      // Input-backed views stay live across deferred nodes. Public operation
++      // roots can lose direct backing when finalization applies F layout, so
++      // they are deliberately not treated as persistent leaves here.
++      std::vector<bool> input_backed(nodes.size(), false);
++      for (std::size_t id = 0; id < nodes.size(); ++id) {
++        const auto &node = nodes[id];
++        input_backed[id] = node.kind == NodeKind::input || node.kind == NodeKind::constant ||
++            node.kind == NodeKind::parameter;
++        if (node.kind != NodeKind::operation) continue;
++        const auto op = static_cast<ops::Op>(node.opcode);
++        if (op == ops::Op::lag || op == ops::Op::transpose || ops::foundation_view(op) ||
++            ops::latent_view(op) || ops::series_record_projection(op))
++          input_backed[id] = input_backed[node.parents[0]];
++      }
++      // A private concatenation tree only moves bytes. Validate every logical
++      // node in order, but write persistent leaves once into the final rectangle.
++      // Descending order selects maximal, non-overlapping trees.
++      for (std::size_t reverse = 0; reverse < nodes.size(); ++reverse) {
++        const auto target = nodes.size() - 1 - reverse;
++        const auto &root = nodes[target];
++        if (root.kind != NodeKind::operation || root.storage != StorageKind::numeric ||
++            root.opcode != static_cast<std::uint16_t>(ops::Op::concatenate) ||
++            metadata->deferred_to[target] >= 0 || metadata->fused_from[target] >= 0) continue;
++        std::vector<std::uint32_t> pending{static_cast<std::uint32_t>(target)}, children;
++        bool valid = true;
++        while (valid && !pending.empty()) {
++          const auto id = pending.back(); pending.pop_back();
++          const auto &node = nodes[id];
++          const bool expand = id == target || (node.kind == NodeKind::operation &&
++              node.opcode == static_cast<std::uint16_t>(ops::Op::concatenate) &&
++              node.storage == StorageKind::numeric && uses[id] == 1 &&
++              metadata->root_destinations[id] < 0 && metadata->deferred_to[id] < 0 &&
++              metadata->fused_from[id] < 0);
++          if (!expand) { valid = input_backed[id]; continue; }
++          if (node.parent_count != 3) { valid = false; break; }
++          const auto &axis = nodes[node.parents[2]];
++          if (axis.kind != NodeKind::constant || !std::isfinite(axis.constant) ||
++              axis.constant != std::floor(axis.constant) || axis.constant < 0 || axis.constant > 2) {
++            valid = false; break;
++          }
++          if (id != target) children.push_back(id);
++          pending.push_back(node.parents[1]); pending.push_back(node.parents[0]);
++        }
++        if (!valid || children.empty()) continue;
++        if (metadata->concat_tree_roots.empty()) metadata->concat_tree_roots.assign(nodes.size(), 0);
++        metadata->concat_tree_roots[target] = 1;
++        for (auto child : children) metadata->deferred_to[child] = static_cast<std::int32_t>(target);
++      }
+       for (std::size_t i = 0; i < nodes.size(); ++i) {
+         const auto &solve = nodes[i];
+         if (solve.kind != NodeKind::operation || solve.parent_count != 2 ||
+@@ -1204,6 +1252,75 @@
+   if (program.nodes[consumer].opcode==static_cast<std::uint16_t>(ops::Op::argmax_axis))
+     return !shapes.empty() && shapes[producer].rank==2;
+   return true;
++}
++
++// No leaf lifetime is extended unless its backing is persistent. Intermediate
++// descriptors are geometry only and are never read by this byte-copy lowering.
++static void execute_concat_tree(const Program &program, std::size_t target,
++                                ops::Output &out, const Scratch &scratch) {
++  struct Piece { std::uint32_t id; std::array<std::size_t, 3> origin{}; };
++  std::vector<Piece> pending{{static_cast<std::uint32_t>(target), {}}};
++  const auto &metadata = *program.execution_metadata;
++  ops::require(out.kind == ops::Kind::number && out.order == ops::MemoryOrder::c,
++               "CONCAT_TREE_CONTRACT");
++  auto *destination = static_cast<double *>(out.data);
++  while (!pending.empty()) {
++    const auto piece = pending.back(); pending.pop_back();
++    const auto &node = program.nodes[piece.id];
++    if (piece.id == target || metadata.deferred_to[piece.id] == static_cast<std::int32_t>(target)) {
++      const auto axis = static_cast<std::size_t>(program.nodes[node.parents[2]].constant);
++      auto right = piece.origin;
++      right[axis] += scratch.values[node.parents[0]].shape.dim[axis];
++      pending.push_back({node.parents[1], right});
++      pending.push_back({node.parents[0], piece.origin});
++      continue;
++    }
++    const auto &leaf = scratch.values[piece.id];
++    ops::require(leaf.kind == ops::Kind::number && leaf.shape.rank == out.shape.rank,
++                 "CONCAT_TREE_CONTRACT");
++    for (int axis = 0; axis < out.shape.rank; ++axis)
++      ops::require(piece.origin[axis] <= out.shape.dim[axis] &&
++          leaf.shape.dim[axis] <= out.shape.dim[axis] - piece.origin[axis], "CONCAT_TREE_CONTRACT");
++    if (!leaf.size()) continue;
++    const auto last = leaf.shape.rank - 1;
++    const auto width = leaf.shape.dim[last];
++    const auto *source = static_cast<const double *>(leaf.data);
++    if (leaf.shape.rank == 2 && leaf.stride[0] == 1 &&
++        leaf.stride[1] >= static_cast<std::ptrdiff_t>(leaf.shape.dim[0]) &&
++        leaf.shape.dim[0] >= 32 && width >= 32) {
++      // F-backed rectangles need bounded tiles. Walking an entire C row of
++      // a large F input otherwise touches a new page for nearly every value.
++      constexpr std::size_t tile = 32;
++      for (std::size_t first_row = 0; first_row < leaf.shape.dim[0]; first_row += tile)
++        for (std::size_t first_col = 0; first_col < width; first_col += tile) {
++          const auto row_end = std::min(leaf.shape.dim[0], first_row + tile);
++          const auto col_end = std::min(width, first_col + tile);
++          for (auto col = first_col; col < col_end; ++col)
++            for (auto row = first_row; row < row_end; ++row)
++              destination[(piece.origin[0] + row) * out.shape.dim[1] + piece.origin[1] + col] =
++                  source[static_cast<std::ptrdiff_t>(row) + static_cast<std::ptrdiff_t>(col) * leaf.stride[1]];
++        }
++      continue;
++    }
++    for (std::size_t line = 0; line < leaf.size() / width; ++line) {
++      auto coordinates = piece.origin;
++      auto remaining = line;
++      std::ptrdiff_t source_offset = 0;
++      for (int axis = last - 1; axis >= 0; --axis) {
++        const auto coordinate = remaining % leaf.shape.dim[axis];
++        remaining /= leaf.shape.dim[axis];
++        coordinates[axis] += coordinate;
++        source_offset += static_cast<std::ptrdiff_t>(coordinate) * leaf.stride[axis];
++      }
++      std::size_t base = 0;
++      for (int axis = 0; axis <= last; ++axis) base = base * out.shape.dim[axis] + coordinates[axis];
++      if (leaf.stride[last] == 1)
++        std::memcpy(destination + base, source + source_offset, width * sizeof(double));
++      else
++        for (std::size_t j = 0; j < width; ++j)
++          destination[base + j] = source[source_offset + static_cast<std::ptrdiff_t>(j) * leaf.stride[last]];
++    }
++  }
+ }
+ 
+ // This proof controls both the physical arena size and the private execution.
+@@ -3220,6 +3337,16 @@
+           // the sole fused consumer never reads this placeholder's values.
+           for (std::size_t j=0;j<prepared.count;++j)
+             if (prepared.args[j].shape.rank>0) { placeholder.data=prepared.args[j].data; break; }
++          // Concatenation preparation never consumes numeric array elements.
++          // Keep a non-null descriptor even when its first leaf is empty.
++          if (spec.op == ops::Op::concatenate) {
++            // Raw native callers still receive the original storage error here,
++            // before an independent later node can fail. Python dtype binding
++            // alone cannot prove this native execution contract.
++            ops::require(prepared.output_shape.size() <= max_window, "GRAPH_OUTPUT_TOO_LARGE");
++            ops::require(prepared.output_kind == ops::Kind::number, "GRAPH_STORAGE_KIND");
++            placeholder.data = &scratch.values[node_index].scalar;
++          }
+           placeholder.kind = prepared.output_kind;
+           placeholder.shape = prepared.output_shape;
+           placeholder.set_contiguous_strides();
+@@ -3351,6 +3478,11 @@
+         } else if (!fused) {
+           ops::Audit operator_audit;
+           bool accelerated = false;
++          if (fuse_pairs && !program.execution_metadata->concat_tree_roots.empty() &&
++              program.execution_metadata->concat_tree_roots[node_index]) {
++            execute_concat_tree(program, node_index, native_output, scratch);
++            accelerated = true;
++          }
+           if constexpr (!Observe) {
+             if (!prebound_inputs && !scratch.isolate_errors && !input_failures &&
+                 native_output.order == ops::MemoryOrder::f &&
+--- a/cpp/include/calmetrics_engine/graph.hpp
++++ b/cpp/include/calmetrics_engine/graph.hpp
+@@ -269,6 +269,8 @@
+   std::vector<std::int32_t> deferred_to, fused_from;
+   // A private full filter can materialize only its sole, proven last-row slice.
+   std::vector<std::int32_t> filter_tail_source, filter_tail_slice;
++  // Deferred private concatenations expand persistent leaves into one C destination.
++  std::vector<std::uint8_t> concat_tree_roots;
+   // A sole materialized coefficient consumer may use its own dead arena as LU workspace.
+   std::vector<std::int32_t> solve_private_source;
+   // Terminal floating solve and its full private arithmetic producer.
+--- a/tests/graph_native_tests.cpp
++++ b/tests/graph_native_tests.cpp
+@@ -2,6 +2,7 @@
+ #include "affine_projection_native_cases.hpp"
+ #include "compact_path_native_cases.hpp"
+ 
++#include <algorithm>
+ #include <cmath>
+ #include <cstdint>
+ #include <cstdlib>
+@@ -65,6 +66,58 @@
+ } // namespace
+ 
+ int main() {
++  {
++    graph::Program program;
++    program.input_count = 2;
++    program.input_axes = {1, 1};
++    program.numeric_slots = 2;
++    program.output_kind = graph::OutputKind::typed;
++    program.root_outputs = {{graph::OutputDType::float64, 1, graph::OutputOrder::c},
++                            {graph::OutputDType::float64, 0, graph::OutputOrder::c}};
++    program.nodes = {
++        input_node(0), input_node(1), constant_node(0),
++        operation(ops::Op::concatenate, {0, 1, 2}, graph::StorageKind::numeric, 0),
++        constant_node(-1), operation(ops::Op::log, {4}),
++        operation(ops::Op::concatenate, {3, 0, 2}, graph::StorageKind::numeric, 1)};
++    program.roots = {6, 5};
++    program.finalize();
++    std::vector<double> numbers{1, 2};
++    std::vector<std::int64_t> integers{1, 2};
++    std::vector<std::uint8_t> masks{0, 1};
++    const std::int64_t begin = 0, end = 0;
++    for (auto kind : {ops::Kind::integer, ops::Kind::mask, ops::Kind::number}) {
++      ops::Value value;
++      value.kind = kind; value.shape = ops::vector_shape(2); value.set_contiguous_strides();
++      value.data = kind == ops::Kind::integer ? static_cast<const void *>(integers.data()) :
++          kind == ops::Kind::mask ? static_cast<const void *>(masks.data()) :
++                                   static_cast<const void *>(numbers.data());
++      const std::vector<ops::Value> inputs{value, value};
++      const auto layout = graph::result_layout(program, inputs, &begin, &end, 1);
++      std::vector<double> output((layout.bytes() + sizeof(double) - 1) / sizeof(double), 987.0);
++      const auto run = [&](bool observed) {
++        try {
++          if (observed)
++            graph::execute_observed(program, inputs, nullptr, 0, &begin, &end, 1,
++                output.data(), 2, &layout, [](std::optional<ops::Op>, const ops::Value &, bool) {});
++          else
++            graph::execute(program, inputs, nullptr, 0, &begin, &end, 1, output.data(), 2, &layout);
++        } catch (const ops::Error &error) { return std::string(error.what()); }
++        return std::string("OK");
++      };
++      const auto canonical = run(true);
++      const auto canonical_output = output;
++      std::fill(output.begin(), output.end(), 987.0);
++      const auto actual = run(false);
++      const auto expected = kind == ops::Kind::number ? "DOMAIN_ERROR" : "GRAPH_STORAGE_KIND";
++      // Both entries initialize failure output slots. Preserve those original
++      // bytes; a failed call does not promise to leave caller output untouched.
++      if (canonical != expected || actual != canonical ||
++          std::memcmp(output.data(), canonical_output.data(), output.size() * sizeof(double)) != 0) {
++        std::cerr << "concat native first error: " << canonical << " / " << actual << '\n';
++        return 1;
++      }
++    }
++  }
+   {
+     graph::Program program;
+     program.input_count = 1;

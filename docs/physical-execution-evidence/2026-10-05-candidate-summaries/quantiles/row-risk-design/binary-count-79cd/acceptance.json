@@ -1,0 +1,304 @@
+{
+  "status": "isolated_time_memory_and_quality_passed_actual_adoption_pending",
+  "build_id": "79cd4f6010c6e096798a25c00aa52b00436c1f075c1f2bbdbe8830dd1c65f58d",
+  "baseline_build_id": "3fce0fd2c641710d087659138bc87d57d7f0342387597a44f071e817b5a3898a",
+  "related": 1297,
+  "native": 9,
+  "new_cases": 120,
+  "timing": [
+    {
+      "load": "many-short-large",
+      "shape": [
+        262144,
+        252,
+        30
+      ],
+      "layout": "C",
+      "medians_seconds": {
+        "current": 1.0550506249999998,
+        "candidate": 0.9739355415,
+        "njit64": 1.1814464585,
+        "njit512": 1.136400708
+      },
+      "maximum_absolute_errors": {
+        "current": [
+          1.734723475976807e-18,
+          4.336808689942018e-19,
+          2.220446049250313e-16
+        ],
+        "candidate": [
+          1.734723475976807e-18,
+          4.336808689942018e-19,
+          2.220446049250313e-16
+        ],
+        "njit64": [
+          1.734723475976807e-18,
+          6.505213034913027e-19,
+          2.220446049250313e-16
+        ],
+        "njit512": [
+          1.734723475976807e-18,
+          6.505213034913027e-19,
+          2.220446049250313e-16
+        ]
+      },
+      "strongest_njit_seconds": 1.136400708
+    },
+    {
+      "load": "many-short-large",
+      "shape": [
+        262144,
+        252,
+        30
+      ],
+      "layout": "F",
+      "medians_seconds": {
+        "current": 1.2008229165,
+        "candidate": 1.11828275,
+        "njit64": 1.1862136455,
+        "njit512": 1.2138143750000001
+      },
+      "maximum_absolute_errors": {
+        "current": [
+          1.734723475976807e-18,
+          4.336808689942018e-19,
+          2.220446049250313e-16
+        ],
+        "candidate": [
+          1.734723475976807e-18,
+          4.336808689942018e-19,
+          2.220446049250313e-16
+        ],
+        "njit64": [
+          1.734723475976807e-18,
+          6.505213034913027e-19,
+          2.220446049250313e-16
+        ],
+        "njit512": [
+          1.734723475976807e-18,
+          6.505213034913027e-19,
+          2.220446049250313e-16
+        ]
+      },
+      "strongest_njit_seconds": 1.1862136455
+    },
+    {
+      "load": "regular-history",
+      "shape": [
+        16384,
+        2520,
+        30
+      ],
+      "layout": "C",
+      "medians_seconds": {
+        "current": 0.632465,
+        "candidate": 0.563388875,
+        "njit64": 0.41765406250000003,
+        "njit512": 0.41994939600000003
+      },
+      "maximum_absolute_errors": {
+        "current": [
+          3.469446951953614e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "candidate": [
+          3.469446951953614e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "njit64": [
+          4.336808689942018e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "njit512": [
+          4.336808689942018e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ]
+      },
+      "strongest_njit_seconds": 0.41765406250000003
+    },
+    {
+      "load": "regular-history",
+      "shape": [
+        16384,
+        2520,
+        30
+      ],
+      "layout": "F",
+      "medians_seconds": {
+        "current": 0.6342617085,
+        "candidate": 0.568892438,
+        "njit64": 0.4202366875,
+        "njit512": 0.421924354
+      },
+      "maximum_absolute_errors": {
+        "current": [
+          3.469446951953614e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "candidate": [
+          3.469446951953614e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "njit64": [
+          4.336808689942018e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "njit512": [
+          4.336808689942018e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ]
+      },
+      "strongest_njit_seconds": 0.4202366875
+    },
+    {
+      "load": "regular-history-large",
+      "shape": [
+        262144,
+        2520,
+        30
+      ],
+      "layout": "C",
+      "medians_seconds": {
+        "current": 10.113597146,
+        "candidate": 9.0704081455,
+        "njit64": 8.496011333,
+        "njit512": 8.5680545625
+      },
+      "maximum_absolute_errors": {
+        "current": [
+          3.469446951953614e-18,
+          1.3010426069826053e-18,
+          2.220446049250313e-16
+        ],
+        "candidate": [
+          3.469446951953614e-18,
+          1.3010426069826053e-18,
+          2.220446049250313e-16
+        ],
+        "njit64": [
+          3.469446951953614e-18,
+          1.3010426069826053e-18,
+          2.220446049250313e-16
+        ],
+        "njit512": [
+          3.469446951953614e-18,
+          1.3010426069826053e-18,
+          2.220446049250313e-16
+        ]
+      },
+      "strongest_njit_seconds": 8.496011333
+    },
+    {
+      "load": "regular-history-large",
+      "shape": [
+        262144,
+        2520,
+        30
+      ],
+      "layout": "F",
+      "medians_seconds": {
+        "current": 11.1659570625,
+        "candidate": 10.113029,
+        "njit64": 8.568437292,
+        "njit512": 8.571976853999999
+      },
+      "maximum_absolute_errors": {
+        "current": [
+          3.469446951953614e-18,
+          1.3010426069826053e-18,
+          2.220446049250313e-16
+        ],
+        "candidate": [
+          3.469446951953614e-18,
+          1.3010426069826053e-18,
+          2.220446049250313e-16
+        ],
+        "njit64": [
+          3.469446951953614e-18,
+          1.3010426069826053e-18,
+          2.220446049250313e-16
+        ],
+        "njit512": [
+          3.469446951953614e-18,
+          1.3010426069826053e-18,
+          2.220446049250313e-16
+        ]
+      },
+      "strongest_njit_seconds": 8.568437292
+    }
+  ],
+  "memory": true,
+  "full_regression": 13823,
+  "sanitizers": {
+    "related": 1297,
+    "native": 9
+  },
+  "libraries_off": {
+    "related": 1297,
+    "native": 9
+  },
+  "production_adopted": false,
+  "whole_goal_complete": false,
+  "finding": "Full regular-history request saves about1second per call. Requested heap remains142446504B for C/F, unchanged from actual3fce and not materially below strong NJIT. All required isolated quality passed; actual source still3fce.",
+  "memory_reference": "large regular-history uses fastest measured NJIT64 configuration for both time and fresh memory; both64/512 time controls preserved; no hybrid reference",
+  "review": "same positive binary mathematical sum, original preparation and payload checks, exact count<=2^53, bit-only scalar recognition, unchanged independent output/arena/admission/Excel contracts",
+  "quality_case_counts": {
+    "full": 13823,
+    "asan-related": 1297,
+    "asan-native": 9,
+    "off-related": 1297,
+    "off-native": 9
+  },
+  "memory_observations": [
+    {
+      "backend": "current",
+      "layout": "C",
+      "requested_heap_warm_peak_bytes": 142446504,
+      "rss_delta_median_bytes": 152158208,
+      "rss_absolute_median_bytes": 238403584
+    },
+    {
+      "backend": "candidate",
+      "layout": "C",
+      "requested_heap_warm_peak_bytes": 142446504,
+      "rss_delta_median_bytes": 152420352,
+      "rss_absolute_median_bytes": 237862912
+    },
+    {
+      "backend": "njit64",
+      "layout": "C",
+      "requested_heap_warm_peak_bytes": 141420064,
+      "rss_delta_median_bytes": 159825920,
+      "rss_absolute_median_bytes": 318177280
+    },
+    {
+      "backend": "current",
+      "layout": "F",
+      "requested_heap_warm_peak_bytes": 142446504,
+      "rss_delta_median_bytes": 152715264,
+      "rss_absolute_median_bytes": 238796800
+    },
+    {
+      "backend": "candidate",
+      "layout": "F",
+      "requested_heap_warm_peak_bytes": 142446504,
+      "rss_delta_median_bytes": 152240128,
+      "rss_absolute_median_bytes": 238895104
+    },
+    {
+      "backend": "njit64",
+      "layout": "F",
+      "requested_heap_warm_peak_bytes": 140953848,
+      "rss_delta_median_bytes": 154566656,
+      "rss_absolute_median_bytes": 316424192
+    }
+  ]
+}

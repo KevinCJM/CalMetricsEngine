@@ -1,0 +1,31 @@
+{
+  "runtime_packages": {
+    "numpy": "1.26.4",
+    "numba": "0.60.0",
+    "llvmlite": "0.43.0",
+    "pytest": "8.4.1",
+    "psutil": "6.1.0"
+  },
+  "build_packages": {
+    "scikit-build-core": "1.1.1",
+    "pybind11": "3.1.0",
+    "ninja": "1.13.2"
+  },
+  "cpu_budget": 1,
+  "warm_njit_fastmath": false,
+  "native_tests": {
+    "passed": 9,
+    "failed": 0,
+    "current_build": "/private/tmp/calmetrics-multiroot-matmul-v65-20261008/baseline-build",
+    "command": "ctest --test-dir baseline-build --output-on-failure",
+    "terminal_log_sha256": "5b6c2845dcaadba51250cc0870e32ab1ef2fde340a6eb2e93a66573577d67590"
+  },
+  "related_python": {
+    "tests": 206,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "full_regression_rerun": false,
+  "production_code_changed": false
+}

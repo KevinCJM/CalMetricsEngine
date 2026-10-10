@@ -1,0 +1,11 @@
+# Historical machine evidence is preserved byte-for-byte. Keep it from drowning
+# source and test changes in generated diffs; Markdown explanations remain readable.
+docs/physical-execution-evidence/** -text -whitespace
+docs/physical-execution-evidence/**/*.json -diff linguist-generated=true
+docs/physical-execution-evidence/**/*.xml -diff linguist-generated=true
+docs/physical-execution-evidence/**/*.log -diff linguist-generated=true
+docs/physical-execution-evidence/**/*.txt -diff linguist-generated=true
+docs/physical-execution-evidence/**/*.patch -diff linguist-generated=true
+docs/physical-execution-evidence/**/*.diff -diff linguist-generated=true
+# Preserve unmodified upstream license notices, including their whitespace.
+third_party/eigen/COPYING.* -text -whitespace

@@ -1,0 +1,50 @@
+{
+  "build_id": "850871ebcff4f6f2e089ae96029f736ccc0c94282cd06824193f839a410906b3",
+  "baseline_build_id": "2ebc5d22f827d240a99a0507b8153213b9fd9216290c22e0bec01f96285567a0",
+  "production_sources_changed_vs_baseline": 2,
+  "python_passed": 10383,
+  "new_regressions": 50,
+  "native_passed": 9,
+  "native_total": 9,
+  "asan_ubsan_passed": 9,
+  "asan_ubsan_total": 9,
+  "leak_sanitizer": false,
+  "both_libraries_off_native_passed": 9,
+  "both_libraries_off_python_passed": 410,
+  "direct_fixture_operators": 185,
+  "direct_fixture_isa": [
+    "scalar",
+    "auto"
+  ],
+  "excel": {
+    "status": "PASS_AGAINST_RECALCULATED_SNAPSHOT",
+    "checked_values": 3056,
+    "failures": [],
+    "newly_recalculated": false,
+    "cases": 469,
+    "snapshot_engine": "Microsoft Excel 16.89.1 (16.89.24091630), macOS desktop full dependency rebuild",
+    "snapshot_sha256": "eab3361371bfff228fe3e6c1ea458fcb3e3d0a7a9b29cbda438c6e5604fb32b1",
+    "current_source_sha256": "1c6ad6121ea0c018228cacdfad9084b525b5d721223c2826e6f0b467995ded9b",
+    "source_identity_differences": 938,
+    "allowed_identity_changes": "Only Readme B4 export identity and B9 build identity; formula and input cells unchanged.",
+    "engine_build_id": "850871ebcff4f6f2e089ae96029f736ccc0c94282cd06824193f839a410906b3",
+    "historical_snapshot": "/private/tmp/calmetrics-reaccept-20260929/excel-ms"
+  },
+  "timing_cases": 35,
+  "memory_cases": 13,
+  "memory_children": 78,
+  "heap_probe": {
+    "path": "/private/tmp/calmetrics-reaccept-20260929/heap_probe.dylib",
+    "sha256": "74421dbfff14b56b730553c7b0b0ce9b38a136de053f132069e1b948decd3382",
+    "controls": "prior frozen controls, not newly rerun",
+    "coverage": "malloc family; not mmap/Python arena internals/process tree"
+  },
+  "self_review": {
+    "unresolved_scoped_findings": 0,
+    "test_import": "fixed; first failure log retained",
+    "provenance_note": "comments clarified; executed timing bytes retained"
+  },
+  "scope": "two physical optimizations on macOS arm64; not all-operator performance acceptance",
+  "committed": false,
+  "pushed": false
+}

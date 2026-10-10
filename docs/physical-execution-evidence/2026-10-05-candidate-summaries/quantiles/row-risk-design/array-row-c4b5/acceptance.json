@@ -1,0 +1,29 @@
+{
+  "status": "rejected_empty_axis_stride_pointer_arithmetic",
+  "build_id": "c4b53ac4c3c0470dfb7cefcf2a13e20b63fc022015d7a3a6b7be7a63f332b6f3",
+  "changed_files": [
+    "cpp/graph.cpp",
+    "cpp/include/calmetrics_engine/graph.hpp",
+    "cpp/planner.cpp",
+    "cpp/native_runtime.cpp",
+    "cpp/native_api_bindings.cpp",
+    "tests/row_batch_native_cases.hpp",
+    "tests/test_array_row_parallel.py"
+  ],
+  "new_python_regressions": 73,
+  "related": 1569,
+  "native": 9,
+  "full_regression": null,
+  "full_expected": 14095,
+  "quality_live_handle": null,
+  "formal_time": false,
+  "formal_memory": false,
+  "production_adopted": false,
+  "actual_source_build_id": "88eac09a9e740895200c37fbf6caf5ef74e995873864d22e0830c492339872da",
+  "whole_goal_complete": false,
+  "previous_failures_preserved": true,
+  "remaining": "full/SAN/OFF; all frozen CPU1/2/4 loads and both NI blocks; complete peaks; actual adoption review",
+  "full_intentionally_interrupted": true,
+  "reason": "empty bounds admit arbitrary stride; nonnull K0 pointer clipping can overflow; V20b guards both paths",
+  "successor": "source-v20b"
+}

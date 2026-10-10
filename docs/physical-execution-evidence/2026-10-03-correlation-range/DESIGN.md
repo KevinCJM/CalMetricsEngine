@@ -1,0 +1,13 @@
+# Correlation source exponent range
+
+Baseline de5d4068db78f42ee1521faa1eb95d81031e3622e6dcc4218a777a79165a330d; verified all 77 native build inputs. Scope is one existing admission check; preserve covariance, direct operators, graph qualification, canonical math and all error/rounding/resource rules. No commit/push.
+
+Reuse the same Accelerate DSYRK, Eigen panel and normalized error certificate. The old absolute source cap 1e4 protects covariance, but is unnecessarily small for a dimensionless correlation certificate. For correlation alone admit finite abs(x)<=2^400. Keep nonzero centered abs(delta)>=2^-400, n<=1e6, and exact canonical diagonals/normalization. No rescaling, clipping, new kernel or buffer.
+
+Range argument: the canonical nearest-rounded Welford means have n*u<2^-32. For bounded inputs A=2^400 the standard error factor is far below one; a loose abs(mean)<2A and abs(delta)<4A suffice. Each square is <2^804, and all positive norm folds (n<2^20), inflated bounds and cross norms remain <2^830. Nonzero centered products are >=2^-800; a nonzero canonical variance is >2^-820. Its square root and pairwise standard-deviation product stay normal. The existing positive error expressions and normalized certificate thus retain a generous margin to binary64 overflow/underflow. Cancellation/sign uncertainty and dense uncertainty still replay canonical; zero/nonfinite standard deviations still reject. This is the existing tested BLAS error model, not a new claim of vendor-certified error bounds.
+
+Outside the larger cap, execute canonical unchanged. Test exact cap and nextafter outside it, huge/tiny mixed column scales, long panel/tail inputs, failure recovery and all transport lanes; retain original tolerance and exact diagonal/sign/zero checks. Extend the existing correlation/native tests rather than add a framework. Covariance source admission must remain unchanged.
+
+Compare actual previous/new wheels and warmed compact NJIT on full ordinary requests, one CPU, balanced rounds, independent results. Include 2048/4096 large sources, normal and rejected controls; measure fresh incremental heap and RSS on newly accepted cases. Report real panel/library costs and small differences without treating KB/ms noise as independent vetoes. Full regression, native, sanitizers, OFF build, direct fixtures, frozen Excel snapshot and source/wheel identity close out. Excel formulas and AST/IPC remain unchanged; no fresh Excel-app claim.
+
+Canonical F-path review: its existing safety limit is sqrt(DBL_MAX/(8*n)); throughout n<=1e6 this is above 2^500, hence the new 2^400 domain remains in the same fused F Welford/fixed-reduction implementation. The extended guard does not accidentally certify against a different canonical reduction path.

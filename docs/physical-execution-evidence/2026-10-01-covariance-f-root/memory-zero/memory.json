@@ -1,0 +1,1234 @@
+[
+  {
+    "case": {
+      "n": 2048,
+      "d": 2048,
+      "layout": "c",
+      "pattern": "zeros"
+    },
+    "backend": "old_ordinary",
+    "measure": "heap",
+    "report": {
+      "setup_heap": {
+        "allocations": 152,
+        "frees": 98,
+        "allocated_bytes": 12904,
+        "live_bytes": 4472,
+        "peak_bytes": 7897,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_heap": {
+        "allocations": 215,
+        "frees": 128,
+        "allocated_bytes": 67128392,
+        "live_bytes": 67116730,
+        "peak_bytes": 67116842,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_retained_heap": {
+        "allocations": 215,
+        "frees": 133,
+        "allocated_bytes": 67128392,
+        "live_bytes": 33561752,
+        "peak_bytes": 67116842,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_baseline_heap": {
+        "allocations": 250,
+        "frees": 168,
+        "allocated_bytes": 234904082,
+        "live_bytes": 33561752,
+        "peak_bytes": 67116842,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_heap": {
+        "allocations": 264,
+        "frees": 177,
+        "allocated_bytes": 302014358,
+        "live_bytes": 67116730,
+        "peak_bytes": 100671804,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_retained_heap": {
+        "allocations": 264,
+        "frees": 182,
+        "allocated_bytes": 302014358,
+        "live_bytes": 33561752,
+        "peak_bytes": 100671804,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "heap_schema": "continuous-live-1",
+      "cold_peak_bytes": 67116842,
+      "warm_peak_bytes": 100671804,
+      "build": {
+        "version": "0.3.0",
+        "compiler": "AppleClang 17.0.0.17000603",
+        "architecture": "arm64",
+        "cpu_policy": "baseline",
+        "thread_backend": "persistent_cpp_native_scheduler",
+        "cxx_standard": 17,
+        "execution_backend": "pybind11_aot",
+        "graph_execution_backend": "native_graph_interpreter",
+        "scheduler_backend": "bounded_thread_process_pool",
+        "scheduler_scope": "process_wide_cpp_cpu_admission",
+        "legacy_finance_scheduler": "shared_native_scheduler",
+        "coroutine_backend": "asyncio_orchestration_only",
+        "process_transport": "shared_memory_or_serialized_small_input",
+        "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+        "runtime_jit": 0,
+        "compiler_backend": "cpp_restricted_ast",
+        "planner_backend": "cpp",
+        "native_scheduler_backend": "persistent_cpp_threads_processes",
+        "native_worker_runtime": "standalone_no_python",
+        "python_role": "numpy_binding_async_adapter",
+        "input_memory_policy": "exact_dtype_strided_zero_copy"
+      }
+    }
+  },
+  {
+    "case": {
+      "n": 2048,
+      "d": 2048,
+      "layout": "c",
+      "pattern": "zeros"
+    },
+    "backend": "old_ordinary",
+    "measure": "rss",
+    "report": {
+      "rss_baseline": 144211968,
+      "rss_peak": 177766400,
+      "rss_delta": 33554432,
+      "rss_idle_delta": 0,
+      "rss_schema": "warm-monitor-control-1",
+      "build": {
+        "version": "0.3.0",
+        "compiler": "AppleClang 17.0.0.17000603",
+        "architecture": "arm64",
+        "cpu_policy": "baseline",
+        "thread_backend": "persistent_cpp_native_scheduler",
+        "cxx_standard": 17,
+        "execution_backend": "pybind11_aot",
+        "graph_execution_backend": "native_graph_interpreter",
+        "scheduler_backend": "bounded_thread_process_pool",
+        "scheduler_scope": "process_wide_cpp_cpu_admission",
+        "legacy_finance_scheduler": "shared_native_scheduler",
+        "coroutine_backend": "asyncio_orchestration_only",
+        "process_transport": "shared_memory_or_serialized_small_input",
+        "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+        "runtime_jit": 0,
+        "compiler_backend": "cpp_restricted_ast",
+        "planner_backend": "cpp",
+        "native_scheduler_backend": "persistent_cpp_threads_processes",
+        "native_worker_runtime": "standalone_no_python",
+        "python_role": "numpy_binding_async_adapter",
+        "input_memory_policy": "exact_dtype_strided_zero_copy"
+      }
+    }
+  },
+  {
+    "case": {
+      "n": 2048,
+      "d": 2048,
+      "layout": "c",
+      "pattern": "zeros"
+    },
+    "backend": "new_ordinary",
+    "measure": "heap",
+    "report": {
+      "setup_heap": {
+        "allocations": 152,
+        "frees": 98,
+        "allocated_bytes": 12896,
+        "live_bytes": 4464,
+        "peak_bytes": 7897,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_heap": {
+        "allocations": 214,
+        "frees": 128,
+        "allocated_bytes": 33573952,
+        "live_bytes": 33562290,
+        "peak_bytes": 33562402,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_retained_heap": {
+        "allocations": 214,
+        "frees": 133,
+        "allocated_bytes": 33573952,
+        "live_bytes": 7312,
+        "peak_bytes": 33562402,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_baseline_heap": {
+        "allocations": 249,
+        "frees": 168,
+        "allocated_bytes": 201349642,
+        "live_bytes": 7312,
+        "peak_bytes": 33562402,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_heap": {
+        "allocations": 263,
+        "frees": 177,
+        "allocated_bytes": 268459918,
+        "live_bytes": 33562290,
+        "peak_bytes": 67117364,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_retained_heap": {
+        "allocations": 263,
+        "frees": 182,
+        "allocated_bytes": 268459918,
+        "live_bytes": 7312,
+        "peak_bytes": 67117364,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "heap_schema": "continuous-live-1",
+      "cold_peak_bytes": 33562402,
+      "warm_peak_bytes": 67117364,
+      "build": {
+        "version": "0.3.0",
+        "compiler": "AppleClang 17.0.0.17000603",
+        "architecture": "arm64",
+        "cpu_policy": "baseline",
+        "thread_backend": "persistent_cpp_native_scheduler",
+        "cxx_standard": 17,
+        "execution_backend": "pybind11_aot",
+        "graph_execution_backend": "native_graph_interpreter",
+        "scheduler_backend": "bounded_thread_process_pool",
+        "scheduler_scope": "process_wide_cpp_cpu_admission",
+        "legacy_finance_scheduler": "shared_native_scheduler",
+        "coroutine_backend": "asyncio_orchestration_only",
+        "process_transport": "shared_memory_or_serialized_small_input",
+        "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+        "runtime_jit": 0,
+        "compiler_backend": "cpp_restricted_ast",
+        "planner_backend": "cpp",
+        "native_scheduler_backend": "persistent_cpp_threads_processes",
+        "native_worker_runtime": "standalone_no_python",
+        "python_role": "numpy_binding_async_adapter",
+        "input_memory_policy": "exact_dtype_strided_zero_copy"
+      }
+    }
+  },
+  {
+    "case": {
+      "n": 2048,
+      "d": 2048,
+      "layout": "c",
+      "pattern": "zeros"
+    },
+    "backend": "new_ordinary",
+    "measure": "rss",
+    "report": {
+      "rss_baseline": 109953024,
+      "rss_peak": 143507456,
+      "rss_delta": 33554432,
+      "rss_idle_delta": 0,
+      "rss_schema": "warm-monitor-control-1",
+      "build": {
+        "version": "0.3.0",
+        "compiler": "AppleClang 17.0.0.17000603",
+        "architecture": "arm64",
+        "cpu_policy": "baseline",
+        "thread_backend": "persistent_cpp_native_scheduler",
+        "cxx_standard": 17,
+        "execution_backend": "pybind11_aot",
+        "graph_execution_backend": "native_graph_interpreter",
+        "scheduler_backend": "bounded_thread_process_pool",
+        "scheduler_scope": "process_wide_cpp_cpu_admission",
+        "legacy_finance_scheduler": "shared_native_scheduler",
+        "coroutine_backend": "asyncio_orchestration_only",
+        "process_transport": "shared_memory_or_serialized_small_input",
+        "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+        "runtime_jit": 0,
+        "compiler_backend": "cpp_restricted_ast",
+        "planner_backend": "cpp",
+        "native_scheduler_backend": "persistent_cpp_threads_processes",
+        "native_worker_runtime": "standalone_no_python",
+        "python_role": "numpy_binding_async_adapter",
+        "input_memory_policy": "exact_dtype_strided_zero_copy"
+      }
+    }
+  },
+  {
+    "case": {
+      "n": 2048,
+      "d": 2048,
+      "layout": "c",
+      "pattern": "zeros"
+    },
+    "backend": "old_prepared",
+    "measure": "heap",
+    "report": {
+      "setup_heap": {
+        "allocations": 206,
+        "frees": 129,
+        "allocated_bytes": 18438,
+        "live_bytes": 6832,
+        "peak_bytes": 7897,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_heap": {
+        "allocations": 218,
+        "frees": 130,
+        "allocated_bytes": 67128560,
+        "live_bytes": 67116890,
+        "peak_bytes": 67116890,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_retained_heap": {
+        "allocations": 218,
+        "frees": 135,
+        "allocated_bytes": 67128560,
+        "live_bytes": 33561912,
+        "peak_bytes": 67116890,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_baseline_heap": {
+        "allocations": 248,
+        "frees": 165,
+        "allocated_bytes": 234903770,
+        "live_bytes": 33561912,
+        "peak_bytes": 67116890,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_heap": {
+        "allocations": 260,
+        "frees": 172,
+        "allocated_bytes": 302013854,
+        "live_bytes": 67116890,
+        "peak_bytes": 100671868,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_retained_heap": {
+        "allocations": 260,
+        "frees": 177,
+        "allocated_bytes": 302013854,
+        "live_bytes": 33561912,
+        "peak_bytes": 100671868,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "heap_schema": "continuous-live-1",
+      "cold_peak_bytes": 67116890,
+      "warm_peak_bytes": 100671868,
+      "build": {
+        "version": "0.3.0",
+        "compiler": "AppleClang 17.0.0.17000603",
+        "architecture": "arm64",
+        "cpu_policy": "baseline",
+        "thread_backend": "persistent_cpp_native_scheduler",
+        "cxx_standard": 17,
+        "execution_backend": "pybind11_aot",
+        "graph_execution_backend": "native_graph_interpreter",
+        "scheduler_backend": "bounded_thread_process_pool",
+        "scheduler_scope": "process_wide_cpp_cpu_admission",
+        "legacy_finance_scheduler": "shared_native_scheduler",
+        "coroutine_backend": "asyncio_orchestration_only",
+        "process_transport": "shared_memory_or_serialized_small_input",
+        "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+        "runtime_jit": 0,
+        "compiler_backend": "cpp_restricted_ast",
+        "planner_backend": "cpp",
+        "native_scheduler_backend": "persistent_cpp_threads_processes",
+        "native_worker_runtime": "standalone_no_python",
+        "python_role": "numpy_binding_async_adapter",
+        "input_memory_policy": "exact_dtype_strided_zero_copy"
+      }
+    }
+  },
+  {
+    "case": {
+      "n": 2048,
+      "d": 2048,
+      "layout": "c",
+      "pattern": "zeros"
+    },
+    "backend": "old_prepared",
+    "measure": "rss",
+    "report": {
+      "rss_baseline": 142950400,
+      "rss_peak": 176570368,
+      "rss_delta": 33619968,
+      "rss_idle_delta": 0,
+      "rss_schema": "warm-monitor-control-1",
+      "build": {
+        "version": "0.3.0",
+        "compiler": "AppleClang 17.0.0.17000603",
+        "architecture": "arm64",
+        "cpu_policy": "baseline",
+        "thread_backend": "persistent_cpp_native_scheduler",
+        "cxx_standard": 17,
+        "execution_backend": "pybind11_aot",
+        "graph_execution_backend": "native_graph_interpreter",
+        "scheduler_backend": "bounded_thread_process_pool",
+        "scheduler_scope": "process_wide_cpp_cpu_admission",
+        "legacy_finance_scheduler": "shared_native_scheduler",
+        "coroutine_backend": "asyncio_orchestration_only",
+        "process_transport": "shared_memory_or_serialized_small_input",
+        "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+        "runtime_jit": 0,
+        "compiler_backend": "cpp_restricted_ast",
+        "planner_backend": "cpp",
+        "native_scheduler_backend": "persistent_cpp_threads_processes",
+        "native_worker_runtime": "standalone_no_python",
+        "python_role": "numpy_binding_async_adapter",
+        "input_memory_policy": "exact_dtype_strided_zero_copy"
+      }
+    }
+  },
+  {
+    "case": {
+      "n": 2048,
+      "d": 2048,
+      "layout": "c",
+      "pattern": "zeros"
+    },
+    "backend": "new_prepared",
+    "measure": "heap",
+    "report": {
+      "setup_heap": {
+        "allocations": 206,
+        "frees": 129,
+        "allocated_bytes": 18430,
+        "live_bytes": 6824,
+        "peak_bytes": 7897,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_heap": {
+        "allocations": 217,
+        "frees": 130,
+        "allocated_bytes": 33574120,
+        "live_bytes": 33562450,
+        "peak_bytes": 33562450,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_retained_heap": {
+        "allocations": 217,
+        "frees": 135,
+        "allocated_bytes": 33574120,
+        "live_bytes": 7472,
+        "peak_bytes": 33562450,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_baseline_heap": {
+        "allocations": 247,
+        "frees": 165,
+        "allocated_bytes": 201349330,
+        "live_bytes": 7472,
+        "peak_bytes": 33562450,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_heap": {
+        "allocations": 259,
+        "frees": 172,
+        "allocated_bytes": 268459414,
+        "live_bytes": 33562450,
+        "peak_bytes": 67117428,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_retained_heap": {
+        "allocations": 259,
+        "frees": 177,
+        "allocated_bytes": 268459414,
+        "live_bytes": 7472,
+        "peak_bytes": 67117428,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "heap_schema": "continuous-live-1",
+      "cold_peak_bytes": 33562450,
+      "warm_peak_bytes": 67117428,
+      "build": {
+        "version": "0.3.0",
+        "compiler": "AppleClang 17.0.0.17000603",
+        "architecture": "arm64",
+        "cpu_policy": "baseline",
+        "thread_backend": "persistent_cpp_native_scheduler",
+        "cxx_standard": 17,
+        "execution_backend": "pybind11_aot",
+        "graph_execution_backend": "native_graph_interpreter",
+        "scheduler_backend": "bounded_thread_process_pool",
+        "scheduler_scope": "process_wide_cpp_cpu_admission",
+        "legacy_finance_scheduler": "shared_native_scheduler",
+        "coroutine_backend": "asyncio_orchestration_only",
+        "process_transport": "shared_memory_or_serialized_small_input",
+        "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+        "runtime_jit": 0,
+        "compiler_backend": "cpp_restricted_ast",
+        "planner_backend": "cpp",
+        "native_scheduler_backend": "persistent_cpp_threads_processes",
+        "native_worker_runtime": "standalone_no_python",
+        "python_role": "numpy_binding_async_adapter",
+        "input_memory_policy": "exact_dtype_strided_zero_copy"
+      }
+    }
+  },
+  {
+    "case": {
+      "n": 2048,
+      "d": 2048,
+      "layout": "c",
+      "pattern": "zeros"
+    },
+    "backend": "new_prepared",
+    "measure": "rss",
+    "report": {
+      "rss_baseline": 110182400,
+      "rss_peak": 143736832,
+      "rss_delta": 33554432,
+      "rss_idle_delta": 0,
+      "rss_schema": "warm-monitor-control-1",
+      "build": {
+        "version": "0.3.0",
+        "compiler": "AppleClang 17.0.0.17000603",
+        "architecture": "arm64",
+        "cpu_policy": "baseline",
+        "thread_backend": "persistent_cpp_native_scheduler",
+        "cxx_standard": 17,
+        "execution_backend": "pybind11_aot",
+        "graph_execution_backend": "native_graph_interpreter",
+        "scheduler_backend": "bounded_thread_process_pool",
+        "scheduler_scope": "process_wide_cpp_cpu_admission",
+        "legacy_finance_scheduler": "shared_native_scheduler",
+        "coroutine_backend": "asyncio_orchestration_only",
+        "process_transport": "shared_memory_or_serialized_small_input",
+        "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+        "runtime_jit": 0,
+        "compiler_backend": "cpp_restricted_ast",
+        "planner_backend": "cpp",
+        "native_scheduler_backend": "persistent_cpp_threads_processes",
+        "native_worker_runtime": "standalone_no_python",
+        "python_role": "numpy_binding_async_adapter",
+        "input_memory_policy": "exact_dtype_strided_zero_copy"
+      }
+    }
+  },
+  {
+    "case": {
+      "n": 2048,
+      "d": 2048,
+      "layout": "c",
+      "pattern": "zeros"
+    },
+    "backend": "njit",
+    "measure": "heap",
+    "report": {
+      "setup_heap": {
+        "allocations": 9,
+        "frees": 9,
+        "allocated_bytes": 140526418,
+        "live_bytes": 0,
+        "peak_bytes": 106955136,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_heap": {
+        "allocations": 18,
+        "frees": 17,
+        "allocated_bytes": 281052836,
+        "live_bytes": 33554544,
+        "peak_bytes": 106955136,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_retained_heap": {
+        "allocations": 18,
+        "frees": 18,
+        "allocated_bytes": 281052836,
+        "live_bytes": 0,
+        "peak_bytes": 106955136,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_baseline_heap": {
+        "allocations": 63,
+        "frees": 63,
+        "allocated_bytes": 983684926,
+        "live_bytes": 0,
+        "peak_bytes": 106955136,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_heap": {
+        "allocations": 81,
+        "frees": 80,
+        "allocated_bytes": 1264737762,
+        "live_bytes": 33554544,
+        "peak_bytes": 140509680,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_retained_heap": {
+        "allocations": 81,
+        "frees": 81,
+        "allocated_bytes": 1264737762,
+        "live_bytes": 0,
+        "peak_bytes": 140509680,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "heap_schema": "continuous-live-1",
+      "cold_peak_bytes": 106955136,
+      "warm_peak_bytes": 140509680,
+      "build": "warmed NJIT np.cov"
+    }
+  },
+  {
+    "case": {
+      "n": 2048,
+      "d": 2048,
+      "layout": "c",
+      "pattern": "zeros"
+    },
+    "backend": "njit",
+    "measure": "rss",
+    "report": {
+      "rss_baseline": 333266944,
+      "rss_peak": 366870528,
+      "rss_delta": 33603584,
+      "rss_idle_delta": 0,
+      "rss_schema": "warm-monitor-control-1",
+      "build": "warmed NJIT np.cov"
+    }
+  },
+  {
+    "case": {
+      "n": 2048,
+      "d": 2048,
+      "layout": "f",
+      "pattern": "zeros"
+    },
+    "backend": "old_ordinary",
+    "measure": "heap",
+    "report": {
+      "setup_heap": {
+        "allocations": 152,
+        "frees": 98,
+        "allocated_bytes": 12904,
+        "live_bytes": 4472,
+        "peak_bytes": 7897,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_heap": {
+        "allocations": 215,
+        "frees": 128,
+        "allocated_bytes": 67128392,
+        "live_bytes": 67116730,
+        "peak_bytes": 67116842,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_retained_heap": {
+        "allocations": 215,
+        "frees": 133,
+        "allocated_bytes": 67128392,
+        "live_bytes": 33561752,
+        "peak_bytes": 67116842,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_baseline_heap": {
+        "allocations": 250,
+        "frees": 168,
+        "allocated_bytes": 234904082,
+        "live_bytes": 33561752,
+        "peak_bytes": 67116842,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_heap": {
+        "allocations": 264,
+        "frees": 177,
+        "allocated_bytes": 302014358,
+        "live_bytes": 67116730,
+        "peak_bytes": 100671804,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_retained_heap": {
+        "allocations": 264,
+        "frees": 182,
+        "allocated_bytes": 302014358,
+        "live_bytes": 33561752,
+        "peak_bytes": 100671804,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "heap_schema": "continuous-live-1",
+      "cold_peak_bytes": 67116842,
+      "warm_peak_bytes": 100671804,
+      "build": {
+        "version": "0.3.0",
+        "compiler": "AppleClang 17.0.0.17000603",
+        "architecture": "arm64",
+        "cpu_policy": "baseline",
+        "thread_backend": "persistent_cpp_native_scheduler",
+        "cxx_standard": 17,
+        "execution_backend": "pybind11_aot",
+        "graph_execution_backend": "native_graph_interpreter",
+        "scheduler_backend": "bounded_thread_process_pool",
+        "scheduler_scope": "process_wide_cpp_cpu_admission",
+        "legacy_finance_scheduler": "shared_native_scheduler",
+        "coroutine_backend": "asyncio_orchestration_only",
+        "process_transport": "shared_memory_or_serialized_small_input",
+        "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+        "runtime_jit": 0,
+        "compiler_backend": "cpp_restricted_ast",
+        "planner_backend": "cpp",
+        "native_scheduler_backend": "persistent_cpp_threads_processes",
+        "native_worker_runtime": "standalone_no_python",
+        "python_role": "numpy_binding_async_adapter",
+        "input_memory_policy": "exact_dtype_strided_zero_copy"
+      }
+    }
+  },
+  {
+    "case": {
+      "n": 2048,
+      "d": 2048,
+      "layout": "f",
+      "pattern": "zeros"
+    },
+    "backend": "old_ordinary",
+    "measure": "rss",
+    "report": {
+      "rss_baseline": 143687680,
+      "rss_peak": 177242112,
+      "rss_delta": 33554432,
+      "rss_idle_delta": 0,
+      "rss_schema": "warm-monitor-control-1",
+      "build": {
+        "version": "0.3.0",
+        "compiler": "AppleClang 17.0.0.17000603",
+        "architecture": "arm64",
+        "cpu_policy": "baseline",
+        "thread_backend": "persistent_cpp_native_scheduler",
+        "cxx_standard": 17,
+        "execution_backend": "pybind11_aot",
+        "graph_execution_backend": "native_graph_interpreter",
+        "scheduler_backend": "bounded_thread_process_pool",
+        "scheduler_scope": "process_wide_cpp_cpu_admission",
+        "legacy_finance_scheduler": "shared_native_scheduler",
+        "coroutine_backend": "asyncio_orchestration_only",
+        "process_transport": "shared_memory_or_serialized_small_input",
+        "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+        "runtime_jit": 0,
+        "compiler_backend": "cpp_restricted_ast",
+        "planner_backend": "cpp",
+        "native_scheduler_backend": "persistent_cpp_threads_processes",
+        "native_worker_runtime": "standalone_no_python",
+        "python_role": "numpy_binding_async_adapter",
+        "input_memory_policy": "exact_dtype_strided_zero_copy"
+      }
+    }
+  },
+  {
+    "case": {
+      "n": 2048,
+      "d": 2048,
+      "layout": "f",
+      "pattern": "zeros"
+    },
+    "backend": "new_ordinary",
+    "measure": "heap",
+    "report": {
+      "setup_heap": {
+        "allocations": 152,
+        "frees": 98,
+        "allocated_bytes": 12896,
+        "live_bytes": 4464,
+        "peak_bytes": 7897,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_heap": {
+        "allocations": 214,
+        "frees": 128,
+        "allocated_bytes": 33573952,
+        "live_bytes": 33562290,
+        "peak_bytes": 33562402,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_retained_heap": {
+        "allocations": 214,
+        "frees": 133,
+        "allocated_bytes": 33573952,
+        "live_bytes": 7312,
+        "peak_bytes": 33562402,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_baseline_heap": {
+        "allocations": 249,
+        "frees": 168,
+        "allocated_bytes": 201349642,
+        "live_bytes": 7312,
+        "peak_bytes": 33562402,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_heap": {
+        "allocations": 263,
+        "frees": 177,
+        "allocated_bytes": 268459918,
+        "live_bytes": 33562290,
+        "peak_bytes": 67117364,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_retained_heap": {
+        "allocations": 263,
+        "frees": 182,
+        "allocated_bytes": 268459918,
+        "live_bytes": 7312,
+        "peak_bytes": 67117364,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "heap_schema": "continuous-live-1",
+      "cold_peak_bytes": 33562402,
+      "warm_peak_bytes": 67117364,
+      "build": {
+        "version": "0.3.0",
+        "compiler": "AppleClang 17.0.0.17000603",
+        "architecture": "arm64",
+        "cpu_policy": "baseline",
+        "thread_backend": "persistent_cpp_native_scheduler",
+        "cxx_standard": 17,
+        "execution_backend": "pybind11_aot",
+        "graph_execution_backend": "native_graph_interpreter",
+        "scheduler_backend": "bounded_thread_process_pool",
+        "scheduler_scope": "process_wide_cpp_cpu_admission",
+        "legacy_finance_scheduler": "shared_native_scheduler",
+        "coroutine_backend": "asyncio_orchestration_only",
+        "process_transport": "shared_memory_or_serialized_small_input",
+        "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+        "runtime_jit": 0,
+        "compiler_backend": "cpp_restricted_ast",
+        "planner_backend": "cpp",
+        "native_scheduler_backend": "persistent_cpp_threads_processes",
+        "native_worker_runtime": "standalone_no_python",
+        "python_role": "numpy_binding_async_adapter",
+        "input_memory_policy": "exact_dtype_strided_zero_copy"
+      }
+    }
+  },
+  {
+    "case": {
+      "n": 2048,
+      "d": 2048,
+      "layout": "f",
+      "pattern": "zeros"
+    },
+    "backend": "new_ordinary",
+    "measure": "rss",
+    "report": {
+      "rss_baseline": 109723648,
+      "rss_peak": 143278080,
+      "rss_delta": 33554432,
+      "rss_idle_delta": 32768,
+      "rss_schema": "warm-monitor-control-1",
+      "build": {
+        "version": "0.3.0",
+        "compiler": "AppleClang 17.0.0.17000603",
+        "architecture": "arm64",
+        "cpu_policy": "baseline",
+        "thread_backend": "persistent_cpp_native_scheduler",
+        "cxx_standard": 17,
+        "execution_backend": "pybind11_aot",
+        "graph_execution_backend": "native_graph_interpreter",
+        "scheduler_backend": "bounded_thread_process_pool",
+        "scheduler_scope": "process_wide_cpp_cpu_admission",
+        "legacy_finance_scheduler": "shared_native_scheduler",
+        "coroutine_backend": "asyncio_orchestration_only",
+        "process_transport": "shared_memory_or_serialized_small_input",
+        "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+        "runtime_jit": 0,
+        "compiler_backend": "cpp_restricted_ast",
+        "planner_backend": "cpp",
+        "native_scheduler_backend": "persistent_cpp_threads_processes",
+        "native_worker_runtime": "standalone_no_python",
+        "python_role": "numpy_binding_async_adapter",
+        "input_memory_policy": "exact_dtype_strided_zero_copy"
+      }
+    }
+  },
+  {
+    "case": {
+      "n": 2048,
+      "d": 2048,
+      "layout": "f",
+      "pattern": "zeros"
+    },
+    "backend": "old_prepared",
+    "measure": "heap",
+    "report": {
+      "setup_heap": {
+        "allocations": 206,
+        "frees": 129,
+        "allocated_bytes": 18438,
+        "live_bytes": 6832,
+        "peak_bytes": 7897,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_heap": {
+        "allocations": 218,
+        "frees": 130,
+        "allocated_bytes": 67128560,
+        "live_bytes": 67116890,
+        "peak_bytes": 67116890,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_retained_heap": {
+        "allocations": 218,
+        "frees": 135,
+        "allocated_bytes": 67128560,
+        "live_bytes": 33561912,
+        "peak_bytes": 67116890,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_baseline_heap": {
+        "allocations": 248,
+        "frees": 165,
+        "allocated_bytes": 234903770,
+        "live_bytes": 33561912,
+        "peak_bytes": 67116890,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_heap": {
+        "allocations": 260,
+        "frees": 172,
+        "allocated_bytes": 302013854,
+        "live_bytes": 67116890,
+        "peak_bytes": 100671868,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_retained_heap": {
+        "allocations": 260,
+        "frees": 177,
+        "allocated_bytes": 302013854,
+        "live_bytes": 33561912,
+        "peak_bytes": 100671868,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "heap_schema": "continuous-live-1",
+      "cold_peak_bytes": 67116890,
+      "warm_peak_bytes": 100671868,
+      "build": {
+        "version": "0.3.0",
+        "compiler": "AppleClang 17.0.0.17000603",
+        "architecture": "arm64",
+        "cpu_policy": "baseline",
+        "thread_backend": "persistent_cpp_native_scheduler",
+        "cxx_standard": 17,
+        "execution_backend": "pybind11_aot",
+        "graph_execution_backend": "native_graph_interpreter",
+        "scheduler_backend": "bounded_thread_process_pool",
+        "scheduler_scope": "process_wide_cpp_cpu_admission",
+        "legacy_finance_scheduler": "shared_native_scheduler",
+        "coroutine_backend": "asyncio_orchestration_only",
+        "process_transport": "shared_memory_or_serialized_small_input",
+        "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+        "runtime_jit": 0,
+        "compiler_backend": "cpp_restricted_ast",
+        "planner_backend": "cpp",
+        "native_scheduler_backend": "persistent_cpp_threads_processes",
+        "native_worker_runtime": "standalone_no_python",
+        "python_role": "numpy_binding_async_adapter",
+        "input_memory_policy": "exact_dtype_strided_zero_copy"
+      }
+    }
+  },
+  {
+    "case": {
+      "n": 2048,
+      "d": 2048,
+      "layout": "f",
+      "pattern": "zeros"
+    },
+    "backend": "old_prepared",
+    "measure": "rss",
+    "report": {
+      "rss_baseline": 142163968,
+      "rss_peak": 175783936,
+      "rss_delta": 33619968,
+      "rss_idle_delta": 0,
+      "rss_schema": "warm-monitor-control-1",
+      "build": {
+        "version": "0.3.0",
+        "compiler": "AppleClang 17.0.0.17000603",
+        "architecture": "arm64",
+        "cpu_policy": "baseline",
+        "thread_backend": "persistent_cpp_native_scheduler",
+        "cxx_standard": 17,
+        "execution_backend": "pybind11_aot",
+        "graph_execution_backend": "native_graph_interpreter",
+        "scheduler_backend": "bounded_thread_process_pool",
+        "scheduler_scope": "process_wide_cpp_cpu_admission",
+        "legacy_finance_scheduler": "shared_native_scheduler",
+        "coroutine_backend": "asyncio_orchestration_only",
+        "process_transport": "shared_memory_or_serialized_small_input",
+        "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+        "runtime_jit": 0,
+        "compiler_backend": "cpp_restricted_ast",
+        "planner_backend": "cpp",
+        "native_scheduler_backend": "persistent_cpp_threads_processes",
+        "native_worker_runtime": "standalone_no_python",
+        "python_role": "numpy_binding_async_adapter",
+        "input_memory_policy": "exact_dtype_strided_zero_copy"
+      }
+    }
+  },
+  {
+    "case": {
+      "n": 2048,
+      "d": 2048,
+      "layout": "f",
+      "pattern": "zeros"
+    },
+    "backend": "new_prepared",
+    "measure": "heap",
+    "report": {
+      "setup_heap": {
+        "allocations": 206,
+        "frees": 129,
+        "allocated_bytes": 18430,
+        "live_bytes": 6824,
+        "peak_bytes": 7897,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_heap": {
+        "allocations": 217,
+        "frees": 130,
+        "allocated_bytes": 33574120,
+        "live_bytes": 33562450,
+        "peak_bytes": 33562450,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_retained_heap": {
+        "allocations": 217,
+        "frees": 135,
+        "allocated_bytes": 33574120,
+        "live_bytes": 7472,
+        "peak_bytes": 33562450,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_baseline_heap": {
+        "allocations": 247,
+        "frees": 165,
+        "allocated_bytes": 201349330,
+        "live_bytes": 7472,
+        "peak_bytes": 33562450,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_heap": {
+        "allocations": 259,
+        "frees": 172,
+        "allocated_bytes": 268459414,
+        "live_bytes": 33562450,
+        "peak_bytes": 67117428,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_retained_heap": {
+        "allocations": 259,
+        "frees": 177,
+        "allocated_bytes": 268459414,
+        "live_bytes": 7472,
+        "peak_bytes": 67117428,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "heap_schema": "continuous-live-1",
+      "cold_peak_bytes": 33562450,
+      "warm_peak_bytes": 67117428,
+      "build": {
+        "version": "0.3.0",
+        "compiler": "AppleClang 17.0.0.17000603",
+        "architecture": "arm64",
+        "cpu_policy": "baseline",
+        "thread_backend": "persistent_cpp_native_scheduler",
+        "cxx_standard": 17,
+        "execution_backend": "pybind11_aot",
+        "graph_execution_backend": "native_graph_interpreter",
+        "scheduler_backend": "bounded_thread_process_pool",
+        "scheduler_scope": "process_wide_cpp_cpu_admission",
+        "legacy_finance_scheduler": "shared_native_scheduler",
+        "coroutine_backend": "asyncio_orchestration_only",
+        "process_transport": "shared_memory_or_serialized_small_input",
+        "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+        "runtime_jit": 0,
+        "compiler_backend": "cpp_restricted_ast",
+        "planner_backend": "cpp",
+        "native_scheduler_backend": "persistent_cpp_threads_processes",
+        "native_worker_runtime": "standalone_no_python",
+        "python_role": "numpy_binding_async_adapter",
+        "input_memory_policy": "exact_dtype_strided_zero_copy"
+      }
+    }
+  },
+  {
+    "case": {
+      "n": 2048,
+      "d": 2048,
+      "layout": "f",
+      "pattern": "zeros"
+    },
+    "backend": "new_prepared",
+    "measure": "rss",
+    "report": {
+      "rss_baseline": 109756416,
+      "rss_peak": 143310848,
+      "rss_delta": 33554432,
+      "rss_idle_delta": 0,
+      "rss_schema": "warm-monitor-control-1",
+      "build": {
+        "version": "0.3.0",
+        "compiler": "AppleClang 17.0.0.17000603",
+        "architecture": "arm64",
+        "cpu_policy": "baseline",
+        "thread_backend": "persistent_cpp_native_scheduler",
+        "cxx_standard": 17,
+        "execution_backend": "pybind11_aot",
+        "graph_execution_backend": "native_graph_interpreter",
+        "scheduler_backend": "bounded_thread_process_pool",
+        "scheduler_scope": "process_wide_cpp_cpu_admission",
+        "legacy_finance_scheduler": "shared_native_scheduler",
+        "coroutine_backend": "asyncio_orchestration_only",
+        "process_transport": "shared_memory_or_serialized_small_input",
+        "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+        "runtime_jit": 0,
+        "compiler_backend": "cpp_restricted_ast",
+        "planner_backend": "cpp",
+        "native_scheduler_backend": "persistent_cpp_threads_processes",
+        "native_worker_runtime": "standalone_no_python",
+        "python_role": "numpy_binding_async_adapter",
+        "input_memory_policy": "exact_dtype_strided_zero_copy"
+      }
+    }
+  },
+  {
+    "case": {
+      "n": 2048,
+      "d": 2048,
+      "layout": "f",
+      "pattern": "zeros"
+    },
+    "backend": "njit",
+    "measure": "heap",
+    "report": {
+      "setup_heap": {
+        "allocations": 9,
+        "frees": 9,
+        "allocated_bytes": 140526418,
+        "live_bytes": 0,
+        "peak_bytes": 106955136,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_heap": {
+        "allocations": 18,
+        "frees": 17,
+        "allocated_bytes": 281052836,
+        "live_bytes": 33554544,
+        "peak_bytes": 106955136,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_retained_heap": {
+        "allocations": 18,
+        "frees": 18,
+        "allocated_bytes": 281052836,
+        "live_bytes": 0,
+        "peak_bytes": 106955136,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_baseline_heap": {
+        "allocations": 63,
+        "frees": 63,
+        "allocated_bytes": 983684926,
+        "live_bytes": 0,
+        "peak_bytes": 106955136,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_heap": {
+        "allocations": 81,
+        "frees": 80,
+        "allocated_bytes": 1264737762,
+        "live_bytes": 33554544,
+        "peak_bytes": 140509680,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_retained_heap": {
+        "allocations": 81,
+        "frees": 81,
+        "allocated_bytes": 1264737762,
+        "live_bytes": 0,
+        "peak_bytes": 140509680,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "heap_schema": "continuous-live-1",
+      "cold_peak_bytes": 106955136,
+      "warm_peak_bytes": 140509680,
+      "build": "warmed NJIT np.cov"
+    }
+  },
+  {
+    "case": {
+      "n": 2048,
+      "d": 2048,
+      "layout": "f",
+      "pattern": "zeros"
+    },
+    "backend": "njit",
+    "measure": "rss",
+    "report": {
+      "rss_baseline": 330186752,
+      "rss_peak": 363757568,
+      "rss_delta": 33570816,
+      "rss_idle_delta": 0,
+      "rss_schema": "warm-monitor-control-1",
+      "build": "warmed NJIT np.cov"
+    }
+  }
+]

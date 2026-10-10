@@ -1,0 +1,59 @@
+{
+  "status": "passed",
+  "actual_adopted": true,
+  "goal_complete": false,
+  "build_id": "199d11357c76f2f77daefe4d0e8735664b7dd41ef4c711ef7967fc6b9f232ccc",
+  "fresh_complete_processes": 20,
+  "summary": {
+    "C": {
+      "cpp": {
+        "group_medians": [
+          0.49677770899870666,
+          0.45935124999959953,
+          0.4870382500012056
+        ],
+        "seconds": 0.4870382500012056,
+        "heap_peak_bytes": 2288002088,
+        "incremental_rss_bytes": 2233974784
+      },
+      "njit": {
+        "group_medians": [
+          0.6439717500034021,
+          0.6399189169969759,
+          0.6721072079999431
+        ],
+        "seconds": 0.6439717500034021,
+        "heap_peak_bytes": 2281702136,
+        "incremental_rss_bytes": 2227240960
+      },
+      "cpp_over_njit": 0.756303750899993,
+      "time_reduction_percent": 24.3696249100007
+    },
+    "F": {
+      "cpp": {
+        "group_medians": [
+          0.46025195800029906,
+          0.47493075000238605,
+          0.4794658339997113
+        ],
+        "seconds": 0.47493075000238605,
+        "heap_peak_bytes": 2288002088,
+        "incremental_rss_bytes": 2233909248
+      },
+      "njit": {
+        "group_medians": [
+          0.6866092080017552,
+          0.6762491250010498,
+          0.6961214170005405
+        ],
+        "seconds": 0.6866092080017552,
+        "heap_peak_bytes": 2281702136,
+        "incremental_rss_bytes": 2227273728
+      },
+      "cpp_over_njit": 0.6917046035321623,
+      "time_reduction_percent": 30.829539646783765
+    }
+  },
+  "maximum_absolute_error": 4.757863492077519e-09,
+  "interpretation": "Actual current-source ordinary CPU1 complete requests faster than strong warmed NJIT in every rotated time group. Heap equal to V65; no significant NI memory advantage. All retained generations/output/readonly ownership and complete .000049 parity passed. Other major workloads still open."
+}

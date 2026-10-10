@@ -1,0 +1,48 @@
+{
+  "status": "source-package-quality-and-measurements-verified",
+  "root_head": "d17b371abbd692e3ac839c7ba191a44d11054d7f",
+  "baseline_build_id": "fafa1da26cdab07fbf59f519ac76dc1524f1a689fc7622c5e14d818297450f98",
+  "build_id": "7a6f446c76ea4b5edd6f49389192b62b918d830a06c03bcd3da23d12695397d1",
+  "paths": [
+    "cpp/graph.cpp",
+    "cpp/include/calmetrics_engine/matrix_backend.hpp",
+    "cpp/operators/solve_accelerate.cpp",
+    "tests/test_concat_solve_workspace.py",
+    "tests/test_measured_concat_solve.py"
+  ],
+  "preimages": {
+    "cpp/graph.cpp": "18c5bb595ae1c7f2d7454517b659d86a6484aa30c831144020af6b92ba410211",
+    "cpp/include/calmetrics_engine/matrix_backend.hpp": "dc14cfb6ff182c1b7ebb4cb1de04421d5550edb2503e30d35d223ca6c0851925",
+    "cpp/operators/solve_accelerate.cpp": "ea2fbf8f2e288aa1669e4be397ecda15ba4a1ff3078dd63d70c4ef7ca9db547f",
+    "tests/test_concat_solve_workspace.py": "b767b556146ff07e3df29e9e2b720e855e9d27ce62ed0e96690e380f92e6bd0e",
+    "tests/test_measured_concat_solve.py": null
+  },
+  "validation_counts": {
+    "native": 9,
+    "full": 12957,
+    "asan-related": 506,
+    "asan-native": 9,
+    "off-related": 506,
+    "off-native": 9
+  },
+  "validation_status_sha256": "23edd7472a6a93dd9a659aece99bc045118930d46efd1d56f1763a440259b850",
+  "numerical_source_adopted": true,
+  "rebuilt_package_verified": true,
+  "whole_goal_complete": false,
+  "scope": "three numerical files and two tests only; no Git mutation or other-task overwrite",
+  "postimages": {
+    "cpp/graph.cpp": "0564e098c6a01f3275160fd755a313bd2ef9a3c2e140c1f33ff3d7297d7572d0",
+    "cpp/include/calmetrics_engine/matrix_backend.hpp": "4e8e5e2554c5d012d21dc6f33eafabcdd6ae0217b90fee66caf24e36a7a1b203",
+    "cpp/operators/solve_accelerate.cpp": "b5f98bae6574f0f9a95f54b86fa5196064039c6937407a653a5fbaf544f00aa7",
+    "tests/test_concat_solve_workspace.py": "3a42e0debc26db9b26a5872f24a17c54c5b7ed82aa93b2609a50eaf1d9e1285e",
+    "tests/test_measured_concat_solve.py": "343363575e071536bd435e5ed329c62b840a141fe2b53fb93e2bc7d167239c11"
+  },
+  "actual_root_related_passed": 1009,
+  "actual_root_native_passed": 9,
+  "production_install": "/private/tmp/calmetrics-local-lu-integration-20261004/production-tiled/install",
+  "production_identity_sha256": "7fd3cfcb989758f8f31789a86dd12376fcc08e06992b0d93dd0d6fcf048d328e",
+  "performance_jobs_complete": 18,
+  "performance_complete": true,
+  "njit_time_goal_met": false,
+  "provenance_correction_sha256": "40e59f823963b2e024b5b3e0ba4c709d2670e1f25a86d188ccc857f706c6f96e"
+}
