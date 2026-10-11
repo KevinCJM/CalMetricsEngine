@@ -26,6 +26,18 @@ python -m twine check --strict dist/*
 python -I -m pytest tests -q --import-mode=importlib
 ```
 
+完整的 NJIT 参考对照需安装 `.[test,njit-test]`，并设置
+`CALMETRICS_TEST_EXPECT_EIGEN=1`。Numba 不属于引擎运行依赖；其当前二进制分发
+不覆盖 Intel Mac 和部分旧 libc 平台，不能据此缩减引擎的平台支持。
+这些平台的 wheel 正确性测试显式设置 `CALMETRICS_TEST_REFERENCE_BACKEND=python`，
+解释执行同一份冻结参考函数体，保留全部输入、断言和容差。此模式只用于测试参考，
+不是引擎运行时回退，也不是 NJIT 性能证据。
+
+参考后端默认仍为 `njit`；缺少 Numba、未知模式或禁用 JIT 均直接报错，不自动回退。
+性能工具拒绝 Python 参考模式。source、NumPy 最低版本、Linux 最新 NumPy 和 sanitizer
+验收继续安装 `njit-test` 并使用 NJIT。所有 wheel 的移植性测试使用明确的 Python
+参考模式；后端模式与测试结果一同记录。
+
 安装后的包验证：
 
 ```bash
@@ -44,6 +56,11 @@ python -c "import calmetrics_engine; print(calmetrics_engine.build_info())"
 - NumPy 1.26 最低兼容验证。
 - C++ standalone tests。
 - ASan / UBSan。
+
+wheel 验收按五个平台和五个 CPython ABI 拆成 25 个任务；Linux 每个任务同时验证
+manylinux、musllinux 及宿主机最新兼容 NumPy。每个 wheel 仍执行完整测试集。
+五个原有受保护的 `Wheels` 检查名保持不变；只有全部 ABI 任务成功时才通过，
+失败、取消或跳过均不通过。单任务上限为 180 分钟，用于包含大型参考计算的全量验收。
 
 公开 wheel 使用 baseline CPU，不允许强制 `-mavx*`、`-march=native` 或 fast-math。
 

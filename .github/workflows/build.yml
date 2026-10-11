@@ -16,6 +16,10 @@ on:
 permissions:
   contents: read
 
+env:
+  CALMETRICS_TEST_REFERENCE_BACKEND: njit
+  CALMETRICS_TEST_EXPECT_EIGEN: "1"
+
 jobs:
   source:
     runs-on: ubuntu-24.04
@@ -39,7 +43,7 @@ jobs:
         shell: bash
         run: |
           for wheel in dist/*.whl; do
-            python -m pip install "${wheel}[test]"
+            python -m pip install "${wheel}[test,njit-test]"
           done
           cd "$RUNNER_TEMP"
           python -I -m pytest "$GITHUB_WORKSPACE/tests" -q --import-mode=importlib
@@ -49,24 +53,25 @@ jobs:
           path: dist/*.tar.gz
           if-no-files-found: error
 
-  wheels:
-    name: Wheels (${{ matrix.arch }} / ${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 45
+  wheel-abi:
+    name: Wheel ABI (${{ matrix.platform.arch }} / ${{ matrix.platform.os }} / ${{ matrix.python.version }})
+    runs-on: ${{ matrix.platform.os }}
+    timeout-minutes: 180
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - os: ubuntu-24.04
-            arch: x86_64
-          - os: ubuntu-24.04-arm
-            arch: aarch64
-          - os: macos-15-intel
-            arch: x86_64
-          - os: macos-15
-            arch: arm64
-          - os: windows-2022
-            arch: AMD64
+        platform:
+          - {os: ubuntu-24.04, arch: x86_64}
+          - {os: ubuntu-24.04-arm, arch: aarch64}
+          - {os: macos-15-intel, arch: x86_64}
+          - {os: macos-15, arch: arm64}
+          - {os: windows-2022, arch: AMD64}
+        python:
+          - {version: "3.10", tag: cp310}
+          - {version: "3.11", tag: cp311}
+          - {version: "3.12", tag: cp312}
+          - {version: "3.13", tag: cp313}
+          - {version: "3.14", tag: cp314}
     steps:
       - name: Enable long paths for the complete evidence checkout
         if: runner.os == 'Windows'
@@ -87,27 +92,25 @@ jobs:
       - name: Build, repair and test every wheel
         run: python -m cibuildwheel --output-dir wheelhouse
         env:
-          CIBW_ARCHS: ${{ matrix.arch }}
+          CIBW_ARCHS: ${{ matrix.platform.arch }}
+          CIBW_BUILD: ${{ matrix.python.tag }}-*
       - run: python tools/check_dist.py wheelhouse
       - name: Set up Python versions for latest NumPy wheel tests
         if: runner.os == 'Linux'
         uses: actions/setup-python@v5
         with:
-          python-version: |
-            3.10
-            3.11
-            3.12
-            3.13
-            3.14
+          python-version: ${{ matrix.python.version }}
       - name: Test the same manylinux wheels with latest compatible NumPy
         if: runner.os == 'Linux'
         shell: bash
+        env:
+          PYTHON_VERSION: ${{ matrix.python.version }}
         run: |
           # manylinux2014 tests compiler-compatible NumPy inside the old image.
           # Each required Linux check also tests the exact repaired artifacts
           # against the latest NumPy supported by each Python on the new host.
           cd "$RUNNER_TEMP"
-          for version in 3.10 3.11 3.12 3.13 3.14; do
+          for version in "$PYTHON_VERSION"; do
             abi="cp${version/./}"
             wheels=("$GITHUB_WORKSPACE"/wheelhouse/*-"$abi"-"$abi"-manylinux*.whl)
             if [[ ${#wheels[@]} != 1 || ! -f "${wheels[0]}" ]]; then
@@ -116,16 +119,37 @@ jobs:
             fi
             "python$version" -m venv "$RUNNER_TEMP/latest-numpy-$version"
             py="$RUNNER_TEMP/latest-numpy-$version/bin/python"
-            "$py" -m pip install --upgrade --only-binary=numpy "${wheels[0]}[test]"
+            "$py" -m pip install --upgrade --only-binary=numpy "${wheels[0]}[test,njit-test]"
             "$py" -m pip check
             "$py" -I -c 'import sys, numpy; print(sys.version, "NumPy", numpy.__version__)'
             "$py" -I -m pytest "$GITHUB_WORKSPACE/tests" -v --import-mode=importlib -o faulthandler_timeout=60
           done
       - uses: actions/upload-artifact@v4
         with:
-          name: dist-wheels-${{ matrix.os }}-${{ matrix.arch }}
+          name: dist-wheels-${{ matrix.platform.os }}-${{ matrix.platform.arch }}-${{ matrix.python.tag }}
           path: wheelhouse/*.whl
           if-no-files-found: error
+
+  # Keep the five protected check names. Every ABI, libc and platform must
+  # finish successfully; cancellation, skipping and failure all fail closed.
+  wheels:
+    name: Wheels (${{ matrix.arch }} / ${{ matrix.os }})
+    needs: wheel-abi
+    if: always()
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        include:
+          - {os: ubuntu-24.04, arch: x86_64}
+          - {os: ubuntu-24.04-arm, arch: aarch64}
+          - {os: macos-15-intel, arch: x86_64}
+          - {os: macos-15, arch: arm64}
+          - {os: windows-2022, arch: AMD64}
+    steps:
+      - name: Require every wheel verification to succeed
+        env:
+          WHEEL_RESULT: ${{ needs.wheel-abi.result }}
+        run: test "$WHEEL_RESULT" = success
 
   numpy-minimum:
     runs-on: ubuntu-24.04
@@ -139,7 +163,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
-      - run: python -m pip install "numpy==1.26.4" ".[test]"
+      - run: python -m pip install "numpy==1.26.4" ".[test,njit-test]"
       - run: python -I -m pytest tests -q --import-mode=importlib
 
   sanitizers:
@@ -160,7 +184,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Build an instrumented Python extension
-        run: python -m pip install ".[test]" --config-settings=cmake.define.CALMETRICS_ENGINE_SANITIZE=ON
+        run: python -m pip install ".[test,njit-test]" --config-settings=cmake.define.CALMETRICS_ENGINE_SANITIZE=ON
       - name: Exercise bindings and kernels under sanitizers
         shell: bash
         run: |

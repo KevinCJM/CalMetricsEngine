@@ -1,11 +1,11 @@
 """Controlled complete-chain test reference; never a production numerical path."""
 
 import numpy as np
-from numba import njit
 
 from calmetrics_engine import GraphCompiler
 
 from . import latent_reference as ref
+from .reference_backend import njit
 
 
 @njit(cache=True, nogil=True)

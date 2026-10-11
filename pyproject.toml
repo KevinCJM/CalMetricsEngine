@@ -32,10 +32,13 @@ Issues = "https://github.com/KevinCJM/CalMetricsEngine/issues"
 
 [project.optional-dependencies]
 excel = ["XlsxWriter>=3.2,<4"]
-test = ["pytest>=8,<10", "numba>=0.63.1,<1"]
+test = ["pytest>=8,<10", "XlsxWriter>=3.2,<4", "openpyxl>=3.1,<4"]
+njit-test = ["numba>=0.63.1,<1"]
 dev = [
   "pytest>=8,<10",
   "numba>=0.63.1,<1",
+  "XlsxWriter>=3.2,<4",
+  "openpyxl>=3.1,<4",
   "build>=1.2,<2",
   "twine>=6,<7",
   "ruff>=0.11,<1",
@@ -106,6 +109,7 @@ skip = "*-win32 *-win_arm64 *-manylinux_i686 *-musllinux_i686"
 test-extras = ["test"]
 test-sources = ["tests", "tools"]
 test-command = "python -m pytest tests -v --import-mode=importlib -o faulthandler_timeout=60"
+environment = { CALMETRICS_TEST_REFERENCE_BACKEND = "python", CALMETRICS_TEST_EXPECT_EIGEN = "1" }
 
 [tool.cibuildwheel.linux]
 manylinux-x86_64-image = "manylinux2014"
@@ -114,7 +118,7 @@ musllinux-x86_64-image = "musllinux_1_2"
 musllinux-aarch64-image = "musllinux_1_2"
 
 [tool.cibuildwheel.macos]
-environment = { MACOSX_DEPLOYMENT_TARGET = "11.0" }
+environment = { MACOSX_DEPLOYMENT_TARGET = "11.0", CALMETRICS_TEST_REFERENCE_BACKEND = "python", CALMETRICS_TEST_EXPECT_EIGEN = "1" }
 
 [[tool.cibuildwheel.overrides]]
 select = "*-manylinux_*"

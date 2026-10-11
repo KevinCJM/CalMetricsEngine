@@ -10,7 +10,8 @@ explicit decorators become lazy NJIT to isolate service startup dependencies.
 from __future__ import annotations
 
 import numpy as np
-from numba import njit
+
+from .reference_backend import njit
 
 
 @njit(cache=True, nogil=True)

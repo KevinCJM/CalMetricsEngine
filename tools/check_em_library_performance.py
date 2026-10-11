@@ -74,6 +74,10 @@ def setup(case, backend, data):
     iterations = case['iterations']
     args = tuple(data[key] for key in keys)
     if backend == 'njit':
+        sys.path.insert(0, str(ROOT))
+        from tests.reference_backend import require_njit_reference
+
+        require_njit_reference()
         from numba import njit, typeof
 
         if not _references:

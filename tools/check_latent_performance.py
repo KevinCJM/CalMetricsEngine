@@ -32,6 +32,7 @@ from numba import njit
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from tests import latent_reference as ref
+from tests.reference_backend import require_njit_reference
 
 
 @njit(cache=True, nogil=True)
@@ -308,6 +309,8 @@ def primitive_setup(case, backend, data):
 
 
 def setup(case, backend, data):
+    if backend == "njit":
+        require_njit_reference()
     from calmetrics_engine import AdaptiveScheduler, GraphCompiler
     from calmetrics_engine import operators as op
 
