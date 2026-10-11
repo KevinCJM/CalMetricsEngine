@@ -60,7 +60,9 @@ python -c "import calmetrics_engine; print(calmetrics_engine.build_info())"
 wheel 验收按五个平台和五个 CPython ABI 拆成 25 个任务；Linux 每个任务同时验证
 manylinux、musllinux 及宿主机最新兼容 NumPy。每个 wheel 仍执行完整测试集。
 五个原有受保护的 `Wheels` 检查名保持不变；只有全部 ABI 任务成功时才通过，
-失败、取消或跳过均不通过。单任务上限为 180 分钟，用于包含大型参考计算的全量验收。
+失败、取消或跳过均不通过。单任务上限为 240 分钟，用于包含大型参考计算的全量验收。
+Linux 每个 ABI 串行执行三轮完整测试；实测 180 分钟不足以完成部分任务。
+此上限只控制 CI 任务的最长运行时间，不修改测试范围、数学容差或引擎性能门槛。
 
 Linux wheel 测试容器将 `/dev/shm` 容量设为 1 GiB。大型共享结果用例的单代输出
 预算约为 73 MB，且需同时保留两代结果，超过 Docker 默认的 64 MiB。

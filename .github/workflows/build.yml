@@ -56,7 +56,8 @@ jobs:
   wheel-abi:
     name: Wheel ABI (${{ matrix.platform.arch }} / ${{ matrix.platform.os }} / ${{ matrix.python.version }})
     runs-on: ${{ matrix.platform.os }}
-    timeout-minutes: 180
+    # Linux runs three complete suites: manylinux, musllinux and latest NumPy.
+    timeout-minutes: 240
     strategy:
       fail-fast: false
       matrix:
