@@ -399,8 +399,9 @@ def test_short_wide_factor_prefix_full_batch_reuses_rotation_across_all_combinat
         assert not inputs[name].flags.writeable
     del scheduler, graph, canonical, inputs, transported, reference, later, bundle
     gc.collect()
+    retained_outputs = first.named_outputs
     for name, values in saved.items():
-        for value, snapshot in zip(first.named_outputs[name].values, values, strict=True):
+        for value, snapshot in zip(retained_outputs[name].values, values, strict=True):
             ieee_bits(value, snapshot)
 
 

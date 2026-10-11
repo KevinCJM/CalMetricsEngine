@@ -123,7 +123,7 @@ jobs:
             "$py" -m pip install --upgrade --only-binary=numpy "${wheels[0]}[test,njit-test]"
             "$py" -m pip check
             "$py" -I -c 'import sys, numpy; print(sys.version, "NumPy", numpy.__version__)'
-            "$py" -I -m pytest "$GITHUB_WORKSPACE/tests" -v --import-mode=importlib -o faulthandler_timeout=60
+            "$py" -I -m pytest "$GITHUB_WORKSPACE/tests" -v --import-mode=importlib --durations=20
           done
       - uses: actions/upload-artifact@v4
         with:

@@ -322,9 +322,10 @@ def ieee_bits(actual, expected):
 
 
 def compare_named(result, expected, *, exact=False, row=0):
-    assert tuple(result.named_outputs) == tuple(expected)
+    outputs = result.named_outputs
+    assert tuple(outputs) == tuple(expected)
     for name, target in expected.items():
-        out = result.named_outputs[name]
+        out = outputs[name]
         actual = out.values[row]
         assert actual.shape == target.shape and actual.dtype == np.float64
         assert not actual.flags.writeable

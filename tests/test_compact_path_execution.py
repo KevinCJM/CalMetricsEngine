@@ -65,8 +65,9 @@ def assert_canonical(result):
 
 
 def compare_selected(actual, reference):
+    reference_outputs = reference.named_outputs
     for name, out in actual.named_outputs.items():
-        target = reference.named_outputs[name]
+        target = reference_outputs[name]
         assert out.axes == target.axes and out.dtype == target.dtype
         assert out.order == target.order
         np.testing.assert_array_equal(out.root_statuses, target.root_statuses)
@@ -83,9 +84,10 @@ def saved_outputs(result):
 
 
 def check_ownership(first, later, saved, inputs):
+    first_outputs, later_outputs = first.named_outputs, later.named_outputs
     for name, snapshots in saved.items():
-        old = first.named_outputs[name]
-        new = later.named_outputs[name]
+        old = first_outputs[name]
+        new = later_outputs[name]
         for value, current, snapshot in zip(old.values, new.values, snapshots, strict=True):
             ieee_bits(value, snapshot)
             assert not np.shares_memory(value, current)

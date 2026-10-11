@@ -108,7 +108,7 @@ skip = "*-win32 *-win_arm64 *-manylinux_i686 *-musllinux_i686"
 # Reuse the declared test dependency without passing < / > through Windows cmd.
 test-extras = ["test"]
 test-sources = ["tests", "tools"]
-test-command = "python -m pytest tests -v --import-mode=importlib -o faulthandler_timeout=60"
+test-command = "python -m pytest tests -v --import-mode=importlib --durations=20"
 environment = { CALMETRICS_TEST_REFERENCE_BACKEND = "python", CALMETRICS_TEST_EXPECT_EIGEN = "1" }
 
 [tool.cibuildwheel.linux]
