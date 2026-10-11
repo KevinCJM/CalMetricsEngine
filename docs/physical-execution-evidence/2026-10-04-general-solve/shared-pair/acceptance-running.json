@@ -1,0 +1,630 @@
+{
+  "status": "full_san_off_closed_and_actual_root_adopted_retested",
+  "source_build_id": "15ea55acd6ef95431691e7ef5dcf887f328abf6c923a3a89592b45706bb60193",
+  "production_adopted": true,
+  "goal_complete": false,
+  "related_passed": 767,
+  "native_passed": 9,
+  "new_regressions": 41,
+  "complete_task_jobs": 20,
+  "joint_njit_reference": "concatenate both RHS, solve once, return two requested-layout independent output spans; actual readonly signatures warmed",
+  "tasks": [
+    {
+      "task": "shared-private-2048-c-c",
+      "seconds": {
+        "production": 0.647135229,
+        "old": 0.205168354,
+        "new": 0.102516521,
+        "njit": 0.092821,
+        "njit-original": 0.171400104
+      },
+      "new_over_joint_njit": 1.1044539597720344,
+      "memory": {
+        "heap-new": {
+          "setup_heap": {
+            "allocations": 376,
+            "frees": 295,
+            "allocated_bytes": 168203475,
+            "live_bytes": 67247748,
+            "peak_bytes": 134480104,
+            "untracked_frees": 0,
+            "table_overflows": 0
+          },
+          "cold_heap": {
+            "allocations": 1211,
+            "frees": 1080,
+            "allocated_bytes": 322962521,
+            "live_bytes": 101283342,
+            "peak_bytes": 170141052,
+            "untracked_frees": 0,
+            "table_overflows": 0
+          },
+          "cold_retained_heap": {
+            "allocations": 1211,
+            "frees": 1086,
+            "allocated_bytes": 322962521,
+            "live_bytes": 101151570,
+            "peak_bytes": 170141052,
+            "untracked_frees": 0,
+            "table_overflows": 0
+          },
+          "warm_baseline_heap": {
+            "allocations": 5301,
+            "frees": 5176,
+            "allocated_bytes": 927242591,
+            "live_bytes": 101151570,
+            "peak_bytes": 170141190,
+            "untracked_frees": 0,
+            "table_overflows": 0
+          },
+          "warm_heap": {
+            "allocations": 7758,
+            "frees": 7625,
+            "allocated_bytes": 1289810785,
+            "live_bytes": 101283454,
+            "peak_bytes": 170274038,
+            "untracked_frees": 0,
+            "table_overflows": 0
+          },
+          "warm_retained_heap": {
+            "allocations": 7758,
+            "frees": 7631,
+            "allocated_bytes": 1289810785,
+            "live_bytes": 101151682,
+            "peak_bytes": 170274038,
+            "untracked_frees": 1,
+            "table_overflows": 0
+          },
+          "heap_schema": "continuous-live-1",
+          "cold_peak_bytes": 170141052,
+          "warm_peak_bytes": 170274038
+        },
+        "heap-njit": {
+          "setup_heap": {
+            "allocations": 56,
+            "frees": 42,
+            "allocated_bytes": 168191056,
+            "live_bytes": 67240176,
+            "peak_bytes": 134480104,
+            "untracked_frees": 1,
+            "table_overflows": 0
+          },
+          "cold_heap": {
+            "allocations": 708,
+            "frees": 692,
+            "allocated_bytes": 318654848,
+            "live_bytes": 67371472,
+            "peak_bytes": 203453664,
+            "untracked_frees": 1,
+            "table_overflows": 0
+          },
+          "cold_retained_heap": {
+            "allocations": 708,
+            "frees": 694,
+            "allocated_bytes": 318654848,
+            "live_bytes": 67240176,
+            "peak_bytes": 203453664,
+            "untracked_frees": 1,
+            "table_overflows": 0
+          },
+          "warm_baseline_heap": {
+            "allocations": 3968,
+            "frees": 3954,
+            "allocated_bytes": 1070973808,
+            "live_bytes": 67240176,
+            "peak_bytes": 203453664,
+            "untracked_frees": 1,
+            "table_overflows": 0
+          },
+          "warm_heap": {
+            "allocations": 5925,
+            "frees": 5908,
+            "allocated_bytes": 1522365216,
+            "live_bytes": 67371504,
+            "peak_bytes": 203584992,
+            "untracked_frees": 1,
+            "table_overflows": 0
+          },
+          "warm_retained_heap": {
+            "allocations": 5925,
+            "frees": 5910,
+            "allocated_bytes": 1522365216,
+            "live_bytes": 67240208,
+            "peak_bytes": 203584992,
+            "untracked_frees": 2,
+            "table_overflows": 0
+          },
+          "heap_schema": "continuous-live-1",
+          "cold_peak_bytes": 203453664,
+          "warm_peak_bytes": 203584992
+        },
+        "rss-new": {
+          "rss_baseline": 145801216,
+          "rss_peak": 317423616,
+          "rss_delta": 171622400,
+          "rss_idle_delta": 0,
+          "rss_schema": "warm-monitor-control-1"
+        },
+        "rss-njit": {
+          "rss_baseline": 140361728,
+          "rss_peak": 344555520,
+          "rss_delta": 204193792,
+          "rss_idle_delta": 0,
+          "rss_schema": "warm-monitor-control-1"
+        }
+      },
+      "max_absolute_new_joint_njit_difference": 8.673617379884035e-19
+    },
+    {
+      "task": "shared-private-4096-c-c",
+      "seconds": {
+        "production": 4.756513188,
+        "old": 1.0997213755,
+        "new": 0.5936054375,
+        "njit": 0.761234667,
+        "njit-original": 1.540099646
+      },
+      "new_over_joint_njit": 0.7797929642896835,
+      "memory": {
+        "heap-new": {
+          "setup_heap": {
+            "allocations": 376,
+            "frees": 295,
+            "allocated_bytes": 671847635,
+            "live_bytes": 268705412,
+            "peak_bytes": 537395432,
+            "untracked_frees": 0,
+            "table_overflows": 0
+          },
+          "cold_heap": {
+            "allocations": 2363,
+            "frees": 2232,
+            "allocated_bytes": 1197663321,
+            "live_bytes": 403879438,
+            "peak_bytes": 675792252,
+            "untracked_frees": 0,
+            "table_overflows": 0
+          },
+          "cold_retained_heap": {
+            "allocations": 2363,
+            "frees": 2238,
+            "allocated_bytes": 1197663321,
+            "live_bytes": 403616594,
+            "peak_bytes": 675792252,
+            "untracked_frees": 0,
+            "table_overflows": 0
+          },
+          "warm_baseline_heap": {
+            "allocations": 12213,
+            "frees": 12088,
+            "allocated_bytes": 3152189791,
+            "live_bytes": 403616594,
+            "peak_bytes": 675792390,
+            "untracked_frees": 0,
+            "table_overflows": 0
+          },
+          "warm_heap": {
+            "allocations": 18126,
+            "frees": 17993,
+            "allocated_bytes": 4324905825,
+            "live_bytes": 403879550,
+            "peak_bytes": 676056310,
+            "untracked_frees": 0,
+            "table_overflows": 0
+          },
+          "warm_retained_heap": {
+            "allocations": 18126,
+            "frees": 17999,
+            "allocated_bytes": 4324905825,
+            "live_bytes": 403616706,
+            "peak_bytes": 676056310,
+            "untracked_frees": 1,
+            "table_overflows": 0
+          },
+          "heap_schema": "continuous-live-1",
+          "cold_peak_bytes": 675792252,
+          "warm_peak_bytes": 676056310
+        },
+        "heap-njit": {
+          "setup_heap": {
+            "allocations": 56,
+            "frees": 42,
+            "allocated_bytes": 671835216,
+            "live_bytes": 268697840,
+            "peak_bytes": 537395432,
+            "untracked_frees": 1,
+            "table_overflows": 0
+          },
+          "cold_heap": {
+            "allocations": 1796,
+            "frees": 1780,
+            "allocated_bytes": 1258137984,
+            "live_bytes": 268960208,
+            "peak_bytes": 809538784,
+            "untracked_frees": 1,
+            "table_overflows": 0
+          },
+          "cold_retained_heap": {
+            "allocations": 1796,
+            "frees": 1782,
+            "allocated_bytes": 1258137984,
+            "live_bytes": 268697840,
+            "peak_bytes": 809538784,
+            "untracked_frees": 1,
+            "table_overflows": 0
+          },
+          "warm_baseline_heap": {
+            "allocations": 10496,
+            "frees": 10482,
+            "allocated_bytes": 4189651824,
+            "live_bytes": 268697840,
+            "peak_bytes": 809538784,
+            "untracked_frees": 1,
+            "table_overflows": 0
+          },
+          "warm_heap": {
+            "allocations": 15717,
+            "frees": 15700,
+            "allocated_bytes": 5948560160,
+            "live_bytes": 268960240,
+            "peak_bytes": 809801184,
+            "untracked_frees": 1,
+            "table_overflows": 0
+          },
+          "warm_retained_heap": {
+            "allocations": 15717,
+            "frees": 15702,
+            "allocated_bytes": 5948560160,
+            "live_bytes": 268697872,
+            "peak_bytes": 809801184,
+            "untracked_frees": 2,
+            "table_overflows": 0
+          },
+          "heap_schema": "continuous-live-1",
+          "cold_peak_bytes": 809538784,
+          "warm_peak_bytes": 809801184
+        },
+        "rss-new": {
+          "rss_baseline": 146817024,
+          "rss_peak": 841449472,
+          "rss_delta": 694632448,
+          "rss_idle_delta": 0,
+          "rss_schema": "warm-monitor-control-1"
+        },
+        "rss-njit": {
+          "rss_baseline": 140181504,
+          "rss_peak": 953974784,
+          "rss_delta": 813793280,
+          "rss_idle_delta": 0,
+          "rss_schema": "warm-monitor-control-1"
+        }
+      },
+      "max_absolute_new_joint_njit_difference": 3.2526065174565133e-19
+    },
+    {
+      "task": "shared-private-4096-f-c",
+      "seconds": {
+        "production": 4.937494562,
+        "old": 1.2975426245,
+        "new": 0.4762259165,
+        "njit": 0.650449979,
+        "njit-original": 1.382014313
+      },
+      "new_over_joint_njit": 0.7321484078332179,
+      "memory": {
+        "heap-new": {
+          "setup_heap": {
+            "allocations": 376,
+            "frees": 295,
+            "allocated_bytes": 671847635,
+            "live_bytes": 268705412,
+            "peak_bytes": 537395432,
+            "untracked_frees": 0,
+            "table_overflows": 0
+          },
+          "cold_heap": {
+            "allocations": 2363,
+            "frees": 2232,
+            "allocated_bytes": 1114825817,
+            "live_bytes": 403879438,
+            "peak_bytes": 675792252,
+            "untracked_frees": 0,
+            "table_overflows": 0
+          },
+          "cold_retained_heap": {
+            "allocations": 2363,
+            "frees": 2238,
+            "allocated_bytes": 1114825817,
+            "live_bytes": 403616594,
+            "peak_bytes": 675792252,
+            "untracked_frees": 0,
+            "table_overflows": 0
+          },
+          "warm_baseline_heap": {
+            "allocations": 12213,
+            "frees": 12088,
+            "allocated_bytes": 2655164767,
+            "live_bytes": 403616594,
+            "peak_bytes": 675792390,
+            "untracked_frees": 0,
+            "table_overflows": 0
+          },
+          "warm_heap": {
+            "allocations": 18126,
+            "frees": 17993,
+            "allocated_bytes": 3579368289,
+            "live_bytes": 403879550,
+            "peak_bytes": 676056310,
+            "untracked_frees": 0,
+            "table_overflows": 0
+          },
+          "warm_retained_heap": {
+            "allocations": 18126,
+            "frees": 17999,
+            "allocated_bytes": 3579368289,
+            "live_bytes": 403616706,
+            "peak_bytes": 676056310,
+            "untracked_frees": 1,
+            "table_overflows": 0
+          },
+          "heap_schema": "continuous-live-1",
+          "cold_peak_bytes": 675792252,
+          "warm_peak_bytes": 676056310
+        },
+        "heap-njit": {
+          "setup_heap": {
+            "allocations": 56,
+            "frees": 42,
+            "allocated_bytes": 671835216,
+            "live_bytes": 268697840,
+            "peak_bytes": 537395432,
+            "untracked_frees": 1,
+            "table_overflows": 0
+          },
+          "cold_heap": {
+            "allocations": 1796,
+            "frees": 1780,
+            "allocated_bytes": 1258137984,
+            "live_bytes": 268960208,
+            "peak_bytes": 809538784,
+            "untracked_frees": 1,
+            "table_overflows": 0
+          },
+          "cold_retained_heap": {
+            "allocations": 1796,
+            "frees": 1782,
+            "allocated_bytes": 1258137984,
+            "live_bytes": 268697840,
+            "peak_bytes": 809538784,
+            "untracked_frees": 1,
+            "table_overflows": 0
+          },
+          "warm_baseline_heap": {
+            "allocations": 10496,
+            "frees": 10482,
+            "allocated_bytes": 4189651824,
+            "live_bytes": 268697840,
+            "peak_bytes": 809538784,
+            "untracked_frees": 1,
+            "table_overflows": 0
+          },
+          "warm_heap": {
+            "allocations": 15717,
+            "frees": 15700,
+            "allocated_bytes": 5948560160,
+            "live_bytes": 268960240,
+            "peak_bytes": 809801184,
+            "untracked_frees": 1,
+            "table_overflows": 0
+          },
+          "warm_retained_heap": {
+            "allocations": 15717,
+            "frees": 15702,
+            "allocated_bytes": 5948560160,
+            "live_bytes": 268697872,
+            "peak_bytes": 809801184,
+            "untracked_frees": 2,
+            "table_overflows": 0
+          },
+          "heap_schema": "continuous-live-1",
+          "cold_peak_bytes": 809538784,
+          "warm_peak_bytes": 809801184
+        },
+        "rss-new": {
+          "rss_baseline": 148553728,
+          "rss_peak": 831504384,
+          "rss_delta": 682950656,
+          "rss_idle_delta": 0,
+          "rss_schema": "warm-monitor-control-1"
+        },
+        "rss-njit": {
+          "rss_baseline": 138133504,
+          "rss_peak": 949960704,
+          "rss_delta": 811827200,
+          "rss_idle_delta": 0,
+          "rss_schema": "warm-monitor-control-1"
+        }
+      },
+      "max_absolute_new_joint_njit_difference": 3.2526065174565133e-19
+    },
+    {
+      "task": "shared-private-4096-f-f",
+      "seconds": {
+        "production": 4.88375625,
+        "old": 1.343878896,
+        "new": 0.4942365625,
+        "njit": 0.6593388755,
+        "njit-original": 1.294319771
+      },
+      "new_over_joint_njit": 0.7495941478123869,
+      "memory": {
+        "heap-new": {
+          "setup_heap": {
+            "allocations": 378,
+            "frees": 297,
+            "allocated_bytes": 671847699,
+            "live_bytes": 268705412,
+            "peak_bytes": 537395432,
+            "untracked_frees": 0,
+            "table_overflows": 0
+          },
+          "cold_heap": {
+            "allocations": 2367,
+            "frees": 2236,
+            "allocated_bytes": 1115088057,
+            "live_bytes": 404141582,
+            "peak_bytes": 676054396,
+            "untracked_frees": 0,
+            "table_overflows": 0
+          },
+          "cold_retained_heap": {
+            "allocations": 2367,
+            "frees": 2242,
+            "allocated_bytes": 1115088057,
+            "live_bytes": 403878738,
+            "peak_bytes": 676054396,
+            "untracked_frees": 0,
+            "table_overflows": 0
+          },
+          "warm_baseline_heap": {
+            "allocations": 12227,
+            "frees": 12102,
+            "allocated_bytes": 2655427167,
+            "live_bytes": 403878738,
+            "peak_bytes": 676054534,
+            "untracked_frees": 0,
+            "table_overflows": 0
+          },
+          "warm_heap": {
+            "allocations": 18146,
+            "frees": 18013,
+            "allocated_bytes": 3579630785,
+            "live_bytes": 404141694,
+            "peak_bytes": 676318454,
+            "untracked_frees": 0,
+            "table_overflows": 0
+          },
+          "warm_retained_heap": {
+            "allocations": 18146,
+            "frees": 18019,
+            "allocated_bytes": 3579630785,
+            "live_bytes": 403878850,
+            "peak_bytes": 676318454,
+            "untracked_frees": 1,
+            "table_overflows": 0
+          },
+          "heap_schema": "continuous-live-1",
+          "cold_peak_bytes": 676054396,
+          "warm_peak_bytes": 676318454
+        },
+        "heap-njit": {
+          "setup_heap": {
+            "allocations": 54,
+            "frees": 40,
+            "allocated_bytes": 671834480,
+            "live_bytes": 268697840,
+            "peak_bytes": 537395432,
+            "untracked_frees": 1,
+            "table_overflows": 0
+          },
+          "cold_heap": {
+            "allocations": 1792,
+            "frees": 1777,
+            "allocated_bytes": 1257874880,
+            "live_bytes": 268960096,
+            "peak_bytes": 809538784,
+            "untracked_frees": 1,
+            "table_overflows": 0
+          },
+          "cold_retained_heap": {
+            "allocations": 1792,
+            "frees": 1778,
+            "allocated_bytes": 1257874880,
+            "live_bytes": 268697840,
+            "peak_bytes": 809538784,
+            "untracked_frees": 1,
+            "table_overflows": 0
+          },
+          "warm_baseline_heap": {
+            "allocations": 10482,
+            "frees": 10468,
+            "allocated_bytes": 4188076880,
+            "live_bytes": 268697840,
+            "peak_bytes": 809538784,
+            "untracked_frees": 1,
+            "table_overflows": 0
+          },
+          "warm_heap": {
+            "allocations": 15697,
+            "frees": 15681,
+            "allocated_bytes": 5946198112,
+            "live_bytes": 268960128,
+            "peak_bytes": 809801072,
+            "untracked_frees": 1,
+            "table_overflows": 0
+          },
+          "warm_retained_heap": {
+            "allocations": 15697,
+            "frees": 15682,
+            "allocated_bytes": 5946198112,
+            "live_bytes": 268697872,
+            "peak_bytes": 809801072,
+            "untracked_frees": 2,
+            "table_overflows": 0
+          },
+          "heap_schema": "continuous-live-1",
+          "cold_peak_bytes": 809538784,
+          "warm_peak_bytes": 809801072
+        },
+        "rss-new": {
+          "rss_baseline": 149045248,
+          "rss_peak": 835092480,
+          "rss_delta": 686047232,
+          "rss_idle_delta": 0,
+          "rss_schema": "warm-monitor-control-1"
+        },
+        "rss-njit": {
+          "rss_baseline": 139542528,
+          "rss_peak": 955170816,
+          "rss_delta": 815628288,
+          "rss_idle_delta": 0,
+          "rss_schema": "warm-monitor-control-1"
+        }
+      },
+      "max_absolute_new_joint_njit_difference": 3.2526065174565133e-19
+    }
+  ],
+  "known_gaps": [
+    "2048 C is 9.7ms slower than joint NJIT; preserve as diagnostic",
+    "non-DD/KKT and other important platform chains remain open",
+    "direct/public retained RSS gaps remain open"
+  ],
+  "transport_factor_reuse": {
+    "lanes": [
+      "single",
+      "thread",
+      "process_inline",
+      "process_shared"
+    ],
+    "factorizations_per_row": 1,
+    "rows_per_case": 2,
+    "math_roots_per_case": 4,
+    "raw": "transport-probe.json"
+  },
+  "full_passed": 12715,
+  "sanitized_related_passed": 767,
+  "off_related_passed": 767,
+  "native_counts": {
+    "normal": 9,
+    "sanitized": 9,
+    "off": 9
+  },
+  "root_related_passed": 767,
+  "root_native_passed": 9,
+  "root_integration": {
+    "status": "passed",
+    "raw": "integration/verify-root-status.json",
+    "numeric_source_build_id": "15ea55acd6ef95431691e7ef5dcf887f328abf6c923a3a89592b45706bb60193",
+    "same_full_and_san_source88": true
+  }
+}

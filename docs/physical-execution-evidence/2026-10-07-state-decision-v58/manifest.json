@@ -1,0 +1,1291 @@
+{
+  "candidate": "V58D",
+  "source_build_id": "6a4114d3736f7967e011c5e7619172eb093685461cbacd3cbda74191de02aadb",
+  "goal_complete": false,
+  "git_delivery": false,
+  "preserved_baseline_files_before_doc_updates": 327,
+  "not_claimed": [
+    "all major matrix/NJIT gaps closed",
+    "HMM whole-chain benefit",
+    "complete allocation/copy audit",
+    "new library adoption"
+  ],
+  "files": {
+    "raw/actual-build-driver.log": {
+      "sha256": "4917cb94122e541c87bb27e918afbf4eea4ff764f6ce8701731a1dad8de65959",
+      "bytes": 113,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/actual-build-driver.log"
+    },
+    "raw/actual-validation-driver.log": {
+      "sha256": "fad36cd0305c631ee10bd7c3661e8069ca8cd366397a49f3063d181ada943fb2",
+      "bytes": 2662,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/actual-validation-driver.log"
+    },
+    "raw/adopt_v58d.py.txt": {
+      "sha256": "7e9328022bb1227486b116db3ebdb7b3881edaa7bbbbf758e871f44bf963527c",
+      "bytes": 2115,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/adopt_v58d.py"
+    },
+    "raw/archive_v58d.py.txt": {
+      "sha256": "ab22cb396c3f39e526ca5b714d0a44879207792f970fdfb61ceb486fd6469134",
+      "bytes": 8026,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/archive_v58d.py"
+    },
+    "raw/asan-driver.log": {
+      "sha256": "210b4b2680e3bf3b1e94f8c918b0efb23dfb46b7ca8f74f9e5f5992321f30aab",
+      "bytes": 113,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/asan-driver.log"
+    },
+    "raw/asan-quality-driver.log": {
+      "sha256": "58edf4c46c5ef8f8acebb07e08e2596bf558233317c1ec43c1d46621678ebb84",
+      "bytes": 162,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/asan-quality-driver.log"
+    },
+    "raw/asan_python_bootstrap.py.txt": {
+      "sha256": "946ff913a36d69080ebba291e601c5e716546d8c7c3f578da1b49c1e22686cd4",
+      "bytes": 1127,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/asan_python_bootstrap.py"
+    },
+    "raw/build.py.txt": {
+      "sha256": "d8380bd6e9d030c75ddb2c7e5ecc793eb93679bf310327b945e196966af9ca8f",
+      "bytes": 3539,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/build.py"
+    },
+    "raw/build_actual.py.txt": {
+      "sha256": "e76fb56a61ea0cd983002c9ba22bd58210c164547fd4dd8754538e29a5d9ae62",
+      "bytes": 3535,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/build_actual.py"
+    },
+    "raw/build_asan.py.txt": {
+      "sha256": "967bc77109c8d5900918d47aecab38fccad406c0e7a35dfc275695168d6bfa69",
+      "bytes": 4187,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/build_asan.py"
+    },
+    "raw/build_b.py.txt": {
+      "sha256": "b9a323911890debf037f636737990005420eea94e0e4791e870ba8c676d92d55",
+      "bytes": 3539,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/build_b.py"
+    },
+    "raw/build_c.py.txt": {
+      "sha256": "070fb9e9c665c76be299d4f4de8f5286bda296fa56e7eda4b174b3621eac4175",
+      "bytes": 3539,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/build_c.py"
+    },
+    "raw/build_d_asan.py.txt": {
+      "sha256": "b977666f37157dc952f126e22235603f92d748e638f05ec2b1594cd2223045e9",
+      "bytes": 4189,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/build_d_asan.py"
+    },
+    "raw/build_d_normal.py.txt": {
+      "sha256": "3715e5758d3dca520813e4e06e2a95bf1bbdf6ec4bc33f7642b560f2b07d8607",
+      "bytes": 3541,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/build_d_normal.py"
+    },
+    "raw/build_d_off.py.txt": {
+      "sha256": "fa4c6627fe502b702c7170415d52d2880655186b0dfe8ccb58fffafe6af648b8",
+      "bytes": 3661,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/build_d_off.py"
+    },
+    "raw/build_off.py.txt": {
+      "sha256": "47b96f2e6bc5498c256398bac73703d9b52cee4fa8b4fb16c04c2841c23fbe43",
+      "bytes": 3659,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/build_off.py"
+    },
+    "raw/collection.log": {
+      "sha256": "dc9277c525da8df3ca68dfe3dfb63b01f1132db5b6ef1a10013850f58e0f8626",
+      "bytes": 11097,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/collection.log"
+    },
+    "raw/cpp-graph.cpp.diff": {
+      "sha256": "0a0417cb83c1d3fcaa8dcde021ee8847d3bb1a8940475b378bec282cbb8fd342",
+      "bytes": 14986,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/cpp-graph.cpp.diff"
+    },
+    "raw/cpp-include-calmetrics_engine-graph.hpp.diff": {
+      "sha256": "f36182b89f801f57c0a12ac7e45b12e6da31b884deb3bf17a4feb6906277350e",
+      "bytes": 1130,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/cpp-include-calmetrics_engine-graph.hpp.diff"
+    },
+    "raw/cpp-planner.cpp.diff": {
+      "sha256": "5aa4ef0f91b968da4466c5d6ecc1ca6e66634693ab5a0cbeba94b81d7d330b52",
+      "bytes": 708,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/cpp-planner.cpp.diff"
+    },
+    "raw/d-asan-build-driver.log": {
+      "sha256": "0182798d03813a56e9f74089b08354882ee7afc1389c7220543728430a44c342",
+      "bytes": 113,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/d-asan-build-driver.log"
+    },
+    "raw/d-asan-quality-driver.log": {
+      "sha256": "52881543f77d0df677067499dc87e84941be1aadd654f65e40d332af2e01beea",
+      "bytes": 225,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/d-asan-quality-driver.log"
+    },
+    "raw/d-benefit-review.json": {
+      "sha256": "4536d3ba86b926c93253a497ed08620a65f613e3660424ca5f685772eb193551",
+      "bytes": 947,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/d-benefit-review.json"
+    },
+    "raw/d-native-fault-build.log": {
+      "sha256": "ccd6653fce26281f1b4900b3442340e2497fc20b28a3aa58dcf876fad68a94fc",
+      "bytes": 202,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/d-native-fault-build.log"
+    },
+    "raw/d-normal-build-driver.log": {
+      "sha256": "4917cb94122e541c87bb27e918afbf4eea4ff764f6ce8701731a1dad8de65959",
+      "bytes": 113,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/d-normal-build-driver.log"
+    },
+    "raw/d-normal-quality-driver.log": {
+      "sha256": "7ad2c33c98662c45ca0de3e37fe9d18297d05b95d85f21b1c666a578539148a9",
+      "bytes": 227,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/d-normal-quality-driver.log"
+    },
+    "raw/d-off-build-driver.log": {
+      "sha256": "aa996591a0d91ea2b939f8cc3086046c7e37b79fe7f8111e1ab116620e5c746d",
+      "bytes": 113,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/d-off-build-driver.log"
+    },
+    "raw/d-off-final-native-build.log": {
+      "sha256": "c2ed93ffd93c840755c0e91392ae593b1b52de9b7aaf6c208123feaceb1dde2e",
+      "bytes": 63,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/d-off-final-native-build.log"
+    },
+    "raw/d-off-quality-driver.log": {
+      "sha256": "e6a8381266c03e202297a2944528f69e2300b20c628b059ced3a88ad4b556ee2",
+      "bytes": 160,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/d-off-quality-driver.log"
+    },
+    "raw/d-qualification-test-sha.json": {
+      "sha256": "452f9418d488e097067b23259698609c38f84102d030f6d11aa8083a97531e40",
+      "bytes": 326,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/d-qualification-test-sha.json"
+    },
+    "raw/d-screen-driver-state.json": {
+      "sha256": "49ddab9680bccad442a54cf887fbc42598ae89a469727a724601a449b0954e21",
+      "bytes": 51,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/d-screen-driver-state.json"
+    },
+    "raw/d-screen-driver.log": {
+      "sha256": "519f42e372f386bade4b35c47d21ce7a150a647ef2209e42bf29e41929b73681",
+      "bytes": 1082,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/d-screen-driver.log"
+    },
+    "raw/design.md.txt": {
+      "sha256": "673642c9d4c022dd83294bc6a1272b97ab6ea653d503737330e77e705eaf2bbe",
+      "bytes": 6115,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/design.md"
+    },
+    "raw/double-fault-c-result.log": {
+      "sha256": "56f06c38eed9e8870ae0227a432fefd368a9fdb7ed6e7f22e84f405b9f6614a8",
+      "bytes": 79,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/double-fault-c-result.log"
+    },
+    "raw/double-fault-compile-2.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/double-fault-compile-2.log"
+    },
+    "raw/double-fault-compile.log": {
+      "sha256": "b4457fafc5da997c3ead55d249ecd4009d67e138ac4ab9719f4e4e82c2c51195",
+      "bytes": 75,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/double-fault-compile.log"
+    },
+    "raw/double_fault_probe.cpp.txt": {
+      "sha256": "b945c945773e0bf2268840561d947972bfde648ee377b527f05fa1941486e8f2",
+      "bytes": 204,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/double_fault_probe.cpp"
+    },
+    "raw/double_fault_probe.hpp.txt": {
+      "sha256": "3e622f2ab717eb491392807738ac81b9c1aa3941be5c79330fee70c60e4553c6",
+      "bytes": 3748,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/double_fault_probe.hpp"
+    },
+    "raw/final-native-asan.log": {
+      "sha256": "422740f18d8531cafa098fd9760a4d583cabc0932931b24fbba850f35155e0d5",
+      "bytes": 1412,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/final-native-asan.log"
+    },
+    "raw/final-native-asan.xml": {
+      "sha256": "85ef1b7f0337e3409e2708944749de4dca245ac65af370d3c99e0b979209aa62",
+      "bytes": 2245,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/final-native-asan.xml"
+    },
+    "raw/final-native-driver.log": {
+      "sha256": "32aca11fdd4d6895fc602d194a1608f356c3d6e2776752559533f533f48779a8",
+      "bytes": 37,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/final-native-driver.log"
+    },
+    "raw/final-native-normal.log": {
+      "sha256": "5a25e9a75c29552cc59f8763edaa643f786b5d4142142c3b8978cfa4e265a952",
+      "bytes": 1407,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/final-native-normal.log"
+    },
+    "raw/final-native-normal.xml": {
+      "sha256": "a38da1ebbb35f740b32dad5ae30cdd4ef4eeed6c7f89129a47fc82f5b6c26c46",
+      "bytes": 2247,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/final-native-normal.xml"
+    },
+    "raw/final-native-off.log": {
+      "sha256": "9dc491cf5679ad64174a76a8d7f73307457a938677fe75c4e6e1ed00c933cc1d",
+      "bytes": 1411,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/final-native-off.log"
+    },
+    "raw/final-native-off.xml": {
+      "sha256": "815058dfb43493a522b59d2af795252c65a981fba97dfc4f819839efe2ec9723",
+      "bytes": 2246,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/final-native-off.xml"
+    },
+    "raw/final-native.json": {
+      "sha256": "0f6801d49439b83bb8e12562688dd1a994ce67c27ffdd0a2b803646ab905251f",
+      "bytes": 491,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/final-native.json"
+    },
+    "raw/focused-b.log": {
+      "sha256": "a4ddf2ff307417fa27ae314d85832d490b0985d76a9f15b40dee55df9c4e9c06",
+      "bytes": 66733,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/focused-b.log"
+    },
+    "raw/focused-b.xml": {
+      "sha256": "7709b48ccdedcc3da9b1bb75256868b5306a03a0bad68a472b02b8a232e2cecb",
+      "bytes": 110510,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/focused-b.xml"
+    },
+    "raw/focused-c.log": {
+      "sha256": "f82a19973605ccd6b3c0448b9d7c41d3555b689fd160f8f1c4eea3aaebff1bff",
+      "bytes": 59270,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/focused-c.log"
+    },
+    "raw/focused-c.xml": {
+      "sha256": "9af38341fefb8c5354c7754f5be4c88d185b7385a8ac0edcfc99a2e7f5e14540",
+      "bytes": 68214,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/focused-c.xml"
+    },
+    "raw/focused-d.log": {
+      "sha256": "989dad4ff98cfcceb95b56a62f504f8c781d6d27806ee0c81783df6d63c03a59",
+      "bytes": 5077,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/focused-d.log"
+    },
+    "raw/focused-d.xml": {
+      "sha256": "381e8d0c0c7d5a55914f8a0792b56371336c3339ab31e4f4fbb5719bbd0ac396",
+      "bytes": 53587,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/focused-d.xml"
+    },
+    "raw/focused-e.log": {
+      "sha256": "bbc9df6484a51b71f2fed0dc177af20a373221fb5cf5247ff390298eb9699c1b",
+      "bytes": 510,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/focused-e.log"
+    },
+    "raw/focused-e.xml": {
+      "sha256": "e337f0381a46cbb9ff18a08a2507a3467c14caa6aed0d955bda87e19dbdb385f",
+      "bytes": 49861,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/focused-e.xml"
+    },
+    "raw/implement.py.txt": {
+      "sha256": "e8af7c66107a6b9dc548e2ba0515142c120f5175632169d82b429ace89f20cb2",
+      "bytes": 12250,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/implement.py"
+    },
+    "raw/int64-precision-asan.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/int64-precision-asan.stderr"
+    },
+    "raw/int64-precision-asan.stdout": {
+      "sha256": "860080c33be887d407fd89a65de3d4e735acc6dc7dff97bc61a9bd7711d54071",
+      "bytes": 259,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/int64-precision-asan.stdout"
+    },
+    "raw/int64-precision-initial-normal.stderr": {
+      "sha256": "c5896db3aa15f61541cc1ffb81ec103a39927312d48558cd7ba939dccb4c2bca",
+      "bytes": 423,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/int64-precision-initial-normal.stderr"
+    },
+    "raw/int64-precision-normal.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/int64-precision-normal.stderr"
+    },
+    "raw/int64-precision-normal.stdout": {
+      "sha256": "7f754dc5b279c10aabf6578b47d8d3ec7e6fb08f122d13b94229eb228cecfe25",
+      "bytes": 259,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/int64-precision-normal.stdout"
+    },
+    "raw/int64-precision-off.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/int64-precision-off.stderr"
+    },
+    "raw/int64-precision-off.stdout": {
+      "sha256": "99d5480cd21f71e637c0bb5f314af54d9eac18d645dcf1907cf96794a43d97b3",
+      "bytes": 259,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/int64-precision-off.stdout"
+    },
+    "raw/int64-precision-probes.json": {
+      "sha256": "c7a29e0ef947f8ee75181657fb4bf62bbfa957f144ef86add9b4cb2d002777ed",
+      "bytes": 1245,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/int64-precision-probes.json"
+    },
+    "raw/int64_precision_probe.py.txt": {
+      "sha256": "9bc05c7eedd8d4c90ed94a7a5b231d540bb6dac9fc28e9bbadd85181767d83d3",
+      "bytes": 1902,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/int64_precision_probe.py"
+    },
+    "raw/int64_precision_probe_initial.py.txt": {
+      "sha256": "3f2ec6a14f0e193baafa46f5c9d2147f120ef84ae79b0e1e5c9f71c785f7c26f",
+      "bytes": 1288,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/int64_precision_probe_initial.py"
+    },
+    "raw/native-errors-build.log": {
+      "sha256": "ccd6653fce26281f1b4900b3442340e2497fc20b28a3aa58dcf876fad68a94fc",
+      "bytes": 202,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/native-errors-build.log"
+    },
+    "raw/native-errors.xml": {
+      "sha256": "d32373a37fe57d00c57ae9f816ad6bd6c819670d4c88627f11071c6e00c2a0fc",
+      "bytes": 390,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/native-errors.xml"
+    },
+    "raw/native-probe-build-2.log": {
+      "sha256": "ccd6653fce26281f1b4900b3442340e2497fc20b28a3aa58dcf876fad68a94fc",
+      "bytes": 202,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/native-probe-build-2.log"
+    },
+    "raw/native-probe-build.log": {
+      "sha256": "7d158ee6ba6b2d59fdaa3c0c3fe908f0b80fa4fe8cf83903753d97d9c1d41363",
+      "bytes": 91,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/native-probe-build.log"
+    },
+    "raw/normal-driver.log": {
+      "sha256": "9b6d3d7a36996dae4cba5165a0652367e060091bf6a955e1f776203a051b8170",
+      "bytes": 366,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/normal-driver.log"
+    },
+    "raw/off-driver.log": {
+      "sha256": "57464633dcdf481aca0cb8703690a6e181ebdf7bb7b2ebfbd171a6094f3f713b",
+      "bytes": 113,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/off-driver.log"
+    },
+    "raw/off-quality-driver.log": {
+      "sha256": "7924faec0d29c209e036d0b90f9cfafeb1d30de4498b62d14197fea9f8bb9ce0",
+      "bytes": 160,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/off-quality-driver.log"
+    },
+    "raw/prepare_actual_scripts.py.txt": {
+      "sha256": "1ae903de701fc4df080a9a5139cfb2610ee094d94e34f41fc80eb51ab393b111",
+      "bytes": 1394,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/prepare_actual_scripts.py"
+    },
+    "raw/prepare_d_evidence.py.txt": {
+      "sha256": "919e8ad45c75781cca817dab9efb0db31eb8b713c1909486a3939b7e5b3d0398",
+      "bytes": 1961,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/prepare_d_evidence.py"
+    },
+    "raw/protected-baseline.json": {
+      "sha256": "0b1780d71d1744b7fc0b82f8be873396eca0f0fc000dd47ee2bf802216bddcb0",
+      "bytes": 35152,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/protected-baseline.json"
+    },
+    "raw/publish_v58d_docs.py.txt": {
+      "sha256": "85f534f215007886f4a9c06c81d1557db59e93b1c9fe54e55e57e85c3c991566",
+      "bytes": 5673,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/publish_v58d_docs.py"
+    },
+    "raw/qualification-initial-test-sha.json": {
+      "sha256": "b12c71de2b8de6c2655a1deb700ad1c1effda254f58aa8cf35aee9943fa5c67f",
+      "bytes": 326,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/qualification-initial-test-sha.json"
+    },
+    "raw/qualification-test-sha.json": {
+      "sha256": "15f3e45e76a8caf9f495f39ed728a48a66959279ee4221b44edfaefa2066a4ed",
+      "bytes": 326,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/qualification-test-sha.json"
+    },
+    "raw/review_d_benefit.py.txt": {
+      "sha256": "d76e1590c8509f43e2c1bd09c0bcb9d1e2be27136b55bce1c276b97b32cfc5fe",
+      "bytes": 2815,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/review_d_benefit.py"
+    },
+    "raw/run_actual_confirmation.py.txt": {
+      "sha256": "48749ae1ec6548f0eae91e335abd3203020a74fa9d081f04e007f4bcaa56a0ad",
+      "bytes": 3788,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/run_actual_confirmation.py"
+    },
+    "raw/run_actual_quality.py.txt": {
+      "sha256": "ecf15afbd25c4c6c6f63dd70fecd6a9d0f35760119ca43e9c549e1756b69a036",
+      "bytes": 3535,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/run_actual_quality.py"
+    },
+    "raw/run_actual_validation.py.txt": {
+      "sha256": "b6d1a697fe96768865e780d6b57a84c45a794d14453576279d246bbb8a9cef1a",
+      "bytes": 245,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/run_actual_validation.py"
+    },
+    "raw/run_d_asan.py.txt": {
+      "sha256": "f9810bd601b176f795bb2d906bf9ddc21fb41f0ab204e03859a4f81ecb2953d9",
+      "bytes": 301,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/run_d_asan.py"
+    },
+    "raw/run_d_normal.py.txt": {
+      "sha256": "1bfa6cbf146a3543fe0fbda39ebfa56d2c1f2f521899a91b503ff5dd4f0e5acb",
+      "bytes": 331,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/run_d_normal.py"
+    },
+    "raw/run_final_native.py.txt": {
+      "sha256": "3e0fe1092076b44d58fba8819a8d9ebb16464fe2cebfd779bf2a33b791ad5613",
+      "bytes": 1535,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/run_final_native.py"
+    },
+    "raw/run_normal.py.txt": {
+      "sha256": "c1d929d63e8db2bc552c3892153eda914aa89a226688be58cf06a3c34830fd35",
+      "bytes": 329,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/run_normal.py"
+    },
+    "raw/run_precision_probes.py.txt": {
+      "sha256": "d62346fa8bc34f756c7ca70ee71e8d2224b8fa26985b02df1c5ee480f92d763d",
+      "bytes": 1503,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/run_precision_probes.py"
+    },
+    "raw/run_quality.py.txt": {
+      "sha256": "be1dba6ecd05cd94c43972dab94b36536409ad79336fa6a52c344e12586fbb5a",
+      "bytes": 3585,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/run_quality.py"
+    },
+    "raw/run_quality_d.py.txt": {
+      "sha256": "d7b67af52fed942021dcb8905cb78cdc67b99bb0f0d3d8ebcc9bab8ad1f7a9d8",
+      "bytes": 3587,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/run_quality_d.py"
+    },
+    "raw/run_screen.py.txt": {
+      "sha256": "5fe71debd6ce6ba802c22007fd2de3068cd9bdb2362dd84572c9ace91a8be52b",
+      "bytes": 2640,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/run_screen.py"
+    },
+    "raw/run_screen_d.py.txt": {
+      "sha256": "e24a33627b6d38f6a1bcbe0995b1ec4046fe7f4f12e7d3ff76580dfcc4e845c9",
+      "bytes": 2640,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/run_screen_d.py"
+    },
+    "raw/screen-c-heap-baseline.json": {
+      "sha256": "d0b3281d85426c63043e1421285e31d382bed28fc51b803c87ba3e574abc1c5a",
+      "bytes": 16439,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-c-heap-baseline.json"
+    },
+    "raw/screen-c-heap-baseline.log": {
+      "sha256": "5f13235a067db62db2843f3b67d9119039c45b6034d1d86734cd7db90ec2775e",
+      "bytes": 11203,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-c-heap-baseline.log"
+    },
+    "raw/screen-c-heap-candidate.json": {
+      "sha256": "fb7c834093f40f63fe99e80c88769414e71b9526ab0043b9236545c9762d4d05",
+      "bytes": 16442,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-c-heap-candidate.json"
+    },
+    "raw/screen-c-heap-candidate.log": {
+      "sha256": "c6da879de49c69d11dd87356948cad8c6ab823ec52aaea0b84a49165a5bc4498",
+      "bytes": 11206,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-c-heap-candidate.log"
+    },
+    "raw/screen-c-heap-njit.json": {
+      "sha256": "e9e21f29db2cd44e767d74f790d5edca1f8679df42ce732ecea80c45f9596d57",
+      "bytes": 10117,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-c-heap-njit.json"
+    },
+    "raw/screen-c-heap-njit.log": {
+      "sha256": "0ea92b621cdcdf5aabd0ecfab0e61e0eb5582407fc9b987bf6e64dcd89325dce",
+      "bytes": 6745,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-c-heap-njit.log"
+    },
+    "raw/screen-c-rss-baseline.json": {
+      "sha256": "9e50600622a11c094525303668a39f89ad80d618152bba3240fd5447cae9a0cd",
+      "bytes": 16163,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-c-rss-baseline.json"
+    },
+    "raw/screen-c-rss-baseline.log": {
+      "sha256": "48b6fbe6a33dd997b8f4bd9ab5e9f8a62c41ee118a7d30bd6a81d7841b79acfe",
+      "bytes": 10995,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-c-rss-baseline.log"
+    },
+    "raw/screen-c-rss-candidate.json": {
+      "sha256": "941a82182b97f8c14aa78f8ca5fdccbd70c057d77c22ba6c3da5a1b632a6896e",
+      "bytes": 16167,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-c-rss-candidate.json"
+    },
+    "raw/screen-c-rss-candidate.log": {
+      "sha256": "c7a40c8cb85c2a8ad00eba1a64aa893247bc01bd6f43e97655823e27dd68c76e",
+      "bytes": 10999,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-c-rss-candidate.log"
+    },
+    "raw/screen-c-rss-njit.json": {
+      "sha256": "e81c4744e7f5f0b349ed21519f575bc1a6e0c8c0df76f000e904aaaec999b4a4",
+      "bytes": 9849,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-c-rss-njit.json"
+    },
+    "raw/screen-c-rss-njit.log": {
+      "sha256": "e5cb0866839bb6ad6455fb2ddcd3a4712a34c76144bd85b44c8b1267634bcb88",
+      "bytes": 6545,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-c-rss-njit.log"
+    },
+    "raw/screen-c-time-0-baseline.json": {
+      "sha256": "47332e382ea28fa24cb5813784f48cff5584470f20155ffaa187cb62a284d306",
+      "bytes": 16048,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-c-time-0-baseline.json"
+    },
+    "raw/screen-c-time-0-baseline.log": {
+      "sha256": "8cecd1b9d0da8a66fc1b24c39bf2f8a375ffc5fefb56d144b9eebc2ed34c25e2",
+      "bytes": 10934,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-c-time-0-baseline.log"
+    },
+    "raw/screen-c-time-0-candidate.json": {
+      "sha256": "067f47219b92c92ed77fa138e173f46687eaa5cb69c528009e78c57288f24553",
+      "bytes": 16036,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-c-time-0-candidate.json"
+    },
+    "raw/screen-c-time-0-candidate.log": {
+      "sha256": "550a32c7f758257ff1d509c3a6d004501ade1de9890f74733055933fc6a971de",
+      "bytes": 10922,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-c-time-0-candidate.log"
+    },
+    "raw/screen-c-time-0-njit.json": {
+      "sha256": "558f8a94719632c743d9f9e827c6a25da3f14b92334a3071e07444313249eb23",
+      "bytes": 9731,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-c-time-0-njit.json"
+    },
+    "raw/screen-c-time-0-njit.log": {
+      "sha256": "e2b6d563454d0d6c2949160b1caaaa8df1957541de2afedb5366ba5acbcabe7b",
+      "bytes": 6481,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-c-time-0-njit.log"
+    },
+    "raw/screen-c-time-1-baseline.json": {
+      "sha256": "4724ccfa22fdb9592e4b7257d2fabc3c8457690b254d62469095bf1dce998d38",
+      "bytes": 16041,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-c-time-1-baseline.json"
+    },
+    "raw/screen-c-time-1-baseline.log": {
+      "sha256": "a396ecc3debaed176a0e46441888c5f26ea68430a7410fe41de99387a2203894",
+      "bytes": 10927,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-c-time-1-baseline.log"
+    },
+    "raw/screen-c-time-1-candidate.json": {
+      "sha256": "81ab1f216fefcf9085bb2dc27880308dc06543d4ba29a2a65daa68e67b725875",
+      "bytes": 16049,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-c-time-1-candidate.json"
+    },
+    "raw/screen-c-time-1-candidate.log": {
+      "sha256": "9d3b1e7b52e424bda0fed195fa868beb59d88094b7835de289a06de3a5320ab9",
+      "bytes": 10935,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-c-time-1-candidate.log"
+    },
+    "raw/screen-c-time-1-njit.json": {
+      "sha256": "6db8aef6b5604aa3df9da31f7d3cdb9b80b45dd95a54be65c0262464f28659dc",
+      "bytes": 9723,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-c-time-1-njit.json"
+    },
+    "raw/screen-c-time-1-njit.log": {
+      "sha256": "8f5c47183f8295057ee61d375a75065e2328f067c2ac31da89a27e175bbd50c9",
+      "bytes": 6473,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-c-time-1-njit.log"
+    },
+    "raw/screen-c-time-2-baseline.json": {
+      "sha256": "38ec2a4dad8390a5676181a8c40eac918f9d4eae41ce8d004eec87fe27bcda60",
+      "bytes": 16044,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-c-time-2-baseline.json"
+    },
+    "raw/screen-c-time-2-baseline.log": {
+      "sha256": "82659a9abd3d09ac21c13064935ae65c245787bd843ebb0df0e2128bb171b261",
+      "bytes": 10930,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-c-time-2-baseline.log"
+    },
+    "raw/screen-c-time-2-candidate.json": {
+      "sha256": "bd2a83d732e174e19fb78f557255c097c137c25af47e2e649518323c6683adae",
+      "bytes": 16045,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-c-time-2-candidate.json"
+    },
+    "raw/screen-c-time-2-candidate.log": {
+      "sha256": "776b82ec848b2ea9fa4ba40493e6ae17c325c2722c2647267b86d6c53278e63a",
+      "bytes": 10931,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-c-time-2-candidate.log"
+    },
+    "raw/screen-c-time-2-njit.json": {
+      "sha256": "8e59cacc16ecdeddd78aff285cd3b8215cede0bb83285b7f4e7ec57cf11883b1",
+      "bytes": 9731,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-c-time-2-njit.json"
+    },
+    "raw/screen-c-time-2-njit.log": {
+      "sha256": "09a881987e0292b54b13ab91dd751af94b9f8213da4bb2090e9fb32359a7fb1f",
+      "bytes": 6481,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-c-time-2-njit.log"
+    },
+    "raw/screen-c.json": {
+      "sha256": "e4e977d1587267fd33dca89fffe86f526fe73a93f84460d88753f514a9d704a6",
+      "bytes": 2241,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-c.json"
+    },
+    "raw/screen-d-heap-baseline.json": {
+      "sha256": "6795f806fa7024221d401660259a794342bb4d620943a277c79d2996fafa3fde",
+      "bytes": 16444,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-d-heap-baseline.json"
+    },
+    "raw/screen-d-heap-baseline.log": {
+      "sha256": "5edfa360f42721ccf377781baa9b9b2ecbb39cb227b434389e31ed05600b4059",
+      "bytes": 11208,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-d-heap-baseline.log"
+    },
+    "raw/screen-d-heap-candidate.json": {
+      "sha256": "a112a6681b6e90d23d5b650e59cdfd9c00b754a979a9837f608b074f3719f457",
+      "bytes": 16442,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-d-heap-candidate.json"
+    },
+    "raw/screen-d-heap-candidate.log": {
+      "sha256": "4b3b87cbb6a8babc4e894b73727fdc1446c839cc9693809b07fae291a514ecf7",
+      "bytes": 11206,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-d-heap-candidate.log"
+    },
+    "raw/screen-d-heap-njit.json": {
+      "sha256": "e9e21f29db2cd44e767d74f790d5edca1f8679df42ce732ecea80c45f9596d57",
+      "bytes": 10117,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-d-heap-njit.json"
+    },
+    "raw/screen-d-heap-njit.log": {
+      "sha256": "0ea92b621cdcdf5aabd0ecfab0e61e0eb5582407fc9b987bf6e64dcd89325dce",
+      "bytes": 6745,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-d-heap-njit.log"
+    },
+    "raw/screen-d-rss-baseline.json": {
+      "sha256": "4cadefc87baca92b2db21cb358ccfc8ba80c2771e0dda15d1a2c7fa1e2483cc8",
+      "bytes": 16169,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-d-rss-baseline.json"
+    },
+    "raw/screen-d-rss-baseline.log": {
+      "sha256": "ed3eb9e447d5d03b1e7f129fb7bfdd62f74cd48aee8706f9e87ab2ff425f032e",
+      "bytes": 11001,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-d-rss-baseline.log"
+    },
+    "raw/screen-d-rss-candidate.json": {
+      "sha256": "8497d6afead68e1f02b7ae55626ab61426227adb76f79377ad21de0bd54e8a3a",
+      "bytes": 16166,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-d-rss-candidate.json"
+    },
+    "raw/screen-d-rss-candidate.log": {
+      "sha256": "691418abd062584a50703ca38619cfd4ba348a9ebc174bd08bab301b8b0c48bf",
+      "bytes": 10998,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-d-rss-candidate.log"
+    },
+    "raw/screen-d-rss-njit.json": {
+      "sha256": "1f98a940d1f5d263ad8150152d8f775b9a24c150d5c4660e35c9fa1ec7989fb6",
+      "bytes": 9849,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-d-rss-njit.json"
+    },
+    "raw/screen-d-rss-njit.log": {
+      "sha256": "6b2474c8e4e25f41508b928db284c8928da403cc3e8ca2999311c33a4d382a8e",
+      "bytes": 6545,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-d-rss-njit.log"
+    },
+    "raw/screen-d-time-0-baseline.json": {
+      "sha256": "946baf71eb8b9c853069d1775ba8b84baa00630efe7e9b0d3ae681b546aca729",
+      "bytes": 16061,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-d-time-0-baseline.json"
+    },
+    "raw/screen-d-time-0-baseline.log": {
+      "sha256": "31630d960cd7c90bcc7c923de21c2452baf8fc869f6157929c76f4ba6b67b033",
+      "bytes": 10947,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-d-time-0-baseline.log"
+    },
+    "raw/screen-d-time-0-candidate.json": {
+      "sha256": "d108d528e5168ad266112aceae56f678a01fe68a0b6a77698cf7b058d7bba3ea",
+      "bytes": 16045,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-d-time-0-candidate.json"
+    },
+    "raw/screen-d-time-0-candidate.log": {
+      "sha256": "cb277e108bdfa88a466d67f20fa4df361a1e2b05b914807ef17fa207e7dcf1d5",
+      "bytes": 10931,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-d-time-0-candidate.log"
+    },
+    "raw/screen-d-time-0-njit.json": {
+      "sha256": "57917a5de8c621c67d7ed4913696af9e5bfaacdc15441df2e6b9db765e7e1fd3",
+      "bytes": 9722,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-d-time-0-njit.json"
+    },
+    "raw/screen-d-time-0-njit.log": {
+      "sha256": "019431adf55c2d01dcfcf794fb2f50e0166bfc09f1315b6f0028ee88197f1459",
+      "bytes": 6472,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-d-time-0-njit.log"
+    },
+    "raw/screen-d-time-1-baseline.json": {
+      "sha256": "52c501ea641597440f06b1bd9046ac83aa92a629d2d12befbdd964ecd60a51f1",
+      "bytes": 16059,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-d-time-1-baseline.json"
+    },
+    "raw/screen-d-time-1-baseline.log": {
+      "sha256": "c2f3ca4c4fa564823f982ac7e56a25926d039dc5c7d23d7f287547300372609a",
+      "bytes": 10945,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-d-time-1-baseline.log"
+    },
+    "raw/screen-d-time-1-candidate.json": {
+      "sha256": "c824172310596ea80bb9ce4db20c7029b9f4218161b12bb75c4cafeb5a55cb33",
+      "bytes": 16032,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-d-time-1-candidate.json"
+    },
+    "raw/screen-d-time-1-candidate.log": {
+      "sha256": "afa6ccc06fa562c8e4d1d47be5ff1d46af1cd364d9e4bd8e9005f0c675fc6126",
+      "bytes": 10918,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-d-time-1-candidate.log"
+    },
+    "raw/screen-d-time-1-njit.json": {
+      "sha256": "5085dcd8386a92069b0224bc278d4c32ef2ac7d44b2fc8717a06e064c6db4aeb",
+      "bytes": 9721,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-d-time-1-njit.json"
+    },
+    "raw/screen-d-time-1-njit.log": {
+      "sha256": "99bf0c1abe408d444695fdf73e428c8517c6ff7877d91a9eb812e5687111ff5f",
+      "bytes": 6471,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-d-time-1-njit.log"
+    },
+    "raw/screen-d-time-2-baseline.json": {
+      "sha256": "312af4c9df82397e11055bff609333294149c7f8574c23b5a4db80fd74c78b2b",
+      "bytes": 16038,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-d-time-2-baseline.json"
+    },
+    "raw/screen-d-time-2-baseline.log": {
+      "sha256": "ce65347fbb76db934cf6e789fff6fd0c3743f8c214fa16a56d092fcb12d4f42d",
+      "bytes": 10924,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-d-time-2-baseline.log"
+    },
+    "raw/screen-d-time-2-candidate.json": {
+      "sha256": "0d9b753bdcbbf2bb764b20d6d69f4474704396c21272c791cd7b944e85b59563",
+      "bytes": 16027,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-d-time-2-candidate.json"
+    },
+    "raw/screen-d-time-2-candidate.log": {
+      "sha256": "76285486b083550e609459538754030f068e86a17d81163e7e93531e2116ca17",
+      "bytes": 10913,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-d-time-2-candidate.log"
+    },
+    "raw/screen-d-time-2-njit.json": {
+      "sha256": "b92f9620ef3f121cd81ac9d7d32941f932b2895460099eb845126907860fb95a",
+      "bytes": 9716,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-d-time-2-njit.json"
+    },
+    "raw/screen-d-time-2-njit.log": {
+      "sha256": "7c51c58ac29a0ebc3508eab4b0c888d91ac01821a8772f7934a81196684c5a3f",
+      "bytes": 6466,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-d-time-2-njit.log"
+    },
+    "raw/screen-d.json": {
+      "sha256": "d5c4b13f3005e11e2eae50d7a00a1f0b20c15dd3d3d403810c3f6b8dc97b1505",
+      "bytes": 2240,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-d.json"
+    },
+    "raw/screen-summary.json": {
+      "sha256": "3cdc10918022fb805bf1cb2c334871d42e2db29c09f40e001ab38d21d73b11aa",
+      "bytes": 404,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/screen-summary.json"
+    },
+    "raw/self-review-c.json": {
+      "sha256": "83cdda5cae9c1e64d3ca9385298dcbefc61c08dc16f46f50eb97d1334de1b855",
+      "bytes": 901,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/self-review-c.json"
+    },
+    "raw/self-review-d.json": {
+      "sha256": "f7d15b5ca32d3064c7047b5e86656c053058b8ab4407b7d4ff36d9e0d86de34d",
+      "bytes": 3575,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/self-review-d.json"
+    },
+    "raw/self-review.json": {
+      "sha256": "83cdda5cae9c1e64d3ca9385298dcbefc61c08dc16f46f50eb97d1334de1b855",
+      "bytes": 901,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/self-review.json"
+    },
+    "raw/tests-graph_native_tests.cpp.diff": {
+      "sha256": "38632691ac793d7e31a31d4607edde91c3e27c41d6088ff0fe006acfa17dc1c7",
+      "bytes": 515,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/tests-graph_native_tests.cpp.diff"
+    },
+    "raw/v58c-quality-asan-native.log": {
+      "sha256": "838757860c7e2677d6394ac15ddc15bf0d8f1eae7ed9e8c0ac35105f4c61fb09",
+      "bytes": 1210,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58c-quality-asan-native.log"
+    },
+    "raw/v58c-quality-asan-native.xml": {
+      "sha256": "bcad73f36f8deeb71c61769c371d0730c8933a374dee9f38b9d240e71b4549d7",
+      "bytes": 2239,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58c-quality-asan-native.xml"
+    },
+    "raw/v58c-quality-asan-related.log": {
+      "sha256": "a3eaa53362778aa110ae5b3eeb20b848966309347de6b21f5a3124a01d9a35ff",
+      "bytes": 1819,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58c-quality-asan-related.log"
+    },
+    "raw/v58c-quality-asan-related.xml": {
+      "sha256": "fbea1b7d04fb9beba7460a83bd3c1a070362481d1c35fff502f66077ebec1a32",
+      "bytes": 210273,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58c-quality-asan-related.xml"
+    },
+    "raw/v58c-quality-asan.json": {
+      "sha256": "35931cf81578d3544d51b85203e6c2538aabb3fc30c9c4f50411336c543bcdb6",
+      "bytes": 557,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58c-quality-asan.json"
+    },
+    "raw/v58c-quality-normal-full.log": {
+      "sha256": "1ce463d5113ad8864363351a5528347dd55e3e9778ef9257aeb5a2e041dafd04",
+      "bytes": 18220,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58c-quality-normal-full.log"
+    },
+    "raw/v58c-quality-normal-full.xml": {
+      "sha256": "809cbdd25b9392e21a4bfcc634a5167f76944ece6ce5f13fc228da59abb48937",
+      "bytes": 2375843,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58c-quality-normal-full.xml"
+    },
+    "raw/v58c-quality-normal-native.log": {
+      "sha256": "808805f134cc560d9f14ffce657a7cb6f3f6fec34a8087874b7f7f795e36a46b",
+      "bytes": 1205,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58c-quality-normal-native.log"
+    },
+    "raw/v58c-quality-normal-native.xml": {
+      "sha256": "0936737bdb2df25eb2d9bbfd49cab9eab9fdd760474c055307306ece1f4fed33",
+      "bytes": 2240,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58c-quality-normal-native.xml"
+    },
+    "raw/v58c-quality-normal.json": {
+      "sha256": "7a02b30e6afd322c23267748aa631a2f53479eb3737459d0dadb2ae0fb881d72",
+      "bytes": 555,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58c-quality-normal.json"
+    },
+    "raw/v58c-quality-off-native.log": {
+      "sha256": "f3833fc44206be04bdb8cf21ab4e36cbf870026b41516b7b3a99ddf21f5d68de",
+      "bytes": 1209,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58c-quality-off-native.log"
+    },
+    "raw/v58c-quality-off-native.xml": {
+      "sha256": "818dd929f5c75043f3708018e75154e28772396ad9d3ba3b98b66b4ebf47cb4f",
+      "bytes": 2243,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58c-quality-off-native.xml"
+    },
+    "raw/v58c-quality-off-related.log": {
+      "sha256": "2681fa991fc8e9323b7552f7c92b1e61e21b6e5dff68ff3218ae76c1403a8b49",
+      "bytes": 1818,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58c-quality-off-related.log"
+    },
+    "raw/v58c-quality-off-related.xml": {
+      "sha256": "036dbd899dff719f0c4bca255de199d634f164168cd289fe01f252a385db9d57",
+      "bytes": 210244,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58c-quality-off-related.xml"
+    },
+    "raw/v58c-quality-off.json": {
+      "sha256": "e5baa63d9a40a875324d0aa40101d44a1a83350fa870d5817a27f7d95ab9f5f4",
+      "bytes": 558,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58c-quality-off.json"
+    },
+    "raw/v58d-actual-confirmation.json": {
+      "sha256": "b990b1533c26b6b54d5fa9763fef70cb4645e7557639abb1e8c8b687e1eb0857",
+      "bytes": 2777,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58d-actual-confirmation.json"
+    },
+    "raw/v58d-actual-heap-cpp.json": {
+      "sha256": "04c977b1be52510feac5560b9be4923c104676e18e114f60259099352041dbdd",
+      "bytes": 11206,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58d-actual-heap-cpp.json"
+    },
+    "raw/v58d-actual-heap-cpp.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58d-actual-heap-cpp.stderr"
+    },
+    "raw/v58d-actual-heap-njit.json": {
+      "sha256": "0ea92b621cdcdf5aabd0ecfab0e61e0eb5582407fc9b987bf6e64dcd89325dce",
+      "bytes": 6745,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58d-actual-heap-njit.json"
+    },
+    "raw/v58d-actual-heap-njit.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58d-actual-heap-njit.stderr"
+    },
+    "raw/v58d-actual-quality-native.log": {
+      "sha256": "75eeb0780d8ca7bfc7f5d843cf582fe7ea075074aab56625f3adbc2b942d3e3b",
+      "bytes": 1201,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58d-actual-quality-native.log"
+    },
+    "raw/v58d-actual-quality-native.xml": {
+      "sha256": "e3fb6a109499acd9d8a85dc90e494bb7211a759f371008dfefc1786f0935cccf",
+      "bytes": 2242,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58d-actual-quality-native.xml"
+    },
+    "raw/v58d-actual-quality-related.log": {
+      "sha256": "f2078819cde243a276cdca635345d454319a90cf5149dfc1b148d484e064b6f7",
+      "bytes": 1820,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58d-actual-quality-related.log"
+    },
+    "raw/v58d-actual-quality-related.xml": {
+      "sha256": "2ce3aeaec0f0a9673e0853b85f0e29373f586b62a6e2b0371531048f2906002c",
+      "bytes": 210243,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58d-actual-quality-related.xml"
+    },
+    "raw/v58d-actual-quality.json": {
+      "sha256": "fd74951452dadecf934df6bbd33f7e703b252fd2d51dec1444e4e71a7a8abbd5",
+      "bytes": 557,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58d-actual-quality.json"
+    },
+    "raw/v58d-actual-rss-cpp.json": {
+      "sha256": "d90f5b25eb9d06d87fc5a3f1f416da5b6d9037dc7f392ba9e530f72704895e1c",
+      "bytes": 10999,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58d-actual-rss-cpp.json"
+    },
+    "raw/v58d-actual-rss-cpp.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58d-actual-rss-cpp.stderr"
+    },
+    "raw/v58d-actual-rss-njit.json": {
+      "sha256": "7a29edf621bf5c5fdb6b7acef667c748dfdfa1bd395c51a552926f77624274f5",
+      "bytes": 6545,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58d-actual-rss-njit.json"
+    },
+    "raw/v58d-actual-rss-njit.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58d-actual-rss-njit.stderr"
+    },
+    "raw/v58d-actual-time-0-cpp.json": {
+      "sha256": "cd928920a5de8ec649feede715d21db45dcf0c7f358c40706de580535a9ad661",
+      "bytes": 10863,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58d-actual-time-0-cpp.json"
+    },
+    "raw/v58d-actual-time-0-cpp.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58d-actual-time-0-cpp.stderr"
+    },
+    "raw/v58d-actual-time-0-njit.json": {
+      "sha256": "11f4fccbe36e201753a9695d6b00a01127d54c8a9da3b91802a5322c1e860a44",
+      "bytes": 6404,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58d-actual-time-0-njit.json"
+    },
+    "raw/v58d-actual-time-0-njit.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58d-actual-time-0-njit.stderr"
+    },
+    "raw/v58d-actual-time-1-cpp.json": {
+      "sha256": "3b1f78b098a94c9b3d2930ce496bc6d6ca7ce7188e4f0034c2ac7b402888d805",
+      "bytes": 10856,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58d-actual-time-1-cpp.json"
+    },
+    "raw/v58d-actual-time-1-cpp.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58d-actual-time-1-cpp.stderr"
+    },
+    "raw/v58d-actual-time-1-njit.json": {
+      "sha256": "7419a7d0d17d74c1377ac43248b985b60f8967908efab536050fdc2b40caa599",
+      "bytes": 6402,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58d-actual-time-1-njit.json"
+    },
+    "raw/v58d-actual-time-1-njit.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58d-actual-time-1-njit.stderr"
+    },
+    "raw/v58d-actual-time-2-cpp.json": {
+      "sha256": "408004ebe7456a915f6186d32ac0ee85f447a97ef010ba84c493da889cee9d39",
+      "bytes": 10849,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58d-actual-time-2-cpp.json"
+    },
+    "raw/v58d-actual-time-2-cpp.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58d-actual-time-2-cpp.stderr"
+    },
+    "raw/v58d-actual-time-2-njit.json": {
+      "sha256": "f45ca19d18b117610ecc7bf463796e15d2ca6ffb0987fdb2a389e6a352ccd0e5",
+      "bytes": 6406,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58d-actual-time-2-njit.json"
+    },
+    "raw/v58d-actual-time-2-njit.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58d-actual-time-2-njit.stderr"
+    },
+    "raw/v58d-adoption.json": {
+      "sha256": "1895120478cea8753da65cfb1fbc96b6c3ebb2b9473f8af77873b129441b0326",
+      "bytes": 3267,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58d-adoption.json"
+    },
+    "raw/v58d-quality-asan-native.log": {
+      "sha256": "b47284d194ae79870ef360067dcdf7b5658f6baa1aa24c10e58e4e5eac66c892",
+      "bytes": 1210,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58d-quality-asan-native.log"
+    },
+    "raw/v58d-quality-asan-native.xml": {
+      "sha256": "2c5853ea2fcf54e57cc26f760aa5a63b78228fde009536348cf3d26b1e53e29a",
+      "bytes": 2241,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58d-quality-asan-native.xml"
+    },
+    "raw/v58d-quality-asan-related.log": {
+      "sha256": "fde9bba47d0ea43bdbbae19c782f839a487849dc226c99ecdc07a3a19ae7c46a",
+      "bytes": 1819,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58d-quality-asan-related.log"
+    },
+    "raw/v58d-quality-asan-related.xml": {
+      "sha256": "87134e97d571b8cc2e321514be1e14491997cf9b12dc858a5a97d189eb072317",
+      "bytes": 210273,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58d-quality-asan-related.xml"
+    },
+    "raw/v58d-quality-asan.json": {
+      "sha256": "7bf55a7a76bc0199c448cea8810cde91777b1aa254475fc0a0fff19fa4a36437",
+      "bytes": 558,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58d-quality-asan.json"
+    },
+    "raw/v58d-quality-normal-full.log": {
+      "sha256": "b3eb15f547a0c4ff09e2e562bbeeeb7627795ae8aec8f43e8a20267414558d8d",
+      "bytes": 18220,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58d-quality-normal-full.log"
+    },
+    "raw/v58d-quality-normal-full.xml": {
+      "sha256": "399e849ee4e3540e428b5d4c4f65d38c67b5ee74e61a1d04c2b63b21b657c70c",
+      "bytes": 2375844,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58d-quality-normal-full.xml"
+    },
+    "raw/v58d-quality-normal-native.log": {
+      "sha256": "a7f42510716e90674a9c0be1644781b8d7e97a382b0c32bb64bfcb02e322caee",
+      "bytes": 1205,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58d-quality-normal-native.log"
+    },
+    "raw/v58d-quality-normal-native.xml": {
+      "sha256": "a743465fcf963160d7fa2d4e3feb01d744396a4889affe3e8a2bcbd1e4eecc99",
+      "bytes": 2243,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58d-quality-normal-native.xml"
+    },
+    "raw/v58d-quality-normal.json": {
+      "sha256": "03d7b30e6aa1e3e505874d2022e96329532acdc574c1fd47b79697c1550b0ac8",
+      "bytes": 555,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58d-quality-normal.json"
+    },
+    "raw/v58d-quality-off-native.log": {
+      "sha256": "1a7916991db6557cfed6952927fbce17d89f2fe213510c5ae4b3ec79e44769d0",
+      "bytes": 1209,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58d-quality-off-native.log"
+    },
+    "raw/v58d-quality-off-native.xml": {
+      "sha256": "ad6d567f3ab3b30301d2eda5e9a9375cb784459ded68c6ed28d2561e8c2ed312",
+      "bytes": 2242,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58d-quality-off-native.xml"
+    },
+    "raw/v58d-quality-off-related.log": {
+      "sha256": "94a1ef6cfa34a11a691ad118399eb431af0222889764a4951743f16e86fc91b0",
+      "bytes": 1818,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58d-quality-off-related.log"
+    },
+    "raw/v58d-quality-off-related.xml": {
+      "sha256": "e7cf32d1247865b0a198275f2e319657415f8b9235cf7e6305cb777749994681",
+      "bytes": 210244,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58d-quality-off-related.xml"
+    },
+    "raw/v58d-quality-off.json": {
+      "sha256": "06ca55ae1b2277a4ffcc27ebad45ddad60ccf22c01c2e8541234b45ba84d4b5b",
+      "bytes": 557,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/v58d-quality-off.json"
+    },
+    "raw/wait_quality_and_screen_d.py.txt": {
+      "sha256": "9f881c29590eb323f7aadf5fe416f70dc9759b1940810a49a31700da08a32eae",
+      "bytes": 1556,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/wait_quality_and_screen_d.py"
+    },
+    "builds/actual-v58/identity.json": {
+      "sha256": "8c0dfe29c0ba8ab685aa5738cba5d115f42fef7c8bc724b2309e9b467c790892",
+      "bytes": 12051,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/actual-v58/identity.json"
+    },
+    "builds/actual-v58/build.log": {
+      "sha256": "1960346ce05e2b0c0a0f001d4fdd6a248a86750e82f4f11e7f58b30e9c3efef8",
+      "bytes": 1081,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/actual-v58/build.log"
+    },
+    "builds/actual-v58/install.log": {
+      "sha256": "054b0b5ee0a1409c1159f1a946400113029fa0914cd4a5cc97eb25e59a2d642f",
+      "bytes": 464,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/actual-v58/install.log"
+    },
+    "builds/candidate-v58a/build.log": {
+      "sha256": "186bab0cb3abca11e73f8b7e765ecc9da68290be37e83bca9bdf25fa9c7f9bda",
+      "bytes": 29120,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/candidate-v58a/build.log"
+    },
+    "builds/candidate-v58b/identity.json": {
+      "sha256": "d5cc24caff317622211d28cddd0302b3e3b0deff4647b2de6edcaec0c52e96fb",
+      "bytes": 12063,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/candidate-v58b/identity.json"
+    },
+    "builds/candidate-v58b/build.log": {
+      "sha256": "860f7da7b3b7f7573d2e4aae4b017ba9871b70aaf92b7c87c8110c34d3dd3747",
+      "bytes": 1077,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/candidate-v58b/build.log"
+    },
+    "builds/candidate-v58b/install.log": {
+      "sha256": "8fe8de9ec1c04fc867f781343f3d1399f5ebc5a33adf5d35bb86f1fd64ee5617",
+      "bytes": 518,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/candidate-v58b/install.log"
+    },
+    "builds/candidate-v58c/identity.json": {
+      "sha256": "7282cea413e0aea4a685233ac212a53f2fa095a2c866b1643d0a7275a82c0ed5",
+      "bytes": 12063,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/candidate-v58c/identity.json"
+    },
+    "builds/candidate-v58c/build.log": {
+      "sha256": "c96765f24952ae41eced87e24bd798b8ef26f68b781e750700fd9901c6b74e97",
+      "bytes": 1077,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/candidate-v58c/build.log"
+    },
+    "builds/candidate-v58c/install.log": {
+      "sha256": "cab339ee6fe9f347a89c101bc37904cc8263102009223fa67228882914178d20",
+      "bytes": 518,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/candidate-v58c/install.log"
+    },
+    "builds/candidate-v58c-asan/identity.json": {
+      "sha256": "ac20465bc2ba49325f7fafc209b0458061a3ab14d6843236ac44fc545383ca83",
+      "bytes": 12255,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/candidate-v58c-asan/identity.json"
+    },
+    "builds/candidate-v58c-asan/build.log": {
+      "sha256": "98a10166dd72c6b13cf9de7a8a5f64c454c09be7d8b3f6ae19af7ec869609e63",
+      "bytes": 1374,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/candidate-v58c-asan/build.log"
+    },
+    "builds/candidate-v58c-asan/install.log": {
+      "sha256": "a0bf9018d6c4ecdb9e32accce006d1ea94db7ddeec9fc52664fd6d076b82edc2",
+      "bytes": 473,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/candidate-v58c-asan/install.log"
+    },
+    "builds/candidate-v58c-off/identity.json": {
+      "sha256": "fac3f20f7d4fc46de4ef065826705ef5df81a57297751f2e06c74a534e845908",
+      "bytes": 12078,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/candidate-v58c-off/identity.json"
+    },
+    "builds/candidate-v58c-off/build.log": {
+      "sha256": "9d8d362237f0521c367cd9089fc59d1adfe83bba48421738eb650eb03ce6a5c8",
+      "bytes": 1151,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/candidate-v58c-off/build.log"
+    },
+    "builds/candidate-v58c-off/install.log": {
+      "sha256": "571b9bcdcaf22379c5d67f76a86cfbde1631628e3f54f3957edd46dd95389bf0",
+      "bytes": 472,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/candidate-v58c-off/install.log"
+    },
+    "builds/candidate-v58d/identity.json": {
+      "sha256": "323d313d554825c9d140ede70d4a2e5d308a87a9491d117e5dc0dceb031d990b",
+      "bytes": 12063,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/candidate-v58d/identity.json"
+    },
+    "builds/candidate-v58d/build.log": {
+      "sha256": "9d32d06a9580704f647ee5be26be455f7fe0705e7996178512a2a07d151335eb",
+      "bytes": 1079,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/candidate-v58d/build.log"
+    },
+    "builds/candidate-v58d/install.log": {
+      "sha256": "671d62f0167db84de458fa0d2b96fce8d6c2ec5b885b368ceda9275a0c70bb5e",
+      "bytes": 468,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/candidate-v58d/install.log"
+    },
+    "builds/candidate-v58d-asan/identity.json": {
+      "sha256": "0ef435e55cf54e330f7e459b872c77aacc75ba5861feefedbf0c6b4d3ab613f3",
+      "bytes": 12255,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/candidate-v58d-asan/identity.json"
+    },
+    "builds/candidate-v58d-asan/build.log": {
+      "sha256": "b8a9126d28d14eb05418b682ffcf92644311a4b3f1acab819fea88dc71a4f22b",
+      "bytes": 1376,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/candidate-v58d-asan/build.log"
+    },
+    "builds/candidate-v58d-asan/install.log": {
+      "sha256": "be89e62d2b714d7ca49c69d54ba886b9ef507f83bc6caef1fbf5480f958858c0",
+      "bytes": 473,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/candidate-v58d-asan/install.log"
+    },
+    "builds/candidate-v58d-off/identity.json": {
+      "sha256": "360a8af9b0641dfcc4b2afd1e040483869791ab3e1f82506e50999605777f994",
+      "bytes": 12078,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/candidate-v58d-off/identity.json"
+    },
+    "builds/candidate-v58d-off/build.log": {
+      "sha256": "6750af357c3f3a0f4ab1d33d67437ce69c9c6fa691f1e08b90df33301620ef8a",
+      "bytes": 1153,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/candidate-v58d-off/build.log"
+    },
+    "builds/candidate-v58d-off/install.log": {
+      "sha256": "603d4dea92c8dd40cf4e2d63d54916a2dedcb69de7fe83b09cf792f278987a12",
+      "bytes": 472,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/candidate-v58d-off/install.log"
+    },
+    "qualified-source/cpp/graph.cpp.txt": {
+      "sha256": "30c2204fb3a164919ee98711891f19efac2eaad939eaa2f2f337ff4e663a649c",
+      "bytes": 310786,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/source-d/cpp/graph.cpp"
+    },
+    "qualified-source/cpp/include/calmetrics_engine/graph.hpp.txt": {
+      "sha256": "da71b574e77fc5f2a52c80eae2d9481c45d5131edb38805f77f7a2c840f8793c",
+      "bytes": 20705,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/source-d/cpp/include/calmetrics_engine/graph.hpp"
+    },
+    "qualified-source/cpp/planner.cpp.txt": {
+      "sha256": "b86b689d221f7bb8247b20517b6b7bb21ff80a3c5caf0ff82a75164bcbf094a6",
+      "bytes": 65022,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/source-d/cpp/planner.cpp"
+    },
+    "qualified-source/tests/graph_native_tests.cpp.txt": {
+      "sha256": "2bd4a639b2be8a044835b7879f79851c2638ecc8bcc1643fd16ea75bc485c7da",
+      "bytes": 16047,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/source-d/tests/graph_native_tests.cpp"
+    },
+    "qualified-source/tests/state_decision_native_cases.hpp.txt": {
+      "sha256": "0960c7e2c7f3dc44e35fa7a8f17dbfaa14ca181de41f359870de7aeb7edbed5b",
+      "bytes": 3933,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/source-d/tests/state_decision_native_cases.hpp"
+    },
+    "qualified-source/tests/test_state_decision_regions.py.txt": {
+      "sha256": "09a7a936a1545aba9063a0360f3a0823c1b6585a18c1e587b2668372dcaa591e",
+      "bytes": 9778,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/source-d/tests/test_state_decision_regions.py"
+    },
+    "failed-c-source/cpp/graph.cpp.txt": {
+      "sha256": "a42844d0b3fd393f678982d3473f81902828318a7edb5d1922d0ba89ff5468c1",
+      "bytes": 309762,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/source/cpp/graph.cpp"
+    },
+    "harness/chain_benchmark.py.txt": {
+      "sha256": "f5722c846f80f1bc2b6ed3d438e1d790c5d01a70532bcd6274bb57fd1dd96319",
+      "bytes": 8739,
+      "original": "/private/tmp/calmetrics-private-training-v57-20261007/chain_benchmark.py"
+    },
+    "raw/maintenance.json": {
+      "sha256": "90fd51fd2d38eeeb8b426eb57858572e2dcec69ca6a35cd4b5ba87e666184039",
+      "bytes": 1234,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/maintenance.json"
+    },
+    "raw/codegraph-sync.log": {
+      "sha256": "e7c29ae5e0adb4b4dd369e4b1d1b52f25b0ffde5b0db44a4b9769da950fe5b6d",
+      "bytes": 181,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/codegraph-sync.log"
+    },
+    "raw/codegraph-status.txt": {
+      "sha256": "637370466fa8ca585ea955d609ca0eced36a84889c7958267cca9dd457f18529",
+      "bytes": 664,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/codegraph-status.txt"
+    },
+    "raw/codegraph-current-symbols.txt": {
+      "sha256": "b7dc4bd663552d058f911c6d658391a32e0e1f4a74b774ac866bc0bbc018b6fd",
+      "bytes": 13023,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/codegraph-current-symbols.txt"
+    },
+    "raw/closeout_v58d.py.txt": {
+      "sha256": "78adafb50e61cd960c5f5a8bbf22501678aaffd31b62ce2e4d60e601ca09fc29",
+      "bytes": 4242,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/closeout_v58d.py"
+    },
+    "raw/verify_final_v58d.py.txt": {
+      "sha256": "3015d57883d99652eeee740cbe85b3080a09e92b9c6522ebe8f0f7303d4d47df",
+      "bytes": 2698,
+      "original": "/private/tmp/calmetrics-state-decision-v58-20261007/verify_final_v58d.py"
+    }
+  },
+  "preserved_baseline_files_after_doc_updates": 324
+}

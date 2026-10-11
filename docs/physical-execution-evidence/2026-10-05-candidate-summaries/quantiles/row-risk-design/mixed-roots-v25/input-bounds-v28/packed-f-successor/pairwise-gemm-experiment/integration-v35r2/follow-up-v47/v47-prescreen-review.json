@@ -1,0 +1,407 @@
+{
+  "status": "admissible_pending_complete_quality",
+  "review_findings": [],
+  "production_adopted": false,
+  "goal_complete": false,
+  "qualification": {
+    "status": "passed",
+    "jobs": [
+      {
+        "label": "native",
+        "pid": 93177,
+        "created": 1791282705.792819,
+        "command": [
+          "/opt/homebrew/bin/ctest",
+          "--test-dir",
+          "/private/tmp/calmetrics-quantile-selection-20261006/candidate-v47-build",
+          "--output-on-failure",
+          "--output-junit",
+          "/private/tmp/calmetrics-quantile-selection-20261006/v47-native.xml"
+        ],
+        "started": 1791282705.794695,
+        "returncode": 0,
+        "finished": 1791282712.865165,
+        "counts": {
+          "tests": 9,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      },
+      {
+        "label": "related",
+        "pid": 93220,
+        "created": 1791282712.865978,
+        "command": [
+          "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+          "-m",
+          "pytest",
+          "tests/test_matmul_common_quantile.py",
+          "tests/test_matmul_quantile_statistics.py",
+          "tests/test_matmul_statistics.py",
+          "tests/test_numeric_line_sort_library.py",
+          "tests/test_single_axis_quantile_selection.py",
+          "tests/test_short_axis_quantile_selection.py",
+          "-q",
+          "--tb=short",
+          "--junitxml=/private/tmp/calmetrics-quantile-selection-20261006/v47-related.xml"
+        ],
+        "started": 1791282712.867158,
+        "returncode": 0,
+        "finished": 1791282718.600734,
+        "counts": {
+          "tests": 643,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      }
+    ],
+    "handle": {
+      "pid": 92712,
+      "created": 1791282704.944508,
+      "command": [
+        "/opt/homebrew/Cellar/python@3.12/3.12.11/Frameworks/Python.framework/Versions/3.12/Resources/Python.app/Contents/MacOS/Python",
+        "/private/tmp/calmetrics-quantile-selection-20261006/run_v47_quality.py"
+      ]
+    },
+    "production_adopted": false,
+    "goal_complete": false
+  },
+  "time": {
+    "C": {
+      "shape": [
+        131072,
+        2520,
+        30
+      ],
+      "layout": "C",
+      "medians_seconds": {
+        "actual": 6.618967625,
+        "candidate": 1.8977241249999999,
+        "njit64": 4.384456978999999,
+        "njit512": 4.385921667
+      },
+      "maximum_absolute_errors": {
+        "actual": [
+          1.5265566588595902e-16,
+          6.938893903907228e-17,
+          1.734723475976807e-18
+        ],
+        "candidate": [
+          1.5265566588595902e-16,
+          6.938893903907228e-17,
+          1.734723475976807e-18
+        ],
+        "njit64": [
+          1.5265566588595902e-16,
+          6.938893903907228e-17,
+          1.734723475976807e-18
+        ],
+        "njit512": [
+          1.5265566588595902e-16,
+          6.938893903907228e-17,
+          1.734723475976807e-18
+        ]
+      },
+      "actual_counters": {
+        "highway_vqsort_calls": 131072,
+        "accelerate_matmul_calls": 2048,
+        "numeric_arena_bytes": 2097152,
+        "operator_workspace_capacity_bytes": 4451344,
+        "algorithm_copy_bytes": 31457280
+      },
+      "candidate_counters": {
+        "highway_vqsort_calls": 0,
+        "accelerate_matmul_calls": 2048,
+        "numeric_arena_bytes": 2097152,
+        "operator_workspace_capacity_bytes": 4451344,
+        "algorithm_copy_bytes": 31457280
+      },
+      "goal_complete": false
+    },
+    "F": {
+      "shape": [
+        131072,
+        2520,
+        30
+      ],
+      "layout": "F",
+      "medians_seconds": {
+        "actual": 6.627188063,
+        "candidate": 1.8910833335000001,
+        "njit64": 4.3855042915,
+        "njit512": 4.413629958
+      },
+      "maximum_absolute_errors": {
+        "actual": [
+          1.5265566588595902e-16,
+          6.938893903907228e-17,
+          1.734723475976807e-18
+        ],
+        "candidate": [
+          1.5265566588595902e-16,
+          6.938893903907228e-17,
+          1.734723475976807e-18
+        ],
+        "njit64": [
+          1.5265566588595902e-16,
+          6.938893903907228e-17,
+          1.734723475976807e-18
+        ],
+        "njit512": [
+          1.5265566588595902e-16,
+          6.938893903907228e-17,
+          1.734723475976807e-18
+        ]
+      },
+      "actual_counters": {
+        "highway_vqsort_calls": 131072,
+        "accelerate_matmul_calls": 2048,
+        "numeric_arena_bytes": 2097152,
+        "operator_workspace_capacity_bytes": 4451344,
+        "algorithm_copy_bytes": 31457280
+      },
+      "candidate_counters": {
+        "highway_vqsort_calls": 0,
+        "accelerate_matmul_calls": 2048,
+        "numeric_arena_bytes": 2097152,
+        "operator_workspace_capacity_bytes": 4451344,
+        "algorithm_copy_bytes": 31457280
+      },
+      "goal_complete": false
+    }
+  },
+  "memory": {
+    "C": {
+      "actual": {
+        "warm_heap_peak": 77494161,
+        "rss_delta_median": 86097920,
+        "rss_deltas": [
+          87834624,
+          84770816,
+          86097920
+        ]
+      },
+      "candidate": {
+        "warm_heap_peak": 77494169,
+        "rss_delta_median": 86589440,
+        "rss_deltas": [
+          86589440,
+          89735168,
+          83509248
+        ]
+      },
+      "njit64": {
+        "warm_heap_peak": 72217512,
+        "rss_delta_median": 88342528,
+        "rss_deltas": [
+          87883776,
+          90996736,
+          88342528
+        ]
+      },
+      "njit512": {
+        "warm_heap_peak": 80926632,
+        "rss_delta_median": 84983808,
+        "rss_deltas": [
+          85573632,
+          84983808,
+          84377600
+        ]
+      }
+    },
+    "F": {
+      "actual": {
+        "warm_heap_peak": 76991121,
+        "rss_delta_median": 81739776,
+        "rss_deltas": [
+          81264640,
+          81739776,
+          85344256
+        ]
+      },
+      "candidate": {
+        "warm_heap_peak": 76991129,
+        "rss_delta_median": 80740352,
+        "rss_deltas": [
+          80740352,
+          82526208,
+          79740928
+        ]
+      },
+      "njit64": {
+        "warm_heap_peak": 71751296,
+        "rss_delta_median": 84131840,
+        "rss_deltas": [
+          84131840,
+          83902464,
+          85999616
+        ]
+      },
+      "njit512": {
+        "warm_heap_peak": 80869144,
+        "rss_delta_median": 82378752,
+        "rss_deltas": [
+          81199104,
+          82378752,
+          86573056
+        ]
+      }
+    }
+  },
+  "gains": {
+    "C": {
+      "seconds_saved": 4.7212435,
+      "own_time_reduction_percent": 71.3290012504027,
+      "njit_over_candidate": 2.3103763720135033,
+      "own_heap_delta": 8,
+      "candidate_heap_over_low_memory_njit": 5276657
+    },
+    "F": {
+      "seconds_saved": 4.7361047295,
+      "own_time_reduction_percent": 71.4647703441821,
+      "njit_over_candidate": 2.3190433831296837,
+      "own_heap_delta": 8,
+      "candidate_heap_over_low_memory_njit": 5239833
+    }
+  },
+  "terminal_observations": {
+    "paired_time": 48,
+    "fresh_memory": 32
+  },
+  "review_checks": [
+    "One scoped physical optimization of existing private projection/summary path; no public operator, API, graph or worker protocol added.",
+    "Only validated, writeable probability consumers determine the common mathematical probability; empty/invalid consumers retain original logical errors.",
+    "Canonical ordered mean and two-pass squared deviations finish before scratch permutation; statistics never read a selected line afterwards.",
+    "Existing Highway/std selection helper reconstructs both adjacent ranks; unchanged convex interpolation reads only those ranks.",
+    "Multiple distinct probabilities keep full sort. Unsupported/exceptional selection domains retain original helper fallback.",
+    "Both blocked DGEMM and canonical-row paths share the same ordering decision; existing trajectory accuracy and cancellation remain unchanged.",
+    "No input mutation, no output alias, two independent retained readonly generations, same explicit C/F output request.",
+    "Fair warmed NJIT uses actual SciPy/Accelerate NEWLAPACK binding with per-calling-thread single-CPU control and bounded 64/512 row projection blocks.",
+    "Paired timing counts input ownership preparation, ordinary Scheduler execution and all three outputs; compilation and once-only graph definition excluded.",
+    "No meaningful own peak increase: both continuous malloc observations differ by eight bytes, RSS remains noisy and is reported separately."
+  ],
+  "research_sources": [
+    {
+      "url": "https://raw.githubusercontent.com/google/highway/master/hwy/contrib/sort/vqsort.h",
+      "use": "Official VQSelect order-statistic contract; current source contract inspected against pinned local 1.3.0 header, no dependency upgrade."
+    },
+    {
+      "url": "https://github.com/google/highway/releases/tag/1.3.0",
+      "use": "Pinned existing mature library release; local cache/CMake provides actual build identity."
+    }
+  ],
+  "evidence_boundaries": [
+    "Supplied candidate weights plus projection and three-summary calculation only; not random generation, repair, multiround exploration, frontier optimization or platform service.",
+    "Current helper reuse does not improve all distinct multi-quantile requests.",
+    "Malloc excludes some Python arenas, zones, mmap and stack; RSS sampling may miss brief peaks, not comprehensive process-tree or leak audit.",
+    "Candidate full/SAN/OFF and actual adoption/replay still pending at this review.",
+    "No meaningful new peak-memory reduction, no Excel desktop recalculation, deployment or cross-platform performance claim."
+  ],
+  "runtime_path_proof": {
+    "status": "passed",
+    "shape": [
+      65,
+      1024,
+      7
+    ],
+    "reports": {
+      "baseline": {
+        "build_id": "ef10f1573baea5f3009128434e8f1701d79282bcbb35849e026e8ae6a765e1c2",
+        "counts": {
+          "highway_vqsort_calls": 130,
+          "accelerate_matmul_calls": 4,
+          "numeric_arena_bytes": 0,
+          "operator_workspace_capacity_bytes": 528928
+        }
+      },
+      "candidate": {
+        "build_id": "9bbf2f5043d7b509fa3be64389697d2ae8252f7128fb120b4a411bc9db075172",
+        "counts": {
+          "highway_vqsort_calls": 0,
+          "accelerate_matmul_calls": 4,
+          "numeric_arena_bytes": 0,
+          "operator_workspace_capacity_bytes": 528928
+        }
+      }
+    },
+    "scope": "Representative new duplicate-probability regression exercises changed private ordering path; not a performance measurement.",
+    "requested_interval_count": 2
+  },
+  "selection_runtime_proof": {
+    "status": "passed",
+    "build_info": {
+      "version": "0.3.0",
+      "compiler": "AppleClang 17.0.0.17000603",
+      "architecture": "arm64",
+      "cpu_policy": "baseline",
+      "thread_backend": "persistent_cpp_native_scheduler",
+      "cxx_standard": 17,
+      "execution_backend": "pybind11_aot",
+      "graph_execution_backend": "native_graph_interpreter",
+      "scheduler_backend": "bounded_thread_process_pool",
+      "scheduler_scope": "process_wide_cpp_cpu_admission",
+      "legacy_finance_scheduler": "shared_native_scheduler",
+      "coroutine_backend": "asyncio_orchestration_only",
+      "process_transport": "shared_memory_or_serialized_small_input",
+      "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+      "runtime_jit": 0,
+      "compiler_backend": "cpp_restricted_ast",
+      "planner_backend": "cpp",
+      "native_scheduler_backend": "persistent_cpp_threads_processes",
+      "native_worker_runtime": "standalone_no_python",
+      "python_role": "numpy_binding_async_adapter",
+      "input_memory_policy": "exact_dtype_strided_zero_copy"
+    },
+    "audit": {
+      "operator_id": "quantiles_axis",
+      "opcode": 190,
+      "execution_backend": "pybind11_aot",
+      "scheduler_backend": "process_wide_cpp_cpu_admission",
+      "cpu_tokens": 1,
+      "python_fallback": 0,
+      "isa": "highway_vqselect",
+      "vector_elements": 0,
+      "input_copy_bytes": 0,
+      "eigen_rotation_calls": 0,
+      "highway_vqsort_calls": 0,
+      "native_library_workspace_reserve_bytes": 16384,
+      "eigen_matvec_calls": 0,
+      "eigen_covariance_calls": 0,
+      "eigen_density_calls": 0,
+      "accelerate_covchol_calls": 0,
+      "accelerate_vforce_calls": 0,
+      "accelerate_lu_attempts": 0,
+      "accelerate_lu_calls": 0,
+      "accelerate_lu_fallbacks": 0,
+      "solve_residual_materialization_bytes": 0,
+      "algorithm_copy_bytes": 40320,
+      "workspace_bytes": 20160,
+      "workspace_capacity_bytes": 20160,
+      "output_is_view": false,
+      "input_addresses": [
+        5100896256,
+        4990902144
+      ]
+    },
+    "shape": [
+      2,
+      2520
+    ],
+    "probability": 0.05,
+    "bitwise_equal_scalar": true,
+    "input_unchanged": true,
+    "scope": "Direct same shared selection helper runtime proof; no new per-VQSelect graph audit field or full-request library invocation count claimed."
+  },
+  "full_source_qualification": {
+    "status": "passed",
+    "counts": {
+      "tests": 15277,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "same_build_id": "9bbf2f5043d7b509fa3be64389697d2ae8252f7128fb120b4a411bc9db075172"
+  }
+}

@@ -1,0 +1,173 @@
+[
+  {
+    "run": 1,
+    "case": {
+      "name": "sum_axis",
+      "n": 2048,
+      "d": 65,
+      "layout": "f",
+      "entry": "ordinary",
+      "rtol": 1e-10,
+      "atol": 1e-12
+    },
+    "median_ms": {
+      "old": 0.1628125,
+      "new": 0.073833,
+      "njit": 0.130292
+    },
+    "new_old_paired": 0.47164490360960043,
+    "new_njit_paired": 0.5902873231216916
+  },
+  {
+    "run": 1,
+    "case": {
+      "name": "standardize",
+      "n": 32768,
+      "d": 128,
+      "layout": "f",
+      "entry": "ordinary",
+      "rtol": 1e-10,
+      "atol": 1e-12
+    },
+    "median_ms": {
+      "old": 28.162604,
+      "new": 13.585292,
+      "njit": 9.0915625
+    },
+    "new_old_paired": 0.48568917344738693,
+    "new_njit_paired": 1.5136461911697134
+  },
+  {
+    "run": 1,
+    "case": {
+      "name": "standardize",
+      "n": 2048,
+      "d": 8,
+      "layout": "c",
+      "entry": "ordinary",
+      "rtol": 1e-10,
+      "atol": 1e-12
+    },
+    "median_ms": {
+      "old": 0.0753755,
+      "new": 0.143104,
+      "njit": 0.069792
+    },
+    "new_old_paired": 1.2248398622003407,
+    "new_njit_paired": 1.5290407113561675
+  },
+  {
+    "run": 2,
+    "case": {
+      "name": "sum_axis",
+      "n": 2048,
+      "d": 65,
+      "layout": "f",
+      "entry": "ordinary",
+      "rtol": 1e-10,
+      "atol": 1e-12
+    },
+    "median_ms": {
+      "old": 0.15525,
+      "new": 0.0551875,
+      "njit": 0.1304795
+    },
+    "new_old_paired": 0.37540347678452385,
+    "new_njit_paired": 0.4143833764180494
+  },
+  {
+    "run": 2,
+    "case": {
+      "name": "standardize",
+      "n": 32768,
+      "d": 128,
+      "layout": "f",
+      "entry": "ordinary",
+      "rtol": 1e-10,
+      "atol": 1e-12
+    },
+    "median_ms": {
+      "old": 25.2678965,
+      "new": 9.749688,
+      "njit": 8.9893535
+    },
+    "new_old_paired": 0.38635637640642906,
+    "new_njit_paired": 1.0833384887136064
+  },
+  {
+    "run": 2,
+    "case": {
+      "name": "standardize",
+      "n": 2048,
+      "d": 8,
+      "layout": "c",
+      "entry": "ordinary",
+      "rtol": 1e-10,
+      "atol": 1e-12
+    },
+    "median_ms": {
+      "old": 0.0991665,
+      "new": 0.0932495,
+      "njit": 0.0702505
+    },
+    "new_old_paired": 1.0552657997509836,
+    "new_njit_paired": 1.2491473587955273
+  },
+  {
+    "run": 3,
+    "case": {
+      "name": "sum_axis",
+      "n": 2048,
+      "d": 65,
+      "layout": "f",
+      "entry": "ordinary",
+      "rtol": 1e-10,
+      "atol": 1e-12
+    },
+    "median_ms": {
+      "old": 0.141896,
+      "new": 0.0456875,
+      "njit": 0.1255835
+    },
+    "new_old_paired": 0.3248563800667625,
+    "new_njit_paired": 0.36680494185606916
+  },
+  {
+    "run": 3,
+    "case": {
+      "name": "standardize",
+      "n": 32768,
+      "d": 128,
+      "layout": "f",
+      "entry": "ordinary",
+      "rtol": 1e-10,
+      "atol": 1e-12
+    },
+    "median_ms": {
+      "old": 22.4659165,
+      "new": 10.0132085,
+      "njit": 8.917125
+    },
+    "new_old_paired": 0.4380491754460922,
+    "new_njit_paired": 1.1147948417827198
+  },
+  {
+    "run": 3,
+    "case": {
+      "name": "standardize",
+      "n": 2048,
+      "d": 8,
+      "layout": "c",
+      "entry": "ordinary",
+      "rtol": 1e-10,
+      "atol": 1e-12
+    },
+    "median_ms": {
+      "old": 0.058917,
+      "new": 0.05525,
+      "njit": 0.055125
+    },
+    "new_old_paired": 0.9283163199612114,
+    "new_njit_paired": 0.9733663982419765
+  }
+]

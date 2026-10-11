@@ -1,0 +1,88 @@
+"""Offline structural/capacity counterfactual, never a production optimizer."""
+from pathlib import Path
+import hashlib,json,sys
+import numpy as np
+
+D=Path(__file__).resolve().parent
+R=Path('/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine')
+T=Path('/private/tmp/calmetrics-sized-arena-v71-20261009')
+identity=json.loads((D/'actual/package/identity.json').read_text())
+sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+assert all(sha(R/n)==h for n,h in identity['source'].items())
+sys.path[:0]=[identity['installed'],str(R)]
+from tests import latent_chain as chain
+from calmetrics_engine import build_info
+
+def slot_bytes(nodes,skip=frozenset()):
+    capacities=[{}, {}, {}]
+    for node in nodes:
+        if node['node'] in skip or node['kind']==3:continue
+        kind=node['kind']; slot=node['slot']
+        capacities[kind][slot]=max(capacities[kind].get(slot,0),node['extent'])
+    return [sum(v.values())*(1 if k==1 else 8) for k,v in enumerate(capacities)],capacities
+
+records=[]
+for name in ['gmm3','gmm16','hmm3','hmm3large','hmm12']:
+    old=json.loads((T/(name+'-original.json')).read_text())
+    trace_path=T/(name+'-original-original-trace.json')
+    trace=json.loads(trace_path.read_text())
+    n,d,k=old['n'],old['d'],old['k']; nt=n*3//4
+    fake={'raw':np.broadcast_to(np.float64(0),(n,d)),
+          'training_positions':np.broadcast_to(np.int64(0),(nt,))}
+    graph,root_names=chain.graph_for(fake,k,old['iterations'],17,old['model'])
+    nodes=[]
+    for q in graph.nodes:
+        nodes.append(dict(node_id=q.node_id,kind=q.kind,storage=q.storage,slot=q.slot,
+            opcode=q.opcode,input_index=q.binding_index,constant=q.constant,
+            parents=list(q.parents),last_use=q.last_use,type=q.inferred_type,operator=q.operator_id))
+    assert len(nodes)==len(old['nodes']) and list(graph.roots)==old['roots']
+    for actual,past in zip(nodes,old['nodes'],strict=True):
+        assert all(actual[key]==past[key] for key in actual), (name,actual['node_id'])
+    original,capacities=slot_bytes(trace['nodes'])
+    assert original==[trace['numeric_arena_bytes'],trace['mask_arena_bytes'],trace['integer_arena_bytes']]
+    raw_takes=[]; root_takes=[]; equivalent=[]
+    roots=set(graph.roots)
+    for node in nodes:
+        if node['opcode']!=153 or node['node_id'] in roots:continue
+        source=nodes[node['parents'][0]]
+        axis=nodes[node['parents'][2]]
+        if axis['kind']!='constant' or axis['constant']!=0 or len(node['type']['shape'])!=2:continue
+        if source['kind']=='input':raw_takes.append(node['node_id'])
+        elif source['node_id'] in roots and source['node_id']<node['node_id']:root_takes.append(node['node_id'])
+    for take_id in raw_takes:
+        take=nodes[take_id];raw_id=take['parents'][0]
+        def same_tree(selected,full,depth=0):
+            if depth>12:return False
+            if selected==full:return True
+            if selected==take_id and full==raw_id:return True
+            a,b=nodes[selected],nodes[full]
+            if a['kind']!='operation' or b['kind']!='operation' or a['opcode']!=b['opcode']:return False
+            if a['opcode'] not in [1,2,3,4,157]:return False
+            if len(a['parents'])!=len(b['parents']):return False
+            return all(same_tree(x,y,depth+1) for x,y in zip(a['parents'],b['parents'],strict=True))
+        for selected in nodes:
+            sid=selected['node_id'];shape=selected['type']['shape']
+            if sid in roots or selected['storage']!='numeric' or len(shape)!=2:continue
+            for full_id in graph.roots:
+                full=nodes[full_id];fshape=full['type']['shape']
+                if full_id>=sid or len(fshape)!=2 or fshape[1]!=shape[1]:continue
+                if int(shape[0])>=int(fshape[0]):continue
+                if same_tree(sid,full_id):equivalent.append(dict(selected=sid,root=full_id,take=take_id,
+                    shared_leaf_ids='identical node IDs after replacing selected row take with its raw source'))
+    variants={}
+    for variant,skip in [('raw_take_only',set(raw_takes)),
+                         ('normalized_only',{x['selected'] for x in equivalent}),
+                         ('all_three',set(raw_takes+root_takes)|{x['selected'] for x in equivalent})]:
+        after,slots=slot_bytes(trace['nodes'],skip)
+        variants[variant]=dict(omitted_nodes=sorted(skip),counterfactual_arena_bytes=after,
+            numeric_saved_bytes=original[0]-after[0],counterfactual_slots=slots)
+    records.append(dict(name=name,actual_build_id=identity['build_id'],fresh_compiled_logical_graph_matches_historical_trace=True,
+        actual_nodes=nodes, roots=list(graph.roots),original_arena_bytes=original,
+        raw_takes=raw_takes,earlier_owned_root_takes=root_takes,equivalent_subgraphs=equivalent,
+        variants=variants, historical_trace_sha256=sha(trace_path),
+        runtime_contiguous_indices_proved=False,numerical_execution=False,
+        note='Slot capacity counterfactual only. No new borrow liveness, mutation, fallback, HMM loan/pack or runtime peak has been qualified.'))
+result=dict(status='completed_current_graph_structural_counterfactual',actual_build_id=identity['build_id'],
+    ordinary_execution_changed=False,goal_complete=False,records=records)
+(D/'reuse-diagnosis.json').write_text(json.dumps(result,indent=2)+'\n')
+print(json.dumps([{k:v for k,v in item.items() if k not in ('actual_nodes',)} for item in records],indent=2))

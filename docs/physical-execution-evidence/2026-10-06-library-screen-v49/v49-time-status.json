@@ -1,0 +1,648 @@
+{
+  "status": "passed",
+  "started": 1791295092.447579,
+  "cases": {
+    "1048576-C": {
+      "medians_seconds": {
+        "native": 0.128458854,
+        "candidate": 0.1206103125,
+        "njit": 0.090421479
+      },
+      "medians_cpu_seconds": {
+        "native": 0.127903,
+        "candidate": 0.12001800000000001,
+        "njit": 0.0900785
+      },
+      "pairs": [
+        {
+          "repeat": 0,
+          "order": [
+            "native",
+            "candidate",
+            "njit"
+          ],
+          "samples": {
+            "native": {
+              "wall": 0.16432325,
+              "cpu": 0.153493
+            },
+            "candidate": {
+              "wall": 0.159563125,
+              "cpu": 0.150452
+            },
+            "njit": {
+              "wall": 0.106452541,
+              "cpu": 0.096188
+            }
+          }
+        },
+        {
+          "repeat": 1,
+          "order": [
+            "candidate",
+            "njit",
+            "native"
+          ],
+          "samples": {
+            "candidate": {
+              "wall": 0.160674417,
+              "cpu": 0.160133
+            },
+            "njit": {
+              "wall": 0.08928525,
+              "cpu": 0.088934
+            },
+            "native": {
+              "wall": 0.170818041,
+              "cpu": 0.169819
+            }
+          }
+        },
+        {
+          "repeat": 2,
+          "order": [
+            "njit",
+            "native",
+            "candidate"
+          ],
+          "samples": {
+            "njit": {
+              "wall": 0.088488792,
+              "cpu": 0.088136
+            },
+            "native": {
+              "wall": 0.140012333,
+              "cpu": 0.139342
+            },
+            "candidate": {
+              "wall": 0.132356333,
+              "cpu": 0.131863
+            }
+          }
+        },
+        {
+          "repeat": 3,
+          "order": [
+            "njit",
+            "candidate",
+            "native"
+          ],
+          "samples": {
+            "njit": {
+              "wall": 0.088243291,
+              "cpu": 0.087961
+            },
+            "candidate": {
+              "wall": 0.106408416,
+              "cpu": 0.105998
+            },
+            "native": {
+              "wall": 0.11682475,
+              "cpu": 0.116327
+            }
+          }
+        },
+        {
+          "repeat": 4,
+          "order": [
+            "candidate",
+            "native",
+            "njit"
+          ],
+          "samples": {
+            "candidate": {
+              "wall": 0.108471958,
+              "cpu": 0.108084
+            },
+            "native": {
+              "wall": 0.115791291,
+              "cpu": 0.115225
+            },
+            "njit": {
+              "wall": 0.091557708,
+              "cpu": 0.091223
+            }
+          }
+        },
+        {
+          "repeat": 5,
+          "order": [
+            "native",
+            "njit",
+            "candidate"
+          ],
+          "samples": {
+            "native": {
+              "wall": 0.116905375,
+              "cpu": 0.116464
+            },
+            "njit": {
+              "wall": 0.095609958,
+              "cpu": 0.094679
+            },
+            "candidate": {
+              "wall": 0.108864292,
+              "cpu": 0.108173
+            }
+          }
+        }
+      ],
+      "candidate_to_native": 0.938902292402515,
+      "candidate_to_njit": 1.333867946353764,
+      "maximum_absolute_errors": {
+        "native": 0.0,
+        "candidate": 0.0,
+        "njit": 0.0
+      },
+      "candidate_reuse_calls": 1,
+      "clean_first_five_medians_seconds": {
+        "native": 0.140012333,
+        "candidate": 0.132356333,
+        "njit": 0.08928525
+      }
+    },
+    "1048576-F": {
+      "medians_seconds": {
+        "native": 0.1003364795,
+        "candidate": 0.10197462500000001,
+        "njit": 0.13456158299999998
+      },
+      "medians_cpu_seconds": {
+        "native": 0.0999975,
+        "candidate": 0.1014465,
+        "njit": 0.134054
+      },
+      "pairs": [
+        {
+          "repeat": 0,
+          "order": [
+            "native",
+            "candidate",
+            "njit"
+          ],
+          "samples": {
+            "native": {
+              "wall": 0.097123208,
+              "cpu": 0.096722
+            },
+            "candidate": {
+              "wall": 0.094801208,
+              "cpu": 0.094493
+            },
+            "njit": {
+              "wall": 0.135900292,
+              "cpu": 0.135442
+            }
+          }
+        },
+        {
+          "repeat": 1,
+          "order": [
+            "candidate",
+            "njit",
+            "native"
+          ],
+          "samples": {
+            "candidate": {
+              "wall": 0.149809,
+              "cpu": 0.149248
+            },
+            "njit": {
+              "wall": 0.133887,
+              "cpu": 0.13313
+            },
+            "native": {
+              "wall": 0.152561458,
+              "cpu": 0.151658
+            }
+          }
+        },
+        {
+          "repeat": 2,
+          "order": [
+            "njit",
+            "native",
+            "candidate"
+          ],
+          "samples": {
+            "njit": {
+              "wall": 0.134252542,
+              "cpu": 0.133691
+            },
+            "native": {
+              "wall": 0.121691208,
+              "cpu": 0.121245
+            },
+            "candidate": {
+              "wall": 0.13268625,
+              "cpu": 0.132072
+            }
+          }
+        },
+        {
+          "repeat": 3,
+          "order": [
+            "njit",
+            "candidate",
+            "native"
+          ],
+          "samples": {
+            "njit": {
+              "wall": 0.134497,
+              "cpu": 0.13397
+            },
+            "candidate": {
+              "wall": 0.096199375,
+              "cpu": 0.095775
+            },
+            "native": {
+              "wall": 0.096312416,
+              "cpu": 0.095878
+            }
+          }
+        },
+        {
+          "repeat": 4,
+          "order": [
+            "candidate",
+            "native",
+            "njit"
+          ],
+          "samples": {
+            "candidate": {
+              "wall": 0.097984625,
+              "cpu": 0.097485
+            },
+            "native": {
+              "wall": 0.10262925,
+              "cpu": 0.102262
+            },
+            "njit": {
+              "wall": 0.134626166,
+              "cpu": 0.134138
+            }
+          }
+        },
+        {
+          "repeat": 5,
+          "order": [
+            "native",
+            "njit",
+            "candidate"
+          ],
+          "samples": {
+            "native": {
+              "wall": 0.098043709,
+              "cpu": 0.097733
+            },
+            "njit": {
+              "wall": 0.138036166,
+              "cpu": 0.137329
+            },
+            "candidate": {
+              "wall": 0.105964625,
+              "cpu": 0.105408
+            }
+          }
+        }
+      ],
+      "candidate_to_native": 1.016326519608454,
+      "candidate_to_njit": 0.7578286664478376,
+      "maximum_absolute_errors": {
+        "native": 1.3233858453531866e-13,
+        "candidate": 1.3233858453531866e-13,
+        "njit": 1.3233858453531866e-13
+      },
+      "candidate_reuse_calls": 0,
+      "clean_first_five_medians_seconds": {
+        "native": 0.10262925,
+        "candidate": 0.097984625,
+        "njit": 0.134497
+      }
+    },
+    "4194304-C": {
+      "medians_seconds": {
+        "native": 0.50749675,
+        "candidate": 0.4984571455,
+        "njit": 0.4257850205
+      },
+      "medians_cpu_seconds": {
+        "native": 0.505413,
+        "candidate": 0.49525549999999996,
+        "njit": 0.414707
+      },
+      "pairs": [
+        {
+          "repeat": 0,
+          "order": [
+            "native",
+            "candidate",
+            "njit"
+          ],
+          "samples": {
+            "native": {
+              "wall": 1.061276834,
+              "cpu": 0.738924
+            },
+            "candidate": {
+              "wall": 0.74636075,
+              "cpu": 0.729949
+            },
+            "njit": {
+              "wall": 0.453251625,
+              "cpu": 0.421941
+            }
+          }
+        },
+        {
+          "repeat": 1,
+          "order": [
+            "candidate",
+            "njit",
+            "native"
+          ],
+          "samples": {
+            "candidate": {
+              "wall": 0.452119667,
+              "cpu": 0.450036
+            },
+            "njit": {
+              "wall": 0.411295166,
+              "cpu": 0.408402
+            },
+            "native": {
+              "wall": 0.50650875,
+              "cpu": 0.504135
+            }
+          }
+        },
+        {
+          "repeat": 2,
+          "order": [
+            "njit",
+            "native",
+            "candidate"
+          ],
+          "samples": {
+            "njit": {
+              "wall": 0.406920209,
+              "cpu": 0.400335
+            },
+            "native": {
+              "wall": 0.50848475,
+              "cpu": 0.506691
+            },
+            "candidate": {
+              "wall": 0.521878375,
+              "cpu": 0.500926
+            }
+          }
+        },
+        {
+          "repeat": 3,
+          "order": [
+            "njit",
+            "candidate",
+            "native"
+          ],
+          "samples": {
+            "njit": {
+              "wall": 0.384760791,
+              "cpu": 0.382914
+            },
+            "candidate": {
+              "wall": 0.503413291,
+              "cpu": 0.499301
+            },
+            "native": {
+              "wall": 0.503352708,
+              "cpu": 0.501646
+            }
+          }
+        },
+        {
+          "repeat": 4,
+          "order": [
+            "candidate",
+            "native",
+            "njit"
+          ],
+          "samples": {
+            "candidate": {
+              "wall": 0.493501,
+              "cpu": 0.49121
+            },
+            "native": {
+              "wall": 0.552258,
+              "cpu": 0.524423
+            },
+            "njit": {
+              "wall": 0.440274875,
+              "cpu": 0.421012
+            }
+          }
+        },
+        {
+          "repeat": 5,
+          "order": [
+            "native",
+            "njit",
+            "candidate"
+          ],
+          "samples": {
+            "native": {
+              "wall": 0.500080083,
+              "cpu": 0.498303
+            },
+            "njit": {
+              "wall": 0.667213958,
+              "cpu": 0.45911
+            },
+            "candidate": {
+              "wall": 0.457303042,
+              "cpu": 0.455223
+            }
+          }
+        }
+      ],
+      "candidate_to_native": 0.9821878573606627,
+      "candidate_to_njit": 1.170677974802075,
+      "maximum_absolute_errors": {
+        "native": 0.0,
+        "candidate": 0.0,
+        "njit": 0.0
+      },
+      "candidate_reuse_calls": 1,
+      "clean_first_five_medians_seconds": {
+        "native": 0.50848475,
+        "candidate": 0.503413291,
+        "njit": 0.411295166
+      }
+    },
+    "4194304-F": {
+      "medians_seconds": {
+        "native": 0.46991150000000004,
+        "candidate": 0.45400949999999995,
+        "njit": 0.5839002090000001
+      },
+      "medians_cpu_seconds": {
+        "native": 0.467407,
+        "candidate": 0.4501315,
+        "njit": 0.581487
+      },
+      "pairs": [
+        {
+          "repeat": 0,
+          "order": [
+            "native",
+            "candidate",
+            "njit"
+          ],
+          "samples": {
+            "native": {
+              "wall": 0.418949875,
+              "cpu": 0.417389
+            },
+            "candidate": {
+              "wall": 0.405627334,
+              "cpu": 0.404008
+            },
+            "njit": {
+              "wall": 0.583860459,
+              "cpu": 0.581131
+            }
+          }
+        },
+        {
+          "repeat": 1,
+          "order": [
+            "candidate",
+            "njit",
+            "native"
+          ],
+          "samples": {
+            "candidate": {
+              "wall": 0.481691416,
+              "cpu": 0.475643
+            },
+            "njit": {
+              "wall": 0.565217375,
+              "cpu": 0.554553
+            },
+            "native": {
+              "wall": 0.468489042,
+              "cpu": 0.46575
+            }
+          }
+        },
+        {
+          "repeat": 2,
+          "order": [
+            "njit",
+            "native",
+            "candidate"
+          ],
+          "samples": {
+            "njit": {
+              "wall": 0.583939959,
+              "cpu": 0.581843
+            },
+            "native": {
+              "wall": 0.414287125,
+              "cpu": 0.41265
+            },
+            "candidate": {
+              "wall": 0.426220958,
+              "cpu": 0.423459
+            }
+          }
+        },
+        {
+          "repeat": 3,
+          "order": [
+            "njit",
+            "candidate",
+            "native"
+          ],
+          "samples": {
+            "njit": {
+              "wall": 0.568674458,
+              "cpu": 0.566624
+            },
+            "candidate": {
+              "wall": 0.426327584,
+              "cpu": 0.42462
+            },
+            "native": {
+              "wall": 0.471333958,
+              "cpu": 0.469064
+            }
+          }
+        },
+        {
+          "repeat": 4,
+          "order": [
+            "candidate",
+            "native",
+            "njit"
+          ],
+          "samples": {
+            "candidate": {
+              "wall": 0.537637125,
+              "cpu": 0.506437
+            },
+            "native": {
+              "wall": 1.312125333,
+              "cpu": 0.664363
+            },
+            "njit": {
+              "wall": 0.659760584,
+              "cpu": 0.6223
+            }
+          }
+        },
+        {
+          "repeat": 5,
+          "order": [
+            "native",
+            "njit",
+            "candidate"
+          ],
+          "samples": {
+            "native": {
+              "wall": 0.60038275,
+              "cpu": 0.591317
+            },
+            "njit": {
+              "wall": 0.690089333,
+              "cpu": 0.680157
+            },
+            "candidate": {
+              "wall": 0.692640792,
+              "cpu": 0.673753
+            }
+          }
+        }
+      ],
+      "candidate_to_native": 0.9661595853687341,
+      "candidate_to_njit": 0.7775463906367601,
+      "maximum_absolute_errors": {
+        "native": 2.922107000813412e-13,
+        "candidate": 2.922107000813412e-13,
+        "njit": 2.922107000813412e-13
+      },
+      "candidate_reuse_calls": 0,
+      "clean_first_five_medians_seconds": {
+        "native": 0.468489042,
+        "candidate": 0.426327584,
+        "njit": 0.583860459
+      }
+    }
+  },
+  "production_adopted": false,
+  "goal_complete": false,
+  "live_children": {},
+  "finished": 1791295199.3508842,
+  "complete_requests": 72,
+  "limitations": "The sixth rotation can overlap other workers final NumPy verification. All raw samples retained; first five rotations are clean sequential requests. Performance rejection is diagnostic, not a full qualification."
+}

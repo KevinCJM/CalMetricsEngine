@@ -1,0 +1,3582 @@
+{
+  "scope": "isolated C ABI + owned output + input copy; no Scheduler/Planner acceptance",
+  "cpu_budget": 1,
+  "warmed_njit": true,
+  "platform": "macOS-15.6.1-arm64-arm-64bit",
+  "thread_policy": "baseline_threads(njit) outside each NJIT timed block; native context does not set TLS",
+  "records": [
+    {
+      "n": 2048,
+      "d": 8,
+      "layout": "c",
+      "median_ms": {
+        "0": 319.2514375,
+        "1": 331.838813,
+        "2": 628.853709,
+        "3": 375.2013125,
+        "njit": 81.8173125
+      },
+      "samples_ns": {
+        "0": [
+          322398625.0,
+          319330375.0,
+          319211750.0,
+          318402666.0,
+          319981458.0,
+          318625583.0,
+          319383375.0,
+          318328084.0,
+          317820958.0,
+          319291125.0
+        ],
+        "1": [
+          332181584.0,
+          345998583.0,
+          331035125.0,
+          332904625.0,
+          331226208.0,
+          333371458.0,
+          331063542.0,
+          331623250.0,
+          332046959.0,
+          331630667.0
+        ],
+        "2": [
+          627645667.0,
+          629056917.0,
+          629043459.0,
+          627492417.0,
+          633384167.0,
+          628663959.0,
+          633903333.0,
+          627310458.0,
+          627558083.0,
+          629292167.0
+        ],
+        "3": [
+          375681209.0,
+          374575000.0,
+          375127042.0,
+          374522583.0,
+          395209084.0,
+          393028917.0,
+          375275583.0,
+          387216458.0,
+          374716959.0,
+          374864792.0
+        ],
+        "njit": [
+          82082375.0,
+          81433584.0,
+          81535541.0,
+          84372625.0,
+          80521125.0,
+          89837125.0,
+          80852542.0,
+          84489416.0,
+          82192917.0,
+          81552250.0
+        ]
+      },
+      "candidate_output_bytes": 131072,
+      "coefficient_workspace_bytes": 33554432,
+      "schedule": [
+        [
+          "0",
+          "1",
+          "2",
+          "3",
+          "njit"
+        ],
+        [
+          "1",
+          "2",
+          "3",
+          "njit",
+          "0"
+        ],
+        [
+          "2",
+          "3",
+          "njit",
+          "0",
+          "1"
+        ],
+        [
+          "3",
+          "njit",
+          "0",
+          "1",
+          "2"
+        ],
+        [
+          "njit",
+          "0",
+          "1",
+          "2",
+          "3"
+        ],
+        [
+          "njit",
+          "3",
+          "2",
+          "1",
+          "0"
+        ],
+        [
+          "0",
+          "njit",
+          "3",
+          "2",
+          "1"
+        ],
+        [
+          "1",
+          "0",
+          "njit",
+          "3",
+          "2"
+        ],
+        [
+          "2",
+          "1",
+          "0",
+          "njit",
+          "3"
+        ],
+        [
+          "3",
+          "2",
+          "1",
+          "0",
+          "njit"
+        ]
+      ],
+      "threads": [
+        {
+          "phase": "warm",
+          "backend": "0",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "warm",
+          "backend": "1",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "warm",
+          "backend": "2",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "warm",
+          "backend": "3",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "warm",
+          "backend": "njit",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": {
+              "prior": 0,
+              "active": 1,
+              "restored": 0
+            },
+            "pools": [
+              {
+                "user_api": "blas",
+                "internal_api": "openblas",
+                "num_threads": 1,
+                "prefix": "libopenblas",
+                "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+                "version": "0.3.23.dev",
+                "threading_layer": "pthreads",
+                "architecture": "armv8"
+              }
+            ]
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 0,
+          "backend": "0",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 0,
+          "backend": "1",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 0,
+          "backend": "2",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 0,
+          "backend": "3",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 0,
+          "backend": "njit",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": {
+              "prior": 0,
+              "active": 1,
+              "restored": 0
+            },
+            "pools": [
+              {
+                "user_api": "blas",
+                "internal_api": "openblas",
+                "num_threads": 1,
+                "prefix": "libopenblas",
+                "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+                "version": "0.3.23.dev",
+                "threading_layer": "pthreads",
+                "architecture": "armv8"
+              }
+            ]
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 1,
+          "backend": "1",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 1,
+          "backend": "2",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 1,
+          "backend": "3",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 1,
+          "backend": "njit",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": {
+              "prior": 0,
+              "active": 1,
+              "restored": 0
+            },
+            "pools": [
+              {
+                "user_api": "blas",
+                "internal_api": "openblas",
+                "num_threads": 1,
+                "prefix": "libopenblas",
+                "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+                "version": "0.3.23.dev",
+                "threading_layer": "pthreads",
+                "architecture": "armv8"
+              }
+            ]
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 1,
+          "backend": "0",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 2,
+          "backend": "2",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 2,
+          "backend": "3",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 2,
+          "backend": "njit",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": {
+              "prior": 0,
+              "active": 1,
+              "restored": 0
+            },
+            "pools": [
+              {
+                "user_api": "blas",
+                "internal_api": "openblas",
+                "num_threads": 1,
+                "prefix": "libopenblas",
+                "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+                "version": "0.3.23.dev",
+                "threading_layer": "pthreads",
+                "architecture": "armv8"
+              }
+            ]
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 2,
+          "backend": "0",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 2,
+          "backend": "1",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 3,
+          "backend": "3",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 3,
+          "backend": "njit",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": {
+              "prior": 0,
+              "active": 1,
+              "restored": 0
+            },
+            "pools": [
+              {
+                "user_api": "blas",
+                "internal_api": "openblas",
+                "num_threads": 1,
+                "prefix": "libopenblas",
+                "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+                "version": "0.3.23.dev",
+                "threading_layer": "pthreads",
+                "architecture": "armv8"
+              }
+            ]
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 3,
+          "backend": "0",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 3,
+          "backend": "1",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 3,
+          "backend": "2",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 4,
+          "backend": "njit",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": {
+              "prior": 0,
+              "active": 1,
+              "restored": 0
+            },
+            "pools": [
+              {
+                "user_api": "blas",
+                "internal_api": "openblas",
+                "num_threads": 1,
+                "prefix": "libopenblas",
+                "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+                "version": "0.3.23.dev",
+                "threading_layer": "pthreads",
+                "architecture": "armv8"
+              }
+            ]
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 4,
+          "backend": "0",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 4,
+          "backend": "1",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 4,
+          "backend": "2",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 4,
+          "backend": "3",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 5,
+          "backend": "njit",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": {
+              "prior": 0,
+              "active": 1,
+              "restored": 0
+            },
+            "pools": [
+              {
+                "user_api": "blas",
+                "internal_api": "openblas",
+                "num_threads": 1,
+                "prefix": "libopenblas",
+                "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+                "version": "0.3.23.dev",
+                "threading_layer": "pthreads",
+                "architecture": "armv8"
+              }
+            ]
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 5,
+          "backend": "3",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 5,
+          "backend": "2",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 5,
+          "backend": "1",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 5,
+          "backend": "0",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 6,
+          "backend": "0",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 6,
+          "backend": "njit",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": {
+              "prior": 0,
+              "active": 1,
+              "restored": 0
+            },
+            "pools": [
+              {
+                "user_api": "blas",
+                "internal_api": "openblas",
+                "num_threads": 1,
+                "prefix": "libopenblas",
+                "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+                "version": "0.3.23.dev",
+                "threading_layer": "pthreads",
+                "architecture": "armv8"
+              }
+            ]
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 6,
+          "backend": "3",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 6,
+          "backend": "2",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 6,
+          "backend": "1",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 7,
+          "backend": "1",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 7,
+          "backend": "0",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 7,
+          "backend": "njit",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": {
+              "prior": 0,
+              "active": 1,
+              "restored": 0
+            },
+            "pools": [
+              {
+                "user_api": "blas",
+                "internal_api": "openblas",
+                "num_threads": 1,
+                "prefix": "libopenblas",
+                "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+                "version": "0.3.23.dev",
+                "threading_layer": "pthreads",
+                "architecture": "armv8"
+              }
+            ]
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 7,
+          "backend": "3",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 7,
+          "backend": "2",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 8,
+          "backend": "2",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 8,
+          "backend": "1",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 8,
+          "backend": "0",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 8,
+          "backend": "njit",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": {
+              "prior": 0,
+              "active": 1,
+              "restored": 0
+            },
+            "pools": [
+              {
+                "user_api": "blas",
+                "internal_api": "openblas",
+                "num_threads": 1,
+                "prefix": "libopenblas",
+                "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+                "version": "0.3.23.dev",
+                "threading_layer": "pthreads",
+                "architecture": "armv8"
+              }
+            ]
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 8,
+          "backend": "3",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 9,
+          "backend": "3",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 9,
+          "backend": "2",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 9,
+          "backend": "1",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 9,
+          "backend": "0",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 9,
+          "backend": "njit",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": {
+              "prior": 0,
+              "active": 1,
+              "restored": 0
+            },
+            "pools": [
+              {
+                "user_api": "blas",
+                "internal_api": "openblas",
+                "num_threads": 1,
+                "prefix": "libopenblas",
+                "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+                "version": "0.3.23.dev",
+                "threading_layer": "pthreads",
+                "architecture": "armv8"
+              }
+            ]
+          }
+        }
+      ],
+      "ownership": "one retained independent previous result per backend; replacement after call",
+      "status_checked_every_native_call": true,
+      "parity_scope": "warmup and final timed outputs",
+      "output_layouts": {
+        "0": {
+          "c_contiguous": true,
+          "f_contiguous": false,
+          "strides": [
+            64,
+            8
+          ]
+        },
+        "1": {
+          "c_contiguous": true,
+          "f_contiguous": false,
+          "strides": [
+            64,
+            8
+          ]
+        },
+        "2": {
+          "c_contiguous": true,
+          "f_contiguous": false,
+          "strides": [
+            64,
+            8
+          ]
+        },
+        "3": {
+          "c_contiguous": true,
+          "f_contiguous": false,
+          "strides": [
+            64,
+            8
+          ]
+        },
+        "njit": {
+          "c_contiguous": false,
+          "f_contiguous": true,
+          "strides": [
+            8,
+            16384
+          ]
+        }
+      }
+    },
+    {
+      "n": 4096,
+      "d": 8,
+      "layout": "c",
+      "median_ms": {
+        "0": 2399.0720205,
+        "1": 2479.432229,
+        "2": 5280.6329165,
+        "3": 2842.0123955,
+        "njit": 622.8792085
+      },
+      "samples_ns": {
+        "0": [
+          2354883042.0,
+          2370569750.0,
+          2431848584.0,
+          2446029291.0,
+          2423268583.0,
+          2576100084.0,
+          2372068000.0,
+          2374875458.0,
+          2360683791.0,
+          3114954084.0
+        ],
+        "1": [
+          2446600333.0,
+          2458409709.0,
+          2570447375.0,
+          2548753625.0,
+          2475221042.0,
+          2653817041.0,
+          2483643416.0,
+          2463877625.0,
+          2460937208.0,
+          3002191083.0
+        ],
+        "2": [
+          5160336125.0,
+          5342412833.0,
+          5281406166.0,
+          5304306417.0,
+          5279859667.0,
+          5320881375.0,
+          5182539875.0,
+          5227558667.0,
+          5221259834.0,
+          6197720417.0
+        ],
+        "3": [
+          2794225167.0,
+          2804770666.0,
+          2907280208.0,
+          2890032917.0,
+          2807335167.0,
+          2862726125.0,
+          2812637584.0,
+          2996795666.0,
+          2821298666.0,
+          3194029333.0
+        ],
+        "njit": [
+          620197542.0,
+          607230959.0,
+          625560875.0,
+          628245459.0,
+          618100875.0,
+          600278958.0,
+          619568917.0,
+          650479958.0,
+          692241541.0,
+          687832667.0
+        ]
+      },
+      "candidate_output_bytes": 262144,
+      "coefficient_workspace_bytes": 134217728,
+      "schedule": [
+        [
+          "0",
+          "1",
+          "2",
+          "3",
+          "njit"
+        ],
+        [
+          "1",
+          "2",
+          "3",
+          "njit",
+          "0"
+        ],
+        [
+          "2",
+          "3",
+          "njit",
+          "0",
+          "1"
+        ],
+        [
+          "3",
+          "njit",
+          "0",
+          "1",
+          "2"
+        ],
+        [
+          "njit",
+          "0",
+          "1",
+          "2",
+          "3"
+        ],
+        [
+          "njit",
+          "3",
+          "2",
+          "1",
+          "0"
+        ],
+        [
+          "0",
+          "njit",
+          "3",
+          "2",
+          "1"
+        ],
+        [
+          "1",
+          "0",
+          "njit",
+          "3",
+          "2"
+        ],
+        [
+          "2",
+          "1",
+          "0",
+          "njit",
+          "3"
+        ],
+        [
+          "3",
+          "2",
+          "1",
+          "0",
+          "njit"
+        ]
+      ],
+      "threads": [
+        {
+          "phase": "warm",
+          "backend": "0",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "warm",
+          "backend": "1",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "warm",
+          "backend": "2",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "warm",
+          "backend": "3",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "warm",
+          "backend": "njit",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": {
+              "prior": 0,
+              "active": 1,
+              "restored": 0
+            },
+            "pools": [
+              {
+                "user_api": "blas",
+                "internal_api": "openblas",
+                "num_threads": 1,
+                "prefix": "libopenblas",
+                "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+                "version": "0.3.23.dev",
+                "threading_layer": "pthreads",
+                "architecture": "armv8"
+              }
+            ]
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 0,
+          "backend": "0",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 0,
+          "backend": "1",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 0,
+          "backend": "2",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 0,
+          "backend": "3",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 0,
+          "backend": "njit",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": {
+              "prior": 0,
+              "active": 1,
+              "restored": 0
+            },
+            "pools": [
+              {
+                "user_api": "blas",
+                "internal_api": "openblas",
+                "num_threads": 1,
+                "prefix": "libopenblas",
+                "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+                "version": "0.3.23.dev",
+                "threading_layer": "pthreads",
+                "architecture": "armv8"
+              }
+            ]
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 1,
+          "backend": "1",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 1,
+          "backend": "2",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 1,
+          "backend": "3",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 1,
+          "backend": "njit",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": {
+              "prior": 0,
+              "active": 1,
+              "restored": 0
+            },
+            "pools": [
+              {
+                "user_api": "blas",
+                "internal_api": "openblas",
+                "num_threads": 1,
+                "prefix": "libopenblas",
+                "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+                "version": "0.3.23.dev",
+                "threading_layer": "pthreads",
+                "architecture": "armv8"
+              }
+            ]
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 1,
+          "backend": "0",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 2,
+          "backend": "2",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 2,
+          "backend": "3",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 2,
+          "backend": "njit",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": {
+              "prior": 0,
+              "active": 1,
+              "restored": 0
+            },
+            "pools": [
+              {
+                "user_api": "blas",
+                "internal_api": "openblas",
+                "num_threads": 1,
+                "prefix": "libopenblas",
+                "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+                "version": "0.3.23.dev",
+                "threading_layer": "pthreads",
+                "architecture": "armv8"
+              }
+            ]
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 2,
+          "backend": "0",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 2,
+          "backend": "1",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 3,
+          "backend": "3",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 3,
+          "backend": "njit",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": {
+              "prior": 0,
+              "active": 1,
+              "restored": 0
+            },
+            "pools": [
+              {
+                "user_api": "blas",
+                "internal_api": "openblas",
+                "num_threads": 1,
+                "prefix": "libopenblas",
+                "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+                "version": "0.3.23.dev",
+                "threading_layer": "pthreads",
+                "architecture": "armv8"
+              }
+            ]
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 3,
+          "backend": "0",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 3,
+          "backend": "1",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 3,
+          "backend": "2",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 4,
+          "backend": "njit",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": {
+              "prior": 0,
+              "active": 1,
+              "restored": 0
+            },
+            "pools": [
+              {
+                "user_api": "blas",
+                "internal_api": "openblas",
+                "num_threads": 1,
+                "prefix": "libopenblas",
+                "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+                "version": "0.3.23.dev",
+                "threading_layer": "pthreads",
+                "architecture": "armv8"
+              }
+            ]
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 4,
+          "backend": "0",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 4,
+          "backend": "1",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 4,
+          "backend": "2",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 4,
+          "backend": "3",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 5,
+          "backend": "njit",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": {
+              "prior": 0,
+              "active": 1,
+              "restored": 0
+            },
+            "pools": [
+              {
+                "user_api": "blas",
+                "internal_api": "openblas",
+                "num_threads": 1,
+                "prefix": "libopenblas",
+                "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+                "version": "0.3.23.dev",
+                "threading_layer": "pthreads",
+                "architecture": "armv8"
+              }
+            ]
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 5,
+          "backend": "3",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 5,
+          "backend": "2",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 5,
+          "backend": "1",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 5,
+          "backend": "0",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 6,
+          "backend": "0",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 6,
+          "backend": "njit",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": {
+              "prior": 0,
+              "active": 1,
+              "restored": 0
+            },
+            "pools": [
+              {
+                "user_api": "blas",
+                "internal_api": "openblas",
+                "num_threads": 1,
+                "prefix": "libopenblas",
+                "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+                "version": "0.3.23.dev",
+                "threading_layer": "pthreads",
+                "architecture": "armv8"
+              }
+            ]
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 6,
+          "backend": "3",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 6,
+          "backend": "2",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 6,
+          "backend": "1",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 7,
+          "backend": "1",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 7,
+          "backend": "0",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 7,
+          "backend": "njit",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": {
+              "prior": 0,
+              "active": 1,
+              "restored": 0
+            },
+            "pools": [
+              {
+                "user_api": "blas",
+                "internal_api": "openblas",
+                "num_threads": 1,
+                "prefix": "libopenblas",
+                "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+                "version": "0.3.23.dev",
+                "threading_layer": "pthreads",
+                "architecture": "armv8"
+              }
+            ]
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 7,
+          "backend": "3",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 7,
+          "backend": "2",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 8,
+          "backend": "2",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 8,
+          "backend": "1",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 8,
+          "backend": "0",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 8,
+          "backend": "njit",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": {
+              "prior": 0,
+              "active": 1,
+              "restored": 0
+            },
+            "pools": [
+              {
+                "user_api": "blas",
+                "internal_api": "openblas",
+                "num_threads": 1,
+                "prefix": "libopenblas",
+                "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+                "version": "0.3.23.dev",
+                "threading_layer": "pthreads",
+                "architecture": "armv8"
+              }
+            ]
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 8,
+          "backend": "3",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 9,
+          "backend": "3",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 9,
+          "backend": "2",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 9,
+          "backend": "1",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 9,
+          "backend": "0",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 9,
+          "backend": "njit",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": {
+              "prior": 0,
+              "active": 1,
+              "restored": 0
+            },
+            "pools": [
+              {
+                "user_api": "blas",
+                "internal_api": "openblas",
+                "num_threads": 1,
+                "prefix": "libopenblas",
+                "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+                "version": "0.3.23.dev",
+                "threading_layer": "pthreads",
+                "architecture": "armv8"
+              }
+            ]
+          }
+        }
+      ],
+      "ownership": "one retained independent previous result per backend; replacement after call",
+      "status_checked_every_native_call": true,
+      "parity_scope": "warmup and final timed outputs",
+      "output_layouts": {
+        "0": {
+          "c_contiguous": true,
+          "f_contiguous": false,
+          "strides": [
+            64,
+            8
+          ]
+        },
+        "1": {
+          "c_contiguous": true,
+          "f_contiguous": false,
+          "strides": [
+            64,
+            8
+          ]
+        },
+        "2": {
+          "c_contiguous": true,
+          "f_contiguous": false,
+          "strides": [
+            64,
+            8
+          ]
+        },
+        "3": {
+          "c_contiguous": true,
+          "f_contiguous": false,
+          "strides": [
+            64,
+            8
+          ]
+        },
+        "njit": {
+          "c_contiguous": false,
+          "f_contiguous": true,
+          "strides": [
+            8,
+            32768
+          ]
+        }
+      }
+    },
+    {
+      "n": 4096,
+      "d": 8,
+      "layout": "f",
+      "median_ms": {
+        "0": 3499.773583,
+        "1": 3531.364375,
+        "2": 7543.4728125,
+        "3": 4420.9573125,
+        "njit": 642.4184585
+      },
+      "samples_ns": {
+        "0": [
+          2899231291.0,
+          3615537000.0,
+          3371960958.0,
+          4686716459.0,
+          3384010166.0,
+          5853971750.0,
+          5322669042.0,
+          3249306416.0,
+          3837727792.0,
+          2543847750.0
+        ],
+        "1": [
+          2928140917.0,
+          3559496667.0,
+          3908348250.0,
+          5004672041.0,
+          3503232083.0,
+          5536254083.0,
+          3172491375.0,
+          3215333250.0,
+          4063980000.0,
+          2710776000.0
+        ],
+        "2": [
+          6074301542.0,
+          6681468416.0,
+          8323283042.0,
+          7503993250.0,
+          8647405958.0,
+          10467091708.0,
+          7582952375.0,
+          7432229583.0,
+          7734067250.0,
+          5391399333.0
+        ],
+        "3": [
+          3675635333.0,
+          3766639750.0,
+          3352952209.0,
+          5602785625.0,
+          4991530959.0,
+          5360345291.0,
+          5209043292.0,
+          4006230750.0,
+          4835683875.0,
+          3595262500.0
+        ],
+        "njit": [
+          547742333.0,
+          585507583.0,
+          540694417.0,
+          815535125.0,
+          600408584.0,
+          817311083.0,
+          734622125.0,
+          689328417.0,
+          684428333.0,
+          537352875.0
+        ]
+      },
+      "candidate_output_bytes": 262144,
+      "coefficient_workspace_bytes": 134217728,
+      "schedule": [
+        [
+          "0",
+          "1",
+          "2",
+          "3",
+          "njit"
+        ],
+        [
+          "1",
+          "2",
+          "3",
+          "njit",
+          "0"
+        ],
+        [
+          "2",
+          "3",
+          "njit",
+          "0",
+          "1"
+        ],
+        [
+          "3",
+          "njit",
+          "0",
+          "1",
+          "2"
+        ],
+        [
+          "njit",
+          "0",
+          "1",
+          "2",
+          "3"
+        ],
+        [
+          "njit",
+          "3",
+          "2",
+          "1",
+          "0"
+        ],
+        [
+          "0",
+          "njit",
+          "3",
+          "2",
+          "1"
+        ],
+        [
+          "1",
+          "0",
+          "njit",
+          "3",
+          "2"
+        ],
+        [
+          "2",
+          "1",
+          "0",
+          "njit",
+          "3"
+        ],
+        [
+          "3",
+          "2",
+          "1",
+          "0",
+          "njit"
+        ]
+      ],
+      "threads": [
+        {
+          "phase": "warm",
+          "backend": "0",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "warm",
+          "backend": "1",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "warm",
+          "backend": "2",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "warm",
+          "backend": "3",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "warm",
+          "backend": "njit",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": {
+              "prior": 0,
+              "active": 1,
+              "restored": 0
+            },
+            "pools": [
+              {
+                "user_api": "blas",
+                "internal_api": "openblas",
+                "num_threads": 1,
+                "prefix": "libopenblas",
+                "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+                "version": "0.3.23.dev",
+                "threading_layer": "pthreads",
+                "architecture": "armv8"
+              }
+            ]
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 0,
+          "backend": "0",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 0,
+          "backend": "1",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 0,
+          "backend": "2",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 0,
+          "backend": "3",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 0,
+          "backend": "njit",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": {
+              "prior": 0,
+              "active": 1,
+              "restored": 0
+            },
+            "pools": [
+              {
+                "user_api": "blas",
+                "internal_api": "openblas",
+                "num_threads": 1,
+                "prefix": "libopenblas",
+                "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+                "version": "0.3.23.dev",
+                "threading_layer": "pthreads",
+                "architecture": "armv8"
+              }
+            ]
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 1,
+          "backend": "1",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 1,
+          "backend": "2",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 1,
+          "backend": "3",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 1,
+          "backend": "njit",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": {
+              "prior": 0,
+              "active": 1,
+              "restored": 0
+            },
+            "pools": [
+              {
+                "user_api": "blas",
+                "internal_api": "openblas",
+                "num_threads": 1,
+                "prefix": "libopenblas",
+                "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+                "version": "0.3.23.dev",
+                "threading_layer": "pthreads",
+                "architecture": "armv8"
+              }
+            ]
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 1,
+          "backend": "0",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 2,
+          "backend": "2",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 2,
+          "backend": "3",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 2,
+          "backend": "njit",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": {
+              "prior": 0,
+              "active": 1,
+              "restored": 0
+            },
+            "pools": [
+              {
+                "user_api": "blas",
+                "internal_api": "openblas",
+                "num_threads": 1,
+                "prefix": "libopenblas",
+                "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+                "version": "0.3.23.dev",
+                "threading_layer": "pthreads",
+                "architecture": "armv8"
+              }
+            ]
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 2,
+          "backend": "0",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 2,
+          "backend": "1",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 3,
+          "backend": "3",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 3,
+          "backend": "njit",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": {
+              "prior": 0,
+              "active": 1,
+              "restored": 0
+            },
+            "pools": [
+              {
+                "user_api": "blas",
+                "internal_api": "openblas",
+                "num_threads": 1,
+                "prefix": "libopenblas",
+                "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+                "version": "0.3.23.dev",
+                "threading_layer": "pthreads",
+                "architecture": "armv8"
+              }
+            ]
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 3,
+          "backend": "0",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 3,
+          "backend": "1",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 3,
+          "backend": "2",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 4,
+          "backend": "njit",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": {
+              "prior": 0,
+              "active": 1,
+              "restored": 0
+            },
+            "pools": [
+              {
+                "user_api": "blas",
+                "internal_api": "openblas",
+                "num_threads": 1,
+                "prefix": "libopenblas",
+                "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+                "version": "0.3.23.dev",
+                "threading_layer": "pthreads",
+                "architecture": "armv8"
+              }
+            ]
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 4,
+          "backend": "0",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 4,
+          "backend": "1",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 4,
+          "backend": "2",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 4,
+          "backend": "3",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 5,
+          "backend": "njit",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": {
+              "prior": 0,
+              "active": 1,
+              "restored": 0
+            },
+            "pools": [
+              {
+                "user_api": "blas",
+                "internal_api": "openblas",
+                "num_threads": 1,
+                "prefix": "libopenblas",
+                "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+                "version": "0.3.23.dev",
+                "threading_layer": "pthreads",
+                "architecture": "armv8"
+              }
+            ]
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 5,
+          "backend": "3",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 5,
+          "backend": "2",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 5,
+          "backend": "1",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 5,
+          "backend": "0",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 6,
+          "backend": "0",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 6,
+          "backend": "njit",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": {
+              "prior": 0,
+              "active": 1,
+              "restored": 0
+            },
+            "pools": [
+              {
+                "user_api": "blas",
+                "internal_api": "openblas",
+                "num_threads": 1,
+                "prefix": "libopenblas",
+                "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+                "version": "0.3.23.dev",
+                "threading_layer": "pthreads",
+                "architecture": "armv8"
+              }
+            ]
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 6,
+          "backend": "3",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 6,
+          "backend": "2",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 6,
+          "backend": "1",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 7,
+          "backend": "1",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 7,
+          "backend": "0",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 7,
+          "backend": "njit",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": {
+              "prior": 0,
+              "active": 1,
+              "restored": 0
+            },
+            "pools": [
+              {
+                "user_api": "blas",
+                "internal_api": "openblas",
+                "num_threads": 1,
+                "prefix": "libopenblas",
+                "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+                "version": "0.3.23.dev",
+                "threading_layer": "pthreads",
+                "architecture": "armv8"
+              }
+            ]
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 7,
+          "backend": "3",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 7,
+          "backend": "2",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 8,
+          "backend": "2",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 8,
+          "backend": "1",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 8,
+          "backend": "0",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 8,
+          "backend": "njit",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": {
+              "prior": 0,
+              "active": 1,
+              "restored": 0
+            },
+            "pools": [
+              {
+                "user_api": "blas",
+                "internal_api": "openblas",
+                "num_threads": 1,
+                "prefix": "libopenblas",
+                "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+                "version": "0.3.23.dev",
+                "threading_layer": "pthreads",
+                "architecture": "armv8"
+              }
+            ]
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 8,
+          "backend": "3",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 9,
+          "backend": "3",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 9,
+          "backend": "2",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 9,
+          "backend": "1",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 9,
+          "backend": "0",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": "not_applied_to_native"
+          }
+        },
+        {
+          "phase": "timing",
+          "round": 9,
+          "backend": "njit",
+          "metadata": {
+            "environment": {
+              "OPENBLAS_NUM_THREADS": "1",
+              "OMP_NUM_THREADS": "1",
+              "VECLIB_MAXIMUM_THREADS": "1",
+              "NUMBA_NUM_THREADS": "1",
+              "MKL_NUM_THREADS": "1"
+            },
+            "accelerate_thread_local": {
+              "prior": 0,
+              "active": 1,
+              "restored": 0
+            },
+            "pools": [
+              {
+                "user_api": "blas",
+                "internal_api": "openblas",
+                "num_threads": 1,
+                "prefix": "libopenblas",
+                "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+                "version": "0.3.23.dev",
+                "threading_layer": "pthreads",
+                "architecture": "armv8"
+              }
+            ]
+          }
+        }
+      ],
+      "ownership": "one retained independent previous result per backend; replacement after call",
+      "status_checked_every_native_call": true,
+      "parity_scope": "warmup and final timed outputs",
+      "output_layouts": {
+        "0": {
+          "c_contiguous": true,
+          "f_contiguous": false,
+          "strides": [
+            64,
+            8
+          ]
+        },
+        "1": {
+          "c_contiguous": true,
+          "f_contiguous": false,
+          "strides": [
+            64,
+            8
+          ]
+        },
+        "2": {
+          "c_contiguous": true,
+          "f_contiguous": false,
+          "strides": [
+            64,
+            8
+          ]
+        },
+        "3": {
+          "c_contiguous": true,
+          "f_contiguous": false,
+          "strides": [
+            64,
+            8
+          ]
+        },
+        "njit": {
+          "c_contiguous": false,
+          "f_contiguous": true,
+          "strides": [
+            8,
+            32768
+          ]
+        }
+      }
+    }
+  ]
+}

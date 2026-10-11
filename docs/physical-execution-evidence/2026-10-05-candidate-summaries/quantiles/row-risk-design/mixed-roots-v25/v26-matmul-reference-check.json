@@ -1,0 +1,97 @@
+{
+  "status": "passed",
+  "configurations": 8,
+  "cases": [
+    {
+      "method": "njit_direct",
+      "layout": "CC",
+      "order": "C",
+      "mathematical_verification": {
+        "decimal_maximum_absolute_error": 8.881784197001252e-16,
+        "normalized_bilinear_residual": 4.5102810375396984e-17
+      },
+      "readonly": true,
+      "independent_generations": true
+    },
+    {
+      "method": "njit_direct",
+      "layout": "CC",
+      "order": "F",
+      "mathematical_verification": {
+        "decimal_maximum_absolute_error": 8.881784197001252e-16,
+        "normalized_bilinear_residual": 2.7755575615628914e-17
+      },
+      "readonly": true,
+      "independent_generations": true
+    },
+    {
+      "method": "njit_direct",
+      "layout": "FF",
+      "order": "C",
+      "mathematical_verification": {
+        "decimal_maximum_absolute_error": 8.881784197001252e-16,
+        "normalized_bilinear_residual": 4.5102810375396984e-17
+      },
+      "readonly": true,
+      "independent_generations": true
+    },
+    {
+      "method": "njit_direct",
+      "layout": "FF",
+      "order": "F",
+      "mathematical_verification": {
+        "decimal_maximum_absolute_error": 8.881784197001252e-16,
+        "normalized_bilinear_residual": 2.7755575615628914e-17
+      },
+      "readonly": true,
+      "independent_generations": true
+    },
+    {
+      "method": "njit_copy",
+      "layout": "CC",
+      "order": "C",
+      "mathematical_verification": {
+        "decimal_maximum_absolute_error": 8.881784197001252e-16,
+        "normalized_bilinear_residual": 4.5102810375396984e-17
+      },
+      "readonly": true,
+      "independent_generations": true
+    },
+    {
+      "method": "njit_copy",
+      "layout": "CC",
+      "order": "F",
+      "mathematical_verification": {
+        "decimal_maximum_absolute_error": 8.881784197001252e-16,
+        "normalized_bilinear_residual": 2.7755575615628914e-17
+      },
+      "readonly": true,
+      "independent_generations": true
+    },
+    {
+      "method": "njit_copy",
+      "layout": "FF",
+      "order": "C",
+      "mathematical_verification": {
+        "decimal_maximum_absolute_error": 8.881784197001252e-16,
+        "normalized_bilinear_residual": 4.5102810375396984e-17
+      },
+      "readonly": true,
+      "independent_generations": true
+    },
+    {
+      "method": "njit_copy",
+      "layout": "FF",
+      "order": "F",
+      "mathematical_verification": {
+        "decimal_maximum_absolute_error": 8.881784197001252e-16,
+        "normalized_bilinear_residual": 2.7755575615628914e-17
+      },
+      "readonly": true,
+      "independent_generations": true
+    }
+  ],
+  "performance_measurement": false,
+  "reason": "correctness/ownership validation only while current full tests run; timing data not collected",
+  "whole_goal_complete": false
+}

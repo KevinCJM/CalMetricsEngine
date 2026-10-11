@@ -1,0 +1,33 @@
+........................................................................ [  5%]
+........................................................................ [ 11%]
+........................................................................ [ 17%]
+........................................................................ [ 23%]
+........................................................................ [ 29%]
+........................................................................ [ 34%]
+........................................................................ [ 40%]
+........................................................................ [ 46%]
+........................................................................ [ 52%]
+........F............................................................... [ 58%]
+........................................................................ [ 64%]
+........................................................................ [ 69%]
+........................................................................ [ 75%]
+........................................................................ [ 81%]
+........................................................................ [ 87%]
+........................................................................ [ 93%]
+........................................................................ [ 99%]
+...........                                                              [100%]
+=================================== FAILURES ===================================
+________ test_empty_selected_axis_does_not_iterate_large_outer_geometry ________
+tests/test_matrix_array_foundation.py:387: in test_empty_selected_axis_does_not_iterate_large_outer_geometry
+    subprocess.run(
+/opt/homebrew/Cellar/python@3.12/3.12.11/Frameworks/Python.framework/Versions/3.12/lib/python3.12/subprocess.py:571: in run
+    raise CalledProcessError(retcode, process.args,
+E   subprocess.CalledProcessError: Command '['/opt/homebrew/opt/python@3.12/bin/python3.12', '-c', '\nimport numpy as np\nfrom calmetrics_engine import operators as op\nx = np.empty((2**35, 0))\ny = op.take_axis(x, np.empty(0, np.int64), 1)\nassert y.shape == x.shape and y.size == 0\n']' died with <Signals.SIGABRT: 6>.
+----------------------------- Captured stderr call -----------------------------
+==91890==ERROR: Interceptors are not working. This may be because AddressSanitizer is loaded too late (e.g. via dlopen). Please launch the executable with:
+DYLD_INSERT_LIBRARIES=/Library/Developer/CommandLineTools/usr/lib/clang/17/lib/darwin/libclang_rt.asan_osx_dynamic.dylib
+"interceptors not installed" && 0
+- generated xml file: /private/tmp/calmetrics-broadcast-standardize-20261006/v48-asan-related.xml -
+=========================== short test summary info ============================
+FAILED tests/test_matrix_array_foundation.py::test_empty_selected_axis_does_not_iterate_large_outer_geometry
+1 failed, 1234 passed in 26.43s

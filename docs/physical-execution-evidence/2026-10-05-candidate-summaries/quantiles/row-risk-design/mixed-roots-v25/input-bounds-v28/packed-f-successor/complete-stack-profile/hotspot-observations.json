@@ -1,0 +1,54 @@
+{
+  "baseline": {
+    "top_frame_counts": {
+      "other resolved/runtime": 2319,
+      "Highway quantile selection": 2034,
+      "operand structural validation": 834,
+      "path/scans": 758,
+      "fused masked sums": 716,
+      "fused squares": 362,
+      "generic elementwise traversal": 351,
+      "SIMD transforms": 335,
+      "waiting (not compute)": 179,
+      "memory movement": 63
+    },
+    "reported_top_frame_count": 7951,
+    "count_boundary": "top-of-stack >=5 samples only across process threads; omitted low-frequency frames and wait counts not treated as time/peak evidence",
+    "real_complete_request": "supplied weights -> MatMul -> three risks, CPU4 C,262144/2520/30",
+    "whole_platform_chain": false,
+    "formal_time_or_peak": false
+  },
+  "candidate": {
+    "top_frame_counts": {
+      "other resolved/runtime": 2358,
+      "Highway quantile selection": 1934,
+      "operand structural validation": 834,
+      "path/scans": 759,
+      "fused masked sums": 731,
+      "generic elementwise traversal": 360,
+      "fused squares": 359,
+      "SIMD transforms": 342,
+      "waiting (not compute)": 157,
+      "memory movement": 60
+    },
+    "reported_top_frame_count": 7894,
+    "count_boundary": "top-of-stack >=5 samples only across process threads; omitted low-frequency frames and wait counts not treated as time/peak evidence",
+    "real_complete_request": "supplied weights -> MatMul -> three risks, CPU4 C,262144/2520/30",
+    "whole_platform_chain": false,
+    "formal_time_or_peak": false
+  },
+  "njit": {
+    "top_frame_counts": {
+      "unresolved anonymous JIT (not attributed)": 7981,
+      "waiting (not compute)": 2382,
+      "matrix library/kernel": 187,
+      "other resolved/runtime": 159,
+      "memory movement": 96
+    },
+    "reported_top_frame_count": 10805,
+    "count_boundary": "top-of-stack >=5 samples only across process threads; omitted low-frequency frames and wait counts not treated as time/peak evidence",
+    "real_complete_request": "supplied weights -> MatMul -> three risks, CPU4 C,262144/2520/30",
+    "whole_platform_chain": false,
+    "formal_time_or_peak": false
+  }
+}

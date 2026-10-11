@@ -1,0 +1,725 @@
+--- a/cpp/graph.cpp
++++ b/cpp/graph.cpp
+@@ -640,6 +640,7 @@
+   return true;
+ }
+ 
++static bool independent_matmul_root(const Program &program, std::size_t index);
+ static bool independent_covariance_root(const Program &program, std::size_t index) {
+   if (program.output_kind != OutputKind::typed || program.isolate_errors ||
+       program.roots.empty() || program.roots.size() > 2 ||
+@@ -1326,6 +1327,7 @@
+     // in place after successful C execution, with that movement audited.
+     if (static_cast<std::int32_t>(id)!=metadata->split_eigh_vectors && !independent_covariance_root(*this, id) &&
+         !independent_cholesky_f_root(*this, id, metadata.get()) &&
++        !independent_matmul_root(*this, id) &&
+         ((nodes[id].kind == NodeKind::operation && metadata->specs[id]->family != ops::Family::elementwise &&
+           metadata->specs[id]->op != ops::Op::affine_contract &&
+           !ops::axis_path_operator(metadata->specs[id]->op)) ||
+@@ -4419,7 +4421,7 @@
+             }
+             if (!prebound_inputs && !scratch.isolate_errors && !input_failures &&
+                 spec.op == ops::Op::matmul && independent_matmul_root(program, node_index))
+-              accelerated = ops::try_accelerate_sign_consistent_matmul(
++              accelerated = ops::try_accelerate_matmul_root(
+                   prepared, native_output, scratch.workspace, operator_audit);
+             if (!prebound_inputs && !scratch.isolate_errors && !input_failures &&
+                 independent_covariance_root(program, node_index))
+--- a/cpp/include/calmetrics_engine/matrix_backend.hpp
++++ b/cpp/include/calmetrics_engine/matrix_backend.hpp
+@@ -66,7 +66,7 @@
+ bool matmul_packed_eligible(const Value &, const Value &);
+ bool library_matmul_packed(const Value &, const Value &, double *, Workspace &, Audit &);
+ // Caller proves an independent float root; rejected input never writes output.
+-bool try_accelerate_sign_consistent_matmul(const Prepared &, Output &, Workspace &, Audit &);
++bool try_accelerate_matmul_root(const Prepared &, Output &, Workspace &, Audit &);
+ // Complete an eligible independent root, including canonical replay. A paired
+ // correlation output requires both covariance and normalized error bounds.
+ bool try_accelerate_covariance(const Prepared &, Output &, Workspace &, Audit &,
+@@ -104,6 +104,7 @@
+ double covariance_library_pair(const Value &, std::size_t, std::size_t, const double *);
+ // Admitted C/F-compatible matmul; void entries permit caller tail dispatch.
+ void library_matmul_f(const Value &, const Value &, double *, Audit &);
++void library_matmul_f_root(const Value &, const Value &, double *, Audit &);
+ void library_matmul_c(const Value &, const Value &, double *, Audit &);
+ void library_matmul_c_blocked(const Value &, const Value &, double *, Audit &);
+ void library_matmul_repeated_rows(const Value &, const Value &, double *, Audit &);
+--- a/cpp/operators/matmul_accelerate.cpp
++++ b/cpp/operators/matmul_accelerate.cpp
+@@ -5,6 +5,7 @@
+ #include <cfenv>
+ #include <climits>
+ #include <cmath>
++#include <limits>
+ 
+ #if defined(CALMETRICS_HAVE_ACCELERATE_COVCHOL)
+ #define ACCELERATE_NEW_LAPACK
+@@ -27,39 +28,44 @@
+     return 0;
+ }
+ 
+-bool try_accelerate_sign_consistent_matmul(const Prepared &p, Output &output,
++bool try_accelerate_matmul_root(const Prepared &p, Output &output,
+                                          Workspace &work, Audit &audit) {
+ #if defined(CALMETRICS_HAVE_ACCELERATE_COVCHOL)
+     if (__builtin_available(macOS 15.0, *)) {
+         if (p.spec->op != Op::matmul || p.count != 2 ||
+-            output.order != MemoryOrder::c || output.kind != Kind::number ||
++            (output.order != MemoryOrder::c && output.order != MemoryOrder::f) ||
++            output.kind != Kind::number ||
+             !output.data) return false;
+         const auto &a = p.args[0], &b = p.args[1];
+         const auto reserve = matmul_accelerate_reserve_doubles(a.shape, b.shape);
+         if (!reserve || a.kind != Kind::number || b.kind != Kind::number ||
+             !a.data || !b.data) return false;
+-        const auto describe = [](const Value &v, CBLAS_TRANSPOSE &trans, int &ld) {
++        const bool f_output = output.order == MemoryOrder::f;
++        const auto describe = [f_output](const Value &v, CBLAS_TRANSPOSE &trans, int &ld) {
+             const auto rows = static_cast<std::ptrdiff_t>(v.shape.dim[0]);
+             const auto cols = static_cast<std::ptrdiff_t>(v.shape.dim[1]);
+             if (v.stride[1] == 1 && v.stride[0] >= cols && v.stride[0] <= INT_MAX) {
+-                trans = CblasNoTrans; ld = static_cast<int>(v.stride[0]); return true;
++                trans = f_output ? CblasTrans : CblasNoTrans;
++                ld = static_cast<int>(v.stride[0]); return true;
+             }
+             if (v.stride[0] == 1 && v.stride[1] >= rows && v.stride[1] <= INT_MAX) {
+-                trans = CblasTrans; ld = static_cast<int>(v.stride[1]); return true;
++                trans = f_output ? CblasNoTrans : CblasTrans;
++                ld = static_cast<int>(v.stride[1]); return true;
+             }
+             return false;
+         };
+         CBLAS_TRANSPOSE ta, tb;
+         int lda, ldb;
+         if (!describe(a, ta, lda) || !describe(b, tb, ldb)) return false;
+-        bool has_negative = false, has_zero = false;
+-        const auto scan = [&](const Value &v, bool by_row, bool &all_zero) {
+-            // One sign per A row / B column makes every dot cancellation-free.
++        bool has_negative = false, has_zero = false, mixed_sign = false;
++        const auto scan = [&](const Value &v, bool by_row, bool &all_zero, double &maximum) {
++            // Detect the existing cancellation-free domain and bound the
++            // general signed domain independently of physical C/F storage.
+             std::array<std::int8_t, 4096> signs{};
+             const bool column = v.stride[0] == 1;
+             const auto rows = v.shape.dim[0], cols = v.shape.dim[1];
+             const auto *data = static_cast<const double *>(v.data);
+-            all_zero = true;
++            all_zero = true; maximum = 0.0;
+             for (std::size_t outer = 0; outer < (column ? cols : rows); ++outer)
+                 for (std::size_t inner = 0; inner < (column ? rows : cols); ++inner) {
+                     const auto i = column ? inner : outer, j = column ? outer : inner;
+@@ -76,21 +82,34 @@
+                         return false;
+                     const std::int8_t sign = std::signbit(value) ? -1 : 1;
+                     auto &previous = signs[by_row ? i : j];
+-                    if (previous && previous != sign) return false;
++                    if (previous && previous != sign) mixed_sign = true;
+                     previous = sign;
++                    maximum = std::max(maximum, magnitude);
+                     has_negative = has_negative || sign < 0;
+                     all_zero = false;
+                 }
+             return true;
+         };
+         bool zero_a, zero_b;
+-        if (!scan(a, true, zero_a) || !scan(b, false, zero_b) ||
++        double max_a, max_b;
++        if (!scan(a, true, zero_a, max_a) || !scan(b, false, zero_b, max_b) ||
+             (has_negative && std::fegetround() != FE_TONEAREST)) return false;
+-        // ensure(0,0) only shrinks sizes; release retained numerical panels.
+-        std::vector<double>().swap(work.doubles);
+-        std::vector<std::size_t>().swap(work.indices);
+-        audit = {};
++        double error_bound = 0.0;
++        if (mixed_sign && !zero_a && !zero_b) {
++            // Standard binary64 dot-product bound for both the canonical fold
++            // and GEMM. Round each positive operation outward; no data packing.
++            const auto up = [](double x) {
++                return std::nextafter(x, std::numeric_limits<double>::infinity());
++            };
++            const double ku = 2.0 * double(a.shape.dim[1]) * 0x1p-53;
++            const double gamma = up(ku / std::nextafter(1.0 - ku, 0.0));
++            error_bound = up(up(up(up(2.0 * gamma) * double(a.shape.dim[1])) * max_a) * max_b);
++            if (error_bound > 0.000049) return false;
++        }
+         if (zero_a || zero_b) {
++            std::vector<double>().swap(work.doubles);
++            std::vector<std::size_t>().swap(work.indices);
++            audit = {};
+             std::fill_n(static_cast<double *>(output.data), output.shape.size(), 0.0);
+             audit.isa = "std-fill-matmul-zero";
+             audit.matmul_zero_calls = 1;
+@@ -108,19 +127,38 @@
+         if (status != 0 || BLASGetThreading() != BLAS_THREADING_SINGLE_THREADED) {
+             restore(); return false;
+         }
+-        cblas_dgemm(CblasRowMajor, ta, tb, static_cast<int>(a.shape.dim[0]),
++        // Release retained numerical panels only after successful admission.
++        std::vector<double>().swap(work.doubles);
++        std::vector<std::size_t>().swap(work.indices);
++        audit = {};
++        cblas_dgemm(f_output ? CblasColMajor : CblasRowMajor, ta, tb, static_cast<int>(a.shape.dim[0]),
+                     static_cast<int>(b.shape.dim[1]), static_cast<int>(a.shape.dim[1]),
+                     1.0, static_cast<const double *>(a.data), lda,
+                     static_cast<const double *>(b.data), ldb, 0.0,
+-                    static_cast<double *>(output.data), static_cast<int>(b.shape.dim[1]));
++                    static_cast<double *>(output.data),
++                    static_cast<int>(f_output ? a.shape.dim[0] : b.shape.dim[1]));
+         restore();
++        if (mixed_sign) {
++            // Only ambiguous zero/sign cells need the existing exact fold.
++            // Independent root admission excludes every in-graph consumer.
++            auto *result = static_cast<double *>(output.data);
++            const auto rows = a.shape.dim[0], cols = b.shape.dim[1];
++            for (std::size_t outer = 0; outer < (f_output ? cols : rows); ++outer)
++                for (std::size_t inner = 0; inner < (f_output ? rows : cols); ++inner) {
++                    const auto row = f_output ? inner : outer, col = f_output ? outer : inner;
++                    auto &value = result[f_output ? col * rows + row : row * cols + col];
++                    if (!std::isfinite(value) || std::abs(value) <= error_bound)
++                        value = dot_value(a.row(row), b.column(col));
++                }
++        }
+         // Under RN, canonical +0 accumulation gives +0 for an all-zero dot.
+         // The admitted magnitude bounds exclude nonzero underflow/cancellation.
+         if (has_negative && has_zero) {
+             auto *result = static_cast<double *>(output.data);
+             std::replace(result, result + output.shape.size(), 0.0, 0.0);
+         }
+-        audit.isa = has_negative ? "accelerate-sign-consistent-matmul"
++        audit.isa = mixed_sign ? "accelerate-bounded-signed-matmul"
++                              : has_negative ? "accelerate-sign-consistent-matmul"
+                                 : "accelerate-nonnegative-matmul";
+         audit.accelerate_matmul_calls = 1;
+         audit.vector_elements = output.shape.size();
+--- a/cpp/operators/matrix.cpp
++++ b/cpp/operators/matrix.cpp
+@@ -186,6 +186,25 @@
+                 result[i * b.size() + j] = a.f(i) * b.f(j);
+         return;
+     }
++    if (op == Op::matmul && out.order == MemoryOrder::f) {
++        if (a.shape.dim[1] == 0) {
++            if (out.shape.size()) std::fill_n(result, out.shape.size(), 0.0);
++            return;
++        }
++#if defined(CALMETRICS_HAVE_EIGEN_ROTATION) && defined(__APPLE__) && defined(__aarch64__)
++        if (requested == Isa::automatic && a.shape.dim[0] >= 4 &&
++            a.shape.dim[1] >= 32 && b.shape.dim[1] >= 4) {
++            if (__builtin_available(macOS 15.0, *))
++                return library_matmul_f_root(a, b, result, audit);
++        }
++#endif
++        // Canonical ordered dot is also the portable/exceptional F writer.
++        // Preserve A*B operand order; do not swap them to emulate a transpose.
++        for (std::size_t col = 0; col < b.shape.dim[1]; ++col)
++            for (std::size_t row = 0; row < a.shape.dim[0]; ++row)
++                result[col * a.shape.dim[0] + row] = dot_value(a.row(row), b.column(col));
++        return;
++    }
+ #if defined(CALMETRICS_HAVE_EIGEN_ROTATION) && defined(__APPLE__) && defined(__aarch64__)
+     // Match shape-only scratch admission before the unbuffered rectangular
+     // path. The library rechecks actual dense strides and borrows its panels.
+--- a/cpp/operators/matrix_backend.cpp
++++ b/cpp/operators/matrix_backend.cpp
+@@ -419,7 +419,7 @@
+     return covariance_f_fallback(x, output, work, audit);
+ }
+ 
+-template<int Rows, int Cols, int BColumnStride>
++template<int Rows, int Cols, int BColumnStride, bool FOutput = false>
+ EIGEN_ALWAYS_INLINE void column_contiguous_matmul(const double *a, std::ptrdiff_t ar, std::ptrdiff_t ac,
+     const double *b, std::ptrdiff_t br, std::ptrdiff_t bc, double *__restrict out,
+     std::size_t m, std::size_t inner, std::size_t n) {
+@@ -445,8 +445,15 @@
+                 accumulator += left.template replicate<1, Cols>() *
+                                right.template replicate<Rows, 1>();
+             }
+-            Eigen::Map<Tile, Eigen::Unaligned, Eigen::OuterStride<>>(
+-                out + i * n + j, Eigen::OuterStride<>(static_cast<Eigen::Index>(n))) = accumulator;
++            if constexpr (FOutput) {
++                // RowMajor logical tile, borrowed column-major destination.
++                Eigen::Map<Tile, Eigen::Unaligned, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>(
++                    out + j * m + i,
++                    Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>(1, static_cast<Eigen::Index>(m))) = accumulator;
++            } else {
++                Eigen::Map<Tile, Eigen::Unaligned, Eigen::OuterStride<>>(
++                    out + i * n + j, Eigen::OuterStride<>(static_cast<Eigen::Index>(n))) = accumulator;
++            }
+         }
+         for (auto row = i; row < i + Rows; ++row)
+             for (auto col = full_cols; col < n; ++col) {
+@@ -456,7 +463,7 @@
+                                static_cast<std::ptrdiff_t>(k) * ac] *
+                              b[static_cast<std::ptrdiff_t>(k) * br +
+                                static_cast<std::ptrdiff_t>(col) * bc];
+-                out[row * n + col] = total;
++                out[FOutput ? col * m + row : row * n + col] = total;
+             }
+     }
+     for (auto row = full_rows; row < m; ++row)
+@@ -467,7 +474,7 @@
+                            static_cast<std::ptrdiff_t>(k) * ac] *
+                          b[static_cast<std::ptrdiff_t>(k) * br +
+                            static_cast<std::ptrdiff_t>(col) * bc];
+-            out[row * n + col] = total;
++            out[FOutput ? col * m + row : row * n + col] = total;
+         }
+ }
+ 
+@@ -693,6 +700,14 @@
+         static_cast<const double *>(b.data), b.stride[0], b.stride[1], output,
+         a.shape.dim[0], a.shape.dim[1], b.shape.dim[1]);
+     audit.isa = "eigen-array-matmul";
++}
++void library_matmul_f_root(const Value &a, const Value &b, double *output, Audit &audit) {
++    column_contiguous_matmul<4, 4, Eigen::Dynamic, true>(
++        static_cast<const double *>(a.data), a.stride[0], a.stride[1],
++        static_cast<const double *>(b.data), b.stride[0], b.stride[1], output,
++        a.shape.dim[0], a.shape.dim[1], b.shape.dim[1]);
++    audit.isa = "eigen-array-matmul-f-root";
++    audit.vector_elements = a.shape.dim[0] * b.shape.dim[1];
+ }
+ void library_matmul_c(const Value &a, const Value &b, double *output, Audit &audit) {
+     row_contiguous_matmul<8, 1>(
+--- a/tests/graph_native_tests.cpp
++++ b/tests/graph_native_tests.cpp
+@@ -4,6 +4,7 @@
+ #include "affine_projection_native_cases.hpp"
+ #include "compact_path_native_cases.hpp"
+ #include "matmul_statistics_native_cases.hpp"
++#include "matmul_root_native_cases.hpp"
+ #include "row_batch_native_cases.hpp"
+ #include "masked_reduce_native_cases.hpp"
+ 
+@@ -128,6 +129,7 @@
+ }
+ 
+ int main() {
++  matmul_root_native_cases::run();
+   masked_reduce_native_cases::run();
+   test_scan_packet_exception_and_lifetime();
+   row_batch_native_cases::run();
+--- a/tests/matmul_root_native_cases.hpp
++++ b/tests/matmul_root_native_cases.hpp
+@@ -0,0 +1,96 @@
++#pragma once
++#include "calmetrics_engine/operators.hpp"
++#include "calmetrics_engine/matrix_backend.hpp"
++#include <algorithm>
++#include <array>
++#include <cfenv>
++#include <cmath>
++#include <cstring>
++#include <cstddef>
++#include <cstdint>
++#include <stdexcept>
++#include <vector>
++
++namespace matmul_root_native_cases {
++namespace o = calmetrics_engine::ops;
++inline void check(bool ok, const char *message) { if (!ok) throw std::runtime_error(message); }
++inline bool same(double a, double b) {
++    return std::memcmp(&a, &b, sizeof(double)) == 0 || (std::isnan(a) && std::isnan(b));
++}
++inline o::Value view(const double *data, std::size_t m, std::size_t n, bool f = false) {
++    o::Value v; v.data = data; v.shape = o::matrix_shape(m, n);
++    v.stride = f ? std::array<std::ptrdiff_t, 3>{1, std::ptrdiff_t(m), 1}
++                 : std::array<std::ptrdiff_t, 3>{std::ptrdiff_t(n), 1, 1};
++    return v;
++}
++inline void run() {
++    // Native F writer, including panel tails, unsupported strides, empty K,
++    // and a nonnull empty descriptor whose row stride must never be advanced.
++    for (const auto shape : {std::array<std::size_t, 3>{7, 33, 9}, {3, 17, 5}, {7, 0, 9}})
++      for (int layout = 0; layout < 7; ++layout) {
++        const auto m = shape[0], k = shape[1], n = shape[2];
++        std::vector<double> a(std::max<std::size_t>(m*k, 1)), b(std::max<std::size_t>(k*n, 1));
++        for (std::size_t i = 0; i < a.size(); ++i) a[i] = double(int(i%5)-2);
++        for (std::size_t i = 0; i < b.size(); ++i) b[i] = double(int(i%7)-3);
++        std::array<o::Value, 8> args{view(a.data(),m,k,layout&1),view(b.data(),k,n,layout&2)};
++        if (k && layout == 4) {
++            args[0].data = a.data() + k - 1; args[0].stride[1] = -1;
++            args[1].data = b.data() + (k-1)*n; args[1].stride[0] = -std::ptrdiff_t(n);
++        }
++        if (layout == 5) args[0].stride[0] = 0;
++        if (!k && layout == 6) args[0].stride[0] = PTRDIFF_MAX;
++        const auto plan = o::prepare(o::lookup("matmul"), args.data(), 2);
++        for (const auto isa : {o::Isa::scalar, o::Isa::automatic}) {
++            std::vector<double> storage(m*n+2, -993.);
++            o::Output out; out.shape = plan.output_shape; out.order = o::MemoryOrder::f;
++            out.data = storage.data()+1;
++            o::Workspace work; work.ensure(plan.scratch_doubles, plan.scratch_indices);
++            o::Audit audit; o::execute(plan,out,work,isa,audit);
++            for (std::size_t i=0;i<m;++i) for (std::size_t j=0;j<n;++j) {
++                const auto expected = k ? o::dot_value(args[0].row(i),args[1].column(j)) : 0.0;
++                check(same(storage[1+j*m+i],expected),"F matmul changed canonical arithmetic");
++            }
++            check(storage.front()==-993. && storage.back()==-993.,"F matmul crossed output canary");
++        }
++      }
++    const std::size_t m=512,k=256,n=512;
++    std::vector<double> a(m*k),b(k*n),storage(m*n+2,-993.);
++    for (std::size_t i=0;i<a.size();++i) a[i]=double(int(i%13)-6)/8.;
++    for (std::size_t i=0;i<b.size();++i) b[i]=double(int(i%11)-5)/8.;
++    std::array<o::Value,8> args{view(a.data(),m,k),view(b.data(),k,n)};
++    const auto plan=o::prepare(o::lookup("matmul"),args.data(),2);
++    const bool available=o::matmul_accelerate_reserve_doubles(args[0].shape,args[1].shape)!=0;
++    const int saved_round=std::fegetround();
++    for (const auto order:{o::MemoryOrder::c,o::MemoryOrder::f}) {
++        o::Output out;out.shape=plan.output_shape;out.order=order;out.data=storage.data()+1;
++        o::Workspace work; o::Audit audit;
++        for (const int mode:{FE_DOWNWARD,FE_UPWARD,FE_TOWARDZERO}) {
++            check(std::fesetround(mode)==0,"cannot change signed GEMM rounding");
++            std::fill(storage.begin(),storage.end(),-993.);work.ensure(64,8);
++            const auto capacity=work.capacity_bytes();audit.isa="untouched";
++            check(!o::try_accelerate_matmul_root(plan,out,work,audit),"mixed GEMM admitted non-nearest rounding");
++            check(std::fegetround()==mode && work.capacity_bytes()==capacity &&
++                  std::strcmp(audit.isa,"untouched")==0,"mixed GEMM rejection mutated caller state");
++            for (auto x:storage) check(x==-993.,"mixed GEMM rejection wrote output");
++        }
++        check(std::fesetround(FE_TONEAREST)==0,"cannot restore nearest rounding");
++        check(o::try_accelerate_matmul_root(plan,out,work,audit)==available,"mixed GEMM platform admission");
++        if (available) {
++            check(std::strcmp(audit.isa,"accelerate-bounded-signed-matmul")==0,"mixed GEMM lost dispatch audit");
++            for (std::size_t i=0;i<m;++i) for (std::size_t j=0;j<n;++j) {
++                const auto actual=storage[1+(order==o::MemoryOrder::f ? j*m+i : i*n+j)];
++                check(same(actual,o::dot_value(args[0].row(i),args[1].column(j))),"mixed GEMM changed exact binary fixture");
++            }
++            check(storage.front()==-993. && storage.back()==-993.,"mixed GEMM crossed output canary");
++        }
++        for (auto &x:a) x*=0x1p30;
++        std::fill(storage.begin(),storage.end(),-993.);work.ensure(64,8);
++        const auto capacity=work.capacity_bytes();audit.isa="untouched";
++        check(!o::try_accelerate_matmul_root(plan,out,work,audit),"mixed GEMM exceeded absolute error bound");
++        check(work.capacity_bytes()==capacity && std::strcmp(audit.isa,"untouched")==0,"bounded rejection changed state");
++        for (auto x:storage) check(x==-993.,"bounded rejection wrote output");
++        for (auto &x:a) x*=0x1p-30;
++    }
++    check(std::fesetround(saved_round)==0,"cannot restore caller rounding");
++}
++} // namespace matmul_root_native_cases
+--- a/tests/operator_native_tests.cpp
++++ b/tests/operator_native_tests.cpp
+@@ -1453,7 +1453,7 @@
+             ops::Output out;out.shape=plan.output_shape;out.data=storage.data()+1;
+             ops::Workspace work;work.ensure(64,8);ops::Audit audit;
+             const auto reserve=ops::matmul_accelerate_reserve_doubles(args[0].shape,args[1].shape);
+-            const bool accepted=ops::try_accelerate_sign_consistent_matmul(plan,out,work,audit);
++            const bool accepted=ops::try_accelerate_matmul_root(plan,out,work,audit);
+             check(accepted==(reserve!=0),"guarded matmul platform admission mismatch");
+             if (accepted) {
+                 const auto expected=run(ops::lookup("matmul"),args,2,ops::Isa::automatic);
+@@ -1474,7 +1474,7 @@
+                     std::fill(storage.begin()+1,storage.end()-1,-993.);
+                     work.ensure(64,8);const auto capacity=work.capacity_bytes();
+                     audit.isa="untouched";
+-                    check(!ops::try_accelerate_sign_consistent_matmul(plan,out,work,audit),
++                    check(!ops::try_accelerate_matmul_root(plan,out,work,audit),
+                           "signed GEMM accepted non-nearest rounding");
+                     check(std::fegetround()==mode && work.capacity_bytes()==capacity &&
+                           std::strcmp(audit.isa,"untouched")==0,
+@@ -1483,7 +1483,7 @@
+                           "signed GEMM rounding rejection wrote output");
+                 }
+                 check(std::fesetround(FE_TONEAREST)==0,"cannot set GEMM nearest rounding");
+-                check(ops::try_accelerate_sign_consistent_matmul(plan,out,work,audit),
++                check(ops::try_accelerate_matmul_root(plan,out,work,audit),
+                       "signed GEMM rejected cancellation-free inputs");
+                 const auto signed_expected=run(ops::lookup("matmul"),args,2,ops::Isa::automatic);
+                 check(std::memcmp(storage.data()+1,signed_expected.values.data(),m*n*8)==0,
+@@ -1491,12 +1491,12 @@
+                 check(std::fesetround(previous_round)==0,"cannot restore GEMM rounding");
+                 std::fill(storage.begin()+1,storage.end()-1,-993.);
+                 a[0]=-0.;
+-                check(!ops::try_accelerate_sign_consistent_matmul(plan,out,work,audit),
++                check(!ops::try_accelerate_matmul_root(plan,out,work,audit),
+                       "guarded matmul accepted negative zero");
+                 check(std::all_of(storage.begin()+1,storage.end()-1,[](double x){return x==-993.;}),
+                       "guarded matmul rejection wrote output");
+                 std::fill(a.begin(),a.end(),0.);work.ensure(64,8);
+-                check(ops::try_accelerate_sign_consistent_matmul(plan,out,work,audit),
++                check(ops::try_accelerate_matmul_root(plan,out,work,audit),
+                       "guarded matmul rejected finite all-zero domain");
+                 check(audit.matmul_zero_calls==1 && audit.accelerate_matmul_calls==0,
+                       "zero matmul was mislabeled as BLAS");
+--- a/tests/test_matmul_packed_library.py
++++ b/tests/test_matmul_packed_library.py
+@@ -30,12 +30,16 @@
+ def integer_inputs(m=1025, k=257, n=1027, layout="cc"):
+     a = np.array(np.broadcast_to((np.arange(m) % 5 - 2)[:, None], (m, k)), dtype=np.float64, order=layout[0].upper())
+     b = np.array(np.broadcast_to((np.arange(n) % 7 - 3)[None, :], (k, n)), dtype=np.float64, order=layout[1].upper())
+-    # Keep graph fixtures on the packed path; paired sign flips preserve every product.
++    # Mixed-sign GEMM has a bounded domain; exact power-of-two scaling keeps
++    # this fixture testing the packed fallback without changing its integer math.
++    a *= 1024.0
++    b *= 1024.0
++    # Paired sign flips preserve every product.
+     a[:, ::2] *= -1
+     b[::2] *= -1
+     expected = k * (np.arange(m) % 5 - 2)[:, None] * (np.arange(n) % 7 - 3)[None, :]
+     a.flags.writeable = b.flags.writeable = False
+-    return a, b, expected.astype(np.float64)
++    return a, b, expected.astype(np.float64) * 1024.0 ** 2
+ 
+ 
+ @pytest.mark.parametrize("layout", ["cc", "cf", "fc", "ff"])
+--- a/tests/test_matmul_root_layout.py
++++ b/tests/test_matmul_root_layout.py
+@@ -0,0 +1,188 @@
++"""Bounded signed GEMM and canonical F roots through the complete native API."""
++
++from decimal import Decimal, localcontext
++
++import numpy as np
++import pytest
++
++from calmetrics_engine import AdaptiveScheduler, GraphCompiler
++from calmetrics_engine import operators as op
++
++from .test_matmul_library import declarations, settings
++from .test_nonnegative_matmul_accelerate import ACCELERATE
++
++
++def matrices(layout, shape=(513, 257, 515)):
++    rng = np.random.default_rng(221005)
++    orders = "cf" if layout == "padded" else layout
++    a = np.array(rng.uniform(-1, 1, (shape[0], shape[1])), order=orders[0].upper())
++    b = np.array(rng.uniform(-1, 1, (shape[1], shape[2])), order=orders[1].upper())
++    if layout == "padded":
++        left = np.full((shape[0], shape[1] + 3), np.nan)
++        right = np.full((shape[1] + 3, shape[2]), np.nan, order="F")
++        left[:, :shape[1]], right[:shape[1]] = a, b
++        a, b = left[:, :shape[1]], right[:shape[1]]
++    a.flags.writeable = b.flags.writeable = False
++    return a, b
++
++
++def graph(order="F", transpose=False, isolate=False):
++    expression = "transpose(matmul(a,b))" if transpose else "matmul(a,b)"
++    return GraphCompiler(declarations()).compile(
++        expression, output_order=order, error_policy="isolate" if isolate else "raise",
++    )
++
++
++@pytest.mark.parametrize("layout", ["cc", "cf", "fc", "ff", "padded"])
++@pytest.mark.parametrize("order", ["C", "F", "auto"])
++@pytest.mark.parametrize("transpose", [False, True])
++@pytest.mark.parametrize("lane", ["single", "thread", "process_inline", "process_shared"])
++def test_signed_root_library_layout_and_retained_results(layout, order, transpose, lane):
++    a, b = matrices(layout)
++    saved_a, saved_b = a.copy(), b.copy()
++    # Independent decimal cells plus the whole canonical product.
++    reference = op.matmul(a, b)
++    for i, j in [(0, 0), (17, 23), (a.shape[0] - 1, b.shape[1] - 1)]:
++        with localcontext() as context:
++            context.prec = 80
++            independent = sum((Decimal.from_float(float(x)) * Decimal.from_float(float(y))
++                               for x, y in zip(a[i], b[:, j])), Decimal(0))
++        assert abs(reference[i, j] - float(independent)) < 1e-10
++    expected = reference.T if transpose else reference
++    bounds = np.zeros(2, np.int64)
++    with AdaptiveScheduler(cpu_budget=2, config=settings(lane)) as scheduler:
++        compiled = graph(order, transpose)
++        first = scheduler.execute(compiled, {"a": a, "b": b}, bounds, bounds)
++        preserved = first.outputs[0].values[0].copy()
++        second = scheduler.execute(compiled, {"a": a, "b": b}, bounds, bounds)
++    for result in (first, second):
++        for value in result.outputs[0].values:
++            np.testing.assert_allclose(value, expected, rtol=0, atol=1e-10)
++            assert not value.flags.writeable
++            assert not np.shares_memory(value, a) and not np.shares_memory(value, b)
++            assert value.flags.f_contiguous if order == "F" or (transpose and order == "auto") else value.flags.c_contiguous
++        assert sum(c["accelerate_matmul_calls"] for c in result.audit["native_chunks"]) == (2 if ACCELERATE else 0)
++        for chunk in result.audit["native_chunks"]:
++            if not transpose or order != "C":
++                assert chunk["numeric_arena_bytes"] == chunk["root_copy_bytes"] == 0
++    assert not np.shares_memory(first.outputs[0].values[0], first.outputs[0].values[1])
++    assert not np.shares_memory(first.outputs[0].values[0], second.outputs[0].values[0])
++    np.testing.assert_array_equal(first.outputs[0].values[0], preserved)
++    np.testing.assert_array_equal(a, saved_a)
++    np.testing.assert_array_equal(b, saved_b)
++
++
++@pytest.mark.parametrize("layout", ["cc", "cf", "fc", "ff"])
++@pytest.mark.parametrize("order", ["C", "F"])
++def test_cancellation_and_sparse_zero_cells_replay_exact_fold(layout, order):
++    a, b = matrices(layout, (512, 256, 512))
++    a.setflags(write=True)
++    b.setflags(write=True)
++    a[0] = b[:, 0] = 0.0
++    a[1] = 0.0
++    a[1, :3] = [1.0, 2.0 ** -53, -1.0]
++    b[:3, 1] = 1.0
++    a[2] = 0.0
++    a[2, :3] = [1.0, 2.0 ** -50, -1.0]
++    b[:3, 2] = 1.0
++    a.flags.writeable = b.flags.writeable = False
++    with AdaptiveScheduler(cpu_budget=1) as scheduler:
++        result = scheduler.execute(graph(order), {"a": a, "b": b}, np.zeros(1, np.int64), np.zeros(1, np.int64))
++    actual = result.outputs[0].values[0]
++    expected = op.matmul(a, b)
++    for i, j in [(0, 0), (1, 1), (2, 2)]:
++        assert actual[i, j].view(np.uint64) == expected[i, j].view(np.uint64)
++    np.testing.assert_array_equal(actual == 0, expected == 0)
++    assert not np.signbit(actual[actual == 0]).any()
++    np.testing.assert_allclose(actual, expected, rtol=0, atol=1e-10)
++
++
++@pytest.mark.parametrize("layout", ["cc", "cf", "ff", "reverse", "broadcast"])
++@pytest.mark.parametrize("shape", [(7, 33, 9), (3, 17, 5), (7, 0, 9), (0, 33, 9)])
++def test_f_root_canonical_fallback_and_empty_geometry(layout, shape):
++    a, b = matrices("ff" if layout in {"reverse", "broadcast"} else layout, shape)
++    if layout == "reverse":
++        a, b = a[:, ::-1], b[::-1]
++    elif layout == "broadcast" and shape[0]:
++        a = np.broadcast_to(a[:1], a.shape)
++    expected = op.matmul(a, b, simd="scalar")
++    bounds = np.zeros(1, np.int64)
++    with AdaptiveScheduler(cpu_budget=1) as scheduler:
++        result = scheduler.execute(graph(), {"a": a, "b": b}, bounds, bounds)
++    actual = result.outputs[0].values[0]
++    np.testing.assert_array_equal(np.array(actual, order="C").view(np.uint64), expected.view(np.uint64))
++    assert actual.flags.f_contiguous
++    chunk = result.audit["native_chunks"][0]
++    assert chunk["numeric_arena_bytes"] == chunk["root_copy_bytes"] == 0
++
++
++@pytest.mark.parametrize("fault", ["bound", "negative_zero", "nan", "inf"])
++def test_general_signed_rejection_keeps_canonical_f_root(fault):
++    a, b = matrices("ff", (512, 256, 512))
++    a.setflags(write=True)
++    if fault == "bound":
++        a *= 2.0 ** 30
++    else:
++        a[11, 13] = {"negative_zero": -0.0, "nan": np.nan, "inf": np.inf}[fault]
++    a.setflags(write=False)
++    expected = op.matmul(a, b)
++    bounds = np.zeros(1, np.int64)
++    with AdaptiveScheduler(cpu_budget=1) as scheduler:
++        result = scheduler.execute(graph(), {"a": a, "b": b}, bounds, bounds)
++    actual = np.array(result.outputs[0].values[0], order="C")
++    np.testing.assert_array_equal(actual.view(np.uint64), expected.view(np.uint64))
++    chunk = result.audit["native_chunks"][0]
++    assert chunk["accelerate_matmul_calls"] == 0
++    assert chunk["numeric_arena_bytes"] == chunk["root_copy_bytes"] == 0
++
++
++@pytest.mark.parametrize("layout", ["cc", "ff"])
++@pytest.mark.parametrize("order", ["C", "F"])
++@pytest.mark.parametrize("scale", [512.0, 1024.0, 2048.0])
++def test_scaled_signed_domain_respects_absolute_error_admission(layout, order, scale):
++    a, b = matrices(layout, (512, 256, 512))
++    a, b = np.array(a * scale, order=layout[0].upper()), np.array(b * scale, order=layout[1].upper())
++    a.flags.writeable = b.flags.writeable = False
++    bounds = np.zeros(1, np.int64)
++    with AdaptiveScheduler(cpu_budget=1) as scheduler:
++        result = scheduler.execute(graph(order), {"a": a, "b": b}, bounds, bounds)
++    actual = result.outputs[0].values[0]
++    expected = op.matmul(a, b)
++    np.testing.assert_allclose(actual, expected, rtol=0, atol=0.000049)
++    admitted = ACCELERATE and scale <= 1024.0
++    assert result.audit["native_chunks"][0]["accelerate_matmul_calls"] == int(admitted)
++    if not admitted:
++        np.testing.assert_array_equal(actual, expected)
++
++
++@pytest.mark.parametrize("order", ["C", "F"])
++def test_prepared_rereads_mixed_values_then_rejects_changed_bound(order):
++    a, b = matrices("ff", (512, 256, 512))
++    bounds = np.zeros(1, np.int64)
++    with AdaptiveScheduler(cpu_budget=1) as scheduler:
++        prepared = scheduler.prepare_execution(graph(order), {"a": a, "b": b}, bounds, bounds)
++        first = prepared.run_snapshot()
++        preserved = first.outputs[0].values[0].copy()
++        a.setflags(write=True)
++        a *= 2.0 ** 30
++        a.setflags(write=False)
++        second = prepared.run_snapshot()
++    assert first.audit["native_chunks"][0]["accelerate_matmul_calls"] == (1 if ACCELERATE else 0)
++    assert second.audit["native_chunks"][0]["accelerate_matmul_calls"] == 0
++    np.testing.assert_array_equal(second.outputs[0].values[0], op.matmul(a, b))
++    np.testing.assert_array_equal(first.outputs[0].values[0], preserved)
++
++
++@pytest.mark.parametrize("mode", ["isolate", "discrete", "trace", "shared"])
++def test_general_signed_consumers_retain_canonical_arithmetic(mode):
++    a, b = matrices("ff", (512, 256, 512))
++    expr = {"isolate": "matmul(a,b)", "discrete": "matmul(a,b)>0",
++            "trace": "trace(matmul(a,b))", "shared": ["matmul(a,b)", "trace(matmul(a,b))"]}[mode]
++    compiled = GraphCompiler(declarations()).compile(expr, output_order="F", error_policy="isolate" if mode == "isolate" else "raise")
++    bounds = np.zeros(1, np.int64)
++    with AdaptiveScheduler(cpu_budget=1) as scheduler:
++        result = scheduler.execute(compiled, {"a": a, "b": b}, bounds, bounds)
++    canonical = op.matmul(a, b)
++    expected = canonical > 0 if mode == "discrete" else op.trace(canonical) if mode == "trace" else canonical
++    np.testing.assert_array_equal(result.outputs[0].values[0], expected)
++    assert all(c["accelerate_matmul_calls"] == 0 for c in result.audit["native_chunks"])
+--- a/tests/test_matmul_transpose_direct.py
++++ b/tests/test_matmul_transpose_direct.py
+@@ -58,6 +58,9 @@
+ 
+ def test_large_packed_matmul_transpose_keeps_exact_product_and_removes_full_arena():
+     a, b = matrices(1025, 257, 1027, "ff")
++    a = a * 1024.0
++    b = b * 1024.0
++    a.flags.writeable = b.flags.writeable = False
+     product, direct_audit = op.matmul(a, b, audit=True)
+     assert_dispatch(direct_audit)
+     expected = product.T
+--- a/tests/test_nonnegative_matmul_accelerate.py
++++ b/tests/test_nonnegative_matmul_accelerate.py
+@@ -96,7 +96,7 @@
+         first = prepared.run_snapshot()
+         preserved = first.outputs[0].values[0].copy()
+         a.setflags(write=True)
+-        a[0, 0] *= -1
++        a[0, 0] = -0.0
+         a.setflags(write=False)
+         fallback = prepared.run_snapshot()
+         no_library(fallback)
+@@ -126,7 +126,10 @@
+     bounds = np.zeros(1, np.int64)
+     with AdaptiveScheduler(cpu_budget=1) as scheduler:
+         result = scheduler.execute(graph, {"a": a, "b": b}, bounds, bounds)
+-    no_library(result)
++    if fault == -1.0 and ACCELERATE:
++        assert chunks(result)[0]["accelerate_matmul_calls"] == 1
++    else:
++        no_library(result)
+     assert_ieee_classes_and_close(result.outputs[0].values[0], expected)
+ 
+ 
+@@ -146,9 +149,13 @@
+     bounds = np.zeros(1, np.int64)
+     with AdaptiveScheduler(cpu_budget=1) as scheduler:
+         result = scheduler.execute(graph, {"a": a, "b": b}, bounds, bounds)
+-    no_library(result)
+-    np.testing.assert_array_equal(result.outputs[0].values[0].view(np.uint64),
+-                                  op.matmul(a, b).view(np.uint64))
++    if fault == "mixed_sign" and ACCELERATE:
++        assert chunks(result)[0]["accelerate_matmul_calls"] == 1
++        assert_ieee_classes_and_close(result.outputs[0].values[0], op.matmul(a, b))
++    else:
++        no_library(result)
++        np.testing.assert_array_equal(result.outputs[0].values[0].view(np.uint64),
++                                      op.matmul(a, b).view(np.uint64))
+ 
+ 
+ @active
+@@ -262,9 +269,13 @@
+     bounds = np.zeros(1, np.int64)
+     with AdaptiveScheduler(cpu_budget=1) as scheduler:
+         result = scheduler.execute(graph, {"a": a, "b": b}, bounds, bounds)
+-    no_library(result)
+-    np.testing.assert_array_equal(result.outputs[0].values[0].view(np.uint64),
+-                                  op.matmul(a, b).view(np.uint64))
++    if fault == "mixed_sign" and ACCELERATE:
++        assert chunks(result)[0]["accelerate_matmul_calls"] == 1
++        assert_ieee_classes_and_close(result.outputs[0].values[0], op.matmul(a, b))
++    else:
++        no_library(result)
++        np.testing.assert_array_equal(result.outputs[0].values[0].view(np.uint64),
++                                      op.matmul(a, b).view(np.uint64))
+ 
+ 
+ @active

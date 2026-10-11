@@ -1,0 +1,40 @@
+--- actual199/cpp/operators/solve_accelerate.cpp
++++ isolated56/cpp/operators/solve_accelerate.cpp
+@@ -92,32 +92,12 @@
+         ~ThreadLimit() { if (active) BLASSetThreading(prior); }
+ };
+ 
+-// Bounded-panel orchestration of the same Netlib DGETRF sequence. All
+-// factor, pivot, triangular and rank-k mathematics stay in mature libraries.
++// Same partial-pivot LU factorization delegated to the mature vendor driver.
++// Existing deterministic certificate and canonical recovery remain unchanged.
+ void factor_bounded_panels(__LAPACK_int n, double *a, __LAPACK_int *pivots,
+-                  __LAPACK_int block, __LAPACK_int &info) {
+-    info = 0;
+-    const __LAPACK_int increment = 1;
+-    for (__LAPACK_int first = 0; first < n; first += block) {
+-        const __LAPACK_int width = std::min(block, n - first);
+-        const __LAPACK_int height = n - first;
+-        __LAPACK_int local_info = 0;
+-        dgetrf2_(&height, &width, a + first * n + first, &n, pivots + first, &local_info);
+-        if (!info && local_info > 0) info = local_info + first;
+-        if (local_info < 0) { info = local_info; return; }
+-        for (__LAPACK_int i = first; i < first + width; ++i) pivots[i] += first;
+-        const __LAPACK_int start = first + 1, end = first + width;
+-        if (first) dlaswp_(&first, a, &n, &start, &end, pivots, &increment);
+-        const __LAPACK_int trailing = n - first - width;
+-        if (!trailing) continue;
+-        auto *upper = a + (first + width) * n + first;
+-        dlaswp_(&trailing, a + (first + width) * n, &n, &start, &end, pivots, &increment);
+-        cblas_dtrsm(CblasColMajor, CblasLeft, CblasLower, CblasNoTrans, CblasUnit,
+-                    int(width), int(trailing), 1., a + first * n + first, int(n), upper, int(n));
+-        cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
+-                    int(trailing), int(trailing), int(width), -1., a + first * n + first + width,
+-                    int(n), upper, int(n), 1., a + (first + width) * n + first + width, int(n));
+-    }
++                          __LAPACK_int block, __LAPACK_int &info) {
++    (void)block;
++    dgetrf_(&n, &n, a, &n, pivots, &info);
+ }
+ 
+ void transpose_square(double *m, std::size_t n) {

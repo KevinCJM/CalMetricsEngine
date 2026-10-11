@@ -8,6 +8,9 @@
 namespace calmetrics_engine::excel {
 using Op = ops::Op;
 using F = std::string;
+// One ceiling for frozen values and coupled-recipe intermediate checks. The
+// xlsx reference writer must be able to serialize it without rounding to Inf.
+inline constexpr double max_reproduction_number = 1.797693134862315e308;
 inline F num(double x) {
   if (std::isnan(x))
     return "\"NaN\"";
@@ -86,6 +89,9 @@ struct Builder {
   Array operation(Op, const std::vector<Array> &);
   Array recipe(Op, const std::vector<Array> &);
   Array state_operation(Op, const std::vector<Array> &, Array output);
+  Array latent_operation(Op, const std::vector<Array> &, Array output);
+  Array foundation_operation(Op, const std::vector<Array> &, Array output);
+  Array axis_path_recipe(Op, const std::vector<Array> &, Array output);
   std::vector<Array> program(const graph::Program &, const std::vector<Array> &,
                              const std::vector<Array> &, std::size_t extent,
                              unsigned depth = 0);
@@ -107,4 +113,9 @@ Budget symbolic_budget(const compiler::CompiledGraph *, std::optional<Op>,
                        const std::vector<Snapshot> &,
                        const std::vector<double> &, Limits,
                        const std::function<void()> & = {});
+// Explicit export diagnostics only. Observe each multiplication and ordered
+// addition; final NaN can otherwise hide an Excel-unrepresentable intermediate.
+void validate_affine_excel_domain(const ops::Value *, std::size_t);
+// Export-only checks for axis recipe intermediates that node outputs can hide.
+void axis_path_validate(Op, const ops::Value *, std::size_t);
 } // namespace calmetrics_engine::excel

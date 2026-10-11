@@ -1,0 +1,3050 @@
+[
+  {
+    "case": {
+      "n": 63,
+      "d": 8,
+      "layout": "c",
+      "pattern": "normal"
+    },
+    "builds": {
+      "native": {
+        "scope": "component ABI screen",
+        "threads": {
+          "environment": {
+            "OPENBLAS_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "VECLIB_MAXIMUM_THREADS": "1",
+            "NUMBA_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1"
+          },
+          "accelerate_thread_local": "not_applied_to_native"
+        },
+        "pools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "independent_results": true,
+        "library_sha256": "acbbd58ef132af03a41700345850068aa2d77f45b8764f0a1e529089d20b9630",
+        "counters": {
+          "dsyrk_calls": 0,
+          "replayed_cells": 0,
+          "canonical_replay": 1,
+          "scratch_bytes": 0,
+          "centered_bytes": 0,
+          "centered_reuses": 0,
+          "fenv_flags": 16,
+          "rounding": 0,
+          "accelerate_attempts": 0
+        },
+        "caller_blas_threading": 0,
+        "execution_threads": 1,
+        "blas_single_verified_by_admission": false
+      },
+      "candidate": {
+        "scope": "component ABI screen",
+        "threads": {
+          "environment": {
+            "OPENBLAS_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "VECLIB_MAXIMUM_THREADS": "1",
+            "NUMBA_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1"
+          },
+          "accelerate_thread_local": "not_applied_to_native"
+        },
+        "pools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "independent_results": true,
+        "library_sha256": "522b1c03bda11bfce71f45825e2e2839c4d530efa147a0473f720828ea473975",
+        "counters": {
+          "dsyrk_calls": 0,
+          "replayed_cells": 0,
+          "canonical_replay": 1,
+          "scratch_bytes": 0,
+          "centered_bytes": 0,
+          "centered_reuses": 0,
+          "fenv_flags": 16,
+          "rounding": 0,
+          "accelerate_attempts": 0
+        },
+        "caller_blas_threading": 0,
+        "execution_threads": 1,
+        "blas_single_verified_by_admission": false
+      },
+      "njit": {
+        "scope": "component ABI screen",
+        "threads": {
+          "environment": {
+            "OPENBLAS_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "VECLIB_MAXIMUM_THREADS": "1",
+            "NUMBA_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1"
+          },
+          "accelerate_thread_local": {
+            "prior": 0,
+            "active": 1
+          },
+          "pools": [
+            {
+              "user_api": "blas",
+              "internal_api": "openblas",
+              "num_threads": 1,
+              "prefix": "libopenblas",
+              "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+              "version": "0.3.23.dev",
+              "threading_layer": "pthreads",
+              "architecture": "armv8"
+            }
+          ]
+        },
+        "pools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "independent_results": true,
+        "numba_threads": 1
+      }
+    },
+    "comparison": {
+      "candidate": {
+        "outside_tolerance": 0,
+        "max_abs": 0.0,
+        "bits_changed": 0
+      },
+      "njit": {
+        "outside_tolerance": 0,
+        "max_abs": 2.220446049250313e-16
+      }
+    },
+    "final_checks": {
+      "native": {
+        "verified": true
+      },
+      "candidate": {
+        "verified": true
+      },
+      "njit": {
+        "verified": true
+      }
+    },
+    "samples_ns": {
+      "native": [
+        40125,
+        9833,
+        6458,
+        8917,
+        5917,
+        5209,
+        5208,
+        10458,
+        5541,
+        5417,
+        5209,
+        5208,
+        5125,
+        5250,
+        8208,
+        5167,
+        5083,
+        5333,
+        5083,
+        4958,
+        5000,
+        7667,
+        5333,
+        6875,
+        5333,
+        5208,
+        5375,
+        4792,
+        8708,
+        5542,
+        4875,
+        4833,
+        4875,
+        4917,
+        4917,
+        6958,
+        5083,
+        4834,
+        4917,
+        4917,
+        8250,
+        4875
+      ],
+      "candidate": [
+        48084,
+        9333,
+        6291,
+        10875,
+        5542,
+        5416,
+        5000,
+        8958,
+        5167,
+        5416,
+        5334,
+        4917,
+        4917,
+        4875,
+        9042,
+        5625,
+        4917,
+        4959,
+        5083,
+        4958,
+        4792,
+        7750,
+        5458,
+        6459,
+        5291,
+        5041,
+        4958,
+        4833,
+        7458,
+        5083,
+        4875,
+        4916,
+        4791,
+        4875,
+        5041,
+        7625,
+        5167,
+        4916,
+        5000,
+        4875,
+        4917,
+        7875
+      ],
+      "njit": [
+        16542,
+        4459,
+        3583,
+        3500,
+        3291,
+        3583,
+        3250,
+        5208,
+        3417,
+        3250,
+        3417,
+        3375,
+        3541,
+        3209,
+        4708,
+        3292,
+        3167,
+        3250,
+        3167,
+        3500,
+        3292,
+        4791,
+        3292,
+        3167,
+        3333,
+        3208,
+        3541,
+        3250,
+        10083,
+        9334,
+        4042,
+        3833,
+        3833,
+        3750,
+        3750,
+        4708,
+        3542,
+        3666,
+        3584,
+        3667,
+        3542,
+        3542
+      ]
+    },
+    "cpu_ns": {
+      "native": [
+        39000,
+        9000,
+        5000,
+        5000,
+        6000,
+        5000,
+        5000,
+        9000,
+        5000,
+        5000,
+        4000,
+        4000,
+        4000,
+        5000,
+        7000,
+        6000,
+        5000,
+        5000,
+        6000,
+        5000,
+        4000,
+        7000,
+        4000,
+        6000,
+        5000,
+        4000,
+        5000,
+        5000,
+        9000,
+        4000,
+        4000,
+        5000,
+        4000,
+        6000,
+        4000,
+        6000,
+        5000,
+        4000,
+        4000,
+        5000,
+        8000,
+        4000
+      ],
+      "candidate": [
+        46000,
+        8000,
+        5000,
+        5000,
+        6000,
+        4000,
+        4000,
+        8000,
+        5000,
+        5000,
+        4000,
+        5000,
+        5000,
+        4000,
+        8000,
+        5000,
+        5000,
+        5000,
+        4000,
+        5000,
+        4000,
+        8000,
+        5000,
+        6000,
+        4000,
+        4000,
+        5000,
+        4000,
+        6000,
+        4000,
+        5000,
+        4000,
+        4000,
+        4000,
+        4000,
+        7000,
+        5000,
+        5000,
+        4000,
+        4000,
+        5000,
+        7000
+      ],
+      "njit": [
+        15000,
+        4000,
+        3000,
+        3000,
+        2000,
+        3000,
+        3000,
+        5000,
+        2000,
+        3000,
+        3000,
+        3000,
+        3000,
+        3000,
+        4000,
+        3000,
+        3000,
+        3000,
+        3000,
+        3000,
+        4000,
+        3000,
+        3000,
+        3000,
+        3000,
+        2000,
+        3000,
+        4000,
+        9000,
+        10000,
+        4000,
+        3000,
+        2000,
+        3000,
+        3000,
+        4000,
+        4000,
+        3000,
+        3000,
+        3000,
+        2000,
+        3000
+      ]
+    },
+    "median_ms": {
+      "native": 0.005209,
+      "candidate": 0.005083,
+      "njit": 0.0035415
+    },
+    "median_cpu_wall_ratio": {
+      "native": 0.9141445231757463,
+      "candidate": 0.8868244488682444,
+      "njit": 0.867552991345792
+    }
+  },
+  {
+    "case": {
+      "n": 63,
+      "d": 8,
+      "layout": "f",
+      "pattern": "normal"
+    },
+    "builds": {
+      "native": {
+        "scope": "component ABI screen",
+        "threads": {
+          "environment": {
+            "OPENBLAS_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "VECLIB_MAXIMUM_THREADS": "1",
+            "NUMBA_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1"
+          },
+          "accelerate_thread_local": "not_applied_to_native"
+        },
+        "pools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "independent_results": true,
+        "library_sha256": "acbbd58ef132af03a41700345850068aa2d77f45b8764f0a1e529089d20b9630",
+        "counters": {
+          "dsyrk_calls": 0,
+          "replayed_cells": 0,
+          "canonical_replay": 1,
+          "scratch_bytes": 0,
+          "centered_bytes": 0,
+          "centered_reuses": 0,
+          "fenv_flags": 16,
+          "rounding": 0,
+          "accelerate_attempts": 0
+        },
+        "caller_blas_threading": 0,
+        "execution_threads": 1,
+        "blas_single_verified_by_admission": false
+      },
+      "candidate": {
+        "scope": "component ABI screen",
+        "threads": {
+          "environment": {
+            "OPENBLAS_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "VECLIB_MAXIMUM_THREADS": "1",
+            "NUMBA_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1"
+          },
+          "accelerate_thread_local": "not_applied_to_native"
+        },
+        "pools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "independent_results": true,
+        "library_sha256": "522b1c03bda11bfce71f45825e2e2839c4d530efa147a0473f720828ea473975",
+        "counters": {
+          "dsyrk_calls": 0,
+          "replayed_cells": 0,
+          "canonical_replay": 1,
+          "scratch_bytes": 0,
+          "centered_bytes": 0,
+          "centered_reuses": 0,
+          "fenv_flags": 16,
+          "rounding": 0,
+          "accelerate_attempts": 0
+        },
+        "caller_blas_threading": 0,
+        "execution_threads": 1,
+        "blas_single_verified_by_admission": false
+      },
+      "njit": {
+        "scope": "component ABI screen",
+        "threads": {
+          "environment": {
+            "OPENBLAS_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "VECLIB_MAXIMUM_THREADS": "1",
+            "NUMBA_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1"
+          },
+          "accelerate_thread_local": {
+            "prior": 0,
+            "active": 1
+          },
+          "pools": [
+            {
+              "user_api": "blas",
+              "internal_api": "openblas",
+              "num_threads": 1,
+              "prefix": "libopenblas",
+              "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+              "version": "0.3.23.dev",
+              "threading_layer": "pthreads",
+              "architecture": "armv8"
+            }
+          ]
+        },
+        "pools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "independent_results": true,
+        "numba_threads": 1
+      }
+    },
+    "comparison": {
+      "candidate": {
+        "outside_tolerance": 0,
+        "max_abs": 0.0,
+        "bits_changed": 0
+      },
+      "njit": {
+        "outside_tolerance": 0,
+        "max_abs": 2.220446049250313e-16
+      }
+    },
+    "final_checks": {
+      "native": {
+        "verified": true
+      },
+      "candidate": {
+        "verified": true
+      },
+      "njit": {
+        "verified": true
+      }
+    },
+    "samples_ns": {
+      "native": [
+        33583,
+        7083,
+        5250,
+        4708,
+        4792,
+        4708,
+        4709,
+        15625,
+        6666,
+        9875,
+        4834,
+        10041,
+        4709,
+        4500,
+        8208,
+        4834,
+        4583,
+        4625,
+        4583,
+        4334,
+        4500,
+        7458,
+        4625,
+        4542,
+        4709,
+        4625,
+        4459,
+        4417,
+        7958,
+        4667,
+        4708,
+        4542,
+        4709,
+        4625,
+        4333,
+        6250,
+        4583,
+        4584,
+        4500,
+        4500,
+        4375,
+        4375
+      ],
+      "candidate": [
+        32333,
+        6875,
+        4917,
+        4792,
+        4667,
+        4500,
+        4500,
+        8625,
+        4875,
+        4458,
+        4541,
+        11625,
+        4584,
+        4375,
+        8750,
+        4917,
+        4375,
+        4416,
+        4375,
+        4500,
+        4375,
+        7375,
+        4666,
+        4375,
+        4333,
+        4542,
+        4500,
+        4250,
+        6584,
+        4416,
+        4458,
+        4584,
+        4417,
+        4584,
+        4250,
+        9167,
+        4917,
+        4417,
+        4417,
+        4333,
+        4416,
+        4500
+      ],
+      "njit": [
+        11958,
+        3959,
+        3375,
+        3250,
+        3334,
+        3500,
+        3375,
+        4916,
+        3084,
+        3041,
+        3125,
+        3208,
+        3167,
+        3417,
+        4791,
+        3292,
+        2959,
+        3167,
+        3292,
+        3375,
+        3458,
+        4833,
+        3083,
+        3209,
+        3167,
+        3334,
+        3167,
+        3375,
+        4333,
+        3042,
+        2917,
+        3042,
+        3042,
+        3458,
+        3125,
+        4334,
+        3042,
+        2959,
+        3083,
+        3166,
+        3250,
+        3166
+      ]
+    },
+    "cpu_ns": {
+      "native": [
+        33000,
+        7000,
+        5000,
+        4000,
+        4000,
+        4000,
+        4000,
+        15000,
+        6000,
+        9000,
+        4000,
+        10000,
+        5000,
+        4000,
+        9000,
+        4000,
+        4000,
+        5000,
+        4000,
+        4000,
+        4000,
+        6000,
+        4000,
+        4000,
+        5000,
+        4000,
+        4000,
+        4000,
+        7000,
+        5000,
+        4000,
+        4000,
+        5000,
+        4000,
+        3000,
+        6000,
+        5000,
+        4000,
+        4000,
+        5000,
+        4000,
+        4000
+      ],
+      "candidate": [
+        31000,
+        7000,
+        5000,
+        4000,
+        5000,
+        4000,
+        4000,
+        9000,
+        4000,
+        4000,
+        5000,
+        11000,
+        4000,
+        4000,
+        8000,
+        5000,
+        5000,
+        4000,
+        4000,
+        5000,
+        4000,
+        8000,
+        4000,
+        3000,
+        4000,
+        4000,
+        4000,
+        4000,
+        6000,
+        4000,
+        4000,
+        4000,
+        4000,
+        4000,
+        4000,
+        8000,
+        4000,
+        4000,
+        4000,
+        3000,
+        4000,
+        4000
+      ],
+      "njit": [
+        10000,
+        4000,
+        3000,
+        4000,
+        3000,
+        3000,
+        3000,
+        4000,
+        4000,
+        3000,
+        2000,
+        2000,
+        2000,
+        3000,
+        3000,
+        3000,
+        3000,
+        3000,
+        2000,
+        2000,
+        4000,
+        3000,
+        2000,
+        2000,
+        3000,
+        3000,
+        2000,
+        3000,
+        4000,
+        2000,
+        2000,
+        4000,
+        2000,
+        4000,
+        2000,
+        4000,
+        3000,
+        2000,
+        2000,
+        3000,
+        4000,
+        3000
+      ]
+    },
+    "median_ms": {
+      "native": 0.0046875,
+      "candidate": 0.0045,
+      "njit": 0.0032295
+    },
+    "median_cpu_wall_ratio": {
+      "native": 0.8929755052204031,
+      "candidate": 0.9057971014492754,
+      "njit": 0.8888888888888888
+    }
+  },
+  {
+    "case": {
+      "n": 512,
+      "d": 256,
+      "layout": "c",
+      "pattern": "normal"
+    },
+    "builds": {
+      "native": {
+        "scope": "component ABI screen",
+        "threads": {
+          "environment": {
+            "OPENBLAS_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "VECLIB_MAXIMUM_THREADS": "1",
+            "NUMBA_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1"
+          },
+          "accelerate_thread_local": "not_applied_to_native"
+        },
+        "pools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "independent_results": true,
+        "library_sha256": "acbbd58ef132af03a41700345850068aa2d77f45b8764f0a1e529089d20b9630",
+        "counters": {
+          "dsyrk_calls": 1,
+          "replayed_cells": 0,
+          "canonical_replay": 0,
+          "scratch_bytes": 1054720,
+          "centered_bytes": 1048576,
+          "centered_reuses": 0,
+          "fenv_flags": 16,
+          "rounding": 0,
+          "accelerate_attempts": 1
+        },
+        "caller_blas_threading": 0,
+        "execution_threads": 1,
+        "blas_single_verified_by_admission": true
+      },
+      "candidate": {
+        "scope": "component ABI screen",
+        "threads": {
+          "environment": {
+            "OPENBLAS_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "VECLIB_MAXIMUM_THREADS": "1",
+            "NUMBA_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1"
+          },
+          "accelerate_thread_local": "not_applied_to_native"
+        },
+        "pools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "independent_results": true,
+        "library_sha256": "522b1c03bda11bfce71f45825e2e2839c4d530efa147a0473f720828ea473975",
+        "counters": {
+          "dsyrk_calls": 1,
+          "replayed_cells": 0,
+          "canonical_replay": 0,
+          "scratch_bytes": 1054720,
+          "centered_bytes": 1048576,
+          "centered_reuses": 0,
+          "fenv_flags": 16,
+          "rounding": 0,
+          "accelerate_attempts": 1
+        },
+        "caller_blas_threading": 0,
+        "execution_threads": 1,
+        "blas_single_verified_by_admission": true
+      },
+      "njit": {
+        "scope": "component ABI screen",
+        "threads": {
+          "environment": {
+            "OPENBLAS_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "VECLIB_MAXIMUM_THREADS": "1",
+            "NUMBA_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1"
+          },
+          "accelerate_thread_local": {
+            "prior": 0,
+            "active": 1
+          },
+          "pools": [
+            {
+              "user_api": "blas",
+              "internal_api": "openblas",
+              "num_threads": 1,
+              "prefix": "libopenblas",
+              "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+              "version": "0.3.23.dev",
+              "threading_layer": "pthreads",
+              "architecture": "armv8"
+            }
+          ]
+        },
+        "pools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "independent_results": true,
+        "numba_threads": 1
+      }
+    },
+    "comparison": {
+      "candidate": {
+        "outside_tolerance": 0,
+        "max_abs": 0.0,
+        "bits_changed": 0
+      },
+      "njit": {
+        "outside_tolerance": 0,
+        "max_abs": 4.440892098500626e-16
+      }
+    },
+    "final_checks": {
+      "native": {
+        "verified": true
+      },
+      "candidate": {
+        "verified": true
+      },
+      "njit": {
+        "verified": true
+      }
+    },
+    "samples_ns": {
+      "native": [
+        887500,
+        811917,
+        729208,
+        883291,
+        742250,
+        776625
+      ],
+      "candidate": [
+        789916,
+        734833,
+        969167,
+        932208,
+        727542,
+        740958
+      ],
+      "njit": [
+        961250,
+        1006416,
+        668667,
+        735875,
+        659500,
+        675750
+      ]
+    },
+    "cpu_ns": {
+      "native": [
+        885000,
+        810000,
+        729000,
+        882000,
+        741000,
+        774000
+      ],
+      "candidate": [
+        788000,
+        735000,
+        969000,
+        931000,
+        726000,
+        741000
+      ],
+      "njit": [
+        960000,
+        1006000,
+        668000,
+        735000,
+        658000,
+        674000
+      ]
+    },
+    "median_ms": {
+      "native": 0.794271,
+      "candidate": 0.765437,
+      "njit": 0.7058125
+    },
+    "median_cpu_wall_ratio": {
+      "native": 0.9979774262548882,
+      "candidate": 0.9992659194693527,
+      "njit": 0.998755274620436
+    }
+  },
+  {
+    "case": {
+      "n": 512,
+      "d": 256,
+      "layout": "f",
+      "pattern": "normal"
+    },
+    "builds": {
+      "native": {
+        "scope": "component ABI screen",
+        "threads": {
+          "environment": {
+            "OPENBLAS_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "VECLIB_MAXIMUM_THREADS": "1",
+            "NUMBA_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1"
+          },
+          "accelerate_thread_local": "not_applied_to_native"
+        },
+        "pools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "independent_results": true,
+        "library_sha256": "acbbd58ef132af03a41700345850068aa2d77f45b8764f0a1e529089d20b9630",
+        "counters": {
+          "dsyrk_calls": 1,
+          "replayed_cells": 256,
+          "canonical_replay": 0,
+          "scratch_bytes": 1054720,
+          "centered_bytes": 1048576,
+          "centered_reuses": 0,
+          "fenv_flags": 16,
+          "rounding": 0,
+          "accelerate_attempts": 1
+        },
+        "caller_blas_threading": 0,
+        "execution_threads": 1,
+        "blas_single_verified_by_admission": true
+      },
+      "candidate": {
+        "scope": "component ABI screen",
+        "threads": {
+          "environment": {
+            "OPENBLAS_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "VECLIB_MAXIMUM_THREADS": "1",
+            "NUMBA_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1"
+          },
+          "accelerate_thread_local": "not_applied_to_native"
+        },
+        "pools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "independent_results": true,
+        "library_sha256": "522b1c03bda11bfce71f45825e2e2839c4d530efa147a0473f720828ea473975",
+        "counters": {
+          "dsyrk_calls": 1,
+          "replayed_cells": 256,
+          "canonical_replay": 0,
+          "scratch_bytes": 1054720,
+          "centered_bytes": 1048576,
+          "centered_reuses": 0,
+          "fenv_flags": 16,
+          "rounding": 0,
+          "accelerate_attempts": 1
+        },
+        "caller_blas_threading": 0,
+        "execution_threads": 1,
+        "blas_single_verified_by_admission": true
+      },
+      "njit": {
+        "scope": "component ABI screen",
+        "threads": {
+          "environment": {
+            "OPENBLAS_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "VECLIB_MAXIMUM_THREADS": "1",
+            "NUMBA_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1"
+          },
+          "accelerate_thread_local": {
+            "prior": 0,
+            "active": 1
+          },
+          "pools": [
+            {
+              "user_api": "blas",
+              "internal_api": "openblas",
+              "num_threads": 1,
+              "prefix": "libopenblas",
+              "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+              "version": "0.3.23.dev",
+              "threading_layer": "pthreads",
+              "architecture": "armv8"
+            }
+          ]
+        },
+        "pools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "independent_results": true,
+        "numba_threads": 1
+      }
+    },
+    "comparison": {
+      "candidate": {
+        "outside_tolerance": 0,
+        "max_abs": 0.0,
+        "bits_changed": 0
+      },
+      "njit": {
+        "outside_tolerance": 0,
+        "max_abs": 2.4424906541753444e-15
+      }
+    },
+    "final_checks": {
+      "native": {
+        "verified": true
+      },
+      "candidate": {
+        "verified": true
+      },
+      "njit": {
+        "verified": true
+      }
+    },
+    "samples_ns": {
+      "native": [
+        931250,
+        837791,
+        863541,
+        827958,
+        853208,
+        834834
+      ],
+      "candidate": [
+        855666,
+        849292,
+        825541,
+        879291,
+        845666,
+        818917
+      ],
+      "njit": [
+        786583,
+        729708,
+        609084,
+        607500,
+        696666,
+        540875
+      ]
+    },
+    "cpu_ns": {
+      "native": [
+        927000,
+        837000,
+        863000,
+        826000,
+        853000,
+        834000
+      ],
+      "candidate": [
+        855000,
+        848000,
+        824000,
+        878000,
+        844000,
+        819000
+      ],
+      "njit": [
+        773000,
+        729000,
+        608000,
+        606000,
+        695000,
+        540000
+      ]
+    },
+    "median_ms": {
+      "native": 0.8454995,
+      "candidate": 0.847479,
+      "njit": 0.652875
+    },
+    "median_cpu_wall_ratio": {
+      "native": 0.9990284247228999,
+      "candidate": 0.9985052522472573,
+      "njit": 0.9979144442356775
+    }
+  },
+  {
+    "case": {
+      "n": 2048,
+      "d": 2048,
+      "layout": "c",
+      "pattern": "scaled"
+    },
+    "builds": {
+      "native": {
+        "scope": "component ABI screen",
+        "threads": {
+          "environment": {
+            "OPENBLAS_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "VECLIB_MAXIMUM_THREADS": "1",
+            "NUMBA_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1"
+          },
+          "accelerate_thread_local": "not_applied_to_native"
+        },
+        "pools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "independent_results": true,
+        "library_sha256": "acbbd58ef132af03a41700345850068aa2d77f45b8764f0a1e529089d20b9630",
+        "counters": {
+          "dsyrk_calls": 0,
+          "replayed_cells": 2098176,
+          "canonical_replay": 1,
+          "scratch_bytes": 0,
+          "centered_bytes": 33554432,
+          "centered_reuses": 0,
+          "fenv_flags": 16,
+          "rounding": 0,
+          "accelerate_attempts": 1
+        },
+        "caller_blas_threading": 0,
+        "execution_threads": 1,
+        "blas_single_verified_by_admission": true
+      },
+      "candidate": {
+        "scope": "component ABI screen",
+        "threads": {
+          "environment": {
+            "OPENBLAS_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "VECLIB_MAXIMUM_THREADS": "1",
+            "NUMBA_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1"
+          },
+          "accelerate_thread_local": "not_applied_to_native"
+        },
+        "pools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "independent_results": true,
+        "library_sha256": "522b1c03bda11bfce71f45825e2e2839c4d530efa147a0473f720828ea473975",
+        "counters": {
+          "dsyrk_calls": 0,
+          "replayed_cells": 2098176,
+          "canonical_replay": 1,
+          "scratch_bytes": 0,
+          "centered_bytes": 33554432,
+          "centered_reuses": 0,
+          "fenv_flags": 16,
+          "rounding": 0,
+          "accelerate_attempts": 1
+        },
+        "caller_blas_threading": 0,
+        "execution_threads": 1,
+        "blas_single_verified_by_admission": true
+      },
+      "njit": {
+        "scope": "component ABI screen",
+        "threads": {
+          "environment": {
+            "OPENBLAS_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "VECLIB_MAXIMUM_THREADS": "1",
+            "NUMBA_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1"
+          },
+          "accelerate_thread_local": {
+            "prior": 0,
+            "active": 1
+          },
+          "pools": [
+            {
+              "user_api": "blas",
+              "internal_api": "openblas",
+              "num_threads": 1,
+              "prefix": "libopenblas",
+              "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+              "version": "0.3.23.dev",
+              "threading_layer": "pthreads",
+              "architecture": "armv8"
+            }
+          ]
+        },
+        "pools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "independent_results": true,
+        "numba_threads": 1
+      }
+    },
+    "comparison": {
+      "candidate": {
+        "outside_tolerance": 0,
+        "max_abs": 0.0,
+        "bits_changed": 0
+      },
+      "njit": {
+        "outside_tolerance": 972,
+        "max_abs": 6.984919309616089e-10
+      }
+    },
+    "final_checks": {
+      "native": {
+        "verified": true
+      },
+      "candidate": {
+        "verified": true
+      },
+      "njit": {
+        "verified": true
+      }
+    },
+    "samples_ns": {
+      "native": [
+        586849292,
+        584092666,
+        586284208,
+        585664917,
+        588750666,
+        613465125
+      ],
+      "candidate": [
+        585002208,
+        586530208,
+        588860541,
+        585628708,
+        588260291,
+        586171000
+      ],
+      "njit": [
+        91741666,
+        91571750,
+        91931667,
+        92758333,
+        92458667,
+        92913459
+      ]
+    },
+    "cpu_ns": {
+      "native": [
+        586756000,
+        584025000,
+        586204000,
+        585505000,
+        588406000,
+        595960000
+      ],
+      "candidate": [
+        584893000,
+        586386000,
+        588806000,
+        585496000,
+        588169000,
+        585826000
+      ],
+      "njit": [
+        91733000,
+        91559000,
+        91908000,
+        92704000,
+        92430000,
+        92837000
+      ]
+    },
+    "median_ms": {
+      "native": 586.56675,
+      "candidate": 586.350604,
+      "njit": 92.195167
+    },
+    "median_cpu_wall_ratio": {
+      "native": 0.9997839884963096,
+      "candidate": 0.9997933563096494,
+      "njit": 0.9997162533636785
+    }
+  },
+  {
+    "case": {
+      "n": 2048,
+      "d": 2048,
+      "layout": "f",
+      "pattern": "scaled"
+    },
+    "builds": {
+      "native": {
+        "scope": "component ABI screen",
+        "threads": {
+          "environment": {
+            "OPENBLAS_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "VECLIB_MAXIMUM_THREADS": "1",
+            "NUMBA_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1"
+          },
+          "accelerate_thread_local": "not_applied_to_native"
+        },
+        "pools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "independent_results": true,
+        "library_sha256": "acbbd58ef132af03a41700345850068aa2d77f45b8764f0a1e529089d20b9630",
+        "counters": {
+          "dsyrk_calls": 0,
+          "replayed_cells": 2098176,
+          "canonical_replay": 1,
+          "scratch_bytes": 0,
+          "centered_bytes": 33554432,
+          "centered_reuses": 0,
+          "fenv_flags": 16,
+          "rounding": 0,
+          "accelerate_attempts": 1
+        },
+        "caller_blas_threading": 0,
+        "execution_threads": 1,
+        "blas_single_verified_by_admission": true
+      },
+      "candidate": {
+        "scope": "component ABI screen",
+        "threads": {
+          "environment": {
+            "OPENBLAS_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "VECLIB_MAXIMUM_THREADS": "1",
+            "NUMBA_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1"
+          },
+          "accelerate_thread_local": "not_applied_to_native"
+        },
+        "pools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "independent_results": true,
+        "library_sha256": "522b1c03bda11bfce71f45825e2e2839c4d530efa147a0473f720828ea473975",
+        "counters": {
+          "dsyrk_calls": 0,
+          "replayed_cells": 2098176,
+          "canonical_replay": 1,
+          "scratch_bytes": 33603584,
+          "centered_bytes": 33554432,
+          "centered_reuses": 1,
+          "fenv_flags": 16,
+          "rounding": 0,
+          "accelerate_attempts": 1
+        },
+        "caller_blas_threading": 0,
+        "execution_threads": 1,
+        "blas_single_verified_by_admission": true
+      },
+      "njit": {
+        "scope": "component ABI screen",
+        "threads": {
+          "environment": {
+            "OPENBLAS_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "VECLIB_MAXIMUM_THREADS": "1",
+            "NUMBA_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1"
+          },
+          "accelerate_thread_local": {
+            "prior": 0,
+            "active": 1
+          },
+          "pools": [
+            {
+              "user_api": "blas",
+              "internal_api": "openblas",
+              "num_threads": 1,
+              "prefix": "libopenblas",
+              "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+              "version": "0.3.23.dev",
+              "threading_layer": "pthreads",
+              "architecture": "armv8"
+            }
+          ]
+        },
+        "pools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "independent_results": true,
+        "numba_threads": 1
+      }
+    },
+    "comparison": {
+      "candidate": {
+        "outside_tolerance": 0,
+        "max_abs": 0.0,
+        "bits_changed": 0
+      },
+      "njit": {
+        "outside_tolerance": 2644,
+        "max_abs": 4.540197551250458e-09
+      }
+    },
+    "final_checks": {
+      "native": {
+        "verified": true
+      },
+      "candidate": {
+        "verified": true
+      },
+      "njit": {
+        "verified": true
+      }
+    },
+    "samples_ns": {
+      "native": [
+        601442791,
+        606685916,
+        614376708,
+        616926250,
+        614263833,
+        613144083
+      ],
+      "candidate": [
+        471420375,
+        465513834,
+        473178167,
+        460509542,
+        463695667,
+        465258042
+      ],
+      "njit": [
+        81502125,
+        81900125,
+        82506083,
+        80793667,
+        81794375,
+        82197417
+      ]
+    },
+    "cpu_ns": {
+      "native": [
+        601438000,
+        606532000,
+        614146000,
+        616691000,
+        613954000,
+        613113000
+      ],
+      "candidate": [
+        469841000,
+        465208000,
+        472151000,
+        460495000,
+        463598000,
+        465140000
+      ],
+      "njit": [
+        81463000,
+        81858000,
+        82487000,
+        80734000,
+        81774000,
+        82125000
+      ]
+    },
+    "median_ms": {
+      "native": 613.703958,
+      "candidate": 465.385938,
+      "njit": 81.84725
+    },
+    "median_cpu_wall_ratio": {
+      "native": 0.9996853924097812,
+      "candidate": 0.9995446527398494,
+      "njit": 0.999502802593796
+    }
+  },
+  {
+    "case": {
+      "n": 2048,
+      "d": 2048,
+      "layout": "c",
+      "pattern": "normal"
+    },
+    "builds": {
+      "native": {
+        "scope": "component ABI screen",
+        "threads": {
+          "environment": {
+            "OPENBLAS_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "VECLIB_MAXIMUM_THREADS": "1",
+            "NUMBA_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1"
+          },
+          "accelerate_thread_local": "not_applied_to_native"
+        },
+        "pools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "independent_results": true,
+        "library_sha256": "acbbd58ef132af03a41700345850068aa2d77f45b8764f0a1e529089d20b9630",
+        "counters": {
+          "dsyrk_calls": 1,
+          "replayed_cells": 0,
+          "canonical_replay": 0,
+          "scratch_bytes": 33603584,
+          "centered_bytes": 33554432,
+          "centered_reuses": 0,
+          "fenv_flags": 16,
+          "rounding": 0,
+          "accelerate_attempts": 1
+        },
+        "caller_blas_threading": 0,
+        "execution_threads": 1,
+        "blas_single_verified_by_admission": true
+      },
+      "candidate": {
+        "scope": "component ABI screen",
+        "threads": {
+          "environment": {
+            "OPENBLAS_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "VECLIB_MAXIMUM_THREADS": "1",
+            "NUMBA_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1"
+          },
+          "accelerate_thread_local": "not_applied_to_native"
+        },
+        "pools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "independent_results": true,
+        "library_sha256": "522b1c03bda11bfce71f45825e2e2839c4d530efa147a0473f720828ea473975",
+        "counters": {
+          "dsyrk_calls": 1,
+          "replayed_cells": 0,
+          "canonical_replay": 0,
+          "scratch_bytes": 33603584,
+          "centered_bytes": 33554432,
+          "centered_reuses": 0,
+          "fenv_flags": 16,
+          "rounding": 0,
+          "accelerate_attempts": 1
+        },
+        "caller_blas_threading": 0,
+        "execution_threads": 1,
+        "blas_single_verified_by_admission": true
+      },
+      "njit": {
+        "scope": "component ABI screen",
+        "threads": {
+          "environment": {
+            "OPENBLAS_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "VECLIB_MAXIMUM_THREADS": "1",
+            "NUMBA_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1"
+          },
+          "accelerate_thread_local": {
+            "prior": 0,
+            "active": 1
+          },
+          "pools": [
+            {
+              "user_api": "blas",
+              "internal_api": "openblas",
+              "num_threads": 1,
+              "prefix": "libopenblas",
+              "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+              "version": "0.3.23.dev",
+              "threading_layer": "pthreads",
+              "architecture": "armv8"
+            }
+          ]
+        },
+        "pools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "independent_results": true,
+        "numba_threads": 1
+      }
+    },
+    "comparison": {
+      "candidate": {
+        "outside_tolerance": 0,
+        "max_abs": 0.0,
+        "bits_changed": 0
+      },
+      "njit": {
+        "outside_tolerance": 0,
+        "max_abs": 6.661338147750939e-16
+      }
+    },
+    "final_checks": {
+      "native": {
+        "verified": true
+      },
+      "candidate": {
+        "verified": true
+      },
+      "njit": {
+        "verified": true
+      }
+    },
+    "samples_ns": {
+      "native": [
+        99687416,
+        83726584,
+        84993667,
+        83766709,
+        86901125,
+        84687875
+      ],
+      "candidate": [
+        89560375,
+        83981875,
+        81796208,
+        84989834,
+        85919625,
+        84404708
+      ],
+      "njit": [
+        95083041,
+        94659292,
+        94757000,
+        100958666,
+        96364625,
+        93971333
+      ]
+    },
+    "cpu_ns": {
+      "native": [
+        91085000,
+        83705000,
+        84930000,
+        83758000,
+        86884000,
+        84676000
+      ],
+      "candidate": [
+        88423000,
+        83928000,
+        81664000,
+        84757000,
+        85850000,
+        84370000
+      ],
+      "njit": [
+        95022000,
+        94584000,
+        94686000,
+        100809000,
+        96347000,
+        93904000
+      ]
+    },
+    "median_ms": {
+      "native": 84.840771,
+      "candidate": 84.697271,
+      "njit": 94.9200205
+    },
+    "median_cpu_wall_ratio": {
+      "native": 0.9997725727392912,
+      "candidate": 0.9987866699914498,
+      "njit": 0.9992670939791207
+    }
+  },
+  {
+    "case": {
+      "n": 2048,
+      "d": 2048,
+      "layout": "f",
+      "pattern": "normal"
+    },
+    "builds": {
+      "native": {
+        "scope": "component ABI screen",
+        "threads": {
+          "environment": {
+            "OPENBLAS_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "VECLIB_MAXIMUM_THREADS": "1",
+            "NUMBA_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1"
+          },
+          "accelerate_thread_local": "not_applied_to_native"
+        },
+        "pools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "independent_results": true,
+        "library_sha256": "acbbd58ef132af03a41700345850068aa2d77f45b8764f0a1e529089d20b9630",
+        "counters": {
+          "dsyrk_calls": 1,
+          "replayed_cells": 2048,
+          "canonical_replay": 0,
+          "scratch_bytes": 33603584,
+          "centered_bytes": 33554432,
+          "centered_reuses": 0,
+          "fenv_flags": 16,
+          "rounding": 0,
+          "accelerate_attempts": 1
+        },
+        "caller_blas_threading": 0,
+        "execution_threads": 1,
+        "blas_single_verified_by_admission": true
+      },
+      "candidate": {
+        "scope": "component ABI screen",
+        "threads": {
+          "environment": {
+            "OPENBLAS_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "VECLIB_MAXIMUM_THREADS": "1",
+            "NUMBA_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1"
+          },
+          "accelerate_thread_local": "not_applied_to_native"
+        },
+        "pools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "independent_results": true,
+        "library_sha256": "522b1c03bda11bfce71f45825e2e2839c4d530efa147a0473f720828ea473975",
+        "counters": {
+          "dsyrk_calls": 1,
+          "replayed_cells": 2048,
+          "canonical_replay": 0,
+          "scratch_bytes": 33603584,
+          "centered_bytes": 33554432,
+          "centered_reuses": 0,
+          "fenv_flags": 16,
+          "rounding": 0,
+          "accelerate_attempts": 1
+        },
+        "caller_blas_threading": 0,
+        "execution_threads": 1,
+        "blas_single_verified_by_admission": true
+      },
+      "njit": {
+        "scope": "component ABI screen",
+        "threads": {
+          "environment": {
+            "OPENBLAS_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "VECLIB_MAXIMUM_THREADS": "1",
+            "NUMBA_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1"
+          },
+          "accelerate_thread_local": {
+            "prior": 0,
+            "active": 1
+          },
+          "pools": [
+            {
+              "user_api": "blas",
+              "internal_api": "openblas",
+              "num_threads": 1,
+              "prefix": "libopenblas",
+              "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+              "version": "0.3.23.dev",
+              "threading_layer": "pthreads",
+              "architecture": "armv8"
+            }
+          ]
+        },
+        "pools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "independent_results": true,
+        "numba_threads": 1
+      }
+    },
+    "comparison": {
+      "candidate": {
+        "outside_tolerance": 0,
+        "max_abs": 0.0,
+        "bits_changed": 0
+      },
+      "njit": {
+        "outside_tolerance": 0,
+        "max_abs": 4.3298697960381105e-15
+      }
+    },
+    "final_checks": {
+      "native": {
+        "verified": true
+      },
+      "candidate": {
+        "verified": true
+      },
+      "njit": {
+        "verified": true
+      }
+    },
+    "samples_ns": {
+      "native": [
+        85591584,
+        84301083,
+        83940791,
+        83764500,
+        84314333,
+        82639958
+      ],
+      "candidate": [
+        85645416,
+        83613917,
+        82464167,
+        83751167,
+        83631458,
+        84086209
+      ],
+      "njit": [
+        82310708,
+        84360500,
+        81634666,
+        81457666,
+        82016958,
+        81478459
+      ]
+    },
+    "cpu_ns": {
+      "native": [
+        85586000,
+        84242000,
+        83927000,
+        83760000,
+        84305000,
+        82627000
+      ],
+      "candidate": [
+        85622000,
+        83605000,
+        82378000,
+        83742000,
+        83619000,
+        84077000
+      ],
+      "njit": [
+        82307000,
+        84280000,
+        81615000,
+        81378000,
+        81992000,
+        81466000
+      ]
+    },
+    "median_ms": {
+      "native": 84.120937,
+      "candidate": 83.6913125,
+      "njit": 81.825812
+    },
+    "median_cpu_wall_ratio": {
+      "native": 0.999866253208064,
+      "candidate": 0.9998707591805457,
+      "njit": 0.9997273972589831
+    }
+  },
+  {
+    "case": {
+      "n": 32769,
+      "d": 256,
+      "layout": "c",
+      "pattern": "correlated"
+    },
+    "builds": {
+      "native": {
+        "scope": "component ABI screen",
+        "threads": {
+          "environment": {
+            "OPENBLAS_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "VECLIB_MAXIMUM_THREADS": "1",
+            "NUMBA_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1"
+          },
+          "accelerate_thread_local": "not_applied_to_native"
+        },
+        "pools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "independent_results": true,
+        "library_sha256": "acbbd58ef132af03a41700345850068aa2d77f45b8764f0a1e529089d20b9630",
+        "counters": {
+          "dsyrk_calls": 65,
+          "replayed_cells": 32896,
+          "canonical_replay": 1,
+          "scratch_bytes": 0,
+          "centered_bytes": 67110912,
+          "centered_reuses": 0,
+          "fenv_flags": 16,
+          "rounding": 0,
+          "accelerate_attempts": 1
+        },
+        "caller_blas_threading": 0,
+        "execution_threads": 1,
+        "blas_single_verified_by_admission": true
+      },
+      "candidate": {
+        "scope": "component ABI screen",
+        "threads": {
+          "environment": {
+            "OPENBLAS_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "VECLIB_MAXIMUM_THREADS": "1",
+            "NUMBA_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1"
+          },
+          "accelerate_thread_local": "not_applied_to_native"
+        },
+        "pools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "independent_results": true,
+        "library_sha256": "522b1c03bda11bfce71f45825e2e2839c4d530efa147a0473f720828ea473975",
+        "counters": {
+          "dsyrk_calls": 65,
+          "replayed_cells": 32896,
+          "canonical_replay": 1,
+          "scratch_bytes": 0,
+          "centered_bytes": 67110912,
+          "centered_reuses": 0,
+          "fenv_flags": 16,
+          "rounding": 0,
+          "accelerate_attempts": 1
+        },
+        "caller_blas_threading": 0,
+        "execution_threads": 1,
+        "blas_single_verified_by_admission": true
+      },
+      "njit": {
+        "scope": "component ABI screen",
+        "threads": {
+          "environment": {
+            "OPENBLAS_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "VECLIB_MAXIMUM_THREADS": "1",
+            "NUMBA_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1"
+          },
+          "accelerate_thread_local": {
+            "prior": 0,
+            "active": 1
+          },
+          "pools": [
+            {
+              "user_api": "blas",
+              "internal_api": "openblas",
+              "num_threads": 1,
+              "prefix": "libopenblas",
+              "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+              "version": "0.3.23.dev",
+              "threading_layer": "pthreads",
+              "architecture": "armv8"
+            }
+          ]
+        },
+        "pools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "independent_results": true,
+        "numba_threads": 1
+      }
+    },
+    "comparison": {
+      "candidate": {
+        "outside_tolerance": 0,
+        "max_abs": 0.0,
+        "bits_changed": 0
+      },
+      "njit": {
+        "outside_tolerance": 0,
+        "max_abs": 6.661338147750939e-16
+      }
+    },
+    "final_checks": {
+      "native": {
+        "verified": true
+      },
+      "candidate": {
+        "verified": true
+      },
+      "njit": {
+        "verified": true
+      }
+    },
+    "samples_ns": {
+      "native": [
+        166402791,
+        166815333,
+        167258500,
+        169013083,
+        167387958,
+        167399291
+      ],
+      "candidate": [
+        166774292,
+        167020334,
+        166993583,
+        170181250,
+        167513167,
+        166776750
+      ],
+      "njit": [
+        72936583,
+        72464000,
+        72149958,
+        73222042,
+        72285792,
+        72744000
+      ]
+    },
+    "cpu_ns": {
+      "native": [
+        166388000,
+        166798000,
+        167194000,
+        168508000,
+        167365000,
+        167378000
+      ],
+      "candidate": [
+        166743000,
+        167004000,
+        166967000,
+        169806000,
+        167488000,
+        166702000
+      ],
+      "njit": [
+        72920000,
+        72460000,
+        72142000,
+        73164000,
+        72277000,
+        72692000
+      ]
+    },
+    "median_ms": {
+      "native": 167.323229,
+      "candidate": 167.0069585,
+      "njit": 72.604
+    },
+    "median_cpu_wall_ratio": {
+      "native": 0.9998678293255998,
+      "candidate": 0.9998265917027666,
+      "njit": 0.9998255048867519
+    }
+  },
+  {
+    "case": {
+      "n": 32769,
+      "d": 256,
+      "layout": "f",
+      "pattern": "correlated"
+    },
+    "builds": {
+      "native": {
+        "scope": "component ABI screen",
+        "threads": {
+          "environment": {
+            "OPENBLAS_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "VECLIB_MAXIMUM_THREADS": "1",
+            "NUMBA_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1"
+          },
+          "accelerate_thread_local": "not_applied_to_native"
+        },
+        "pools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "independent_results": true,
+        "library_sha256": "acbbd58ef132af03a41700345850068aa2d77f45b8764f0a1e529089d20b9630",
+        "counters": {
+          "dsyrk_calls": 65,
+          "replayed_cells": 33152,
+          "canonical_replay": 1,
+          "scratch_bytes": 0,
+          "centered_bytes": 67110912,
+          "centered_reuses": 0,
+          "fenv_flags": 16,
+          "rounding": 0,
+          "accelerate_attempts": 1
+        },
+        "caller_blas_threading": 0,
+        "execution_threads": 1,
+        "blas_single_verified_by_admission": true
+      },
+      "candidate": {
+        "scope": "component ABI screen",
+        "threads": {
+          "environment": {
+            "OPENBLAS_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "VECLIB_MAXIMUM_THREADS": "1",
+            "NUMBA_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1"
+          },
+          "accelerate_thread_local": "not_applied_to_native"
+        },
+        "pools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "independent_results": true,
+        "library_sha256": "522b1c03bda11bfce71f45825e2e2839c4d530efa147a0473f720828ea473975",
+        "counters": {
+          "dsyrk_calls": 65,
+          "replayed_cells": 33152,
+          "canonical_replay": 1,
+          "scratch_bytes": 0,
+          "centered_bytes": 67110912,
+          "centered_reuses": 0,
+          "fenv_flags": 16,
+          "rounding": 0,
+          "accelerate_attempts": 1
+        },
+        "caller_blas_threading": 0,
+        "execution_threads": 1,
+        "blas_single_verified_by_admission": true
+      },
+      "njit": {
+        "scope": "component ABI screen",
+        "threads": {
+          "environment": {
+            "OPENBLAS_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "VECLIB_MAXIMUM_THREADS": "1",
+            "NUMBA_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1"
+          },
+          "accelerate_thread_local": {
+            "prior": 0,
+            "active": 1
+          },
+          "pools": [
+            {
+              "user_api": "blas",
+              "internal_api": "openblas",
+              "num_threads": 1,
+              "prefix": "libopenblas",
+              "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+              "version": "0.3.23.dev",
+              "threading_layer": "pthreads",
+              "architecture": "armv8"
+            }
+          ]
+        },
+        "pools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "independent_results": true,
+        "numba_threads": 1
+      }
+    },
+    "comparison": {
+      "candidate": {
+        "outside_tolerance": 0,
+        "max_abs": 0.0,
+        "bits_changed": 0
+      },
+      "njit": {
+        "outside_tolerance": 0,
+        "max_abs": 1.9317880628477724e-14
+      }
+    },
+    "final_checks": {
+      "native": {
+        "verified": true
+      },
+      "candidate": {
+        "verified": true
+      },
+      "njit": {
+        "verified": true
+      }
+    },
+    "samples_ns": {
+      "native": [
+        188209083,
+        189542166,
+        189101500,
+        189181709,
+        188038500,
+        188128292
+      ],
+      "candidate": [
+        187726458,
+        186324916,
+        190142083,
+        189053666,
+        189602792,
+        189255667
+      ],
+      "njit": [
+        53484750,
+        52587875,
+        53022583,
+        52896292,
+        52679583,
+        53982500
+      ]
+    },
+    "cpu_ns": {
+      "native": [
+        188117000,
+        189518000,
+        188973000,
+        189109000,
+        187973000,
+        188086000
+      ],
+      "candidate": [
+        187639000,
+        186315000,
+        190072000,
+        188982000,
+        189520000,
+        189229000
+      ],
+      "njit": [
+        53472000,
+        52584000,
+        52982000,
+        52891000,
+        52671000,
+        53968000
+      ]
+    },
+    "median_ms": {
+      "native": 188.6552915,
+      "candidate": 189.1546665,
+      "njit": 52.9594375
+    },
+    "median_cpu_wall_ratio": {
+      "native": 0.999633666441478,
+      "candidate": 0.9996261700929018,
+      "njit": 0.9997993429475838
+    }
+  },
+  {
+    "case": {
+      "n": 2049,
+      "d": 256,
+      "layout": "f",
+      "pattern": "scaled"
+    },
+    "builds": {
+      "native": {
+        "scope": "component ABI screen",
+        "threads": {
+          "environment": {
+            "OPENBLAS_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "VECLIB_MAXIMUM_THREADS": "1",
+            "NUMBA_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1"
+          },
+          "accelerate_thread_local": "not_applied_to_native"
+        },
+        "pools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "independent_results": true,
+        "library_sha256": "acbbd58ef132af03a41700345850068aa2d77f45b8764f0a1e529089d20b9630",
+        "counters": {
+          "dsyrk_calls": 0,
+          "replayed_cells": 32896,
+          "canonical_replay": 1,
+          "scratch_bytes": 0,
+          "centered_bytes": 1048576,
+          "centered_reuses": 0,
+          "fenv_flags": 16,
+          "rounding": 0,
+          "accelerate_attempts": 1
+        },
+        "caller_blas_threading": 0,
+        "execution_threads": 1,
+        "blas_single_verified_by_admission": true
+      },
+      "candidate": {
+        "scope": "component ABI screen",
+        "threads": {
+          "environment": {
+            "OPENBLAS_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "VECLIB_MAXIMUM_THREADS": "1",
+            "NUMBA_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1"
+          },
+          "accelerate_thread_local": "not_applied_to_native"
+        },
+        "pools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "independent_results": true,
+        "library_sha256": "522b1c03bda11bfce71f45825e2e2839c4d530efa147a0473f720828ea473975",
+        "counters": {
+          "dsyrk_calls": 0,
+          "replayed_cells": 32896,
+          "canonical_replay": 1,
+          "scratch_bytes": 0,
+          "centered_bytes": 1048576,
+          "centered_reuses": 0,
+          "fenv_flags": 16,
+          "rounding": 0,
+          "accelerate_attempts": 1
+        },
+        "caller_blas_threading": 0,
+        "execution_threads": 1,
+        "blas_single_verified_by_admission": true
+      },
+      "njit": {
+        "scope": "component ABI screen",
+        "threads": {
+          "environment": {
+            "OPENBLAS_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "VECLIB_MAXIMUM_THREADS": "1",
+            "NUMBA_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1"
+          },
+          "accelerate_thread_local": {
+            "prior": 0,
+            "active": 1
+          },
+          "pools": [
+            {
+              "user_api": "blas",
+              "internal_api": "openblas",
+              "num_threads": 1,
+              "prefix": "libopenblas",
+              "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+              "version": "0.3.23.dev",
+              "threading_layer": "pthreads",
+              "architecture": "armv8"
+            }
+          ]
+        },
+        "pools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "independent_results": true,
+        "numba_threads": 1
+      }
+    },
+    "comparison": {
+      "candidate": {
+        "outside_tolerance": 0,
+        "max_abs": 0.0,
+        "bits_changed": 0
+      },
+      "njit": {
+        "outside_tolerance": 42,
+        "max_abs": 3.841705620288849e-09
+      }
+    },
+    "final_checks": {
+      "native": {
+        "verified": true
+      },
+      "candidate": {
+        "verified": true
+      },
+      "njit": {
+        "verified": true
+      }
+    },
+    "samples_ns": {
+      "native": [
+        9746917,
+        10046917,
+        9963625,
+        9831875,
+        10257500,
+        9990417
+      ],
+      "candidate": [
+        9686250,
+        9957959,
+        9825916,
+        9867458,
+        10429125,
+        10168583
+      ],
+      "njit": [
+        3069209,
+        2896375,
+        2783583,
+        3575500,
+        2968375,
+        2909166
+      ]
+    },
+    "cpu_ns": {
+      "native": [
+        9739000,
+        10044000,
+        9961000,
+        9828000,
+        10256000,
+        9989000
+      ],
+      "candidate": [
+        9685000,
+        9957000,
+        9824000,
+        9853000,
+        10427000,
+        10166000
+      ],
+      "njit": [
+        3062000,
+        2891000,
+        2781000,
+        3550000,
+        2965000,
+        2894000
+      ]
+    },
+    "median_ms": {
+      "native": 9.977021,
+      "candidate": 9.9127085,
+      "njit": 2.9387705
+    },
+    "median_cpu_wall_ratio": {
+      "native": 0.9997231019241427,
+      "candidate": 0.9998006245747706,
+      "njit": 0.9978977091810846
+    }
+  },
+  {
+    "case": {
+      "n": 513,
+      "d": 257,
+      "layout": "f",
+      "pattern": "scaled"
+    },
+    "builds": {
+      "native": {
+        "scope": "component ABI screen",
+        "threads": {
+          "environment": {
+            "OPENBLAS_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "VECLIB_MAXIMUM_THREADS": "1",
+            "NUMBA_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1"
+          },
+          "accelerate_thread_local": "not_applied_to_native"
+        },
+        "pools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "independent_results": true,
+        "library_sha256": "acbbd58ef132af03a41700345850068aa2d77f45b8764f0a1e529089d20b9630",
+        "counters": {
+          "dsyrk_calls": 0,
+          "replayed_cells": 33153,
+          "canonical_replay": 1,
+          "scratch_bytes": 0,
+          "centered_bytes": 1054728,
+          "centered_reuses": 0,
+          "fenv_flags": 16,
+          "rounding": 0,
+          "accelerate_attempts": 1
+        },
+        "caller_blas_threading": 0,
+        "execution_threads": 1,
+        "blas_single_verified_by_admission": true
+      },
+      "candidate": {
+        "scope": "component ABI screen",
+        "threads": {
+          "environment": {
+            "OPENBLAS_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "VECLIB_MAXIMUM_THREADS": "1",
+            "NUMBA_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1"
+          },
+          "accelerate_thread_local": "not_applied_to_native"
+        },
+        "pools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "independent_results": true,
+        "library_sha256": "522b1c03bda11bfce71f45825e2e2839c4d530efa147a0473f720828ea473975",
+        "counters": {
+          "dsyrk_calls": 0,
+          "replayed_cells": 33153,
+          "canonical_replay": 1,
+          "scratch_bytes": 0,
+          "centered_bytes": 1054728,
+          "centered_reuses": 0,
+          "fenv_flags": 16,
+          "rounding": 0,
+          "accelerate_attempts": 1
+        },
+        "caller_blas_threading": 0,
+        "execution_threads": 1,
+        "blas_single_verified_by_admission": true
+      },
+      "njit": {
+        "scope": "component ABI screen",
+        "threads": {
+          "environment": {
+            "OPENBLAS_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "VECLIB_MAXIMUM_THREADS": "1",
+            "NUMBA_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1"
+          },
+          "accelerate_thread_local": {
+            "prior": 0,
+            "active": 1
+          },
+          "pools": [
+            {
+              "user_api": "blas",
+              "internal_api": "openblas",
+              "num_threads": 1,
+              "prefix": "libopenblas",
+              "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+              "version": "0.3.23.dev",
+              "threading_layer": "pthreads",
+              "architecture": "armv8"
+            }
+          ]
+        },
+        "pools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "prefix": "libopenblas",
+            "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+            "version": "0.3.23.dev",
+            "threading_layer": "pthreads",
+            "architecture": "armv8"
+          }
+        ],
+        "independent_results": true,
+        "numba_threads": 1
+      }
+    },
+    "comparison": {
+      "candidate": {
+        "outside_tolerance": 0,
+        "max_abs": 0.0,
+        "bits_changed": 0
+      },
+      "njit": {
+        "outside_tolerance": 36,
+        "max_abs": 1.979060471057892e-09
+      }
+    },
+    "final_checks": {
+      "native": {
+        "verified": true
+      },
+      "candidate": {
+        "verified": true
+      },
+      "njit": {
+        "verified": true
+      }
+    },
+    "samples_ns": {
+      "native": [
+        2670958,
+        2521792,
+        2619375,
+        2843583,
+        2711792,
+        2802584
+      ],
+      "candidate": [
+        2785917,
+        2609167,
+        2539750,
+        2496084,
+        2501917,
+        2578625
+      ],
+      "njit": [
+        684334,
+        926333,
+        657625,
+        760083,
+        687083,
+        687833
+      ]
+    },
+    "cpu_ns": {
+      "native": [
+        2669000,
+        2521000,
+        2618000,
+        2843000,
+        2711000,
+        2802000
+      ],
+      "candidate": [
+        2784000,
+        2608000,
+        2539000,
+        2494000,
+        2502000,
+        2577000
+      ],
+      "njit": [
+        683000,
+        925000,
+        657000,
+        759000,
+        686000,
+        687000
+      ]
+    },
+    "median_ms": {
+      "native": 2.691375,
+      "candidate": 2.5591875,
+      "njit": 0.687458
+    },
+    "median_cpu_wall_ratio": {
+      "native": 0.99969693991051,
+      "candidate": 0.9994612750003347,
+      "njit": 0.9985680741265996
+    }
+  }
+]

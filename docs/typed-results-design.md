@@ -1,6 +1,6 @@
 # Typed 多输出结果协议设计
 
-状态：已实现并通过本机验收，详见 [验收记录](typed-results-acceptance.md)。基线为 main e88f69a；本轮只修改 CalMetricsEngine。
+状态：此文保留初版 typed-results-1 阶段设计及[当时验收](typed-results-acceptance.md)。当前 auto/F 图新增 typed-results-2 布局协议，接口与范围见[用户指南](user-guide.md)及[布局设计](physical-layout-design.md)。基线为 main e88f69a；本轮只修改 CalMetricsEngine。
 
 ## 目标与兼容
 

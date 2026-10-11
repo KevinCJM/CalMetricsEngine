@@ -1,0 +1,17 @@
+# Covariance tile production design — 2026-09-30
+
+Baseline build 6ff48aac8a819ad1854a33d51cd76221d902bcc7ede4e293860e9e7f86a30dd0. Scope: physical implementation of existing covariance/correlation, no new canonical operator or math version. Applicable discipline: D1 pure same-input dependence; D2 no retained data cache; D5 single ascending fold and last-row mean lifetime; D6 borrowed strided input and single CPU; D8 full output, old/new/NJIT and separate cold/warm memory.
+
+C-compatible input retains existing Eigen/macOS 15+/arm64/n>=32/d>=8 admission. Use Eigen Array fixed 4x4 tiles and 128-observation panels. Each output resumes its own accumulator from the independent result storage; this is not a sum of independent block sums. Retain original per-column Welford order, separate multiplication/addition, ddof=1, existing finish/mirror/correlation normalization and errors. Tail dimensions follow the original ascending observation fold. The final output row holds means until all consumers complete. When d is divisible by four, a final 4x4 diagonal tile reduces repeated edge scans. No input pack, new heap, private threads, numeric cache, or extra output buffer. Remove replaced C kernel.
+
+Use separate noinline functions and tail calls through identical Value/output/Workspace/Audit signatures so the driver does not keep a large F-path frame live during the tile kernel. Actual production object must verify stack, NEON, no FMA and no allocator, rather than inferring from prototypes.
+
+F-compatible means: only finite bounded d>=8 and positive nonoverlapping column stride>=n use one cross-column Welford pass. Full-N pair reductions remain unchanged. Existing limit, unusual strides and IEEE fallback remain. This strided mean is not claimed to be SIMD; pair reductions retain Eigen SIMD.
+
+Screen: V1 full-N C tiling regressed wide/padded matrices; V2 128-observation panels fixed those but 8-wide increased frame. Selected V3 4-wide final diagonal tile passed 232 fixtures/2784 records, zero contract failures; full raw rejected candidates retained. V3 long C/padded at 32768x8/16/64 improved old kernel and NJIT; this is only a numerical-screen layer, not public acceptance. F time blocks rejected due long-wide regression, only full-N variant selected.
+
+Validation: direct scalar and independent fsum, exact state/IEEE/discrete comparisons, canaries, invalid layout admission, read-only input, independent retained outputs, graph and prepared paths; native ASan and portable Eigen-OFF; complete Python/operator regression and frozen real Excel snapshot replay (not a new Excel recalculation). Public old/new/NJIT comparisons include allocation/entry/output lifetime at equal CPU, memory independently measured. Full medium/large superiority remains open if F or other workloads still lag.
+
+## Production review correction
+
+The first production compiler folded ordinary C return into call + true, retaining the F frame: known matrix/helper chain 880 B vs baseline688 B. Explicit clang::musttail now forces the outer dispatch to restore272 B before branching. The final driver still calls upper with its48 B frame active; no claim of driver-tail elimination. Final C known chain is matrix320 + driver48 + upper288 =656 B,32 B below baseline. Runtime/system callee and entire-request peaks are separate. Initial source/build and Python7226/phase2 4/4 evidence are preserved, then final source was rebuilt and revalidated.

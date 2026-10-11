@@ -1,0 +1,274 @@
+{
+  "schema": "whole-owner-rss-adjacent-1",
+  "case": "short_many",
+  "cpu_budget": 1,
+  "native_adjacent_pairs": [
+    {
+      "pair": 1,
+      "order": [
+        "old",
+        "new"
+      ],
+      "old_pid": 97516,
+      "new_pid": 98041,
+      "new_minus_old": {
+        "rss_peak": 3227648,
+        "rss_delta": 2064384,
+        "constructor_end_rss": -1343488,
+        "execution_delta": 4571136
+      }
+    },
+    {
+      "pair": 2,
+      "order": [
+        "new",
+        "old"
+      ],
+      "old_pid": 99131,
+      "new_pid": 98125,
+      "new_minus_old": {
+        "rss_peak": 737280,
+        "rss_delta": 1359872,
+        "constructor_end_rss": -5554176,
+        "execution_delta": 6291456
+      }
+    },
+    {
+      "pair": 3,
+      "order": [
+        "old",
+        "new"
+      ],
+      "old_pid": 99660,
+      "new_pid": 384,
+      "new_minus_old": {
+        "rss_peak": -6258688,
+        "rss_delta": -4456448,
+        "constructor_end_rss": -4571136,
+        "execution_delta": -1687552
+      }
+    }
+  ],
+  "versions": {
+    "old": {
+      "trials": 3,
+      "build_id": "b8dc2f16aef13017d8652575f282cc6522992fdabb08e051c68634b76b26cb4d",
+      "observations": [
+        {
+          "rss_baseline": 192020480,
+          "rss_peak": 219496448,
+          "rss_delta": 27475968,
+          "rss_idle_delta": 0,
+          "rss_schema": "whole-owner-monitor-control-1",
+          "constructor_end_rss": 206995456,
+          "constructor_peak_rss": 206995456,
+          "execution_peak_rss": 219496448,
+          "execution_delta": 12500992,
+          "replacement_end_rss": [
+            219447296,
+            219496448
+          ],
+          "observation_note": "Common inputs/runtime warmup precede epoch; owner construction and first full-size execution are both observed. RSS is neither requested heap nor workspace.",
+          "fresh_pid": 97516
+        },
+        {
+          "rss_baseline": 192790528,
+          "rss_peak": 224198656,
+          "rss_delta": 31408128,
+          "rss_idle_delta": 0,
+          "rss_schema": "whole-owner-monitor-control-1",
+          "constructor_end_rss": 209666048,
+          "constructor_peak_rss": 209666048,
+          "execution_peak_rss": 224198656,
+          "execution_delta": 14532608,
+          "replacement_end_rss": [
+            221593600,
+            224198656
+          ],
+          "observation_note": "Common inputs/runtime warmup precede epoch; owner construction and first full-size execution are both observed. RSS is neither requested heap nor workspace.",
+          "fresh_pid": 99131
+        },
+        {
+          "rss_baseline": 194002944,
+          "rss_peak": 227229696,
+          "rss_delta": 33226752,
+          "rss_idle_delta": 0,
+          "rss_schema": "whole-owner-monitor-control-1",
+          "constructor_end_rss": 210190336,
+          "constructor_peak_rss": 210190336,
+          "execution_peak_rss": 227229696,
+          "execution_delta": 17039360,
+          "replacement_end_rss": [
+            224411648,
+            227229696
+          ],
+          "observation_note": "Common inputs/runtime warmup precede epoch; owner construction and first full-size execution are both observed. RSS is neither requested heap nor workspace.",
+          "fresh_pid": 99660
+        }
+      ],
+      "aggregate": {
+        "rss_peak": {
+          "min": 219496448,
+          "median": 224198656,
+          "max": 227229696
+        },
+        "rss_delta": {
+          "min": 27475968,
+          "median": 31408128,
+          "max": 33226752
+        },
+        "constructor_end_rss": {
+          "min": 206995456,
+          "median": 209666048,
+          "max": 210190336
+        },
+        "execution_delta": {
+          "min": 12500992,
+          "median": 14532608,
+          "max": 17039360
+        }
+      }
+    },
+    "new": {
+      "trials": 3,
+      "build_id": "97fdfe5267e55ea83caffc38b333919bcf4c206dc1d37e57eeec500fb86f247c",
+      "observations": [
+        {
+          "rss_baseline": 193183744,
+          "rss_peak": 222724096,
+          "rss_delta": 29540352,
+          "rss_idle_delta": 0,
+          "rss_schema": "whole-owner-monitor-control-1",
+          "constructor_end_rss": 205651968,
+          "constructor_peak_rss": 205651968,
+          "execution_peak_rss": 222724096,
+          "execution_delta": 17072128,
+          "replacement_end_rss": [
+            218923008,
+            222724096
+          ],
+          "observation_note": "Common inputs/runtime warmup precede epoch; owner construction and first full-size execution are both observed. RSS is neither requested heap nor workspace.",
+          "fresh_pid": 98041
+        },
+        {
+          "rss_baseline": 192167936,
+          "rss_peak": 224935936,
+          "rss_delta": 32768000,
+          "rss_idle_delta": 0,
+          "rss_schema": "whole-owner-monitor-control-1",
+          "constructor_end_rss": 204111872,
+          "constructor_peak_rss": 204111872,
+          "execution_peak_rss": 224935936,
+          "execution_delta": 20824064,
+          "replacement_end_rss": [
+            222674944,
+            224935936
+          ],
+          "observation_note": "Common inputs/runtime warmup precede epoch; owner construction and first full-size execution are both observed. RSS is neither requested heap nor workspace.",
+          "fresh_pid": 98125
+        },
+        {
+          "rss_baseline": 192200704,
+          "rss_peak": 220971008,
+          "rss_delta": 28770304,
+          "rss_idle_delta": 0,
+          "rss_schema": "whole-owner-monitor-control-1",
+          "constructor_end_rss": 205619200,
+          "constructor_peak_rss": 205619200,
+          "execution_peak_rss": 220971008,
+          "execution_delta": 15351808,
+          "replacement_end_rss": [
+            217333760,
+            220971008
+          ],
+          "observation_note": "Common inputs/runtime warmup precede epoch; owner construction and first full-size execution are both observed. RSS is neither requested heap nor workspace.",
+          "fresh_pid": 384
+        }
+      ],
+      "aggregate": {
+        "rss_peak": {
+          "min": 220971008,
+          "median": 222724096,
+          "max": 224935936
+        },
+        "rss_delta": {
+          "min": 28770304,
+          "median": 29540352,
+          "max": 32768000
+        },
+        "constructor_end_rss": {
+          "min": 204111872,
+          "median": 205619200,
+          "max": 205651968
+        },
+        "execution_delta": {
+          "min": 15351808,
+          "median": 17072128,
+          "max": 20824064
+        }
+      }
+    }
+  },
+  "njit": [
+    {
+      "version": "old",
+      "fresh_pid": 402,
+      "measurement": {
+        "rss_baseline": 194035712,
+        "rss_peak": 242581504,
+        "rss_delta": 48545792,
+        "rss_idle_delta": 0,
+        "rss_schema": "whole-owner-monitor-control-1",
+        "constructor_end_rss": 194035712,
+        "constructor_peak_rss": 194035712,
+        "execution_peak_rss": 242581504,
+        "execution_delta": 48545792,
+        "replacement_end_rss": [
+          237633536,
+          242581504
+        ],
+        "observation_note": "Common inputs/runtime warmup precede epoch; owner construction and first full-size execution are both observed. RSS is neither requested heap nor workspace."
+      }
+    },
+    {
+      "version": "new",
+      "fresh_pid": 485,
+      "measurement": {
+        "rss_baseline": 193282048,
+        "rss_peak": 247627776,
+        "rss_delta": 54345728,
+        "rss_idle_delta": 0,
+        "rss_schema": "whole-owner-monitor-control-1",
+        "constructor_end_rss": 193282048,
+        "constructor_peak_rss": 193282048,
+        "execution_peak_rss": 247627776,
+        "execution_delta": 54345728,
+        "replacement_end_rss": [
+          241418240,
+          247627776
+        ],
+        "observation_note": "Common inputs/runtime warmup precede epoch; owner construction and first full-size execution are both observed. RSS is neither requested heap nor workspace."
+      }
+    }
+  ],
+  "input_bytes_outside_epoch": 64016640,
+  "interpretation": "Three fresh-PID adjacent pairs change absolute peak in both directions. Neither stable RSS regression nor stable RSS improvement is established. Original single observations remain unchanged. Heap savings remain separate requested-allocation evidence, not proof of resident-page savings.",
+  "original_scope": "successful fixed transformed tape projection/nav/fan/14 stats/12 samples/asset contributions; excluded components are unchanged",
+  "original_stage_rss": {
+    "old": {
+      "rss_baseline": 207503360,
+      "rss_peak": 217333760,
+      "rss_delta": 9830400,
+      "rss_idle_delta": 0,
+      "rss_schema": "warm-monitor-control-1"
+    },
+    "new": {
+      "rss_baseline": 203866112,
+      "rss_peak": 221659136,
+      "rss_delta": 17793024,
+      "rss_idle_delta": 0,
+      "rss_schema": "warm-monitor-control-1"
+    }
+  },
+  "source_roots_verified_from_87_file_manifests": true
+}

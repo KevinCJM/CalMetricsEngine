@@ -1,0 +1,29 @@
+Traceback (most recent call last):
+  File "/private/tmp/calmetrics-covchol-f-next/benchmark.py", line 145, in <module>
+    bench.main()
+  File "/private/tmp/calmetrics-covchol-f-next/tools/check_large_matrix_performance.py", line 544, in main
+    worker(args.worker, args.output)
+  File "/private/tmp/calmetrics-covchol-f-next/tools/check_large_matrix_performance.py", line 356, in worker
+    residuals = invariants(case, data, value(result))
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/calmetrics-covchol-f-next/benchmark.py", line 108, in invariants
+    np.testing.assert_allclose(actual,expected,rtol=case['rtol'],atol=case['atol'])
+  File "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/testing/_private/utils.py", line 1504, in assert_allclose
+    assert_array_compare(compare, actual, desired, err_msg=str(err_msg),
+  File "/opt/homebrew/Cellar/python@3.12/3.12.11/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/testing/_private/utils.py", line 797, in assert_array_compare
+    raise AssertionError(msg)
+AssertionError: 
+Not equal to tolerance rtol=1e-12, atol=1e-12
+
+Mismatched elements: 10042 / 4194304 (0.239%)
+Max absolute difference: 1.31757697e-05
+Max relative difference: 1.47754015e-08
+ x: array([[ 9.700125e+07,  0.000000e+00,  0.000000e+00, ...,  0.000000e+00,
+         0.000000e+00,  0.000000e+00],
+       [ 9.987578e+04,  9.932114e+07,  0.000000e+00, ...,  0.000000e+00,...
+ y: array([[ 9.700125e+07,  0.000000e+00,  0.000000e+00, ...,  0.000000e+00,
+         0.000000e+00,  0.000000e+00],
+       [ 9.987578e+04,  9.932114e+07,  0.000000e+00, ...,  0.000000e+00,...

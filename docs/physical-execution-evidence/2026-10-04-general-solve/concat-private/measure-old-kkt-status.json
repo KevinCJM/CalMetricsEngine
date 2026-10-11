@@ -1,0 +1,98 @@
+{
+  "status": "passed",
+  "jobs": [
+    {
+      "label": "kkt-4096-c-c-heap-old",
+      "pid": 20683,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-concat-solve-20261004/bench-kkt.py",
+        "--mode",
+        "memory",
+        "--backend",
+        "old",
+        "--n",
+        "4096",
+        "--layout",
+        "c",
+        "--output-order",
+        "c",
+        "--metric",
+        "heap"
+      ],
+      "started": 1791096641.756025,
+      "exit_code": 0,
+      "elapsed_seconds": 28.936494827270508
+    },
+    {
+      "label": "kkt-4096-c-c-rss-old",
+      "pid": 20783,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-concat-solve-20261004/bench-kkt.py",
+        "--mode",
+        "memory",
+        "--backend",
+        "old",
+        "--n",
+        "4096",
+        "--layout",
+        "c",
+        "--output-order",
+        "c",
+        "--metric",
+        "rss"
+      ],
+      "started": 1791096670.6930041,
+      "exit_code": 0,
+      "elapsed_seconds": 12.600831985473633
+    },
+    {
+      "label": "kkt-4096-f-f-heap-old",
+      "pid": 20846,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-concat-solve-20261004/bench-kkt.py",
+        "--mode",
+        "memory",
+        "--backend",
+        "old",
+        "--n",
+        "4096",
+        "--layout",
+        "f",
+        "--output-order",
+        "f",
+        "--metric",
+        "heap"
+      ],
+      "started": 1791096683.294924,
+      "exit_code": 0,
+      "elapsed_seconds": 31.726846933364868
+    },
+    {
+      "label": "kkt-4096-f-f-rss-old",
+      "pid": 21453,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-concat-solve-20261004/bench-kkt.py",
+        "--mode",
+        "memory",
+        "--backend",
+        "old",
+        "--n",
+        "4096",
+        "--layout",
+        "f",
+        "--output-order",
+        "f",
+        "--metric",
+        "rss"
+      ],
+      "started": 1791096715.0222359,
+      "exit_code": 0,
+      "elapsed_seconds": 14.028918981552124
+    }
+  ],
+  "scope": "previous15ea complete KKT heap/RSS control, CPU1"
+}

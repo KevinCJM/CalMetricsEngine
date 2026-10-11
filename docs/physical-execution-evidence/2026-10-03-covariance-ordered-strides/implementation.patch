@@ -1,0 +1,362 @@
+--- a/cpp/operators/matrix_backend.cpp
++++ b/cpp/operators/matrix_backend.cpp
+@@ -44,11 +44,12 @@
+     using Tail = Eigen::Array<double, 1, Width - Start, Eigen::RowMajor>;
+     Eigen::Map<Tail>(target + Start) = value.template tail<Width - Start>();
+ }
+-template<int Width, int Offset>
++template<int Width, int Offset, int ColumnStride = 1>
+ EIGEN_ALWAYS_INLINE void covariance_accumulate_tile(const double* x, Eigen::Index count,
+     Eigen::Index d, Eigen::Index j, Eigen::Index k, std::ptrdiff_t rs,
+-    const double* means, double* out) {
++    const double* means, double* out, std::ptrdiff_t cs = 1) {
+     using Row = Eigen::Array<double, 1, Width, Eigen::RowMajor>;
++    using Read = Eigen::Map<const Row, Eigen::Unaligned, Eigen::InnerStride<ColumnStride>>;
+     constexpr int s0 = Offset < 0 ? 0 : Offset;
+     constexpr int s1 = Offset < 0 ? 0 : Offset + 1;
+     constexpr int s2 = Offset < 0 ? 0 : Offset + 2;
+@@ -61,11 +62,11 @@
+     const double m0 = means[j], m1 = means[j + 1], m2 = means[j + 2], m3 = means[j + 3];
+     for (Eigen::Index i = 0; i < count; ++i) {
+         const auto* row = x + i * rs;
+-        const Row right = Eigen::Map<const Row>(row + k) - center;
+-        a0 += (row[j] - m0) * right;
+-        a1 += (row[j + 1] - m1) * right;
+-        a2 += (row[j + 2] - m2) * right;
+-        a3 += (row[j + 3] - m3) * right;
++        const Row right = Read(row + k * cs, Eigen::InnerStride<ColumnStride>(cs)) - center;
++        a0 += (row[j * cs] - m0) * right;
++        a1 += (row[(j + 1) * cs] - m1) * right;
++        a2 += (row[(j + 2) * cs] - m2) * right;
++        a3 += (row[(j + 3) * cs] - m3) * right;
+     }
+     covariance_write_tail<Width, s0>(out + j * d + k, a0);
+     covariance_write_tail<Width, s1>(out + (j + 1) * d + k, a1);
+@@ -105,28 +106,32 @@
+         }
+     }
+ }
++template<int ColumnStride = 1>
+ EIGEN_DONT_INLINE void covariance_c_means(const Value &input, double *out,
+     Workspace &, Audit &) {
+     const auto d = static_cast<Eigen::Index>(input.shape.dim[1]);
+     using Row = Eigen::Array<double, 1, Eigen::Dynamic>;
+-    covariance_c_means_only(input, out + (d - 1) * d);
++    covariance_c_means_only<ColumnStride>(input, out + (d - 1) * d);
+     for (Eigen::Index j = 0; j < d - 1; ++j)
+         Eigen::Map<Row>(out + j * d + j, d - j).setZero();
+ }
+ // The bottom four features are one final diagonal tile. Computing it
+ // after all other pairs permits the final diagonal to overwrite its mean.
++template<int ColumnStride = 1>
+ EIGEN_DONT_INLINE bool covariance_c_bottom(const Value &input, double *out,
+     Workspace &, Audit &) {
+     const auto *x = static_cast<const double *>(input.data);
+     const auto n = static_cast<Eigen::Index>(input.shape.dim[0]);
+     const auto d = static_cast<Eigen::Index>(input.shape.dim[1]);
+     const auto rs = input.stride[0];
++    const auto cs = ColumnStride == 1 ? std::ptrdiff_t{1} : input.stride[1];
+     using Row = Eigen::Array<double, 1, 4, Eigen::RowMajor>;
++    using Read = Eigen::Map<const Row, Eigen::Unaligned, Eigen::InnerStride<ColumnStride>>;
+     const auto j = d - 4;
+     const Row center = Eigen::Map<const Row>(out + (d - 1) * d + j);
+     Row a0 = Row::Zero(), a1 = Row::Zero(), a2 = Row::Zero(), a3 = Row::Zero();
+     for (Eigen::Index i = 0; i < n; ++i) {
+-        const Row delta = Eigen::Map<const Row>(x + i * rs + j) - center;
++        const Row delta = Read(x + i * rs + j * cs, Eigen::InnerStride<ColumnStride>(cs)) - center;
+         a0 += delta[0] * delta;
+         a1 += delta[1] * delta;
+         a2 += delta[2] * delta;
+@@ -140,6 +145,7 @@
+     covariance_write_tail<4, 3>(out + (j + 3) * d + j, a3);
+     return true;
+ }
++template<int ColumnStride = 1>
+ EIGEN_DONT_INLINE bool covariance_c_upper(const Value &input, double *out,
+     Workspace &work, Audit &audit) {
+     constexpr int Width = 4;
+@@ -147,6 +153,7 @@
+     const auto n = static_cast<Eigen::Index>(input.shape.dim[0]);
+     const auto d = static_cast<Eigen::Index>(input.shape.dim[1]);
+     const auto rs = input.stride[0];
++    const auto cs = ColumnStride == 1 ? std::ptrdiff_t{1} : input.stride[1];
+     using Row = Eigen::Array<double, 1, Eigen::Dynamic>;
+     const auto* means = out + (d - 1) * d;
+     const auto full_rows = (d - 1) - (d - 1) % 4;
+@@ -157,32 +164,33 @@
+         const auto* panel = x + start * rs;
+         for (Eigen::Index j = 0; j < full_rows; j += 4) {
+             for (Eigen::Index k = (j / Width) * Width; k < full_columns; k += Width) {
+-                if (k >= j + 4) covariance_accumulate_tile<Width, -1>(panel, count, d, j, k, rs, means, out);
+-                else covariance_accumulate_tile<Width, 0>(panel, count, d, j, k, rs, means, out);
++                if (k >= j + 4) covariance_accumulate_tile<Width, -1, ColumnStride>(panel, count, d, j, k, rs, means, out, cs);
++                else covariance_accumulate_tile<Width, 0, ColumnStride>(panel, count, d, j, k, rs, means, out, cs);
+             }
+         }
+     }
+     for (Eigen::Index j = 0; j < full_rows; j += 4)
+         for (Eigen::Index row = j; row < j + 4; ++row)
+             for (Eigen::Index col = std::max(row, full_columns); col < d; ++col)
+-                out[row * d + col] = covariance_ordered_sum(x, n, row, col, rs, means);
++                out[row * d + col] = covariance_ordered_sum(x, n, row, col, rs, means, cs);
+     for (Eigen::Index row = d % 4 == 0 ? d - 1 : full_rows; row < d - 1; ++row)
+         for (Eigen::Index col = row; col < d; ++col)
+-            out[row * d + col] = covariance_ordered_sum(x, n, row, col, rs, means);
++            out[row * d + col] = covariance_ordered_sum(x, n, row, col, rs, means, cs);
+     for (Eigen::Index j = 0; j < d - 1; ++j)
+         Eigen::Map<Row>(out + j * d + j, d - j) /= static_cast<double>(n - 1);
+-    if (d % 4 == 0) return covariance_c_bottom(input, out, work, audit);
+-    out[d * d - 1] = covariance_ordered_sum(x, n, d - 1, d - 1, rs, means) / static_cast<double>(n - 1);
++    if (d % 4 == 0) return covariance_c_bottom<ColumnStride>(input, out, work, audit);
++    out[d * d - 1] = covariance_ordered_sum(x, n, d - 1, d - 1, rs, means, cs) / static_cast<double>(n - 1);
+     return true;
+ }
+ 
+ // The identical four-reference signature permits tail calls after mean setup,
+ // avoiding a driver frame around the numerical tile or final diagonal tile.
++template<int ColumnStride = 1>
+ EIGEN_DONT_INLINE bool covariance_c(const Value &input, double *out,
+     Workspace &work, Audit &audit) {
+-    covariance_c_means(input, out, work, audit);
++    covariance_c_means<ColumnStride>(input, out, work, audit);
+     ++audit.eigen_covariance_calls;
+-    return covariance_c_upper(input, out, work, audit);
++    return covariance_c_upper<ColumnStride>(input, out, work, audit);
+ }
+ 
+ // Fuse independent F column pairs through public Eigen expressions. The
+@@ -739,6 +747,14 @@
+ #endif
+             return covariance_c(x, output, work, audit);
+         }
++        // Descending F has the same scalar observation fold as C. Borrow its
++        // strided columns in the existing ordered tiles; no matrix packing.
++        if (x.stride[0] == -1 && x.stride[1] >= static_cast<std::ptrdiff_t>(n) && d >= 8) {
++#if defined(__clang__)
++            [[clang::musttail]]
++#endif
++            return covariance_c<Eigen::Dynamic>(x, output, work, audit);
++        }
+ #if defined(__clang__)
+         [[clang::musttail]]
+ #endif
+--- a/docs/execution-guide.md
++++ b/docs/execution-guide.md
+@@ -56,7 +56,7 @@
+ 
+ Eigen 以头文件编译到原生引擎，借用独占缓冲，不建立线程池、调用 BLAS、修改调用方线程设置或触发 Python 数值计算。直接算子 audit 和整图 `native_chunks` 的 `eigen_rotation_calls` 记录完成算子的实际库旋转次数，包含子作用域及进程传输；未使用为 0。`vector_elements` 统计当前路径报告的向量处理规模（MatMul为输出单元数），不等于全部Eigen内部指令或浮点运算数量；`isa` 还可用实现路径名称标记下述 EM 内核。必要缩放复制、压缩 scratch 仍计量，Planner 保留保守上界。时间和活跃堆峰值已有改善证据，但 RSS 及 NJIT 联合门禁仍未闭环，详见[物理执行优化](physical-execution-optimization.md)。
+ 
+-直接算子和普通 canonical 路径的单参数矩阵 `covariance/correlation` 复用独立结果的最后一行暂存均值和标准差，数值 scratch 为 0；输入、旧结果均不写入。macOS 15+ arm64、至少 32 行时，行方向连续且至少 8 列使用 Eigen Array 的 4×4 特征块和 128 行时间块，各结果格沿原顺序继续累加；均值仍按 Welford 顺序更新，尾部单独完成。列方向连续且至少 8 列、有限且在原溢出界限内、列 stride 不小于行数时，使用固定 8 列 Eigen Array 做 Welford 均值扫描，并将 2×2 列对的居中乘积合并计算，共享读取、保持原 Eigen 两包归约分组；不足块的列保留完整内积。其他列连续布局保持原逐列均值与 Eigen Map 内积。极值溢出风险的列归约、小样本、其他 strides/平台、显式 scalar 或禁用 Eigen 时使用原生标量路径。`eigen_covariance_calls` 记录成功完成的库协方差内核次数，相关矩阵也计一次，贯通子作用域和 worker。该字段不是 CPU 指令数；上三角完成后才归一化、镜像，样本除数、零方差错误和独立结果契约不变。Planner 的保守图容量、框架分配及 RSS 仍须单独计量。
++直接算子和普通 canonical 路径的单参数矩阵 `covariance/correlation` 复用独立结果的最后一行暂存均值和标准差，数值 scratch 为 0；输入、旧结果均不写入。macOS 15+ arm64、至少 32 行时，行方向连续且至少 8 列使用 Eigen Array 的 4×4 特征块和 128 行时间块，各结果格沿原顺序继续累加；均值仍按 Welford 顺序更新，尾部单独完成。时间步长为−1、特征步长不小于行数且至少8列的负向F视图也复用同一有序块，通过 Eigen InnerStride 借用列数据，不打包矩阵、不新增数值工作区；每格保持原scalar观察顺序，内部消费者和库失败重放也适用，详见[有序步长验收](physical-execution-evidence/2026-10-03-covariance-ordered-strides/README.md)。正向列方向连续且至少 8 列、有限且在原溢出界限内、列 stride 不小于行数时，使用固定 8 列 Eigen Array 做 Welford 均值扫描，并将 2×2 列对的居中乘积合并计算，共享读取、保持原 Eigen 两包归约分组；不足块的列保留完整内积。其他列连续布局保持原逐列均值与 Eigen Map 内积。极值溢出风险的列归约、小样本、其他 strides/平台、显式 scalar 或禁用 Eigen 时使用原生标量路径。`eigen_covariance_calls` 记录成功完成的库协方差内核次数，相关矩阵也计一次，贯通子作用域和 worker。该字段不是 CPU 指令数；上三角完成后才归一化、镜像，样本除数、零方差错误和独立结果契约不变。Planner 的保守图容量、框架分配及 RSS 仍须单独计量。
+ 
+ 独立 typed float64 矩阵根 `covariance(X)` 或 `correlation(X)` 在相同平台、Eigen/Accelerate 均启用、`32≤T≤1,000,000`、`256≤D≤4096` 时，可采用守卫 Accelerate DSYRK。支持单根及下文受限的同源双输出；限定无内部消费者、非 isolate、无子作用域和观察器的图。逐次检查输入布局、有限值与受控中心化尺度、标准舍入环境，不按地址缓存数值准入。C方向要求列步长为1、行步长绝对值至少D，支持倒序及带间隔的时间行；F方向允许时间步长为+1或−1、特征步长至少T，准入leading步长限制在±INT_MAX。负向F沿原scalar顺序计算，不能改用正向F的归约树。倒序行按逻辑顺序做均值、对角和重放，只有本来需要的中心化面板交给BLAS，不先复制整块输入；进程传输原有的非连续输入打包仍单独计量，不能称整链零复制。共用 canonical 均值和局部重放接口，以确定性舍入模型检查原 1e-12 容差、对角位模式及正负/零分类；不确定格局部重放，过密或尺度不合格时完整原生重放。模型假设及适用构建见[设计与验收](physical-execution-evidence/2026-10-01-covariance-syrk-integration/README.md)，不能外推成所有厂商库版本的形式化保证。倒序C方向扩展见[倒序行验收](physical-execution-evidence/2026-10-03-covariance-reverse/README.md)，后续负向F扩展见[负向F验收](physical-execution-evidence/2026-10-03-covariance-reverse-f/README.md)。现有IPC将反向连续列打包为正向F，worker按该实际布局执行；本地负向F与worker的精确对角线分别对照各自canonical路径，完整结果保持原容差。
+ 
+--- a/docs/physical-execution-optimization.md
++++ b/docs/physical-execution-optimization.md
+@@ -1,4 +1,14 @@
+ # 物理执行优化（性能验收未闭环）
++
++## 2026-10-03 负向F的canonical回退复用有序Eigen块
++
++仅将现有4×4特征/128行有序协方差helper按特征stride模板化，负向F不再逐格泛型scalar访问；原时间顺序、尾部/最后均值槽、错误与独立所有权不变，不新增数值workspace、输入复制或线程。静态汇编有双精度SIMD乘加（非FMA合并）。
++
++12类完整请求6轮，新旧C++全部输出逐位一致：4096 scaled **34.460→6.895s**，2048 **4.255→0.853s**，dense长序列 **1.150→0.275s**，回退约4–7倍提升，仍慢于NI。正常及C/F控制几ms增加只记录。另一个乘16384案例的旧C++/NI协方差206格容差失败原样保留；新增加16384的合格source-reject案例没有关闭原失败，也没有放宽容差。
++
++12个fresh内存子进程，old/new申请峰完全持平：2048 cold约80.056MiB、NI102.000MiB；dense约2.086MiB、NI132.504MiB。未重新测4096内存，追踪限制保留。Python **11029通过**、专项885，原生/ASan/UBSan/三库OFF原生各9/9，OFF专项686/199跳过；185夹具、历史Excel469例/3056值、77项包身份通过，无新Excel重算。
++
++[设计、原失败、正负性能与自审核](physical-execution-evidence/2026-10-03-covariance-ordered-strides/README.md)。未提交推送，整体目标保持开放；后续应审核库误差证书/分块策略以减少昂贵回退，不能用放宽精度替代优化。
+ 
+ ## 2026-10-03 负向F接入守卫库并改善读取局部性
+ 
+--- a/docs/physical-layout-design.md
++++ b/docs/physical-layout-design.md
+@@ -337,3 +337,12 @@
+ 源预检沿物理列扫描，两个偏移项均为ptrdiff_t；有界维度与±INT_MAX leading检查维持安全索引。正向F保留其原树和完整中心化重放，负向F不进入该重放捷径。库拒绝、非有限、内部消费者、隔离、所有权、CPU恢复与预算沿既有契约。
+ 
+ IPC规则未改：既有反向列打包产生正向F，worker数值精确对照该实际布局；本地保留负stride，精确对照其scalar顺序。两者完整结果均执行原1e-12及符号/零约束；不能将布局打包后的尾差误判为此次算法变化，也不能据此放宽原容差。详见[本轮实际验收](physical-execution-evidence/2026-10-03-covariance-reverse-f/README.md)。
++
++
++## 23. 负向 F 的 canonical 回退复用有序 Eigen 块（2026-10-03）
++
++第22节守卫库拒绝后，负向F原先只能逐格scalar计算。本轮在同平台和Eigen条件下，将已有C方向4×4有序特征块、128行扫描、尾部和底部四列逻辑按特征stride模板化：C固定stride=1不变，时间stride=−1、特征stride≥T、T≥32且D≥8时使用动态Eigen InnerStride。借用原输入；沿原逻辑时间继续每格累加，未换成正向F的两包归约树。
++
++均值仍暂存独立结果最后一行，最后一个对角完成后才归一化并镜像。所有尾部和底块使用同一个特征stride，防止只有整块正确、奇数维度或最后均值槽错误。所有索引项保持有符号；只扩展已验证的负向列方向，重叠、负特征stride等未额外准入。直接scalar及禁用库路径不变。
++
++这是唯一canonical路径的库实现扩展：直接算子、内部消费者、子作用域及守卫失败重放都复用它，无新增scratch、输入副本、私有线程、图根资格或IPC协议；旧结果仍独立。验收要求负F有限结果逐位对照原scalar，并复核非有限分类/错误、padding canary、跨进程实际布局和原零拷贝/预算声明。[详细设计、性能与自审核](physical-execution-evidence/2026-10-03-covariance-ordered-strides/README.md)保留未达到NJIT的情况。
+--- a/tests/result_native_tests.cpp
++++ b/tests/result_native_tests.cpp
+@@ -739,6 +739,16 @@
+       o::Output out; out.kind=prepared.output_kind; out.shape=prepared.output_shape;
+       out.data=expected.data()+root*elements; o::Workspace work; o::Audit audit;
+       o::execute(prepared,out,work,o::Isa::automatic,audit);
++      if (reverse_f) {
++        std::vector<double> scalar(elements);
++        auto reference=out; reference.data=scalar.data();
++        o::Audit scalar_audit;
++        o::execute(prepared,reference,work,o::Isa::scalar,scalar_audit);
++        check(std::memcmp(out.data,scalar.data(),elements*sizeof(double))==0,
++              "descending F ordered library changed canonical bits");
++        if (o::covariance_accelerate_reserve_doubles(input.shape))
++          check(audit.eigen_covariance_calls==1,"descending F bypassed ordered Eigen tiles");
++      }
+     }
+     for (auto order : {g::OutputOrder::c,g::OutputOrder::f}) {
+       auto compiled=c::compile({"covariance(x)","correlation(x)"},
+--- a/tests/test_covariance_library.py
++++ b/tests/test_covariance_library.py
+@@ -23,8 +23,10 @@
+ 
+ def data(n, d, layout):
+     x = np.random.default_rng(716).normal(size=(n, d))
+-    if layout == "f":
++    if layout in {"f", "reverse_f"}:
+         x = np.asfortranarray(x)
++        if layout == "reverse_f":
++            x = x[::-1]
+     elif layout == "reverse_rows":
+         x = x[::-1]
+     elif layout == "reverse_columns":
+@@ -41,7 +43,7 @@
+     "n,d", [(2, 0), (2, 1), (31, 8), (32, 8), (64, 1), (64, 7), (65, 9), (128, 64)]
+ )
+ @pytest.mark.parametrize(
+-    "layout", ["c", "f", "reverse_rows", "reverse_columns", "slice", "broadcast"]
++    "layout", ["c", "f", "reverse_rows", "reverse_columns", "slice", "broadcast", "reverse_f"]
+ )
+ def test_covariance_layout_and_independent_ownership(name, n, d, layout):
+     x = data(n, d, layout)
+@@ -64,8 +66,11 @@
+         PACKING_PLATFORM
+         and n >= 32
+         and d > 0
+-        and ((x.strides[1] == 8 and d >= 8) or x.strides[0] == 8)
++        and ((x.strides[1] == 8 and d >= 8) or x.strides[0] == 8
++             or (x.strides[0] == -8 and x.strides[1] >= n*8 and d >= 8))
+     )
++    if layout == "reverse_f":
++        np.testing.assert_array_equal(actual.view(np.uint64), scalar.view(np.uint64))
+     if not eligible:
+         assert audit["eigen_covariance_calls"] == 0
+     elif os.environ.get("CME_EXPECT_EIGEN"):
+@@ -79,7 +84,7 @@
+ 
+ 
+ @pytest.mark.parametrize("name", ["covariance", "correlation"])
+-@pytest.mark.parametrize("layout", ["c", "f"])
++@pytest.mark.parametrize("layout", ["c", "f", "reverse_f"])
+ @pytest.mark.parametrize(
+     "fault", ["nan", "inf", "zero", "constant", "huge", "tiny", "near_constant"]
+ )
+@@ -98,7 +103,7 @@
+     elif fault == "tiny":
+         x *= 1e-162
+     elif fault == "near_constant":
+-        x = x * 1e-14 + 7
++        x[:] = x * 1e-14 + 7
+     try:
+         expected = op.call(name, x, simd="scalar")
+     except ValueError as error:
+@@ -108,6 +113,9 @@
+         actual = op.call(name, x)
+         np.testing.assert_array_equal(np.isfinite(actual), np.isfinite(expected))
+         np.testing.assert_allclose(actual, expected, rtol=1e-12, atol=1e-12, equal_nan=True)
++        if layout == "reverse_f":
++            finite = np.isfinite(expected)
++            np.testing.assert_array_equal(actual[finite].view(np.uint64), expected[finite].view(np.uint64))
+ 
+ 
+ @pytest.mark.parametrize("n", [0, 1])
+@@ -119,8 +127,9 @@
+ 
+ 
+ @pytest.mark.parametrize("lane", ["single", "thread", "process", "process_shared"])
+-def test_covariance_cse_transport_and_failure_isolation(lane):
+-    x = data(65, 9, "c")
++@pytest.mark.parametrize("layout", ["c", "reverse_f"])
++def test_covariance_cse_transport_and_failure_isolation(lane, layout):
++    x = data(65, 9, layout)
+     expected, audit = op.covariance(x, audit=True)
+     graph = GraphCompiler({"x": MATRIX}).compile(
+         ["covariance(x)", "trace(covariance(x))", "correlation(x)"]
+@@ -143,8 +152,9 @@
+     assert np.all(np.asarray(bad.outputs[2].values) == 7)
+ 
+ 
+-def test_covariance_prepared_rereads_input_and_keeps_snapshot():
+-    x = data(64, 8, "c")
++@pytest.mark.parametrize("layout", ["c", "reverse_f"])
++def test_covariance_prepared_rereads_input_and_keeps_snapshot(layout):
++    x = data(64, 8, layout)
+     graph = GraphCompiler({"x": MATRIX}).compile("covariance(x)")
+     bounds = np.zeros(1, np.int64)
+     with AdaptiveScheduler(cpu_budget=1, config=config("single")) as scheduler:
+@@ -159,8 +169,9 @@
+         np.testing.assert_array_equal(first.outputs[0].values[0], frozen)
+ 
+ 
+-def test_covariance_nested_iteration_and_memory_admission():
+-    x = data(64, 8, "c")
++@pytest.mark.parametrize("layout", ["c", "reverse_f"])
++def test_covariance_nested_iteration_and_memory_admission(layout):
++    x = data(64, 8, layout)
+     _, direct = op.correlation(x, audit=True)
+     seed = np.zeros((8, 8))
+     graph = GraphCompiler(
+--- a/tests/test_covariance_tiles.py
++++ b/tests/test_covariance_tiles.py
+@@ -10,7 +10,7 @@
+ from calmetrics_engine import AdaptiveScheduler, GraphCompiler
+ from calmetrics_engine import operators as op
+ 
+-from .test_covariance_library import MATRIX, data, PACKING_PLATFORM
++from .test_covariance_library import MATRIX, PACKING_PLATFORM, data
+ from .test_covariance_reuse import _check_pair, _count
+ from .test_typed_results import config, execute
+ 
+@@ -69,13 +69,19 @@
+ @pytest.mark.parametrize("name", ["covariance", "correlation"])
+ @pytest.mark.parametrize("n,d", [(31, 8), (32, 7), (32, 8), (34, 10), (35, 11), (36, 12),
+                               (33, 15), (127, 9), (128, 17), (129, 65)])
+-def test_padded_f_scan_thresholds_and_last_mean_slot(name, n, d):
++@pytest.mark.parametrize("descending", [False, True])
++def test_padded_f_scan_thresholds_and_last_mean_slot(name, n, d, descending):
+     owner, x = _padded_f(n, d)
++    if descending:
++        x = x[::-1]
+     before = owner.copy()
+     x.flags.writeable = False
+     workspace = op.Workspace()
+     actual = _direct_matches_scalar(name, x, workspace)
+     assert actual is not None and np.isfinite(actual).all()
++    if descending:
++        scalar = op.call(name, x, simd="scalar")
++        np.testing.assert_array_equal(actual.view(np.uint64), scalar.view(np.uint64))
+     for j, k in ((0, 0), (0, d - 1), (d // 2, d - 1), (d - 1, d - 1)):
+         expected = _fsum_cell(x, j, k)
+         if name == "correlation":
+@@ -142,8 +148,11 @@
+ 
+ 
+ @pytest.mark.parametrize("fault", [np.nan, np.inf, 1e200], ids=["nan", "inf", "extreme"])
+-def test_padded_f_last_column_fault_preserves_healthy_submatrix(fault):
++@pytest.mark.parametrize("descending", [False, True])
++def test_padded_f_last_column_fault_preserves_healthy_submatrix(fault, descending):
+     owner, x = _padded_f(129, 17)
++    if descending:
++        x = x[::-1]
+     x[91, -1] = fault
+     before = owner.copy()
+     x.flags.writeable = False
+@@ -157,8 +166,11 @@
+     np.testing.assert_array_equal(owner, before)
+ 
+ 
+-def test_padded_f_last_constant_column_keeps_covariance_and_isolates_correlation():
++@pytest.mark.parametrize("descending", [False, True])
++def test_padded_f_last_constant_column_keeps_covariance_and_isolates_correlation(descending):
+     owner, x = _padded_f(129, 17)
++    if descending:
++        x = x[::-1]
+     x[:, -1] = 7.0
+     before = owner.copy()
+     x.flags.writeable = False

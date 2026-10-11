@@ -1,0 +1,1860 @@
+{
+  "scope": "11 ordinary/prepared full-result workloads, 12 balanced rounds, CPU budget 1, warm unchanged NJIT reference; final timing confirmation uses 25 repetitions/round below 8192 rows, otherwise 3; all 11 cases repeated; 2 independent memory rounds; no concurrent build/test",
+  "timing": [
+    {
+      "case": {
+        "name": "standardize",
+        "n": 16,
+        "d": 8,
+        "layout": "f",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "median_ms": {
+        "old": 0.011271,
+        "new": 0.010792,
+        "njit": 0.001417
+      },
+      "correctness": true,
+      "new_over_old": 0.957501552657262,
+      "new_over_njit": 7.616090331686661,
+      "output_orders": [
+        "C",
+        "C",
+        "C"
+      ]
+    },
+    {
+      "case": {
+        "name": "standardize",
+        "n": 252,
+        "d": 8,
+        "layout": "f",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "median_ms": {
+        "old": 0.013209,
+        "new": 0.013166,
+        "njit": 0.005791
+      },
+      "correctness": true,
+      "new_over_old": 0.9967446438034674,
+      "new_over_njit": 2.273527888102228,
+      "output_orders": [
+        "F",
+        "C",
+        "C"
+      ]
+    },
+    {
+      "case": {
+        "name": "standardize",
+        "n": 2048,
+        "d": 64,
+        "layout": "f",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "median_ms": {
+        "old": 0.168271,
+        "new": 0.149542,
+        "njit": 0.276083
+      },
+      "correctness": true,
+      "new_over_old": 0.888697398838778,
+      "new_over_njit": 0.5416559512900107,
+      "output_orders": [
+        "F",
+        "C",
+        "C"
+      ]
+    },
+    {
+      "case": {
+        "name": "standardize",
+        "n": 32768,
+        "d": 64,
+        "layout": "f",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "median_ms": {
+        "old": 3.9694375,
+        "new": 2.666083,
+        "njit": 4.438375
+      },
+      "correctness": true,
+      "new_over_old": 0.6716525956133583,
+      "new_over_njit": 0.6006889909032023,
+      "output_orders": [
+        "F",
+        "C",
+        "C"
+      ]
+    },
+    {
+      "case": {
+        "name": "standardize",
+        "n": 32768,
+        "d": 128,
+        "layout": "f",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "median_ms": {
+        "old": 11.1846245,
+        "new": 7.537583,
+        "njit": 11.9031045
+      },
+      "correctness": true,
+      "new_over_old": 0.6739236529576831,
+      "new_over_njit": 0.6332451336539976,
+      "output_orders": [
+        "F",
+        "C",
+        "C"
+      ]
+    },
+    {
+      "case": {
+        "name": "standardize",
+        "n": 8192,
+        "d": 256,
+        "layout": "f",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "median_ms": {
+        "old": 3.9244165,
+        "new": 2.517354,
+        "njit": 4.4486665
+      },
+      "correctness": true,
+      "new_over_old": 0.6414594373456538,
+      "new_over_njit": 0.5658670974774127,
+      "output_orders": [
+        "F",
+        "C",
+        "C"
+      ]
+    },
+    {
+      "case": {
+        "name": "standardize",
+        "n": 32768,
+        "d": 128,
+        "layout": "c",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "median_ms": {
+        "old": 14.761937,
+        "new": 14.705354,
+        "njit": 45.320458
+      },
+      "correctness": true,
+      "new_over_old": 0.9961669664353668,
+      "new_over_njit": 0.3244749644851338,
+      "output_orders": [
+        "C",
+        "C",
+        "C"
+      ]
+    },
+    {
+      "case": {
+        "name": "standardize",
+        "n": 32768,
+        "d": 128,
+        "layout": "reverse",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "median_ms": {
+        "old": 31.031562,
+        "new": 25.579021,
+        "njit": 21.650125
+      },
+      "correctness": true,
+      "new_over_old": 0.8242904756131838,
+      "new_over_njit": 1.1814722085900198,
+      "output_orders": [
+        "C",
+        "C",
+        "C"
+      ]
+    },
+    {
+      "case": {
+        "name": "standardize",
+        "n": 32768,
+        "d": 128,
+        "layout": "f",
+        "entry": "prepared",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "median_ms": {
+        "old": 12.620438,
+        "new": 8.63,
+        "njit": 12.208021
+      },
+      "correctness": true,
+      "new_over_old": 0.6838114493332166,
+      "new_over_njit": 0.7069122833258561,
+      "output_orders": [
+        "F",
+        "C",
+        "C"
+      ]
+    },
+    {
+      "case": {
+        "name": "mean_axis",
+        "n": 16,
+        "d": 8,
+        "layout": "f",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "median_ms": {
+        "old": 0.0045,
+        "new": 0.004375,
+        "njit": 0.000625
+      },
+      "correctness": true,
+      "new_over_old": 0.9722222222222224,
+      "new_over_njit": 7.000000000000001,
+      "output_orders": [
+        "C"
+      ]
+    },
+    {
+      "case": {
+        "name": "mean_axis",
+        "n": 32768,
+        "d": 128,
+        "layout": "f",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "median_ms": {
+        "old": 0.9413755,
+        "new": 0.887979,
+        "njit": 4.046188
+      },
+      "correctness": true,
+      "new_over_old": 0.9432782136352602,
+      "new_over_njit": 0.21946063801286544,
+      "output_orders": [
+        "C"
+      ]
+    }
+  ],
+  "initial_lower_repeat_timing": [
+    {
+      "case": {
+        "name": "standardize",
+        "n": 16,
+        "d": 8,
+        "layout": "f",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "median_ms": {
+        "old": 0.0122085,
+        "new": 0.012125,
+        "njit": 0.001541
+      },
+      "correctness": true,
+      "new_over_old": 0.9931605029282876,
+      "new_over_njit": 7.868267358857884,
+      "output_orders": [
+        "C",
+        "C",
+        "C"
+      ]
+    },
+    {
+      "case": {
+        "name": "standardize",
+        "n": 252,
+        "d": 8,
+        "layout": "f",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "median_ms": {
+        "old": 0.014542,
+        "new": 0.014875,
+        "njit": 0.0058335
+      },
+      "correctness": true,
+      "new_over_old": 1.0228991885572825,
+      "new_over_njit": 2.549927144938716,
+      "output_orders": [
+        "F",
+        "C",
+        "C"
+      ]
+    },
+    {
+      "case": {
+        "name": "standardize",
+        "n": 2048,
+        "d": 64,
+        "layout": "f",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "median_ms": {
+        "old": 0.2012705,
+        "new": 0.237292,
+        "njit": 0.2968125
+      },
+      "correctness": true,
+      "new_over_old": 1.1789705893312732,
+      "new_over_njit": 0.7994676774057697,
+      "output_orders": [
+        "F",
+        "C",
+        "C"
+      ]
+    },
+    {
+      "case": {
+        "name": "standardize",
+        "n": 32768,
+        "d": 64,
+        "layout": "f",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "median_ms": {
+        "old": 3.790479,
+        "new": 2.714396,
+        "njit": 4.4745
+      },
+      "correctness": true,
+      "new_over_old": 0.7161089667031528,
+      "new_over_njit": 0.6066367191865013,
+      "output_orders": [
+        "F",
+        "C",
+        "C"
+      ]
+    },
+    {
+      "case": {
+        "name": "standardize",
+        "n": 32768,
+        "d": 128,
+        "layout": "f",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "median_ms": {
+        "old": 12.975,
+        "new": 9.261667,
+        "njit": 12.560667
+      },
+      "correctness": true,
+      "new_over_old": 0.7138086319845857,
+      "new_over_njit": 0.7373547121343157,
+      "output_orders": [
+        "F",
+        "C",
+        "C"
+      ]
+    },
+    {
+      "case": {
+        "name": "standardize",
+        "n": 8192,
+        "d": 256,
+        "layout": "f",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "median_ms": {
+        "old": 3.520396,
+        "new": 2.562583,
+        "njit": 4.4630415
+      },
+      "correctness": true,
+      "new_over_old": 0.7279246425686202,
+      "new_over_njit": 0.5741786178775169,
+      "output_orders": [
+        "F",
+        "C",
+        "C"
+      ]
+    },
+    {
+      "case": {
+        "name": "standardize",
+        "n": 32768,
+        "d": 128,
+        "layout": "c",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "median_ms": {
+        "old": 14.9918755,
+        "new": 15.1241875,
+        "njit": 45.4629585
+      },
+      "correctness": true,
+      "new_over_old": 1.0088255802284376,
+      "new_over_njit": 0.33267055200554096,
+      "output_orders": [
+        "C",
+        "C",
+        "C"
+      ]
+    },
+    {
+      "case": {
+        "name": "standardize",
+        "n": 32768,
+        "d": 128,
+        "layout": "reverse",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "median_ms": {
+        "old": 30.8868125,
+        "new": 30.7936455,
+        "njit": 22.1659585
+      },
+      "correctness": true,
+      "new_over_old": 0.9969835993921353,
+      "new_over_njit": 1.3892313973248664,
+      "output_orders": [
+        "C",
+        "C",
+        "C"
+      ]
+    },
+    {
+      "case": {
+        "name": "standardize",
+        "n": 32768,
+        "d": 128,
+        "layout": "f",
+        "entry": "prepared",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "median_ms": {
+        "old": 12.5771665,
+        "new": 8.5701875,
+        "njit": 12.048354
+      },
+      "correctness": true,
+      "new_over_old": 0.6814084476022481,
+      "new_over_njit": 0.7113160436687036,
+      "output_orders": [
+        "F",
+        "C",
+        "C"
+      ]
+    },
+    {
+      "case": {
+        "name": "mean_axis",
+        "n": 16,
+        "d": 8,
+        "layout": "f",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "median_ms": {
+        "old": 0.0053955,
+        "new": 0.00525,
+        "njit": 0.0007915
+      },
+      "correctness": true,
+      "new_over_old": 0.9730330831248263,
+      "new_over_njit": 6.632975363234365,
+      "output_orders": [
+        "C"
+      ]
+    },
+    {
+      "case": {
+        "name": "mean_axis",
+        "n": 32768,
+        "d": 128,
+        "layout": "f",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "median_ms": {
+        "old": 1.0128125,
+        "new": 0.958604,
+        "njit": 4.0679995
+      },
+      "correctness": true,
+      "new_over_old": 0.946477260104906,
+      "new_over_njit": 0.23564506337820346,
+      "output_orders": [
+        "C"
+      ]
+    }
+  ],
+  "identity_window_supplement": {
+    "scope": "old/new only, no NJIT claim; CPU budget 1; 32768x128 F input; full window and 100:20000 window; all outputs materialized and retained; 30 alternating samples",
+    "identity-accepted": [
+      {
+        "case": {
+          "expr": "x",
+          "partial": false
+        },
+        "meta": {
+          "old": {
+            "shape": [
+              32768,
+              128
+            ],
+            "strides": [
+              1024,
+              8
+            ]
+          },
+          "new": {
+            "shape": [
+              32768,
+              128
+            ],
+            "strides": [
+              8,
+              262144
+            ]
+          }
+        },
+        "median_ms": {
+          "old": 41.084583,
+          "new": 1.03775
+        }
+      },
+      {
+        "case": {
+          "expr": "x",
+          "partial": true
+        },
+        "meta": {
+          "old": {
+            "shape": [
+              19900,
+              128
+            ],
+            "strides": [
+              1024,
+              8
+            ]
+          },
+          "new": {
+            "shape": [
+              19900,
+              128
+            ],
+            "strides": [
+              8,
+              159200
+            ]
+          }
+        },
+        "median_ms": {
+          "old": 25.970938,
+          "new": 1.6596455
+        }
+      },
+      {
+        "case": {
+          "expr": "x*2+1",
+          "partial": false
+        },
+        "meta": {
+          "old": {
+            "shape": [
+              32768,
+              128
+            ],
+            "strides": [
+              1024,
+              8
+            ]
+          },
+          "new": {
+            "shape": [
+              32768,
+              128
+            ],
+            "strides": [
+              8,
+              262144
+            ]
+          }
+        },
+        "median_ms": {
+          "old": 10.968333,
+          "new": 3.4419585
+        }
+      },
+      {
+        "case": {
+          "expr": "x*2+1",
+          "partial": true
+        },
+        "meta": {
+          "old": {
+            "shape": [
+              19900,
+              128
+            ],
+            "strides": [
+              1024,
+              8
+            ]
+          },
+          "new": {
+            "shape": [
+              19900,
+              128
+            ],
+            "strides": [
+              8,
+              159200
+            ]
+          }
+        },
+        "median_ms": {
+          "old": 7.91475,
+          "new": 2.469417
+        }
+      }
+    ],
+    "identity-isolate-accepted": [
+      {
+        "case": {
+          "expr": "x",
+          "partial": false
+        },
+        "meta": {
+          "old": {
+            "shape": [
+              32768,
+              128
+            ],
+            "strides": [
+              1024,
+              8
+            ]
+          },
+          "new": {
+            "shape": [
+              32768,
+              128
+            ],
+            "strides": [
+              1024,
+              8
+            ]
+          }
+        },
+        "median_ms": {
+          "old": 45.5414375,
+          "new": 33.486479
+        }
+      },
+      {
+        "case": {
+          "expr": "x",
+          "partial": true
+        },
+        "meta": {
+          "old": {
+            "shape": [
+              19900,
+              128
+            ],
+            "strides": [
+              1024,
+              8
+            ]
+          },
+          "new": {
+            "shape": [
+              19900,
+              128
+            ],
+            "strides": [
+              1024,
+              8
+            ]
+          }
+        },
+        "median_ms": {
+          "old": 29.0663125,
+          "new": 21.470104
+        }
+      },
+      {
+        "case": {
+          "expr": "x*2+1",
+          "partial": false
+        },
+        "meta": {
+          "old": {
+            "shape": [
+              32768,
+              128
+            ],
+            "strides": [
+              1024,
+              8
+            ]
+          },
+          "new": {
+            "shape": [
+              32768,
+              128
+            ],
+            "strides": [
+              1024,
+              8
+            ]
+          }
+        },
+        "median_ms": {
+          "old": 30.4356665,
+          "new": 26.59475
+        }
+      },
+      {
+        "case": {
+          "expr": "x*2+1",
+          "partial": true
+        },
+        "meta": {
+          "old": {
+            "shape": [
+              19900,
+              128
+            ],
+            "strides": [
+              1024,
+              8
+            ]
+          },
+          "new": {
+            "shape": [
+              19900,
+              128
+            ],
+            "strides": [
+              1024,
+              8
+            ]
+          }
+        },
+        "median_ms": {
+          "old": 19.125854,
+          "new": 16.5719795
+        }
+      }
+    ]
+  },
+  "memory": [
+    {
+      "round": 1,
+      "case": {
+        "name": "standardize",
+        "n": 16,
+        "d": 8,
+        "layout": "f",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "backend": "old",
+      "kind": "heap",
+      "setup_heap": {
+        "allocations": 858,
+        "frees": 709,
+        "allocated_bytes": 66110,
+        "live_bytes": 19348,
+        "peak_bytes": 22757,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_heap": {
+        "allocations": 987,
+        "frees": 794,
+        "allocated_bytes": 80272,
+        "live_bytes": 27062,
+        "peak_bytes": 27764,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_heap": {
+        "allocations": 1931,
+        "frees": 1733,
+        "allocated_bytes": 131664,
+        "live_bytes": 27142,
+        "peak_bytes": 29530,
+        "untracked_frees": 5,
+        "table_overflows": 0
+      }
+    },
+    {
+      "round": 1,
+      "case": {
+        "name": "standardize",
+        "n": 16,
+        "d": 8,
+        "layout": "f",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "backend": "old",
+      "kind": "rss",
+      "rss_baseline": 43302912,
+      "rss_peak": 44007424,
+      "rss_delta": 704512,
+      "rss_scope": "one fresh RSS child; cold1call includes setup, warm11calls retains prior result; deltas are not added"
+    },
+    {
+      "round": 1,
+      "case": {
+        "name": "standardize",
+        "n": 16,
+        "d": 8,
+        "layout": "f",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "backend": "new",
+      "kind": "heap",
+      "setup_heap": {
+        "allocations": 862,
+        "frees": 713,
+        "allocated_bytes": 66260,
+        "live_bytes": 19356,
+        "peak_bytes": 22765,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_heap": {
+        "allocations": 991,
+        "frees": 798,
+        "allocated_bytes": 80374,
+        "live_bytes": 27094,
+        "peak_bytes": 27724,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_heap": {
+        "allocations": 1935,
+        "frees": 1737,
+        "allocated_bytes": 130614,
+        "live_bytes": 27174,
+        "peak_bytes": 29490,
+        "untracked_frees": 5,
+        "table_overflows": 0
+      }
+    },
+    {
+      "round": 1,
+      "case": {
+        "name": "standardize",
+        "n": 16,
+        "d": 8,
+        "layout": "f",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "backend": "new",
+      "kind": "rss",
+      "rss_baseline": 43024384,
+      "rss_peak": 43810816,
+      "rss_delta": 786432,
+      "rss_scope": "one fresh RSS child; cold1call includes setup, warm11calls retains prior result; deltas are not added"
+    },
+    {
+      "round": 1,
+      "case": {
+        "name": "standardize",
+        "n": 16,
+        "d": 8,
+        "layout": "f",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "backend": "njit",
+      "kind": "heap",
+      "setup_heap": {
+        "allocations": 0,
+        "frees": 0,
+        "allocated_bytes": 0,
+        "live_bytes": 0,
+        "peak_bytes": 0,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_heap": {
+        "allocations": 8,
+        "frees": 1,
+        "allocated_bytes": 1660,
+        "live_bytes": 1612,
+        "peak_bytes": 1628,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_heap": {
+        "allocations": 74,
+        "frees": 65,
+        "allocated_bytes": 26268,
+        "live_bytes": 1644,
+        "peak_bytes": 3180,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      }
+    },
+    {
+      "round": 1,
+      "case": {
+        "name": "standardize",
+        "n": 16,
+        "d": 8,
+        "layout": "f",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "backend": "njit",
+      "kind": "rss",
+      "rss_baseline": 119586816,
+      "rss_peak": 119603200,
+      "rss_delta": 16384,
+      "rss_scope": "one fresh RSS child; cold1call includes setup, warm11calls retains prior result; deltas are not added"
+    },
+    {
+      "round": 1,
+      "case": {
+        "name": "standardize",
+        "n": 32768,
+        "d": 128,
+        "layout": "f",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "backend": "old",
+      "kind": "heap",
+      "setup_heap": {
+        "allocations": 858,
+        "frees": 709,
+        "allocated_bytes": 66110,
+        "live_bytes": 19348,
+        "peak_bytes": 22757,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_heap": {
+        "allocations": 987,
+        "frees": 794,
+        "allocated_bytes": 33637640,
+        "live_bytes": 33584430,
+        "peak_bytes": 33585132,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_heap": {
+        "allocations": 1931,
+        "frees": 1733,
+        "allocated_bytes": 570574280,
+        "live_bytes": 33584510,
+        "peak_bytes": 67142226,
+        "untracked_frees": 5,
+        "table_overflows": 0
+      }
+    },
+    {
+      "round": 1,
+      "case": {
+        "name": "standardize",
+        "n": 32768,
+        "d": 128,
+        "layout": "f",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "backend": "old",
+      "kind": "rss",
+      "rss_baseline": 143900672,
+      "rss_peak": 178225152,
+      "rss_delta": 34324480,
+      "rss_scope": "one fresh RSS child; cold1call includes setup, warm11calls retains prior result; deltas are not added"
+    },
+    {
+      "round": 1,
+      "case": {
+        "name": "standardize",
+        "n": 32768,
+        "d": 128,
+        "layout": "f",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "backend": "new",
+      "kind": "heap",
+      "setup_heap": {
+        "allocations": 862,
+        "frees": 713,
+        "allocated_bytes": 66260,
+        "live_bytes": 19356,
+        "peak_bytes": 22765,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_heap": {
+        "allocations": 993,
+        "frees": 799,
+        "allocated_bytes": 33637761,
+        "live_bytes": 33584465,
+        "peak_bytes": 33585095,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_heap": {
+        "allocations": 1953,
+        "frees": 1754,
+        "allocated_bytes": 570573505,
+        "live_bytes": 33584545,
+        "peak_bytes": 67142189,
+        "untracked_frees": 5,
+        "table_overflows": 0
+      }
+    },
+    {
+      "round": 1,
+      "case": {
+        "name": "standardize",
+        "n": 32768,
+        "d": 128,
+        "layout": "f",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "backend": "new",
+      "kind": "rss",
+      "rss_baseline": 144998400,
+      "rss_peak": 179306496,
+      "rss_delta": 34308096,
+      "rss_scope": "one fresh RSS child; cold1call includes setup, warm11calls retains prior result; deltas are not added"
+    },
+    {
+      "round": 1,
+      "case": {
+        "name": "standardize",
+        "n": 32768,
+        "d": 128,
+        "layout": "f",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "backend": "njit",
+      "kind": "heap",
+      "setup_heap": {
+        "allocations": 0,
+        "frees": 0,
+        "allocated_bytes": 0,
+        "live_bytes": 0,
+        "peak_bytes": 0,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_heap": {
+        "allocations": 8,
+        "frees": 1,
+        "allocated_bytes": 33556988,
+        "live_bytes": 33556940,
+        "peak_bytes": 33556956,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_heap": {
+        "allocations": 74,
+        "frees": 65,
+        "allocated_bytes": 570466844,
+        "live_bytes": 33556972,
+        "peak_bytes": 67113836,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      }
+    },
+    {
+      "round": 1,
+      "case": {
+        "name": "standardize",
+        "n": 32768,
+        "d": 128,
+        "layout": "f",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "backend": "njit",
+      "kind": "rss",
+      "rss_baseline": 220495872,
+      "rss_peak": 254115840,
+      "rss_delta": 33619968,
+      "rss_scope": "one fresh RSS child; cold1call includes setup, warm11calls retains prior result; deltas are not added"
+    },
+    {
+      "round": 1,
+      "case": {
+        "name": "standardize",
+        "n": 32768,
+        "d": 128,
+        "layout": "c",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "backend": "old",
+      "kind": "heap",
+      "setup_heap": {
+        "allocations": 858,
+        "frees": 709,
+        "allocated_bytes": 66110,
+        "live_bytes": 19348,
+        "peak_bytes": 22757,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_heap": {
+        "allocations": 987,
+        "frees": 794,
+        "allocated_bytes": 33637640,
+        "live_bytes": 33584430,
+        "peak_bytes": 33585132,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_heap": {
+        "allocations": 1931,
+        "frees": 1733,
+        "allocated_bytes": 570574280,
+        "live_bytes": 33584510,
+        "peak_bytes": 67142226,
+        "untracked_frees": 5,
+        "table_overflows": 0
+      }
+    },
+    {
+      "round": 1,
+      "case": {
+        "name": "standardize",
+        "n": 32768,
+        "d": 128,
+        "layout": "c",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "backend": "old",
+      "kind": "rss",
+      "rss_baseline": 145014784,
+      "rss_peak": 179306496,
+      "rss_delta": 34291712,
+      "rss_scope": "one fresh RSS child; cold1call includes setup, warm11calls retains prior result; deltas are not added"
+    },
+    {
+      "round": 1,
+      "case": {
+        "name": "standardize",
+        "n": 32768,
+        "d": 128,
+        "layout": "c",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "backend": "new",
+      "kind": "heap",
+      "setup_heap": {
+        "allocations": 862,
+        "frees": 713,
+        "allocated_bytes": 66260,
+        "live_bytes": 19356,
+        "peak_bytes": 22765,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_heap": {
+        "allocations": 991,
+        "frees": 798,
+        "allocated_bytes": 33637742,
+        "live_bytes": 33584462,
+        "peak_bytes": 33585092,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_heap": {
+        "allocations": 1935,
+        "frees": 1737,
+        "allocated_bytes": 570573230,
+        "live_bytes": 33584542,
+        "peak_bytes": 67142186,
+        "untracked_frees": 5,
+        "table_overflows": 0
+      }
+    },
+    {
+      "round": 1,
+      "case": {
+        "name": "standardize",
+        "n": 32768,
+        "d": 128,
+        "layout": "c",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "backend": "new",
+      "kind": "rss",
+      "rss_baseline": 144359424,
+      "rss_peak": 178683904,
+      "rss_delta": 34324480,
+      "rss_scope": "one fresh RSS child; cold1call includes setup, warm11calls retains prior result; deltas are not added"
+    },
+    {
+      "round": 1,
+      "case": {
+        "name": "standardize",
+        "n": 32768,
+        "d": 128,
+        "layout": "c",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "backend": "njit",
+      "kind": "heap",
+      "setup_heap": {
+        "allocations": 0,
+        "frees": 0,
+        "allocated_bytes": 0,
+        "live_bytes": 0,
+        "peak_bytes": 0,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_heap": {
+        "allocations": 8,
+        "frees": 1,
+        "allocated_bytes": 33556988,
+        "live_bytes": 33556940,
+        "peak_bytes": 33556956,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_heap": {
+        "allocations": 74,
+        "frees": 65,
+        "allocated_bytes": 570466844,
+        "live_bytes": 33556972,
+        "peak_bytes": 67113836,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      }
+    },
+    {
+      "round": 1,
+      "case": {
+        "name": "standardize",
+        "n": 32768,
+        "d": 128,
+        "layout": "c",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "backend": "njit",
+      "kind": "rss",
+      "rss_baseline": 220725248,
+      "rss_peak": 254345216,
+      "rss_delta": 33619968,
+      "rss_scope": "one fresh RSS child; cold1call includes setup, warm11calls retains prior result; deltas are not added"
+    },
+    {
+      "round": 2,
+      "case": {
+        "name": "standardize",
+        "n": 16,
+        "d": 8,
+        "layout": "f",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "backend": "old",
+      "kind": "heap",
+      "setup_heap": {
+        "allocations": 858,
+        "frees": 709,
+        "allocated_bytes": 66110,
+        "live_bytes": 19348,
+        "peak_bytes": 22757,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_heap": {
+        "allocations": 987,
+        "frees": 794,
+        "allocated_bytes": 80272,
+        "live_bytes": 27062,
+        "peak_bytes": 27764,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_heap": {
+        "allocations": 1931,
+        "frees": 1733,
+        "allocated_bytes": 131664,
+        "live_bytes": 27142,
+        "peak_bytes": 29530,
+        "untracked_frees": 5,
+        "table_overflows": 0
+      }
+    },
+    {
+      "round": 2,
+      "case": {
+        "name": "standardize",
+        "n": 16,
+        "d": 8,
+        "layout": "f",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "backend": "old",
+      "kind": "rss",
+      "rss_baseline": 43401216,
+      "rss_peak": 44138496,
+      "rss_delta": 737280,
+      "rss_scope": "one fresh RSS child; cold1call includes setup, warm11calls retains prior result; deltas are not added"
+    },
+    {
+      "round": 2,
+      "case": {
+        "name": "standardize",
+        "n": 16,
+        "d": 8,
+        "layout": "f",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "backend": "new",
+      "kind": "heap",
+      "setup_heap": {
+        "allocations": 862,
+        "frees": 713,
+        "allocated_bytes": 66260,
+        "live_bytes": 19356,
+        "peak_bytes": 22765,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_heap": {
+        "allocations": 991,
+        "frees": 798,
+        "allocated_bytes": 80374,
+        "live_bytes": 27094,
+        "peak_bytes": 27724,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_heap": {
+        "allocations": 1935,
+        "frees": 1737,
+        "allocated_bytes": 130614,
+        "live_bytes": 27174,
+        "peak_bytes": 29490,
+        "untracked_frees": 5,
+        "table_overflows": 0
+      }
+    },
+    {
+      "round": 2,
+      "case": {
+        "name": "standardize",
+        "n": 16,
+        "d": 8,
+        "layout": "f",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "backend": "new",
+      "kind": "rss",
+      "rss_baseline": 42696704,
+      "rss_peak": 43499520,
+      "rss_delta": 802816,
+      "rss_scope": "one fresh RSS child; cold1call includes setup, warm11calls retains prior result; deltas are not added"
+    },
+    {
+      "round": 2,
+      "case": {
+        "name": "standardize",
+        "n": 16,
+        "d": 8,
+        "layout": "f",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "backend": "njit",
+      "kind": "heap",
+      "setup_heap": {
+        "allocations": 0,
+        "frees": 0,
+        "allocated_bytes": 0,
+        "live_bytes": 0,
+        "peak_bytes": 0,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_heap": {
+        "allocations": 8,
+        "frees": 1,
+        "allocated_bytes": 1660,
+        "live_bytes": 1612,
+        "peak_bytes": 1628,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_heap": {
+        "allocations": 74,
+        "frees": 65,
+        "allocated_bytes": 26268,
+        "live_bytes": 1644,
+        "peak_bytes": 3180,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      }
+    },
+    {
+      "round": 2,
+      "case": {
+        "name": "standardize",
+        "n": 16,
+        "d": 8,
+        "layout": "f",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "backend": "njit",
+      "kind": "rss",
+      "rss_baseline": 119406592,
+      "rss_peak": 119422976,
+      "rss_delta": 16384,
+      "rss_scope": "one fresh RSS child; cold1call includes setup, warm11calls retains prior result; deltas are not added"
+    },
+    {
+      "round": 2,
+      "case": {
+        "name": "standardize",
+        "n": 32768,
+        "d": 128,
+        "layout": "f",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "backend": "old",
+      "kind": "heap",
+      "setup_heap": {
+        "allocations": 858,
+        "frees": 709,
+        "allocated_bytes": 66110,
+        "live_bytes": 19348,
+        "peak_bytes": 22757,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_heap": {
+        "allocations": 987,
+        "frees": 794,
+        "allocated_bytes": 33637640,
+        "live_bytes": 33584430,
+        "peak_bytes": 33585132,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_heap": {
+        "allocations": 1931,
+        "frees": 1733,
+        "allocated_bytes": 570574280,
+        "live_bytes": 33584510,
+        "peak_bytes": 67142226,
+        "untracked_frees": 5,
+        "table_overflows": 0
+      }
+    },
+    {
+      "round": 2,
+      "case": {
+        "name": "standardize",
+        "n": 32768,
+        "d": 128,
+        "layout": "f",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "backend": "old",
+      "kind": "rss",
+      "rss_baseline": 144130048,
+      "rss_peak": 178470912,
+      "rss_delta": 34340864,
+      "rss_scope": "one fresh RSS child; cold1call includes setup, warm11calls retains prior result; deltas are not added"
+    },
+    {
+      "round": 2,
+      "case": {
+        "name": "standardize",
+        "n": 32768,
+        "d": 128,
+        "layout": "f",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "backend": "new",
+      "kind": "heap",
+      "setup_heap": {
+        "allocations": 862,
+        "frees": 713,
+        "allocated_bytes": 66260,
+        "live_bytes": 19356,
+        "peak_bytes": 22765,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_heap": {
+        "allocations": 993,
+        "frees": 799,
+        "allocated_bytes": 33637761,
+        "live_bytes": 33584465,
+        "peak_bytes": 33585095,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_heap": {
+        "allocations": 1953,
+        "frees": 1754,
+        "allocated_bytes": 570573505,
+        "live_bytes": 33584545,
+        "peak_bytes": 67142189,
+        "untracked_frees": 5,
+        "table_overflows": 0
+      }
+    },
+    {
+      "round": 2,
+      "case": {
+        "name": "standardize",
+        "n": 32768,
+        "d": 128,
+        "layout": "f",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "backend": "new",
+      "kind": "rss",
+      "rss_baseline": 143917056,
+      "rss_peak": 178225152,
+      "rss_delta": 34308096,
+      "rss_scope": "one fresh RSS child; cold1call includes setup, warm11calls retains prior result; deltas are not added"
+    },
+    {
+      "round": 2,
+      "case": {
+        "name": "standardize",
+        "n": 32768,
+        "d": 128,
+        "layout": "f",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "backend": "njit",
+      "kind": "heap",
+      "setup_heap": {
+        "allocations": 0,
+        "frees": 0,
+        "allocated_bytes": 0,
+        "live_bytes": 0,
+        "peak_bytes": 0,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_heap": {
+        "allocations": 8,
+        "frees": 1,
+        "allocated_bytes": 33556988,
+        "live_bytes": 33556940,
+        "peak_bytes": 33556956,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_heap": {
+        "allocations": 74,
+        "frees": 65,
+        "allocated_bytes": 570466844,
+        "live_bytes": 33556972,
+        "peak_bytes": 67113836,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      }
+    },
+    {
+      "round": 2,
+      "case": {
+        "name": "standardize",
+        "n": 32768,
+        "d": 128,
+        "layout": "f",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "backend": "njit",
+      "kind": "rss",
+      "rss_baseline": 221659136,
+      "rss_peak": 255246336,
+      "rss_delta": 33587200,
+      "rss_scope": "one fresh RSS child; cold1call includes setup, warm11calls retains prior result; deltas are not added"
+    },
+    {
+      "round": 2,
+      "case": {
+        "name": "standardize",
+        "n": 32768,
+        "d": 128,
+        "layout": "c",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "backend": "old",
+      "kind": "heap",
+      "setup_heap": {
+        "allocations": 858,
+        "frees": 709,
+        "allocated_bytes": 66110,
+        "live_bytes": 19348,
+        "peak_bytes": 22757,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_heap": {
+        "allocations": 987,
+        "frees": 794,
+        "allocated_bytes": 33637640,
+        "live_bytes": 33584430,
+        "peak_bytes": 33585132,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_heap": {
+        "allocations": 1931,
+        "frees": 1733,
+        "allocated_bytes": 570574280,
+        "live_bytes": 33584510,
+        "peak_bytes": 67142226,
+        "untracked_frees": 5,
+        "table_overflows": 0
+      }
+    },
+    {
+      "round": 2,
+      "case": {
+        "name": "standardize",
+        "n": 32768,
+        "d": 128,
+        "layout": "c",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "backend": "old",
+      "kind": "rss",
+      "rss_baseline": 144392192,
+      "rss_peak": 178667520,
+      "rss_delta": 34275328,
+      "rss_scope": "one fresh RSS child; cold1call includes setup, warm11calls retains prior result; deltas are not added"
+    },
+    {
+      "round": 2,
+      "case": {
+        "name": "standardize",
+        "n": 32768,
+        "d": 128,
+        "layout": "c",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "backend": "new",
+      "kind": "heap",
+      "setup_heap": {
+        "allocations": 862,
+        "frees": 713,
+        "allocated_bytes": 66260,
+        "live_bytes": 19356,
+        "peak_bytes": 22765,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_heap": {
+        "allocations": 991,
+        "frees": 798,
+        "allocated_bytes": 33637742,
+        "live_bytes": 33584462,
+        "peak_bytes": 33585092,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_heap": {
+        "allocations": 1935,
+        "frees": 1737,
+        "allocated_bytes": 570573230,
+        "live_bytes": 33584542,
+        "peak_bytes": 67142186,
+        "untracked_frees": 5,
+        "table_overflows": 0
+      }
+    },
+    {
+      "round": 2,
+      "case": {
+        "name": "standardize",
+        "n": 32768,
+        "d": 128,
+        "layout": "c",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "backend": "new",
+      "kind": "rss",
+      "rss_baseline": 143769600,
+      "rss_peak": 178143232,
+      "rss_delta": 34373632,
+      "rss_scope": "one fresh RSS child; cold1call includes setup, warm11calls retains prior result; deltas are not added"
+    },
+    {
+      "round": 2,
+      "case": {
+        "name": "standardize",
+        "n": 32768,
+        "d": 128,
+        "layout": "c",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "backend": "njit",
+      "kind": "heap",
+      "setup_heap": {
+        "allocations": 0,
+        "frees": 0,
+        "allocated_bytes": 0,
+        "live_bytes": 0,
+        "peak_bytes": 0,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_heap": {
+        "allocations": 8,
+        "frees": 1,
+        "allocated_bytes": 33556988,
+        "live_bytes": 33556940,
+        "peak_bytes": 33556956,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_heap": {
+        "allocations": 74,
+        "frees": 65,
+        "allocated_bytes": 570466844,
+        "live_bytes": 33556972,
+        "peak_bytes": 67113836,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      }
+    },
+    {
+      "round": 2,
+      "case": {
+        "name": "standardize",
+        "n": 32768,
+        "d": 128,
+        "layout": "c",
+        "entry": "ordinary",
+        "rtol": 1e-10,
+        "atol": 1e-12
+      },
+      "backend": "njit",
+      "kind": "rss",
+      "rss_baseline": 220872704,
+      "rss_peak": 254492672,
+      "rss_delta": 33619968,
+      "rss_scope": "one fresh RSS child; cold1call includes setup, warm11calls retains prior result; deltas are not added"
+    }
+  ],
+  "limitations": [
+    "malloc probe excludes Python pymalloc arenas, mmap and stack; RSS includes process baseline and is not incremental-allocation proof",
+    "medium/large all-operator acceptance remains open; direct-operator order API and general DAG/state layout optimization remain pending",
+    "initial 2048x64 F timing regressed from 0.2012705 to 0.237292 ms; the repeated confirmation improved; no claim of uniform wins across every timing round",
+    "reverse input remains slower than NJIT; large native malloc peaks remain about 28 KB above NJIT"
+  ]
+}

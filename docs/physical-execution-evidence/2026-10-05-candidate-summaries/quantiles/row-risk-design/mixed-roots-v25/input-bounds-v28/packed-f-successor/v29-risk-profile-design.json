@@ -1,0 +1,33 @@
+{
+  "status": "prepared_not_executed",
+  "driver_sha256": {
+    "run-v29-risk-profile.py": "821061fd80ddd35a4263ed162de9e3b61f1b9c3c54c522a391247e461da515c8",
+    "benchmark_risks_parallel_v29.py": "c01e017db54b4bc60522e81658660e5550d644fa149919470122a4ab690e2dca",
+    "risk_graphs.py": "e8a566dd3a991622f2f1d5c1f6368fca7a9cbea71f2cd3bc1be02e6b67b006d3"
+  },
+  "configurations": 3,
+  "backend": [
+    "actual0216",
+    "candidate20e3",
+    "warmedNJIT64"
+  ],
+  "shape": [
+    262144,
+    2520,
+    30
+  ],
+  "cpu_budget": 4,
+  "source": "actual loaded released native wheel; ordinary Scheduler; no value observer or edited kernel",
+  "phases": "macOS sample captures all process threads for3s at1ms interval after READY while six existing complete requests execute",
+  "evidence": "sampled call stacks and complete fixture/math/ownership checks; profiler overhead and unpaired time not performance acceptance",
+  "limitations": [
+    "statistical sampling may miss short phases",
+    "release symbols may be unavailable",
+    "does not attribute allocations",
+    "fixed regular-weight3risk chain only; not random repair/Pareto or platform service"
+  ],
+  "gate": "exact corrected V29 all8 formal jobs terminalpassed; no concurrent compile or formal measurement",
+  "production_adopted": false,
+  "request_or_peak_acceptance": false,
+  "whole_goal_complete": false
+}

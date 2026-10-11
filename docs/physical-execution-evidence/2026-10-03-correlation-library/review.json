@@ -1,0 +1,56 @@
+{
+  "method": "root self-review; no new subagent review",
+  "status": "NO_PRODUCTION_BLOCKER_FOUND",
+  "checks": [
+    "Single canonical means, diagonal, pair replay and final normalization reused; no new mathematical implementation",
+    "Correlation certificate accounts for division by the same exact canonical standard-deviation product and both final rounding errors",
+    "Existing finite source cap and nonzero centered lower bound retained; only covariance keeps its absolute-amplitude replay heuristic",
+    "Constant/zero/NaN/Inf and error recovery preserve canonical rules; no clipping or forced unit diagonal",
+    "Independent symmetric F storage uses the same admission in finalization, reserve, execution and worker metadata; observer remains canonical",
+    "No shared/boolean/isolate/scope approximation; no added worker field or thread; library restores current-thread policy",
+    "Result ownership, CPU and memory budget, input immutability and native dispatch covered by actual Scheduler tests"
+  ],
+  "corrections": [
+    {
+      "kind": "test_contract_update",
+      "detail": "Old F fallback-budget fixture assumed standalone correlation always needed a C arena. Keep that requirement on isolate mode and separately enforce C/F budget equality for new independent symmetric roots."
+    },
+    {
+      "kind": "reference_strengthened",
+      "detail": "Preserved initial corrcoef measurements; final NI uses covariance plus mirrored in-place normalization and zero-copy F view."
+    },
+    {
+      "kind": "admission_refined",
+      "detail": "Normalized bound made centered amplitude>8 rejection unnecessary for correlation; kept finite input<=1e4 and exponent/rounding/error guards."
+    }
+  ],
+  "limits": [
+    "No claim of universal NJIT time or memory superiority",
+    "Vendor DSYRK error model is restricted to tested backend/build; not formal vendor certification",
+    "malloc/RSS do not cover all Python arena, stack, mmap and process-tree memory",
+    "No fresh Excel application recalculation; historical snapshot verified",
+    "No new cross-platform run; OFF build checks local portable path",
+    "2048 C adds about 44 MiB versus the old engine; source-amplitude rejection remains materially slower than NJIT"
+  ],
+  "delivery": "No commit or push",
+  "verification": {
+    "python": 10663,
+    "native": "9/9",
+    "asan_ubsan": "9/9",
+    "native_off": "9/9",
+    "off_focused": {
+      "passed": 176,
+      "skipped": 139
+    },
+    "focused": 315,
+    "direct_operators": 185,
+    "historical_excel": {
+      "cases": 469,
+      "values": 3056,
+      "new_recalculation": false
+    },
+    "fresh_memory_children": 18,
+    "heap_stages": 54,
+    "memory_tracking_errors": 0
+  }
+}

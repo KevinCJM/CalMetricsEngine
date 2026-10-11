@@ -1,0 +1,104 @@
+{
+  "status": "performance_prescreen_passed_qualification_in_progress",
+  "production_adopted": false,
+  "goal_complete": false,
+  "candidate_build_id": "ef10f1573baea5f3009128434e8f1701d79282bcbb35849e026e8ae6a765e1c2",
+  "normal_related": 1513,
+  "normal_native": 9,
+  "private_controls": 262,
+  "private_asan_ubsan_controls": 262,
+  "time": {
+    "v46-square-FF-F": {
+      "actual": 1.2134656455,
+      "candidate": 1.113382479,
+      "njit_direct": 0.6962420625
+    },
+    "v46-square-CC-C": {
+      "actual": 1.0674632915000002,
+      "candidate": 1.0282526870000002,
+      "njit_direct": 0.6542668125
+    },
+    "v46-long-FF-F": {
+      "actual": 3.2557752705,
+      "candidate": 2.4358979585,
+      "njit_direct": 1.4542339585000001
+    },
+    "v46-square-CC-F": {
+      "actual": 1.3095502295,
+      "candidate": 1.2201144165,
+      "njit_direct": 0.8667682290000001
+    }
+  },
+  "memory": {
+    "v46-long-FF-F-memory": {
+      "actual": {
+        "warm_heap_peak": 1363240248,
+        "rss_delta_median": 1364230144,
+        "rss_deltas": [
+          1364230144,
+          1364328448,
+          1364131840
+        ]
+      },
+      "candidate": {
+        "warm_heap_peak": 1363240248,
+        "rss_delta_median": 1364131840,
+        "rss_deltas": [
+          1364131840,
+          1364099072,
+          1364131840
+        ]
+      },
+      "njit_direct": {
+        "warm_heap_peak": 1348474432,
+        "rss_delta_median": 1361117184,
+        "rss_deltas": [
+          1361117184,
+          1354874880,
+          1361199104
+        ]
+      }
+    },
+    "v46-square-FF-F-memory": {
+      "actual": {
+        "warm_heap_peak": 815883576,
+        "rss_delta_median": 816431104,
+        "rss_deltas": [
+          816365568,
+          816431104,
+          816840704
+        ]
+      },
+      "candidate": {
+        "warm_heap_peak": 815883576,
+        "rss_delta_median": 816562176,
+        "rss_deltas": [
+          816562176,
+          816316416,
+          816644096
+        ]
+      },
+      "njit_direct": {
+        "warm_heap_peak": 811603520,
+        "rss_delta_median": 818036736,
+        "rss_deltas": [
+          818020352,
+          824295424,
+          818036736
+        ]
+      }
+    }
+  },
+  "terminal_observations": {
+    "time": 72,
+    "fresh_memory": 24
+  },
+  "actual_source_unchanged": 93,
+  "existing_preserved": 299,
+  "remaining": [
+    "Full candidate regression and full-engine variants currently running/waiting.",
+    "Actual-source adoption and actual-build replay remain unperformed.",
+    "High-amplitude large matrices still materially slower than warmed same-CPU NJIT.",
+    "No material new peak-memory reduction; platform full-chain and full allocation audit remain open."
+  ]
+}

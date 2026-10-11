@@ -1,0 +1,574 @@
+--- a/cpp/operators/cholesky_library.hpp
++++ b/cpp/operators/cholesky_library.hpp
+@@ -30,6 +30,36 @@
+   d=((((((((d-factor[0]*s0)-factor[1]*s1)-factor[2]*s2)-factor[3]*s3)-factor[4]*s4)-factor[5]*s5)-factor[6]*s6)-factor[7]*s7);
+ }
+ 
++// Four panel rows are independent after the eight factors have been computed.
++// Each fixed array retains one coefficient's ascending-u multiply/subtract order.
++// common_count is the shortest row prefix; row r has common_count+r coefficients.
++inline void update_group(double *__restrict dst, const double *__restrict source,
++                         std::size_t n, std::size_t pitch,
++                         std::size_t common_count, const double *factor) {
++    constexpr std::size_t rows=4, width=8, steps=8;
++    using Tile=Eigen::Array<double,width,1>;
++    using Read=Eigen::Map<const Tile,Eigen::Unaligned>;
++    std::size_t j=0;
++    for (;common_count-j>=width;j+=width) {
++        Tile values[rows];
++        for (std::size_t r=0;r<rows;++r)
++            values[r]=Read(dst+r*pitch+j);
++        for (std::size_t u=0;u<steps;++u) {
++            // Fixed owning storage materializes the source once for all four rows.
++            // This is bounded register/stack storage, never a dynamic Eigen array.
++            const Tile shared=Read(source+u*n+j);
++            for (std::size_t r=0;r<rows;++r)
++                values[r]=values[r]-factor[r*steps+u]*shared;
++        }
++        for (std::size_t r=0;r<rows;++r)
++            Eigen::Map<Tile,Eigen::Unaligned>(dst+r*pitch+j)=values[r];
++    }
++    // Preserve each row's unequal triangular suffix, including the common tail.
++    // The existing ordered expression consumes exactly common_count+r-j values.
++    for (std::size_t r=0;r<rows;++r)
++        update(dst+r*pitch+j,source+j,n,common_count+r-j,factor+r*steps);
++}
++
+ // The caller owns validation, final row arithmetic, error replay and upper clear.
+ template<class FinishRow>
+ void factor_rows(const Value &a, double *y, Workspace &work, FinishRow &&finish) {
+@@ -56,7 +86,11 @@
+                     y[(k+u)*n+begin+r]=factor;
+                 }
+             }
+-            for (std::size_t r=0;r<count;++r)
++            std::size_t r=0;
++            for (;count-r>=4;r+=4)
++                update_group(panel+r*pitch+k+steps,y+k*n+k+steps,n,pitch,
++                             begin+r-k-steps+1,factors+r*steps);
++            for (;r<count;++r)
+                 update(panel+r*pitch+k+steps,y+k*n+k+steps,n,
+                        begin+r-k-steps+1,factors+r*steps);
+         }
+--- a/cpp/operators/reduction.cpp
++++ b/cpp/operators/reduction.cpp
+@@ -36,22 +36,44 @@
+   return mapping[index];
+ }
+ double ordered_stat(Op op, const Value &x, const Value *mask,
+-                    double probability, Workspace &work) {
++                    double probability, Workspace &work, Audit *audit = nullptr) {
+   auto *ordered = work.doubles.data();
++  const auto n = x.size();
+   std::size_t count = 0;
+   bool has_nan = false, positive_zero = false, negative_zero = false;
+-  for (std::size_t i = 0; i < x.size(); ++i)
+-    if (!mask || mask->u(i)) {
+-      const double value = x.f(i);
+-      ordered[count++] = value;
+-      has_nan |= std::isnan(value);
+-      if (value == 0.0) {
+-        if (std::signbit(value))
+-          negative_zero = true;
+-        else
+-          positive_zero = true;
+-      }
+-    }
++  const auto append = [&](double value) {
++    ordered[count++] = value;
++    has_nan |= std::isnan(value);
++    if (value == 0.0) {
++      if (std::signbit(value))
++        negative_zero = true;
++      else
++        positive_zero = true;
++    }
++  };
++  // Only logical-C-contiguous arrays can preserve the existing scratch order
++  // through a raw pointer. Scalars live inline; other views keep logical access.
++  if (x.shape.rank > 0 && x.c_contiguous() &&
++      (!mask || (mask->shape.rank > 0 && mask->c_contiguous()))) {
++    const auto *source = static_cast<const double *>(x.data);
++    if (mask) {
++      const auto *selected = static_cast<const std::uint8_t *>(mask->data);
++      for (std::size_t i = 0; i < n; ++i)
++        if (selected[i])
++          append(source[i]);
++    } else {
++      for (std::size_t i = 0; i < n; ++i)
++        append(source[i]);
++    }
++  } else {
++    for (std::size_t i = 0; i < n; ++i)
++      if (!mask || mask->u(i))
++        append(x.f(i));
++  }
++  // The packing pass already knows the exact consumption count. Keep this
++  // physical-copy audit before numerical selection, including empty masks.
++  if (audit)
++    audit->algorithm_copy_bytes = count * sizeof(double);
+   require(count > 0, "INSUFFICIENT_SAMPLE");
+   // A contiguous numeric scratch copy is deliberate algorithm workspace.
+   // It keeps the caller input read-only while avoiding cache-hostile indirect
+@@ -236,13 +258,9 @@
+                                               : 0.5;
+   if (op == Op::median || op == Op::quantile || op == Op::median_where ||
+       op == Op::quantile_where) {
+-    std::size_t copied = x.size();
+-    if (masked) {
+-      copied = 0;
+-      for (std::size_t i = 0; i < x.size(); ++i)
+-        copied += p.args[1].u(i) != 0;
+-    }
+-    audit.algorithm_copy_bytes = copied * sizeof(double);
++    out.set(0, ordered_stat(unmasked_op(op), x, masked ? &p.args[1] : nullptr,
++                            q, work, &audit));
++    return;
+   }
+   out.set(0, reduce_value(op, x, masked ? &p.args[1] : nullptr, ddof, q, work));
+ }
+--- a/docs/execution-guide.md
++++ b/docs/execution-guide.md
+@@ -301,11 +301,11 @@
+ 
+ 矩阵与数组新增原语的内核不创建私有线程池；`cholesky/solve_multi/triangular_solve/symmetric_eigh` 内部单线程，批次由原生 Scheduler 统一分配预算。多个 RHS 共用一次消元，特征值/向量投影共用分解。slice/swap/broadcast 为视图，但普通根结果仍需独立存储；零拷贝视图不代表整条图零分配。上述库旋转和消元可使用Eigen内部SIMD，其指令不计入引擎的 `vector_elements`。初始验收见[矩阵与数组验收](matrix-array-foundation.md)，后续库优化及未关闭项见[物理执行优化](physical-execution-optimization.md)。
+ 
+-Cholesky在macOS15+arm64、Eigen开启、自动ISA、n≥1024时复用Eigen Array/Map，将16行的8步更新合并写回；保留每个元素升序减法、除法和平方根顺序。输入按原C/F或任意受支持步长读取，现有独立C结果不改；行面板与因素表上界为 `(16*(n+17)+128)*8` 字节。Planner与准备/执行使用同一上界，顺序节点复用工作区，变阶时释放预算外旧容量，子作用域/worker分别预算。该路径审计ISA为 `eigen-array-panel-cholesky`，算法复制与绑定零拷贝分别计数。数值失败按原行序重放以保持错误优先级；边界和资源异常不捕获。其他平台、Eigen-OFF、小矩阵与显式ISA保持原路径。
++Cholesky在macOS15+arm64、Eigen开启、自动ISA、n≥1024时复用Eigen Array/Map，将16行面板的8步更新合并写回。因子完成后，每4个独立行用固定8列数组共享源读取；只更新共同三角前缀，各行不同长度的尾部继续原路径。每个元素的升序乘减、除法和平方根顺序不变；固定数组没有新增数值堆工作区，调用栈另行计量。输入按原C/F或任意受支持步长读取，现有独立C结果不改；行面板与因素表上界为 `(16*(n+17)+128)*8` 字节。Planner与准备/执行使用同一上界，顺序节点复用工作区，变阶时释放预算外旧容量，子作用域/worker分别预算。该路径审计ISA为 `eigen-array-panel-cholesky`，算法复制与绑定零拷贝分别计数。数值失败按原行序重放以保持错误优先级；边界和资源异常不捕获。其他平台、Eigen-OFF、小矩阵与显式ISA保持原路径。
+ 
+ 独立明确 F 的单一 typed float64 Cholesky 根可直接写独占结果：原算法完成时三角因素已有逐位镜像，仅改变成功末尾清零的物理三角，公开逻辑下三角和原数学顺序不变。无需另一份 C arena 或最终整矩阵转换；此存储优化不依赖面板库准入。多根、消费者、isolate、作用域和 covariance→Cholesky 融合保留原路径；observer/prebound/继承错误恢复原 C arena。Planner 对 prebound 子图计入该降级的完整矩阵，直接算子 F out 仍遵守原拒绝契约。
+ 
+-单个 `median/quantile` 及对应 masked 算子在至少1024个消费值、不含NaN且没有混合正负零时，复用原工作区调用标准库 `nth_element`；需要相邻下排名时再用 `max_element`。原中位数和插值表达式不变，输入仍只读。其他消费集继续原排序，多个图根仍共享完整排序；因此不能把单指标提速外推为所有多指标图的提速。工作区仍按源数组上界计入预算。
++单个 `median/quantile` 及对应 masked 算子在至少1024个消费值、不含NaN且没有混合正负零时，复用原工作区调用标准库 `nth_element`；需要相邻下排名时再用 `max_element`。原中位数和插值表达式不变，输入仍只读。其他消费集继续原排序，多个图根仍共享完整排序；因此不能把单指标提速外推为所有多指标图的提速。工作区仍按源数组上界计入预算。C连续且非标量的输入（有掩码时掩码也须C连续）直接按逻辑顺序读取；其他步长继续通用访问。掩码校验保持原顺序，打包时先判断是否消费，再读取该值，并复用实际消费计数填写算法复制审计，省去审计专用的重复扫描；不改变NaN、正负零分类、排序及插值规则。
+ 
+ `cholesky(covariance(X))` 的 typed/raise 图，在协方差是紧邻的单消费者临时节点、不是公开根且源有持久后备时，可复用消费方独占缓冲。两个既有原生算子及逻辑 DAG 都保留；C 根直接写独立结果，显式 F 根继续沿用 C arena 后物化 F 的路径。Cholesky 行面板发生数值失败时，先重算纯协方差恢复输入，再按原 canonical 顺序重放；前置校验、资源错误和普通直接算子的 out 别名限制不变。isolate、值观察器、共享协方差及不满足依赖证明的图不使用此融合。prepared 借用值仍仅有效至下一次运行，独立快照不受后续失败影响。
+ 
+--- /dev/null
++++ b/tests/test_cholesky_grouped_library.py
+@@ -0,0 +1,179 @@
++"""Four independent Cholesky rows retain ordered arithmetic and error replay."""
++
++import numpy as np
++import pytest
++
++from calmetrics_engine import AdaptiveScheduler, GraphCompiler
++from calmetrics_engine import operators as op
++
++from .test_cholesky_panel_library import DECL, assert_bits, assert_dispatch, spd
++
++
++def layout_input(values, layout):
++    if layout == "f":
++        return np.asfortranarray(values), None
++    if layout == "negative":
++        owner = np.array(values[::-1, ::-1], order="C")
++        return owner[::-1, ::-1], None
++    if layout == "padded":
++        n = len(values)
++        owner = np.full((n + 3, n + 5), np.nan)
++        owner[:n, :n] = values
++        return owner[:n, :n], owner
++    return values, None
++
++
++def guarded_output(n):
++    storage = np.full(n * n + 2, -913.25)
++    return storage, storage[1:-1].reshape(n, n)
++
++
++@pytest.mark.parametrize("n,layout", [
++    (1026, "c"), (1027, "f"), (1028, "negative"),
++    (1032, "padded"), (1039, "c"), (1040, "f"),
++])
++def test_grouped_dense_rows_and_unequal_triangular_tails(n, layout):
++    # Dense off-diagonal entries exercise every preceding factor. These sizes
++    # cover terminal panels of 2/3/4/8/15/16 rows without a layout cross-product.
++    a, owner = layout_input(spd(n), layout)
++    before = a.copy()
++    owner_before = owner.copy() if owner is not None else None
++    a.flags.writeable = False
++    expected = op.cholesky(a, simd="scalar")
++    storage, out = guarded_output(n)
++    actual, audit = op.cholesky(a, out=out, audit=True)
++    assert actual is out
++    assert_bits(actual, expected)
++    assert_dispatch(audit, n)
++    assert storage[0] == storage[-1] == -913.25
++    assert not np.shares_memory(actual, a)
++    assert_bits(a, before)
++    if owner is not None:
++        assert_bits(owner, owner_before)
++
++
++def common_tile_values(case, n=1032):
++    a = np.eye(n)
++    if case == "cancellation":
++        # The (20,8) residual is (2**54+4)-2**54-1 = 3. Combining
++        # the two products first would lose the 1 at this scale.
++        for row in (8, 20):
++            a[0, row] = a[row, 0] = 2. ** 27
++            a[1, row] = a[row, 1] = 1.
++        a[8, 8] = 2. ** 54 + 8.
++        a[8, 20] = a[20, 8] = 2. ** 54 + 4.
++        a[20, 20] = 2. ** 54 + 16.
++    elif case == "subnormal":
++        a[8, 20] = a[20, 8] = np.nextafter(0., 1.)
++    else:
++        a[a == 0.] = -0.
++    return a
++
++
++@pytest.mark.parametrize("case", ["cancellation", "subnormal", "signed_zero"])
++def test_grouped_common_tile_preserves_consumed_special_values(case):
++    # Column 8 of row 20 lies in a common complete tile, rather than the
++    # diagonal or the final row's ungrouped suffix.
++    a = common_tile_values(case)
++    before = a.copy()
++    a.flags.writeable = False
++    expected = op.cholesky(a, simd="scalar")
++    actual, audit = op.cholesky(a, audit=True)
++    assert_bits(actual, expected)
++    assert_dispatch(audit, len(a))
++    assert_bits(a, before)
++    if case == "cancellation":
++        assert expected[20, 8] == 3. / np.sqrt(7.)
++    elif case == "subnormal":
++        assert expected[20, 8] == np.nextafter(0., 1.)
++    else:
++        assert expected[20, 8] == 0. and np.signbit(expected[20, 8])
++
++
++def shared_tile_overflow(n, bad_row=16, overflow_row=20):
++    a = np.eye(n)
++    a[8, 8] = 2e300
++    a[0, 8] = a[8, 0] = 1e150
++    a[bad_row, bad_row] = -1.
++    a[0, overflow_row] = a[overflow_row, 0] = 1e200
++    return a
++
++
++@pytest.mark.parametrize("bad_row,overflow_row,layout", [
++    (16, 20, "c"), (19, 20, "f"),
++    (20, 24, "c"), (27, 28, "f"),
++])
++def test_grouped_shared_tile_overflow_replays_earlier_bad_pivot(
++        bad_row, overflow_row, layout):
++    # All inputs/factors are finite. The shared tile's column 8 overflows
++    # before packed execution reaches the earlier negative pivot in row order.
++    a, _ = layout_input(shared_tile_overflow(1028, bad_row, overflow_row), layout)
++    before = a.copy()
++    a.flags.writeable = False
++    errors = []
++    for isa in ("scalar", "auto"):
++        storage, out = guarded_output(len(a))
++        with pytest.raises((ValueError, RuntimeError), match="DOMAIN_ERROR") as error:
++            op.cholesky(a, out=out, simd=isa)
++        errors.append(error.value)
++        assert storage[0] == storage[-1] == -913.25
++        assert_bits(a, before)
++    assert type(errors[0]) is type(errors[1])
++    assert str(errors[0]) == str(errors[1])
++
++
++@pytest.mark.parametrize("value", [np.nan, np.inf], ids=["nan", "infinity"])
++def test_grouped_consumed_nonfinite_keeps_input_validation_priority(value):
++    a = np.eye(1028)
++    a[16, 16] = -1.
++    a[8, 20] = a[20, 8] = value
++    before = a.copy()
++    a.flags.writeable = False
++    errors = []
++    for isa in ("scalar", "auto"):
++        storage, out = guarded_output(len(a))
++        with pytest.raises((ValueError, RuntimeError), match="NON_FINITE_RESULT") as error:
++            op.cholesky(a, out=out, simd=isa)
++        errors.append(error.value)
++        assert storage[0] == storage[-1] == -913.25
++        assert_bits(a, before)
++    assert type(errors[0]) is type(errors[1])
++    assert str(errors[0]) == str(errors[1])
++
++
++def test_grouped_f_snapshot_survives_shared_tile_failure_and_workspace_reuse():
++    n = 1028
++    good = spd(n)
++    a = np.asfortranarray(good)
++    a.flags.writeable = False
++    expected = op.cholesky(a, simd="scalar")
++    graph = GraphCompiler(DECL).compile("cholesky(a)", output_order="F")
++    bounds = np.zeros(1, np.int64)
++    with AdaptiveScheduler(cpu_budget=1) as scheduler:
++        prepared = scheduler.prepare_execution(graph, {"a": a}, bounds, bounds)
++        first = prepared.run_snapshot()
++        first_value = first.outputs[0].values[0]
++        assert_bits(first_value, expected)
++        a.flags.writeable = True
++        a[:] = shared_tile_overflow(n)
++        a.flags.writeable = False
++        failed_input = a.copy()
++        with pytest.raises(ValueError, match="DOMAIN_ERROR"):
++            prepared.run_snapshot()
++        assert_bits(a, failed_input)
++        assert_bits(first_value, expected)
++        a.flags.writeable = True
++        a[:] = good * 4.
++        a.flags.writeable = False
++        second = prepared.run_snapshot()
++    second_value = second.outputs[0].values[0]
++    assert_bits(second_value, op.cholesky(a, simd="scalar"))
++    assert_bits(first_value, expected)
++    assert not np.shares_memory(first_value, second_value)
++    assert not np.shares_memory(first_value, a)
++    for value in (first_value, second_value):
++        assert value.flags.f_contiguous and not value.flags.writeable
++    for chunk in second.audit["native_chunks"]:
++        assert chunk["numeric_arena_bytes"] == chunk["root_copy_bytes"] == 0
++        assert chunk["direct_output_bytes"] == a.nbytes
++        assert chunk["input_copy_bytes"] == 0
+--- /dev/null
++++ b/tests/test_order_linear_packing.py
+@@ -0,0 +1,244 @@
++"""Consumption counts and logical-C packing for native order statistics."""
++
++import numpy as np
++import pytest
++
++from calmetrics_engine import AdaptiveScheduler, GraphCompiler
++from calmetrics_engine import operators as op
++from .test_order_selection_library import (
++    assert_bits, cached_sort_values, finite_values, sorted_value,
++)
++
++
++def layout_view(flat, layout, shape):
++    flat = np.asarray(flat)
++    if layout in ("C", "F"):
++        return np.array(flat.reshape(shape), order=layout, copy=True)
++    if layout == "padded":
++        owner = np.empty(3 * flat.size, dtype=flat.dtype)
++        if flat.dtype == np.dtype(bool):
++            # Invalid bytes outside the logical mask must never be validated.
++            owner.view(np.uint8)[:] = 2
++        else:
++            owner[:] = np.nan
++        owner[::3] = flat
++        return owner[::3].reshape(shape)
++    if layout == "negative":
++        owner = flat[::-1].copy()
++        return owner[::-1].reshape(shape)
++    owner = flat.copy()
++    item = flat.itemsize
++    if layout == "singleton2":
++        return np.ndarray(shape, flat.dtype, buffer=owner,
++                          strides=(item, -37 * item))
++    assert layout == "singleton3"
++    return np.ndarray(shape, flat.dtype, buffer=owner,
++                      strides=(-19 * item, item, 0))
++
++
++@pytest.mark.parametrize("x_layout,m_layout,shape", [
++    ("C", "C", (2, 1025)),
++    ("C", "padded", (2, 1025)),
++    ("padded", "C", (2, 1025)),
++    ("F", "C", (2, 1025)),
++    ("negative", "negative", (2, 1025)),
++    ("singleton2", "singleton2", (2050, 1)),
++    ("singleton3", "singleton3", (1, 2050, 1)),
++])
++@pytest.mark.parametrize("sparse", [False, True])
++def test_packing_layout_and_actual_copy_count(x_layout, m_layout, shape, sparse):
++    flat = finite_values(2050)
++    selected = np.arange(flat.size) % 3 == 1 if sparse else np.ones(flat.size, bool)
++    values = layout_view(flat, x_layout, shape)
++    mask = layout_view(selected, m_layout, shape)
++    values.setflags(write=False)
++    mask.setflags(write=False)
++    before = values.copy()
++    mask_before = mask.view(np.uint8).copy()
++    consumed = flat[selected]
++    workspace = op.Workspace()
++    for name, probability in (("median_where", None), ("quantile_where", .37)):
++        arguments = (values, mask) if probability is None else (values, mask, probability)
++        owner = np.full(3, 912.)
++        actual, audit = op.call(name, *arguments, workspace=workspace,
++                               out=owner[1:2].reshape(()), audit=True)
++        assert_bits(actual, sorted_value(consumed, probability))
++        assert audit["algorithm_copy_bytes"] == consumed.size * 8
++        assert audit["input_copy_bytes"] == 0
++        assert owner[0] == owner[-1] == 912.
++    assert_bits(values, before)
++    np.testing.assert_array_equal(mask.view(np.uint8), mask_before)
++
++
++@pytest.mark.parametrize("count", [1023, 1024, 1025])
++@pytest.mark.parametrize("m_layout", ["C", "padded"])
++def test_threshold_is_consumed_count_not_input_size(count, m_layout):
++    values = np.full(3 * count + 7, np.nan)
++    chosen = finite_values(count)
++    values[:3 * count:3] = chosen
++    selected = np.zeros(values.size, bool)
++    selected[:3 * count:3] = True
++    mask = layout_view(selected, m_layout, values.shape)
++    values.setflags(write=False)
++    mask.setflags(write=False)
++    for name, probability in (("median_where", None), ("quantile_where", .5)):
++        args = (values, mask) if probability is None else (values, mask, probability)
++        actual, audit = op.call(name, *args, audit=True)
++        assert_bits(actual, sorted_value(chosen, probability))
++        assert audit["algorithm_copy_bytes"] == count * 8
++        assert audit["workspace_bytes"] == values.nbytes
++
++
++@pytest.mark.parametrize("pattern", [
++    "unconsumed", "mixed_zero", "negative_zero", "qnan", "snan",
++])
++def test_only_consumed_ieee_bits_affect_selection(pattern):
++    chosen = finite_values(1025)
++    if pattern == "mixed_zero":
++        chosen.view(np.uint64)[::2] = 0x8000000000000000
++        chosen.view(np.uint64)[1::2] = 0
++    elif pattern == "negative_zero":
++        chosen.view(np.uint64)[:] = 0x8000000000000000
++    elif pattern == "qnan":
++        chosen.view(np.uint64)[::2] = 0x7FF8000000000013
++        chosen.view(np.uint64)[1::2] = 0xFFF8000000000029
++    elif pattern == "snan":
++        chosen.view(np.uint64)[::2] = 0x7FF0000000000013
++        chosen.view(np.uint64)[1::2] = 0xFFF0000000000029
++    # Even signaling NaNs and opposite zero signs are irrelevant when unselected.
++    padding = np.array([0x7FF0000000000037, 0xFFF8000000000051,
++                        0x8000000000000000, 0], np.uint64)
++    bits = np.resize(padding, chosen.size * 3)
++    bits[::3] = chosen.view(np.uint64)
++    values = bits.view(np.float64)
++    mask = np.zeros(values.size, bool)
++    mask[::3] = True
++    values.setflags(write=False)
++    mask.setflags(write=False)
++    before = bits.copy()
++    # The unchanged multi-consumer native sort is the exceptional-tie oracle.
++    # .5 has an integral rank here, so both interpolation operands use one payload.
++    median, quantile = cached_sort_values(chosen, .5)
++    for name, expected, extra in (("median_where", median, ()),
++                                  ("quantile_where", quantile, (.5,))):
++        actual, audit = op.call(name, values, mask, *extra, audit=True)
++        assert_bits(actual, expected)
++        assert audit["algorithm_copy_bytes"] == chosen.nbytes
++    np.testing.assert_array_equal(bits, before)
++
++
++@pytest.mark.parametrize("empty", [False, True])
++def test_empty_consumption_keeps_output_and_workspace_reusable(empty):
++    values = np.empty(0) if empty else finite_values(1025)
++    mask = np.zeros(values.shape, bool)
++    values.setflags(write=False)
++    mask.setflags(write=False)
++    before = values.copy()
++    workspace = op.Workspace()
++    for name, extra in (("median_where", ()), ("quantile_where", (.5,))):
++        owner = np.full(3, 912.)
++        with pytest.raises(ValueError, match="INSUFFICIENT_SAMPLE"):
++            op.call(name, values, mask, *extra, workspace=workspace,
++                    out=owner[1:2].reshape(()), audit=True)
++        np.testing.assert_array_equal(owner, 912.)
++        recovered, audit = op.call(name, np.array([2., 6., 10.]),
++                                   np.array([True, False, True]), *extra,
++                                   workspace=workspace, audit=True)
++        assert_bits(recovered, 6.)
++        assert audit["algorithm_copy_bytes"] == 2 * 8
++    assert_bits(values, before)
++
++
++@pytest.mark.parametrize("bad_index", [0, 2049])
++def test_invalid_bool_byte_is_rejected_before_value_or_output_write(bad_index):
++    values = np.full(2050, np.nan)
++    mask = np.ones(values.shape, bool)
++    mask.view(np.uint8)[bad_index] = 2
++    values.setflags(write=False)
++    mask.setflags(write=False)
++    before, mask_before = values.copy(), mask.view(np.uint8).copy()
++    owner = np.full(3, 912.)
++    with pytest.raises(ValueError, match="INVALID_MASK"):
++        op.call("quantile_where", values, mask, .5,
++                out=owner[1:2].reshape(()), audit=True)
++    assert_bits(values, before)
++    np.testing.assert_array_equal(mask.view(np.uint8), mask_before)
++    np.testing.assert_array_equal(owner, 912.)
++
++
++@pytest.mark.parametrize("value", [3., np.array(3.), np.array([3.]).reshape(())])
++def test_public_rank_zero_reduction_remains_rejected(value):
++    # Raw reduce_value/Value inline storage is not exposed by the Python API.
++    owner = np.full(3, 912.)
++    with pytest.raises(ValueError, match="RANK_MISMATCH"):
++        op.call("median", value, out=owner[1:2].reshape(()))
++    np.testing.assert_array_equal(owner, 912.)
++
++
++def graph_copy_bytes(result):
++    return sum(chunk["algorithm_copy_bytes"] for chunk in result.audit["native_chunks"])
++
++
++def test_masked_counts_and_shared_unmasked_sort_coexist():
++    values = finite_values(4100)
++    mask = np.arange(values.size) % 3 != 0
++    values.setflags(write=False)
++    mask.setflags(write=False)
++    graph = GraphCompiler({"x": "series", "m": dict(
++        kind="series", dtype="bool", semantic_dimension="mask")}).compile(
++        ["median(x)", "quantile(x,.75)", "median_where(x,m)",
++         "quantile_where(x,m,.37)"], result_format="typed")
++    starts, ends = np.array([0, 2050], np.int64), np.array([2050, 4100], np.int64)
++    with AdaptiveScheduler(cpu_budget=1) as scheduler:
++        result = scheduler.execute(graph, {"x": values, "m": mask}, starts, ends)
++    assert sum(chunk["order_stat_sorts"] for chunk in result.audit["native_chunks"]) == 2
++    assert graph_copy_bytes(result) == (values.size + 2 * np.count_nonzero(mask)) * 8
++    for row, (start, end) in enumerate(zip(starts, ends, strict=True)):
++        part = values[start:end]
++        consumed = part[mask[start:end]]
++        expected = (sorted_value(part), sorted_value(part, .75),
++                    sorted_value(consumed), sorted_value(consumed, .37))
++        for field, wanted in zip(result.outputs, expected, strict=True):
++            assert_bits(field.values[row], wanted)
++            assert not field.values[row].flags.writeable
++            assert not np.shares_memory(field.values[row], values)
++
++
++def test_prepared_rereads_current_mask_and_preserves_snapshots_after_failure():
++    values = finite_values(2049)
++    mask = np.zeros(values.shape, bool)
++    values.setflags(write=False)
++    mask.setflags(write=False)
++    graph = GraphCompiler({"x": "series", "m": dict(
++        kind="series", dtype="bool", semantic_dimension="mask")}).compile(
++        "quantile_where(x,m,.37)", result_format="typed")
++    with AdaptiveScheduler(cpu_budget=1) as scheduler:
++        prepared = scheduler.prepare_execution(
++            graph, {"x": values, "m": mask},
++            np.array([0], np.int64), np.array([values.size], np.int64))
++        saved = []
++        for count in (1023, 1024, 1025, values.size):
++            mask.setflags(write=True)
++            mask[:] = False
++            mask[:count] = True
++            mask.setflags(write=False)
++            result = prepared.run_snapshot()
++            wanted = sorted_value(values[:count], .37)
++            assert_bits(result.outputs[0].values[0], wanted)
++            assert graph_copy_bytes(result) == count * 8
++            saved.append((result, wanted))
++        mask.setflags(write=True)
++        mask[:] = False
++        mask.setflags(write=False)
++        with pytest.raises(ValueError, match="INSUFFICIENT_SAMPLE"):
++            prepared.run_snapshot()
++        mask.setflags(write=True)
++        mask[1::2] = True
++        mask.setflags(write=False)
++        borrowed = prepared.run()
++        assert_bits(borrowed.outputs[0].values[0], sorted_value(values[1::2], .37))
++        assert graph_copy_bytes(borrowed) == 1024 * 8
++        for result, wanted in saved:
++            assert_bits(result.outputs[0].values[0], wanted)
++            assert not np.shares_memory(result.outputs[0].values[0],
++                                        borrowed.outputs[0].values[0])

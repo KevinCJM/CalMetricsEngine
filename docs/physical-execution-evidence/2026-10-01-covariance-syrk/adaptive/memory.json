@@ -1,0 +1,506 @@
+[
+  {
+    "case": {
+      "n": 4096,
+      "d": 4096,
+      "layout": "c"
+    },
+    "backend": "native",
+    "measure": "heap",
+    "report": {
+      "setup_heap": {
+        "allocations": 152,
+        "frees": 98,
+        "allocated_bytes": 12840,
+        "live_bytes": 4456,
+        "peak_bytes": 7897,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_heap": {
+        "allocations": 214,
+        "frees": 128,
+        "allocated_bytes": 134237136,
+        "live_bytes": 134225522,
+        "peak_bytes": 134225634,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_retained_heap": {
+        "allocations": 214,
+        "frees": 133,
+        "allocated_bytes": 134237136,
+        "live_bytes": 7304,
+        "peak_bytes": 134225634,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_baseline_heap": {
+        "allocations": 249,
+        "frees": 168,
+        "allocated_bytes": 805329026,
+        "live_bytes": 7304,
+        "peak_bytes": 134225634,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_heap": {
+        "allocations": 263,
+        "frees": 177,
+        "allocated_bytes": 1073765782,
+        "live_bytes": 134225522,
+        "peak_bytes": 268443836,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_retained_heap": {
+        "allocations": 263,
+        "frees": 182,
+        "allocated_bytes": 1073765782,
+        "live_bytes": 7304,
+        "peak_bytes": 268443836,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "heap_schema": "continuous-live-1",
+      "cold_peak_bytes": 134225634,
+      "warm_peak_bytes": 268443836
+    }
+  },
+  {
+    "case": {
+      "n": 4096,
+      "d": 4096,
+      "layout": "c"
+    },
+    "backend": "native",
+    "measure": "rss",
+    "report": {
+      "rss_baseline": 310722560,
+      "rss_peak": 445038592,
+      "rss_delta": 134316032,
+      "rss_idle_delta": 0,
+      "rss_schema": "warm-monitor-control-1"
+    }
+  },
+  {
+    "case": {
+      "n": 4096,
+      "d": 4096,
+      "layout": "c"
+    },
+    "backend": "candidate",
+    "measure": "heap",
+    "report": {
+      "setup_heap": {
+        "allocations": 5,
+        "frees": 1,
+        "allocated_bytes": 3584,
+        "live_bytes": 3488,
+        "peak_bytes": 3488,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_heap": {
+        "allocations": 17,
+        "frees": 10,
+        "allocated_bytes": 201428528,
+        "live_bytes": 134221264,
+        "peak_bytes": 157388240,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_retained_heap": {
+        "allocations": 17,
+        "frees": 11,
+        "allocated_bytes": 201428528,
+        "live_bytes": 3536,
+        "peak_bytes": 157388240,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_baseline_heap": {
+        "allocations": 67,
+        "frees": 61,
+        "allocated_bytes": 1208553008,
+        "live_bytes": 3536,
+        "peak_bytes": 157388240,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_heap": {
+        "allocations": 87,
+        "frees": 80,
+        "allocated_bytes": 1611402800,
+        "live_bytes": 134221264,
+        "peak_bytes": 291605968,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_retained_heap": {
+        "allocations": 87,
+        "frees": 81,
+        "allocated_bytes": 1611402800,
+        "live_bytes": 3536,
+        "peak_bytes": 291605968,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "heap_schema": "continuous-live-1",
+      "cold_peak_bytes": 157388240,
+      "warm_peak_bytes": 291605968
+    }
+  },
+  {
+    "case": {
+      "n": 4096,
+      "d": 4096,
+      "layout": "c"
+    },
+    "backend": "candidate",
+    "measure": "rss",
+    "report": {
+      "rss_baseline": 365592576,
+      "rss_peak": 499875840,
+      "rss_delta": 134283264,
+      "rss_idle_delta": 0,
+      "rss_schema": "warm-monitor-control-1"
+    }
+  },
+  {
+    "case": {
+      "n": 4096,
+      "d": 4096,
+      "layout": "c"
+    },
+    "backend": "njit",
+    "measure": "heap",
+    "report": {
+      "setup_heap": {
+        "allocations": 8,
+        "frees": 8,
+        "allocated_bytes": 408978146,
+        "live_bytes": 0,
+        "peak_bytes": 408945024,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_heap": {
+        "allocations": 16,
+        "frees": 15,
+        "allocated_bytes": 817956292,
+        "live_bytes": 134217840,
+        "peak_bytes": 408945024,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_retained_heap": {
+        "allocations": 16,
+        "frees": 16,
+        "allocated_bytes": 817956292,
+        "live_bytes": 0,
+        "peak_bytes": 408945024,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_baseline_heap": {
+        "allocations": 56,
+        "frees": 56,
+        "allocated_bytes": 2862847022,
+        "live_bytes": 0,
+        "peak_bytes": 408945024,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_heap": {
+        "allocations": 72,
+        "frees": 71,
+        "allocated_bytes": 3680803314,
+        "live_bytes": 134217840,
+        "peak_bytes": 543162864,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_retained_heap": {
+        "allocations": 72,
+        "frees": 72,
+        "allocated_bytes": 3680803314,
+        "live_bytes": 0,
+        "peak_bytes": 543162864,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "heap_schema": "continuous-live-1",
+      "cold_peak_bytes": 408945024,
+      "warm_peak_bytes": 543162864
+    }
+  },
+  {
+    "case": {
+      "n": 4096,
+      "d": 4096,
+      "layout": "c"
+    },
+    "backend": "njit",
+    "measure": "rss",
+    "report": {
+      "rss_baseline": 835747840,
+      "rss_peak": 970047488,
+      "rss_delta": 134299648,
+      "rss_idle_delta": 0,
+      "rss_schema": "warm-monitor-control-1"
+    }
+  },
+  {
+    "case": {
+      "n": 4096,
+      "d": 4096,
+      "layout": "f"
+    },
+    "backend": "native",
+    "measure": "heap",
+    "report": {
+      "setup_heap": {
+        "allocations": 152,
+        "frees": 98,
+        "allocated_bytes": 12840,
+        "live_bytes": 4456,
+        "peak_bytes": 7897,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_heap": {
+        "allocations": 214,
+        "frees": 128,
+        "allocated_bytes": 134237136,
+        "live_bytes": 134225522,
+        "peak_bytes": 134225634,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_retained_heap": {
+        "allocations": 214,
+        "frees": 133,
+        "allocated_bytes": 134237136,
+        "live_bytes": 7304,
+        "peak_bytes": 134225634,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_baseline_heap": {
+        "allocations": 249,
+        "frees": 168,
+        "allocated_bytes": 805329026,
+        "live_bytes": 7304,
+        "peak_bytes": 134225634,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_heap": {
+        "allocations": 263,
+        "frees": 177,
+        "allocated_bytes": 1073765782,
+        "live_bytes": 134225522,
+        "peak_bytes": 268443836,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_retained_heap": {
+        "allocations": 263,
+        "frees": 182,
+        "allocated_bytes": 1073765782,
+        "live_bytes": 7304,
+        "peak_bytes": 268443836,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "heap_schema": "continuous-live-1",
+      "cold_peak_bytes": 134225634,
+      "warm_peak_bytes": 268443836
+    }
+  },
+  {
+    "case": {
+      "n": 4096,
+      "d": 4096,
+      "layout": "f"
+    },
+    "backend": "native",
+    "measure": "rss",
+    "report": {
+      "rss_baseline": 311590912,
+      "rss_peak": 445939712,
+      "rss_delta": 134348800,
+      "rss_idle_delta": 0,
+      "rss_schema": "warm-monitor-control-1"
+    }
+  },
+  {
+    "case": {
+      "n": 4096,
+      "d": 4096,
+      "layout": "f"
+    },
+    "backend": "candidate",
+    "measure": "heap",
+    "report": {
+      "setup_heap": {
+        "allocations": 5,
+        "frees": 1,
+        "allocated_bytes": 3584,
+        "live_bytes": 3488,
+        "peak_bytes": 3488,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_heap": {
+        "allocations": 17,
+        "frees": 10,
+        "allocated_bytes": 201428528,
+        "live_bytes": 134221264,
+        "peak_bytes": 157388240,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_retained_heap": {
+        "allocations": 17,
+        "frees": 11,
+        "allocated_bytes": 201428528,
+        "live_bytes": 3536,
+        "peak_bytes": 157388240,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_baseline_heap": {
+        "allocations": 67,
+        "frees": 61,
+        "allocated_bytes": 1208553008,
+        "live_bytes": 3536,
+        "peak_bytes": 157388240,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_heap": {
+        "allocations": 87,
+        "frees": 80,
+        "allocated_bytes": 1611402800,
+        "live_bytes": 134221264,
+        "peak_bytes": 291605968,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_retained_heap": {
+        "allocations": 87,
+        "frees": 81,
+        "allocated_bytes": 1611402800,
+        "live_bytes": 3536,
+        "peak_bytes": 291605968,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "heap_schema": "continuous-live-1",
+      "cold_peak_bytes": 157388240,
+      "warm_peak_bytes": 291605968
+    }
+  },
+  {
+    "case": {
+      "n": 4096,
+      "d": 4096,
+      "layout": "f"
+    },
+    "backend": "candidate",
+    "measure": "rss",
+    "report": {
+      "rss_baseline": 351780864,
+      "rss_peak": 486146048,
+      "rss_delta": 134365184,
+      "rss_idle_delta": 0,
+      "rss_schema": "warm-monitor-control-1"
+    }
+  },
+  {
+    "case": {
+      "n": 4096,
+      "d": 4096,
+      "layout": "f"
+    },
+    "backend": "njit",
+    "measure": "heap",
+    "report": {
+      "setup_heap": {
+        "allocations": 8,
+        "frees": 8,
+        "allocated_bytes": 408978146,
+        "live_bytes": 0,
+        "peak_bytes": 408945024,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_heap": {
+        "allocations": 16,
+        "frees": 15,
+        "allocated_bytes": 817956292,
+        "live_bytes": 134217840,
+        "peak_bytes": 408945024,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_retained_heap": {
+        "allocations": 16,
+        "frees": 16,
+        "allocated_bytes": 817956292,
+        "live_bytes": 0,
+        "peak_bytes": 408945024,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_baseline_heap": {
+        "allocations": 56,
+        "frees": 56,
+        "allocated_bytes": 2862847022,
+        "live_bytes": 0,
+        "peak_bytes": 408945024,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_heap": {
+        "allocations": 72,
+        "frees": 71,
+        "allocated_bytes": 3680803314,
+        "live_bytes": 134217840,
+        "peak_bytes": 543162864,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_retained_heap": {
+        "allocations": 72,
+        "frees": 72,
+        "allocated_bytes": 3680803314,
+        "live_bytes": 0,
+        "peak_bytes": 543162864,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "heap_schema": "continuous-live-1",
+      "cold_peak_bytes": 408945024,
+      "warm_peak_bytes": 543162864
+    }
+  },
+  {
+    "case": {
+      "n": 4096,
+      "d": 4096,
+      "layout": "f"
+    },
+    "backend": "njit",
+    "measure": "rss",
+    "report": {
+      "rss_baseline": 835911680,
+      "rss_peak": 976437248,
+      "rss_delta": 140525568,
+      "rss_idle_delta": 0,
+      "rss_schema": "warm-monitor-control-1"
+    }
+  }
+]

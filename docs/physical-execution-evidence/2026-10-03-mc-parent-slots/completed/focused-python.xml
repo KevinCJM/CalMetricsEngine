@@ -1,0 +1,1483 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="25" skipped="0" tests="25" time="1.092" timestamp="2026-10-03T16:39:25.564542+08:00" hostname="chenjunmingdeMacBook-Pro-2.local"><testcase classname="tests.test_compact_parent_storage" name="test_parent_prefix_capture_boundaries_and_lifetime[single-0]" time="0.026"><failure message="AssertionError: &#10;Arrays are not equal&#10;&#10;Mismatched elements: 2 / 2 (100%)&#10; x: array(None, dtype=object)&#10; y: array([[0],&#10;       [0]], dtype=int16)">captures = 0, lane = 'single'
+
+    @pytest.mark.parametrize("captures", [0, 6, 7, 8, 29, 30])
+    @pytest.mark.parametrize("lane", ["single", "thread", "process_inline", "process_shared"])
+    def test_parent_prefix_capture_boundaries_and_lifetime(captures, lane):
+        compiler, expression = definition(captures)
+        graph = compiler.compile([expression])
+        scope = next(node for node in graph.nodes if node.kind == "apply_scope")
+        prefix = scope.parents
+        assert len(prefix) == captures + 2
+        native = graph.native_nodes()
+        restored = pickle.loads(pickle.dumps(graph))
+        assert restored.native_nodes() == native
+        assert restored.metadata() == graph.metadata()
+        del graph
+        gc.collect()
+        assert scope.parents == prefix
+    
+        config = PlannerConfig(
+            thread_work_units=1 if lane != "single" else 1e99,
+            process_work_units=1 if lane.startswith("process") else 1e100,
+            min_rows_per_worker=1, max_processes=2,
+            shared_memory_threshold_bytes=1 if lane == "process_shared" else 1 &lt;&lt; 30,
+        )
+        x = np.arange(1., 7.)
+        saved_input = x.copy()
+        x.flags.writeable = False
+        starts, ends = np.array([0, 2], np.int64), np.array([6, 6], np.int64)
+        parameters = {f"p{i}": float(i + 1) for i in range(captures)}
+        total = captures * (captures + 1) // 2
+        expected = np.array([[21 + 3 * total], [18 + 2 * total]], np.float64)
+        with AdaptiveScheduler(cpu_budget=2, config=config) as scheduler:
+            first = scheduler.execute(restored, {"x": x}, starts, ends,
+                                      parameters=parameters, timeout=20.)
+            second = scheduler.execute(restored, {"x": x}, starts, ends,
+                                       parameters=parameters, timeout=20.)
+            assert first.plan.lane == ("process" if lane.startswith("process") else lane)
+            for result in (first, second):
+                np.testing.assert_array_equal(result.values, expected)
+&gt;               np.testing.assert_array_equal(result.statuses, np.zeros((2, 1), np.int16))
+
+tests/test_compact_parent_storage.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (&lt;built-in function eq&gt;, None, array([[0],
+       [0]], dtype=int16))
+kwds = {'err_msg': '', 'header': 'Arrays are not equal', 'strict': False, 'verbose': True}
+
+    @wraps(func)
+    def inner(*args, **kwds):
+        with self._recreate_cm():
+&gt;           return func(*args, **kwds)
+                   ^^^^^^^^^^^^^^^^^^^
+E           AssertionError: 
+E           Arrays are not equal
+E           
+E           Mismatched elements: 2 / 2 (100%)
+E            x: array(None, dtype=object)
+E            y: array([[0],
+E                  [0]], dtype=int16)
+
+/opt/homebrew/Cellar/python@3.12/3.12.11/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py:81: AssertionError</failure></testcase><testcase classname="tests.test_compact_parent_storage" name="test_parent_prefix_capture_boundaries_and_lifetime[single-6]" time="0.018"><failure message="AssertionError: &#10;Arrays are not equal&#10;&#10;Mismatched elements: 2 / 2 (100%)&#10; x: array(None, dtype=object)&#10; y: array([[0],&#10;       [0]], dtype=int16)">captures = 6, lane = 'single'
+
+    @pytest.mark.parametrize("captures", [0, 6, 7, 8, 29, 30])
+    @pytest.mark.parametrize("lane", ["single", "thread", "process_inline", "process_shared"])
+    def test_parent_prefix_capture_boundaries_and_lifetime(captures, lane):
+        compiler, expression = definition(captures)
+        graph = compiler.compile([expression])
+        scope = next(node for node in graph.nodes if node.kind == "apply_scope")
+        prefix = scope.parents
+        assert len(prefix) == captures + 2
+        native = graph.native_nodes()
+        restored = pickle.loads(pickle.dumps(graph))
+        assert restored.native_nodes() == native
+        assert restored.metadata() == graph.metadata()
+        del graph
+        gc.collect()
+        assert scope.parents == prefix
+    
+        config = PlannerConfig(
+            thread_work_units=1 if lane != "single" else 1e99,
+            process_work_units=1 if lane.startswith("process") else 1e100,
+            min_rows_per_worker=1, max_processes=2,
+            shared_memory_threshold_bytes=1 if lane == "process_shared" else 1 &lt;&lt; 30,
+        )
+        x = np.arange(1., 7.)
+        saved_input = x.copy()
+        x.flags.writeable = False
+        starts, ends = np.array([0, 2], np.int64), np.array([6, 6], np.int64)
+        parameters = {f"p{i}": float(i + 1) for i in range(captures)}
+        total = captures * (captures + 1) // 2
+        expected = np.array([[21 + 3 * total], [18 + 2 * total]], np.float64)
+        with AdaptiveScheduler(cpu_budget=2, config=config) as scheduler:
+            first = scheduler.execute(restored, {"x": x}, starts, ends,
+                                      parameters=parameters, timeout=20.)
+            second = scheduler.execute(restored, {"x": x}, starts, ends,
+                                       parameters=parameters, timeout=20.)
+            assert first.plan.lane == ("process" if lane.startswith("process") else lane)
+            for result in (first, second):
+                np.testing.assert_array_equal(result.values, expected)
+&gt;               np.testing.assert_array_equal(result.statuses, np.zeros((2, 1), np.int16))
+
+tests/test_compact_parent_storage.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (&lt;built-in function eq&gt;, None, array([[0],
+       [0]], dtype=int16))
+kwds = {'err_msg': '', 'header': 'Arrays are not equal', 'strict': False, 'verbose': True}
+
+    @wraps(func)
+    def inner(*args, **kwds):
+        with self._recreate_cm():
+&gt;           return func(*args, **kwds)
+                   ^^^^^^^^^^^^^^^^^^^
+E           AssertionError: 
+E           Arrays are not equal
+E           
+E           Mismatched elements: 2 / 2 (100%)
+E            x: array(None, dtype=object)
+E            y: array([[0],
+E                  [0]], dtype=int16)
+
+/opt/homebrew/Cellar/python@3.12/3.12.11/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py:81: AssertionError</failure></testcase><testcase classname="tests.test_compact_parent_storage" name="test_parent_prefix_capture_boundaries_and_lifetime[single-7]" time="0.014"><failure message="AssertionError: &#10;Arrays are not equal&#10;&#10;Mismatched elements: 2 / 2 (100%)&#10; x: array(None, dtype=object)&#10; y: array([[0],&#10;       [0]], dtype=int16)">captures = 7, lane = 'single'
+
+    @pytest.mark.parametrize("captures", [0, 6, 7, 8, 29, 30])
+    @pytest.mark.parametrize("lane", ["single", "thread", "process_inline", "process_shared"])
+    def test_parent_prefix_capture_boundaries_and_lifetime(captures, lane):
+        compiler, expression = definition(captures)
+        graph = compiler.compile([expression])
+        scope = next(node for node in graph.nodes if node.kind == "apply_scope")
+        prefix = scope.parents
+        assert len(prefix) == captures + 2
+        native = graph.native_nodes()
+        restored = pickle.loads(pickle.dumps(graph))
+        assert restored.native_nodes() == native
+        assert restored.metadata() == graph.metadata()
+        del graph
+        gc.collect()
+        assert scope.parents == prefix
+    
+        config = PlannerConfig(
+            thread_work_units=1 if lane != "single" else 1e99,
+            process_work_units=1 if lane.startswith("process") else 1e100,
+            min_rows_per_worker=1, max_processes=2,
+            shared_memory_threshold_bytes=1 if lane == "process_shared" else 1 &lt;&lt; 30,
+        )
+        x = np.arange(1., 7.)
+        saved_input = x.copy()
+        x.flags.writeable = False
+        starts, ends = np.array([0, 2], np.int64), np.array([6, 6], np.int64)
+        parameters = {f"p{i}": float(i + 1) for i in range(captures)}
+        total = captures * (captures + 1) // 2
+        expected = np.array([[21 + 3 * total], [18 + 2 * total]], np.float64)
+        with AdaptiveScheduler(cpu_budget=2, config=config) as scheduler:
+            first = scheduler.execute(restored, {"x": x}, starts, ends,
+                                      parameters=parameters, timeout=20.)
+            second = scheduler.execute(restored, {"x": x}, starts, ends,
+                                       parameters=parameters, timeout=20.)
+            assert first.plan.lane == ("process" if lane.startswith("process") else lane)
+            for result in (first, second):
+                np.testing.assert_array_equal(result.values, expected)
+&gt;               np.testing.assert_array_equal(result.statuses, np.zeros((2, 1), np.int16))
+
+tests/test_compact_parent_storage.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (&lt;built-in function eq&gt;, None, array([[0],
+       [0]], dtype=int16))
+kwds = {'err_msg': '', 'header': 'Arrays are not equal', 'strict': False, 'verbose': True}
+
+    @wraps(func)
+    def inner(*args, **kwds):
+        with self._recreate_cm():
+&gt;           return func(*args, **kwds)
+                   ^^^^^^^^^^^^^^^^^^^
+E           AssertionError: 
+E           Arrays are not equal
+E           
+E           Mismatched elements: 2 / 2 (100%)
+E            x: array(None, dtype=object)
+E            y: array([[0],
+E                  [0]], dtype=int16)
+
+/opt/homebrew/Cellar/python@3.12/3.12.11/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py:81: AssertionError</failure></testcase><testcase classname="tests.test_compact_parent_storage" name="test_parent_prefix_capture_boundaries_and_lifetime[single-8]" time="0.014"><failure message="AssertionError: &#10;Arrays are not equal&#10;&#10;Mismatched elements: 2 / 2 (100%)&#10; x: array(None, dtype=object)&#10; y: array([[0],&#10;       [0]], dtype=int16)">captures = 8, lane = 'single'
+
+    @pytest.mark.parametrize("captures", [0, 6, 7, 8, 29, 30])
+    @pytest.mark.parametrize("lane", ["single", "thread", "process_inline", "process_shared"])
+    def test_parent_prefix_capture_boundaries_and_lifetime(captures, lane):
+        compiler, expression = definition(captures)
+        graph = compiler.compile([expression])
+        scope = next(node for node in graph.nodes if node.kind == "apply_scope")
+        prefix = scope.parents
+        assert len(prefix) == captures + 2
+        native = graph.native_nodes()
+        restored = pickle.loads(pickle.dumps(graph))
+        assert restored.native_nodes() == native
+        assert restored.metadata() == graph.metadata()
+        del graph
+        gc.collect()
+        assert scope.parents == prefix
+    
+        config = PlannerConfig(
+            thread_work_units=1 if lane != "single" else 1e99,
+            process_work_units=1 if lane.startswith("process") else 1e100,
+            min_rows_per_worker=1, max_processes=2,
+            shared_memory_threshold_bytes=1 if lane == "process_shared" else 1 &lt;&lt; 30,
+        )
+        x = np.arange(1., 7.)
+        saved_input = x.copy()
+        x.flags.writeable = False
+        starts, ends = np.array([0, 2], np.int64), np.array([6, 6], np.int64)
+        parameters = {f"p{i}": float(i + 1) for i in range(captures)}
+        total = captures * (captures + 1) // 2
+        expected = np.array([[21 + 3 * total], [18 + 2 * total]], np.float64)
+        with AdaptiveScheduler(cpu_budget=2, config=config) as scheduler:
+            first = scheduler.execute(restored, {"x": x}, starts, ends,
+                                      parameters=parameters, timeout=20.)
+            second = scheduler.execute(restored, {"x": x}, starts, ends,
+                                       parameters=parameters, timeout=20.)
+            assert first.plan.lane == ("process" if lane.startswith("process") else lane)
+            for result in (first, second):
+                np.testing.assert_array_equal(result.values, expected)
+&gt;               np.testing.assert_array_equal(result.statuses, np.zeros((2, 1), np.int16))
+
+tests/test_compact_parent_storage.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (&lt;built-in function eq&gt;, None, array([[0],
+       [0]], dtype=int16))
+kwds = {'err_msg': '', 'header': 'Arrays are not equal', 'strict': False, 'verbose': True}
+
+    @wraps(func)
+    def inner(*args, **kwds):
+        with self._recreate_cm():
+&gt;           return func(*args, **kwds)
+                   ^^^^^^^^^^^^^^^^^^^
+E           AssertionError: 
+E           Arrays are not equal
+E           
+E           Mismatched elements: 2 / 2 (100%)
+E            x: array(None, dtype=object)
+E            y: array([[0],
+E                  [0]], dtype=int16)
+
+/opt/homebrew/Cellar/python@3.12/3.12.11/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py:81: AssertionError</failure></testcase><testcase classname="tests.test_compact_parent_storage" name="test_parent_prefix_capture_boundaries_and_lifetime[single-29]" time="0.015"><failure message="AssertionError: &#10;Arrays are not equal&#10;&#10;Mismatched elements: 2 / 2 (100%)&#10; x: array(None, dtype=object)&#10; y: array([[0],&#10;       [0]], dtype=int16)">captures = 29, lane = 'single'
+
+    @pytest.mark.parametrize("captures", [0, 6, 7, 8, 29, 30])
+    @pytest.mark.parametrize("lane", ["single", "thread", "process_inline", "process_shared"])
+    def test_parent_prefix_capture_boundaries_and_lifetime(captures, lane):
+        compiler, expression = definition(captures)
+        graph = compiler.compile([expression])
+        scope = next(node for node in graph.nodes if node.kind == "apply_scope")
+        prefix = scope.parents
+        assert len(prefix) == captures + 2
+        native = graph.native_nodes()
+        restored = pickle.loads(pickle.dumps(graph))
+        assert restored.native_nodes() == native
+        assert restored.metadata() == graph.metadata()
+        del graph
+        gc.collect()
+        assert scope.parents == prefix
+    
+        config = PlannerConfig(
+            thread_work_units=1 if lane != "single" else 1e99,
+            process_work_units=1 if lane.startswith("process") else 1e100,
+            min_rows_per_worker=1, max_processes=2,
+            shared_memory_threshold_bytes=1 if lane == "process_shared" else 1 &lt;&lt; 30,
+        )
+        x = np.arange(1., 7.)
+        saved_input = x.copy()
+        x.flags.writeable = False
+        starts, ends = np.array([0, 2], np.int64), np.array([6, 6], np.int64)
+        parameters = {f"p{i}": float(i + 1) for i in range(captures)}
+        total = captures * (captures + 1) // 2
+        expected = np.array([[21 + 3 * total], [18 + 2 * total]], np.float64)
+        with AdaptiveScheduler(cpu_budget=2, config=config) as scheduler:
+            first = scheduler.execute(restored, {"x": x}, starts, ends,
+                                      parameters=parameters, timeout=20.)
+            second = scheduler.execute(restored, {"x": x}, starts, ends,
+                                       parameters=parameters, timeout=20.)
+            assert first.plan.lane == ("process" if lane.startswith("process") else lane)
+            for result in (first, second):
+                np.testing.assert_array_equal(result.values, expected)
+&gt;               np.testing.assert_array_equal(result.statuses, np.zeros((2, 1), np.int16))
+
+tests/test_compact_parent_storage.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (&lt;built-in function eq&gt;, None, array([[0],
+       [0]], dtype=int16))
+kwds = {'err_msg': '', 'header': 'Arrays are not equal', 'strict': False, 'verbose': True}
+
+    @wraps(func)
+    def inner(*args, **kwds):
+        with self._recreate_cm():
+&gt;           return func(*args, **kwds)
+                   ^^^^^^^^^^^^^^^^^^^
+E           AssertionError: 
+E           Arrays are not equal
+E           
+E           Mismatched elements: 2 / 2 (100%)
+E            x: array(None, dtype=object)
+E            y: array([[0],
+E                  [0]], dtype=int16)
+
+/opt/homebrew/Cellar/python@3.12/3.12.11/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py:81: AssertionError</failure></testcase><testcase classname="tests.test_compact_parent_storage" name="test_parent_prefix_capture_boundaries_and_lifetime[single-30]" time="0.014"><failure message="AssertionError: &#10;Arrays are not equal&#10;&#10;Mismatched elements: 2 / 2 (100%)&#10; x: array(None, dtype=object)&#10; y: array([[0],&#10;       [0]], dtype=int16)">captures = 30, lane = 'single'
+
+    @pytest.mark.parametrize("captures", [0, 6, 7, 8, 29, 30])
+    @pytest.mark.parametrize("lane", ["single", "thread", "process_inline", "process_shared"])
+    def test_parent_prefix_capture_boundaries_and_lifetime(captures, lane):
+        compiler, expression = definition(captures)
+        graph = compiler.compile([expression])
+        scope = next(node for node in graph.nodes if node.kind == "apply_scope")
+        prefix = scope.parents
+        assert len(prefix) == captures + 2
+        native = graph.native_nodes()
+        restored = pickle.loads(pickle.dumps(graph))
+        assert restored.native_nodes() == native
+        assert restored.metadata() == graph.metadata()
+        del graph
+        gc.collect()
+        assert scope.parents == prefix
+    
+        config = PlannerConfig(
+            thread_work_units=1 if lane != "single" else 1e99,
+            process_work_units=1 if lane.startswith("process") else 1e100,
+            min_rows_per_worker=1, max_processes=2,
+            shared_memory_threshold_bytes=1 if lane == "process_shared" else 1 &lt;&lt; 30,
+        )
+        x = np.arange(1., 7.)
+        saved_input = x.copy()
+        x.flags.writeable = False
+        starts, ends = np.array([0, 2], np.int64), np.array([6, 6], np.int64)
+        parameters = {f"p{i}": float(i + 1) for i in range(captures)}
+        total = captures * (captures + 1) // 2
+        expected = np.array([[21 + 3 * total], [18 + 2 * total]], np.float64)
+        with AdaptiveScheduler(cpu_budget=2, config=config) as scheduler:
+            first = scheduler.execute(restored, {"x": x}, starts, ends,
+                                      parameters=parameters, timeout=20.)
+            second = scheduler.execute(restored, {"x": x}, starts, ends,
+                                       parameters=parameters, timeout=20.)
+            assert first.plan.lane == ("process" if lane.startswith("process") else lane)
+            for result in (first, second):
+                np.testing.assert_array_equal(result.values, expected)
+&gt;               np.testing.assert_array_equal(result.statuses, np.zeros((2, 1), np.int16))
+
+tests/test_compact_parent_storage.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (&lt;built-in function eq&gt;, None, array([[0],
+       [0]], dtype=int16))
+kwds = {'err_msg': '', 'header': 'Arrays are not equal', 'strict': False, 'verbose': True}
+
+    @wraps(func)
+    def inner(*args, **kwds):
+        with self._recreate_cm():
+&gt;           return func(*args, **kwds)
+                   ^^^^^^^^^^^^^^^^^^^
+E           AssertionError: 
+E           Arrays are not equal
+E           
+E           Mismatched elements: 2 / 2 (100%)
+E            x: array(None, dtype=object)
+E            y: array([[0],
+E                  [0]], dtype=int16)
+
+/opt/homebrew/Cellar/python@3.12/3.12.11/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py:81: AssertionError</failure></testcase><testcase classname="tests.test_compact_parent_storage" name="test_parent_prefix_capture_boundaries_and_lifetime[thread-0]" time="0.014"><failure message="AssertionError: &#10;Arrays are not equal&#10;&#10;Mismatched elements: 2 / 2 (100%)&#10; x: array(None, dtype=object)&#10; y: array([[0],&#10;       [0]], dtype=int16)">captures = 0, lane = 'thread'
+
+    @pytest.mark.parametrize("captures", [0, 6, 7, 8, 29, 30])
+    @pytest.mark.parametrize("lane", ["single", "thread", "process_inline", "process_shared"])
+    def test_parent_prefix_capture_boundaries_and_lifetime(captures, lane):
+        compiler, expression = definition(captures)
+        graph = compiler.compile([expression])
+        scope = next(node for node in graph.nodes if node.kind == "apply_scope")
+        prefix = scope.parents
+        assert len(prefix) == captures + 2
+        native = graph.native_nodes()
+        restored = pickle.loads(pickle.dumps(graph))
+        assert restored.native_nodes() == native
+        assert restored.metadata() == graph.metadata()
+        del graph
+        gc.collect()
+        assert scope.parents == prefix
+    
+        config = PlannerConfig(
+            thread_work_units=1 if lane != "single" else 1e99,
+            process_work_units=1 if lane.startswith("process") else 1e100,
+            min_rows_per_worker=1, max_processes=2,
+            shared_memory_threshold_bytes=1 if lane == "process_shared" else 1 &lt;&lt; 30,
+        )
+        x = np.arange(1., 7.)
+        saved_input = x.copy()
+        x.flags.writeable = False
+        starts, ends = np.array([0, 2], np.int64), np.array([6, 6], np.int64)
+        parameters = {f"p{i}": float(i + 1) for i in range(captures)}
+        total = captures * (captures + 1) // 2
+        expected = np.array([[21 + 3 * total], [18 + 2 * total]], np.float64)
+        with AdaptiveScheduler(cpu_budget=2, config=config) as scheduler:
+            first = scheduler.execute(restored, {"x": x}, starts, ends,
+                                      parameters=parameters, timeout=20.)
+            second = scheduler.execute(restored, {"x": x}, starts, ends,
+                                       parameters=parameters, timeout=20.)
+            assert first.plan.lane == ("process" if lane.startswith("process") else lane)
+            for result in (first, second):
+                np.testing.assert_array_equal(result.values, expected)
+&gt;               np.testing.assert_array_equal(result.statuses, np.zeros((2, 1), np.int16))
+
+tests/test_compact_parent_storage.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (&lt;built-in function eq&gt;, None, array([[0],
+       [0]], dtype=int16))
+kwds = {'err_msg': '', 'header': 'Arrays are not equal', 'strict': False, 'verbose': True}
+
+    @wraps(func)
+    def inner(*args, **kwds):
+        with self._recreate_cm():
+&gt;           return func(*args, **kwds)
+                   ^^^^^^^^^^^^^^^^^^^
+E           AssertionError: 
+E           Arrays are not equal
+E           
+E           Mismatched elements: 2 / 2 (100%)
+E            x: array(None, dtype=object)
+E            y: array([[0],
+E                  [0]], dtype=int16)
+
+/opt/homebrew/Cellar/python@3.12/3.12.11/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py:81: AssertionError</failure></testcase><testcase classname="tests.test_compact_parent_storage" name="test_parent_prefix_capture_boundaries_and_lifetime[thread-6]" time="0.014"><failure message="AssertionError: &#10;Arrays are not equal&#10;&#10;Mismatched elements: 2 / 2 (100%)&#10; x: array(None, dtype=object)&#10; y: array([[0],&#10;       [0]], dtype=int16)">captures = 6, lane = 'thread'
+
+    @pytest.mark.parametrize("captures", [0, 6, 7, 8, 29, 30])
+    @pytest.mark.parametrize("lane", ["single", "thread", "process_inline", "process_shared"])
+    def test_parent_prefix_capture_boundaries_and_lifetime(captures, lane):
+        compiler, expression = definition(captures)
+        graph = compiler.compile([expression])
+        scope = next(node for node in graph.nodes if node.kind == "apply_scope")
+        prefix = scope.parents
+        assert len(prefix) == captures + 2
+        native = graph.native_nodes()
+        restored = pickle.loads(pickle.dumps(graph))
+        assert restored.native_nodes() == native
+        assert restored.metadata() == graph.metadata()
+        del graph
+        gc.collect()
+        assert scope.parents == prefix
+    
+        config = PlannerConfig(
+            thread_work_units=1 if lane != "single" else 1e99,
+            process_work_units=1 if lane.startswith("process") else 1e100,
+            min_rows_per_worker=1, max_processes=2,
+            shared_memory_threshold_bytes=1 if lane == "process_shared" else 1 &lt;&lt; 30,
+        )
+        x = np.arange(1., 7.)
+        saved_input = x.copy()
+        x.flags.writeable = False
+        starts, ends = np.array([0, 2], np.int64), np.array([6, 6], np.int64)
+        parameters = {f"p{i}": float(i + 1) for i in range(captures)}
+        total = captures * (captures + 1) // 2
+        expected = np.array([[21 + 3 * total], [18 + 2 * total]], np.float64)
+        with AdaptiveScheduler(cpu_budget=2, config=config) as scheduler:
+            first = scheduler.execute(restored, {"x": x}, starts, ends,
+                                      parameters=parameters, timeout=20.)
+            second = scheduler.execute(restored, {"x": x}, starts, ends,
+                                       parameters=parameters, timeout=20.)
+            assert first.plan.lane == ("process" if lane.startswith("process") else lane)
+            for result in (first, second):
+                np.testing.assert_array_equal(result.values, expected)
+&gt;               np.testing.assert_array_equal(result.statuses, np.zeros((2, 1), np.int16))
+
+tests/test_compact_parent_storage.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (&lt;built-in function eq&gt;, None, array([[0],
+       [0]], dtype=int16))
+kwds = {'err_msg': '', 'header': 'Arrays are not equal', 'strict': False, 'verbose': True}
+
+    @wraps(func)
+    def inner(*args, **kwds):
+        with self._recreate_cm():
+&gt;           return func(*args, **kwds)
+                   ^^^^^^^^^^^^^^^^^^^
+E           AssertionError: 
+E           Arrays are not equal
+E           
+E           Mismatched elements: 2 / 2 (100%)
+E            x: array(None, dtype=object)
+E            y: array([[0],
+E                  [0]], dtype=int16)
+
+/opt/homebrew/Cellar/python@3.12/3.12.11/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py:81: AssertionError</failure></testcase><testcase classname="tests.test_compact_parent_storage" name="test_parent_prefix_capture_boundaries_and_lifetime[thread-7]" time="0.015"><failure message="AssertionError: &#10;Arrays are not equal&#10;&#10;Mismatched elements: 2 / 2 (100%)&#10; x: array(None, dtype=object)&#10; y: array([[0],&#10;       [0]], dtype=int16)">captures = 7, lane = 'thread'
+
+    @pytest.mark.parametrize("captures", [0, 6, 7, 8, 29, 30])
+    @pytest.mark.parametrize("lane", ["single", "thread", "process_inline", "process_shared"])
+    def test_parent_prefix_capture_boundaries_and_lifetime(captures, lane):
+        compiler, expression = definition(captures)
+        graph = compiler.compile([expression])
+        scope = next(node for node in graph.nodes if node.kind == "apply_scope")
+        prefix = scope.parents
+        assert len(prefix) == captures + 2
+        native = graph.native_nodes()
+        restored = pickle.loads(pickle.dumps(graph))
+        assert restored.native_nodes() == native
+        assert restored.metadata() == graph.metadata()
+        del graph
+        gc.collect()
+        assert scope.parents == prefix
+    
+        config = PlannerConfig(
+            thread_work_units=1 if lane != "single" else 1e99,
+            process_work_units=1 if lane.startswith("process") else 1e100,
+            min_rows_per_worker=1, max_processes=2,
+            shared_memory_threshold_bytes=1 if lane == "process_shared" else 1 &lt;&lt; 30,
+        )
+        x = np.arange(1., 7.)
+        saved_input = x.copy()
+        x.flags.writeable = False
+        starts, ends = np.array([0, 2], np.int64), np.array([6, 6], np.int64)
+        parameters = {f"p{i}": float(i + 1) for i in range(captures)}
+        total = captures * (captures + 1) // 2
+        expected = np.array([[21 + 3 * total], [18 + 2 * total]], np.float64)
+        with AdaptiveScheduler(cpu_budget=2, config=config) as scheduler:
+            first = scheduler.execute(restored, {"x": x}, starts, ends,
+                                      parameters=parameters, timeout=20.)
+            second = scheduler.execute(restored, {"x": x}, starts, ends,
+                                       parameters=parameters, timeout=20.)
+            assert first.plan.lane == ("process" if lane.startswith("process") else lane)
+            for result in (first, second):
+                np.testing.assert_array_equal(result.values, expected)
+&gt;               np.testing.assert_array_equal(result.statuses, np.zeros((2, 1), np.int16))
+
+tests/test_compact_parent_storage.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (&lt;built-in function eq&gt;, None, array([[0],
+       [0]], dtype=int16))
+kwds = {'err_msg': '', 'header': 'Arrays are not equal', 'strict': False, 'verbose': True}
+
+    @wraps(func)
+    def inner(*args, **kwds):
+        with self._recreate_cm():
+&gt;           return func(*args, **kwds)
+                   ^^^^^^^^^^^^^^^^^^^
+E           AssertionError: 
+E           Arrays are not equal
+E           
+E           Mismatched elements: 2 / 2 (100%)
+E            x: array(None, dtype=object)
+E            y: array([[0],
+E                  [0]], dtype=int16)
+
+/opt/homebrew/Cellar/python@3.12/3.12.11/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py:81: AssertionError</failure></testcase><testcase classname="tests.test_compact_parent_storage" name="test_parent_prefix_capture_boundaries_and_lifetime[thread-8]" time="0.015"><failure message="AssertionError: &#10;Arrays are not equal&#10;&#10;Mismatched elements: 2 / 2 (100%)&#10; x: array(None, dtype=object)&#10; y: array([[0],&#10;       [0]], dtype=int16)">captures = 8, lane = 'thread'
+
+    @pytest.mark.parametrize("captures", [0, 6, 7, 8, 29, 30])
+    @pytest.mark.parametrize("lane", ["single", "thread", "process_inline", "process_shared"])
+    def test_parent_prefix_capture_boundaries_and_lifetime(captures, lane):
+        compiler, expression = definition(captures)
+        graph = compiler.compile([expression])
+        scope = next(node for node in graph.nodes if node.kind == "apply_scope")
+        prefix = scope.parents
+        assert len(prefix) == captures + 2
+        native = graph.native_nodes()
+        restored = pickle.loads(pickle.dumps(graph))
+        assert restored.native_nodes() == native
+        assert restored.metadata() == graph.metadata()
+        del graph
+        gc.collect()
+        assert scope.parents == prefix
+    
+        config = PlannerConfig(
+            thread_work_units=1 if lane != "single" else 1e99,
+            process_work_units=1 if lane.startswith("process") else 1e100,
+            min_rows_per_worker=1, max_processes=2,
+            shared_memory_threshold_bytes=1 if lane == "process_shared" else 1 &lt;&lt; 30,
+        )
+        x = np.arange(1., 7.)
+        saved_input = x.copy()
+        x.flags.writeable = False
+        starts, ends = np.array([0, 2], np.int64), np.array([6, 6], np.int64)
+        parameters = {f"p{i}": float(i + 1) for i in range(captures)}
+        total = captures * (captures + 1) // 2
+        expected = np.array([[21 + 3 * total], [18 + 2 * total]], np.float64)
+        with AdaptiveScheduler(cpu_budget=2, config=config) as scheduler:
+            first = scheduler.execute(restored, {"x": x}, starts, ends,
+                                      parameters=parameters, timeout=20.)
+            second = scheduler.execute(restored, {"x": x}, starts, ends,
+                                       parameters=parameters, timeout=20.)
+            assert first.plan.lane == ("process" if lane.startswith("process") else lane)
+            for result in (first, second):
+                np.testing.assert_array_equal(result.values, expected)
+&gt;               np.testing.assert_array_equal(result.statuses, np.zeros((2, 1), np.int16))
+
+tests/test_compact_parent_storage.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (&lt;built-in function eq&gt;, None, array([[0],
+       [0]], dtype=int16))
+kwds = {'err_msg': '', 'header': 'Arrays are not equal', 'strict': False, 'verbose': True}
+
+    @wraps(func)
+    def inner(*args, **kwds):
+        with self._recreate_cm():
+&gt;           return func(*args, **kwds)
+                   ^^^^^^^^^^^^^^^^^^^
+E           AssertionError: 
+E           Arrays are not equal
+E           
+E           Mismatched elements: 2 / 2 (100%)
+E            x: array(None, dtype=object)
+E            y: array([[0],
+E                  [0]], dtype=int16)
+
+/opt/homebrew/Cellar/python@3.12/3.12.11/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py:81: AssertionError</failure></testcase><testcase classname="tests.test_compact_parent_storage" name="test_parent_prefix_capture_boundaries_and_lifetime[thread-29]" time="0.015"><failure message="AssertionError: &#10;Arrays are not equal&#10;&#10;Mismatched elements: 2 / 2 (100%)&#10; x: array(None, dtype=object)&#10; y: array([[0],&#10;       [0]], dtype=int16)">captures = 29, lane = 'thread'
+
+    @pytest.mark.parametrize("captures", [0, 6, 7, 8, 29, 30])
+    @pytest.mark.parametrize("lane", ["single", "thread", "process_inline", "process_shared"])
+    def test_parent_prefix_capture_boundaries_and_lifetime(captures, lane):
+        compiler, expression = definition(captures)
+        graph = compiler.compile([expression])
+        scope = next(node for node in graph.nodes if node.kind == "apply_scope")
+        prefix = scope.parents
+        assert len(prefix) == captures + 2
+        native = graph.native_nodes()
+        restored = pickle.loads(pickle.dumps(graph))
+        assert restored.native_nodes() == native
+        assert restored.metadata() == graph.metadata()
+        del graph
+        gc.collect()
+        assert scope.parents == prefix
+    
+        config = PlannerConfig(
+            thread_work_units=1 if lane != "single" else 1e99,
+            process_work_units=1 if lane.startswith("process") else 1e100,
+            min_rows_per_worker=1, max_processes=2,
+            shared_memory_threshold_bytes=1 if lane == "process_shared" else 1 &lt;&lt; 30,
+        )
+        x = np.arange(1., 7.)
+        saved_input = x.copy()
+        x.flags.writeable = False
+        starts, ends = np.array([0, 2], np.int64), np.array([6, 6], np.int64)
+        parameters = {f"p{i}": float(i + 1) for i in range(captures)}
+        total = captures * (captures + 1) // 2
+        expected = np.array([[21 + 3 * total], [18 + 2 * total]], np.float64)
+        with AdaptiveScheduler(cpu_budget=2, config=config) as scheduler:
+            first = scheduler.execute(restored, {"x": x}, starts, ends,
+                                      parameters=parameters, timeout=20.)
+            second = scheduler.execute(restored, {"x": x}, starts, ends,
+                                       parameters=parameters, timeout=20.)
+            assert first.plan.lane == ("process" if lane.startswith("process") else lane)
+            for result in (first, second):
+                np.testing.assert_array_equal(result.values, expected)
+&gt;               np.testing.assert_array_equal(result.statuses, np.zeros((2, 1), np.int16))
+
+tests/test_compact_parent_storage.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (&lt;built-in function eq&gt;, None, array([[0],
+       [0]], dtype=int16))
+kwds = {'err_msg': '', 'header': 'Arrays are not equal', 'strict': False, 'verbose': True}
+
+    @wraps(func)
+    def inner(*args, **kwds):
+        with self._recreate_cm():
+&gt;           return func(*args, **kwds)
+                   ^^^^^^^^^^^^^^^^^^^
+E           AssertionError: 
+E           Arrays are not equal
+E           
+E           Mismatched elements: 2 / 2 (100%)
+E            x: array(None, dtype=object)
+E            y: array([[0],
+E                  [0]], dtype=int16)
+
+/opt/homebrew/Cellar/python@3.12/3.12.11/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py:81: AssertionError</failure></testcase><testcase classname="tests.test_compact_parent_storage" name="test_parent_prefix_capture_boundaries_and_lifetime[thread-30]" time="0.015"><failure message="AssertionError: &#10;Arrays are not equal&#10;&#10;Mismatched elements: 2 / 2 (100%)&#10; x: array(None, dtype=object)&#10; y: array([[0],&#10;       [0]], dtype=int16)">captures = 30, lane = 'thread'
+
+    @pytest.mark.parametrize("captures", [0, 6, 7, 8, 29, 30])
+    @pytest.mark.parametrize("lane", ["single", "thread", "process_inline", "process_shared"])
+    def test_parent_prefix_capture_boundaries_and_lifetime(captures, lane):
+        compiler, expression = definition(captures)
+        graph = compiler.compile([expression])
+        scope = next(node for node in graph.nodes if node.kind == "apply_scope")
+        prefix = scope.parents
+        assert len(prefix) == captures + 2
+        native = graph.native_nodes()
+        restored = pickle.loads(pickle.dumps(graph))
+        assert restored.native_nodes() == native
+        assert restored.metadata() == graph.metadata()
+        del graph
+        gc.collect()
+        assert scope.parents == prefix
+    
+        config = PlannerConfig(
+            thread_work_units=1 if lane != "single" else 1e99,
+            process_work_units=1 if lane.startswith("process") else 1e100,
+            min_rows_per_worker=1, max_processes=2,
+            shared_memory_threshold_bytes=1 if lane == "process_shared" else 1 &lt;&lt; 30,
+        )
+        x = np.arange(1., 7.)
+        saved_input = x.copy()
+        x.flags.writeable = False
+        starts, ends = np.array([0, 2], np.int64), np.array([6, 6], np.int64)
+        parameters = {f"p{i}": float(i + 1) for i in range(captures)}
+        total = captures * (captures + 1) // 2
+        expected = np.array([[21 + 3 * total], [18 + 2 * total]], np.float64)
+        with AdaptiveScheduler(cpu_budget=2, config=config) as scheduler:
+            first = scheduler.execute(restored, {"x": x}, starts, ends,
+                                      parameters=parameters, timeout=20.)
+            second = scheduler.execute(restored, {"x": x}, starts, ends,
+                                       parameters=parameters, timeout=20.)
+            assert first.plan.lane == ("process" if lane.startswith("process") else lane)
+            for result in (first, second):
+                np.testing.assert_array_equal(result.values, expected)
+&gt;               np.testing.assert_array_equal(result.statuses, np.zeros((2, 1), np.int16))
+
+tests/test_compact_parent_storage.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (&lt;built-in function eq&gt;, None, array([[0],
+       [0]], dtype=int16))
+kwds = {'err_msg': '', 'header': 'Arrays are not equal', 'strict': False, 'verbose': True}
+
+    @wraps(func)
+    def inner(*args, **kwds):
+        with self._recreate_cm():
+&gt;           return func(*args, **kwds)
+                   ^^^^^^^^^^^^^^^^^^^
+E           AssertionError: 
+E           Arrays are not equal
+E           
+E           Mismatched elements: 2 / 2 (100%)
+E            x: array(None, dtype=object)
+E            y: array([[0],
+E                  [0]], dtype=int16)
+
+/opt/homebrew/Cellar/python@3.12/3.12.11/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py:81: AssertionError</failure></testcase><testcase classname="tests.test_compact_parent_storage" name="test_parent_prefix_capture_boundaries_and_lifetime[process_inline-0]" time="0.410"><failure message="AssertionError: &#10;Arrays are not equal&#10;&#10;Mismatched elements: 2 / 2 (100%)&#10; x: array(None, dtype=object)&#10; y: array([[0],&#10;       [0]], dtype=int16)">captures = 0, lane = 'process_inline'
+
+    @pytest.mark.parametrize("captures", [0, 6, 7, 8, 29, 30])
+    @pytest.mark.parametrize("lane", ["single", "thread", "process_inline", "process_shared"])
+    def test_parent_prefix_capture_boundaries_and_lifetime(captures, lane):
+        compiler, expression = definition(captures)
+        graph = compiler.compile([expression])
+        scope = next(node for node in graph.nodes if node.kind == "apply_scope")
+        prefix = scope.parents
+        assert len(prefix) == captures + 2
+        native = graph.native_nodes()
+        restored = pickle.loads(pickle.dumps(graph))
+        assert restored.native_nodes() == native
+        assert restored.metadata() == graph.metadata()
+        del graph
+        gc.collect()
+        assert scope.parents == prefix
+    
+        config = PlannerConfig(
+            thread_work_units=1 if lane != "single" else 1e99,
+            process_work_units=1 if lane.startswith("process") else 1e100,
+            min_rows_per_worker=1, max_processes=2,
+            shared_memory_threshold_bytes=1 if lane == "process_shared" else 1 &lt;&lt; 30,
+        )
+        x = np.arange(1., 7.)
+        saved_input = x.copy()
+        x.flags.writeable = False
+        starts, ends = np.array([0, 2], np.int64), np.array([6, 6], np.int64)
+        parameters = {f"p{i}": float(i + 1) for i in range(captures)}
+        total = captures * (captures + 1) // 2
+        expected = np.array([[21 + 3 * total], [18 + 2 * total]], np.float64)
+        with AdaptiveScheduler(cpu_budget=2, config=config) as scheduler:
+            first = scheduler.execute(restored, {"x": x}, starts, ends,
+                                      parameters=parameters, timeout=20.)
+            second = scheduler.execute(restored, {"x": x}, starts, ends,
+                                       parameters=parameters, timeout=20.)
+            assert first.plan.lane == ("process" if lane.startswith("process") else lane)
+            for result in (first, second):
+                np.testing.assert_array_equal(result.values, expected)
+&gt;               np.testing.assert_array_equal(result.statuses, np.zeros((2, 1), np.int16))
+
+tests/test_compact_parent_storage.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (&lt;built-in function eq&gt;, None, array([[0],
+       [0]], dtype=int16))
+kwds = {'err_msg': '', 'header': 'Arrays are not equal', 'strict': False, 'verbose': True}
+
+    @wraps(func)
+    def inner(*args, **kwds):
+        with self._recreate_cm():
+&gt;           return func(*args, **kwds)
+                   ^^^^^^^^^^^^^^^^^^^
+E           AssertionError: 
+E           Arrays are not equal
+E           
+E           Mismatched elements: 2 / 2 (100%)
+E            x: array(None, dtype=object)
+E            y: array([[0],
+E                  [0]], dtype=int16)
+
+/opt/homebrew/Cellar/python@3.12/3.12.11/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py:81: AssertionError</failure></testcase><testcase classname="tests.test_compact_parent_storage" name="test_parent_prefix_capture_boundaries_and_lifetime[process_inline-6]" time="0.025"><failure message="AssertionError: &#10;Arrays are not equal&#10;&#10;Mismatched elements: 2 / 2 (100%)&#10; x: array(None, dtype=object)&#10; y: array([[0],&#10;       [0]], dtype=int16)">captures = 6, lane = 'process_inline'
+
+    @pytest.mark.parametrize("captures", [0, 6, 7, 8, 29, 30])
+    @pytest.mark.parametrize("lane", ["single", "thread", "process_inline", "process_shared"])
+    def test_parent_prefix_capture_boundaries_and_lifetime(captures, lane):
+        compiler, expression = definition(captures)
+        graph = compiler.compile([expression])
+        scope = next(node for node in graph.nodes if node.kind == "apply_scope")
+        prefix = scope.parents
+        assert len(prefix) == captures + 2
+        native = graph.native_nodes()
+        restored = pickle.loads(pickle.dumps(graph))
+        assert restored.native_nodes() == native
+        assert restored.metadata() == graph.metadata()
+        del graph
+        gc.collect()
+        assert scope.parents == prefix
+    
+        config = PlannerConfig(
+            thread_work_units=1 if lane != "single" else 1e99,
+            process_work_units=1 if lane.startswith("process") else 1e100,
+            min_rows_per_worker=1, max_processes=2,
+            shared_memory_threshold_bytes=1 if lane == "process_shared" else 1 &lt;&lt; 30,
+        )
+        x = np.arange(1., 7.)
+        saved_input = x.copy()
+        x.flags.writeable = False
+        starts, ends = np.array([0, 2], np.int64), np.array([6, 6], np.int64)
+        parameters = {f"p{i}": float(i + 1) for i in range(captures)}
+        total = captures * (captures + 1) // 2
+        expected = np.array([[21 + 3 * total], [18 + 2 * total]], np.float64)
+        with AdaptiveScheduler(cpu_budget=2, config=config) as scheduler:
+            first = scheduler.execute(restored, {"x": x}, starts, ends,
+                                      parameters=parameters, timeout=20.)
+            second = scheduler.execute(restored, {"x": x}, starts, ends,
+                                       parameters=parameters, timeout=20.)
+            assert first.plan.lane == ("process" if lane.startswith("process") else lane)
+            for result in (first, second):
+                np.testing.assert_array_equal(result.values, expected)
+&gt;               np.testing.assert_array_equal(result.statuses, np.zeros((2, 1), np.int16))
+
+tests/test_compact_parent_storage.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (&lt;built-in function eq&gt;, None, array([[0],
+       [0]], dtype=int16))
+kwds = {'err_msg': '', 'header': 'Arrays are not equal', 'strict': False, 'verbose': True}
+
+    @wraps(func)
+    def inner(*args, **kwds):
+        with self._recreate_cm():
+&gt;           return func(*args, **kwds)
+                   ^^^^^^^^^^^^^^^^^^^
+E           AssertionError: 
+E           Arrays are not equal
+E           
+E           Mismatched elements: 2 / 2 (100%)
+E            x: array(None, dtype=object)
+E            y: array([[0],
+E                  [0]], dtype=int16)
+
+/opt/homebrew/Cellar/python@3.12/3.12.11/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py:81: AssertionError</failure></testcase><testcase classname="tests.test_compact_parent_storage" name="test_parent_prefix_capture_boundaries_and_lifetime[process_inline-7]" time="0.021"><failure message="AssertionError: &#10;Arrays are not equal&#10;&#10;Mismatched elements: 2 / 2 (100%)&#10; x: array(None, dtype=object)&#10; y: array([[0],&#10;       [0]], dtype=int16)">captures = 7, lane = 'process_inline'
+
+    @pytest.mark.parametrize("captures", [0, 6, 7, 8, 29, 30])
+    @pytest.mark.parametrize("lane", ["single", "thread", "process_inline", "process_shared"])
+    def test_parent_prefix_capture_boundaries_and_lifetime(captures, lane):
+        compiler, expression = definition(captures)
+        graph = compiler.compile([expression])
+        scope = next(node for node in graph.nodes if node.kind == "apply_scope")
+        prefix = scope.parents
+        assert len(prefix) == captures + 2
+        native = graph.native_nodes()
+        restored = pickle.loads(pickle.dumps(graph))
+        assert restored.native_nodes() == native
+        assert restored.metadata() == graph.metadata()
+        del graph
+        gc.collect()
+        assert scope.parents == prefix
+    
+        config = PlannerConfig(
+            thread_work_units=1 if lane != "single" else 1e99,
+            process_work_units=1 if lane.startswith("process") else 1e100,
+            min_rows_per_worker=1, max_processes=2,
+            shared_memory_threshold_bytes=1 if lane == "process_shared" else 1 &lt;&lt; 30,
+        )
+        x = np.arange(1., 7.)
+        saved_input = x.copy()
+        x.flags.writeable = False
+        starts, ends = np.array([0, 2], np.int64), np.array([6, 6], np.int64)
+        parameters = {f"p{i}": float(i + 1) for i in range(captures)}
+        total = captures * (captures + 1) // 2
+        expected = np.array([[21 + 3 * total], [18 + 2 * total]], np.float64)
+        with AdaptiveScheduler(cpu_budget=2, config=config) as scheduler:
+            first = scheduler.execute(restored, {"x": x}, starts, ends,
+                                      parameters=parameters, timeout=20.)
+            second = scheduler.execute(restored, {"x": x}, starts, ends,
+                                       parameters=parameters, timeout=20.)
+            assert first.plan.lane == ("process" if lane.startswith("process") else lane)
+            for result in (first, second):
+                np.testing.assert_array_equal(result.values, expected)
+&gt;               np.testing.assert_array_equal(result.statuses, np.zeros((2, 1), np.int16))
+
+tests/test_compact_parent_storage.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (&lt;built-in function eq&gt;, None, array([[0],
+       [0]], dtype=int16))
+kwds = {'err_msg': '', 'header': 'Arrays are not equal', 'strict': False, 'verbose': True}
+
+    @wraps(func)
+    def inner(*args, **kwds):
+        with self._recreate_cm():
+&gt;           return func(*args, **kwds)
+                   ^^^^^^^^^^^^^^^^^^^
+E           AssertionError: 
+E           Arrays are not equal
+E           
+E           Mismatched elements: 2 / 2 (100%)
+E            x: array(None, dtype=object)
+E            y: array([[0],
+E                  [0]], dtype=int16)
+
+/opt/homebrew/Cellar/python@3.12/3.12.11/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py:81: AssertionError</failure></testcase><testcase classname="tests.test_compact_parent_storage" name="test_parent_prefix_capture_boundaries_and_lifetime[process_inline-8]" time="0.019"><failure message="AssertionError: &#10;Arrays are not equal&#10;&#10;Mismatched elements: 2 / 2 (100%)&#10; x: array(None, dtype=object)&#10; y: array([[0],&#10;       [0]], dtype=int16)">captures = 8, lane = 'process_inline'
+
+    @pytest.mark.parametrize("captures", [0, 6, 7, 8, 29, 30])
+    @pytest.mark.parametrize("lane", ["single", "thread", "process_inline", "process_shared"])
+    def test_parent_prefix_capture_boundaries_and_lifetime(captures, lane):
+        compiler, expression = definition(captures)
+        graph = compiler.compile([expression])
+        scope = next(node for node in graph.nodes if node.kind == "apply_scope")
+        prefix = scope.parents
+        assert len(prefix) == captures + 2
+        native = graph.native_nodes()
+        restored = pickle.loads(pickle.dumps(graph))
+        assert restored.native_nodes() == native
+        assert restored.metadata() == graph.metadata()
+        del graph
+        gc.collect()
+        assert scope.parents == prefix
+    
+        config = PlannerConfig(
+            thread_work_units=1 if lane != "single" else 1e99,
+            process_work_units=1 if lane.startswith("process") else 1e100,
+            min_rows_per_worker=1, max_processes=2,
+            shared_memory_threshold_bytes=1 if lane == "process_shared" else 1 &lt;&lt; 30,
+        )
+        x = np.arange(1., 7.)
+        saved_input = x.copy()
+        x.flags.writeable = False
+        starts, ends = np.array([0, 2], np.int64), np.array([6, 6], np.int64)
+        parameters = {f"p{i}": float(i + 1) for i in range(captures)}
+        total = captures * (captures + 1) // 2
+        expected = np.array([[21 + 3 * total], [18 + 2 * total]], np.float64)
+        with AdaptiveScheduler(cpu_budget=2, config=config) as scheduler:
+            first = scheduler.execute(restored, {"x": x}, starts, ends,
+                                      parameters=parameters, timeout=20.)
+            second = scheduler.execute(restored, {"x": x}, starts, ends,
+                                       parameters=parameters, timeout=20.)
+            assert first.plan.lane == ("process" if lane.startswith("process") else lane)
+            for result in (first, second):
+                np.testing.assert_array_equal(result.values, expected)
+&gt;               np.testing.assert_array_equal(result.statuses, np.zeros((2, 1), np.int16))
+
+tests/test_compact_parent_storage.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (&lt;built-in function eq&gt;, None, array([[0],
+       [0]], dtype=int16))
+kwds = {'err_msg': '', 'header': 'Arrays are not equal', 'strict': False, 'verbose': True}
+
+    @wraps(func)
+    def inner(*args, **kwds):
+        with self._recreate_cm():
+&gt;           return func(*args, **kwds)
+                   ^^^^^^^^^^^^^^^^^^^
+E           AssertionError: 
+E           Arrays are not equal
+E           
+E           Mismatched elements: 2 / 2 (100%)
+E            x: array(None, dtype=object)
+E            y: array([[0],
+E                  [0]], dtype=int16)
+
+/opt/homebrew/Cellar/python@3.12/3.12.11/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py:81: AssertionError</failure></testcase><testcase classname="tests.test_compact_parent_storage" name="test_parent_prefix_capture_boundaries_and_lifetime[process_inline-29]" time="0.019"><failure message="AssertionError: &#10;Arrays are not equal&#10;&#10;Mismatched elements: 2 / 2 (100%)&#10; x: array(None, dtype=object)&#10; y: array([[0],&#10;       [0]], dtype=int16)">captures = 29, lane = 'process_inline'
+
+    @pytest.mark.parametrize("captures", [0, 6, 7, 8, 29, 30])
+    @pytest.mark.parametrize("lane", ["single", "thread", "process_inline", "process_shared"])
+    def test_parent_prefix_capture_boundaries_and_lifetime(captures, lane):
+        compiler, expression = definition(captures)
+        graph = compiler.compile([expression])
+        scope = next(node for node in graph.nodes if node.kind == "apply_scope")
+        prefix = scope.parents
+        assert len(prefix) == captures + 2
+        native = graph.native_nodes()
+        restored = pickle.loads(pickle.dumps(graph))
+        assert restored.native_nodes() == native
+        assert restored.metadata() == graph.metadata()
+        del graph
+        gc.collect()
+        assert scope.parents == prefix
+    
+        config = PlannerConfig(
+            thread_work_units=1 if lane != "single" else 1e99,
+            process_work_units=1 if lane.startswith("process") else 1e100,
+            min_rows_per_worker=1, max_processes=2,
+            shared_memory_threshold_bytes=1 if lane == "process_shared" else 1 &lt;&lt; 30,
+        )
+        x = np.arange(1., 7.)
+        saved_input = x.copy()
+        x.flags.writeable = False
+        starts, ends = np.array([0, 2], np.int64), np.array([6, 6], np.int64)
+        parameters = {f"p{i}": float(i + 1) for i in range(captures)}
+        total = captures * (captures + 1) // 2
+        expected = np.array([[21 + 3 * total], [18 + 2 * total]], np.float64)
+        with AdaptiveScheduler(cpu_budget=2, config=config) as scheduler:
+            first = scheduler.execute(restored, {"x": x}, starts, ends,
+                                      parameters=parameters, timeout=20.)
+            second = scheduler.execute(restored, {"x": x}, starts, ends,
+                                       parameters=parameters, timeout=20.)
+            assert first.plan.lane == ("process" if lane.startswith("process") else lane)
+            for result in (first, second):
+                np.testing.assert_array_equal(result.values, expected)
+&gt;               np.testing.assert_array_equal(result.statuses, np.zeros((2, 1), np.int16))
+
+tests/test_compact_parent_storage.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (&lt;built-in function eq&gt;, None, array([[0],
+       [0]], dtype=int16))
+kwds = {'err_msg': '', 'header': 'Arrays are not equal', 'strict': False, 'verbose': True}
+
+    @wraps(func)
+    def inner(*args, **kwds):
+        with self._recreate_cm():
+&gt;           return func(*args, **kwds)
+                   ^^^^^^^^^^^^^^^^^^^
+E           AssertionError: 
+E           Arrays are not equal
+E           
+E           Mismatched elements: 2 / 2 (100%)
+E            x: array(None, dtype=object)
+E            y: array([[0],
+E                  [0]], dtype=int16)
+
+/opt/homebrew/Cellar/python@3.12/3.12.11/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py:81: AssertionError</failure></testcase><testcase classname="tests.test_compact_parent_storage" name="test_parent_prefix_capture_boundaries_and_lifetime[process_inline-30]" time="0.020"><failure message="AssertionError: &#10;Arrays are not equal&#10;&#10;Mismatched elements: 2 / 2 (100%)&#10; x: array(None, dtype=object)&#10; y: array([[0],&#10;       [0]], dtype=int16)">captures = 30, lane = 'process_inline'
+
+    @pytest.mark.parametrize("captures", [0, 6, 7, 8, 29, 30])
+    @pytest.mark.parametrize("lane", ["single", "thread", "process_inline", "process_shared"])
+    def test_parent_prefix_capture_boundaries_and_lifetime(captures, lane):
+        compiler, expression = definition(captures)
+        graph = compiler.compile([expression])
+        scope = next(node for node in graph.nodes if node.kind == "apply_scope")
+        prefix = scope.parents
+        assert len(prefix) == captures + 2
+        native = graph.native_nodes()
+        restored = pickle.loads(pickle.dumps(graph))
+        assert restored.native_nodes() == native
+        assert restored.metadata() == graph.metadata()
+        del graph
+        gc.collect()
+        assert scope.parents == prefix
+    
+        config = PlannerConfig(
+            thread_work_units=1 if lane != "single" else 1e99,
+            process_work_units=1 if lane.startswith("process") else 1e100,
+            min_rows_per_worker=1, max_processes=2,
+            shared_memory_threshold_bytes=1 if lane == "process_shared" else 1 &lt;&lt; 30,
+        )
+        x = np.arange(1., 7.)
+        saved_input = x.copy()
+        x.flags.writeable = False
+        starts, ends = np.array([0, 2], np.int64), np.array([6, 6], np.int64)
+        parameters = {f"p{i}": float(i + 1) for i in range(captures)}
+        total = captures * (captures + 1) // 2
+        expected = np.array([[21 + 3 * total], [18 + 2 * total]], np.float64)
+        with AdaptiveScheduler(cpu_budget=2, config=config) as scheduler:
+            first = scheduler.execute(restored, {"x": x}, starts, ends,
+                                      parameters=parameters, timeout=20.)
+            second = scheduler.execute(restored, {"x": x}, starts, ends,
+                                       parameters=parameters, timeout=20.)
+            assert first.plan.lane == ("process" if lane.startswith("process") else lane)
+            for result in (first, second):
+                np.testing.assert_array_equal(result.values, expected)
+&gt;               np.testing.assert_array_equal(result.statuses, np.zeros((2, 1), np.int16))
+
+tests/test_compact_parent_storage.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (&lt;built-in function eq&gt;, None, array([[0],
+       [0]], dtype=int16))
+kwds = {'err_msg': '', 'header': 'Arrays are not equal', 'strict': False, 'verbose': True}
+
+    @wraps(func)
+    def inner(*args, **kwds):
+        with self._recreate_cm():
+&gt;           return func(*args, **kwds)
+                   ^^^^^^^^^^^^^^^^^^^
+E           AssertionError: 
+E           Arrays are not equal
+E           
+E           Mismatched elements: 2 / 2 (100%)
+E            x: array(None, dtype=object)
+E            y: array([[0],
+E                  [0]], dtype=int16)
+
+/opt/homebrew/Cellar/python@3.12/3.12.11/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py:81: AssertionError</failure></testcase><testcase classname="tests.test_compact_parent_storage" name="test_parent_prefix_capture_boundaries_and_lifetime[process_shared-0]" time="0.019"><failure message="AssertionError: &#10;Arrays are not equal&#10;&#10;Mismatched elements: 2 / 2 (100%)&#10; x: array(None, dtype=object)&#10; y: array([[0],&#10;       [0]], dtype=int16)">captures = 0, lane = 'process_shared'
+
+    @pytest.mark.parametrize("captures", [0, 6, 7, 8, 29, 30])
+    @pytest.mark.parametrize("lane", ["single", "thread", "process_inline", "process_shared"])
+    def test_parent_prefix_capture_boundaries_and_lifetime(captures, lane):
+        compiler, expression = definition(captures)
+        graph = compiler.compile([expression])
+        scope = next(node for node in graph.nodes if node.kind == "apply_scope")
+        prefix = scope.parents
+        assert len(prefix) == captures + 2
+        native = graph.native_nodes()
+        restored = pickle.loads(pickle.dumps(graph))
+        assert restored.native_nodes() == native
+        assert restored.metadata() == graph.metadata()
+        del graph
+        gc.collect()
+        assert scope.parents == prefix
+    
+        config = PlannerConfig(
+            thread_work_units=1 if lane != "single" else 1e99,
+            process_work_units=1 if lane.startswith("process") else 1e100,
+            min_rows_per_worker=1, max_processes=2,
+            shared_memory_threshold_bytes=1 if lane == "process_shared" else 1 &lt;&lt; 30,
+        )
+        x = np.arange(1., 7.)
+        saved_input = x.copy()
+        x.flags.writeable = False
+        starts, ends = np.array([0, 2], np.int64), np.array([6, 6], np.int64)
+        parameters = {f"p{i}": float(i + 1) for i in range(captures)}
+        total = captures * (captures + 1) // 2
+        expected = np.array([[21 + 3 * total], [18 + 2 * total]], np.float64)
+        with AdaptiveScheduler(cpu_budget=2, config=config) as scheduler:
+            first = scheduler.execute(restored, {"x": x}, starts, ends,
+                                      parameters=parameters, timeout=20.)
+            second = scheduler.execute(restored, {"x": x}, starts, ends,
+                                       parameters=parameters, timeout=20.)
+            assert first.plan.lane == ("process" if lane.startswith("process") else lane)
+            for result in (first, second):
+                np.testing.assert_array_equal(result.values, expected)
+&gt;               np.testing.assert_array_equal(result.statuses, np.zeros((2, 1), np.int16))
+
+tests/test_compact_parent_storage.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (&lt;built-in function eq&gt;, None, array([[0],
+       [0]], dtype=int16))
+kwds = {'err_msg': '', 'header': 'Arrays are not equal', 'strict': False, 'verbose': True}
+
+    @wraps(func)
+    def inner(*args, **kwds):
+        with self._recreate_cm():
+&gt;           return func(*args, **kwds)
+                   ^^^^^^^^^^^^^^^^^^^
+E           AssertionError: 
+E           Arrays are not equal
+E           
+E           Mismatched elements: 2 / 2 (100%)
+E            x: array(None, dtype=object)
+E            y: array([[0],
+E                  [0]], dtype=int16)
+
+/opt/homebrew/Cellar/python@3.12/3.12.11/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py:81: AssertionError</failure></testcase><testcase classname="tests.test_compact_parent_storage" name="test_parent_prefix_capture_boundaries_and_lifetime[process_shared-6]" time="0.019"><failure message="AssertionError: &#10;Arrays are not equal&#10;&#10;Mismatched elements: 2 / 2 (100%)&#10; x: array(None, dtype=object)&#10; y: array([[0],&#10;       [0]], dtype=int16)">captures = 6, lane = 'process_shared'
+
+    @pytest.mark.parametrize("captures", [0, 6, 7, 8, 29, 30])
+    @pytest.mark.parametrize("lane", ["single", "thread", "process_inline", "process_shared"])
+    def test_parent_prefix_capture_boundaries_and_lifetime(captures, lane):
+        compiler, expression = definition(captures)
+        graph = compiler.compile([expression])
+        scope = next(node for node in graph.nodes if node.kind == "apply_scope")
+        prefix = scope.parents
+        assert len(prefix) == captures + 2
+        native = graph.native_nodes()
+        restored = pickle.loads(pickle.dumps(graph))
+        assert restored.native_nodes() == native
+        assert restored.metadata() == graph.metadata()
+        del graph
+        gc.collect()
+        assert scope.parents == prefix
+    
+        config = PlannerConfig(
+            thread_work_units=1 if lane != "single" else 1e99,
+            process_work_units=1 if lane.startswith("process") else 1e100,
+            min_rows_per_worker=1, max_processes=2,
+            shared_memory_threshold_bytes=1 if lane == "process_shared" else 1 &lt;&lt; 30,
+        )
+        x = np.arange(1., 7.)
+        saved_input = x.copy()
+        x.flags.writeable = False
+        starts, ends = np.array([0, 2], np.int64), np.array([6, 6], np.int64)
+        parameters = {f"p{i}": float(i + 1) for i in range(captures)}
+        total = captures * (captures + 1) // 2
+        expected = np.array([[21 + 3 * total], [18 + 2 * total]], np.float64)
+        with AdaptiveScheduler(cpu_budget=2, config=config) as scheduler:
+            first = scheduler.execute(restored, {"x": x}, starts, ends,
+                                      parameters=parameters, timeout=20.)
+            second = scheduler.execute(restored, {"x": x}, starts, ends,
+                                       parameters=parameters, timeout=20.)
+            assert first.plan.lane == ("process" if lane.startswith("process") else lane)
+            for result in (first, second):
+                np.testing.assert_array_equal(result.values, expected)
+&gt;               np.testing.assert_array_equal(result.statuses, np.zeros((2, 1), np.int16))
+
+tests/test_compact_parent_storage.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (&lt;built-in function eq&gt;, None, array([[0],
+       [0]], dtype=int16))
+kwds = {'err_msg': '', 'header': 'Arrays are not equal', 'strict': False, 'verbose': True}
+
+    @wraps(func)
+    def inner(*args, **kwds):
+        with self._recreate_cm():
+&gt;           return func(*args, **kwds)
+                   ^^^^^^^^^^^^^^^^^^^
+E           AssertionError: 
+E           Arrays are not equal
+E           
+E           Mismatched elements: 2 / 2 (100%)
+E            x: array(None, dtype=object)
+E            y: array([[0],
+E                  [0]], dtype=int16)
+
+/opt/homebrew/Cellar/python@3.12/3.12.11/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py:81: AssertionError</failure></testcase><testcase classname="tests.test_compact_parent_storage" name="test_parent_prefix_capture_boundaries_and_lifetime[process_shared-7]" time="0.020"><failure message="AssertionError: &#10;Arrays are not equal&#10;&#10;Mismatched elements: 2 / 2 (100%)&#10; x: array(None, dtype=object)&#10; y: array([[0],&#10;       [0]], dtype=int16)">captures = 7, lane = 'process_shared'
+
+    @pytest.mark.parametrize("captures", [0, 6, 7, 8, 29, 30])
+    @pytest.mark.parametrize("lane", ["single", "thread", "process_inline", "process_shared"])
+    def test_parent_prefix_capture_boundaries_and_lifetime(captures, lane):
+        compiler, expression = definition(captures)
+        graph = compiler.compile([expression])
+        scope = next(node for node in graph.nodes if node.kind == "apply_scope")
+        prefix = scope.parents
+        assert len(prefix) == captures + 2
+        native = graph.native_nodes()
+        restored = pickle.loads(pickle.dumps(graph))
+        assert restored.native_nodes() == native
+        assert restored.metadata() == graph.metadata()
+        del graph
+        gc.collect()
+        assert scope.parents == prefix
+    
+        config = PlannerConfig(
+            thread_work_units=1 if lane != "single" else 1e99,
+            process_work_units=1 if lane.startswith("process") else 1e100,
+            min_rows_per_worker=1, max_processes=2,
+            shared_memory_threshold_bytes=1 if lane == "process_shared" else 1 &lt;&lt; 30,
+        )
+        x = np.arange(1., 7.)
+        saved_input = x.copy()
+        x.flags.writeable = False
+        starts, ends = np.array([0, 2], np.int64), np.array([6, 6], np.int64)
+        parameters = {f"p{i}": float(i + 1) for i in range(captures)}
+        total = captures * (captures + 1) // 2
+        expected = np.array([[21 + 3 * total], [18 + 2 * total]], np.float64)
+        with AdaptiveScheduler(cpu_budget=2, config=config) as scheduler:
+            first = scheduler.execute(restored, {"x": x}, starts, ends,
+                                      parameters=parameters, timeout=20.)
+            second = scheduler.execute(restored, {"x": x}, starts, ends,
+                                       parameters=parameters, timeout=20.)
+            assert first.plan.lane == ("process" if lane.startswith("process") else lane)
+            for result in (first, second):
+                np.testing.assert_array_equal(result.values, expected)
+&gt;               np.testing.assert_array_equal(result.statuses, np.zeros((2, 1), np.int16))
+
+tests/test_compact_parent_storage.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (&lt;built-in function eq&gt;, None, array([[0],
+       [0]], dtype=int16))
+kwds = {'err_msg': '', 'header': 'Arrays are not equal', 'strict': False, 'verbose': True}
+
+    @wraps(func)
+    def inner(*args, **kwds):
+        with self._recreate_cm():
+&gt;           return func(*args, **kwds)
+                   ^^^^^^^^^^^^^^^^^^^
+E           AssertionError: 
+E           Arrays are not equal
+E           
+E           Mismatched elements: 2 / 2 (100%)
+E            x: array(None, dtype=object)
+E            y: array([[0],
+E                  [0]], dtype=int16)
+
+/opt/homebrew/Cellar/python@3.12/3.12.11/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py:81: AssertionError</failure></testcase><testcase classname="tests.test_compact_parent_storage" name="test_parent_prefix_capture_boundaries_and_lifetime[process_shared-8]" time="0.020"><failure message="AssertionError: &#10;Arrays are not equal&#10;&#10;Mismatched elements: 2 / 2 (100%)&#10; x: array(None, dtype=object)&#10; y: array([[0],&#10;       [0]], dtype=int16)">captures = 8, lane = 'process_shared'
+
+    @pytest.mark.parametrize("captures", [0, 6, 7, 8, 29, 30])
+    @pytest.mark.parametrize("lane", ["single", "thread", "process_inline", "process_shared"])
+    def test_parent_prefix_capture_boundaries_and_lifetime(captures, lane):
+        compiler, expression = definition(captures)
+        graph = compiler.compile([expression])
+        scope = next(node for node in graph.nodes if node.kind == "apply_scope")
+        prefix = scope.parents
+        assert len(prefix) == captures + 2
+        native = graph.native_nodes()
+        restored = pickle.loads(pickle.dumps(graph))
+        assert restored.native_nodes() == native
+        assert restored.metadata() == graph.metadata()
+        del graph
+        gc.collect()
+        assert scope.parents == prefix
+    
+        config = PlannerConfig(
+            thread_work_units=1 if lane != "single" else 1e99,
+            process_work_units=1 if lane.startswith("process") else 1e100,
+            min_rows_per_worker=1, max_processes=2,
+            shared_memory_threshold_bytes=1 if lane == "process_shared" else 1 &lt;&lt; 30,
+        )
+        x = np.arange(1., 7.)
+        saved_input = x.copy()
+        x.flags.writeable = False
+        starts, ends = np.array([0, 2], np.int64), np.array([6, 6], np.int64)
+        parameters = {f"p{i}": float(i + 1) for i in range(captures)}
+        total = captures * (captures + 1) // 2
+        expected = np.array([[21 + 3 * total], [18 + 2 * total]], np.float64)
+        with AdaptiveScheduler(cpu_budget=2, config=config) as scheduler:
+            first = scheduler.execute(restored, {"x": x}, starts, ends,
+                                      parameters=parameters, timeout=20.)
+            second = scheduler.execute(restored, {"x": x}, starts, ends,
+                                       parameters=parameters, timeout=20.)
+            assert first.plan.lane == ("process" if lane.startswith("process") else lane)
+            for result in (first, second):
+                np.testing.assert_array_equal(result.values, expected)
+&gt;               np.testing.assert_array_equal(result.statuses, np.zeros((2, 1), np.int16))
+
+tests/test_compact_parent_storage.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (&lt;built-in function eq&gt;, None, array([[0],
+       [0]], dtype=int16))
+kwds = {'err_msg': '', 'header': 'Arrays are not equal', 'strict': False, 'verbose': True}
+
+    @wraps(func)
+    def inner(*args, **kwds):
+        with self._recreate_cm():
+&gt;           return func(*args, **kwds)
+                   ^^^^^^^^^^^^^^^^^^^
+E           AssertionError: 
+E           Arrays are not equal
+E           
+E           Mismatched elements: 2 / 2 (100%)
+E            x: array(None, dtype=object)
+E            y: array([[0],
+E                  [0]], dtype=int16)
+
+/opt/homebrew/Cellar/python@3.12/3.12.11/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py:81: AssertionError</failure></testcase><testcase classname="tests.test_compact_parent_storage" name="test_parent_prefix_capture_boundaries_and_lifetime[process_shared-29]" time="0.020"><failure message="AssertionError: &#10;Arrays are not equal&#10;&#10;Mismatched elements: 2 / 2 (100%)&#10; x: array(None, dtype=object)&#10; y: array([[0],&#10;       [0]], dtype=int16)">captures = 29, lane = 'process_shared'
+
+    @pytest.mark.parametrize("captures", [0, 6, 7, 8, 29, 30])
+    @pytest.mark.parametrize("lane", ["single", "thread", "process_inline", "process_shared"])
+    def test_parent_prefix_capture_boundaries_and_lifetime(captures, lane):
+        compiler, expression = definition(captures)
+        graph = compiler.compile([expression])
+        scope = next(node for node in graph.nodes if node.kind == "apply_scope")
+        prefix = scope.parents
+        assert len(prefix) == captures + 2
+        native = graph.native_nodes()
+        restored = pickle.loads(pickle.dumps(graph))
+        assert restored.native_nodes() == native
+        assert restored.metadata() == graph.metadata()
+        del graph
+        gc.collect()
+        assert scope.parents == prefix
+    
+        config = PlannerConfig(
+            thread_work_units=1 if lane != "single" else 1e99,
+            process_work_units=1 if lane.startswith("process") else 1e100,
+            min_rows_per_worker=1, max_processes=2,
+            shared_memory_threshold_bytes=1 if lane == "process_shared" else 1 &lt;&lt; 30,
+        )
+        x = np.arange(1., 7.)
+        saved_input = x.copy()
+        x.flags.writeable = False
+        starts, ends = np.array([0, 2], np.int64), np.array([6, 6], np.int64)
+        parameters = {f"p{i}": float(i + 1) for i in range(captures)}
+        total = captures * (captures + 1) // 2
+        expected = np.array([[21 + 3 * total], [18 + 2 * total]], np.float64)
+        with AdaptiveScheduler(cpu_budget=2, config=config) as scheduler:
+            first = scheduler.execute(restored, {"x": x}, starts, ends,
+                                      parameters=parameters, timeout=20.)
+            second = scheduler.execute(restored, {"x": x}, starts, ends,
+                                       parameters=parameters, timeout=20.)
+            assert first.plan.lane == ("process" if lane.startswith("process") else lane)
+            for result in (first, second):
+                np.testing.assert_array_equal(result.values, expected)
+&gt;               np.testing.assert_array_equal(result.statuses, np.zeros((2, 1), np.int16))
+
+tests/test_compact_parent_storage.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (&lt;built-in function eq&gt;, None, array([[0],
+       [0]], dtype=int16))
+kwds = {'err_msg': '', 'header': 'Arrays are not equal', 'strict': False, 'verbose': True}
+
+    @wraps(func)
+    def inner(*args, **kwds):
+        with self._recreate_cm():
+&gt;           return func(*args, **kwds)
+                   ^^^^^^^^^^^^^^^^^^^
+E           AssertionError: 
+E           Arrays are not equal
+E           
+E           Mismatched elements: 2 / 2 (100%)
+E            x: array(None, dtype=object)
+E            y: array([[0],
+E                  [0]], dtype=int16)
+
+/opt/homebrew/Cellar/python@3.12/3.12.11/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py:81: AssertionError</failure></testcase><testcase classname="tests.test_compact_parent_storage" name="test_parent_prefix_capture_boundaries_and_lifetime[process_shared-30]" time="0.021"><failure message="AssertionError: &#10;Arrays are not equal&#10;&#10;Mismatched elements: 2 / 2 (100%)&#10; x: array(None, dtype=object)&#10; y: array([[0],&#10;       [0]], dtype=int16)">captures = 30, lane = 'process_shared'
+
+    @pytest.mark.parametrize("captures", [0, 6, 7, 8, 29, 30])
+    @pytest.mark.parametrize("lane", ["single", "thread", "process_inline", "process_shared"])
+    def test_parent_prefix_capture_boundaries_and_lifetime(captures, lane):
+        compiler, expression = definition(captures)
+        graph = compiler.compile([expression])
+        scope = next(node for node in graph.nodes if node.kind == "apply_scope")
+        prefix = scope.parents
+        assert len(prefix) == captures + 2
+        native = graph.native_nodes()
+        restored = pickle.loads(pickle.dumps(graph))
+        assert restored.native_nodes() == native
+        assert restored.metadata() == graph.metadata()
+        del graph
+        gc.collect()
+        assert scope.parents == prefix
+    
+        config = PlannerConfig(
+            thread_work_units=1 if lane != "single" else 1e99,
+            process_work_units=1 if lane.startswith("process") else 1e100,
+            min_rows_per_worker=1, max_processes=2,
+            shared_memory_threshold_bytes=1 if lane == "process_shared" else 1 &lt;&lt; 30,
+        )
+        x = np.arange(1., 7.)
+        saved_input = x.copy()
+        x.flags.writeable = False
+        starts, ends = np.array([0, 2], np.int64), np.array([6, 6], np.int64)
+        parameters = {f"p{i}": float(i + 1) for i in range(captures)}
+        total = captures * (captures + 1) // 2
+        expected = np.array([[21 + 3 * total], [18 + 2 * total]], np.float64)
+        with AdaptiveScheduler(cpu_budget=2, config=config) as scheduler:
+            first = scheduler.execute(restored, {"x": x}, starts, ends,
+                                      parameters=parameters, timeout=20.)
+            second = scheduler.execute(restored, {"x": x}, starts, ends,
+                                       parameters=parameters, timeout=20.)
+            assert first.plan.lane == ("process" if lane.startswith("process") else lane)
+            for result in (first, second):
+                np.testing.assert_array_equal(result.values, expected)
+&gt;               np.testing.assert_array_equal(result.statuses, np.zeros((2, 1), np.int16))
+
+tests/test_compact_parent_storage.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (&lt;built-in function eq&gt;, None, array([[0],
+       [0]], dtype=int16))
+kwds = {'err_msg': '', 'header': 'Arrays are not equal', 'strict': False, 'verbose': True}
+
+    @wraps(func)
+    def inner(*args, **kwds):
+        with self._recreate_cm():
+&gt;           return func(*args, **kwds)
+                   ^^^^^^^^^^^^^^^^^^^
+E           AssertionError: 
+E           Arrays are not equal
+E           
+E           Mismatched elements: 2 / 2 (100%)
+E            x: array(None, dtype=object)
+E            y: array([[0],
+E                  [0]], dtype=int16)
+
+/opt/homebrew/Cellar/python@3.12/3.12.11/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py:81: AssertionError</failure></testcase><testcase classname="tests.test_compact_parent_storage" name="test_scope_parent_limit_remains_32" time="0.002"><failure message="AssertionError: Regex pattern did not match.&#10; Regex: 'too many.*depend|dependency.*limit'&#10; Input: 'too many scope captures'">def test_scope_parent_limit_remains_32():
+        compiler, expression = definition(31)
+        with pytest.raises(GraphCompileError, match="too many.*depend|dependency.*limit"):
+&gt;           compiler.compile([expression])
+E           calmetrics_engine._native.graph.GraphCompileError: too many scope captures
+
+tests/test_compact_parent_storage.py:68: GraphCompileError
+
+During handling of the above exception, another exception occurred:
+
+    def test_scope_parent_limit_remains_32():
+        compiler, expression = definition(31)
+&gt;       with pytest.raises(GraphCompileError, match="too many.*depend|dependency.*limit"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E        Regex: 'too many.*depend|dependency.*limit'
+E        Input: 'too many scope captures'
+
+tests/test_compact_parent_storage.py:67: AssertionError</failure></testcase></testsuite></testsuites>

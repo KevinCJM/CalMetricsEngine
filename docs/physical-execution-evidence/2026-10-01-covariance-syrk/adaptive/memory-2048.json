@@ -1,0 +1,722 @@
+[
+  {
+    "case": {
+      "n": 2048,
+      "d": 2048,
+      "layout": "c"
+    },
+    "backend": "native",
+    "measure": "heap",
+    "report": {
+      "setup_heap": {
+        "allocations": 152,
+        "frees": 98,
+        "allocated_bytes": 12840,
+        "live_bytes": 4456,
+        "peak_bytes": 7897,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_heap": {
+        "allocations": 214,
+        "frees": 128,
+        "allocated_bytes": 33573840,
+        "live_bytes": 33562226,
+        "peak_bytes": 33562338,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_retained_heap": {
+        "allocations": 214,
+        "frees": 133,
+        "allocated_bytes": 33573840,
+        "live_bytes": 7304,
+        "peak_bytes": 33562338,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_baseline_heap": {
+        "allocations": 249,
+        "frees": 168,
+        "allocated_bytes": 201349250,
+        "live_bytes": 7304,
+        "peak_bytes": 33562338,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_heap": {
+        "allocations": 263,
+        "frees": 177,
+        "allocated_bytes": 268459414,
+        "live_bytes": 33562226,
+        "peak_bytes": 67117244,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_retained_heap": {
+        "allocations": 263,
+        "frees": 182,
+        "allocated_bytes": 268459414,
+        "live_bytes": 7304,
+        "peak_bytes": 67117244,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "heap_schema": "continuous-live-1",
+      "cold_peak_bytes": 33562338,
+      "warm_peak_bytes": 67117244
+    },
+    "command": [
+      "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+      "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/docs/physical-execution-evidence/2026-10-01-covariance-syrk/guarded_screen.py",
+      "--mode",
+      "memory",
+      "--backend",
+      "native",
+      "--measure",
+      "heap",
+      "--library",
+      "/private/tmp/calmetrics-covariance-syrk-20261001/adaptive-candidate.dylib",
+      "--probe",
+      "/private/tmp/calmetrics-reaccept-20260929/heap_probe.dylib",
+      "--case",
+      "{\"n\": 2048, \"d\": 2048, \"layout\": \"c\"}",
+      "--output",
+      "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/docs/physical-execution-evidence/2026-10-01-covariance-syrk/adaptive"
+    ]
+  },
+  {
+    "case": {
+      "n": 2048,
+      "d": 2048,
+      "layout": "c"
+    },
+    "backend": "native",
+    "measure": "rss",
+    "report": {
+      "rss_baseline": 110657536,
+      "rss_peak": 144244736,
+      "rss_delta": 33587200,
+      "rss_idle_delta": 0,
+      "rss_schema": "warm-monitor-control-1"
+    },
+    "command": [
+      "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+      "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/docs/physical-execution-evidence/2026-10-01-covariance-syrk/guarded_screen.py",
+      "--mode",
+      "memory",
+      "--backend",
+      "native",
+      "--measure",
+      "rss",
+      "--library",
+      "/private/tmp/calmetrics-covariance-syrk-20261001/adaptive-candidate.dylib",
+      "--probe",
+      "/private/tmp/calmetrics-reaccept-20260929/heap_probe.dylib",
+      "--case",
+      "{\"n\": 2048, \"d\": 2048, \"layout\": \"c\"}",
+      "--output",
+      "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/docs/physical-execution-evidence/2026-10-01-covariance-syrk/adaptive"
+    ]
+  },
+  {
+    "case": {
+      "n": 2048,
+      "d": 2048,
+      "layout": "c"
+    },
+    "backend": "candidate",
+    "measure": "heap",
+    "report": {
+      "setup_heap": {
+        "allocations": 5,
+        "frees": 1,
+        "allocated_bytes": 3584,
+        "live_bytes": 3488,
+        "peak_bytes": 3488,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_heap": {
+        "allocations": 10,
+        "frees": 3,
+        "allocated_bytes": 79744560,
+        "live_bytes": 33557968,
+        "peak_bytes": 79744464,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_retained_heap": {
+        "allocations": 10,
+        "frees": 4,
+        "allocated_bytes": 79744560,
+        "live_bytes": 3536,
+        "peak_bytes": 79744464,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_baseline_heap": {
+        "allocations": 25,
+        "frees": 19,
+        "allocated_bytes": 478449200,
+        "live_bytes": 3536,
+        "peak_bytes": 79744464,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_heap": {
+        "allocations": 31,
+        "frees": 24,
+        "allocated_bytes": 637931056,
+        "live_bytes": 33557968,
+        "peak_bytes": 113298896,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_retained_heap": {
+        "allocations": 31,
+        "frees": 25,
+        "allocated_bytes": 637931056,
+        "live_bytes": 3536,
+        "peak_bytes": 113298896,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "heap_schema": "continuous-live-1",
+      "cold_peak_bytes": 79744464,
+      "warm_peak_bytes": 113298896
+    },
+    "command": [
+      "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+      "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/docs/physical-execution-evidence/2026-10-01-covariance-syrk/guarded_screen.py",
+      "--mode",
+      "memory",
+      "--backend",
+      "candidate",
+      "--measure",
+      "heap",
+      "--library",
+      "/private/tmp/calmetrics-covariance-syrk-20261001/adaptive-candidate.dylib",
+      "--probe",
+      "/private/tmp/calmetrics-reaccept-20260929/heap_probe.dylib",
+      "--case",
+      "{\"n\": 2048, \"d\": 2048, \"layout\": \"c\"}",
+      "--output",
+      "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/docs/physical-execution-evidence/2026-10-01-covariance-syrk/adaptive"
+    ]
+  },
+  {
+    "case": {
+      "n": 2048,
+      "d": 2048,
+      "layout": "c"
+    },
+    "backend": "candidate",
+    "measure": "rss",
+    "report": {
+      "rss_baseline": 156647424,
+      "rss_peak": 190251008,
+      "rss_delta": 33603584,
+      "rss_idle_delta": 0,
+      "rss_schema": "warm-monitor-control-1"
+    },
+    "command": [
+      "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+      "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/docs/physical-execution-evidence/2026-10-01-covariance-syrk/guarded_screen.py",
+      "--mode",
+      "memory",
+      "--backend",
+      "candidate",
+      "--measure",
+      "rss",
+      "--library",
+      "/private/tmp/calmetrics-covariance-syrk-20261001/adaptive-candidate.dylib",
+      "--probe",
+      "/private/tmp/calmetrics-reaccept-20260929/heap_probe.dylib",
+      "--case",
+      "{\"n\": 2048, \"d\": 2048, \"layout\": \"c\"}",
+      "--output",
+      "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/docs/physical-execution-evidence/2026-10-01-covariance-syrk/adaptive"
+    ]
+  },
+  {
+    "case": {
+      "n": 2048,
+      "d": 2048,
+      "layout": "c"
+    },
+    "backend": "njit",
+    "measure": "heap",
+    "report": {
+      "setup_heap": {
+        "allocations": 8,
+        "frees": 8,
+        "allocated_bytes": 106971874,
+        "live_bytes": 0,
+        "peak_bytes": 106955136,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_heap": {
+        "allocations": 16,
+        "frees": 15,
+        "allocated_bytes": 213943748,
+        "live_bytes": 33554544,
+        "peak_bytes": 106955136,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_retained_heap": {
+        "allocations": 16,
+        "frees": 16,
+        "allocated_bytes": 213943748,
+        "live_bytes": 0,
+        "peak_bytes": 106955136,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_baseline_heap": {
+        "allocations": 56,
+        "frees": 56,
+        "allocated_bytes": 748803118,
+        "live_bytes": 0,
+        "peak_bytes": 106955136,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_heap": {
+        "allocations": 72,
+        "frees": 71,
+        "allocated_bytes": 962746866,
+        "live_bytes": 33554544,
+        "peak_bytes": 140509680,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_retained_heap": {
+        "allocations": 72,
+        "frees": 72,
+        "allocated_bytes": 962746866,
+        "live_bytes": 0,
+        "peak_bytes": 140509680,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "heap_schema": "continuous-live-1",
+      "cold_peak_bytes": 106955136,
+      "warm_peak_bytes": 140509680
+    },
+    "command": [
+      "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+      "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/docs/physical-execution-evidence/2026-10-01-covariance-syrk/guarded_screen.py",
+      "--mode",
+      "memory",
+      "--backend",
+      "njit",
+      "--measure",
+      "heap",
+      "--library",
+      "/private/tmp/calmetrics-covariance-syrk-20261001/adaptive-candidate.dylib",
+      "--probe",
+      "/private/tmp/calmetrics-reaccept-20260929/heap_probe.dylib",
+      "--case",
+      "{\"n\": 2048, \"d\": 2048, \"layout\": \"c\"}",
+      "--output",
+      "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/docs/physical-execution-evidence/2026-10-01-covariance-syrk/adaptive"
+    ]
+  },
+  {
+    "case": {
+      "n": 2048,
+      "d": 2048,
+      "layout": "c"
+    },
+    "backend": "njit",
+    "measure": "rss",
+    "report": {
+      "rss_baseline": 332759040,
+      "rss_peak": 372703232,
+      "rss_delta": 39944192,
+      "rss_idle_delta": 0,
+      "rss_schema": "warm-monitor-control-1"
+    },
+    "command": [
+      "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+      "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/docs/physical-execution-evidence/2026-10-01-covariance-syrk/guarded_screen.py",
+      "--mode",
+      "memory",
+      "--backend",
+      "njit",
+      "--measure",
+      "rss",
+      "--library",
+      "/private/tmp/calmetrics-covariance-syrk-20261001/adaptive-candidate.dylib",
+      "--probe",
+      "/private/tmp/calmetrics-reaccept-20260929/heap_probe.dylib",
+      "--case",
+      "{\"n\": 2048, \"d\": 2048, \"layout\": \"c\"}",
+      "--output",
+      "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/docs/physical-execution-evidence/2026-10-01-covariance-syrk/adaptive"
+    ]
+  },
+  {
+    "case": {
+      "n": 2048,
+      "d": 2048,
+      "layout": "f"
+    },
+    "backend": "native",
+    "measure": "heap",
+    "report": {
+      "setup_heap": {
+        "allocations": 152,
+        "frees": 98,
+        "allocated_bytes": 12840,
+        "live_bytes": 4456,
+        "peak_bytes": 7897,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_heap": {
+        "allocations": 214,
+        "frees": 128,
+        "allocated_bytes": 33573840,
+        "live_bytes": 33562226,
+        "peak_bytes": 33562338,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_retained_heap": {
+        "allocations": 214,
+        "frees": 133,
+        "allocated_bytes": 33573840,
+        "live_bytes": 7304,
+        "peak_bytes": 33562338,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_baseline_heap": {
+        "allocations": 249,
+        "frees": 168,
+        "allocated_bytes": 201349250,
+        "live_bytes": 7304,
+        "peak_bytes": 33562338,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_heap": {
+        "allocations": 263,
+        "frees": 177,
+        "allocated_bytes": 268459414,
+        "live_bytes": 33562226,
+        "peak_bytes": 67117244,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_retained_heap": {
+        "allocations": 263,
+        "frees": 182,
+        "allocated_bytes": 268459414,
+        "live_bytes": 7304,
+        "peak_bytes": 67117244,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "heap_schema": "continuous-live-1",
+      "cold_peak_bytes": 33562338,
+      "warm_peak_bytes": 67117244
+    },
+    "command": [
+      "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+      "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/docs/physical-execution-evidence/2026-10-01-covariance-syrk/guarded_screen.py",
+      "--mode",
+      "memory",
+      "--backend",
+      "native",
+      "--measure",
+      "heap",
+      "--library",
+      "/private/tmp/calmetrics-covariance-syrk-20261001/adaptive-candidate.dylib",
+      "--probe",
+      "/private/tmp/calmetrics-reaccept-20260929/heap_probe.dylib",
+      "--case",
+      "{\"n\": 2048, \"d\": 2048, \"layout\": \"f\"}",
+      "--output",
+      "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/docs/physical-execution-evidence/2026-10-01-covariance-syrk/adaptive"
+    ]
+  },
+  {
+    "case": {
+      "n": 2048,
+      "d": 2048,
+      "layout": "f"
+    },
+    "backend": "native",
+    "measure": "rss",
+    "report": {
+      "rss_baseline": 110788608,
+      "rss_peak": 144408576,
+      "rss_delta": 33619968,
+      "rss_idle_delta": 0,
+      "rss_schema": "warm-monitor-control-1"
+    },
+    "command": [
+      "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+      "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/docs/physical-execution-evidence/2026-10-01-covariance-syrk/guarded_screen.py",
+      "--mode",
+      "memory",
+      "--backend",
+      "native",
+      "--measure",
+      "rss",
+      "--library",
+      "/private/tmp/calmetrics-covariance-syrk-20261001/adaptive-candidate.dylib",
+      "--probe",
+      "/private/tmp/calmetrics-reaccept-20260929/heap_probe.dylib",
+      "--case",
+      "{\"n\": 2048, \"d\": 2048, \"layout\": \"f\"}",
+      "--output",
+      "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/docs/physical-execution-evidence/2026-10-01-covariance-syrk/adaptive"
+    ]
+  },
+  {
+    "case": {
+      "n": 2048,
+      "d": 2048,
+      "layout": "f"
+    },
+    "backend": "candidate",
+    "measure": "heap",
+    "report": {
+      "setup_heap": {
+        "allocations": 5,
+        "frees": 1,
+        "allocated_bytes": 3584,
+        "live_bytes": 3488,
+        "peak_bytes": 3488,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_heap": {
+        "allocations": 10,
+        "frees": 3,
+        "allocated_bytes": 79744560,
+        "live_bytes": 33557968,
+        "peak_bytes": 79744464,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_retained_heap": {
+        "allocations": 10,
+        "frees": 4,
+        "allocated_bytes": 79744560,
+        "live_bytes": 3536,
+        "peak_bytes": 79744464,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_baseline_heap": {
+        "allocations": 25,
+        "frees": 19,
+        "allocated_bytes": 478449200,
+        "live_bytes": 3536,
+        "peak_bytes": 79744464,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_heap": {
+        "allocations": 31,
+        "frees": 24,
+        "allocated_bytes": 637931056,
+        "live_bytes": 33557968,
+        "peak_bytes": 113298896,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_retained_heap": {
+        "allocations": 31,
+        "frees": 25,
+        "allocated_bytes": 637931056,
+        "live_bytes": 3536,
+        "peak_bytes": 113298896,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "heap_schema": "continuous-live-1",
+      "cold_peak_bytes": 79744464,
+      "warm_peak_bytes": 113298896
+    },
+    "command": [
+      "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+      "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/docs/physical-execution-evidence/2026-10-01-covariance-syrk/guarded_screen.py",
+      "--mode",
+      "memory",
+      "--backend",
+      "candidate",
+      "--measure",
+      "heap",
+      "--library",
+      "/private/tmp/calmetrics-covariance-syrk-20261001/adaptive-candidate.dylib",
+      "--probe",
+      "/private/tmp/calmetrics-reaccept-20260929/heap_probe.dylib",
+      "--case",
+      "{\"n\": 2048, \"d\": 2048, \"layout\": \"f\"}",
+      "--output",
+      "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/docs/physical-execution-evidence/2026-10-01-covariance-syrk/adaptive"
+    ]
+  },
+  {
+    "case": {
+      "n": 2048,
+      "d": 2048,
+      "layout": "f"
+    },
+    "backend": "candidate",
+    "measure": "rss",
+    "report": {
+      "rss_baseline": 156450816,
+      "rss_peak": 190087168,
+      "rss_delta": 33636352,
+      "rss_idle_delta": 0,
+      "rss_schema": "warm-monitor-control-1"
+    },
+    "command": [
+      "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+      "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/docs/physical-execution-evidence/2026-10-01-covariance-syrk/guarded_screen.py",
+      "--mode",
+      "memory",
+      "--backend",
+      "candidate",
+      "--measure",
+      "rss",
+      "--library",
+      "/private/tmp/calmetrics-covariance-syrk-20261001/adaptive-candidate.dylib",
+      "--probe",
+      "/private/tmp/calmetrics-reaccept-20260929/heap_probe.dylib",
+      "--case",
+      "{\"n\": 2048, \"d\": 2048, \"layout\": \"f\"}",
+      "--output",
+      "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/docs/physical-execution-evidence/2026-10-01-covariance-syrk/adaptive"
+    ]
+  },
+  {
+    "case": {
+      "n": 2048,
+      "d": 2048,
+      "layout": "f"
+    },
+    "backend": "njit",
+    "measure": "heap",
+    "report": {
+      "setup_heap": {
+        "allocations": 8,
+        "frees": 8,
+        "allocated_bytes": 106971874,
+        "live_bytes": 0,
+        "peak_bytes": 106955136,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_heap": {
+        "allocations": 16,
+        "frees": 15,
+        "allocated_bytes": 213943748,
+        "live_bytes": 33554544,
+        "peak_bytes": 106955136,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_retained_heap": {
+        "allocations": 16,
+        "frees": 16,
+        "allocated_bytes": 213943748,
+        "live_bytes": 0,
+        "peak_bytes": 106955136,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_baseline_heap": {
+        "allocations": 56,
+        "frees": 56,
+        "allocated_bytes": 748803118,
+        "live_bytes": 0,
+        "peak_bytes": 106955136,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_heap": {
+        "allocations": 72,
+        "frees": 71,
+        "allocated_bytes": 962746866,
+        "live_bytes": 33554544,
+        "peak_bytes": 140509680,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_retained_heap": {
+        "allocations": 72,
+        "frees": 72,
+        "allocated_bytes": 962746866,
+        "live_bytes": 0,
+        "peak_bytes": 140509680,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "heap_schema": "continuous-live-1",
+      "cold_peak_bytes": 106955136,
+      "warm_peak_bytes": 140509680
+    },
+    "command": [
+      "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+      "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/docs/physical-execution-evidence/2026-10-01-covariance-syrk/guarded_screen.py",
+      "--mode",
+      "memory",
+      "--backend",
+      "njit",
+      "--measure",
+      "heap",
+      "--library",
+      "/private/tmp/calmetrics-covariance-syrk-20261001/adaptive-candidate.dylib",
+      "--probe",
+      "/private/tmp/calmetrics-reaccept-20260929/heap_probe.dylib",
+      "--case",
+      "{\"n\": 2048, \"d\": 2048, \"layout\": \"f\"}",
+      "--output",
+      "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/docs/physical-execution-evidence/2026-10-01-covariance-syrk/adaptive"
+    ]
+  },
+  {
+    "case": {
+      "n": 2048,
+      "d": 2048,
+      "layout": "f"
+    },
+    "backend": "njit",
+    "measure": "rss",
+    "report": {
+      "rss_baseline": 333430784,
+      "rss_peak": 367001600,
+      "rss_delta": 33570816,
+      "rss_idle_delta": 0,
+      "rss_schema": "warm-monitor-control-1"
+    },
+    "command": [
+      "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+      "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/docs/physical-execution-evidence/2026-10-01-covariance-syrk/guarded_screen.py",
+      "--mode",
+      "memory",
+      "--backend",
+      "njit",
+      "--measure",
+      "rss",
+      "--library",
+      "/private/tmp/calmetrics-covariance-syrk-20261001/adaptive-candidate.dylib",
+      "--probe",
+      "/private/tmp/calmetrics-reaccept-20260929/heap_probe.dylib",
+      "--case",
+      "{\"n\": 2048, \"d\": 2048, \"layout\": \"f\"}",
+      "--output",
+      "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/docs/physical-execution-evidence/2026-10-01-covariance-syrk/adaptive"
+    ]
+  }
+]

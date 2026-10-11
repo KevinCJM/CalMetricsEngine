@@ -1,0 +1,35 @@
+{
+  "status": "STAGED_LARGE_BENEFIT_WITH_CANONICAL_REPLAY_GAPS",
+  "method": "Root self-review; no subagents",
+  "original": "c9a5ef102069a8942e2e8a06261140b14f278d45f988f779db0000df881b045c",
+  "first_candidate": "44c762b6d28a52e3efcc55826c46e8df0e6ea03395d52c8ac06486f71febaf6a",
+  "final": "315171f9725b2c03070d2f525713f566f56dc2d719c52ca0ec6f0884c040fd94",
+  "off": "f27e597edaba9ab74f1ce44fe961d26bd694706b39b598f19ebf91dabb3be47b",
+  "verification": {
+    "python": 10969,
+    "focused": 646,
+    "off_passed": 447,
+    "off_skipped": 199,
+    "native": "9/9",
+    "asan": "9/9",
+    "native-off": "9/9"
+  },
+  "checks": [
+    "Two production files only. Reuse existing Eigen strided maps and Accelerate DSYRK, Welford means, canonical pair replay and the existing bounded panel; no new kernel, library, allocation class or thread.",
+    "Negative F canonical uses ordered scalar means/products. Admit stride0=-1 and stride1>=T, using ordered C-style certificates, never the positive-F reduction tree. Positive C/F and all root eligibility remain unchanged.",
+    "Eight-feature traversal reuses the same helper/expression and storage. Every feature keeps ascending logical observations; no arithmetic reassociation or threshold/tolerance change.",
+    "Source scan and panel addressing keep both terms signed. Bounded shape and INT_MAX leading cap bound products; no abs(PTRDIFF_MIN). Native source/output canaries cover padded descending C and F.",
+    "Transport is unchanged: negative F is already packed to positive F. The initial 18 process failures used a wrong local-layout exact-diagonal reference; tests now check the actual worker canonical plus original full tolerance. No production IPC repair or tolerance relaxation.",
+    "Expanded existing tests cover local replay, nonfinite/range rejection, zero/error recovery, interval/padding, single/thread/inline/shared, C/F/auto, snapshots, budgets and OFF fallback.",
+    "Two separately reported 12-case six-round same-CPU comparisons, retaining prior independently owned results and all negative cases. Final memory uses 12 fresh children. No composition of samples across comparison batches.",
+    "Source/wheel/extension/worker identity checked for all 77 native inputs. Formula and Excel budgets unchanged; only historical recalculated snapshot verified."
+  ],
+  "limits": [
+    "Not whole-engine performance acceptance; the goal remains active. Scaled and dense replay still use canonical and remain materially slower than warmed NJIT.",
+    "Initial negative-F admission added about 67.5 ms (6.2%) to 32769x256 dense replay; final tiling saves about 9 ms of that in its own comparison. This is speculative-work cost, not a few-KB/ms exception.",
+    "1024/2048 time is still behind NJIT in several cases; absolute few-ms changes are recorded, not standalone vetoes. The final 4096 paired case is about 9% faster than NI, not a claimed order-of-magnitude NI gain.",
+    "Final memory compares first library candidate versus tiled candidate and NJIT. Original scalar build memory is not newly measured here; library scratch is an existing real cost, not declared free.",
+    "Any untracked frees and RSS/probe limits remain in validation.json. Vendor reserve is an estimate, not a hard allocator bound. ASan/UBSan do not instrument vendor libraries, detect_leaks=0.",
+    "No fresh Microsoft Excel recalculation, platform integration, deployment, commit or push. Explicit LAPACK eigendecomposition contract still awaits user decision."
+  ]
+}

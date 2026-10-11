@@ -1,0 +1,21 @@
+{
+  "numba_version": "0.60.0",
+  "installed_ensure_blas": "def ensure_blas():\n    try:\n        import scipy.linalg.cython_blas\n    except ImportError:\n        raise ImportError(\"scipy 0.16+ is required for linear algebra\")\n",
+  "configs": {
+    "numpy": {
+      "version": "1.26.4",
+      "build_config": "Build Dependencies:\n  blas:\n    detection method: pkgconfig\n    found: true\n    include directory: /opt/arm64-builds/include\n    lib directory: /opt/arm64-builds/lib\n    name: openblas64\n    openblas configuration: USE_64BITINT=1 DYNAMIC_ARCH=1 DYNAMIC_OLDER= NO_CBLAS=\n      NO_LAPACK= NO_LAPACKE= NO_AFFINITY=1 USE_OPENMP= SANDYBRIDGE MAX_THREADS=3\n    pc file directory: /usr/local/lib/pkgconfig\n    version: 0.3.23.dev\n  lapack:\n    detection method: internal\n    found: true\n    include directory: unknown\n    lib directory: unknown\n    name: dep4335021056\n    openblas configuration: unknown\n    pc file directory: unknown\n    version: 1.26.4\nCompilers:\n  c:\n    args: -fno-strict-aliasing, -DBLAS_SYMBOL_SUFFIX=64_, -DHAVE_BLAS_ILP64\n    commands: cc\n    linker: ld64\n    linker args: -fno-strict-aliasing, -DBLAS_SYMBOL_SUFFIX=64_, -DHAVE_BLAS_ILP64\n    name: clang\n    version: 14.0.0\n  c++:\n    args: -DBLAS_SYMBOL_SUFFIX=64_, -DHAVE_BLAS_ILP64\n    commands: c++\n    linker: ld64\n    linker args: -DBLAS_SYMBOL_SUFFIX=64_, -DHAVE_BLAS_ILP64\n    name: clang\n    version: 14.0.0\n  cython:\n    commands: cython\n    linker: cython\n    name: cython\n    version: 3.0.8\nMachine Information:\n  build:\n    cpu: aarch64\n    endian: little\n    family: aarch64\n    system: darwin\n  host:\n    cpu: aarch64\n    endian: little\n    family: aarch64\n    system: darwin\nPython Information:\n  path: /private/var/folders/76/zy5ktkns50v6gt5g8r0sf6sc0000gn/T/cibw-run-q69bfk1p/cp312-macosx_arm64/build/venv/bin/python\n  version: '3.12'\nSIMD Extensions:\n  baseline:\n  - NEON\n  - NEON_FP16\n  - NEON_VFPV4\n  - ASIMD\n  found:\n  - ASIMDHP\n  not found:\n  - ASIMDFHM\n\n"
+    },
+    "scipy": {
+      "version": "1.17.1",
+      "build_config": "Build Dependencies:\n  blas:\n    detection method: extraframeworks\n    found: true\n    has ilp64: false\n    include directory: unknown\n    lib directory: unknown\n    name: Accelerate\n    openblas configuration: unknown\n    pc file directory: unknown\n    version: unknown\n  lapack:\n    detection method: extraframeworks\n    found: true\n    has ilp64: false\n    include directory: unknown\n    lib directory: unknown\n    name: Accelerate\n    openblas configuration: unknown\n    pc file directory: unknown\n    version: unknown\n  pybind11:\n    detection method: config-tool\n    include directory: unknown\n    name: pybind11\n    version: 3.0.2\nCompilers:\n  c:\n    commands: cc\n    linker: ld64\n    name: clang\n    version: 15.0.0\n  c++:\n    commands: c++\n    linker: ld64\n    name: clang\n    version: 15.0.0\n  cython:\n    commands: cython\n    linker: cython\n    name: cython\n    version: 3.2.4\n  fortran:\n    commands: gfortran\n    linker: ld64\n    name: gcc\n    version: 13.4.0\n  pythran:\n    include directory: ../../../../../../private/var/folders/7x/mtlmm33x08j4_89tfb27m_x00000gn/T/build-env-wl6q4faf/lib/python3.12/site-packages/pythran\n    version: 0.18.1\nMachine Information:\n  build:\n    cpu: aarch64\n    endian: little\n    family: aarch64\n    system: darwin\n  cross-compiled: false\n  host:\n    cpu: aarch64\n    endian: little\n    family: aarch64\n    system: darwin\nPython Information:\n  path: /private/var/folders/7x/mtlmm33x08j4_89tfb27m_x00000gn/T/build-env-wl6q4faf/bin/python\n  version: '3.12'\n\n"
+    }
+  },
+  "finding": "Installed Numba delegates BLAS entry points through scipy.linalg.cython_blas. Installed SciPy uses Accelerate; NumPy uses OpenBLAS. Do not equate NumPy show_config with the NJIT backend.",
+  "primary_sources": [
+    "https://github.com/numba/numba/blob/main/numba/np/linalg.py",
+    "https://libeigen.gitlab.io/eigen/docs-nightly/TopicUsingBlasLapack.html",
+    "https://www.openmathlib.org/OpenBLAS/docs/build_system/"
+  ],
+  "scope": "method selection and installed dependency identity; not a performance result"
+}

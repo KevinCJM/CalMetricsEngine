@@ -1,0 +1,30 @@
+{
+  "build_id": "da645b1ff7ec99472585e69c054dbd2928f62665d606ab03aea02bd24186024a",
+  "python_full_passed": 8007,
+  "additional_legacy_regression_passed": 1,
+  "unique_python_passed": 8008,
+  "native": "9/9",
+  "asan_ubsan": "9/9",
+  "eigen_off": "9/9",
+  "operator_fixtures": 185,
+  "excel_snapshot": {
+    "cases": 469,
+    "values": 3056,
+    "new_recalculation": false
+  },
+  "legacy_v1": {
+    "identity": "model-1-395eefb26e0b82a10ffbdbf54c067432",
+    "bytes_sha256": "79c46ed1f7653029efb35226974569964298f09c2b61ea146b45331e1bcb3c06"
+  },
+  "phase2_passed": "3/4",
+  "phase2_failure": "63 observations ordinary paired ratio 1.019 > 1.00; median native4.542us vs NJIT4.500us",
+  "known_remaining": [
+    "C/F auto output selection not implemented",
+    "typed-results-1 still C output",
+    "full medium/large time and memory acceptance not achieved",
+    "heap probe excludes mmap/worker malloc; RSS samples not synchronized process-tree peak"
+  ],
+  "prior_failures_preserved": true,
+  "scope": "input geometry, shared/inline transport, immutable models; no math or formula changes",
+  "build_notes": "Initial builds/focused failures preserved. ASan and Eigen-OFF reused prior temporary build directory names, reconfigured/rebuilt against current source; current logs are in this archive, prior evidence logs not overwritten."
+}

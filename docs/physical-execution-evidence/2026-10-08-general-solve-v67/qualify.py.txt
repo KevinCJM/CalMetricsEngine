@@ -1,0 +1,30 @@
+from pathlib import Path
+import json, hashlib, subprocess, os, sys, time, xml.etree.ElementTree as ET
+D=Path(__file__).resolve().parent;S=D/'source'
+i=json.loads((D/'candidate/identity.json').read_text())
+f=json.loads(Path('/private/tmp/calmetrics-sgemm-v66-20261008/array-lifetime-r2/preparation-with-tests.json').read_text())
+sha=lambda p: hashlib.sha256(p.read_bytes()).hexdigest()
+assert all(sha(S/n)==h for n,h in i['source'].items())
+assert all(sha(S/n)==h for n,h in f['tests'].items())
+related=['tests/test_solve_library.py', 'tests/test_solve_grouped_library.py', 'tests/test_single_solve_library.py', 'tests/test_retained_solve_library.py', 'tests/test_private_solve_workspace.py', 'tests/test_concat_solve_workspace.py', 'tests/test_compact_lu_certificate.py', 'tests/test_batched_lu_certificate.py', 'tests/test_typed_cpp_runtime.py', 'tests/test_cpp_first_runtime.py', 'tests/test_phase2_graph_runtime.py', 'tests/test_scope_error_status.py', 'tests/test_segment_error_status.py', 'tests/test_measured_concat_solve.py', 'tests/test_guarded_lu_graph.py', 'tests/test_lu_panel_workspace.py', 'tests/test_private_solve_pair.py', 'tests/test_solve_pair_reuse.py', 'tests/test_concat_rectangle_library.py', 'tests/test_typed_results.py', 'tests/test_typed_array_execution.py', 'tests/test_concat_tree.py']
+env=dict(os.environ,PYTHONPATH=i['installed'],OPENBLAS_NUM_THREADS='1',OMP_NUM_THREADS='1',NUMBA_NUM_THREADS='1',VECLIB_MAXIMUM_THREADS='1',CALMETRICS_TEST_EXPECT_ACCELERATE='1',CALMETRICS_TEST_EXPECT_EIGEN='1',CME_EXPECT_ACCELERATE='1',CME_EXPECT_EIGEN='1',CME_EXPECT_HIGHWAY='1')
+dest=D/'qualification.json';assert not dest.exists()
+state={'status':'running','build_id':i['build_id'],'actual_adopted':False,'goal_complete':False,'jobs':[],'tests':f['tests']}
+try:
+ for label,cmd in [('native',['/opt/homebrew/bin/ctest','--test-dir',i['build'],'--output-on-failure','--output-junit',str(D/'native.xml')]),('related',[sys.executable,'-m','pytest',*related,'-q','--tb=short','--junitxml='+str(D/'related.xml')])]:
+  with (D/(label+'.log')).open('x') as log:
+   child=subprocess.Popen(cmd,cwd=S,env=env,stdout=log,stderr=subprocess.STDOUT)
+   state['current']={'label':label,'pid':child.pid,'command':cmd};dest.write_text(json.dumps(state,indent=2)+'\n');print('START',label,child.pid,flush=True)
+   code=child.wait()
+  cases=list(ET.parse(D/(label+'.xml')).getroot().iter('testcase'))
+  counts={'tests':len(cases),'failures':sum(c.find('failure') is not None for c in cases),'errors':sum(c.find('error') is not None for c in cases),'skipped':sum(c.find('skipped') is not None for c in cases)}
+  state['jobs'].append({'label':label,'returncode':code,'counts':counts})
+  print(label,counts,flush=True)
+  if code: print((D/(label+'.log')).read_text()[-4000:],flush=True)
+  assert code==0 and not any(counts[k] for k in ['failures','errors','skipped'])
+ assert all(sha(S/n)==h for n,h in i['source'].items())
+ assert all(sha(S/n)==h for n,h in f['tests'].items())
+ state.update(status='passed',finished=time.time());state.pop('current',None)
+except BaseException as error:
+ state.update(status='failed',error=repr(error));raise
+finally:dest.write_text(json.dumps(state,indent=2)+'\n')

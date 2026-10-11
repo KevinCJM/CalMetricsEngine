@@ -20,7 +20,7 @@ PyBind11 / C++17
 The current 0.3.0 code line is **C++ first**: restricted AST parsing, native Typed IR for
 scalar/time-series indicator execution, shared-DAG compilation, CSE, alias-aware liveness,
 rolling scopes, cost planning, CPU admission, thread/process pools, shared-memory ownership
-and all 146 canonical operators execute in C++. Python retains public import names, NumPy
+and all 190 canonical operators execute in C++. Python retains public import names, NumPy
 ownership adaptation and an asyncio await bridge. A complete synchronous request crosses
 PyBind once, not once per worker. The eight existing finance APIs retain their numerical contracts.
 
@@ -38,7 +38,7 @@ No PyPI publication is implied by local builds.
 | 内容 | 文档 |
 | --- | --- |
 | 标量、时序、向量、矩阵、输入输出、DAG 和可运行例子 | [用户使用手册](docs/user-guide.md) |
-| 全部 146 个算子的签名、形状、数学逻辑及边界 | [数学算子参考](docs/operator-reference.md) |
+| 全部 190 个算子的签名、形状、数学逻辑及边界 | [数学算子参考](docs/operator-reference.md) |
 | SIMD、线程、进程、协程、共享内存的实际选择条件 | [执行与性能指南](docs/execution-guide.md) |
 | out、Workspace、借用视图及直接调用约束 | [算子接口与内存契约](docs/canonical-operators.md) |
 
@@ -87,7 +87,7 @@ import numpy as np
 from calmetrics_engine import operators as op
 
 values = np.array([0.01, -0.02, 0.03, 0.005], dtype=np.float64)
-assert len(op.catalog()) == 146
+assert len(op.catalog()) == 190
 volatility = op.std(values, ddof=1)
 
 output = np.empty_like(values)
@@ -555,7 +555,17 @@ states = GraphCompiler({"x": "series"}).compile([
 Homogeneous aligned series preserve **float64, bool and exact int64** in the compatible
 `values`/`offsets` interface. Vectors, matrices, shortened sequences and mixed shapes/dtypes
 use `result.outputs[root].values[interval]`, with readonly typed arrays and per-output statuses.
-Use `compile(..., result_format="typed")` to select that interface explicitly. Records and
+Use `compile(..., result_format="typed")` to select that interface explicitly.
+New graphs default to `output_order="auto"`; explicit `"C"`/`"F"` constraints are also supported.
+Both orders are contiguous. `outputs[root].order` and each array's `strides` describe actual
+storage without changing logical axes. Auto currently covers admitted identity, transpose,
+pointwise, column-arithmetic and guarded independent exp/log paths; other kernels retain C. Explicit F may require a
+budgeted root conversion. Guarded independent exp/log cross-layout matrix/tensor roots
+use vForce/vDSP tiles bounded to 64KiB, without a full matrix intermediate; see
+[admission and copy accounting](docs/execution-guide.md). Status arrays use logical C order. Auto/F typed graphs declare
+`typed-results-2`; explicit C and legacy saved graphs retain `typed-results-1`.
+See [physical layout scope and evidence](docs/physical-layout-design.md).
+Records and
 internal state bundles still require field projections. See the [multi-output examples](docs/user-guide.md).
 
 Always read isolation statuses: invalid bool/int64 entries use False/0 placeholders.

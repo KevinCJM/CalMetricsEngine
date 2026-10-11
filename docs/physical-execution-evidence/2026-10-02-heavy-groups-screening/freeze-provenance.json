@@ -1,0 +1,211 @@
+{
+  "scope": "Frozen standalone Cholesky/LU physical tile screening; not integrated adoption or whole-engine acceptance",
+  "frozen_at": "2026-10-01T23:06:21.984787+00:00",
+  "repository": "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine",
+  "executed_stage": "/private/tmp/calmetrics-heavy-groups-next",
+  "build_id": "ccca6b67a5220ea2134a4743d281b80c5af4c096e7d41c3d5b747bb8de70e331",
+  "production_identity_check": {
+    "source_files": 77,
+    "mismatches": [],
+    "production_headers": {
+      "cpp/operators/cholesky_library.hpp": {
+        "sha256": "d7c91b3be3e49ee3b30ab619d869b04ebe36e3a41e4204a11e4ae229bfa075a9",
+        "frozen_baseline": "cholesky_library.hpp",
+        "equal": true
+      },
+      "cpp/operators/solve_multi_library.hpp": {
+        "sha256": "82172b94c7ef651144f4de0d6b38107e9b508b28573f3cb659c493e00a260499",
+        "frozen_baseline": "lu-baseline.hpp",
+        "equal": true
+      }
+    },
+    "basis": "identity-baseline.json source_sha256 and byte comparison with frozen baseline headers"
+  },
+  "compiler": {
+    "version": "Apple clang version 17.0.0 (clang-1700.6.3.2)",
+    "target": "arm64-apple-darwin24.6.0",
+    "thread_model": "posix",
+    "installed_dir": "/Library/Developer/CommandLineTools/usr/bin"
+  },
+  "python": {
+    "executable": "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+    "distribution_metadata": {
+      "numpy": "1.26.4",
+      "numba": "0.60.0",
+      "threadpoolctl": "3.5.0",
+      "scipy": "1.17.1",
+      "llvmlite": "0.43.0"
+    },
+    "metadata_check": "Read installed dist-info via stdlib importlib.metadata; no numerical imports or execution during freezing"
+  },
+  "eigen": {
+    "version": "3.4.0",
+    "include_directory": "/private/tmp/calmetrics-covchol-next/wheel-build/_deps/eigen-3.4.0"
+  },
+  "original_cholesky_build": {
+    "cwd": "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine",
+    "argv": [
+      "/usr/bin/c++",
+      "-std=c++17",
+      "-O3",
+      "-fno-fast-math",
+      "-ffp-contract=off",
+      "-DCALMETRICS_HAVE_EIGEN_ROTATION=1",
+      "-mmacosx-version-min=15.0",
+      "-I/private/tmp/calmetrics-heavy-groups-next",
+      "-Icpp/include",
+      "-I/private/tmp/calmetrics-covchol-next/wheel-build/_deps/eigen-3.4.0",
+      "-dynamiclib",
+      "/private/tmp/calmetrics-heavy-groups-next/chol-probe.cpp",
+      "-o",
+      "/private/tmp/calmetrics-heavy-groups-next/chol-probe.dylib"
+    ],
+    "stdout_stderr": "chol-build.log",
+    "command_source": "Root supplied exact executed command; empty build log preserved"
+  },
+  "original_lu_build": {
+    "record": "lu-probe-build.json",
+    "lifecycle": "Original compilation-time snapshot, including numeric_execution=NOT_RUN at that time; final execution evidence is the screen/timing JSON and logs",
+    "build_command": "xcrun clang++ -std=c++20 -O3 -DNDEBUG -arch arm64 -mmacosx-version-min=15.0 -dynamiclib -fno-fast-math -ffp-contract=off -DCALMETRICS_HAVE_EIGEN_ROTATION=1 -I/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/cpp/include -I/private/tmp/calmetrics-heavy-groups-next -isystem /private/tmp/calmetrics-covchol-next/wheel-build/_deps/eigen-3.4.0 /private/tmp/calmetrics-heavy-groups-next/lu-probe.cpp -o /private/tmp/calmetrics-heavy-groups-next/lu-probe.dylib"
+  },
+  "built_dylibs_not_copied": {
+    "chol-probe.dylib": {
+      "sha256": "662690a9615018b68c3a567a6c01ab6ddc0754eda6fd68bb3e4c316b5d999280",
+      "bytes": 54304
+    },
+    "lu-probe.dylib": {
+      "sha256": "2b43b8501804859ebbb7742145cc12b5e60468f12dcd65fccb0f2721e6800f48",
+      "bytes": 51840
+    }
+  },
+  "final_harness_sha256": {
+    "chol-screen.py": "63dac894574a60ce514d5bfe8248f61bfe9b8b6494bdba791aae126daf4dc13d",
+    "lu-screen.py": "4a5a39df7b96dcc06bee218e65361fdf12084cfc9db3bff137781a78489dcbc0",
+    "lu-timing.py": "646d59e52d1e69d9a903ed8044f96ecb4bcecd799e5333d6fdf089dbb7ad962e"
+  },
+  "lu_compile_time_harness_sha256": {
+    "lu-screen.py": "4a5a39df7b96dcc06bee218e65361fdf12084cfc9db3bff137781a78489dcbc0",
+    "lu-timing.py": "50b466fdfc94262edb90191760b78a6c8af055b29ec4a325f388f8d40795c78b"
+  },
+  "support_imports": {
+    "tools/check_large_matrix_performance.py": {
+      "frozen_file": "support/tools/check_large_matrix_performance.py",
+      "sha256": "2f99bf41adac0926e30aa2045fa0f6bb67ea938826bf6a4c69ed6cf278c10518",
+      "role": "Existing baseline_threads dependency snapshot; benchmark_memory is imported by the shared tool but no heap/RSS functions were run in this screening"
+    },
+    "tools/benchmark_memory.py": {
+      "frozen_file": "support/tools/benchmark_memory.py",
+      "sha256": "b3862bb22e58f01f874bad0fd8466a3eb63ac4f3803186846184aafb47f4d7f8",
+      "role": "Existing baseline_threads dependency snapshot; benchmark_memory is imported by the shared tool but no heap/RSS functions were run in this screening"
+    }
+  },
+  "cholesky_final_correctness": {
+    "python": "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+    "cwd": "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine",
+    "script": "/private/tmp/calmetrics-heavy-groups-next/chol-screen.py",
+    "arguments": [
+      "--mode",
+      "correctness"
+    ],
+    "environment": {
+      "PYTHONPATH": "/private/tmp/calmetrics-mask-consumed-next/install"
+    },
+    "fixtures": 58,
+    "calls": 464,
+    "rows": 348,
+    "failures": 0,
+    "candidate_modes": {
+      "8": "G8W4",
+      "16": "G16W2",
+      "88": "G8W8"
+    },
+    "outputs": [
+      "screen.json",
+      "chol-correctness-all.log"
+    ]
+  },
+  "cholesky_checked_timing": {
+    "python": "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+    "cwd": "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine",
+    "environment": {
+      "CME_CHOL_TIMING_BACKENDS": "[\"old\",\"g8w4\",\"njit\"]",
+      "PYTHONPATH": "/private/tmp/calmetrics-mask-consumed-next/install"
+    },
+    "python_body": "import importlib.util\np='/private/tmp/calmetrics-heavy-groups-next/chol-screen.py'\ns=importlib.util.spec_from_file_location('chol_screen',p)\nm=importlib.util.module_from_spec(s)\ns.loader.exec_module(m)\nm.timing(((4096,'C'),(4096,'F')))\n",
+    "rounds": 6,
+    "cases": [
+      [
+        4096,
+        "C"
+      ],
+      [
+        4096,
+        "F"
+      ]
+    ],
+    "outputs": [
+      "timing.json",
+      "chol-timing-checked.log",
+      "threads-restored.json"
+    ],
+    "status_checked_every_timed_call": true,
+    "parity": "warmup and final old/candidate full bits; NJIT logical numerical reference"
+  },
+  "lu_final_correctness_reproduction": {
+    "python": "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+    "script": "/private/tmp/calmetrics-heavy-groups-next/lu-screen.py",
+    "environment": {
+      "CME_NATIVE_INSTALL": "/private/tmp/calmetrics-mask-consumed-next/install",
+      "CME_LU_VARIANT": "lu-probe",
+      "CME_LU_MODES": "[0,1,2,3]",
+      "CME_LU_SCOPE": "all",
+      "CME_LU_ROUNDINGS": "[0,1,2,3]",
+      "CME_LU_SCREEN_SIZES": "[1024,1025,1031,1032]"
+    },
+    "passed": 4144,
+    "total": 4144,
+    "outputs": [
+      "lu-probe-screen.json",
+      "lu-correctness.log"
+    ],
+    "label": "Explicit effective settings reconstructed from final script defaults and recorded final output; not a claimed original shell transcript"
+  },
+  "lu_final_timing_reproduction": {
+    "python": "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+    "script": "/private/tmp/calmetrics-heavy-groups-next/lu-timing.py",
+    "environment": {
+      "CME_NATIVE_INSTALL": "/private/tmp/calmetrics-mask-consumed-next/install",
+      "CME_REPO": "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine",
+      "CME_LU_VARIANT": "lu-probe",
+      "CME_LU_MODES": "[0,1,2,3]",
+      "CME_LU_TIMING_CASES": "[[2048,8,\"c\"],[4096,8,\"c\"],[4096,8,\"f\"]]",
+      "CME_LU_ROUNDS": "10"
+    },
+    "rounds": 10,
+    "outputs": [
+      "lu-probe-timing.json",
+      "lu-timing.log"
+    ],
+    "label": "Explicit effective settings reconstructed from final script defaults and recorded final output; not a claimed original shell transcript"
+  },
+  "diagnostics_excluded_from_adoption": {
+    "files": [
+      "diagnostic/chol-screen-pre-review.py",
+      "diagnostic/chol-timing-pre-review.json",
+      "diagnostic/chol-timing-pre-review.log"
+    ],
+    "cases": 7,
+    "reason": "Initial timed callable discarded native status; final harness uses checked_call. Superseded timing does not establish checked status for those seven cases."
+  },
+  "not_run_this_round": [
+    "malloc/RSS",
+    "full Scheduler/Planner performance",
+    "new wheel",
+    "full regression",
+    "Excel recalculation"
+  ],
+  "decision": {
+    "cholesky": "G8W4 saves about 17.6/25.3 ms (1.5/2.0%) at 4096 C/F; retain current production grouping and leave major targets open. Minor KB/ms differences are not independent gates.",
+    "lu": "No measured candidate speedup in the three recorded cases; retain current production grouping."
+  }
+}

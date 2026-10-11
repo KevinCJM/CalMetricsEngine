@@ -1,0 +1,15 @@
+--- pre-off-audit/tests/test_private_solve_workspace.py
++++ corrected/tests/test_private_solve_workspace.py
+@@ -167,6 +167,12 @@
+             expected_copies += a.nbytes
+         if mode == "f_output" and count(result, "accelerate_lu_calls"):
+             expected_copies = a.nbytes + 2 * rhs.nbytes
++    elif mode == "f_output" and count(result, "root_copy_bytes"):
++        # A backend without a direct canonical F solve computes in C staging.
++        # Its exclusive C coefficient arena remains reusable; the independent
++        # F result conversion is separately recorded as one root copy.
++        assert count(result, "root_copy_bytes") == rhs.nbytes
++        expected_copies = rhs.nbytes
+     assert count(result, "algorithm_copy_bytes") == expected_copies
+     if mode == "public":
+         same_ieee(result.outputs[1].values[0], a)

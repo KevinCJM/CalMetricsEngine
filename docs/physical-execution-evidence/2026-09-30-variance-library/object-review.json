@@ -1,0 +1,26 @@
+{
+  "common_dispatcher_frame_before_bytes": 1088,
+  "common_dispatcher_frame_after_bytes": 1088,
+  "variance_helper_frame_bytes": 80,
+  "tail_call_offset": "0x3160",
+  "tail_call_evidence": "dispatcher restores sp + 0x3a0 and saved-register frame 0xa0 before b to helper",
+  "numeric_heap_added_bytes": 0,
+  "input_copy_added_bytes": 0,
+  "fma_in_changed_helper": false,
+  "scope": "Final arm64 Release object; no assertion about system library or exception stack frames",
+  "helper_instruction_evidence": [
+    "00000000000077ec\tfadd.2d\tv16, v5, v16",
+    "00000000000077f0\tfadd.2d\tv7, v17, v7",
+    "00000000000077f8\tfadd.2d\tv6, v5, v6",
+    "00000000000077fc\tfadd.2d\tv4, v17, v4",
+    "0000000000007860\tfdiv.2d\tv16, v16, v1",
+    "0000000000007864\tfdiv.2d\tv7, v7, v1",
+    "0000000000007868\tfdiv.2d\tv6, v6, v1",
+    "000000000000786c\tfdiv.2d\tv4, v4, v1"
+  ],
+  "sha256": {
+    "latent-assembly.txt": "44216380e683f516c9f603e799482adcee0a69b74a00990789657e52da5b7ee4",
+    "old-latent-assembly.txt": "0fc40d123239bc39f9308484e4be4a02027a1b96091ee8ad982e204198422f80",
+    "latent-relocations.txt": "6dd652d705abdce80b69b4bd7fa5bdd06169398ec0784654bce308d3befb302e"
+  }
+}

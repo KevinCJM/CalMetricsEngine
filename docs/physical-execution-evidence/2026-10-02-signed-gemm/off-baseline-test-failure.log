@@ -1,0 +1,23 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_ test_large_packed_matmul_transpose_keeps_exact_product_and_removes_full_arena _
+
+    def test_large_packed_matmul_transpose_keeps_exact_product_and_removes_full_arena():
+        a, b = matrices(1025, 257, 1027, "ff")
+        expected = op.matmul(a, b).T
+        bounds = np.zeros(1, np.int64)
+        with AdaptiveScheduler(cpu_budget=1) as scheduler:
+            result = scheduler.execute(graph(), {"a": a, "b": b}, bounds, bounds)
+        actual = result.outputs[0].values[0]
+        np.testing.assert_array_equal(actual, expected)
+        assert actual.flags.f_contiguous
+        chunk = result.audit["native_chunks"][0]
+        assert chunk["numeric_arena_bytes"] == chunk["root_copy_bytes"] == 0
+        assert chunk["direct_output_bytes"] == expected.nbytes
+>       assert chunk["algorithm_copy_bytes"] > 0
+E       assert 0 > 0
+
+tests/test_matmul_transpose_direct.py:70: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_matmul_transpose_direct.py::test_large_packed_matmul_transpose_keeps_exact_product_and_removes_full_arena
+1 failed in 0.53s

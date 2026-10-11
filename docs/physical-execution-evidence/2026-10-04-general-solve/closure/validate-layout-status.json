@@ -1,0 +1,105 @@
+{
+  "status": "failed",
+  "source_build_id": "ac54d60db240f6989183728ce88881f575fa26ceb7e6a191e40380730f50c048",
+  "goal_complete": false,
+  "jobs": [
+    {
+      "label": "full-layout",
+      "pid": 56472,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "-m",
+        "pytest",
+        "-q",
+        "tests",
+        "--junitxml=/private/tmp/calmetrics-general-solve-public-f-20261004/full-layout.xml"
+      ],
+      "started": 1791084888.98069,
+      "exit_code": 0,
+      "elapsed_seconds": 949.0766241550446
+    },
+    {
+      "label": "build-asan",
+      "pid": 66974,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-general-solve-public-f-20261004/build-asan.py"
+      ],
+      "started": 1791085838.064097,
+      "exit_code": 0,
+      "elapsed_seconds": 89.71963500976562
+    },
+    {
+      "label": "asan-related",
+      "pid": 67908,
+      "command": [
+        "/opt/homebrew/Cellar/python@3.12/3.12.11/Frameworks/Python.framework/Versions/3.12/Resources/Python.app/Contents/MacOS/Python",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/test_dense_elementwise_f_graph.py",
+        "tests/test_retained_solve_library.py",
+        "tests/test_guarded_lu_graph.py",
+        "tests/test_private_solve_workspace.py",
+        "tests/test_solve_pair_reuse.py",
+        "tests/test_triangular_library.py",
+        "tests/test_solve_library.py",
+        "tests/test_solve_grouped_library.py",
+        "tests/test_single_solve_library.py",
+        "--junitxml=/private/tmp/calmetrics-general-solve-public-f-20261004/asan-related.xml"
+      ],
+      "started": 1791085927.790028,
+      "exit_code": 0,
+      "elapsed_seconds": 985.2925927639008
+    },
+    {
+      "label": "asan-native",
+      "pid": 78772,
+      "command": [
+        "/opt/homebrew/bin/ctest",
+        "--test-dir",
+        "/private/tmp/calmetrics-general-solve-public-f-20261004/asan-build",
+        "--output-on-failure",
+        "--output-junit",
+        "/private/tmp/calmetrics-general-solve-public-f-20261004/asan-native.xml"
+      ],
+      "started": 1791086913.091913,
+      "exit_code": 0,
+      "elapsed_seconds": 95.07519197463989
+    },
+    {
+      "label": "build-off",
+      "pid": 80348,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-general-solve-public-f-20261004/build-off.py"
+      ],
+      "started": 1791087008.1733482,
+      "exit_code": 0,
+      "elapsed_seconds": 34.47388696670532
+    },
+    {
+      "label": "off-related",
+      "pid": 80946,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/test_dense_elementwise_f_graph.py",
+        "tests/test_retained_solve_library.py",
+        "tests/test_guarded_lu_graph.py",
+        "tests/test_private_solve_workspace.py",
+        "tests/test_solve_pair_reuse.py",
+        "tests/test_triangular_library.py",
+        "tests/test_solve_library.py",
+        "tests/test_solve_grouped_library.py",
+        "tests/test_single_solve_library.py",
+        "--junitxml=/private/tmp/calmetrics-general-solve-public-f-20261004/off-related.xml"
+      ],
+      "started": 1791087042.654766,
+      "exit_code": 1,
+      "elapsed_seconds": 66.24307799339294
+    }
+  ]
+}

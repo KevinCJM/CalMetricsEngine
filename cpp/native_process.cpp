@@ -25,8 +25,18 @@ extern char **environ;
 namespace calmetrics_engine::native {
 namespace {
 constexpr std::size_t max_frame = max_process_frame_bytes;
-constexpr std::uint64_t request_magic = 0x434d453300000007ull;
-constexpr std::uint64_t response_magic = 0x434d455300000007ull;
+constexpr std::uint64_t request_magic = 0x434d45330000001eull;
+constexpr std::uint64_t response_magic = 0x434d45530000001dull;
+// Request 30 / response 29 require matching external and independent-root F row views.
+// Request 29 / response 28 added external continuous F row-view admission.
+// Request 28 / response 27 required widened Gaussian/history-loan admission.
+// An older worker could reserve full histories beyond the new parent plan.
+// Reject mixed generations before program decoding or attaching shared output.
+// Request 26 / response 25 added gaussian_filter_streams to the audit wire table.
+// Version 25 adds the original row-geometry permission to the two existing mode bits.
+// Per-request policy must not become part of the worker's cached logical Program.
+// Version 12 stores C/F in the existing dtype word, without enlarging frames.
+constexpr unsigned input_order_shift = 8;
 using Bytes = std::vector<std::uint8_t>;
 bool valid_status(std::int16_t value) {
   return (value >= 0 && value <= 4) || value == 7 || value == 9 || value == 10;
@@ -118,13 +128,35 @@ std::size_t input_itemsize(const ops::Value &value) {
   return value.kind == ops::Kind::mask ? 1 : 8;
 }
 bool contiguous_input(const ops::Value &value) {
-  return value.data && value.contiguous();
+  return value.data && value.dense_contiguous();
+}
+ops::MemoryOrder transport_input_order(const ops::Value &value) {
+  // Packing is necessary for a reversed view. Preserve contiguous column runs
+  // in the wire payload so the worker need not traverse a row-major copy.
+  if (value.kind == ops::Kind::number && value.shape.rank == 2 &&
+      value.shape.dim[0] > 1 && value.shape.dim[1] > 1 &&
+      value.stride[0] == -1 && value.stride[1] >= std::ptrdiff_t(value.shape.dim[0]))
+    return ops::MemoryOrder::f;
+  return value.packed_order();
 }
 void pack_input(const ops::Value &value, void *destination) {
   const auto width = input_itemsize(value);
   const auto bytes = planner::checked_mul(value.size(), width);
   if (contiguous_input(value)) {
     if (bytes) std::memcpy(destination, value.data, bytes);
+    return;
+  }
+  if (transport_input_order(value) == ops::MemoryOrder::f) {
+    const auto n = value.shape.dim[0], d = value.shape.dim[1];
+    const auto *source = static_cast<const double *>(value.data);
+    auto *target = static_cast<std::uint8_t *>(destination);
+    for (std::size_t j = 0; j < d; ++j) {
+      const auto *column = source + std::ptrdiff_t(j) * value.stride[1];
+      // The IPC byte buffer need not contain live/aligned double objects.
+      // Copy representations without typed writes or arithmetic on the values.
+      for (std::size_t i = 0; i < n; ++i)
+        std::memcpy(target + (j * n + i) * sizeof(double), column - std::ptrdiff_t(i), sizeof(double));
+    }
     return;
   }
   auto *target = static_cast<std::uint8_t *>(destination);
@@ -139,6 +171,13 @@ void pack_input(const ops::Value &value, void *destination) {
   }
 }
 std::size_t graph::Audit::*const audit_fields[] = {
+    &graph::Audit::compact_path_groups,
+    &graph::Audit::compact_path_batches,
+    &graph::Audit::compact_path_steps,
+    &graph::Audit::compact_path_raw_rows,
+    &graph::Audit::compact_path_raw_scale_elements,
+    &graph::Audit::compact_path_raw_pack_bytes,
+    &graph::Audit::highway_vqsort_calls,
     &graph::Audit::fused_pointwise_calls,
     &graph::Audit::pointwise_tiles,
     &graph::Audit::vector_elements,
@@ -157,20 +196,43 @@ std::size_t graph::Audit::*const audit_fields[] = {
     &graph::Audit::summary_source_scans,
     &graph::Audit::order_stat_sorts,
     &graph::Audit::order_scratch_capacity_bytes,
-    &graph::Audit::algorithm_copy_bytes};
-void write_audit(Writer &out, const graph::Audit &a) {
+    &graph::Audit::algorithm_copy_bytes,
+    &graph::Audit::eigen_rotation_calls,
+    &graph::Audit::eigen_matvec_calls,
+    &graph::Audit::eigen_covariance_calls,
+    &graph::Audit::eigen_density_calls,
+    &graph::Audit::gaussian_filter_streams,
+    &graph::Audit::accelerate_covchol_calls,
+    &graph::Audit::accelerate_matmul_calls,
+    &graph::Audit::matmul_zero_calls,
+    &graph::Audit::accelerate_covariance_attempts,
+    &graph::Audit::accelerate_covariance_calls,
+    &graph::Audit::covariance_syrk_calls,
+    &graph::Audit::covariance_replayed_cells,
+    &graph::Audit::covariance_fallbacks,
+    &graph::Audit::covariance_zero_calls,
+    &graph::Audit::accelerate_vforce_calls,
+    &graph::Audit::accelerate_lu_attempts,
+    &graph::Audit::accelerate_lu_calls,
+    &graph::Audit::accelerate_lu_fallbacks,
+    &graph::Audit::solve_residual_materialization_bytes,
+    &graph::Audit::covariance_panel_materialization_bytes,
+    &graph::Audit::native_library_workspace_reserve_bytes};
+void write_audit(Writer &out, const graph::Audit &a, const graph::ResultLayout *layout) {
   for (auto member : audit_fields)
     out.number(a.*member);
   out.number(a.statuses.size());
   out.blob(a.statuses.data(), a.statuses.size() * sizeof(std::int16_t));
   out.number(a.result_shapes.size());
   for (const auto &shape : a.result_shapes) {
-    out.number(static_cast<std::uint64_t>(shape.rank + 1));
+    const auto index = &shape - a.result_shapes.data();
+    const auto order = layout ? layout->order(index % layout->columns) : ops::MemoryOrder::c;
+    out.number(static_cast<std::uint64_t>(shape.rank + 1) | (static_cast<std::uint64_t>(order) << 8));
     for (auto extent : shape.dim) out.number(extent);
   }
   out.blob(a.root_statuses.data(), a.root_statuses.size() * sizeof(std::int16_t));
 }
-graph::Audit read_audit(Reader &in) {
+graph::Audit read_audit(Reader &in, const graph::ResultLayout *layout) {
   graph::Audit a;
   for (auto member : audit_fields)
     a.*member = static_cast<std::size_t>(in.number());
@@ -178,17 +240,19 @@ graph::Audit read_audit(Reader &in) {
   const auto shapes = static_cast<std::size_t>(in.number());
   require(shapes <= max_frame / 32 && shapes <= (in.bytes.size() - in.position) / 32,
           "invalid result shape count");
-  a.result_shapes.reserve(shapes);
+  a.result_shapes.resize(shapes);
   for (std::size_t i = 0; i < shapes; ++i) {
-    const auto rank = in.number();
+    const auto geometry = in.number(), rank = geometry & 0xff, order = geometry >> 8;
     require(rank <= 4, "invalid result rank");
+    require(layout && layout->columns && order <= 1 &&
+            order == static_cast<unsigned>(layout->order(i % layout->columns)), "invalid result order");
     ops::Shape shape;
     shape.rank = static_cast<int>(rank) - 1;
     for (auto &extent : shape.dim) {
       extent = static_cast<std::size_t>(in.number());
       require(extent <= static_cast<std::size_t>(PTRDIFF_MAX), "invalid result dimension");
     }
-    a.result_shapes.push_back(shape);
+    a.result_shapes[i] = shape;
   }
   a.root_statuses = in.array<std::int16_t>(shapes);
   return a;
@@ -481,7 +545,11 @@ Bytes execute_request(const Bytes &bytes, Bytes &cached_bytes,
       cached_program = compiler::decode_program(program);
       cached_bytes = std::move(program);
     }
-    const bool shared = in.number() != 0;
+    const auto mode = in.number();
+    require((mode & ~std::uint64_t(7)) == 0, "invalid native worker transport mode");
+    const bool shared = (mode & 1) != 0;
+    const bool expanded_matmul_roots = (mode & 2) == 0;
+    const bool row_subviews = (mode & 4) == 0;
     auto params = in.array<double>(cached_program.parameter_count);
     const auto input_count = in.number();
     require(input_count == cached_program.input_count,
@@ -497,7 +565,10 @@ Bytes execute_request(const Bytes &bytes, Bytes &cached_bytes,
     mask_storage.reserve(static_cast<std::size_t>(input_count));
     for (std::size_t i = 0; i < input_count; ++i) {
       ops::Value value;
-      const auto kind = in.number();
+      const auto descriptor = in.number();
+      const auto kind = descriptor & 0xffu;
+      const auto order = descriptor >> input_order_shift;
+      require(order <= static_cast<unsigned>(ops::MemoryOrder::f), "invalid native input order");
       require(kind == static_cast<std::uint64_t>(ops::Kind::number) ||
               kind == static_cast<std::uint64_t>(ops::Kind::integer) ||
               kind == static_cast<std::uint64_t>(ops::Kind::mask),
@@ -511,7 +582,7 @@ Bytes execute_request(const Bytes &bytes, Bytes &cached_bytes,
         value.shape.dim[axis] = static_cast<std::size_t>(in.number());
         count = planner::checked_mul(count, value.shape.dim[axis]);
       }
-      value.set_contiguous_strides();
+      value.set_contiguous_strides(static_cast<ops::MemoryOrder>(order));
       const auto width = input_itemsize(value);
       if (shared) {
         const auto d = get_descriptor(in);
@@ -634,9 +705,10 @@ Bytes execute_request(const Bytes &bytes, Bytes &cached_bytes,
     in.end();
     auto audit = graph::execute(cached_program, inputs, params.data(),
                                 params.size(), starts, ends, end - begin,
-                                output, cached_program.roots.size(), typed ? &typed_layout : nullptr, shared && typed ? begin : 0);
+                                output, cached_program.roots.size(), typed ? &typed_layout : nullptr, shared && typed ? begin : 0,
+                                Deadline::max(), nullptr, true, expanded_matmul_roots, row_subviews);
     response.number(0);
-    write_audit(response, audit);
+    write_audit(response, audit, typed ? &typed_layout : nullptr);
     response.number(static_cast<std::uint8_t>(cached_program.output_dtype));
     response.number(static_cast<std::uint8_t>(cached_program.output_kind));
     response.blob(output, output_bytes);
@@ -731,7 +803,8 @@ void ProcessPool::close() {
 ProcessTransport::ProcessTransport(const planner::Plan &plan,
                                    const Batch &batch)
     : plan_(plan), batch_(batch),
-      program_bytes_(compiler::encode_program(plan.graph->program)) {
+      program_bytes_(compiler::encode_program(plan.graph->program,
+          plan.result_layout ? &plan.result_layout->orders : nullptr)) {
   if (plan.use_shared_memory) {
     if (!batch.shared_inputs.empty()) {
       require(batch.shared_inputs.size() == batch.inputs.size(),
@@ -782,12 +855,14 @@ Bytes ProcessTransport::request(planner::Chunk chunk) const {
   Writer out;
   out.number(request_magic);
   out.blob(program_bytes_);
-  out.number(plan_.use_shared_memory);
+  out.number(std::uint64_t(plan_.use_shared_memory) |
+             (plan_.expanded_matmul_roots ? 0 : 2) | (plan_.row_subviews ? 0 : 4));
   out.blob(batch_.parameters, batch_.parameter_count * sizeof(double));
   out.number(batch_.inputs.size());
   for (std::size_t i = 0; i < batch_.inputs.size(); ++i) {
     const auto &input = batch_.inputs[i];
-    out.number(static_cast<std::uint64_t>(input.kind));
+    out.number(static_cast<std::uint64_t>(input.kind) |
+               (static_cast<std::uint64_t>(transport_input_order(input)) << input_order_shift));
     out.number(static_cast<std::uint64_t>(input.shape.rank));
     for (int axis = 0; axis < input.shape.rank; ++axis) out.number(input.shape.dim[axis]);
     if (plan_.use_shared_memory)
@@ -824,7 +899,7 @@ graph::Audit ProcessTransport::response(const Bytes &bytes,
           "unsupported native worker response version");
   if (in.number())
     throw std::runtime_error("native worker: " + in.string());
-  auto audit = read_audit(in);
+  auto audit = read_audit(in, plan_.result_layout.get());
   std::size_t output_row_begin = chunk.begin;
   std::size_t output_rows = chunk.end - chunk.begin;
   if (plan_.graph->program.output_kind == graph::OutputKind::series) {

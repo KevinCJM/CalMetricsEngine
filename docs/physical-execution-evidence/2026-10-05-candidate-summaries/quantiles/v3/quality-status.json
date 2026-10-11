@@ -1,0 +1,167 @@
+{
+  "status": "failed",
+  "build_id": "95e2083e0c49082386dc643ff7c58c92b1028238bf305c9d64a402c557020d7b",
+  "jobs": [
+    {
+      "label": "related-final",
+      "pid": 37388,
+      "started": 1791149439.6641438,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "-m",
+        "pytest",
+        "tests/test_matmul_quantile_statistics.py",
+        "tests/test_matmul_statistics.py",
+        "tests/test_axis_path_primitives.py",
+        "tests/test_numeric_line_sort_library.py",
+        "tests/test_typed_results.py",
+        "tests/test_matmul_library.py",
+        "tests/test_matmul_packed_library.py",
+        "tests/test_matmul_transpose_direct.py",
+        "-q",
+        "--junitxml=/private/tmp/calmetrics-matmul-quantiles-20261005/related-final.xml"
+      ],
+      "returncode": 0,
+      "finished": 1791149445.400865
+    },
+    {
+      "label": "build-native",
+      "pid": 37564,
+      "started": 1791149445.406034,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-matmul-quantiles-20261005/build-native.py"
+      ],
+      "returncode": 0,
+      "finished": 1791149464.2283819
+    },
+    {
+      "label": "build-native-ctest",
+      "pid": 37721,
+      "started": 1791149464.234126,
+      "command": [
+        "/opt/homebrew/bin/ctest",
+        "--test-dir",
+        "/private/tmp/calmetrics-matmul-quantiles-20261005/candidate-build",
+        "--output-on-failure",
+        "--output-junit",
+        "/private/tmp/calmetrics-matmul-quantiles-20261005/build-native-native.xml"
+      ],
+      "returncode": 0,
+      "finished": 1791149470.606954
+    },
+    {
+      "label": "build-asan",
+      "pid": 37759,
+      "started": 1791149470.612273,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-matmul-quantiles-20261005/build-asan.py"
+      ],
+      "returncode": 0,
+      "finished": 1791149712.531163
+    },
+    {
+      "label": "build-asan-ctest",
+      "pid": 40020,
+      "started": 1791149712.537156,
+      "command": [
+        "/opt/homebrew/bin/ctest",
+        "--test-dir",
+        "/private/tmp/calmetrics-matmul-quantiles-20261005/asan-build",
+        "--output-on-failure",
+        "--output-junit",
+        "/private/tmp/calmetrics-matmul-quantiles-20261005/build-asan-native.xml"
+      ],
+      "returncode": 0,
+      "finished": 1791149807.925053
+    },
+    {
+      "label": "build-asan-related",
+      "pid": 40378,
+      "started": 1791149807.930835,
+      "command": [
+        "/opt/homebrew/Cellar/python@3.12/3.12.11/Frameworks/Python.framework/Versions/3.12/Resources/Python.app/Contents/MacOS/Python",
+        "-m",
+        "pytest",
+        "tests/test_matmul_quantile_statistics.py",
+        "tests/test_matmul_statistics.py",
+        "tests/test_axis_path_primitives.py",
+        "tests/test_numeric_line_sort_library.py",
+        "tests/test_typed_results.py",
+        "tests/test_matmul_library.py",
+        "tests/test_matmul_packed_library.py",
+        "tests/test_matmul_transpose_direct.py",
+        "-q",
+        "--junitxml=/private/tmp/calmetrics-matmul-quantiles-20261005/build-asan-related.xml"
+      ],
+      "returncode": 0,
+      "finished": 1791149829.679837
+    },
+    {
+      "label": "build-off",
+      "pid": 40660,
+      "started": 1791149829.697241,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-matmul-quantiles-20261005/build-off.py"
+      ],
+      "returncode": 0,
+      "finished": 1791149921.995327
+    },
+    {
+      "label": "build-off-ctest",
+      "pid": 41342,
+      "started": 1791149922.001142,
+      "command": [
+        "/opt/homebrew/bin/ctest",
+        "--test-dir",
+        "/private/tmp/calmetrics-matmul-quantiles-20261005/off-build",
+        "--output-on-failure",
+        "--output-junit",
+        "/private/tmp/calmetrics-matmul-quantiles-20261005/build-off-native.xml"
+      ],
+      "returncode": 0,
+      "finished": 1791149934.595087
+    },
+    {
+      "label": "build-off-related",
+      "pid": 41410,
+      "started": 1791149934.6000671,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "-m",
+        "pytest",
+        "tests/test_matmul_quantile_statistics.py",
+        "tests/test_matmul_statistics.py",
+        "tests/test_axis_path_primitives.py",
+        "tests/test_numeric_line_sort_library.py",
+        "tests/test_typed_results.py",
+        "tests/test_matmul_library.py",
+        "tests/test_matmul_packed_library.py",
+        "tests/test_matmul_transpose_direct.py",
+        "-q",
+        "--junitxml=/private/tmp/calmetrics-matmul-quantiles-20261005/build-off-related.xml"
+      ],
+      "returncode": 0,
+      "finished": 1791149943.210641
+    },
+    {
+      "label": "full",
+      "pid": 41602,
+      "started": 1791149943.2159119,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "-m",
+        "pytest",
+        "tests",
+        "-q",
+        "--junitxml=/private/tmp/calmetrics-matmul-quantiles-20261005/full.xml"
+      ],
+      "returncode": 2,
+      "finished": 1791149945.7183008
+    }
+  ],
+  "whole_goal_complete": false,
+  "production_adopted": false
+}

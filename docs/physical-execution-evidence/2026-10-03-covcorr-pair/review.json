@@ -1,0 +1,48 @@
+{
+  "method": "root self-review; no subagents",
+  "status": "ADOPTED_WITH_MATERIAL_LIMITS_AND_INCOMPLETE_HEAP_LIFECYCLE_TRACKING",
+  "checks": [
+    "Both roots must be terminal typed float64 matrices in execution order with identical parent identity; all consumers of either root excluded",
+    "Covariance library candidate satisfies both covariance and normalized correlation tolerances using canonical diagonals, with unchanged sign/zero and dense replay",
+    "F bytes are copied only from completed bitwise symmetric covariance; independent output slots, exact observer descriptors and copy audit retained",
+    "One shared qualification for finalization, workspace reserve, execution and worker reconstruction; no protocol or persistent numeric cache added",
+    "Planner DAG-branch parallelism is scalar-only; typed paired roots remain together, so it cannot fork away this reuse",
+    "NI baseline computes covariance once, writes its independent correlation directly and uses F views, without imposing a needless copy",
+    "Final paired C panel caps medium rows at 1024; existing ascending canonical diagonal fold and global gamma(n+8) bound retained. F centered fallback and shape-only conservative Planner reserve unchanged.",
+    "Final 2048 C cold/warm allocation peaks fall 16 MiB versus initial implementation, with similar wall time; final evidence is not blended with initial measurements.",
+    "User policy: isolated small KB/ms regressions are diagnostics, not standalone adoption blockers; report full workload costs and unresolved substantial NJIT gaps."
+  ],
+  "verification": {
+    "python": 10771,
+    "focused": 448,
+    "focused_off": {
+      "passed": 307,
+      "skipped": 141
+    },
+    "native": "9/9",
+    "asan_ubsan": "9/9",
+    "native_off": "9/9",
+    "direct_operators": 185,
+    "timing_cases": 12,
+    "rounds": 9,
+    "historical_excel": {
+      "cases": 469,
+      "values": 3056,
+      "new_recalculation": false
+    }
+  },
+  "limits": [
+    "No universal time or memory superiority claim. Scaled, negative-stride and dense-replay cases remain materially behind NJIT.",
+    "2048 C cold/warm allocation peaks exceed old C++ by about 28 MiB, while below compact NJIT by about 10 MiB; adoption uses measured large time benefit, not a zero-memory-growth claim.",
+    "Four native heap children record untracked frees after cold peak, reaching 5 during warm measurement. One NJIT child records 1 after warm peak. Counts match initial but cause remains unlocalized; complete lifecycle allocation audit is not passed.",
+    "Cold heap stages have zero untracked frees and all stages zero table overflows. Warm values are reported with incomplete-tracking qualification, not exact leak-free proof.",
+    "Probe and one-sample fresh RSS cover different scopes; neither proves all process-tree/mmap/stack/vendor allocations. Vendor workspace estimate is not a hard upper bound.",
+    "Only macOS arm64 native library path measured; OFF fallback tested. ASan/UBSan do not instrument vendor code and detect_leaks=0.",
+    "Historical Excel snapshot comparison only; no fresh application recalculation.",
+    "No commit or push. Whole-engine goal remains open."
+  ],
+  "delivery": "No commit or push",
+  "build_id": "a129d662535bc5e6ebe20f2dc27e4ce7baa7376bfe8d38b23486a0f284d96142",
+  "baseline_build_id": "59224ee281be4fb2b0d01a62b17cf6b3a5f562d39a5c310eebac8ab3be04d076",
+  "off_build_id": "a53f4ad6fb1c031abb0fc9ccc5f65bd3aa8dd4aac3a26cf92c3a61a0c0fc11f5"
+}

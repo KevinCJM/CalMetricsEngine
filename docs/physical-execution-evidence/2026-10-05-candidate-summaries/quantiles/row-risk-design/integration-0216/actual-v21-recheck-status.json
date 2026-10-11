@@ -1,0 +1,79 @@
+{
+  "status": "passed",
+  "build_id": "02164eb4fd6882b06271a039617c00dd06ca352cc8d09201a97694bff0cddd40",
+  "jobs": [
+    {
+      "label": "collection",
+      "pid": 26525,
+      "created": 1791207558.123971,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "-m",
+        "pytest",
+        "tests",
+        "--collect-only",
+        "-q"
+      ],
+      "started": 1791207558.125508,
+      "returncode": 0,
+      "finished": 1791207560.99697
+    },
+    {
+      "label": "related",
+      "pid": 26538,
+      "created": 1791207561.030135,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "-m",
+        "pytest",
+        "tests/test_matmul_quantile_statistics.py",
+        "tests/test_matmul_statistics.py",
+        "tests/test_axis_path_primitives.py",
+        "tests/test_numeric_line_sort_library.py",
+        "tests/test_typed_results.py",
+        "tests/test_matmul_library.py",
+        "tests/test_matmul_packed_library.py",
+        "tests/test_matmul_transpose_direct.py",
+        "tests/test_row_batch_execution.py",
+        "tests/test_single_axis_quantile_selection.py",
+        "tests/test_where_sum_fusion.py",
+        "tests/test_scan_reduce_fusion.py",
+        "tests/test_square_reduce_fusion.py",
+        "tests/test_matmul_short_rows.py",
+        "tests/test_short_axis_quantile_selection.py",
+        "tests/test_binary_count_fusion.py",
+        "tests/test_rectangular_packed_matmul.py",
+        "tests/test_scan_reduce_packets.py",
+        "tests/test_array_row_parallel.py",
+        "tests/test_masked_reduce_packets.py",
+        "-q",
+        "--junitxml=/private/tmp/calmetrics-row-risk-20261005/actual-v21-related.xml"
+      ],
+      "started": 1791207561.032458,
+      "returncode": 0,
+      "finished": 1791207572.953543
+    },
+    {
+      "label": "native",
+      "pid": 26779,
+      "created": 1791207572.986095,
+      "command": [
+        "/opt/homebrew/bin/ctest",
+        "--test-dir",
+        "/private/tmp/calmetrics-row-risk-20261005/candidate-v21-build",
+        "--output-on-failure",
+        "--output-junit",
+        "/private/tmp/calmetrics-row-risk-20261005/actual-v21-native.xml"
+      ],
+      "started": 1791207572.9880478,
+      "returncode": 0,
+      "finished": 1791207576.70331
+    }
+  ],
+  "whole_goal_complete": false,
+  "collected_full_cases": 14183,
+  "related_passed": 1657,
+  "native_passed": 9,
+  "full_evidence": "prior full14183 on byte-identical source/tests/AOT binaries; not a duplicate full runtime run",
+  "native_evidence": "reused native test binaries from same qualified build; current runtime source verified identical"
+}

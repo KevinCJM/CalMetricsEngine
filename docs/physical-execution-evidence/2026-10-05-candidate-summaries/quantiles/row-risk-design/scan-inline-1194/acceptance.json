@@ -1,0 +1,112 @@
+{
+  "build_id": "119471d06dbaa8dfa8233ae7a3280f10129c4c3259bc16d8d5b6742ab0f1ff7b",
+  "targeted_tests": 729,
+  "native_tests": 9,
+  "initial_cases": 30,
+  "timing": [
+    {
+      "shape": [
+        16384,
+        2520,
+        30
+      ],
+      "layout": "C",
+      "medians_seconds": {
+        "old": 5.2189384585,
+        "candidate": 0.6190290625,
+        "bounded-blas-njit": 2.1629926040000003,
+        "bounded-select-njit": 0.4242192505
+      },
+      "maximum_absolute_errors": {
+        "old": [
+          3.469446951953614e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "candidate": [
+          3.469446951953614e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "bounded-blas-njit": [
+          4.336808689942018e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "bounded-select-njit": [
+          4.336808689942018e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ]
+      }
+    },
+    {
+      "shape": [
+        16384,
+        2520,
+        30
+      ],
+      "layout": "F",
+      "medians_seconds": {
+        "old": 3.238704271,
+        "candidate": 0.6146168955,
+        "bounded-blas-njit": 2.1670582080000003,
+        "bounded-select-njit": 0.4241154795
+      },
+      "maximum_absolute_errors": {
+        "old": [
+          3.469446951953614e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "candidate": [
+          3.469446951953614e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "bounded-blas-njit": [
+          4.336808689942018e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "bounded-select-njit": [
+          4.336808689942018e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ]
+      }
+    }
+  ],
+  "memory": [
+    {
+      "backend": "old",
+      "requested_heap_warm_peak_bytes": 3404465467,
+      "rss_delta_median_bytes": 3421700096,
+      "rss_absolute_median_bytes": 3509551104
+    },
+    {
+      "backend": "candidate",
+      "requested_heap_warm_peak_bytes": 23914848,
+      "rss_delta_median_bytes": 40501248,
+      "rss_absolute_median_bytes": 127352832
+    },
+    {
+      "backend": "bounded-blas-njit",
+      "requested_heap_warm_peak_bytes": 20309536,
+      "rss_delta_median_bytes": 49643520,
+      "rss_absolute_median_bytes": 193019904
+    },
+    {
+      "backend": "bounded-select-njit",
+      "requested_heap_warm_peak_bytes": 20309536,
+      "rss_delta_median_bytes": 55296000,
+      "rss_absolute_median_bytes": 212107264
+    }
+  ],
+  "full_regression": false,
+  "sanitizers": false,
+  "libraries_off": false,
+  "production_adopted": false,
+  "whole_goal_complete": false,
+  "acceptance": "pending: complete chain improved to 0.619 s but remains about 1.46x slower than same-selection warmed NJIT; full quality and production adoption pending"
+}

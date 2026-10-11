@@ -1,0 +1,58 @@
+{
+  "status": "correctness_qualified_only",
+  "actual_adopted": false,
+  "goal_complete": false,
+  "new_python": {
+    "test_matmul_long_rectangle": 148,
+    "test_matmul_root_budget": 68
+  },
+  "normal_full": {
+    "tests": 15876,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "asan_related": {
+    "tests": 2700,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "off_related": {
+    "tests": 2700,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 391
+  },
+  "native": {
+    "normal": 9,
+    "asan": 9,
+    "off": 9
+  },
+  "identities": {
+    "normal": "7f3d170e3cad9e93d6d454e435e65a9e287db425a3a9e3ba4fb01f5f6bdd9306",
+    "asan": "12cb5504f3140d7680449af221822f3d3b67a2c41dd24fa90fd8cc0c770e3114",
+    "off": "4fceb1c07c2962c04ee9f53a328d7ee4753863b399d4686f88a2ff86838b410a"
+  },
+  "preservation": {
+    "native_source": {
+      "checked": 93,
+      "changed": []
+    },
+    "qualified_tests": {
+      "checked": 169,
+      "changed": []
+    },
+    "preserved_existing": {
+      "checked": 294,
+      "changed": []
+    }
+  },
+  "new_performance_measured": false,
+  "remaining": [
+    "same-core complete-request time including original geometry control",
+    "fresh malloc and RSS including library workspace",
+    "actual-source adoption and installed-package confirmation",
+    "other major workloads and whole-engine NJIT objective"
+  ]
+}

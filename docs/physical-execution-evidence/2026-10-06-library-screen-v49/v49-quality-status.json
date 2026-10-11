@@ -1,0 +1,60 @@
+{
+  "status": "passed",
+  "jobs": [
+    {
+      "label": "native",
+      "pid": 83271,
+      "started": 1791295042.911625,
+      "command": [
+        "/opt/homebrew/bin/ctest",
+        "--test-dir",
+        "/private/tmp/calmetrics-saved-mean-20261006/candidate-v49-build",
+        "--output-on-failure",
+        "--output-junit",
+        "/private/tmp/calmetrics-saved-mean-20261006/v49-native.xml"
+      ],
+      "returncode": 0,
+      "finished": 1791295047.106812,
+      "counts": {
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "label": "related",
+      "pid": 83455,
+      "started": 1791295047.1169112,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "-m",
+        "pytest",
+        "tests/test_variance_saved_mean.py",
+        "tests/test_cached_broadcast_pair.py",
+        "tests/test_ordered_row_statistics.py",
+        "tests/test_mixed_graph_optimization.py",
+        "tests/test_dense_elementwise_f_graph.py",
+        "tests/test_matrix_array_foundation.py",
+        "tests/test_physical_pointwise.py",
+        "tests/test_typed_results.py",
+        "tests/test_variance_library.py",
+        "tests/test_em_column_library.py",
+        "tests/test_latent_operators.py",
+        "-q",
+        "--tb=short",
+        "--junitxml=/private/tmp/calmetrics-saved-mean-20261006/v49-related.xml"
+      ],
+      "returncode": 0,
+      "finished": 1791295059.0262809,
+      "counts": {
+        "tests": 1328,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    }
+  ],
+  "production_adopted": false,
+  "goal_complete": false
+}

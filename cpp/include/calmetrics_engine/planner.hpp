@@ -41,6 +41,9 @@ struct Plan {
   bool use_shared_memory = false, async_orchestration = false,
        hard_stop = false;
   bool inputs_already_shared = false;
+  // Per-request physical policy; never mutates the shared logical graph.
+  bool expanded_matmul_roots = true;
+  bool row_subviews = true;
   double estimated_work_units = 0;
   double estimated_logical_work_units = 0;
   double estimated_typed_array_work_units = 0;
@@ -64,6 +67,10 @@ struct Plan {
 };
 std::size_t checked_add(std::size_t a, std::size_t b);
 std::size_t checked_mul(std::size_t a, std::size_t b);
+// Shared canonical child estimate for private graph execution. Static inputs
+// remain precisely shaped; this never selects a compact parent recursively.
+std::size_t canonical_child_scratch_bytes(const graph::Program &,
+    const std::vector<ops::Value> &, std::size_t logical_window);
 Geometry inspect(const std::vector<std::size_t> &sizes,
                  const std::int64_t *starts, const std::int64_t *ends,
                  std::size_t rows, const std::int64_t *product_ids,

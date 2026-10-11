@@ -7,6 +7,11 @@ F numeric(const F &condition, const F &f, const F &otherwise = "\"NaN\"") {
   return iff(condition, "IFERROR(" + f + "," + err("DOMAIN_ERROR") + ")",
              otherwise);
 }
+F reproducible(const F &condition, const F &f) {
+  return iff(condition,
+             "IFERROR(" + f + "," + err("UNREPRESENTABLE_VALUE") + ")",
+             q("NaN"));
+}
 Op base_reduction(Op op) {
   if (op >= Op::sum_where && op <= Op::quantile_where) {
     const Op map[]{Op::sum,       Op::mean,      Op::variance, Op::std,
@@ -16,6 +21,39 @@ Op base_reduction(Op op) {
   return op;
 }
 } // namespace
+void validate_affine_excel_domain(const ops::Value *given, std::size_t count) {
+  const auto p = ops::prepare(
+      ops::lookup(static_cast<std::uint16_t>(Op::affine_contract)), given,
+      count);
+  const auto &x = p.args[0], &coeff = p.args[1], &initial = p.args[2];
+  const auto factors = coeff.shape.dim[0], columns = coeff.shape.dim[1];
+  const auto rows = columns ? p.output_shape.size() / columns : 0;
+  auto check = [](double value) {
+    const auto magnitude = std::abs(value);
+    if (std::isinf(value) || magnitude > max_reproduction_number ||
+        (std::isfinite(value) && value != 0 &&
+         magnitude < std::numeric_limits<double>::min()))
+      throw Error("UNREPRESENTABLE_VALUE: affine_contract intermediate "
+                  "exceeds Excel numeric domain");
+  };
+  // No result calculation or workspace is retained. This small replay is a
+  // domain check for the explicit export path, never a production fallback.
+  for (std::size_t row = 0; row < rows; ++row)
+    for (std::size_t column = 0; column < columns; ++column) {
+      double running = initial.f(initial.shape.rank ? column : 0);
+      check(running);
+      for (std::size_t factor = 0; factor < factors; ++factor) {
+        const double left = coeff.f(factor * columns + column);
+        const double right = x.f(row * factors + factor);
+        check(left);
+        check(right);
+        const double term = left * right;
+        check(term);
+        running = running + term;
+        check(running);
+      }
+    }
+}
 F Builder::reduce(Op raw, const std::vector<F> &x, const std::vector<F> &mask,
                   const F &ddof, const F &prob) {
   const auto op = base_reduction(raw);
@@ -201,7 +239,9 @@ Array Builder::operation(Op op, const std::vector<Array> &given) {
       }
     }
   }
-  F own = "\"\"";
+  // Probability validation remains observable even when an empty outer axis
+  // produces no element whose formula could otherwise carry the failure.
+  F own = op == Op::quantiles_axis ? out.failure : "\"\"";
   if (!((aligned || mapped) && positions))
     for (auto &x : out.refs)
       own = formula(iff(own + "<>\"\"", own,
@@ -340,11 +380,40 @@ Array Builder::recipe(Op op, const std::vector<Array> &given) {
   for (std::size_t i = a.size(); i < spec.max_args; ++i)
     a.push_back(literal(p.args[i].scalar));
   Array out = array(p.output_shape, p.output_kind);
+  if (op == Op::cumulative_product_axis || op == Op::cumulative_max_axis ||
+      op == Op::quantiles_axis)
+    return axis_path_recipe(op, a, std::move(out));
+  if (ops::latent_operator(op)) return latent_operation(op, a, std::move(out));
+  if (ops::matrix_foundation(op))
+    return foundation_operation(op, a, std::move(out));
   if (out.kind == ops::Kind::fit || out.kind == ops::Kind::interval)
     out.refs.resize(5);
   auto A = [&](std::size_t arg, std::size_t i = 0) { return a.at(arg).at(i); };
   auto store = [&](std::size_t i, const F &f) { out.refs.at(i) = formula(f); };
   const auto n = a[0].size();
+  if (op == Op::affine_contract) {
+    const auto factors = a[1].shape.dim[0], columns = a[1].shape.dim[1];
+    // Checked products precede every string/helper expansion. Combined with
+    // the common ingress cost these match the symbolic work bound.
+    cost({out.size(), factors, 32});
+    cost({out.size(), 16});
+    for (std::size_t i = 0; i < out.size(); ++i) {
+      const auto row = i / columns, column = i % columns;
+      F running = formula(A(2, column));
+      for (std::size_t factor = 0; factor < factors; ++factor) {
+        const auto coefficient = A(1, factor * columns + column);
+        const auto component = A(0, row * factors + factor);
+        const auto term = formula(reproducible(
+            "AND(" + fin(coefficient) + "," + fin(component) + ")",
+            coefficient + "*" + component));
+        running = formula(reproducible(
+            "AND(" + fin(running) + "," + fin(term) + ")",
+            running + "+" + term));
+      }
+      out.refs[i] = running;
+    }
+    return out;
+  }
   if (spec.family == ops::Family::elementwise || op == Op::active_returns) {
     for (std::size_t i = 0; i < out.size(); ++i) {
       auto x = A(0, i), y = a.size() > 1 ? A(1, i) : "0",
@@ -399,6 +468,29 @@ Array Builder::recipe(Op op, const std::vector<Array> &given) {
       case Op::exp:
         f = numeric(fin(x), fn("EXP", x), err("DOMAIN_ERROR"));
         break;
+      case Op::expm1: {
+        // EXP(x)-1 loses the input near zero. A visible degree-12 Taylor
+        // Horner chain is stable for |x|<=1/8; its analytic remainder is
+        // bounded by exp(1/8)*(1/8)^13/13! < 4e-22 before rounding.
+        // Tiny x is already its own correctly rounded expm1 value. Guard the
+        // helper cells as well, so no unselected branch overflows/underflows.
+        const auto near = formula(iff(
+            fin(x), "AND(ABS(" + x + ")>2^-54,ABS(" + x + ")<=0.125)",
+            "FALSE"));
+        F horner = "1";
+        for (unsigned degree = 12; degree >= 2; --degree)
+          horner = formula(iff(near, "1+" + x + "*" + horner + "/" +
+                                        std::to_string(degree),
+                               "0"));
+        const auto finite_value =
+            iff("ABS(" + x + ")<=2^-54", x,
+                iff(near, x + "*" + horner,
+                    // Here exp(x) is below half an ulp at -1. Avoid asking
+                    // Excel to represent an irrelevant underflowed exp(x).
+                    iff(x + "<=-40", "-1", fn("EXP", x) + "-1")));
+        f = reproducible(fin(x), finite_value);
+        break;
+      }
       case Op::reciprocal:
         f = iff(x + "=0", err("DIVIDE_BY_ZERO"), "1/" + x);
         break;
@@ -489,7 +581,7 @@ Array Builder::recipe(Op op, const std::vector<Array> &given) {
           spec.min_args == 2 && op != Op::logical_and && op != Op::logical_or;
       if (out.kind == ops::Kind::number && op != Op::where && op != Op::sign &&
           op != Op::divide_or_default && op != Op::power && op != Op::divide &&
-          op != Op::exp)
+          op != Op::exp && op != Op::expm1)
         f = numeric(binary && op != Op::minimum && op != Op::maximum
                         ? "AND(" + fin(x) + "," + fin(y) + ")"
                         : fin(x),

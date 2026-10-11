@@ -1,0 +1,359 @@
+--- a/cpp/operators/matrix_backend.cpp
++++ b/cpp/operators/matrix_backend.cpp
+@@ -3,6 +3,7 @@
+ #include <cmath>
+ #include <limits>
+ #include <algorithm>
++#include <climits>
+ #ifdef CALMETRICS_HAVE_EIGEN_ROTATION
+ // Header-only, with no private pool, BLAS dispatch or fast-math.
+ #define EIGEN_DONT_PARALLELIZE
+@@ -12,6 +13,61 @@
+ #endif
+ 
+ namespace calmetrics_engine::ops {
++MatmulBoundsStatus library_matmul_input_bounds(const Value &input, MatmulInputBounds &result) {
++#if defined(CALMETRICS_HAVE_EIGEN_ROTATION) && defined(__APPLE__) && defined(__aarch64__)
++    if (__builtin_available(macOS 15.0, *)) {
++        if (input.kind != Kind::number || input.shape.rank != 2 || !input.data)
++            return MatmulBoundsStatus::unavailable;
++        const auto rows = input.shape.dim[0], columns = input.shape.dim[1];
++        if (!rows || !columns || rows > 4096 || columns > 4096)
++            return MatmulBoundsStatus::unavailable;
++        const bool c = input.stride[1] == 1 && input.stride[0] >= std::ptrdiff_t(columns) &&
++                       input.stride[0] <= INT_MAX;
++        const bool f = input.stride[0] == 1 && input.stride[1] >= std::ptrdiff_t(rows) &&
++                       input.stride[1] <= INT_MAX;
++        if (!c && !f) return MatmulBoundsStatus::unavailable;
++        const auto inner = c ? columns : rows, outer = c ? rows : columns;
++        const auto leading = c ? input.stride[0] : input.stride[1];
++        const auto *data = static_cast<const double *>(input.data);
++        MatmulInputBounds bounds;
++        constexpr Eigen::Index width = 32;
++        using Tile = Eigen::Array<double, width, 1>;
++        using Read = Eigen::Map<const Tile, Eigen::Unaligned>;
++        for (std::size_t j = 0; j < outer; ++j) {
++            const auto *line = data + std::ptrdiff_t(j) * leading;
++            std::size_t i = 0;
++            for (; i + width <= inner; i += width) {
++                const Read values(line + i);
++                // Public Eigen reductions borrow a bounded cache-sized span.
++                // No arithmetic sum, packing, pool, retained pointer or heap.
++                if (!values.isFinite().all()) return MatmulBoundsStatus::rejected;
++                const auto absolute = values.abs();
++                const double maximum = absolute.maxCoeff(), minimum = absolute.minCoeff();
++                if (minimum == 0.0) return MatmulBoundsStatus::scalar_required;
++                if (minimum < 0x1p-128 || maximum > 0x1p128)
++                    return MatmulBoundsStatus::rejected;
++                bounds.maximum = std::max(bounds.maximum, maximum);
++                bounds.negative = bounds.negative || values.minCoeff() < 0.0;
++            }
++            for (; i < inner; ++i) {
++                const double value = line[i];
++                if (!std::isfinite(value)) return MatmulBoundsStatus::rejected;
++                if (value == 0.0) return MatmulBoundsStatus::scalar_required;
++                const double absolute = std::abs(value);
++                if (absolute < 0x1p-128 || absolute > 0x1p128)
++                    return MatmulBoundsStatus::rejected;
++                bounds.maximum = std::max(bounds.maximum, absolute);
++                bounds.negative = bounds.negative || std::signbit(value);
++            }
++        }
++        result = bounds;
++        return MatmulBoundsStatus::valid;
++    }
++#else
++    (void)input; (void)result;
++#endif
++    return MatmulBoundsStatus::unavailable;
++}
+ bool try_f_rectangle_copy(const double *source, std::size_t source_stride,
+                          double *target, std::size_t target_stride,
+                          std::size_t rows, std::size_t columns) {
+--- a/cpp/operators/matmul_accelerate.cpp
++++ b/cpp/operators/matmul_accelerate.cpp
+@@ -92,8 +92,43 @@
+         };
+         bool zero_a, zero_b;
+         double max_a, max_b;
+-        if (!scan(a, true, zero_a, max_a) || !scan(b, false, zero_b, max_b) ||
+-            (has_negative && std::fegetround() != FE_TONEAREST)) return false;
++        const auto proves_mixed = [](const Value &v, bool by_row) {
++            const auto count = std::min<std::size_t>(64, v.shape.dim[by_row ? 1 : 0]);
++            const auto stride = v.stride[by_row ? 1 : 0];
++            const auto *data = static_cast<const double *>(v.data);
++            int previous = 0;
++            for (std::size_t i = 0; i < count; ++i) {
++                const double value = data[std::ptrdiff_t(i) * stride];
++                if (!std::isfinite(value)) return false;
++                if (value == 0.0) continue;
++                const int sign = std::signbit(value) ? -1 : 1;
++                if (previous && previous != sign) return true;
++                previous = sign;
++            }
++            return false;
++        };
++        // A witnessed opposite-sign pair within one A row or B column proves
++        // the original mixed domain; sampling never proves validity or absence.
++        const bool witnessed = proves_mixed(a, true) || proves_mixed(b, false);
++        if (witnessed && std::fegetround() != FE_TONEAREST) return false;
++        bool bounded = false;
++        if (witnessed) {
++            MatmulInputBounds left, right;
++            const auto left_status = library_matmul_input_bounds(a, left);
++            if (left_status == MatmulBoundsStatus::rejected) return false;
++            if (left_status == MatmulBoundsStatus::valid) {
++                const auto right_status = library_matmul_input_bounds(b, right);
++                if (right_status == MatmulBoundsStatus::rejected) return false;
++                if (right_status == MatmulBoundsStatus::valid) {
++                    max_a = left.maximum; max_b = right.maximum;
++                    has_negative = left.negative || right.negative;
++                    mixed_sign = true; zero_a = zero_b = false; bounded = true;
++                }
++            }
++        }
++        if (!bounded && (!scan(a, true, zero_a, max_a) || !scan(b, false, zero_b, max_b)))
++            return false;
++        if (has_negative && std::fegetround() != FE_TONEAREST) return false;
+         double error_bound = 0.0;
+         if (mixed_sign && !zero_a && !zero_b) {
+             // Standard binary64 dot-product bound for both the canonical fold
+--- a/cpp/include/calmetrics_engine/matrix_backend.hpp
++++ b/cpp/include/calmetrics_engine/matrix_backend.hpp
+@@ -27,6 +27,11 @@
+ };
+ std::size_t solve_concat_reserve_doubles(std::size_t n, std::size_t k);
+ struct Value;
++// Guard statistics only; all-zero/negative-zero and unusual values retain the
++// existing scalar classifier. No input, output or dynamic buffer is modified.
++enum class MatmulBoundsStatus { unavailable, scalar_required, rejected, valid };
++struct MatmulInputBounds { double maximum = 0.0; bool negative = false; };
++MatmulBoundsStatus library_matmul_input_bounds(const Value &, MatmulInputBounds &);
+ struct Workspace;
+ struct Prepared;
+ struct Output;
+--- a/tests/matmul_input_bounds_native_cases.hpp
++++ b/tests/matmul_input_bounds_native_cases.hpp
+@@ -0,0 +1,101 @@
++#pragma once
++#include "calmetrics_engine/operators.hpp"
++#include "calmetrics_engine/matrix_backend.hpp"
++#include <algorithm>
++#include <cfenv>
++#include <cmath>
++#include <cstring>
++#include <limits>
++#include <stdexcept>
++#include <vector>
++namespace matmul_input_bounds_native_cases {
++namespace o = calmetrics_engine::ops;
++inline void check(bool ok, const char *message) { if (!ok) throw std::runtime_error(message); }
++inline void run() {
++    bool available = false;
++#if CALMETRICS_EXPECT_EIGEN_INPUT_SCAN && defined(__APPLE__) && defined(__aarch64__)
++    if (__builtin_available(macOS 15.0, *)) available = true;
++#endif
++    const int rounding = std::fegetround();
++    for (const auto shape : {std::array<std::size_t,2>{1,31},{2,32},{65,33},{129,65}})
++      for (int layout=0; layout<4; ++layout) {
++        const auto rows=shape[0],cols=shape[1];const bool f=layout&1;
++        const auto leading=(f ? rows : cols)+((layout&2) ? 7 : 0);
++        std::vector<double> data(leading*(f ? cols : rows),std::numeric_limits<double>::quiet_NaN());
++        o::Value input;input.shape=o::matrix_shape(rows,cols);input.data=data.data();
++        input.stride=f ? std::array<std::ptrdiff_t,3>{1,std::ptrdiff_t(leading),1}
++                       : std::array<std::ptrdiff_t,3>{std::ptrdiff_t(leading),1,1};
++        const auto offset=[&](std::size_t position) {
++            const auto row=position/cols,column=position%cols;
++            return f ? column*leading+row : row*leading+column;
++        };
++        for(std::size_t i=0;i<rows*cols;++i)
++            data[offset(i)]=(i%2 ? -1.0 : 1.0)*(.5+double(i%29)/32.0);
++        const auto baseline=data;
++        for(const int mode:{FE_TONEAREST,FE_DOWNWARD,FE_UPWARD,FE_TOWARDZERO}) {
++            check(std::fesetround(mode)==0,"input bounds rounding setup");
++            o::MatmulInputBounds bounds{-993.0,true};
++            const auto status=o::library_matmul_input_bounds(input,bounds);
++            check(status==(available ? o::MatmulBoundsStatus::valid : o::MatmulBoundsStatus::unavailable),
++                  "input bounds optional library coverage");
++            check(std::fegetround()==mode,"input bounds changed rounding mode");
++            if(available) {
++                double maximum=0;bool negative=false;
++                for(std::size_t i=0;i<rows*cols;++i) {
++                    const double value=data[offset(i)];maximum=std::max(maximum,std::abs(value));
++                    negative=negative||std::signbit(value);
++                }
++                check(bounds.maximum==maximum&&bounds.negative==negative,"input bounds exact independent extrema");
++            } else check(bounds.maximum==-993.0&&bounds.negative,"unavailable input bounds changed caller");
++            check(std::memcmp(data.data(),baseline.data(),data.size()*sizeof(double))==0,
++                  "valid input bounds modified source or padding");
++        }
++        check(std::fesetround(rounding)==0,"input bounds restore rounding");
++        for(const auto position:{std::size_t(0),rows*cols/2,rows*cols-1})
++          for(const double fault:{0.0,-0.0,std::numeric_limits<double>::quiet_NaN(),
++                std::numeric_limits<double>::infinity(),-std::numeric_limits<double>::infinity(),
++                0x1p-129,0x1p129,std::nextafter(0x1p-128,0.0),
++                std::nextafter(0x1p128,std::numeric_limits<double>::infinity()),0x1p-128,0x1p128}) {
++            data=baseline;data[offset(position)]=fault;input.data=data.data();
++            const auto snapshot=data;
++            o::MatmulInputBounds bounds{-993.0,true};
++            const auto expected=!available ? o::MatmulBoundsStatus::unavailable : fault==0.0 ?
++                o::MatmulBoundsStatus::scalar_required : (!std::isfinite(fault)||
++                std::abs(fault)<0x1p-128||std::abs(fault)>0x1p128) ?
++                o::MatmulBoundsStatus::rejected : o::MatmulBoundsStatus::valid;
++            check(o::library_matmul_input_bounds(input,bounds)==expected,"input bounds boundary classification");
++            if(expected==o::MatmulBoundsStatus::valid) {
++                double maximum=0;bool negative=false;
++                for(std::size_t i=0;i<rows*cols;++i) {
++                    const double value=data[offset(i)];
++                    maximum=std::max(maximum,std::abs(value));
++                    negative=negative||std::signbit(value);
++                }
++                check(bounds.maximum==maximum&&bounds.negative,
++                      "boundary input bounds exact independent extrema");
++            } else
++                check(bounds.maximum==-993.0&&bounds.negative,"rejected/deferred input bounds changed caller");
++            check(std::memcmp(data.data(),snapshot.data(),data.size()*sizeof(double))==0,
++                  "input bounds modified input");
++          }
++        data=baseline;input.data=data.data();
++        for(int mode=0;mode<8;++mode) {
++            auto unsupported=input;
++            if(mode==0)unsupported.stride[0]=0;
++            if(mode==1)unsupported.stride[1]=-1;
++            if(mode==2)unsupported.data=nullptr;
++            if(mode==3)unsupported.shape=o::matrix_shape(0,cols);
++            if(mode==4)unsupported.kind=o::Kind::mask;
++            if(mode==5)unsupported.shape=o::tensor_shape(rows,cols,1);
++            if(mode==6)unsupported.shape=o::matrix_shape(5000,cols);
++            if(mode==7)unsupported.stride=f ? std::array<std::ptrdiff_t,3>{1,PTRDIFF_MAX,1}
++                                          : std::array<std::ptrdiff_t,3>{PTRDIFF_MAX,1,1};
++            o::MatmulInputBounds bounds{-993.0,true};
++            check(o::library_matmul_input_bounds(unsupported,bounds)==o::MatmulBoundsStatus::unavailable,
++                  "unsupported input bounds geometry must not read");
++            check(bounds.maximum==-993.0&&bounds.negative,"unsupported bounds changed caller");
++        }
++      }
++    check(std::fegetround()==rounding,"input bounds leaked rounding state");
++}
++}
+--- a/tests/test_matmul_input_bounds.py
++++ b/tests/test_matmul_input_bounds.py
+@@ -0,0 +1,86 @@
++"""Root admission boundaries and unchanged C/F output/error/ownership contracts."""
++import numpy as np
++import pytest
++from calmetrics_engine import AdaptiveScheduler, GraphCompiler
++
++TYPES={"a":dict(kind="matrix",axes=["asset","asset"],shape=["M","K"]),
++       "b":dict(kind="matrix",axes=["asset","asset"],shape=["K","N"])}
++
++def layout_copy(value,layout):
++    if layout in ["CC","FF"]:
++        return np.array(value,order=layout[0])
++    if layout=="paddedC":
++        result=np.full((value.shape[0],value.shape[1]+3),np.nan)
++        result[:,:value.shape[1]]=value
++        return result[:,:value.shape[1]]
++    result=np.full((value.shape[0]+3,value.shape[1]),np.nan,order="F")
++    result[:value.shape[0]]=value
++    return result[:value.shape[0]]
++
++def execute(graph,a,b,scheduler):
++    return scheduler.execute(graph,{"a":a,"b":b},np.zeros(1,np.int64),np.zeros(1,np.int64))
++
++def calls(result):
++    return sum(chunk["accelerate_matmul_calls"] for chunk in result.audit["native_chunks"])
++
++@pytest.mark.parametrize("layout",["CC","FF","paddedC","paddedF"])
++@pytest.mark.parametrize("order",["C","F"])
++@pytest.mark.parametrize("pattern",["random","consistent","consistent_high","sparse","late_zero",
++                                    "late_negative_zero","late_nan","late_inf","late_tiny","late_huge"])
++def test_root_bounds_full_payload_and_layout(layout,order,pattern):
++    rng=np.random.default_rng(20261005)
++    a=rng.uniform(-1,1,(512,256));b=rng.uniform(-1,1,(256,512))
++    if pattern.startswith("consistent"):
++        a=np.abs(a)+.125;b=np.abs(b)+.125
++        a[1::2]*=-1;b[:,1::2]*=-1
++        if pattern=="consistent_high":a*=1024;b*=1024
++    if pattern=="sparse":a[:,1::2]=0;b[1::2]=0
++    faults={"late_zero":0.,"late_negative_zero":-0.,"late_nan":np.nan,"late_inf":np.inf,
++            "late_tiny":2.**-129,"late_huge":2.**129}
++    if pattern in faults:a[-1,-1]=faults[pattern]
++    a=layout_copy(a,layout);b=layout_copy(b,layout)
++    before=[v.copy() for v in [a,b]]
++    for v in [a,b]:v.flags.writeable=False
++    graph=GraphCompiler(TYPES).compile("matmul(a,b)",output_order=order)
++    with AdaptiveScheduler(cpu_budget=1) as scheduler:
++        first=execute(graph,a,b,scheduler);saved=first.outputs[0].values[0].copy()
++        second=execute(graph,a,b,scheduler)
++        actual=second.outputs[0].values[0]
++        np.testing.assert_array_equal(first.outputs[0].values[0],saved)
++        assert not actual.flags.writeable and not np.shares_memory(actual,first.outputs[0].values[0])
++        assert not np.shares_memory(actual,a) and not np.shares_memory(actual,b)
++        assert actual.flags.c_contiguous if order=="C" else actual.flags.f_contiguous
++        for row in [0,256,511]:
++            for column in [0,256,511]:
++                expected=0.
++                for k in range(256):expected+=float(a[row,k])*float(b[k,column])
++                if np.isnan(expected):
++                    assert np.isnan(actual[row,column])
++                elif np.isinf(expected):
++                    assert actual[row,column]==expected
++                elif pattern in ["late_tiny","late_huge","late_negative_zero"]:
++                    assert actual[row,column]==expected
++                else:assert abs(actual[row,column]-expected)<.000049
++        if pattern in ["late_nan","late_inf"]:
++            # Existing MatMul returns IEEE classes. Only the last A row is faulty.
++            assert np.isfinite(actual[:-1]).all()
++            if pattern=="late_nan":assert np.isnan(actual[-1]).all()
++            else:
++                assert np.isinf(actual[-1]).all()
++                np.testing.assert_array_equal(np.signbit(actual[-1]),np.signbit(b[-1]))
++        if pattern in ["late_tiny","late_huge","late_negative_zero","late_nan","late_inf"]:
++            assert calls(second)==0
++        assert second.audit["python_operator_calls"]==0 and second.audit["request_time_compilation"]==0
++    for v,old in zip([a,b],before,strict=True):np.testing.assert_array_equal(v,old)
++
++@pytest.mark.parametrize("layout",["CC","FF"])
++@pytest.mark.parametrize("order",["C","F"])
++def test_opposite_sign_after_probe_is_still_classified(layout,order):
++    a=np.ones((512,256));b=np.ones((256,512))
++    a[-1,-1]=-1.
++    a=layout_copy(a,layout);b=layout_copy(b,layout)
++    graph=GraphCompiler(TYPES).compile("matmul(a,b)",output_order=order)
++    with AdaptiveScheduler(cpu_budget=1) as scheduler:
++        result=execute(graph,a,b,scheduler)
++        expected=np.full((512,512),256.);expected[-1]=254.
++        np.testing.assert_array_equal(result.outputs[0].values[0],expected)
+--- a/tests/operator_native_tests.cpp
++++ b/tests/operator_native_tests.cpp
+@@ -2,6 +2,7 @@
+ #include "calmetrics_engine/matrix_backend.hpp"
+ #include "axis_path_native_cases.hpp"
+ #include "numeric_line_sort_native_cases.hpp"
++#include "matmul_input_bounds_native_cases.hpp"
+ #include <algorithm>
+ #include <cmath>
+ #include <cfenv>
+@@ -289,6 +290,7 @@
+ 
+ int main() {
+     try {
++        matmul_input_bounds_native_cases::run();
+         test_axis_path_contracts();
+         test_numeric_line_sort_contracts();
+         density_state_contracts();
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -235,6 +235,11 @@
+     set_tests_properties(calmetrics_engine_native_tests PROPERTIES TIMEOUT 60)
+     add_executable(calmetrics_engine_operator_tests tests/operator_native_tests.cpp)
+     target_link_libraries(calmetrics_engine_operator_tests PRIVATE calmetrics_engine_operators)
++    if(CALMETRICS_ENGINE_USE_EIGEN)
++        target_compile_definitions(calmetrics_engine_operator_tests PRIVATE CALMETRICS_EXPECT_EIGEN_INPUT_SCAN=1)
++    else()
++        target_compile_definitions(calmetrics_engine_operator_tests PRIVATE CALMETRICS_EXPECT_EIGEN_INPUT_SCAN=0)
++    endif()
+     if(TARGET calmetrics_engine_highway_order)
+         target_compile_definitions(calmetrics_engine_operator_tests PRIVATE CALMETRICS_EXPECT_HIGHWAY_ORDER=1)
+     else()

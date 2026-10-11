@@ -1,0 +1,188 @@
+"""Complete KKT assembly/solve with stronger direct-fill NJIT reference."""
+import os
+for key in ('OPENBLAS_NUM_THREADS','OMP_NUM_THREADS','VECLIB_MAXIMUM_THREADS','NUMBA_NUM_THREADS','MKL_NUM_THREADS'):
+    os.environ[key]='1'
+import argparse, ctypes, gc, hashlib, json, statistics, sys, threading, time
+from pathlib import Path
+import numpy as np
+from numba import njit
+
+D=Path(__file__).resolve().parent
+p=argparse.ArgumentParser()
+p.add_argument('--variant',choices=['current','vendor','njit','njit-c','njit-concat'],required=True)
+p.add_argument('--n',type=int,default=4096)
+p.add_argument('--layout',choices=['C','F'],default='C')
+p.add_argument('--metric',choices=['time','heap','rss'],default='time')
+p.add_argument('--rounds',type=int,default=3)
+args=p.parse_args()
+
+@njit(nogil=True)
+def direct_reference(h,g,z,b,zr):
+    # One private final coefficient allocation, directly filled in F order.
+    # np.linalg.solve is the same mature partial-pivot LAPACK computation.
+    n=h.shape[0];m=g.shape[0];size=n+m
+    coefficient=np.empty((size,size)).T
+    if h.flags.c_contiguous:
+        # Tile the layout conversion; avoid a full strided column sweep.
+        for j0 in range(0,n,64):
+            for i0 in range(0,n,64):
+                for i in range(i0,min(i0+64,n)):
+                    for j in range(j0,min(j0+64,n)):coefficient[i,j]=h[i,j]
+    else:
+        for j in range(n):
+            for i in range(n):coefficient[i,j]=h[i,j]
+    for j in range(n):
+        for i in range(m):coefficient[n+i,j]=g[i,j]
+    for j in range(m):
+        for i in range(n):coefficient[i,n+j]=g[j,i]
+        for i in range(m):coefficient[n+i,n+j]=z[i,j]
+    rhs=np.empty((size,1))
+    for i in range(n):rhs[i,0]=b[i,0]
+    for i in range(m):rhs[n+i,0]=zr[i,0]
+    return np.linalg.solve(coefficient,rhs)
+
+@njit(nogil=True)
+def direct_c_reference(h,g,z,b,zr):
+    n=h.shape[0];m=g.shape[0];size=n+m
+    coefficient=np.empty((size,size))
+    for i in range(n):
+        for j in range(n):coefficient[i,j]=h[i,j]
+        for j in range(m):coefficient[i,n+j]=g[j,i]
+    for i in range(m):
+        for j in range(n):coefficient[n+i,j]=g[i,j]
+        for j in range(m):coefficient[n+i,n+j]=z[i,j]
+    rhs=np.empty((size,1))
+    for i in range(n):rhs[i,0]=b[i,0]
+    for i in range(m):rhs[n+i,0]=zr[i,0]
+    return np.linalg.solve(coefficient,rhs)
+
+@njit(nogil=True)
+def concat_reference(h,g,z,b,zr):
+    top=np.concatenate((h,g.T),axis=1)
+    bottom=np.concatenate((g,z),axis=1)
+    coefficient=np.concatenate((top,bottom),axis=0)
+    rhs=np.concatenate((b,zr),axis=0)
+    return np.linalg.solve(coefficient,rhs)
+
+def fixture(n):
+    rng=np.random.default_rng(20261004)
+    factors=rng.normal(size=(n,8))*.01
+    h=factors@factors.T
+    h[np.diag_indices(n)]+=np.linspace(.5,1.,n)+1e-10
+    m=min(16,n//2);g=np.zeros((m,n));g[0]=1.
+    for row in range(1,m):g[row,n-row]=-1.
+    data=dict(h=h,g=g,z=np.zeros((m,m)),b=-rng.normal(size=(n,1)),zr=np.zeros((m,1)))
+    result={key:np.array(value,order=args.layout) for key,value in data.items()}
+    for value in result.values():value.flags.writeable=False
+    return result
+
+tiny=fixture(8)
+references=(direct_reference,direct_c_reference,concat_reference)
+for reference in references:reference(*tiny.values())
+signatures=tuple(tuple(reference.signatures) for reference in references)
+data=fixture(args.n)
+input_hashes={name:hashlib.sha256(memoryview(value.ravel(order='K')).cast('B')).hexdigest() for name,value in data.items()}
+identity=None;scheduler=None;audit=None
+if args.variant in ('current','vendor'):
+    identity_path=(D/'candidate/identity.json' if args.variant=='vendor' else
+                   Path('/private/tmp/calmetrics-sgemm-v66-20261008/array-lifetime-r2/actual/identity.json'))
+    identity=json.loads(identity_path.read_text())
+    assert all(hashlib.sha256((Path(identity['installed'])/n).read_bytes()).hexdigest()==h
+               for n,h in identity['installed_binaries'].items())
+    sys.path.insert(0,identity['installed'])
+    import calmetrics_engine as c
+    shapes=dict(h=['N','N'],g=['M','N'],z=['M','M'],b=['N','K'],zr=['M','K'])
+    decl={key:dict(kind='matrix',axes=['asset','asset'],shape=shape) for key,shape in shapes.items()}
+    graph=c.GraphCompiler(decl).compile('solve_multi(concatenate(concatenate(h,transpose(g),1),concatenate(g,z,1),0),concatenate(b,zr,0))',result_format='typed',output_order=args.layout)
+    scheduler=c.AdaptiveScheduler(cpu_budget=1)
+    bounds=np.zeros(1,np.int64)
+
+def call():
+    global audit
+    owned={key:np.array(value,order=args.layout,copy=True) for key,value in data.items()}
+    for value in owned.values():value.flags.writeable=False
+    if scheduler:
+        result=scheduler.execute(graph,owned,bounds,bounds);audit=result.audit
+        assert audit['engine_build_id']==identity['build_id']
+        assert audit['python_fallback']==audit['python_operator_calls']==0
+        assert scheduler.peak_active_cpu_tokens<=1
+        root=result.outputs[0]
+        assert len(result.outputs)==1 and np.all(root.root_statuses==0)
+        assert all(status is None or not np.any(status) for status in root.statuses)
+        output=root.values[0]
+    else:
+        reference={'njit':direct_reference,'njit-c':direct_c_reference,'njit-concat':concat_reference}[args.variant]
+        output=reference(*owned.values())
+        assert signatures==tuple(tuple(reference.signatures) for reference in references)
+    assert output.shape==(args.n+min(16,args.n//2),1) and output.dtype==np.float64
+    # A single-column output is both C/F; this does not prove multi-RHS F layout.
+    assert output.flags.c_contiguous and output.flags.f_contiguous
+    assert all(not np.shares_memory(output,value) for value in owned.values())
+    output.flags.writeable=False
+    return output
+
+def digest(value):return hashlib.sha256(memoryview(value.ravel(order='K')).cast('B')).hexdigest()
+
+old=previous=None
+try:
+    if args.metric=='time':
+        old=call();samples=[];cpu=[]
+        for repeat in range(args.rounds):
+            saved=digest(old);start=time.perf_counter();start_cpu=time.process_time();output=call()
+            samples.append(time.perf_counter()-start);cpu.append(time.process_time()-start_cpu)
+            assert saved==digest(old) and not np.shares_memory(old,output)
+            if repeat==args.rounds-1:previous=old
+            old=output
+        measurement=dict(seconds=samples,cpu_seconds=cpu,median_seconds=statistics.median(samples))
+    elif args.metric=='heap':
+        sys.path.insert(0,'/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/tools')
+        from benchmark_memory import HeapStats
+        probe=ctypes.CDLL(None);gc.collect();probe.cme_heap_begin();stages={}
+        try:
+            for repeat in range(3):
+                saved=digest(old) if old is not None else None
+                probe.cme_heap_reset_peak();output=call();stats=HeapStats();probe.cme_heap_snapshot(ctypes.byref(stats))
+                assert stats.table_overflows==0
+                stages[str(repeat)]={name:getattr(stats,name) for name,_ in stats._fields_}
+                if old is not None:assert saved==digest(old) and not np.shares_memory(old,output)
+                if repeat==2:previous=old
+                old=output
+        finally:
+            stats=HeapStats();probe.cme_heap_end(ctypes.byref(stats));assert stats.table_overflows==0
+        measurement=dict(stages=stages,warm_peak_bytes=stages['2']['peak_bytes'])
+    else:
+        import psutil
+        process=psutil.Process();stop=threading.Event();active=threading.Event();peak=[0]
+        def sample():
+            while not stop.wait(.0005):
+                if active.is_set():peak[0]=max(peak[0],process.memory_info().rss)
+        thread=threading.Thread(target=sample);thread.start();stages={};baseline=process.memory_info().rss
+        try:
+            for repeat in range(3):
+                saved=digest(old) if old is not None else None
+                before=process.memory_info().rss;peak[0]=before;active.set();output=call();after=process.memory_info().rss;active.clear()
+                stages[str(repeat)]=dict(baseline=before,peak=max(peak[0],after),retained=after)
+                if old is not None:assert saved==digest(old) and not np.shares_memory(old,output)
+                if repeat==2:previous=old
+                old=output
+        finally:stop.set();thread.join()
+        measurement=dict(stages=stages,baseline_bytes=baseline,warm_incremental_rss_bytes=stages['2']['peak']-baseline)
+    # Full output checks after measured epochs; no hidden reference in call().
+    expected=direct_reference(*data.values());maximum=0.;residuals=[]
+    for actual in (previous,old):
+        assert actual is not None
+        maximum=max(maximum,float(np.abs(actual-expected).max()))
+        np.testing.assert_allclose(actual,expected,atol=4.9e-5,rtol=1e-11)
+        direction=actual[:args.n];multipliers=actual[args.n:]
+        stationarity=np.einsum('ij,jk->ik',data['h'],direction,optimize=False)
+        stationarity+=np.einsum('ji,jk->ik',data['g'],multipliers,optimize=False)-data['b']
+        feasibility=np.einsum('ij,jk->ik',data['g'],direction,optimize=False)-data['zr']
+        np.testing.assert_allclose(stationarity,0.,atol=1e-10,rtol=0.)
+        np.testing.assert_allclose(feasibility,0.,atol=1e-10,rtol=0.)
+        residuals.append(dict(stationarity=float(np.abs(stationarity).max()),feasibility=float(np.abs(feasibility).max())))
+    assert input_hashes=={name:hashlib.sha256(memoryview(value.ravel(order='K')).cast('B')).hexdigest() for name,value in data.items()}
+    print(json.dumps(dict(variant=args.variant,metric=args.metric,n=args.n,active=min(16,args.n//2),layout=args.layout,
+                         full_parity='passed',max_full_absolute_error=maximum,residuals=residuals,audit=audit,
+                         scope='ordinary CPU1 complete blockKKT construction/solve; identical owned readonly preparation; two retained independent generations; strong direct-block NJIT prewarmed; fixture/JIT/graph/compile/checks excluded; not wholeQP',**measurement)),flush=True)
+finally:
+    if scheduler:scheduler.close()

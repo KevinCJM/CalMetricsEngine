@@ -1,0 +1,32 @@
+{
+  "status": "verified_source_scope_clarification",
+  "sources_sha256": {
+    "benchmark_matmul_v35r2.py": "0e9706c09ea8ecbae9e32ff9635d147d9228f414c45da03f673ca9e88f9c6393",
+    "benchmark_derived_risks_v35r2.py": "aec0e0e985d22dff7ec28ea5394ec5af42b497bc33f4fe156d1edc0bccc67805",
+    "benchmark_mixed_risks_v35r2.py": "38d9cbb1e67312d9d5ef7f83f62282d08bf8027fbaf0873db8ea342d0ff57680",
+    "benchmark_risks_parallel_v35r2.py": "16da354785b7fe60375218b0624428884c5cd12e40a2f03eb9744e2b618020cf"
+  },
+  "original_adoption_review_sha256": "e7495cdd17c3322f5f07f0e391ba2e37037c02b759f541dff3bf1de19d6daa27",
+  "actual_verification_passed": 572,
+  "actual_native_passed": 9,
+  "measured": [
+    "owned readonly input preparation",
+    "ordinary Scheduler input binding and plan validation",
+    "native graph execution and result materialization",
+    "two independently retained readonly result generations"
+  ],
+  "excluded": [
+    "one-time AST/DAG definition compilation",
+    "native wheel build",
+    "NJIT machine-code compilation and library/runtime warmup",
+    "full platform service",
+    "RNG and constraint repair and multiround search"
+  ],
+  "performance_lanes": {
+    "matrix": "single CPU1",
+    "risk_chains": "array_row thread CPU4"
+  },
+  "worker_boundary": "Process-inline/shared-memory correctness and ownership are qualification tests, not timed IPC in this campaign",
+  "original_raw_scope_text_limitation": "Some retained raw scope strings say ordinary engine AST/Planner/worker included; AST graph compilation happens once before measurement and no process lane is timed. Preserve original records but use this verified clarification for current claims",
+  "whole_goal_complete": false
+}

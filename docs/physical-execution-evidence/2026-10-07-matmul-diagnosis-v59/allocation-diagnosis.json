@@ -1,0 +1,59 @@
+{
+  "backends": {
+    "actual": {
+      "boundary_copy_bytes": 0,
+      "output_copy_bytes": 0,
+      "cpu_budget": 1,
+      "lane": "single",
+      "output_ownership": "numpy_owned",
+      "chunk": {
+        "numeric_arena_bytes": 0,
+        "mask_arena_bytes": 0,
+        "operator_workspace_capacity_bytes": 0,
+        "native_library_workspace_reserve_bytes": 12713984,
+        "algorithm_copy_bytes": 0,
+        "root_copy_bytes": 0,
+        "direct_output_bytes": 536870912,
+        "accelerate_matmul_calls": 1
+      }
+    },
+    "candidate": {
+      "boundary_copy_bytes": 0,
+      "output_copy_bytes": 0,
+      "cpu_budget": 1,
+      "lane": "single",
+      "output_ownership": "numpy_owned",
+      "chunk": {
+        "numeric_arena_bytes": 0,
+        "mask_arena_bytes": 0,
+        "operator_workspace_capacity_bytes": 0,
+        "native_library_workspace_reserve_bytes": 12713984,
+        "algorithm_copy_bytes": 0,
+        "root_copy_bytes": 0,
+        "direct_output_bytes": 536870912,
+        "accelerate_matmul_calls": 1
+      }
+    },
+    "njit": {
+      "boundary_copy_bytes": null,
+      "output_copy_bytes": null,
+      "cpu_budget": null,
+      "lane": null,
+      "output_ownership": null,
+      "chunk": {
+        "numeric_arena_bytes": null,
+        "mask_arena_bytes": null,
+        "operator_workspace_capacity_bytes": null,
+        "native_library_workspace_reserve_bytes": null,
+        "algorithm_copy_bytes": null,
+        "root_copy_bytes": null,
+        "direct_output_bytes": null,
+        "accelerate_matmul_calls": null
+      }
+    }
+  },
+  "mandatory_live_numeric_bytes": 2151677952,
+  "source_fixtures_outside_epoch": true,
+  "root_mib": 512,
+  "adoption": false
+}

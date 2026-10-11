@@ -1,0 +1,126 @@
+{
+  "status": "passed",
+  "build_id": "be5bc8811e2546a303bce5c9a878357fec4649ae0e3dca916e0d02be4fd1d2da",
+  "actual_related": 831,
+  "actual_native": 9,
+  "same_source_full_regression": 13357,
+  "same_source_asan_related": 831,
+  "same_source_asan_native": 9,
+  "same_source_off_related": 831,
+  "same_source_off_native": 9,
+  "timing": [
+    {
+      "load": "few-long",
+      "shape": [
+        256,
+        200000,
+        30
+      ],
+      "layout": "C",
+      "medians_seconds": {
+        "v11": 8.7363873955,
+        "candidate": 0.982614917,
+        "bounded-select-njit": 1.0431608545
+      },
+      "maximum_absolute_errors": {
+        "v11": [
+          2.862293735361732e-17,
+          1.3660947373317356e-17,
+          1.887379141862766e-15
+        ],
+        "candidate": [
+          2.862293735361732e-17,
+          1.3660947373317356e-17,
+          1.887379141862766e-15
+        ],
+        "bounded-select-njit": [
+          2.7755575615628914e-17,
+          1.3660947373317356e-17,
+          2.886579864025407e-15
+        ]
+      }
+    },
+    {
+      "load": "few-long",
+      "shape": [
+        256,
+        200000,
+        30
+      ],
+      "layout": "F",
+      "medians_seconds": {
+        "v11": 1.05184875,
+        "candidate": 1.0716217920000002,
+        "bounded-select-njit": 1.524710604
+      },
+      "maximum_absolute_errors": {
+        "v11": [
+          2.862293735361732e-17,
+          1.3660947373317356e-17,
+          1.887379141862766e-15
+        ],
+        "candidate": [
+          2.862293735361732e-17,
+          1.3660947373317356e-17,
+          1.887379141862766e-15
+        ],
+        "bounded-select-njit": [
+          2.7755575615628914e-17,
+          1.3660947373317356e-17,
+          2.886579864025407e-15
+        ]
+      }
+    }
+  ],
+  "memory": [
+    {
+      "backend": "v11",
+      "layout": "C",
+      "requested_heap_warm_peak_bytes": 101196041,
+      "rss_delta_median_bytes": 101679104,
+      "rss_absolute_median_bytes": 188809216
+    },
+    {
+      "backend": "candidate",
+      "layout": "C",
+      "requested_heap_warm_peak_bytes": 101196041,
+      "rss_delta_median_bytes": 101597184,
+      "rss_absolute_median_bytes": 188628992
+    },
+    {
+      "backend": "bounded-select-njit",
+      "layout": "C",
+      "requested_heap_warm_peak_bytes": 100936824,
+      "rss_delta_median_bytes": 134578176,
+      "rss_absolute_median_bytes": 292405248
+    },
+    {
+      "backend": "v11",
+      "layout": "F",
+      "requested_heap_warm_peak_bytes": 101196041,
+      "rss_delta_median_bytes": 101646336,
+      "rss_absolute_median_bytes": 188678144
+    },
+    {
+      "backend": "candidate",
+      "layout": "F",
+      "requested_heap_warm_peak_bytes": 101196041,
+      "rss_delta_median_bytes": 101826560,
+      "rss_absolute_median_bytes": 188841984
+    },
+    {
+      "backend": "bounded-select-njit",
+      "layout": "F",
+      "requested_heap_warm_peak_bytes": 100936824,
+      "rss_delta_median_bytes": 120111104,
+      "rss_absolute_median_bytes": 277676032
+    }
+  ],
+  "source_wheel_worker_identity": true,
+  "production_adopted": true,
+  "production_meaning": "current local source and separately rebuilt actual wheel; no platform deployment or migration",
+  "whole_goal_complete": false,
+  "scope": "supplied weights, ordinary Scheduler, owned readonly preparation and two independent result generations; CPU1; compile excluded",
+  "remaining": "many-short strong NJIT disadvantage; no comprehensive peak advantage vs strongest NI; sampling/repair/Pareto/frontier and other major model/scenario chains remain open",
+  "public_documentation": "execution guide updated; public operator/math/result/error/Excel contracts unchanged, so no duplicate updates to operator reference or user guide; full regression includes formula generation, no desktop Excel rerun"
+}

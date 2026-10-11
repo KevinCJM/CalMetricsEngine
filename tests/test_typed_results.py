@@ -71,7 +71,7 @@ def test_mixed_shapes_dtypes_share_one_native_graph(lane, stride, isolate):
             else:
                 assert out.statuses[row] is None
     assert result.audit["audit_schema"] == "cpp-aot-execution-2"
-    assert result.audit["result_protocol"] == "typed-results-1"
+    assert result.audit["result_protocol"] == "typed-results-2"
     assert result.audit["python_operator_calls"] == 0
     if lane == "process_shared":
         assert result.audit["output_copy_bytes"] == 0

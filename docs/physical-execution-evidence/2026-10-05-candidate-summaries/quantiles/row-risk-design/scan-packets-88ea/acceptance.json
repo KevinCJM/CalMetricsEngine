@@ -1,0 +1,397 @@
+{
+  "status": "isolated_time_memory_full_quality_passed_actual_integration_pending",
+  "build_id": "88eac09a9e740895200c37fbf6caf5ef74e995873864d22e0830c492339872da",
+  "related": 1496,
+  "native": 9,
+  "new_python_cases": 96,
+  "native_exception_and_checkpoint_cases": true,
+  "machine_proof": {
+    "status": "passed",
+    "build_id": "88eac09a9e740895200c37fbf6caf5ef74e995873864d22e0830c492339872da",
+    "object_sha256": "02f48fbc2a7b10e2d056cf230d4421b8fa95d9f6ee5e146f98dcf27c9f99fab9",
+    "instructions": 173,
+    "packet_arithmetic": true,
+    "fma": false,
+    "runtime_native_exception_probe": "used=1 errors=3 floating_flags=1 divide_by_zero=0\n",
+    "production_adopted": false,
+    "whole_goal_complete": false,
+    "scope": "production object disassembly and runtime call linked to same operator archive; complete performance pending"
+  },
+  "performance": true,
+  "memory": true,
+  "full_regression": 14022,
+  "sanitizers": {
+    "related": 1496,
+    "native": 9
+  },
+  "libraries_off": {
+    "related": 1496,
+    "native": 9
+  },
+  "production_adopted": false,
+  "whole_goal_complete": false,
+  "finding": "All six complete six-round shapes and frozen source checks passed. Large C/F current10.1283/11.1819 -> candidate7.8440/7.8664s, strongNI8.5408/8.5869s. About8percent ahead of NI for these largest shapes;16384-history still slower. Fresh32-job memory and full14022/SAN/OFF pipeline live; no actual adoption or whole-goal completion.",
+  "timing": [
+    {
+      "load": "many-short-large",
+      "shape": [
+        262144,
+        252,
+        30
+      ],
+      "layout": "C",
+      "medians_seconds": {
+        "current": 1.0590505625,
+        "count": 0.971447458,
+        "packed": 0.9560702085,
+        "candidate": 0.8528184375000001,
+        "njit64": 1.1879780415,
+        "njit512": 1.1476818954999999
+      },
+      "maximum_absolute_errors": {
+        "current": [
+          1.734723475976807e-18,
+          4.336808689942018e-19,
+          2.220446049250313e-16
+        ],
+        "count": [
+          1.734723475976807e-18,
+          4.336808689942018e-19,
+          2.220446049250313e-16
+        ],
+        "packed": [
+          1.734723475976807e-18,
+          4.336808689942018e-19,
+          2.220446049250313e-16
+        ],
+        "candidate": [
+          1.734723475976807e-18,
+          4.336808689942018e-19,
+          2.220446049250313e-16
+        ],
+        "njit64": [
+          1.734723475976807e-18,
+          6.505213034913027e-19,
+          2.220446049250313e-16
+        ],
+        "njit512": [
+          1.734723475976807e-18,
+          6.505213034913027e-19,
+          2.220446049250313e-16
+        ]
+      },
+      "strongest_njit_seconds": 1.1476818954999999
+    },
+    {
+      "load": "many-short-large",
+      "shape": [
+        262144,
+        252,
+        30
+      ],
+      "layout": "F",
+      "medians_seconds": {
+        "current": 1.191179146,
+        "count": 1.1115907295,
+        "packed": 0.960358813,
+        "candidate": 0.858939875,
+        "njit64": 1.2064016880000001,
+        "njit512": 1.2370562915
+      },
+      "maximum_absolute_errors": {
+        "current": [
+          1.734723475976807e-18,
+          4.336808689942018e-19,
+          2.220446049250313e-16
+        ],
+        "count": [
+          1.734723475976807e-18,
+          4.336808689942018e-19,
+          2.220446049250313e-16
+        ],
+        "packed": [
+          1.734723475976807e-18,
+          4.336808689942018e-19,
+          2.220446049250313e-16
+        ],
+        "candidate": [
+          1.734723475976807e-18,
+          4.336808689942018e-19,
+          2.220446049250313e-16
+        ],
+        "njit64": [
+          1.734723475976807e-18,
+          6.505213034913027e-19,
+          2.220446049250313e-16
+        ],
+        "njit512": [
+          1.734723475976807e-18,
+          6.505213034913027e-19,
+          2.220446049250313e-16
+        ]
+      },
+      "strongest_njit_seconds": 1.2064016880000001
+    },
+    {
+      "load": "regular-history",
+      "shape": [
+        16384,
+        2520,
+        30
+      ],
+      "layout": "C",
+      "medians_seconds": {
+        "current": 0.634396188,
+        "count": 0.5680279374999999,
+        "packed": 0.5553881665,
+        "candidate": 0.4906211665,
+        "njit64": 0.412459688,
+        "njit512": 0.41825235400000005
+      },
+      "maximum_absolute_errors": {
+        "current": [
+          3.469446951953614e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "count": [
+          3.469446951953614e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "packed": [
+          3.469446951953614e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "candidate": [
+          3.469446951953614e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "njit64": [
+          4.336808689942018e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "njit512": [
+          4.336808689942018e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ]
+      },
+      "strongest_njit_seconds": 0.412459688
+    },
+    {
+      "load": "regular-history",
+      "shape": [
+        16384,
+        2520,
+        30
+      ],
+      "layout": "F",
+      "medians_seconds": {
+        "current": 0.635192625,
+        "count": 0.5683398335000001,
+        "packed": 0.558838583,
+        "candidate": 0.491893229,
+        "njit64": 0.4207084585,
+        "njit512": 0.4203820835
+      },
+      "maximum_absolute_errors": {
+        "current": [
+          3.469446951953614e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "count": [
+          3.469446951953614e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "packed": [
+          3.469446951953614e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "candidate": [
+          3.469446951953614e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "njit64": [
+          4.336808689942018e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "njit512": [
+          4.336808689942018e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ]
+      },
+      "strongest_njit_seconds": 0.4203820835
+    },
+    {
+      "load": "regular-history-large",
+      "shape": [
+        262144,
+        2520,
+        30
+      ],
+      "layout": "C",
+      "medians_seconds": {
+        "current": 10.1282910415,
+        "count": 9.077543916500002,
+        "packed": 8.8867855625,
+        "candidate": 7.844042458500001,
+        "njit64": 8.540752624500001,
+        "njit512": 8.5772439795
+      },
+      "maximum_absolute_errors": {
+        "current": [
+          3.469446951953614e-18,
+          1.3010426069826053e-18,
+          2.220446049250313e-16
+        ],
+        "count": [
+          3.469446951953614e-18,
+          1.3010426069826053e-18,
+          2.220446049250313e-16
+        ],
+        "packed": [
+          3.469446951953614e-18,
+          1.3010426069826053e-18,
+          2.220446049250313e-16
+        ],
+        "candidate": [
+          3.469446951953614e-18,
+          1.3010426069826053e-18,
+          2.220446049250313e-16
+        ],
+        "njit64": [
+          3.469446951953614e-18,
+          1.3010426069826053e-18,
+          2.220446049250313e-16
+        ],
+        "njit512": [
+          3.469446951953614e-18,
+          1.3010426069826053e-18,
+          2.220446049250313e-16
+        ]
+      },
+      "strongest_njit_seconds": 8.540752624500001
+    },
+    {
+      "load": "regular-history-large",
+      "shape": [
+        262144,
+        2520,
+        30
+      ],
+      "layout": "F",
+      "medians_seconds": {
+        "current": 11.181868479,
+        "count": 10.1107751665,
+        "packed": 8.891654417,
+        "candidate": 7.866418812999999,
+        "njit64": 8.586908832999999,
+        "njit512": 8.6291348545
+      },
+      "maximum_absolute_errors": {
+        "current": [
+          3.469446951953614e-18,
+          1.3010426069826053e-18,
+          2.220446049250313e-16
+        ],
+        "count": [
+          3.469446951953614e-18,
+          1.3010426069826053e-18,
+          2.220446049250313e-16
+        ],
+        "packed": [
+          3.469446951953614e-18,
+          1.3010426069826053e-18,
+          2.220446049250313e-16
+        ],
+        "candidate": [
+          3.469446951953614e-18,
+          1.3010426069826053e-18,
+          2.220446049250313e-16
+        ],
+        "njit64": [
+          3.469446951953614e-18,
+          1.3010426069826053e-18,
+          2.220446049250313e-16
+        ],
+        "njit512": [
+          3.469446951953614e-18,
+          1.3010426069826053e-18,
+          2.220446049250313e-16
+        ]
+      },
+      "strongest_njit_seconds": 8.586908832999999
+    }
+  ],
+  "memory_job_count": 32,
+  "complete_memory": [
+    {
+      "backend": "current",
+      "layout": "C",
+      "requested_heap_warm_peak_bytes": 142503720,
+      "rss_delta_median_bytes": 153075712,
+      "rss_absolute_median_bytes": 239157248
+    },
+    {
+      "backend": "candidate",
+      "layout": "C",
+      "requested_heap_warm_peak_bytes": 142503720,
+      "rss_delta_median_bytes": 151945216,
+      "rss_absolute_median_bytes": 239321088
+    },
+    {
+      "backend": "njit64",
+      "layout": "C",
+      "requested_heap_warm_peak_bytes": 141420064,
+      "rss_delta_median_bytes": 161693696,
+      "rss_absolute_median_bytes": 320258048
+    },
+    {
+      "backend": "njit512",
+      "layout": "C",
+      "requested_heap_warm_peak_bytes": 141444064,
+      "rss_delta_median_bytes": 162693120,
+      "rss_absolute_median_bytes": 321536000
+    },
+    {
+      "backend": "current",
+      "layout": "F",
+      "requested_heap_warm_peak_bytes": 142503720,
+      "rss_delta_median_bytes": 152125440,
+      "rss_absolute_median_bytes": 239222784
+    },
+    {
+      "backend": "candidate",
+      "layout": "F",
+      "requested_heap_warm_peak_bytes": 142503720,
+      "rss_delta_median_bytes": 152453120,
+      "rss_absolute_median_bytes": 238960640
+    },
+    {
+      "backend": "njit64",
+      "layout": "F",
+      "requested_heap_warm_peak_bytes": 140953848,
+      "rss_delta_median_bytes": 156663808,
+      "rss_absolute_median_bytes": 316604416
+    },
+    {
+      "backend": "njit512",
+      "layout": "F",
+      "requested_heap_warm_peak_bytes": 140974008,
+      "rss_delta_median_bytes": 154992640,
+      "rss_absolute_median_bytes": 313229312
+    }
+  ],
+  "memory_baseline": "current denotes packed-only e2a535, not actual3fce; NI64 and NI512 are separate measured configurations",
+  "acceptance": "Complete large time saves seconds versus actual3fce, but about 8 percent ahead of warmed NI; 16384 long history remains slower. Heap unchanged from e2a and no substantial NI peak-memory advantage. Phase adoption requires completed full/SAN/OFF and separate actual-package qualification."
+}

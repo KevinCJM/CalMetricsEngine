@@ -1,0 +1,7 @@
+# V57G: preserve HMM free-history capacity
+
+D full regression completed: 16098/16100 passed, no skips. In addition to the corrected F result defect, the existing HMM full-chain allocation/copy test failed: 88811360 algorithm copy bytes exceeded the existing 51840000 beta-copy bound. All preceding complete mathematical/ownership comparisons in that test passed. The graph's numeric arena itself is a loan source; eliding private matrices can remove the whole NK span needed for a free third history. The loan then selects its qualified two-history route, which repeats beta copies. This is an interaction between graph memory elimination and existing history reuse, not a new mathematical algorithm error.
+
+G conservatively retains the original owned-arithmetic and column-mapping materialization in flat graphs containing gaussian_hmm_em. Existing persistent arithmetic/broadcast and scatter/argmax optimizations remain. It does not allocate a ghost history, weaken the copy bound, or claim HMM memory improvement. GMM and other graphs retain the candidate reductions. Future HMM optimization must qualify whole arena/history cost selection together, with actual time and peak memory.
+
+Normal/SAN/OFF nearest-neighbor sets now include the pre-existing HMM history cost/budget tests. Existing failed full/D/E evidence stays immutable. F focused 428 and raw native graph checks passed, but F did not receive full qualification. G still needs fresh full regression, three backend variants, paired complete-chain and actual-source confirmation before adoption.

@@ -27,7 +27,13 @@ struct NodeInfo {
   std::uint32_t node_id = 0;
   graph::Node node;
   ValueClass value_class = ValueClass::scalar;
-  typed::ValueType inferred_type = typed::ValueType::scalar();
+  std::shared_ptr<const typed::ValueType> inferred_type;
+  const typed::ValueType &type() const {
+    if (inferred_type) return *inferred_type;
+    // Preserve the default NodeInfo value without a global graph/type cache.
+    static const auto scalar = typed::ValueType::scalar();
+    return scalar;
+  }
   std::uint32_t last_use = 0;
   std::string cost_model = "constant";
   bool simd_eligible = false;
@@ -83,11 +89,13 @@ compile(const std::vector<std::string> &expressions,
         std::uint32_t minimum_observations = 0,
         std::uint64_t scope_work_budget = 100000000,
         bool typed_results = false,
-        const std::vector<std::string> &output_names = {});
+        const std::vector<std::string> &output_names = {},
+        graph::OutputOrder output_order = graph::OutputOrder::c);
 
 // Versioned, pointer-free plan representation shared by bindings and native
 // workers.
-std::vector<std::uint8_t> encode_program(const graph::Program &program);
+std::vector<std::uint8_t> encode_program(const graph::Program &program,
+    const graph::RootOrders *resolved_orders = nullptr);
 graph::Program decode_program(const std::vector<std::uint8_t> &bytes);
 
 } // namespace calmetrics_engine::compiler

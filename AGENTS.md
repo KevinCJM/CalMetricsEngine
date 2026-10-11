@@ -30,6 +30,15 @@
 CalMetricsEngine is the reusable **C++-first, AOT, high-performance calculation engine** for the
 fund investment research platform.
 
+Prefer mature high-performance native numerical libraries for low-level mathematics. C++-first
+means native execution, not hand-writing every numerical kernel: C/C++-callable BLAS/LAPACK and
+other AOT libraries are eligible. Before adding or replacing a kernel, evaluate existing libraries
+against the exact operator contract, complete-request time and memory, portability and the shared
+Scheduler budget. Keep custom mathematics only for a demonstrated contract or measured performance
+gap; record the reason. Library reuse must not silently change algorithms, error/iteration semantics
+or Excel reproducibility. Follow the adoption rules in
+[computation design rules](docs/computation-design-rules.md#21-成熟原生计算库优先).
+
 Its core architectural objective is:
 
 > **Python is only the public/interface layer. Everything between API ingress and result egress —
@@ -115,6 +124,68 @@ The research platform may retain separate **business semantics** such as product
 semantic axes, causality/knowledge-time and research contracts. Those semantics should lower into a
 stable native IR/DAG boundary rather than moving CalMetricsEngine runtime logic back into Python.
 
+### Responsibility boundary
+
+CalMetricsEngine is the **mathematical calculation engine layer**. It is the single numerical
+foundation for every upstream calculation layer: the custom-indicator layer, scenario algorithms,
+attribution, scenario simulation and stress testing, risk warning, timing and similar modules. It
+serves all of them and knows none of them.
+
+The engine owns:
+
+- domain-neutral mathematical semantics: elementwise math, statistics, time series, rolling/window,
+  state/event/interval primitives, linear algebra, regression/model fits, constrained solvers and
+  other numerical algorithms;
+- the single canonical operator registry, its opcodes and each operator's declared contract
+  (granularity class, types, dtype/shape/axes, parameters, missing values, temporal dependency);
+- execution-side Typed IR, parsing of the restricted mathematical language, DAG, lowering, CSE,
+  liveness, physical planning, scheduling, concurrency, memory and transport;
+- numeric result forms: scalars, masks, aligned series, vectors, matrices and model/fit state.
+  Forms not yet implemented remain targets under Section 2;
+- numerical contracts and their evidence: precision, determinism, NaN/Inf, singularity and
+  convergence diagnostics, reference parity and performance gates;
+- operator-level metadata that consumers need to reproduce an operator's exact semantics;
+- the Excel mathematical backend: expanding the same versioned logical DAG, parameter bindings and
+  operator contracts into native Excel formulas, plus layout, budget, verification and the optional
+  workbook writer. Excel formulas and C++ operators implement one mathematical contract, so both
+  backends live here and are verified against each other. Detailed rules are in
+  `docs/excel-generation-rules.md` and `docs/excel-reproduction-design.md`.
+
+The engine does not own, and must not embed:
+
+- financial or business vocabulary: indicator names, fund/asset/benchmark concepts, attribution
+  models as business products, scenario/regime definitions, alert rules or timing signals;
+- data sources, data acquisition, upload formats, business calendars or ingestion validation;
+- price basis, point-in-time/knowledge-time, causality certification and research/backtest/release
+  gates;
+- user-facing output contracts (scalar, multi-channel scalar, time series, multi-channel time
+  series, attribution reports), definition storage, definition versioning and templates of complete
+  business algorithms;
+- reports, persistence, HTTP services, authentication and UI. For Excel, upstream layers keep only
+  business-definition adaptation, input selection, permissions, point-in-time/window policy and the
+  download entry point; they must not write their own formula translation.
+
+Placement rule for new capabilities:
+
+- Put it in the engine only if it can be specified without financial vocabulary and is a primitive,
+  a coupled kernel under Section 15, or an execution capability. Otherwise it belongs upstream as a
+  composite template or business contract lowered into engine IR.
+- An upstream layer must not implement its own numerical kernel, operator registry or execution IR.
+  A missing mathematical capability is added to the engine, not duplicated upstream.
+- A business algorithm upstream is expressed as an explicit composition of engine operators; the
+  engine provides the mathematical pieces, not the business-named algorithm.
+
+Dependency direction:
+
+- Upstream layers depend on the released engine package. The engine never imports, links, reads
+  configuration from or tests against an upstream layer's source tree or runtime.
+- Upstream definitions record the engine version and operator-registry/Typed IR contract versions
+  they were validated against. Engine changes that alter numerical semantics require an explicit
+  contract/algorithm version, never a silent change under an existing one.
+- The existing `cal_*` finance APIs are retained compatibility contracts. Do not add new
+  business-named APIs; new financial indicators are upstream compositions. Retiring existing ones
+  requires explicit authorization.
+
 ## 2. Current vs Target Architecture
 
 ### Current
@@ -125,7 +196,7 @@ The current repository already provides:
   `calmetrics_engine._native`.
 - C++17 AOT finance/numerical kernels; runtime JIT is not part of the architecture.
 - Exact-dtype zero-copy NumPy input binding, strided `ArrayView` support and explicit owner pinning.
-- A 146-entry canonical **C++** operator registry with stable native opcodes; original IDs 1–125 retain their contracts.
+- A 190-entry canonical **C++** operator registry with stable native opcodes; original IDs 1–125 retain their contracts.
 - Exact-shape output/workspace contracts and reusable native `Workspace`.
 - Explicit NEON/SSE2/optional AVX2 runtime dispatch for eligible kernels.
 - A pure-C++ restricted mathematical parser/compiler.
@@ -399,6 +470,8 @@ The investment-research platform may own richer concepts such as:
 
 Those should lower into CalMetricsEngine's stable native IR instead of embedding research-platform
 business logic into the generic engine.
+
+The full ownership split is defined in [Responsibility boundary](#responsibility-boundary).
 
 ## 3. Scope Discipline
 
@@ -982,20 +1055,43 @@ Measure at least:
 
 ### Phase-2 NJIT performance gate
 
-For the standard multi-product × multi-interval × multi-metric workload, **warm native graph
-execution is not allowed to be slower than the production BetterSaaTaa fused NJIT baseline**.
-Cold-start/JIT avoidance and lower memory do not excuse slower warm numerical execution.
+Current acceptance policy follows the user's 2026-09-30 clarification: prioritize substantial
+end-to-end time savings and large memory reductions in medium/large workloads. Do not spend
+optimization cycles on isolated gains of a few KB or a few milliseconds, and do not reject a
+candidate solely for similarly small memory or latency increases. Assess measured absolute and
+relative effects at the actual request/batch scale and within resource budgets. A positive RSS
+page-level delta alone is not an adoption blocker. Report accepted increases honestly; do not
+label them zero. Numerical correctness, ownership and resource limits remain hard requirements.
 
-The current hard acceptance gate is deliberately stronger than parity:
+The overall objective remains substantial medium/large time and memory advantages over warmed
+NJIT, with no material regression for already-fast small workloads. Illustrative amounts and the
+500 s to 50 s example are not universal thresholds. Apply the detailed tradeoff and evidence rules
+in [D8](docs/computation-design-rules.md#10-d8用对等的完整负载证明收益). Preserve historical
+strict-gate measurements and failures below as diagnostics; a tiny failure is not by itself a
+current performance veto and passing these gates does not establish the whole-engine objective.
+Historical `time_pass`, `heap_pass`, `rss_pass` and joint-pass counts are strict comparison
+diagnostics, not current adoption verdicts. Do not automatically reject an optimization because
+one of these fields is false when the measured difference is only a few KB or a few milliseconds.
+Record the absolute differences and the current workload-level decision separately; retaining a
+historical failure does not make it a current performance blocker.
+
+For the active optimization goal, the user's 2026-10-04 clarification permits floating-point
+differences beyond four decimal places and does not require absolute agreement with NJIT.
+Validate the mathematical algorithm, residuals and relevant invariants rather than imposing
+universal bitwise equality or a universal 1e-11 gate. Exact discrete results, errors, singularity
+boundaries, ownership and existing interfaces remain required. Apply the precision policy in
+[D8](docs/computation-design-rules.md#10-d8用对等的完整负载证明收益); retain stricter historical
+measurements as evidence rather than rewriting them.
+
+The historical reference gate is deliberately stronger than parity:
 
 ```text
 prepared/native paired median / NJIT paired median <= 0.90
 ordinary Scheduler.execute paired median / NJIT paired median <= 1.00
 ```
 
-The second condition applies to the required micro workloads so the public adaptive entry point
-itself is never allowed to regress below NJIT, while the pre-bound hot path must retain at least a
-10% margin.
+The historical second condition also applies to the micro workloads; the pre-bound hot path
+uses a 10% margin. Preserve both measurements when applying the current policy above.
 
 Reference gate workloads are at least:
 
@@ -1009,8 +1105,9 @@ execution-order bias. The micro gate compares NJIT's already-compiled `compute()
 equivalent already-bound native `PreparedGraphExecution.run()`; do not charge one side for
 planning/binding work that the other side already completed. Run `tools/check_phase2_performance.py`
 in a benchmark-capable environment.
-If any required workload exceeds the ratio ceiling, performance acceptance fails; do not hide the
-failure behind single-operator microbenchmarks or JIT compile-time comparisons.
+If any required workload exceeds the ratio ceiling, the historical reference gate fails; do not
+hide it behind single-operator microbenchmarks or JIT compile-time comparisons. Passing this
+gate alone does not establish substantial medium/large-workload or memory advantages.
 
 ## 17. Testing Requirements
 
@@ -1087,7 +1184,7 @@ zero-copy claims.
 - Process/SharedMemory/worker lifecycle implementation: CalMetricsEngine native C++ code.
 - Python package responsibility: interface adaptation only; Python must not become a second runtime source of truth.
 - Execution-side Typed IR, alias lowering and rolling-scope semantics: CalMetricsEngine native C++ code.
-- Business causality/knowledge-time and research-workflow semantics: FundInvestmentResearchPlatform.
+- Business causality/knowledge-time, research-workflow semantics and user-facing output contracts: upstream layers (see [Responsibility boundary](#responsibility-boundary)).
 - Historical behavior is preserved by tests and Git history, not duplicate current implementations.
 - README describes public/user-facing contracts.
 - `docs/README.md` routes users to current guides, complete operator reference and historical evidence.

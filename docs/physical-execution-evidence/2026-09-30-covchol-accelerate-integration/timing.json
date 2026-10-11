@@ -1,0 +1,5458 @@
+[
+  {
+    "case": {
+      "n": 63,
+      "d": 8,
+      "layout": "c",
+      "entry": "ordinary",
+      "output_order": "C"
+    },
+    "identities": {
+      "old": {
+        "input_sha256": "594758d465df24b96ff2bd39deb6924e34813dfa6019677d014ab9abf1dc3b4c",
+        "identity": {
+          "backend": "old",
+          "engine_build_id": "a63f72ba69ac969b2a60f90254ad15e8075a05ae15639cc9fe7561b229efa699",
+          "threads": [
+            {
+              "user_api": "blas",
+              "internal_api": "openblas",
+              "num_threads": 1,
+              "prefix": "libopenblas",
+              "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+              "version": "0.3.23.dev",
+              "threading_layer": "pthreads",
+              "architecture": "armv8"
+            }
+          ]
+        },
+        "verification": {
+          "shape": [
+            8,
+            8
+          ],
+          "dtype": "float64",
+          "sha256": "4b5cedb459e7cdb197cf7f389248471bd830ed8b6ff34d4ed825258009894476",
+          "independent": true
+        }
+      },
+      "new": {
+        "input_sha256": "594758d465df24b96ff2bd39deb6924e34813dfa6019677d014ab9abf1dc3b4c",
+        "identity": {
+          "backend": "new",
+          "engine_build_id": "91267c23ac014c947e67ae31054dddc8aaa102fadd12f2ce4331c87752c63758",
+          "threads": [
+            {
+              "user_api": "blas",
+              "internal_api": "openblas",
+              "num_threads": 1,
+              "prefix": "libopenblas",
+              "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+              "version": "0.3.23.dev",
+              "threading_layer": "pthreads",
+              "architecture": "armv8"
+            }
+          ]
+        },
+        "verification": {
+          "shape": [
+            8,
+            8
+          ],
+          "dtype": "float64",
+          "sha256": "4b5cedb459e7cdb197cf7f389248471bd830ed8b6ff34d4ed825258009894476",
+          "independent": true
+        }
+      },
+      "njit": {
+        "input_sha256": "594758d465df24b96ff2bd39deb6924e34813dfa6019677d014ab9abf1dc3b4c",
+        "identity": {
+          "backend": "numba-numpy-lapack",
+          "numba": "0.60.0",
+          "threads": [
+            {
+              "user_api": "blas",
+              "internal_api": "openblas",
+              "num_threads": 1,
+              "prefix": "libopenblas",
+              "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+              "version": "0.3.23.dev",
+              "threading_layer": "pthreads",
+              "architecture": "armv8"
+            }
+          ]
+        },
+        "verification": {
+          "shape": [
+            8,
+            8
+          ],
+          "dtype": "float64",
+          "sha256": "2c9d072e3cd3446fddaeccda207e844168f0ed2dd90a1eff0d4e8ff4ede54e77",
+          "independent": true
+        }
+      }
+    },
+    "parity": {
+      "native": "rtol=atol=1e-12 for large C roots; bitwise otherwise",
+      "njit_rtol": 1e-11,
+      "njit_atol": 1e-11,
+      "njit_within_tolerance": true,
+      "njit_outside_tolerance": 0,
+      "njit_max_abs": 2.220446049250313e-16
+    },
+    "samples": {
+      "old": {
+        "wall_ns": [
+          51625,
+          10917,
+          7958,
+          7500,
+          7583,
+          7500,
+          7583,
+          17500,
+          8083,
+          7833,
+          8000,
+          8042,
+          8000,
+          7333,
+          26625,
+          10458,
+          8458,
+          17958,
+          10834,
+          8417,
+          8291,
+          39250,
+          10291,
+          7792,
+          12167,
+          8333,
+          7375,
+          7166,
+          29458,
+          10625,
+          8084,
+          7500,
+          7209,
+          7709,
+          7792,
+          15750,
+          8208,
+          7750,
+          7375,
+          6833,
+          7917,
+          7709
+        ],
+        "cpu_ns": [
+          50000,
+          10000,
+          7000,
+          8000,
+          7000,
+          7000,
+          7000,
+          18000,
+          7000,
+          8000,
+          8000,
+          7000,
+          7000,
+          7000,
+          25000,
+          10000,
+          8000,
+          15000,
+          10000,
+          8000,
+          8000,
+          38000,
+          9000,
+          7000,
+          12000,
+          8000,
+          7000,
+          8000,
+          28000,
+          10000,
+          9000,
+          7000,
+          7000,
+          7000,
+          7000,
+          15000,
+          8000,
+          7000,
+          7000,
+          7000,
+          7000,
+          7000
+        ]
+      },
+      "new": {
+        "wall_ns": [
+          53167,
+          11125,
+          8416,
+          7792,
+          7833,
+          8042,
+          7167,
+          15000,
+          8708,
+          7833,
+          8000,
+          7708,
+          7750,
+          7416,
+          29667,
+          10500,
+          8250,
+          7209,
+          7292,
+          7583,
+          7041,
+          37875,
+          10084,
+          8000,
+          12458,
+          8750,
+          7584,
+          6792,
+          24375,
+          8666,
+          7667,
+          7291,
+          8833,
+          7500,
+          7416,
+          24833,
+          10083,
+          8416,
+          7375,
+          7333,
+          8042,
+          7541
+        ],
+        "cpu_ns": [
+          51000,
+          10000,
+          7000,
+          7000,
+          7000,
+          8000,
+          6000,
+          14000,
+          8000,
+          7000,
+          7000,
+          8000,
+          7000,
+          7000,
+          28000,
+          10000,
+          8000,
+          7000,
+          6000,
+          7000,
+          6000,
+          36000,
+          9000,
+          9000,
+          12000,
+          8000,
+          6000,
+          6000,
+          23000,
+          8000,
+          7000,
+          7000,
+          8000,
+          7000,
+          8000,
+          24000,
+          9000,
+          7000,
+          6000,
+          7000,
+          7000,
+          6000
+        ]
+      },
+      "njit": {
+        "wall_ns": [
+          23250,
+          5583,
+          4208,
+          4000,
+          4083,
+          4166,
+          4375,
+          8625,
+          4959,
+          4542,
+          4500,
+          4459,
+          4458,
+          4417,
+          14959,
+          5458,
+          4375,
+          4166,
+          4583,
+          3958,
+          3708,
+          25250,
+          7791,
+          5042,
+          4083,
+          4084,
+          3833,
+          3792,
+          18541,
+          4875,
+          4042,
+          3834,
+          3833,
+          4208,
+          4292,
+          15666,
+          6083,
+          4667,
+          4583,
+          4541,
+          4292,
+          4500
+        ],
+        "cpu_ns": [
+          22000,
+          4000,
+          4000,
+          3000,
+          3000,
+          3000,
+          4000,
+          7000,
+          5000,
+          3000,
+          4000,
+          4000,
+          4000,
+          4000,
+          14000,
+          5000,
+          4000,
+          3000,
+          3000,
+          3000,
+          3000,
+          25000,
+          7000,
+          4000,
+          5000,
+          3000,
+          3000,
+          3000,
+          17000,
+          4000,
+          3000,
+          3000,
+          3000,
+          4000,
+          4000,
+          14000,
+          6000,
+          4000,
+          5000,
+          4000,
+          3000,
+          3000
+        ]
+      }
+    },
+    "rounds": [
+      {
+        "order": [
+          "old",
+          "new",
+          "njit"
+        ],
+        "samples": {
+          "old": {
+            "wall_ns": [
+              51625,
+              10917,
+              7958,
+              7500,
+              7583,
+              7500,
+              7583
+            ],
+            "cpu_ns": [
+              50000,
+              10000,
+              7000,
+              8000,
+              7000,
+              7000,
+              7000
+            ]
+          },
+          "new": {
+            "wall_ns": [
+              53167,
+              11125,
+              8416,
+              7792,
+              7833,
+              8042,
+              7167
+            ],
+            "cpu_ns": [
+              51000,
+              10000,
+              7000,
+              7000,
+              7000,
+              8000,
+              6000
+            ]
+          },
+          "njit": {
+            "wall_ns": [
+              23250,
+              5583,
+              4208,
+              4000,
+              4083,
+              4166,
+              4375
+            ],
+            "cpu_ns": [
+              22000,
+              4000,
+              4000,
+              3000,
+              3000,
+              3000,
+              4000
+            ]
+          }
+        }
+      },
+      {
+        "order": [
+          "new",
+          "njit",
+          "old"
+        ],
+        "samples": {
+          "new": {
+            "wall_ns": [
+              15000,
+              8708,
+              7833,
+              8000,
+              7708,
+              7750,
+              7416
+            ],
+            "cpu_ns": [
+              14000,
+              8000,
+              7000,
+              7000,
+              8000,
+              7000,
+              7000
+            ]
+          },
+          "njit": {
+            "wall_ns": [
+              8625,
+              4959,
+              4542,
+              4500,
+              4459,
+              4458,
+              4417
+            ],
+            "cpu_ns": [
+              7000,
+              5000,
+              3000,
+              4000,
+              4000,
+              4000,
+              4000
+            ]
+          },
+          "old": {
+            "wall_ns": [
+              17500,
+              8083,
+              7833,
+              8000,
+              8042,
+              8000,
+              7333
+            ],
+            "cpu_ns": [
+              18000,
+              7000,
+              8000,
+              8000,
+              7000,
+              7000,
+              7000
+            ]
+          }
+        }
+      },
+      {
+        "order": [
+          "njit",
+          "old",
+          "new"
+        ],
+        "samples": {
+          "njit": {
+            "wall_ns": [
+              14959,
+              5458,
+              4375,
+              4166,
+              4583,
+              3958,
+              3708
+            ],
+            "cpu_ns": [
+              14000,
+              5000,
+              4000,
+              3000,
+              3000,
+              3000,
+              3000
+            ]
+          },
+          "old": {
+            "wall_ns": [
+              26625,
+              10458,
+              8458,
+              17958,
+              10834,
+              8417,
+              8291
+            ],
+            "cpu_ns": [
+              25000,
+              10000,
+              8000,
+              15000,
+              10000,
+              8000,
+              8000
+            ]
+          },
+          "new": {
+            "wall_ns": [
+              29667,
+              10500,
+              8250,
+              7209,
+              7292,
+              7583,
+              7041
+            ],
+            "cpu_ns": [
+              28000,
+              10000,
+              8000,
+              7000,
+              6000,
+              7000,
+              6000
+            ]
+          }
+        }
+      },
+      {
+        "order": [
+          "old",
+          "new",
+          "njit"
+        ],
+        "samples": {
+          "old": {
+            "wall_ns": [
+              39250,
+              10291,
+              7792,
+              12167,
+              8333,
+              7375,
+              7166
+            ],
+            "cpu_ns": [
+              38000,
+              9000,
+              7000,
+              12000,
+              8000,
+              7000,
+              8000
+            ]
+          },
+          "new": {
+            "wall_ns": [
+              37875,
+              10084,
+              8000,
+              12458,
+              8750,
+              7584,
+              6792
+            ],
+            "cpu_ns": [
+              36000,
+              9000,
+              9000,
+              12000,
+              8000,
+              6000,
+              6000
+            ]
+          },
+          "njit": {
+            "wall_ns": [
+              25250,
+              7791,
+              5042,
+              4083,
+              4084,
+              3833,
+              3792
+            ],
+            "cpu_ns": [
+              25000,
+              7000,
+              4000,
+              5000,
+              3000,
+              3000,
+              3000
+            ]
+          }
+        }
+      },
+      {
+        "order": [
+          "new",
+          "njit",
+          "old"
+        ],
+        "samples": {
+          "new": {
+            "wall_ns": [
+              24375,
+              8666,
+              7667,
+              7291,
+              8833,
+              7500,
+              7416
+            ],
+            "cpu_ns": [
+              23000,
+              8000,
+              7000,
+              7000,
+              8000,
+              7000,
+              8000
+            ]
+          },
+          "njit": {
+            "wall_ns": [
+              18541,
+              4875,
+              4042,
+              3834,
+              3833,
+              4208,
+              4292
+            ],
+            "cpu_ns": [
+              17000,
+              4000,
+              3000,
+              3000,
+              3000,
+              4000,
+              4000
+            ]
+          },
+          "old": {
+            "wall_ns": [
+              29458,
+              10625,
+              8084,
+              7500,
+              7209,
+              7709,
+              7792
+            ],
+            "cpu_ns": [
+              28000,
+              10000,
+              9000,
+              7000,
+              7000,
+              7000,
+              7000
+            ]
+          }
+        }
+      },
+      {
+        "order": [
+          "njit",
+          "old",
+          "new"
+        ],
+        "samples": {
+          "njit": {
+            "wall_ns": [
+              15666,
+              6083,
+              4667,
+              4583,
+              4541,
+              4292,
+              4500
+            ],
+            "cpu_ns": [
+              14000,
+              6000,
+              4000,
+              5000,
+              4000,
+              3000,
+              3000
+            ]
+          },
+          "old": {
+            "wall_ns": [
+              15750,
+              8208,
+              7750,
+              7375,
+              6833,
+              7917,
+              7709
+            ],
+            "cpu_ns": [
+              15000,
+              8000,
+              7000,
+              7000,
+              7000,
+              7000,
+              7000
+            ]
+          },
+          "new": {
+            "wall_ns": [
+              24833,
+              10083,
+              8416,
+              7375,
+              7333,
+              8042,
+              7541
+            ],
+            "cpu_ns": [
+              24000,
+              9000,
+              7000,
+              6000,
+              7000,
+              7000,
+              6000
+            ]
+          }
+        }
+      }
+    ],
+    "median_ms": {
+      "old": 0.008021,
+      "new": 0.008,
+      "njit": 0.0044585
+    },
+    "audits": {
+      "old": {
+        "execution_backend": "cpp_aot",
+        "audit_schema": "cpp-aot-execution-2",
+        "result_protocol": "typed-results-1",
+        "engine": "calmetrics_engine",
+        "model_identity": null,
+        "engine_version": "0.3.0",
+        "engine_build_id": "a63f72ba69ac969b2a60f90254ad15e8075a05ae15639cc9fe7561b229efa699",
+        "operator_registry_version": "canonical-native-1",
+        "typed_ir_version": "cpp-typed-ir-1",
+        "plan_fingerprint": "native-3-047c85ca1e618ec3bf673cd851b2b5d8",
+        "source_contracts": [],
+        "status_result_copy_bytes": 0,
+        "status_transport_bytes": 0,
+        "native_aot": true,
+        "python_fallback": 0,
+        "python_operator_calls": 0,
+        "request_time_compilation": 0,
+        "input_dtype": "float64",
+        "input_dtypes": {
+          "x": "float64"
+        },
+        "output_dtype": "per_output",
+        "outputs": [
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "asset",
+              "asset"
+            ],
+            "shape": [
+              "D",
+              "D"
+            ]
+          }
+        ],
+        "result_layout": "interval_root_aligned_8",
+        "result_capacity_bytes": 512,
+        "error_policy": "raise",
+        "status_contract": "indicator-status-1",
+        "result_lifetime": "independent",
+        "lane": "single",
+        "elapsed_ms": 0.002459,
+        "queue_wait_ms": 0.00025,
+        "compute_ms": 0.002209,
+        "cpu_tokens": 1,
+        "cpu_budget": 1,
+        "process_count": 1,
+        "thread_count": 1,
+        "threads_per_process": 1,
+        "async_orchestration": false,
+        "hard_stop": false,
+        "use_shared_memory": false,
+        "reason_codes": [
+          "typed_array_shape_work_accounted",
+          "typed_result_capacity_write_work_accounted",
+          "parallel_overhead_expected_to_dominate"
+        ],
+        "parallel_dimension": "interval",
+        "product_count": 1,
+        "estimated_work_units": 9152.0,
+        "prepared": false,
+        "prepared_cached": true,
+        "shared_memory_bytes": 0,
+        "boundary_copy_bytes": 0,
+        "output_copy_bytes": 0,
+        "scheduler_backend": "cpp",
+        "native_threads": 1,
+        "native_processes": 0,
+        "python_worker_callbacks": 0,
+        "python_native_transitions": 1,
+        "output_ownership": "numpy_owned",
+        "output_kind": "typed",
+        "native_chunks": [
+          {
+            "fused_pointwise_calls": 0,
+            "pointwise_tiles": 0,
+            "vector_elements": 0,
+            "root_copy_bytes": 0,
+            "direct_output_bytes": 512,
+            "state_copy_bytes": 0,
+            "pointwise_workspace_capacity_bytes": 0,
+            "rows": 1,
+            "nodes": 3,
+            "max_window": 63,
+            "numeric_arena_bytes": 0,
+            "mask_arena_bytes": 0,
+            "operator_workspace_capacity_bytes": 0,
+            "order_scratch_capacity_bytes": 0,
+            "input_copy_bytes": 0,
+            "eigen_rotation_calls": 0,
+            "eigen_matvec_calls": 0,
+            "eigen_covariance_calls": 1,
+            "algorithm_copy_bytes": 0,
+            "fused_scalar_calls": 0,
+            "summary_source_scans": 0,
+            "order_stat_sorts": 0,
+            "python_operator_calls": 0,
+            "execution_backend": "native_graph_interpreter"
+          }
+        ]
+      },
+      "new": {
+        "execution_backend": "cpp_aot",
+        "audit_schema": "cpp-aot-execution-2",
+        "result_protocol": "typed-results-1",
+        "engine": "calmetrics_engine",
+        "model_identity": null,
+        "engine_version": "0.3.0",
+        "engine_build_id": "91267c23ac014c947e67ae31054dddc8aaa102fadd12f2ce4331c87752c63758",
+        "operator_registry_version": "canonical-native-1",
+        "typed_ir_version": "cpp-typed-ir-1",
+        "plan_fingerprint": "native-3-047c85ca1e618ec3bf673cd851b2b5d8",
+        "source_contracts": [],
+        "status_result_copy_bytes": 0,
+        "status_transport_bytes": 0,
+        "native_aot": true,
+        "python_fallback": 0,
+        "python_operator_calls": 0,
+        "request_time_compilation": 0,
+        "input_dtype": "float64",
+        "input_dtypes": {
+          "x": "float64"
+        },
+        "output_dtype": "per_output",
+        "outputs": [
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "asset",
+              "asset"
+            ],
+            "shape": [
+              "D",
+              "D"
+            ]
+          }
+        ],
+        "result_layout": "interval_root_aligned_8",
+        "result_capacity_bytes": 512,
+        "error_policy": "raise",
+        "status_contract": "indicator-status-1",
+        "result_lifetime": "independent",
+        "lane": "single",
+        "elapsed_ms": 0.002541,
+        "queue_wait_ms": 0.000208,
+        "compute_ms": 0.002333,
+        "cpu_tokens": 1,
+        "cpu_budget": 1,
+        "process_count": 1,
+        "thread_count": 1,
+        "threads_per_process": 1,
+        "async_orchestration": false,
+        "hard_stop": false,
+        "use_shared_memory": false,
+        "reason_codes": [
+          "typed_array_shape_work_accounted",
+          "typed_result_capacity_write_work_accounted",
+          "parallel_overhead_expected_to_dominate"
+        ],
+        "parallel_dimension": "interval",
+        "product_count": 1,
+        "estimated_work_units": 9152.0,
+        "prepared": false,
+        "prepared_cached": true,
+        "shared_memory_bytes": 0,
+        "boundary_copy_bytes": 0,
+        "output_copy_bytes": 0,
+        "scheduler_backend": "cpp",
+        "native_threads": 1,
+        "native_processes": 0,
+        "python_worker_callbacks": 0,
+        "python_native_transitions": 1,
+        "output_ownership": "numpy_owned",
+        "output_kind": "typed",
+        "native_chunks": [
+          {
+            "fused_pointwise_calls": 0,
+            "pointwise_tiles": 0,
+            "vector_elements": 0,
+            "root_copy_bytes": 0,
+            "direct_output_bytes": 512,
+            "state_copy_bytes": 0,
+            "pointwise_workspace_capacity_bytes": 0,
+            "rows": 1,
+            "nodes": 3,
+            "max_window": 63,
+            "numeric_arena_bytes": 0,
+            "mask_arena_bytes": 0,
+            "operator_workspace_capacity_bytes": 0,
+            "order_scratch_capacity_bytes": 0,
+            "input_copy_bytes": 0,
+            "eigen_rotation_calls": 0,
+            "eigen_matvec_calls": 0,
+            "eigen_covariance_calls": 1,
+            "accelerate_covchol_calls": 0,
+            "algorithm_copy_bytes": 0,
+            "fused_scalar_calls": 0,
+            "summary_source_scans": 0,
+            "order_stat_sorts": 0,
+            "python_operator_calls": 0,
+            "execution_backend": "native_graph_interpreter"
+          }
+        ]
+      },
+      "njit": {}
+    }
+  },
+  {
+    "case": {
+      "n": 63,
+      "d": 8,
+      "layout": "f",
+      "entry": "ordinary",
+      "output_order": "C"
+    },
+    "identities": {
+      "old": {
+        "input_sha256": "594758d465df24b96ff2bd39deb6924e34813dfa6019677d014ab9abf1dc3b4c",
+        "identity": {
+          "backend": "old",
+          "engine_build_id": "a63f72ba69ac969b2a60f90254ad15e8075a05ae15639cc9fe7561b229efa699",
+          "threads": [
+            {
+              "user_api": "blas",
+              "internal_api": "openblas",
+              "num_threads": 1,
+              "prefix": "libopenblas",
+              "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+              "version": "0.3.23.dev",
+              "threading_layer": "pthreads",
+              "architecture": "armv8"
+            }
+          ]
+        },
+        "verification": {
+          "shape": [
+            8,
+            8
+          ],
+          "dtype": "float64",
+          "sha256": "643b1886cd5b0a792fbeb8f902648694090ef0a7aa76384b1a6580ef7fe064e6",
+          "independent": true
+        }
+      },
+      "new": {
+        "input_sha256": "594758d465df24b96ff2bd39deb6924e34813dfa6019677d014ab9abf1dc3b4c",
+        "identity": {
+          "backend": "new",
+          "engine_build_id": "91267c23ac014c947e67ae31054dddc8aaa102fadd12f2ce4331c87752c63758",
+          "threads": [
+            {
+              "user_api": "blas",
+              "internal_api": "openblas",
+              "num_threads": 1,
+              "prefix": "libopenblas",
+              "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+              "version": "0.3.23.dev",
+              "threading_layer": "pthreads",
+              "architecture": "armv8"
+            }
+          ]
+        },
+        "verification": {
+          "shape": [
+            8,
+            8
+          ],
+          "dtype": "float64",
+          "sha256": "643b1886cd5b0a792fbeb8f902648694090ef0a7aa76384b1a6580ef7fe064e6",
+          "independent": true
+        }
+      },
+      "njit": {
+        "input_sha256": "594758d465df24b96ff2bd39deb6924e34813dfa6019677d014ab9abf1dc3b4c",
+        "identity": {
+          "backend": "numba-numpy-lapack",
+          "numba": "0.60.0",
+          "threads": [
+            {
+              "user_api": "blas",
+              "internal_api": "openblas",
+              "num_threads": 1,
+              "prefix": "libopenblas",
+              "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+              "version": "0.3.23.dev",
+              "threading_layer": "pthreads",
+              "architecture": "armv8"
+            }
+          ]
+        },
+        "verification": {
+          "shape": [
+            8,
+            8
+          ],
+          "dtype": "float64",
+          "sha256": "2c9d072e3cd3446fddaeccda207e844168f0ed2dd90a1eff0d4e8ff4ede54e77",
+          "independent": true
+        }
+      }
+    },
+    "parity": {
+      "native": "rtol=atol=1e-12 for large C roots; bitwise otherwise",
+      "njit_rtol": 1e-11,
+      "njit_atol": 1e-11,
+      "njit_within_tolerance": true,
+      "njit_outside_tolerance": 0,
+      "njit_max_abs": 4.440892098500626e-16
+    },
+    "samples": {
+      "old": {
+        "wall_ns": [
+          49250,
+          9792,
+          7625,
+          7084,
+          6833,
+          7833,
+          6750,
+          22458,
+          10667,
+          8333,
+          7375,
+          7167,
+          7375,
+          8958,
+          14291,
+          7209,
+          6625,
+          6667,
+          6916,
+          6958,
+          7084,
+          21750,
+          10542,
+          8083,
+          7625,
+          8125,
+          7208,
+          6917,
+          35041,
+          9375,
+          7416,
+          7084,
+          6625,
+          7208,
+          6542,
+          23958,
+          7875,
+          7209,
+          7125,
+          6750,
+          7333,
+          7167
+        ],
+        "cpu_ns": [
+          48000,
+          9000,
+          7000,
+          7000,
+          6000,
+          8000,
+          6000,
+          22000,
+          10000,
+          8000,
+          7000,
+          7000,
+          8000,
+          9000,
+          14000,
+          6000,
+          7000,
+          6000,
+          6000,
+          7000,
+          6000,
+          21000,
+          10000,
+          9000,
+          7000,
+          8000,
+          6000,
+          7000,
+          34000,
+          10000,
+          7000,
+          6000,
+          6000,
+          7000,
+          6000,
+          23000,
+          8000,
+          7000,
+          7000,
+          6000,
+          7000,
+          6000
+        ]
+      },
+      "new": {
+        "wall_ns": [
+          48916,
+          9875,
+          7333,
+          6834,
+          6583,
+          7500,
+          6667,
+          13541,
+          7208,
+          7083,
+          7125,
+          6875,
+          6917,
+          8291,
+          41042,
+          9417,
+          7208,
+          6625,
+          6625,
+          7167,
+          6750,
+          50875,
+          12750,
+          7917,
+          6917,
+          7250,
+          6750,
+          6709,
+          20667,
+          10125,
+          7791,
+          7000,
+          7042,
+          7500,
+          6791,
+          21125,
+          8084,
+          7125,
+          6750,
+          6667,
+          7000,
+          6459
+        ],
+        "cpu_ns": [
+          49000,
+          10000,
+          7000,
+          6000,
+          5000,
+          7000,
+          7000,
+          13000,
+          8000,
+          7000,
+          6000,
+          7000,
+          7000,
+          9000,
+          40000,
+          8000,
+          6000,
+          6000,
+          7000,
+          7000,
+          6000,
+          39000,
+          12000,
+          8000,
+          6000,
+          7000,
+          6000,
+          6000,
+          19000,
+          9000,
+          7000,
+          8000,
+          6000,
+          7000,
+          6000,
+          20000,
+          8000,
+          7000,
+          7000,
+          6000,
+          6000,
+          5000
+        ]
+      },
+      "njit": {
+        "wall_ns": [
+          16500,
+          6041,
+          4625,
+          4333,
+          4542,
+          4584,
+          4625,
+          14208,
+          6041,
+          4417,
+          4333,
+          4208,
+          4250,
+          4500,
+          13792,
+          46750,
+          5500,
+          4416,
+          4375,
+          3917,
+          3500,
+          12542,
+          4875,
+          4375,
+          4333,
+          4375,
+          4208,
+          4292,
+          6834,
+          4583,
+          4292,
+          4334,
+          4333,
+          4250,
+          4250,
+          12250,
+          5625,
+          4667,
+          4250,
+          4167,
+          4292,
+          4083
+        ],
+        "cpu_ns": [
+          14000,
+          5000,
+          4000,
+          3000,
+          3000,
+          4000,
+          4000,
+          13000,
+          6000,
+          4000,
+          4000,
+          4000,
+          4000,
+          4000,
+          12000,
+          34000,
+          6000,
+          4000,
+          5000,
+          4000,
+          3000,
+          12000,
+          5000,
+          4000,
+          5000,
+          4000,
+          5000,
+          4000,
+          7000,
+          4000,
+          4000,
+          3000,
+          4000,
+          3000,
+          3000,
+          10000,
+          5000,
+          3000,
+          3000,
+          3000,
+          4000,
+          3000
+        ]
+      }
+    },
+    "rounds": [
+      {
+        "order": [
+          "old",
+          "new",
+          "njit"
+        ],
+        "samples": {
+          "old": {
+            "wall_ns": [
+              49250,
+              9792,
+              7625,
+              7084,
+              6833,
+              7833,
+              6750
+            ],
+            "cpu_ns": [
+              48000,
+              9000,
+              7000,
+              7000,
+              6000,
+              8000,
+              6000
+            ]
+          },
+          "new": {
+            "wall_ns": [
+              48916,
+              9875,
+              7333,
+              6834,
+              6583,
+              7500,
+              6667
+            ],
+            "cpu_ns": [
+              49000,
+              10000,
+              7000,
+              6000,
+              5000,
+              7000,
+              7000
+            ]
+          },
+          "njit": {
+            "wall_ns": [
+              16500,
+              6041,
+              4625,
+              4333,
+              4542,
+              4584,
+              4625
+            ],
+            "cpu_ns": [
+              14000,
+              5000,
+              4000,
+              3000,
+              3000,
+              4000,
+              4000
+            ]
+          }
+        }
+      },
+      {
+        "order": [
+          "new",
+          "njit",
+          "old"
+        ],
+        "samples": {
+          "new": {
+            "wall_ns": [
+              13541,
+              7208,
+              7083,
+              7125,
+              6875,
+              6917,
+              8291
+            ],
+            "cpu_ns": [
+              13000,
+              8000,
+              7000,
+              6000,
+              7000,
+              7000,
+              9000
+            ]
+          },
+          "njit": {
+            "wall_ns": [
+              14208,
+              6041,
+              4417,
+              4333,
+              4208,
+              4250,
+              4500
+            ],
+            "cpu_ns": [
+              13000,
+              6000,
+              4000,
+              4000,
+              4000,
+              4000,
+              4000
+            ]
+          },
+          "old": {
+            "wall_ns": [
+              22458,
+              10667,
+              8333,
+              7375,
+              7167,
+              7375,
+              8958
+            ],
+            "cpu_ns": [
+              22000,
+              10000,
+              8000,
+              7000,
+              7000,
+              8000,
+              9000
+            ]
+          }
+        }
+      },
+      {
+        "order": [
+          "njit",
+          "old",
+          "new"
+        ],
+        "samples": {
+          "njit": {
+            "wall_ns": [
+              13792,
+              46750,
+              5500,
+              4416,
+              4375,
+              3917,
+              3500
+            ],
+            "cpu_ns": [
+              12000,
+              34000,
+              6000,
+              4000,
+              5000,
+              4000,
+              3000
+            ]
+          },
+          "old": {
+            "wall_ns": [
+              14291,
+              7209,
+              6625,
+              6667,
+              6916,
+              6958,
+              7084
+            ],
+            "cpu_ns": [
+              14000,
+              6000,
+              7000,
+              6000,
+              6000,
+              7000,
+              6000
+            ]
+          },
+          "new": {
+            "wall_ns": [
+              41042,
+              9417,
+              7208,
+              6625,
+              6625,
+              7167,
+              6750
+            ],
+            "cpu_ns": [
+              40000,
+              8000,
+              6000,
+              6000,
+              7000,
+              7000,
+              6000
+            ]
+          }
+        }
+      },
+      {
+        "order": [
+          "old",
+          "new",
+          "njit"
+        ],
+        "samples": {
+          "old": {
+            "wall_ns": [
+              21750,
+              10542,
+              8083,
+              7625,
+              8125,
+              7208,
+              6917
+            ],
+            "cpu_ns": [
+              21000,
+              10000,
+              9000,
+              7000,
+              8000,
+              6000,
+              7000
+            ]
+          },
+          "new": {
+            "wall_ns": [
+              50875,
+              12750,
+              7917,
+              6917,
+              7250,
+              6750,
+              6709
+            ],
+            "cpu_ns": [
+              39000,
+              12000,
+              8000,
+              6000,
+              7000,
+              6000,
+              6000
+            ]
+          },
+          "njit": {
+            "wall_ns": [
+              12542,
+              4875,
+              4375,
+              4333,
+              4375,
+              4208,
+              4292
+            ],
+            "cpu_ns": [
+              12000,
+              5000,
+              4000,
+              5000,
+              4000,
+              5000,
+              4000
+            ]
+          }
+        }
+      },
+      {
+        "order": [
+          "new",
+          "njit",
+          "old"
+        ],
+        "samples": {
+          "new": {
+            "wall_ns": [
+              20667,
+              10125,
+              7791,
+              7000,
+              7042,
+              7500,
+              6791
+            ],
+            "cpu_ns": [
+              19000,
+              9000,
+              7000,
+              8000,
+              6000,
+              7000,
+              6000
+            ]
+          },
+          "njit": {
+            "wall_ns": [
+              6834,
+              4583,
+              4292,
+              4334,
+              4333,
+              4250,
+              4250
+            ],
+            "cpu_ns": [
+              7000,
+              4000,
+              4000,
+              3000,
+              4000,
+              3000,
+              3000
+            ]
+          },
+          "old": {
+            "wall_ns": [
+              35041,
+              9375,
+              7416,
+              7084,
+              6625,
+              7208,
+              6542
+            ],
+            "cpu_ns": [
+              34000,
+              10000,
+              7000,
+              6000,
+              6000,
+              7000,
+              6000
+            ]
+          }
+        }
+      },
+      {
+        "order": [
+          "njit",
+          "old",
+          "new"
+        ],
+        "samples": {
+          "njit": {
+            "wall_ns": [
+              12250,
+              5625,
+              4667,
+              4250,
+              4167,
+              4292,
+              4083
+            ],
+            "cpu_ns": [
+              10000,
+              5000,
+              3000,
+              3000,
+              3000,
+              4000,
+              3000
+            ]
+          },
+          "old": {
+            "wall_ns": [
+              23958,
+              7875,
+              7209,
+              7125,
+              6750,
+              7333,
+              7167
+            ],
+            "cpu_ns": [
+              23000,
+              8000,
+              7000,
+              7000,
+              6000,
+              7000,
+              6000
+            ]
+          },
+          "new": {
+            "wall_ns": [
+              21125,
+              8084,
+              7125,
+              6750,
+              6667,
+              7000,
+              6459
+            ],
+            "cpu_ns": [
+              20000,
+              8000,
+              7000,
+              7000,
+              6000,
+              6000,
+              5000
+            ]
+          }
+        }
+      }
+    ],
+    "median_ms": {
+      "old": 0.007354,
+      "new": 0.007146,
+      "njit": 0.0043955
+    },
+    "audits": {
+      "old": {
+        "execution_backend": "cpp_aot",
+        "audit_schema": "cpp-aot-execution-2",
+        "result_protocol": "typed-results-1",
+        "engine": "calmetrics_engine",
+        "model_identity": null,
+        "engine_version": "0.3.0",
+        "engine_build_id": "a63f72ba69ac969b2a60f90254ad15e8075a05ae15639cc9fe7561b229efa699",
+        "operator_registry_version": "canonical-native-1",
+        "typed_ir_version": "cpp-typed-ir-1",
+        "plan_fingerprint": "native-3-047c85ca1e618ec3bf673cd851b2b5d8",
+        "source_contracts": [],
+        "status_result_copy_bytes": 0,
+        "status_transport_bytes": 0,
+        "native_aot": true,
+        "python_fallback": 0,
+        "python_operator_calls": 0,
+        "request_time_compilation": 0,
+        "input_dtype": "float64",
+        "input_dtypes": {
+          "x": "float64"
+        },
+        "output_dtype": "per_output",
+        "outputs": [
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "asset",
+              "asset"
+            ],
+            "shape": [
+              "D",
+              "D"
+            ]
+          }
+        ],
+        "result_layout": "interval_root_aligned_8",
+        "result_capacity_bytes": 512,
+        "error_policy": "raise",
+        "status_contract": "indicator-status-1",
+        "result_lifetime": "independent",
+        "lane": "single",
+        "elapsed_ms": 0.002167,
+        "queue_wait_ms": 0.000209,
+        "compute_ms": 0.001958,
+        "cpu_tokens": 1,
+        "cpu_budget": 1,
+        "process_count": 1,
+        "thread_count": 1,
+        "threads_per_process": 1,
+        "async_orchestration": false,
+        "hard_stop": false,
+        "use_shared_memory": false,
+        "reason_codes": [
+          "typed_array_shape_work_accounted",
+          "typed_result_capacity_write_work_accounted",
+          "parallel_overhead_expected_to_dominate"
+        ],
+        "parallel_dimension": "interval",
+        "product_count": 1,
+        "estimated_work_units": 9152.0,
+        "prepared": false,
+        "prepared_cached": true,
+        "shared_memory_bytes": 0,
+        "boundary_copy_bytes": 0,
+        "output_copy_bytes": 0,
+        "scheduler_backend": "cpp",
+        "native_threads": 1,
+        "native_processes": 0,
+        "python_worker_callbacks": 0,
+        "python_native_transitions": 1,
+        "output_ownership": "numpy_owned",
+        "output_kind": "typed",
+        "native_chunks": [
+          {
+            "fused_pointwise_calls": 0,
+            "pointwise_tiles": 0,
+            "vector_elements": 0,
+            "root_copy_bytes": 0,
+            "direct_output_bytes": 512,
+            "state_copy_bytes": 0,
+            "pointwise_workspace_capacity_bytes": 0,
+            "rows": 1,
+            "nodes": 3,
+            "max_window": 63,
+            "numeric_arena_bytes": 0,
+            "mask_arena_bytes": 0,
+            "operator_workspace_capacity_bytes": 0,
+            "order_scratch_capacity_bytes": 0,
+            "input_copy_bytes": 0,
+            "eigen_rotation_calls": 0,
+            "eigen_matvec_calls": 0,
+            "eigen_covariance_calls": 1,
+            "algorithm_copy_bytes": 0,
+            "fused_scalar_calls": 0,
+            "summary_source_scans": 0,
+            "order_stat_sorts": 0,
+            "python_operator_calls": 0,
+            "execution_backend": "native_graph_interpreter"
+          }
+        ]
+      },
+      "new": {
+        "execution_backend": "cpp_aot",
+        "audit_schema": "cpp-aot-execution-2",
+        "result_protocol": "typed-results-1",
+        "engine": "calmetrics_engine",
+        "model_identity": null,
+        "engine_version": "0.3.0",
+        "engine_build_id": "91267c23ac014c947e67ae31054dddc8aaa102fadd12f2ce4331c87752c63758",
+        "operator_registry_version": "canonical-native-1",
+        "typed_ir_version": "cpp-typed-ir-1",
+        "plan_fingerprint": "native-3-047c85ca1e618ec3bf673cd851b2b5d8",
+        "source_contracts": [],
+        "status_result_copy_bytes": 0,
+        "status_transport_bytes": 0,
+        "native_aot": true,
+        "python_fallback": 0,
+        "python_operator_calls": 0,
+        "request_time_compilation": 0,
+        "input_dtype": "float64",
+        "input_dtypes": {
+          "x": "float64"
+        },
+        "output_dtype": "per_output",
+        "outputs": [
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "asset",
+              "asset"
+            ],
+            "shape": [
+              "D",
+              "D"
+            ]
+          }
+        ],
+        "result_layout": "interval_root_aligned_8",
+        "result_capacity_bytes": 512,
+        "error_policy": "raise",
+        "status_contract": "indicator-status-1",
+        "result_lifetime": "independent",
+        "lane": "single",
+        "elapsed_ms": 0.002,
+        "queue_wait_ms": 0.000208,
+        "compute_ms": 0.001792,
+        "cpu_tokens": 1,
+        "cpu_budget": 1,
+        "process_count": 1,
+        "thread_count": 1,
+        "threads_per_process": 1,
+        "async_orchestration": false,
+        "hard_stop": false,
+        "use_shared_memory": false,
+        "reason_codes": [
+          "typed_array_shape_work_accounted",
+          "typed_result_capacity_write_work_accounted",
+          "parallel_overhead_expected_to_dominate"
+        ],
+        "parallel_dimension": "interval",
+        "product_count": 1,
+        "estimated_work_units": 9152.0,
+        "prepared": false,
+        "prepared_cached": true,
+        "shared_memory_bytes": 0,
+        "boundary_copy_bytes": 0,
+        "output_copy_bytes": 0,
+        "scheduler_backend": "cpp",
+        "native_threads": 1,
+        "native_processes": 0,
+        "python_worker_callbacks": 0,
+        "python_native_transitions": 1,
+        "output_ownership": "numpy_owned",
+        "output_kind": "typed",
+        "native_chunks": [
+          {
+            "fused_pointwise_calls": 0,
+            "pointwise_tiles": 0,
+            "vector_elements": 0,
+            "root_copy_bytes": 0,
+            "direct_output_bytes": 512,
+            "state_copy_bytes": 0,
+            "pointwise_workspace_capacity_bytes": 0,
+            "rows": 1,
+            "nodes": 3,
+            "max_window": 63,
+            "numeric_arena_bytes": 0,
+            "mask_arena_bytes": 0,
+            "operator_workspace_capacity_bytes": 0,
+            "order_scratch_capacity_bytes": 0,
+            "input_copy_bytes": 0,
+            "eigen_rotation_calls": 0,
+            "eigen_matvec_calls": 0,
+            "eigen_covariance_calls": 1,
+            "accelerate_covchol_calls": 0,
+            "algorithm_copy_bytes": 0,
+            "fused_scalar_calls": 0,
+            "summary_source_scans": 0,
+            "order_stat_sorts": 0,
+            "python_operator_calls": 0,
+            "execution_backend": "native_graph_interpreter"
+          }
+        ]
+      },
+      "njit": {}
+    }
+  },
+  {
+    "case": {
+      "n": 2065,
+      "d": 2048,
+      "layout": "c",
+      "entry": "ordinary",
+      "output_order": "C"
+    },
+    "identities": {
+      "old": {
+        "input_sha256": "f17d563125b4f11eaa747727de0308c27d95cc1a5418d1906bb2026cc6380c5c",
+        "identity": {
+          "backend": "old",
+          "engine_build_id": "a63f72ba69ac969b2a60f90254ad15e8075a05ae15639cc9fe7561b229efa699",
+          "threads": [
+            {
+              "user_api": "blas",
+              "internal_api": "openblas",
+              "num_threads": 1,
+              "prefix": "libopenblas",
+              "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+              "version": "0.3.23.dev",
+              "threading_layer": "pthreads",
+              "architecture": "armv8"
+            }
+          ]
+        },
+        "verification": {
+          "shape": [
+            2048,
+            2048
+          ],
+          "dtype": "float64",
+          "sha256": "5150be8fb177af22d006c121038dd83ae8dccfb14034b9791f60748c49308c65",
+          "independent": true
+        }
+      },
+      "new": {
+        "input_sha256": "f17d563125b4f11eaa747727de0308c27d95cc1a5418d1906bb2026cc6380c5c",
+        "identity": {
+          "backend": "new",
+          "engine_build_id": "91267c23ac014c947e67ae31054dddc8aaa102fadd12f2ce4331c87752c63758",
+          "threads": [
+            {
+              "user_api": "blas",
+              "internal_api": "openblas",
+              "num_threads": 1,
+              "prefix": "libopenblas",
+              "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+              "version": "0.3.23.dev",
+              "threading_layer": "pthreads",
+              "architecture": "armv8"
+            }
+          ]
+        },
+        "verification": {
+          "shape": [
+            2048,
+            2048
+          ],
+          "dtype": "float64",
+          "sha256": "1dc3dfb884efebe03c45d1502a6821e7893649a07d548bdce815b35b35645caa",
+          "independent": true
+        }
+      },
+      "njit": {
+        "input_sha256": "f17d563125b4f11eaa747727de0308c27d95cc1a5418d1906bb2026cc6380c5c",
+        "identity": {
+          "backend": "numba-numpy-lapack",
+          "numba": "0.60.0",
+          "threads": [
+            {
+              "user_api": "blas",
+              "internal_api": "openblas",
+              "num_threads": 1,
+              "prefix": "libopenblas",
+              "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+              "version": "0.3.23.dev",
+              "threading_layer": "pthreads",
+              "architecture": "armv8"
+            }
+          ]
+        },
+        "verification": {
+          "shape": [
+            2048,
+            2048
+          ],
+          "dtype": "float64",
+          "sha256": "44f22e423354f0844d7f679ec51b9f653cc0294dc9d9ae6cc89d39466a4838ce",
+          "independent": true
+        }
+      }
+    },
+    "parity": {
+      "native": "rtol=atol=1e-12 for large C roots; bitwise otherwise",
+      "njit_rtol": 1e-11,
+      "njit_atol": 1e-11,
+      "njit_within_tolerance": true,
+      "njit_outside_tolerance": 0,
+      "njit_max_abs": 1.2177758801357186e-13
+    },
+    "samples": {
+      "old": {
+        "wall_ns": [
+          801349333,
+          802469000,
+          807233542,
+          812606083,
+          806644500,
+          800430708
+        ],
+        "cpu_ns": [
+          801047000,
+          802238000,
+          806886000,
+          811795000,
+          806331000,
+          800248000
+        ]
+      },
+      "new": {
+        "wall_ns": [
+          136907667,
+          153410625,
+          137857250,
+          137918833,
+          140901500,
+          138565250
+        ],
+        "cpu_ns": [
+          136764000,
+          151565000,
+          137574000,
+          137841000,
+          140817000,
+          138470000
+        ]
+      },
+      "njit": {
+        "wall_ns": [
+          182538500,
+          179646333,
+          178266417,
+          175787959,
+          182340708,
+          181593709
+        ],
+        "cpu_ns": [
+          182482000,
+          179580000,
+          178259000,
+          175745000,
+          182031000,
+          181313000
+        ]
+      }
+    },
+    "rounds": [
+      {
+        "order": [
+          "old",
+          "new",
+          "njit"
+        ],
+        "samples": {
+          "old": {
+            "wall_ns": [
+              801349333
+            ],
+            "cpu_ns": [
+              801047000
+            ]
+          },
+          "new": {
+            "wall_ns": [
+              136907667
+            ],
+            "cpu_ns": [
+              136764000
+            ]
+          },
+          "njit": {
+            "wall_ns": [
+              182538500
+            ],
+            "cpu_ns": [
+              182482000
+            ]
+          }
+        }
+      },
+      {
+        "order": [
+          "new",
+          "njit",
+          "old"
+        ],
+        "samples": {
+          "new": {
+            "wall_ns": [
+              153410625
+            ],
+            "cpu_ns": [
+              151565000
+            ]
+          },
+          "njit": {
+            "wall_ns": [
+              179646333
+            ],
+            "cpu_ns": [
+              179580000
+            ]
+          },
+          "old": {
+            "wall_ns": [
+              802469000
+            ],
+            "cpu_ns": [
+              802238000
+            ]
+          }
+        }
+      },
+      {
+        "order": [
+          "njit",
+          "old",
+          "new"
+        ],
+        "samples": {
+          "njit": {
+            "wall_ns": [
+              178266417
+            ],
+            "cpu_ns": [
+              178259000
+            ]
+          },
+          "old": {
+            "wall_ns": [
+              807233542
+            ],
+            "cpu_ns": [
+              806886000
+            ]
+          },
+          "new": {
+            "wall_ns": [
+              137857250
+            ],
+            "cpu_ns": [
+              137574000
+            ]
+          }
+        }
+      },
+      {
+        "order": [
+          "old",
+          "new",
+          "njit"
+        ],
+        "samples": {
+          "old": {
+            "wall_ns": [
+              812606083
+            ],
+            "cpu_ns": [
+              811795000
+            ]
+          },
+          "new": {
+            "wall_ns": [
+              137918833
+            ],
+            "cpu_ns": [
+              137841000
+            ]
+          },
+          "njit": {
+            "wall_ns": [
+              175787959
+            ],
+            "cpu_ns": [
+              175745000
+            ]
+          }
+        }
+      },
+      {
+        "order": [
+          "new",
+          "njit",
+          "old"
+        ],
+        "samples": {
+          "new": {
+            "wall_ns": [
+              140901500
+            ],
+            "cpu_ns": [
+              140817000
+            ]
+          },
+          "njit": {
+            "wall_ns": [
+              182340708
+            ],
+            "cpu_ns": [
+              182031000
+            ]
+          },
+          "old": {
+            "wall_ns": [
+              806644500
+            ],
+            "cpu_ns": [
+              806331000
+            ]
+          }
+        }
+      },
+      {
+        "order": [
+          "njit",
+          "old",
+          "new"
+        ],
+        "samples": {
+          "njit": {
+            "wall_ns": [
+              181593709
+            ],
+            "cpu_ns": [
+              181313000
+            ]
+          },
+          "old": {
+            "wall_ns": [
+              800430708
+            ],
+            "cpu_ns": [
+              800248000
+            ]
+          },
+          "new": {
+            "wall_ns": [
+              138565250
+            ],
+            "cpu_ns": [
+              138470000
+            ]
+          }
+        }
+      }
+    ],
+    "median_ms": {
+      "old": 804.55675,
+      "new": 138.2420415,
+      "njit": 180.620021
+    },
+    "audits": {
+      "old": {
+        "execution_backend": "cpp_aot",
+        "audit_schema": "cpp-aot-execution-2",
+        "result_protocol": "typed-results-1",
+        "engine": "calmetrics_engine",
+        "model_identity": null,
+        "engine_version": "0.3.0",
+        "engine_build_id": "a63f72ba69ac969b2a60f90254ad15e8075a05ae15639cc9fe7561b229efa699",
+        "operator_registry_version": "canonical-native-1",
+        "typed_ir_version": "cpp-typed-ir-1",
+        "plan_fingerprint": "native-3-047c85ca1e618ec3bf673cd851b2b5d8",
+        "source_contracts": [],
+        "status_result_copy_bytes": 0,
+        "status_transport_bytes": 0,
+        "native_aot": true,
+        "python_fallback": 0,
+        "python_operator_calls": 0,
+        "request_time_compilation": 0,
+        "input_dtype": "float64",
+        "input_dtypes": {
+          "x": "float64"
+        },
+        "output_dtype": "per_output",
+        "outputs": [
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "asset",
+              "asset"
+            ],
+            "shape": [
+              "D",
+              "D"
+            ]
+          }
+        ],
+        "result_layout": "interval_root_aligned_8",
+        "result_capacity_bytes": 33554432,
+        "error_policy": "raise",
+        "status_contract": "indicator-status-1",
+        "result_lifetime": "independent",
+        "lane": "single",
+        "elapsed_ms": 799.822417,
+        "queue_wait_ms": 0.005209,
+        "compute_ms": 799.817208,
+        "cpu_tokens": 1,
+        "cpu_budget": 1,
+        "process_count": 1,
+        "thread_count": 1,
+        "threads_per_process": 1,
+        "async_orchestration": false,
+        "hard_stop": false,
+        "use_shared_memory": false,
+        "reason_codes": [
+          "typed_array_shape_work_accounted",
+          "typed_result_capacity_write_work_accounted",
+          "parallel_overhead_expected_to_dominate"
+        ],
+        "parallel_dimension": "interval",
+        "product_count": 1,
+        "estimated_work_units": 34506539008.0,
+        "prepared": false,
+        "prepared_cached": true,
+        "shared_memory_bytes": 0,
+        "boundary_copy_bytes": 0,
+        "output_copy_bytes": 0,
+        "scheduler_backend": "cpp",
+        "native_threads": 1,
+        "native_processes": 0,
+        "python_worker_callbacks": 0,
+        "python_native_transitions": 1,
+        "output_ownership": "numpy_owned",
+        "output_kind": "typed",
+        "native_chunks": [
+          {
+            "fused_pointwise_calls": 0,
+            "pointwise_tiles": 0,
+            "vector_elements": 0,
+            "root_copy_bytes": 0,
+            "direct_output_bytes": 33554432,
+            "state_copy_bytes": 0,
+            "pointwise_workspace_capacity_bytes": 0,
+            "rows": 1,
+            "nodes": 3,
+            "max_window": 2065,
+            "numeric_arena_bytes": 0,
+            "mask_arena_bytes": 0,
+            "operator_workspace_capacity_bytes": 265344,
+            "order_scratch_capacity_bytes": 0,
+            "input_copy_bytes": 0,
+            "eigen_rotation_calls": 0,
+            "eigen_matvec_calls": 0,
+            "eigen_covariance_calls": 1,
+            "algorithm_copy_bytes": 33570816,
+            "fused_scalar_calls": 0,
+            "summary_source_scans": 0,
+            "order_stat_sorts": 0,
+            "python_operator_calls": 0,
+            "execution_backend": "native_graph_interpreter"
+          }
+        ]
+      },
+      "new": {
+        "execution_backend": "cpp_aot",
+        "audit_schema": "cpp-aot-execution-2",
+        "result_protocol": "typed-results-1",
+        "engine": "calmetrics_engine",
+        "model_identity": null,
+        "engine_version": "0.3.0",
+        "engine_build_id": "91267c23ac014c947e67ae31054dddc8aaa102fadd12f2ce4331c87752c63758",
+        "operator_registry_version": "canonical-native-1",
+        "typed_ir_version": "cpp-typed-ir-1",
+        "plan_fingerprint": "native-3-047c85ca1e618ec3bf673cd851b2b5d8",
+        "source_contracts": [],
+        "status_result_copy_bytes": 0,
+        "status_transport_bytes": 0,
+        "native_aot": true,
+        "python_fallback": 0,
+        "python_operator_calls": 0,
+        "request_time_compilation": 0,
+        "input_dtype": "float64",
+        "input_dtypes": {
+          "x": "float64"
+        },
+        "output_dtype": "per_output",
+        "outputs": [
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "asset",
+              "asset"
+            ],
+            "shape": [
+              "D",
+              "D"
+            ]
+          }
+        ],
+        "result_layout": "interval_root_aligned_8",
+        "result_capacity_bytes": 33554432,
+        "error_policy": "raise",
+        "status_contract": "indicator-status-1",
+        "result_lifetime": "independent",
+        "lane": "single",
+        "elapsed_ms": 137.984334,
+        "queue_wait_ms": 0.004667,
+        "compute_ms": 137.979667,
+        "cpu_tokens": 1,
+        "cpu_budget": 1,
+        "process_count": 1,
+        "thread_count": 1,
+        "threads_per_process": 1,
+        "async_orchestration": false,
+        "hard_stop": false,
+        "use_shared_memory": false,
+        "reason_codes": [
+          "typed_array_shape_work_accounted",
+          "typed_result_capacity_write_work_accounted",
+          "parallel_overhead_expected_to_dominate"
+        ],
+        "parallel_dimension": "interval",
+        "product_count": 1,
+        "estimated_work_units": 34506539008.0,
+        "prepared": false,
+        "prepared_cached": true,
+        "shared_memory_bytes": 0,
+        "boundary_copy_bytes": 0,
+        "output_copy_bytes": 0,
+        "scheduler_backend": "cpp",
+        "native_threads": 1,
+        "native_processes": 0,
+        "python_worker_callbacks": 0,
+        "python_native_transitions": 1,
+        "output_ownership": "numpy_owned",
+        "output_kind": "typed",
+        "native_chunks": [
+          {
+            "fused_pointwise_calls": 0,
+            "pointwise_tiles": 0,
+            "vector_elements": 0,
+            "root_copy_bytes": 0,
+            "direct_output_bytes": 33554432,
+            "state_copy_bytes": 0,
+            "pointwise_workspace_capacity_bytes": 0,
+            "rows": 1,
+            "nodes": 3,
+            "max_window": 2065,
+            "numeric_arena_bytes": 0,
+            "mask_arena_bytes": 0,
+            "operator_workspace_capacity_bytes": 8388608,
+            "order_scratch_capacity_bytes": 0,
+            "input_copy_bytes": 0,
+            "eigen_rotation_calls": 0,
+            "eigen_matvec_calls": 0,
+            "eigen_covariance_calls": 0,
+            "accelerate_covchol_calls": 1,
+            "algorithm_copy_bytes": 33832960,
+            "fused_scalar_calls": 0,
+            "summary_source_scans": 0,
+            "order_stat_sorts": 0,
+            "python_operator_calls": 0,
+            "execution_backend": "native_graph_interpreter"
+          }
+        ]
+      },
+      "njit": {}
+    }
+  },
+  {
+    "case": {
+      "n": 2065,
+      "d": 2048,
+      "layout": "f",
+      "entry": "ordinary",
+      "output_order": "C"
+    },
+    "identities": {
+      "old": {
+        "input_sha256": "f17d563125b4f11eaa747727de0308c27d95cc1a5418d1906bb2026cc6380c5c",
+        "identity": {
+          "backend": "old",
+          "engine_build_id": "a63f72ba69ac969b2a60f90254ad15e8075a05ae15639cc9fe7561b229efa699",
+          "threads": [
+            {
+              "user_api": "blas",
+              "internal_api": "openblas",
+              "num_threads": 1,
+              "prefix": "libopenblas",
+              "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+              "version": "0.3.23.dev",
+              "threading_layer": "pthreads",
+              "architecture": "armv8"
+            }
+          ]
+        },
+        "verification": {
+          "shape": [
+            2048,
+            2048
+          ],
+          "dtype": "float64",
+          "sha256": "0a7e74b628d8f8b3c14105f2a26ea2bb4a6f7980d520979292a6c5e777142775",
+          "independent": true
+        }
+      },
+      "new": {
+        "input_sha256": "f17d563125b4f11eaa747727de0308c27d95cc1a5418d1906bb2026cc6380c5c",
+        "identity": {
+          "backend": "new",
+          "engine_build_id": "91267c23ac014c947e67ae31054dddc8aaa102fadd12f2ce4331c87752c63758",
+          "threads": [
+            {
+              "user_api": "blas",
+              "internal_api": "openblas",
+              "num_threads": 1,
+              "prefix": "libopenblas",
+              "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+              "version": "0.3.23.dev",
+              "threading_layer": "pthreads",
+              "architecture": "armv8"
+            }
+          ]
+        },
+        "verification": {
+          "shape": [
+            2048,
+            2048
+          ],
+          "dtype": "float64",
+          "sha256": "0cb4da59172392acd09431bbd2348037e703cf03924b21f796801104bc671f5c",
+          "independent": true
+        }
+      },
+      "njit": {
+        "input_sha256": "f17d563125b4f11eaa747727de0308c27d95cc1a5418d1906bb2026cc6380c5c",
+        "identity": {
+          "backend": "numba-numpy-lapack",
+          "numba": "0.60.0",
+          "threads": [
+            {
+              "user_api": "blas",
+              "internal_api": "openblas",
+              "num_threads": 1,
+              "prefix": "libopenblas",
+              "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+              "version": "0.3.23.dev",
+              "threading_layer": "pthreads",
+              "architecture": "armv8"
+            }
+          ]
+        },
+        "verification": {
+          "shape": [
+            2048,
+            2048
+          ],
+          "dtype": "float64",
+          "sha256": "44f22e423354f0844d7f679ec51b9f653cc0294dc9d9ae6cc89d39466a4838ce",
+          "independent": true
+        }
+      }
+    },
+    "parity": {
+      "native": "rtol=atol=1e-12 for large C roots; bitwise otherwise",
+      "njit_rtol": 1e-11,
+      "njit_atol": 1e-11,
+      "njit_within_tolerance": true,
+      "njit_outside_tolerance": 0,
+      "njit_max_abs": 1.808171667949665e-13
+    },
+    "samples": {
+      "old": {
+        "wall_ns": [
+          811852958,
+          829759875,
+          826796417,
+          828826875,
+          830698625,
+          831191958
+        ],
+        "cpu_ns": [
+          811849000,
+          829658000,
+          826719000,
+          828709000,
+          830478000,
+          830977000
+        ]
+      },
+      "new": {
+        "wall_ns": [
+          156686917,
+          160185208,
+          158194208,
+          154849000,
+          163081833,
+          152849417
+        ],
+        "cpu_ns": [
+          156635000,
+          160089000,
+          158133000,
+          154796000,
+          162960000,
+          152806000
+        ]
+      },
+      "njit": {
+        "wall_ns": [
+          172771917,
+          170585542,
+          173024458,
+          175104666,
+          180790334,
+          167506750
+        ],
+        "cpu_ns": [
+          172727000,
+          170465000,
+          172736000,
+          174859000,
+          180638000,
+          167446000
+        ]
+      }
+    },
+    "rounds": [
+      {
+        "order": [
+          "old",
+          "new",
+          "njit"
+        ],
+        "samples": {
+          "old": {
+            "wall_ns": [
+              811852958
+            ],
+            "cpu_ns": [
+              811849000
+            ]
+          },
+          "new": {
+            "wall_ns": [
+              156686917
+            ],
+            "cpu_ns": [
+              156635000
+            ]
+          },
+          "njit": {
+            "wall_ns": [
+              172771917
+            ],
+            "cpu_ns": [
+              172727000
+            ]
+          }
+        }
+      },
+      {
+        "order": [
+          "new",
+          "njit",
+          "old"
+        ],
+        "samples": {
+          "new": {
+            "wall_ns": [
+              160185208
+            ],
+            "cpu_ns": [
+              160089000
+            ]
+          },
+          "njit": {
+            "wall_ns": [
+              170585542
+            ],
+            "cpu_ns": [
+              170465000
+            ]
+          },
+          "old": {
+            "wall_ns": [
+              829759875
+            ],
+            "cpu_ns": [
+              829658000
+            ]
+          }
+        }
+      },
+      {
+        "order": [
+          "njit",
+          "old",
+          "new"
+        ],
+        "samples": {
+          "njit": {
+            "wall_ns": [
+              173024458
+            ],
+            "cpu_ns": [
+              172736000
+            ]
+          },
+          "old": {
+            "wall_ns": [
+              826796417
+            ],
+            "cpu_ns": [
+              826719000
+            ]
+          },
+          "new": {
+            "wall_ns": [
+              158194208
+            ],
+            "cpu_ns": [
+              158133000
+            ]
+          }
+        }
+      },
+      {
+        "order": [
+          "old",
+          "new",
+          "njit"
+        ],
+        "samples": {
+          "old": {
+            "wall_ns": [
+              828826875
+            ],
+            "cpu_ns": [
+              828709000
+            ]
+          },
+          "new": {
+            "wall_ns": [
+              154849000
+            ],
+            "cpu_ns": [
+              154796000
+            ]
+          },
+          "njit": {
+            "wall_ns": [
+              175104666
+            ],
+            "cpu_ns": [
+              174859000
+            ]
+          }
+        }
+      },
+      {
+        "order": [
+          "new",
+          "njit",
+          "old"
+        ],
+        "samples": {
+          "new": {
+            "wall_ns": [
+              163081833
+            ],
+            "cpu_ns": [
+              162960000
+            ]
+          },
+          "njit": {
+            "wall_ns": [
+              180790334
+            ],
+            "cpu_ns": [
+              180638000
+            ]
+          },
+          "old": {
+            "wall_ns": [
+              830698625
+            ],
+            "cpu_ns": [
+              830478000
+            ]
+          }
+        }
+      },
+      {
+        "order": [
+          "njit",
+          "old",
+          "new"
+        ],
+        "samples": {
+          "njit": {
+            "wall_ns": [
+              167506750
+            ],
+            "cpu_ns": [
+              167446000
+            ]
+          },
+          "old": {
+            "wall_ns": [
+              831191958
+            ],
+            "cpu_ns": [
+              830977000
+            ]
+          },
+          "new": {
+            "wall_ns": [
+              152849417
+            ],
+            "cpu_ns": [
+              152806000
+            ]
+          }
+        }
+      }
+    ],
+    "median_ms": {
+      "old": 829.293375,
+      "new": 157.4405625,
+      "njit": 172.8981875
+    },
+    "audits": {
+      "old": {
+        "execution_backend": "cpp_aot",
+        "audit_schema": "cpp-aot-execution-2",
+        "result_protocol": "typed-results-1",
+        "engine": "calmetrics_engine",
+        "model_identity": null,
+        "engine_version": "0.3.0",
+        "engine_build_id": "a63f72ba69ac969b2a60f90254ad15e8075a05ae15639cc9fe7561b229efa699",
+        "operator_registry_version": "canonical-native-1",
+        "typed_ir_version": "cpp-typed-ir-1",
+        "plan_fingerprint": "native-3-047c85ca1e618ec3bf673cd851b2b5d8",
+        "source_contracts": [],
+        "status_result_copy_bytes": 0,
+        "status_transport_bytes": 0,
+        "native_aot": true,
+        "python_fallback": 0,
+        "python_operator_calls": 0,
+        "request_time_compilation": 0,
+        "input_dtype": "float64",
+        "input_dtypes": {
+          "x": "float64"
+        },
+        "output_dtype": "per_output",
+        "outputs": [
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "asset",
+              "asset"
+            ],
+            "shape": [
+              "D",
+              "D"
+            ]
+          }
+        ],
+        "result_layout": "interval_root_aligned_8",
+        "result_capacity_bytes": 33554432,
+        "error_policy": "raise",
+        "status_contract": "indicator-status-1",
+        "result_lifetime": "independent",
+        "lane": "single",
+        "elapsed_ms": 830.564417,
+        "queue_wait_ms": 0.005459,
+        "compute_ms": 830.558958,
+        "cpu_tokens": 1,
+        "cpu_budget": 1,
+        "process_count": 1,
+        "thread_count": 1,
+        "threads_per_process": 1,
+        "async_orchestration": false,
+        "hard_stop": false,
+        "use_shared_memory": false,
+        "reason_codes": [
+          "typed_array_shape_work_accounted",
+          "typed_result_capacity_write_work_accounted",
+          "parallel_overhead_expected_to_dominate"
+        ],
+        "parallel_dimension": "interval",
+        "product_count": 1,
+        "estimated_work_units": 34506539008.0,
+        "prepared": false,
+        "prepared_cached": true,
+        "shared_memory_bytes": 0,
+        "boundary_copy_bytes": 0,
+        "output_copy_bytes": 0,
+        "scheduler_backend": "cpp",
+        "native_threads": 1,
+        "native_processes": 0,
+        "python_worker_callbacks": 0,
+        "python_native_transitions": 1,
+        "output_ownership": "numpy_owned",
+        "output_kind": "typed",
+        "native_chunks": [
+          {
+            "fused_pointwise_calls": 0,
+            "pointwise_tiles": 0,
+            "vector_elements": 0,
+            "root_copy_bytes": 0,
+            "direct_output_bytes": 33554432,
+            "state_copy_bytes": 0,
+            "pointwise_workspace_capacity_bytes": 0,
+            "rows": 1,
+            "nodes": 3,
+            "max_window": 2065,
+            "numeric_arena_bytes": 0,
+            "mask_arena_bytes": 0,
+            "operator_workspace_capacity_bytes": 265344,
+            "order_scratch_capacity_bytes": 0,
+            "input_copy_bytes": 0,
+            "eigen_rotation_calls": 0,
+            "eigen_matvec_calls": 0,
+            "eigen_covariance_calls": 1,
+            "algorithm_copy_bytes": 33570816,
+            "fused_scalar_calls": 0,
+            "summary_source_scans": 0,
+            "order_stat_sorts": 0,
+            "python_operator_calls": 0,
+            "execution_backend": "native_graph_interpreter"
+          }
+        ]
+      },
+      "new": {
+        "execution_backend": "cpp_aot",
+        "audit_schema": "cpp-aot-execution-2",
+        "result_protocol": "typed-results-1",
+        "engine": "calmetrics_engine",
+        "model_identity": null,
+        "engine_version": "0.3.0",
+        "engine_build_id": "91267c23ac014c947e67ae31054dddc8aaa102fadd12f2ce4331c87752c63758",
+        "operator_registry_version": "canonical-native-1",
+        "typed_ir_version": "cpp-typed-ir-1",
+        "plan_fingerprint": "native-3-047c85ca1e618ec3bf673cd851b2b5d8",
+        "source_contracts": [],
+        "status_result_copy_bytes": 0,
+        "status_transport_bytes": 0,
+        "native_aot": true,
+        "python_fallback": 0,
+        "python_operator_calls": 0,
+        "request_time_compilation": 0,
+        "input_dtype": "float64",
+        "input_dtypes": {
+          "x": "float64"
+        },
+        "output_dtype": "per_output",
+        "outputs": [
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "asset",
+              "asset"
+            ],
+            "shape": [
+              "D",
+              "D"
+            ]
+          }
+        ],
+        "result_layout": "interval_root_aligned_8",
+        "result_capacity_bytes": 33554432,
+        "error_policy": "raise",
+        "status_contract": "indicator-status-1",
+        "result_lifetime": "independent",
+        "lane": "single",
+        "elapsed_ms": 152.246791,
+        "queue_wait_ms": 0.004166,
+        "compute_ms": 152.242625,
+        "cpu_tokens": 1,
+        "cpu_budget": 1,
+        "process_count": 1,
+        "thread_count": 1,
+        "threads_per_process": 1,
+        "async_orchestration": false,
+        "hard_stop": false,
+        "use_shared_memory": false,
+        "reason_codes": [
+          "typed_array_shape_work_accounted",
+          "typed_result_capacity_write_work_accounted",
+          "parallel_overhead_expected_to_dominate"
+        ],
+        "parallel_dimension": "interval",
+        "product_count": 1,
+        "estimated_work_units": 34506539008.0,
+        "prepared": false,
+        "prepared_cached": true,
+        "shared_memory_bytes": 0,
+        "boundary_copy_bytes": 0,
+        "output_copy_bytes": 0,
+        "scheduler_backend": "cpp",
+        "native_threads": 1,
+        "native_processes": 0,
+        "python_worker_callbacks": 0,
+        "python_native_transitions": 1,
+        "output_ownership": "numpy_owned",
+        "output_kind": "typed",
+        "native_chunks": [
+          {
+            "fused_pointwise_calls": 0,
+            "pointwise_tiles": 0,
+            "vector_elements": 0,
+            "root_copy_bytes": 0,
+            "direct_output_bytes": 33554432,
+            "state_copy_bytes": 0,
+            "pointwise_workspace_capacity_bytes": 0,
+            "rows": 1,
+            "nodes": 3,
+            "max_window": 2065,
+            "numeric_arena_bytes": 0,
+            "mask_arena_bytes": 0,
+            "operator_workspace_capacity_bytes": 8388608,
+            "order_scratch_capacity_bytes": 0,
+            "input_copy_bytes": 0,
+            "eigen_rotation_calls": 0,
+            "eigen_matvec_calls": 0,
+            "eigen_covariance_calls": 0,
+            "accelerate_covchol_calls": 1,
+            "algorithm_copy_bytes": 33832960,
+            "fused_scalar_calls": 0,
+            "summary_source_scans": 0,
+            "order_stat_sorts": 0,
+            "python_operator_calls": 0,
+            "execution_backend": "native_graph_interpreter"
+          }
+        ]
+      },
+      "njit": {}
+    }
+  },
+  {
+    "case": {
+      "n": 4113,
+      "d": 4096,
+      "layout": "c",
+      "entry": "ordinary",
+      "output_order": "C"
+    },
+    "identities": {
+      "old": {
+        "input_sha256": "69b4f4a217429f24ea518a4f4c44e5ae5b3e97ca86f6660115f7fa04daa6d7b6",
+        "identity": {
+          "backend": "old",
+          "engine_build_id": "a63f72ba69ac969b2a60f90254ad15e8075a05ae15639cc9fe7561b229efa699",
+          "threads": [
+            {
+              "user_api": "blas",
+              "internal_api": "openblas",
+              "num_threads": 1,
+              "prefix": "libopenblas",
+              "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+              "version": "0.3.23.dev",
+              "threading_layer": "pthreads",
+              "architecture": "armv8"
+            }
+          ]
+        },
+        "verification": {
+          "shape": [
+            4096,
+            4096
+          ],
+          "dtype": "float64",
+          "sha256": "c49f301572e55ecc0572d7c845daca87b143ded96cc70749741fa9802f156b7b",
+          "independent": true
+        }
+      },
+      "new": {
+        "input_sha256": "69b4f4a217429f24ea518a4f4c44e5ae5b3e97ca86f6660115f7fa04daa6d7b6",
+        "identity": {
+          "backend": "new",
+          "engine_build_id": "91267c23ac014c947e67ae31054dddc8aaa102fadd12f2ce4331c87752c63758",
+          "threads": [
+            {
+              "user_api": "blas",
+              "internal_api": "openblas",
+              "num_threads": 1,
+              "prefix": "libopenblas",
+              "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+              "version": "0.3.23.dev",
+              "threading_layer": "pthreads",
+              "architecture": "armv8"
+            }
+          ]
+        },
+        "verification": {
+          "shape": [
+            4096,
+            4096
+          ],
+          "dtype": "float64",
+          "sha256": "423d6dffcfdc2b1a12eb8ebfc535f76a5c51c8f68ad218935f71602a226de507",
+          "independent": true
+        }
+      },
+      "njit": {
+        "input_sha256": "69b4f4a217429f24ea518a4f4c44e5ae5b3e97ca86f6660115f7fa04daa6d7b6",
+        "identity": {
+          "backend": "numba-numpy-lapack",
+          "numba": "0.60.0",
+          "threads": [
+            {
+              "user_api": "blas",
+              "internal_api": "openblas",
+              "num_threads": 1,
+              "prefix": "libopenblas",
+              "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+              "version": "0.3.23.dev",
+              "threading_layer": "pthreads",
+              "architecture": "armv8"
+            }
+          ]
+        },
+        "verification": {
+          "shape": [
+            4096,
+            4096
+          ],
+          "dtype": "float64",
+          "sha256": "6bf70b906de1745c982432e9ca2e59d6d0df91511e53c5d8e452bb47046c9d0b",
+          "independent": true
+        }
+      }
+    },
+    "parity": {
+      "native": "rtol=atol=1e-12 for large C roots; bitwise otherwise",
+      "njit_rtol": 1e-11,
+      "njit_atol": 1e-11,
+      "njit_within_tolerance": true,
+      "njit_outside_tolerance": 0,
+      "njit_max_abs": 2.896745343594631e-13
+    },
+    "samples": {
+      "old": {
+        "wall_ns": [
+          6901139500,
+          7026944125,
+          7067935708,
+          7027924625,
+          7030030375,
+          7014572834
+        ],
+        "cpu_ns": [
+          6901002000,
+          7024256000,
+          7062166000,
+          7025788000,
+          7027941000,
+          7011690000
+        ]
+      },
+      "new": {
+        "wall_ns": [
+          761296750,
+          763795042,
+          763343041,
+          763119416,
+          764774000,
+          761833916
+        ],
+        "cpu_ns": [
+          760878000,
+          763364000,
+          763161000,
+          762892000,
+          764386000,
+          761668000
+        ]
+      },
+      "njit": {
+        "wall_ns": [
+          1645417375,
+          1651467542,
+          1698636375,
+          1654619500,
+          1669458250,
+          1664513708
+        ],
+        "cpu_ns": [
+          1644990000,
+          1650725000,
+          1695671000,
+          1653753000,
+          1668997000,
+          1663906000
+        ]
+      }
+    },
+    "rounds": [
+      {
+        "order": [
+          "old",
+          "new",
+          "njit"
+        ],
+        "samples": {
+          "old": {
+            "wall_ns": [
+              6901139500
+            ],
+            "cpu_ns": [
+              6901002000
+            ]
+          },
+          "new": {
+            "wall_ns": [
+              761296750
+            ],
+            "cpu_ns": [
+              760878000
+            ]
+          },
+          "njit": {
+            "wall_ns": [
+              1645417375
+            ],
+            "cpu_ns": [
+              1644990000
+            ]
+          }
+        }
+      },
+      {
+        "order": [
+          "new",
+          "njit",
+          "old"
+        ],
+        "samples": {
+          "new": {
+            "wall_ns": [
+              763795042
+            ],
+            "cpu_ns": [
+              763364000
+            ]
+          },
+          "njit": {
+            "wall_ns": [
+              1651467542
+            ],
+            "cpu_ns": [
+              1650725000
+            ]
+          },
+          "old": {
+            "wall_ns": [
+              7026944125
+            ],
+            "cpu_ns": [
+              7024256000
+            ]
+          }
+        }
+      },
+      {
+        "order": [
+          "njit",
+          "old",
+          "new"
+        ],
+        "samples": {
+          "njit": {
+            "wall_ns": [
+              1698636375
+            ],
+            "cpu_ns": [
+              1695671000
+            ]
+          },
+          "old": {
+            "wall_ns": [
+              7067935708
+            ],
+            "cpu_ns": [
+              7062166000
+            ]
+          },
+          "new": {
+            "wall_ns": [
+              763343041
+            ],
+            "cpu_ns": [
+              763161000
+            ]
+          }
+        }
+      },
+      {
+        "order": [
+          "old",
+          "new",
+          "njit"
+        ],
+        "samples": {
+          "old": {
+            "wall_ns": [
+              7027924625
+            ],
+            "cpu_ns": [
+              7025788000
+            ]
+          },
+          "new": {
+            "wall_ns": [
+              763119416
+            ],
+            "cpu_ns": [
+              762892000
+            ]
+          },
+          "njit": {
+            "wall_ns": [
+              1654619500
+            ],
+            "cpu_ns": [
+              1653753000
+            ]
+          }
+        }
+      },
+      {
+        "order": [
+          "new",
+          "njit",
+          "old"
+        ],
+        "samples": {
+          "new": {
+            "wall_ns": [
+              764774000
+            ],
+            "cpu_ns": [
+              764386000
+            ]
+          },
+          "njit": {
+            "wall_ns": [
+              1669458250
+            ],
+            "cpu_ns": [
+              1668997000
+            ]
+          },
+          "old": {
+            "wall_ns": [
+              7030030375
+            ],
+            "cpu_ns": [
+              7027941000
+            ]
+          }
+        }
+      },
+      {
+        "order": [
+          "njit",
+          "old",
+          "new"
+        ],
+        "samples": {
+          "njit": {
+            "wall_ns": [
+              1664513708
+            ],
+            "cpu_ns": [
+              1663906000
+            ]
+          },
+          "old": {
+            "wall_ns": [
+              7014572834
+            ],
+            "cpu_ns": [
+              7011690000
+            ]
+          },
+          "new": {
+            "wall_ns": [
+              761833916
+            ],
+            "cpu_ns": [
+              761668000
+            ]
+          }
+        }
+      }
+    ],
+    "median_ms": {
+      "old": 7027.434375,
+      "new": 763.2312285,
+      "njit": 1659.566604
+    },
+    "audits": {
+      "old": {
+        "execution_backend": "cpp_aot",
+        "audit_schema": "cpp-aot-execution-2",
+        "result_protocol": "typed-results-1",
+        "engine": "calmetrics_engine",
+        "model_identity": null,
+        "engine_version": "0.3.0",
+        "engine_build_id": "a63f72ba69ac969b2a60f90254ad15e8075a05ae15639cc9fe7561b229efa699",
+        "operator_registry_version": "canonical-native-1",
+        "typed_ir_version": "cpp-typed-ir-1",
+        "plan_fingerprint": "native-3-047c85ca1e618ec3bf673cd851b2b5d8",
+        "source_contracts": [],
+        "status_result_copy_bytes": 0,
+        "status_transport_bytes": 0,
+        "native_aot": true,
+        "python_fallback": 0,
+        "python_operator_calls": 0,
+        "request_time_compilation": 0,
+        "input_dtype": "float64",
+        "input_dtypes": {
+          "x": "float64"
+        },
+        "output_dtype": "per_output",
+        "outputs": [
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "asset",
+              "asset"
+            ],
+            "shape": [
+              "D",
+              "D"
+            ]
+          }
+        ],
+        "result_layout": "interval_root_aligned_8",
+        "result_capacity_bytes": 134217728,
+        "error_policy": "raise",
+        "status_contract": "indicator-status-1",
+        "result_lifetime": "independent",
+        "lane": "single",
+        "elapsed_ms": 7012.610125,
+        "queue_wait_ms": 0.005417,
+        "compute_ms": 7012.604708,
+        "cpu_tokens": 1,
+        "cpu_budget": 1,
+        "process_count": 1,
+        "thread_count": 1,
+        "threads_per_process": 1,
+        "async_orchestration": false,
+        "hard_stop": false,
+        "use_shared_memory": false,
+        "reason_codes": [
+          "typed_array_shape_work_accounted",
+          "typed_result_capacity_write_work_accounted",
+          "parallel_overhead_expected_to_dominate"
+        ],
+        "parallel_dimension": "interval",
+        "product_count": 1,
+        "estimated_work_units": 275465109504.0,
+        "prepared": false,
+        "prepared_cached": true,
+        "shared_memory_bytes": 0,
+        "boundary_copy_bytes": 0,
+        "output_copy_bytes": 0,
+        "scheduler_backend": "cpp",
+        "native_threads": 1,
+        "native_processes": 0,
+        "python_worker_callbacks": 0,
+        "python_native_transitions": 1,
+        "output_ownership": "numpy_owned",
+        "output_kind": "typed",
+        "native_chunks": [
+          {
+            "fused_pointwise_calls": 0,
+            "pointwise_tiles": 0,
+            "vector_elements": 0,
+            "root_copy_bytes": 0,
+            "direct_output_bytes": 134217728,
+            "state_copy_bytes": 0,
+            "pointwise_workspace_capacity_bytes": 0,
+            "rows": 1,
+            "nodes": 3,
+            "max_window": 4113,
+            "numeric_arena_bytes": 0,
+            "mask_arena_bytes": 0,
+            "operator_workspace_capacity_bytes": 527488,
+            "order_scratch_capacity_bytes": 0,
+            "input_copy_bytes": 0,
+            "eigen_rotation_calls": 0,
+            "eigen_matvec_calls": 0,
+            "eigen_covariance_calls": 1,
+            "algorithm_copy_bytes": 134250496,
+            "fused_scalar_calls": 0,
+            "summary_source_scans": 0,
+            "order_stat_sorts": 0,
+            "python_operator_calls": 0,
+            "execution_backend": "native_graph_interpreter"
+          }
+        ]
+      },
+      "new": {
+        "execution_backend": "cpp_aot",
+        "audit_schema": "cpp-aot-execution-2",
+        "result_protocol": "typed-results-1",
+        "engine": "calmetrics_engine",
+        "model_identity": null,
+        "engine_version": "0.3.0",
+        "engine_build_id": "91267c23ac014c947e67ae31054dddc8aaa102fadd12f2ce4331c87752c63758",
+        "operator_registry_version": "canonical-native-1",
+        "typed_ir_version": "cpp-typed-ir-1",
+        "plan_fingerprint": "native-3-047c85ca1e618ec3bf673cd851b2b5d8",
+        "source_contracts": [],
+        "status_result_copy_bytes": 0,
+        "status_transport_bytes": 0,
+        "native_aot": true,
+        "python_fallback": 0,
+        "python_operator_calls": 0,
+        "request_time_compilation": 0,
+        "input_dtype": "float64",
+        "input_dtypes": {
+          "x": "float64"
+        },
+        "output_dtype": "per_output",
+        "outputs": [
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "asset",
+              "asset"
+            ],
+            "shape": [
+              "D",
+              "D"
+            ]
+          }
+        ],
+        "result_layout": "interval_root_aligned_8",
+        "result_capacity_bytes": 134217728,
+        "error_policy": "raise",
+        "status_contract": "indicator-status-1",
+        "result_lifetime": "independent",
+        "lane": "single",
+        "elapsed_ms": 759.81175,
+        "queue_wait_ms": 0.00375,
+        "compute_ms": 759.808,
+        "cpu_tokens": 1,
+        "cpu_budget": 1,
+        "process_count": 1,
+        "thread_count": 1,
+        "threads_per_process": 1,
+        "async_orchestration": false,
+        "hard_stop": false,
+        "use_shared_memory": false,
+        "reason_codes": [
+          "typed_array_shape_work_accounted",
+          "typed_result_capacity_write_work_accounted",
+          "parallel_overhead_expected_to_dominate"
+        ],
+        "parallel_dimension": "interval",
+        "product_count": 1,
+        "estimated_work_units": 275465109504.0,
+        "prepared": false,
+        "prepared_cached": true,
+        "shared_memory_bytes": 0,
+        "boundary_copy_bytes": 0,
+        "output_copy_bytes": 0,
+        "scheduler_backend": "cpp",
+        "native_threads": 1,
+        "native_processes": 0,
+        "python_worker_callbacks": 0,
+        "python_native_transitions": 1,
+        "output_ownership": "numpy_owned",
+        "output_kind": "typed",
+        "native_chunks": [
+          {
+            "fused_pointwise_calls": 0,
+            "pointwise_tiles": 0,
+            "vector_elements": 0,
+            "root_copy_bytes": 0,
+            "direct_output_bytes": 134217728,
+            "state_copy_bytes": 0,
+            "pointwise_workspace_capacity_bytes": 0,
+            "rows": 1,
+            "nodes": 3,
+            "max_window": 4113,
+            "numeric_arena_bytes": 0,
+            "mask_arena_bytes": 0,
+            "operator_workspace_capacity_bytes": 16777216,
+            "order_scratch_capacity_bytes": 0,
+            "input_copy_bytes": 0,
+            "eigen_rotation_calls": 0,
+            "eigen_matvec_calls": 0,
+            "eigen_covariance_calls": 0,
+            "accelerate_covchol_calls": 1,
+            "algorithm_copy_bytes": 134774784,
+            "fused_scalar_calls": 0,
+            "summary_source_scans": 0,
+            "order_stat_sorts": 0,
+            "python_operator_calls": 0,
+            "execution_backend": "native_graph_interpreter"
+          }
+        ]
+      },
+      "njit": {}
+    }
+  },
+  {
+    "case": {
+      "n": 4113,
+      "d": 4096,
+      "layout": "f",
+      "entry": "ordinary",
+      "output_order": "C"
+    },
+    "identities": {
+      "old": {
+        "input_sha256": "69b4f4a217429f24ea518a4f4c44e5ae5b3e97ca86f6660115f7fa04daa6d7b6",
+        "identity": {
+          "backend": "old",
+          "engine_build_id": "a63f72ba69ac969b2a60f90254ad15e8075a05ae15639cc9fe7561b229efa699",
+          "threads": [
+            {
+              "user_api": "blas",
+              "internal_api": "openblas",
+              "num_threads": 1,
+              "prefix": "libopenblas",
+              "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+              "version": "0.3.23.dev",
+              "threading_layer": "pthreads",
+              "architecture": "armv8"
+            }
+          ]
+        },
+        "verification": {
+          "shape": [
+            4096,
+            4096
+          ],
+          "dtype": "float64",
+          "sha256": "6e2fbcc0225c9e302a274406aa355552c6d9fcb8effe377cbb3a6045b67c7a6f",
+          "independent": true
+        }
+      },
+      "new": {
+        "input_sha256": "69b4f4a217429f24ea518a4f4c44e5ae5b3e97ca86f6660115f7fa04daa6d7b6",
+        "identity": {
+          "backend": "new",
+          "engine_build_id": "91267c23ac014c947e67ae31054dddc8aaa102fadd12f2ce4331c87752c63758",
+          "threads": [
+            {
+              "user_api": "blas",
+              "internal_api": "openblas",
+              "num_threads": 1,
+              "prefix": "libopenblas",
+              "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+              "version": "0.3.23.dev",
+              "threading_layer": "pthreads",
+              "architecture": "armv8"
+            }
+          ]
+        },
+        "verification": {
+          "shape": [
+            4096,
+            4096
+          ],
+          "dtype": "float64",
+          "sha256": "f912428b83c4968355b1368c258b332977f7924199c7490ffd0e290b4c11460f",
+          "independent": true
+        }
+      },
+      "njit": {
+        "input_sha256": "69b4f4a217429f24ea518a4f4c44e5ae5b3e97ca86f6660115f7fa04daa6d7b6",
+        "identity": {
+          "backend": "numba-numpy-lapack",
+          "numba": "0.60.0",
+          "threads": [
+            {
+              "user_api": "blas",
+              "internal_api": "openblas",
+              "num_threads": 1,
+              "prefix": "libopenblas",
+              "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+              "version": "0.3.23.dev",
+              "threading_layer": "pthreads",
+              "architecture": "armv8"
+            }
+          ]
+        },
+        "verification": {
+          "shape": [
+            4096,
+            4096
+          ],
+          "dtype": "float64",
+          "sha256": "6bf70b906de1745c982432e9ca2e59d6d0df91511e53c5d8e452bb47046c9d0b",
+          "independent": true
+        }
+      }
+    },
+    "parity": {
+      "native": "rtol=atol=1e-12 for large C roots; bitwise otherwise",
+      "njit_rtol": 1e-11,
+      "njit_atol": 1e-11,
+      "njit_within_tolerance": true,
+      "njit_outside_tolerance": 0,
+      "njit_max_abs": 6.521345963239611e-13
+    },
+    "samples": {
+      "old": {
+        "wall_ns": [
+          6926794083,
+          7129645333,
+          7080880500,
+          7050417917,
+          7013060458,
+          7067609125
+        ],
+        "cpu_ns": [
+          6926747000,
+          7113836000,
+          7078690000,
+          7009578000,
+          7010481000,
+          7065782000
+        ]
+      },
+      "new": {
+        "wall_ns": [
+          687261708,
+          691344167,
+          695223875,
+          682802375,
+          684714167,
+          681874625
+        ],
+        "cpu_ns": [
+          687007000,
+          690946000,
+          687850000,
+          682559000,
+          684609000,
+          681694000
+        ]
+      },
+      "njit": {
+        "wall_ns": [
+          1617680875,
+          1605602334,
+          1603623791,
+          1588638833,
+          1605887166,
+          1606154208
+        ],
+        "cpu_ns": [
+          1617264000,
+          1604495000,
+          1603389000,
+          1588297000,
+          1604317000,
+          1604897000
+        ]
+      }
+    },
+    "rounds": [
+      {
+        "order": [
+          "old",
+          "new",
+          "njit"
+        ],
+        "samples": {
+          "old": {
+            "wall_ns": [
+              6926794083
+            ],
+            "cpu_ns": [
+              6926747000
+            ]
+          },
+          "new": {
+            "wall_ns": [
+              687261708
+            ],
+            "cpu_ns": [
+              687007000
+            ]
+          },
+          "njit": {
+            "wall_ns": [
+              1617680875
+            ],
+            "cpu_ns": [
+              1617264000
+            ]
+          }
+        }
+      },
+      {
+        "order": [
+          "new",
+          "njit",
+          "old"
+        ],
+        "samples": {
+          "new": {
+            "wall_ns": [
+              691344167
+            ],
+            "cpu_ns": [
+              690946000
+            ]
+          },
+          "njit": {
+            "wall_ns": [
+              1605602334
+            ],
+            "cpu_ns": [
+              1604495000
+            ]
+          },
+          "old": {
+            "wall_ns": [
+              7129645333
+            ],
+            "cpu_ns": [
+              7113836000
+            ]
+          }
+        }
+      },
+      {
+        "order": [
+          "njit",
+          "old",
+          "new"
+        ],
+        "samples": {
+          "njit": {
+            "wall_ns": [
+              1603623791
+            ],
+            "cpu_ns": [
+              1603389000
+            ]
+          },
+          "old": {
+            "wall_ns": [
+              7080880500
+            ],
+            "cpu_ns": [
+              7078690000
+            ]
+          },
+          "new": {
+            "wall_ns": [
+              695223875
+            ],
+            "cpu_ns": [
+              687850000
+            ]
+          }
+        }
+      },
+      {
+        "order": [
+          "old",
+          "new",
+          "njit"
+        ],
+        "samples": {
+          "old": {
+            "wall_ns": [
+              7050417917
+            ],
+            "cpu_ns": [
+              7009578000
+            ]
+          },
+          "new": {
+            "wall_ns": [
+              682802375
+            ],
+            "cpu_ns": [
+              682559000
+            ]
+          },
+          "njit": {
+            "wall_ns": [
+              1588638833
+            ],
+            "cpu_ns": [
+              1588297000
+            ]
+          }
+        }
+      },
+      {
+        "order": [
+          "new",
+          "njit",
+          "old"
+        ],
+        "samples": {
+          "new": {
+            "wall_ns": [
+              684714167
+            ],
+            "cpu_ns": [
+              684609000
+            ]
+          },
+          "njit": {
+            "wall_ns": [
+              1605887166
+            ],
+            "cpu_ns": [
+              1604317000
+            ]
+          },
+          "old": {
+            "wall_ns": [
+              7013060458
+            ],
+            "cpu_ns": [
+              7010481000
+            ]
+          }
+        }
+      },
+      {
+        "order": [
+          "njit",
+          "old",
+          "new"
+        ],
+        "samples": {
+          "njit": {
+            "wall_ns": [
+              1606154208
+            ],
+            "cpu_ns": [
+              1604897000
+            ]
+          },
+          "old": {
+            "wall_ns": [
+              7067609125
+            ],
+            "cpu_ns": [
+              7065782000
+            ]
+          },
+          "new": {
+            "wall_ns": [
+              681874625
+            ],
+            "cpu_ns": [
+              681694000
+            ]
+          }
+        }
+      }
+    ],
+    "median_ms": {
+      "old": 7059.013521,
+      "new": 685.9879375,
+      "njit": 1605.74475
+    },
+    "audits": {
+      "old": {
+        "execution_backend": "cpp_aot",
+        "audit_schema": "cpp-aot-execution-2",
+        "result_protocol": "typed-results-1",
+        "engine": "calmetrics_engine",
+        "model_identity": null,
+        "engine_version": "0.3.0",
+        "engine_build_id": "a63f72ba69ac969b2a60f90254ad15e8075a05ae15639cc9fe7561b229efa699",
+        "operator_registry_version": "canonical-native-1",
+        "typed_ir_version": "cpp-typed-ir-1",
+        "plan_fingerprint": "native-3-047c85ca1e618ec3bf673cd851b2b5d8",
+        "source_contracts": [],
+        "status_result_copy_bytes": 0,
+        "status_transport_bytes": 0,
+        "native_aot": true,
+        "python_fallback": 0,
+        "python_operator_calls": 0,
+        "request_time_compilation": 0,
+        "input_dtype": "float64",
+        "input_dtypes": {
+          "x": "float64"
+        },
+        "output_dtype": "per_output",
+        "outputs": [
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "asset",
+              "asset"
+            ],
+            "shape": [
+              "D",
+              "D"
+            ]
+          }
+        ],
+        "result_layout": "interval_root_aligned_8",
+        "result_capacity_bytes": 134217728,
+        "error_policy": "raise",
+        "status_contract": "indicator-status-1",
+        "result_lifetime": "independent",
+        "lane": "single",
+        "elapsed_ms": 7065.615,
+        "queue_wait_ms": 0.006083,
+        "compute_ms": 7065.608917,
+        "cpu_tokens": 1,
+        "cpu_budget": 1,
+        "process_count": 1,
+        "thread_count": 1,
+        "threads_per_process": 1,
+        "async_orchestration": false,
+        "hard_stop": false,
+        "use_shared_memory": false,
+        "reason_codes": [
+          "typed_array_shape_work_accounted",
+          "typed_result_capacity_write_work_accounted",
+          "parallel_overhead_expected_to_dominate"
+        ],
+        "parallel_dimension": "interval",
+        "product_count": 1,
+        "estimated_work_units": 275465109504.0,
+        "prepared": false,
+        "prepared_cached": true,
+        "shared_memory_bytes": 0,
+        "boundary_copy_bytes": 0,
+        "output_copy_bytes": 0,
+        "scheduler_backend": "cpp",
+        "native_threads": 1,
+        "native_processes": 0,
+        "python_worker_callbacks": 0,
+        "python_native_transitions": 1,
+        "output_ownership": "numpy_owned",
+        "output_kind": "typed",
+        "native_chunks": [
+          {
+            "fused_pointwise_calls": 0,
+            "pointwise_tiles": 0,
+            "vector_elements": 0,
+            "root_copy_bytes": 0,
+            "direct_output_bytes": 134217728,
+            "state_copy_bytes": 0,
+            "pointwise_workspace_capacity_bytes": 0,
+            "rows": 1,
+            "nodes": 3,
+            "max_window": 4113,
+            "numeric_arena_bytes": 0,
+            "mask_arena_bytes": 0,
+            "operator_workspace_capacity_bytes": 527488,
+            "order_scratch_capacity_bytes": 0,
+            "input_copy_bytes": 0,
+            "eigen_rotation_calls": 0,
+            "eigen_matvec_calls": 0,
+            "eigen_covariance_calls": 1,
+            "algorithm_copy_bytes": 134250496,
+            "fused_scalar_calls": 0,
+            "summary_source_scans": 0,
+            "order_stat_sorts": 0,
+            "python_operator_calls": 0,
+            "execution_backend": "native_graph_interpreter"
+          }
+        ]
+      },
+      "new": {
+        "execution_backend": "cpp_aot",
+        "audit_schema": "cpp-aot-execution-2",
+        "result_protocol": "typed-results-1",
+        "engine": "calmetrics_engine",
+        "model_identity": null,
+        "engine_version": "0.3.0",
+        "engine_build_id": "91267c23ac014c947e67ae31054dddc8aaa102fadd12f2ce4331c87752c63758",
+        "operator_registry_version": "canonical-native-1",
+        "typed_ir_version": "cpp-typed-ir-1",
+        "plan_fingerprint": "native-3-047c85ca1e618ec3bf673cd851b2b5d8",
+        "source_contracts": [],
+        "status_result_copy_bytes": 0,
+        "status_transport_bytes": 0,
+        "native_aot": true,
+        "python_fallback": 0,
+        "python_operator_calls": 0,
+        "request_time_compilation": 0,
+        "input_dtype": "float64",
+        "input_dtypes": {
+          "x": "float64"
+        },
+        "output_dtype": "per_output",
+        "outputs": [
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "asset",
+              "asset"
+            ],
+            "shape": [
+              "D",
+              "D"
+            ]
+          }
+        ],
+        "result_layout": "interval_root_aligned_8",
+        "result_capacity_bytes": 134217728,
+        "error_policy": "raise",
+        "status_contract": "indicator-status-1",
+        "result_lifetime": "independent",
+        "lane": "single",
+        "elapsed_ms": 679.857458,
+        "queue_wait_ms": 0.004708,
+        "compute_ms": 679.85275,
+        "cpu_tokens": 1,
+        "cpu_budget": 1,
+        "process_count": 1,
+        "thread_count": 1,
+        "threads_per_process": 1,
+        "async_orchestration": false,
+        "hard_stop": false,
+        "use_shared_memory": false,
+        "reason_codes": [
+          "typed_array_shape_work_accounted",
+          "typed_result_capacity_write_work_accounted",
+          "parallel_overhead_expected_to_dominate"
+        ],
+        "parallel_dimension": "interval",
+        "product_count": 1,
+        "estimated_work_units": 275465109504.0,
+        "prepared": false,
+        "prepared_cached": true,
+        "shared_memory_bytes": 0,
+        "boundary_copy_bytes": 0,
+        "output_copy_bytes": 0,
+        "scheduler_backend": "cpp",
+        "native_threads": 1,
+        "native_processes": 0,
+        "python_worker_callbacks": 0,
+        "python_native_transitions": 1,
+        "output_ownership": "numpy_owned",
+        "output_kind": "typed",
+        "native_chunks": [
+          {
+            "fused_pointwise_calls": 0,
+            "pointwise_tiles": 0,
+            "vector_elements": 0,
+            "root_copy_bytes": 0,
+            "direct_output_bytes": 134217728,
+            "state_copy_bytes": 0,
+            "pointwise_workspace_capacity_bytes": 0,
+            "rows": 1,
+            "nodes": 3,
+            "max_window": 4113,
+            "numeric_arena_bytes": 0,
+            "mask_arena_bytes": 0,
+            "operator_workspace_capacity_bytes": 16777216,
+            "order_scratch_capacity_bytes": 0,
+            "input_copy_bytes": 0,
+            "eigen_rotation_calls": 0,
+            "eigen_matvec_calls": 0,
+            "eigen_covariance_calls": 0,
+            "accelerate_covchol_calls": 1,
+            "algorithm_copy_bytes": 134774784,
+            "fused_scalar_calls": 0,
+            "summary_source_scans": 0,
+            "order_stat_sorts": 0,
+            "python_operator_calls": 0,
+            "execution_backend": "native_graph_interpreter"
+          }
+        ]
+      },
+      "njit": {}
+    }
+  },
+  {
+    "case": {
+      "n": 2065,
+      "d": 2048,
+      "layout": "f",
+      "entry": "prepared",
+      "output_order": "C"
+    },
+    "identities": {
+      "old": {
+        "input_sha256": "f17d563125b4f11eaa747727de0308c27d95cc1a5418d1906bb2026cc6380c5c",
+        "identity": {
+          "backend": "old",
+          "engine_build_id": "a63f72ba69ac969b2a60f90254ad15e8075a05ae15639cc9fe7561b229efa699",
+          "threads": [
+            {
+              "user_api": "blas",
+              "internal_api": "openblas",
+              "num_threads": 1,
+              "prefix": "libopenblas",
+              "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+              "version": "0.3.23.dev",
+              "threading_layer": "pthreads",
+              "architecture": "armv8"
+            }
+          ]
+        },
+        "verification": {
+          "shape": [
+            2048,
+            2048
+          ],
+          "dtype": "float64",
+          "sha256": "0a7e74b628d8f8b3c14105f2a26ea2bb4a6f7980d520979292a6c5e777142775",
+          "independent": true
+        }
+      },
+      "new": {
+        "input_sha256": "f17d563125b4f11eaa747727de0308c27d95cc1a5418d1906bb2026cc6380c5c",
+        "identity": {
+          "backend": "new",
+          "engine_build_id": "91267c23ac014c947e67ae31054dddc8aaa102fadd12f2ce4331c87752c63758",
+          "threads": [
+            {
+              "user_api": "blas",
+              "internal_api": "openblas",
+              "num_threads": 1,
+              "prefix": "libopenblas",
+              "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+              "version": "0.3.23.dev",
+              "threading_layer": "pthreads",
+              "architecture": "armv8"
+            }
+          ]
+        },
+        "verification": {
+          "shape": [
+            2048,
+            2048
+          ],
+          "dtype": "float64",
+          "sha256": "0cb4da59172392acd09431bbd2348037e703cf03924b21f796801104bc671f5c",
+          "independent": true
+        }
+      },
+      "njit": {
+        "input_sha256": "f17d563125b4f11eaa747727de0308c27d95cc1a5418d1906bb2026cc6380c5c",
+        "identity": {
+          "backend": "numba-numpy-lapack",
+          "numba": "0.60.0",
+          "threads": [
+            {
+              "user_api": "blas",
+              "internal_api": "openblas",
+              "num_threads": 1,
+              "prefix": "libopenblas",
+              "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+              "version": "0.3.23.dev",
+              "threading_layer": "pthreads",
+              "architecture": "armv8"
+            }
+          ]
+        },
+        "verification": {
+          "shape": [
+            2048,
+            2048
+          ],
+          "dtype": "float64",
+          "sha256": "44f22e423354f0844d7f679ec51b9f653cc0294dc9d9ae6cc89d39466a4838ce",
+          "independent": true
+        }
+      }
+    },
+    "parity": {
+      "native": "rtol=atol=1e-12 for large C roots; bitwise otherwise",
+      "njit_rtol": 1e-11,
+      "njit_atol": 1e-11,
+      "njit_within_tolerance": true,
+      "njit_outside_tolerance": 0,
+      "njit_max_abs": 1.808171667949665e-13
+    },
+    "samples": {
+      "old": {
+        "wall_ns": [
+          826294334,
+          845403583,
+          842616167,
+          847795500,
+          852098042,
+          847786958
+        ],
+        "cpu_ns": [
+          826290000,
+          845299000,
+          842359000,
+          847564000,
+          849804000,
+          847539000
+        ]
+      },
+      "new": {
+        "wall_ns": [
+          157828583,
+          156839000,
+          158734875,
+          157334750,
+          169181959,
+          156141541
+        ],
+        "cpu_ns": [
+          157783000,
+          156677000,
+          158721000,
+          157172000,
+          169125000,
+          156084000
+        ]
+      },
+      "njit": {
+        "wall_ns": [
+          182830375,
+          171055584,
+          179200708,
+          169067750,
+          178486500,
+          177181583
+        ],
+        "cpu_ns": [
+          182810000,
+          171024000,
+          179179000,
+          168990000,
+          178460000,
+          177157000
+        ]
+      }
+    },
+    "rounds": [
+      {
+        "order": [
+          "old",
+          "new",
+          "njit"
+        ],
+        "samples": {
+          "old": {
+            "wall_ns": [
+              826294334
+            ],
+            "cpu_ns": [
+              826290000
+            ]
+          },
+          "new": {
+            "wall_ns": [
+              157828583
+            ],
+            "cpu_ns": [
+              157783000
+            ]
+          },
+          "njit": {
+            "wall_ns": [
+              182830375
+            ],
+            "cpu_ns": [
+              182810000
+            ]
+          }
+        }
+      },
+      {
+        "order": [
+          "new",
+          "njit",
+          "old"
+        ],
+        "samples": {
+          "new": {
+            "wall_ns": [
+              156839000
+            ],
+            "cpu_ns": [
+              156677000
+            ]
+          },
+          "njit": {
+            "wall_ns": [
+              171055584
+            ],
+            "cpu_ns": [
+              171024000
+            ]
+          },
+          "old": {
+            "wall_ns": [
+              845403583
+            ],
+            "cpu_ns": [
+              845299000
+            ]
+          }
+        }
+      },
+      {
+        "order": [
+          "njit",
+          "old",
+          "new"
+        ],
+        "samples": {
+          "njit": {
+            "wall_ns": [
+              179200708
+            ],
+            "cpu_ns": [
+              179179000
+            ]
+          },
+          "old": {
+            "wall_ns": [
+              842616167
+            ],
+            "cpu_ns": [
+              842359000
+            ]
+          },
+          "new": {
+            "wall_ns": [
+              158734875
+            ],
+            "cpu_ns": [
+              158721000
+            ]
+          }
+        }
+      },
+      {
+        "order": [
+          "old",
+          "new",
+          "njit"
+        ],
+        "samples": {
+          "old": {
+            "wall_ns": [
+              847795500
+            ],
+            "cpu_ns": [
+              847564000
+            ]
+          },
+          "new": {
+            "wall_ns": [
+              157334750
+            ],
+            "cpu_ns": [
+              157172000
+            ]
+          },
+          "njit": {
+            "wall_ns": [
+              169067750
+            ],
+            "cpu_ns": [
+              168990000
+            ]
+          }
+        }
+      },
+      {
+        "order": [
+          "new",
+          "njit",
+          "old"
+        ],
+        "samples": {
+          "new": {
+            "wall_ns": [
+              169181959
+            ],
+            "cpu_ns": [
+              169125000
+            ]
+          },
+          "njit": {
+            "wall_ns": [
+              178486500
+            ],
+            "cpu_ns": [
+              178460000
+            ]
+          },
+          "old": {
+            "wall_ns": [
+              852098042
+            ],
+            "cpu_ns": [
+              849804000
+            ]
+          }
+        }
+      },
+      {
+        "order": [
+          "njit",
+          "old",
+          "new"
+        ],
+        "samples": {
+          "njit": {
+            "wall_ns": [
+              177181583
+            ],
+            "cpu_ns": [
+              177157000
+            ]
+          },
+          "old": {
+            "wall_ns": [
+              847786958
+            ],
+            "cpu_ns": [
+              847539000
+            ]
+          },
+          "new": {
+            "wall_ns": [
+              156141541
+            ],
+            "cpu_ns": [
+              156084000
+            ]
+          }
+        }
+      }
+    ],
+    "median_ms": {
+      "old": 846.5952705,
+      "new": 157.5816665,
+      "njit": 177.8340415
+    },
+    "audits": {
+      "old": {
+        "execution_backend": "cpp_aot",
+        "audit_schema": "cpp-aot-execution-2",
+        "result_protocol": "typed-results-1",
+        "engine": "calmetrics_engine",
+        "model_identity": null,
+        "engine_version": "0.3.0",
+        "engine_build_id": "a63f72ba69ac969b2a60f90254ad15e8075a05ae15639cc9fe7561b229efa699",
+        "operator_registry_version": "canonical-native-1",
+        "typed_ir_version": "cpp-typed-ir-1",
+        "plan_fingerprint": "native-3-047c85ca1e618ec3bf673cd851b2b5d8",
+        "source_contracts": [],
+        "status_result_copy_bytes": 0,
+        "status_transport_bytes": 0,
+        "native_aot": true,
+        "python_fallback": 0,
+        "python_operator_calls": 0,
+        "request_time_compilation": 0,
+        "input_dtype": "float64",
+        "input_dtypes": {
+          "x": "float64"
+        },
+        "output_dtype": "per_output",
+        "outputs": [
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "asset",
+              "asset"
+            ],
+            "shape": [
+              "D",
+              "D"
+            ]
+          }
+        ],
+        "result_layout": "interval_root_aligned_8",
+        "result_capacity_bytes": 33554432,
+        "error_policy": "raise",
+        "status_contract": "indicator-status-1",
+        "result_lifetime": "independent",
+        "lane": "single",
+        "elapsed_ms": 847.178583,
+        "queue_wait_ms": 0.001375,
+        "compute_ms": 847.177208,
+        "cpu_tokens": 1,
+        "cpu_budget": 1,
+        "process_count": 1,
+        "thread_count": 1,
+        "threads_per_process": 1,
+        "async_orchestration": false,
+        "hard_stop": false,
+        "use_shared_memory": false,
+        "reason_codes": [
+          "typed_array_shape_work_accounted",
+          "typed_result_capacity_write_work_accounted",
+          "parallel_overhead_expected_to_dominate"
+        ],
+        "parallel_dimension": "interval",
+        "product_count": 1,
+        "estimated_work_units": 34506539008.0,
+        "prepared": true,
+        "prepared_cached": true,
+        "shared_memory_bytes": 0,
+        "boundary_copy_bytes": 0,
+        "output_copy_bytes": 0,
+        "scheduler_backend": "cpp",
+        "native_threads": 1,
+        "native_processes": 0,
+        "python_worker_callbacks": 0,
+        "python_native_transitions": 1,
+        "output_ownership": "numpy_owned",
+        "output_kind": "typed",
+        "native_chunks": [
+          {
+            "fused_pointwise_calls": 0,
+            "pointwise_tiles": 0,
+            "vector_elements": 0,
+            "root_copy_bytes": 0,
+            "direct_output_bytes": 33554432,
+            "state_copy_bytes": 0,
+            "pointwise_workspace_capacity_bytes": 0,
+            "rows": 1,
+            "nodes": 3,
+            "max_window": 2065,
+            "numeric_arena_bytes": 0,
+            "mask_arena_bytes": 0,
+            "operator_workspace_capacity_bytes": 265344,
+            "order_scratch_capacity_bytes": 0,
+            "input_copy_bytes": 0,
+            "eigen_rotation_calls": 0,
+            "eigen_matvec_calls": 0,
+            "eigen_covariance_calls": 1,
+            "algorithm_copy_bytes": 33570816,
+            "fused_scalar_calls": 0,
+            "summary_source_scans": 0,
+            "order_stat_sorts": 0,
+            "python_operator_calls": 0,
+            "execution_backend": "native_graph_interpreter"
+          }
+        ]
+      },
+      "new": {
+        "execution_backend": "cpp_aot",
+        "audit_schema": "cpp-aot-execution-2",
+        "result_protocol": "typed-results-1",
+        "engine": "calmetrics_engine",
+        "model_identity": null,
+        "engine_version": "0.3.0",
+        "engine_build_id": "91267c23ac014c947e67ae31054dddc8aaa102fadd12f2ce4331c87752c63758",
+        "operator_registry_version": "canonical-native-1",
+        "typed_ir_version": "cpp-typed-ir-1",
+        "plan_fingerprint": "native-3-047c85ca1e618ec3bf673cd851b2b5d8",
+        "source_contracts": [],
+        "status_result_copy_bytes": 0,
+        "status_transport_bytes": 0,
+        "native_aot": true,
+        "python_fallback": 0,
+        "python_operator_calls": 0,
+        "request_time_compilation": 0,
+        "input_dtype": "float64",
+        "input_dtypes": {
+          "x": "float64"
+        },
+        "output_dtype": "per_output",
+        "outputs": [
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "asset",
+              "asset"
+            ],
+            "shape": [
+              "D",
+              "D"
+            ]
+          }
+        ],
+        "result_layout": "interval_root_aligned_8",
+        "result_capacity_bytes": 33554432,
+        "error_policy": "raise",
+        "status_contract": "indicator-status-1",
+        "result_lifetime": "independent",
+        "lane": "single",
+        "elapsed_ms": 155.551292,
+        "queue_wait_ms": 0.001292,
+        "compute_ms": 155.55,
+        "cpu_tokens": 1,
+        "cpu_budget": 1,
+        "process_count": 1,
+        "thread_count": 1,
+        "threads_per_process": 1,
+        "async_orchestration": false,
+        "hard_stop": false,
+        "use_shared_memory": false,
+        "reason_codes": [
+          "typed_array_shape_work_accounted",
+          "typed_result_capacity_write_work_accounted",
+          "parallel_overhead_expected_to_dominate"
+        ],
+        "parallel_dimension": "interval",
+        "product_count": 1,
+        "estimated_work_units": 34506539008.0,
+        "prepared": true,
+        "prepared_cached": true,
+        "shared_memory_bytes": 0,
+        "boundary_copy_bytes": 0,
+        "output_copy_bytes": 0,
+        "scheduler_backend": "cpp",
+        "native_threads": 1,
+        "native_processes": 0,
+        "python_worker_callbacks": 0,
+        "python_native_transitions": 1,
+        "output_ownership": "numpy_owned",
+        "output_kind": "typed",
+        "native_chunks": [
+          {
+            "fused_pointwise_calls": 0,
+            "pointwise_tiles": 0,
+            "vector_elements": 0,
+            "root_copy_bytes": 0,
+            "direct_output_bytes": 33554432,
+            "state_copy_bytes": 0,
+            "pointwise_workspace_capacity_bytes": 0,
+            "rows": 1,
+            "nodes": 3,
+            "max_window": 2065,
+            "numeric_arena_bytes": 0,
+            "mask_arena_bytes": 0,
+            "operator_workspace_capacity_bytes": 8388608,
+            "order_scratch_capacity_bytes": 0,
+            "input_copy_bytes": 0,
+            "eigen_rotation_calls": 0,
+            "eigen_matvec_calls": 0,
+            "eigen_covariance_calls": 0,
+            "accelerate_covchol_calls": 1,
+            "algorithm_copy_bytes": 33832960,
+            "fused_scalar_calls": 0,
+            "summary_source_scans": 0,
+            "order_stat_sorts": 0,
+            "python_operator_calls": 0,
+            "execution_backend": "native_graph_interpreter"
+          }
+        ]
+      },
+      "njit": {}
+    }
+  },
+  {
+    "case": {
+      "n": 2065,
+      "d": 2048,
+      "layout": "f",
+      "entry": "ordinary",
+      "output_order": "F"
+    },
+    "identities": {
+      "old": {
+        "input_sha256": "f17d563125b4f11eaa747727de0308c27d95cc1a5418d1906bb2026cc6380c5c",
+        "identity": {
+          "backend": "old",
+          "engine_build_id": "a63f72ba69ac969b2a60f90254ad15e8075a05ae15639cc9fe7561b229efa699",
+          "threads": [
+            {
+              "user_api": "blas",
+              "internal_api": "openblas",
+              "num_threads": 1,
+              "prefix": "libopenblas",
+              "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+              "version": "0.3.23.dev",
+              "threading_layer": "pthreads",
+              "architecture": "armv8"
+            }
+          ]
+        },
+        "verification": {
+          "shape": [
+            2048,
+            2048
+          ],
+          "dtype": "float64",
+          "sha256": "0a7e74b628d8f8b3c14105f2a26ea2bb4a6f7980d520979292a6c5e777142775",
+          "independent": true
+        }
+      },
+      "new": {
+        "input_sha256": "f17d563125b4f11eaa747727de0308c27d95cc1a5418d1906bb2026cc6380c5c",
+        "identity": {
+          "backend": "new",
+          "engine_build_id": "91267c23ac014c947e67ae31054dddc8aaa102fadd12f2ce4331c87752c63758",
+          "threads": [
+            {
+              "user_api": "blas",
+              "internal_api": "openblas",
+              "num_threads": 1,
+              "prefix": "libopenblas",
+              "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+              "version": "0.3.23.dev",
+              "threading_layer": "pthreads",
+              "architecture": "armv8"
+            }
+          ]
+        },
+        "verification": {
+          "shape": [
+            2048,
+            2048
+          ],
+          "dtype": "float64",
+          "sha256": "0cb4da59172392acd09431bbd2348037e703cf03924b21f796801104bc671f5c",
+          "independent": true
+        }
+      },
+      "njit": {
+        "input_sha256": "f17d563125b4f11eaa747727de0308c27d95cc1a5418d1906bb2026cc6380c5c",
+        "identity": {
+          "backend": "numba-numpy-lapack",
+          "numba": "0.60.0",
+          "threads": [
+            {
+              "user_api": "blas",
+              "internal_api": "openblas",
+              "num_threads": 1,
+              "prefix": "libopenblas",
+              "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+              "version": "0.3.23.dev",
+              "threading_layer": "pthreads",
+              "architecture": "armv8"
+            }
+          ]
+        },
+        "verification": {
+          "shape": [
+            2048,
+            2048
+          ],
+          "dtype": "float64",
+          "sha256": "44f22e423354f0844d7f679ec51b9f653cc0294dc9d9ae6cc89d39466a4838ce",
+          "independent": true
+        }
+      }
+    },
+    "parity": {
+      "native": "rtol=atol=1e-12 for large C roots; bitwise otherwise",
+      "njit_rtol": 1e-11,
+      "njit_atol": 1e-11,
+      "njit_within_tolerance": true,
+      "njit_outside_tolerance": 0,
+      "njit_max_abs": 1.808171667949665e-13
+    },
+    "samples": {
+      "old": {
+        "wall_ns": [
+          841958750,
+          863523625,
+          861594459,
+          862554583,
+          884524792,
+          861132500
+        ],
+        "cpu_ns": [
+          841952000,
+          863278000,
+          861512000,
+          862314000,
+          879627000,
+          860805000
+        ]
+      },
+      "new": {
+        "wall_ns": [
+          185853250,
+          185359500,
+          184676583,
+          178048167,
+          191508833,
+          185395750
+        ],
+        "cpu_ns": [
+          185772000,
+          185106000,
+          184520000,
+          177990000,
+          190942000,
+          185206000
+        ]
+      },
+      "njit": {
+        "wall_ns": [
+          200127792,
+          197539334,
+          201931750,
+          194232292,
+          200602875,
+          192358125
+        ],
+        "cpu_ns": [
+          200042000,
+          197477000,
+          201722000,
+          193730000,
+          200195000,
+          192154000
+        ]
+      }
+    },
+    "rounds": [
+      {
+        "order": [
+          "old",
+          "new",
+          "njit"
+        ],
+        "samples": {
+          "old": {
+            "wall_ns": [
+              841958750
+            ],
+            "cpu_ns": [
+              841952000
+            ]
+          },
+          "new": {
+            "wall_ns": [
+              185853250
+            ],
+            "cpu_ns": [
+              185772000
+            ]
+          },
+          "njit": {
+            "wall_ns": [
+              200127792
+            ],
+            "cpu_ns": [
+              200042000
+            ]
+          }
+        }
+      },
+      {
+        "order": [
+          "new",
+          "njit",
+          "old"
+        ],
+        "samples": {
+          "new": {
+            "wall_ns": [
+              185359500
+            ],
+            "cpu_ns": [
+              185106000
+            ]
+          },
+          "njit": {
+            "wall_ns": [
+              197539334
+            ],
+            "cpu_ns": [
+              197477000
+            ]
+          },
+          "old": {
+            "wall_ns": [
+              863523625
+            ],
+            "cpu_ns": [
+              863278000
+            ]
+          }
+        }
+      },
+      {
+        "order": [
+          "njit",
+          "old",
+          "new"
+        ],
+        "samples": {
+          "njit": {
+            "wall_ns": [
+              201931750
+            ],
+            "cpu_ns": [
+              201722000
+            ]
+          },
+          "old": {
+            "wall_ns": [
+              861594459
+            ],
+            "cpu_ns": [
+              861512000
+            ]
+          },
+          "new": {
+            "wall_ns": [
+              184676583
+            ],
+            "cpu_ns": [
+              184520000
+            ]
+          }
+        }
+      },
+      {
+        "order": [
+          "old",
+          "new",
+          "njit"
+        ],
+        "samples": {
+          "old": {
+            "wall_ns": [
+              862554583
+            ],
+            "cpu_ns": [
+              862314000
+            ]
+          },
+          "new": {
+            "wall_ns": [
+              178048167
+            ],
+            "cpu_ns": [
+              177990000
+            ]
+          },
+          "njit": {
+            "wall_ns": [
+              194232292
+            ],
+            "cpu_ns": [
+              193730000
+            ]
+          }
+        }
+      },
+      {
+        "order": [
+          "new",
+          "njit",
+          "old"
+        ],
+        "samples": {
+          "new": {
+            "wall_ns": [
+              191508833
+            ],
+            "cpu_ns": [
+              190942000
+            ]
+          },
+          "njit": {
+            "wall_ns": [
+              200602875
+            ],
+            "cpu_ns": [
+              200195000
+            ]
+          },
+          "old": {
+            "wall_ns": [
+              884524792
+            ],
+            "cpu_ns": [
+              879627000
+            ]
+          }
+        }
+      },
+      {
+        "order": [
+          "njit",
+          "old",
+          "new"
+        ],
+        "samples": {
+          "njit": {
+            "wall_ns": [
+              192358125
+            ],
+            "cpu_ns": [
+              192154000
+            ]
+          },
+          "old": {
+            "wall_ns": [
+              861132500
+            ],
+            "cpu_ns": [
+              860805000
+            ]
+          },
+          "new": {
+            "wall_ns": [
+              185395750
+            ],
+            "cpu_ns": [
+              185206000
+            ]
+          }
+        }
+      }
+    ],
+    "median_ms": {
+      "old": 862.074521,
+      "new": 185.377625,
+      "njit": 198.833563
+    },
+    "audits": {
+      "old": {
+        "execution_backend": "cpp_aot",
+        "audit_schema": "cpp-aot-execution-2",
+        "result_protocol": "typed-results-2",
+        "engine": "calmetrics_engine",
+        "model_identity": null,
+        "engine_version": "0.3.0",
+        "engine_build_id": "a63f72ba69ac969b2a60f90254ad15e8075a05ae15639cc9fe7561b229efa699",
+        "operator_registry_version": "canonical-native-1",
+        "typed_ir_version": "cpp-typed-ir-1",
+        "plan_fingerprint": "native-3-f75f1da43126a2a9b3aa4516c63c3e94",
+        "source_contracts": [],
+        "status_result_copy_bytes": 0,
+        "status_transport_bytes": 0,
+        "native_aot": true,
+        "python_fallback": 0,
+        "python_operator_calls": 0,
+        "request_time_compilation": 0,
+        "input_dtype": "float64",
+        "input_dtypes": {
+          "x": "float64"
+        },
+        "output_dtype": "per_output",
+        "outputs": [
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "asset",
+              "asset"
+            ],
+            "shape": [
+              "D",
+              "D"
+            ]
+          }
+        ],
+        "result_layout": "interval_root_aligned_8",
+        "result_capacity_bytes": 33554432,
+        "error_policy": "raise",
+        "status_contract": "indicator-status-1",
+        "result_lifetime": "independent",
+        "lane": "single",
+        "elapsed_ms": 861.06525,
+        "queue_wait_ms": 0.005083,
+        "compute_ms": 861.060167,
+        "cpu_tokens": 1,
+        "cpu_budget": 1,
+        "process_count": 1,
+        "thread_count": 1,
+        "threads_per_process": 1,
+        "async_orchestration": false,
+        "hard_stop": false,
+        "use_shared_memory": false,
+        "reason_codes": [
+          "typed_array_shape_work_accounted",
+          "typed_result_capacity_write_work_accounted",
+          "parallel_overhead_expected_to_dominate"
+        ],
+        "parallel_dimension": "interval",
+        "product_count": 1,
+        "estimated_work_units": 34506539008.0,
+        "prepared": false,
+        "prepared_cached": true,
+        "shared_memory_bytes": 0,
+        "boundary_copy_bytes": 0,
+        "output_copy_bytes": 0,
+        "scheduler_backend": "cpp",
+        "native_threads": 1,
+        "native_processes": 0,
+        "python_worker_callbacks": 0,
+        "python_native_transitions": 1,
+        "output_ownership": "numpy_owned",
+        "output_kind": "typed",
+        "native_chunks": [
+          {
+            "fused_pointwise_calls": 0,
+            "pointwise_tiles": 0,
+            "vector_elements": 0,
+            "root_copy_bytes": 33554432,
+            "direct_output_bytes": 0,
+            "state_copy_bytes": 0,
+            "pointwise_workspace_capacity_bytes": 0,
+            "rows": 1,
+            "nodes": 3,
+            "max_window": 2065,
+            "numeric_arena_bytes": 33554432,
+            "mask_arena_bytes": 0,
+            "operator_workspace_capacity_bytes": 265344,
+            "order_scratch_capacity_bytes": 0,
+            "input_copy_bytes": 0,
+            "eigen_rotation_calls": 0,
+            "eigen_matvec_calls": 0,
+            "eigen_covariance_calls": 1,
+            "algorithm_copy_bytes": 33570816,
+            "fused_scalar_calls": 0,
+            "summary_source_scans": 0,
+            "order_stat_sorts": 0,
+            "python_operator_calls": 0,
+            "execution_backend": "native_graph_interpreter"
+          }
+        ]
+      },
+      "new": {
+        "execution_backend": "cpp_aot",
+        "audit_schema": "cpp-aot-execution-2",
+        "result_protocol": "typed-results-2",
+        "engine": "calmetrics_engine",
+        "model_identity": null,
+        "engine_version": "0.3.0",
+        "engine_build_id": "91267c23ac014c947e67ae31054dddc8aaa102fadd12f2ce4331c87752c63758",
+        "operator_registry_version": "canonical-native-1",
+        "typed_ir_version": "cpp-typed-ir-1",
+        "plan_fingerprint": "native-3-f75f1da43126a2a9b3aa4516c63c3e94",
+        "source_contracts": [],
+        "status_result_copy_bytes": 0,
+        "status_transport_bytes": 0,
+        "native_aot": true,
+        "python_fallback": 0,
+        "python_operator_calls": 0,
+        "request_time_compilation": 0,
+        "input_dtype": "float64",
+        "input_dtypes": {
+          "x": "float64"
+        },
+        "output_dtype": "per_output",
+        "outputs": [
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "asset",
+              "asset"
+            ],
+            "shape": [
+              "D",
+              "D"
+            ]
+          }
+        ],
+        "result_layout": "interval_root_aligned_8",
+        "result_capacity_bytes": 33554432,
+        "error_policy": "raise",
+        "status_contract": "indicator-status-1",
+        "result_lifetime": "independent",
+        "lane": "single",
+        "elapsed_ms": 185.330459,
+        "queue_wait_ms": 0.003709,
+        "compute_ms": 185.32675,
+        "cpu_tokens": 1,
+        "cpu_budget": 1,
+        "process_count": 1,
+        "thread_count": 1,
+        "threads_per_process": 1,
+        "async_orchestration": false,
+        "hard_stop": false,
+        "use_shared_memory": false,
+        "reason_codes": [
+          "typed_array_shape_work_accounted",
+          "typed_result_capacity_write_work_accounted",
+          "parallel_overhead_expected_to_dominate"
+        ],
+        "parallel_dimension": "interval",
+        "product_count": 1,
+        "estimated_work_units": 34506539008.0,
+        "prepared": false,
+        "prepared_cached": true,
+        "shared_memory_bytes": 0,
+        "boundary_copy_bytes": 0,
+        "output_copy_bytes": 0,
+        "scheduler_backend": "cpp",
+        "native_threads": 1,
+        "native_processes": 0,
+        "python_worker_callbacks": 0,
+        "python_native_transitions": 1,
+        "output_ownership": "numpy_owned",
+        "output_kind": "typed",
+        "native_chunks": [
+          {
+            "fused_pointwise_calls": 0,
+            "pointwise_tiles": 0,
+            "vector_elements": 0,
+            "root_copy_bytes": 33554432,
+            "direct_output_bytes": 0,
+            "state_copy_bytes": 0,
+            "pointwise_workspace_capacity_bytes": 0,
+            "rows": 1,
+            "nodes": 3,
+            "max_window": 2065,
+            "numeric_arena_bytes": 33554432,
+            "mask_arena_bytes": 0,
+            "operator_workspace_capacity_bytes": 8388608,
+            "order_scratch_capacity_bytes": 0,
+            "input_copy_bytes": 0,
+            "eigen_rotation_calls": 0,
+            "eigen_matvec_calls": 0,
+            "eigen_covariance_calls": 0,
+            "accelerate_covchol_calls": 1,
+            "algorithm_copy_bytes": 33832960,
+            "fused_scalar_calls": 0,
+            "summary_source_scans": 0,
+            "order_stat_sorts": 0,
+            "python_operator_calls": 0,
+            "execution_backend": "native_graph_interpreter"
+          }
+        ]
+      },
+      "njit": {}
+    }
+  }
+]

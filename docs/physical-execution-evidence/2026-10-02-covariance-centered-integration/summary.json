@@ -1,0 +1,119 @@
+{
+  "timing_cases": 12,
+  "timing_rounds": 6,
+  "native_exact_all": true,
+  "njit_strict_failed_cases": 5,
+  "memory_cases": 3,
+  "fresh_memory_children": 18,
+  "heap_stages": 54,
+  "heap_tracking_errors": 0,
+  "memory": [
+    {
+      "case": {
+        "name": "covariance",
+        "n": 2048,
+        "d": 2048,
+        "layout": "f",
+        "pattern": "scaled",
+        "entry": "ordinary",
+        "order": "f",
+        "rtol": 1e-12,
+        "atol": 1e-12
+      },
+      "metrics": {
+        "old": {
+          "cold_heap_bytes": 67165546,
+          "warm_heap_bytes": 100720598,
+          "rss_delta_bytes": 101498880
+        },
+        "new": {
+          "cold_heap_bytes": 67165554,
+          "warm_heap_bytes": 100720606,
+          "rss_delta_bytes": 101400576
+        },
+        "njit": {
+          "cold_heap_bytes": 106955228,
+          "warm_heap_bytes": 140509772,
+          "rss_delta_bytes": 146964480
+        }
+      },
+      "new_minus_old": {
+        "cold_peak_bytes": 8,
+        "warm_peak_bytes": 8
+      },
+      "new_minus_old_rss": -98304
+    },
+    {
+      "case": {
+        "name": "covariance",
+        "n": 2048,
+        "d": 2048,
+        "layout": "f",
+        "pattern": "scaled",
+        "entry": "prepared",
+        "order": "f",
+        "rtol": 1e-12,
+        "atol": 1e-12
+      },
+      "metrics": {
+        "old": {
+          "cold_heap_bytes": 67165634,
+          "warm_heap_bytes": 100720662,
+          "rss_delta_bytes": 101531648
+        },
+        "new": {
+          "cold_heap_bytes": 67165642,
+          "warm_heap_bytes": 100720670,
+          "rss_delta_bytes": 101400576
+        },
+        "njit": {
+          "cold_heap_bytes": 106955228,
+          "warm_heap_bytes": 140509772,
+          "rss_delta_bytes": 146931712
+        }
+      },
+      "new_minus_old": {
+        "cold_peak_bytes": 8,
+        "warm_peak_bytes": 8
+      },
+      "new_minus_old_rss": -131072
+    },
+    {
+      "case": {
+        "name": "covariance",
+        "n": 2048,
+        "d": 2048,
+        "layout": "c",
+        "pattern": "scaled",
+        "entry": "ordinary",
+        "order": "c",
+        "rtol": 1e-12,
+        "atol": 1e-12
+      },
+      "metrics": {
+        "old": {
+          "cold_heap_bytes": 67165546,
+          "warm_heap_bytes": 100720598,
+          "rss_delta_bytes": 101515264
+        },
+        "new": {
+          "cold_heap_bytes": 67165554,
+          "warm_heap_bytes": 100720606,
+          "rss_delta_bytes": 101613568
+        },
+        "njit": {
+          "cold_heap_bytes": 106955228,
+          "warm_heap_bytes": 140509772,
+          "rss_delta_bytes": 153223168
+        }
+      },
+      "new_minus_old": {
+        "cold_peak_bytes": 8,
+        "warm_peak_bytes": 8
+      },
+      "new_minus_old_rss": 98304
+    }
+  ],
+  "adopted": true,
+  "overall_njit_goal_complete": false
+}

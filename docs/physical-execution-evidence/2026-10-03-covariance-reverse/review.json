@@ -1,0 +1,42 @@
+{
+  "status": "STAGED_LARGE_BENEFIT_WITH_MATERIAL_REPLAY_REGRESSION_AND_MEMORY_COST",
+  "method": "Root self-review; no subagents",
+  "baseline": "a129d662535bc5e6ebe20f2dc27e4ce7baa7376bfe8d38b23486a0f284d96142",
+  "build_id": "c9a5ef102069a8942e2e8a06261140b14f278d45f988f779db0000df881b045c",
+  "off_build_id": "3222dd4cc053826b5d540b8f3d6b19935f96d2e28ab8633c22e39fdceeaf7f5a",
+  "verification": {
+    "python": 10852,
+    "focused": 529,
+    "focused_off": {
+      "passed": 371,
+      "skipped": 158
+    },
+    "native": "9/9",
+    "asan_ubsan": "9/9",
+    "native_off": "9/9"
+  },
+  "checks": [
+    "Only one production native file changed; canonical means and pair replay already use signed row strides.",
+    "The bounded input shape and +/-INT_MAX stride cap keep signed row offset multiplication representable; no abs(PTRDIFF_MIN) or unsigned negative pointer arithmetic.",
+    "BLAS sees only existing positive-contiguous centered panels; logical source row order, canonical C diagonal, normalized dual-output certificate, sign/zero and fallback remain unchanged.",
+    "Root eligibility, internal/discrete exclusions, process packing, Planner conservative reserve and independent output ownership are unchanged.",
+    "81 additional Python parameter cases and native negative-stride paired outputs cover strided/padded intervals, real transport lanes, prepared input changes, error recovery, budget, canaries and OFF fallback.",
+    "13 old/new/warmed-NJIT cases at one CPU, 9 rounds each; source/input/output identities and original 1e-12 tolerance preserved.",
+    "Benchmark single-output invariants now use existing output_arrays; original failure, completed first five cases and remaining eight are preserved without selective timing reruns.",
+    "Self-review repaired unsigned promotion in preflight offset addition. Final operator object, full extension and worker __TEXT,__text streams exactly match the measured build; all 13 final requests match full output hashes and audits. Timing/memory are explicitly reused, not remeasured."
+  ],
+  "limits": [
+    "No all-operator or all-workload acceptance. Large gains justify staged retention while the goal remains active.",
+    "Dense replay 32769x256 regresses from 131.897458 to 168.907875 ms (about 28%); this is material new speculative-work overhead, not small noise. NJIT is 76.606375 ms.",
+    "Scaled replay grows from 608.445958 to 620.966084 ms; negative F remains about 512 ms versus 14.750167 ms NJIT. Both remain performance work.",
+    "New library path adds about 28 MiB (2048) and 22 MiB (4096) cold/warm heap versus old C++; compared with NJIT it uses about 10/112 MiB less. The added old-C++ cost is not a few-KB exception.",
+    "Four native heap children have zero untracked free at cold peak but reach 5 during warm measurement. Both NJIT children have 1 only after warm peak. Cause not localized; complete lifecycle allocation audit is incomplete.",
+    "Probe coverage is not all malloc/arena/mmap/stack/process-tree memory; RSS has one fresh sample per backend/case. Vendor reserve is an estimate, not a hard bound.",
+    "ASan/UBSan do not instrument vendor libraries and detect_leaks=0. Historical Excel snapshot only; no fresh recalculation. No commit/push."
+  ],
+  "next_priorities": [
+    "Avoid material speculative-work cost for dense long-series normalized certificates without changing semantics or discarding negative evidence.",
+    "Negative-F matrix traversal remains a large independent gap.",
+    "Explicit LAPACK eigen contract awaits user decision; no change under existing bounded-Jacobi definitions."
+  ]
+}

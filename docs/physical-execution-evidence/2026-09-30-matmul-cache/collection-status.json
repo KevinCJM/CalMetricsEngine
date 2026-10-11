@@ -1,0 +1,439 @@
+{
+  "collection": {
+    "collection_complete": true,
+    "overall_acceptance_passed": null,
+    "builds": {
+      "old": "93dcfd0800e6670e40af4b80a439f131f9b96043c25d213a2310a51f6c611fbf",
+      "new": "18977f51909481ec8e88ee73fd24b88ccc83743cc2e82d01c25c2d459547f4a0"
+    },
+    "timing_cases": 114,
+    "memory_cases": 51,
+    "memory_reports": 306,
+    "memory_is_full_timing_coverage": false,
+    "formal_status": {
+      "status": "measurement-completed; acceptance-requires-review",
+      "frozen_old_build": "93dcfd0800e6670e40af4b80a439f131f9b96043c25d213a2310a51f6c611fbf",
+      "timing_cases": 114,
+      "memory_cases": 51,
+      "memory_reports": 306,
+      "memory_is_full_timing_coverage": false,
+      "commands": [
+        [
+          "public-timing",
+          [
+            "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+            "/private/tmp/calmetrics-matmul-cache/formal-adapter.py",
+            "--old-install",
+            "/private/tmp/calmetrics-matmul-cache/install-old",
+            "--new-install",
+            "/private/tmp/calmetrics-matmul-cache/install-new",
+            "--output",
+            "/private/tmp/calmetrics-matmul-cache/formal-final/timing",
+            "--mode",
+            "timing"
+          ]
+        ],
+        [
+          "public-memory",
+          [
+            "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+            "/private/tmp/calmetrics-matmul-cache/formal-memory.py",
+            "--repo",
+            "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine",
+            "--old-install",
+            "/private/tmp/calmetrics-matmul-cache/install-old",
+            "--new-install",
+            "/private/tmp/calmetrics-matmul-cache/install-new",
+            "--heap-probe",
+            "/private/tmp/calmetrics-reaccept-20260929/heap_probe.dylib",
+            "--output",
+            "/private/tmp/calmetrics-matmul-cache/formal-final/memory",
+            "--prior-memory-driver",
+            "/private/tmp/calmetrics-matmul-libraries/run_matmul_memory.py"
+          ]
+        ]
+      ],
+      "python": "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+      "repo": "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine",
+      "old_install": "/private/tmp/calmetrics-matmul-cache/install-old",
+      "new_install": "/private/tmp/calmetrics-matmul-cache/install-new",
+      "install_path_lengths": [
+        48,
+        48
+      ],
+      "cpu_budget": 1,
+      "affinity": false,
+      "rounds": 11,
+      "methodology": "unchanged shared complete-output harness; 11 rotating paired rounds, 3 persistent workers",
+      "iterations": "5 calls per round for M<256 (including long/wide rectangles), otherwise 1",
+      "invariants": "full native output bitwise to old scalar; NJIT original 1e-11 tolerance; sampled fsum outside timing",
+      "memory": "graph/setup/first numeric call inside cold; input hash may allocate/free before epoch; separate heap/RSS children",
+      "direct_audit": "not-collected; no extra diagnostic MatMul",
+      "source_sha256": {
+        "/private/tmp/calmetrics-matmul-cache/formal-run.py": "70d8cf7c5f5b0d625046f8126d92ccfcc6404d6d8322fd32026f61b48a16d23d",
+        "/private/tmp/calmetrics-matmul-cache/formal-adapter.py": "88cfcf946b872bf786de929c3515f62b70a8339d3e63255ce186383cbc98126f",
+        "/private/tmp/calmetrics-matmul-cache/formal-memory.py": "59062a00643ddfcc1f04de15ef8d756c64a3d2fa2d7b978f58976f099d9f476a",
+        "/private/tmp/calmetrics-reaccept-20260929/heap_probe.dylib": "74421dbfff14b56b730553c7b0b0ce9b38a136de053f132069e1b948decd3382",
+        "/private/tmp/calmetrics-matmul-libraries/run_matmul_memory.py": "6d5a69b385ada37c93d96e2edddffa7206b1dc341effc29299fae8c698e03bb2",
+        "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/tools/check_matmul_performance.py": "6ec03268f7e20784746ecad5fbe148b0d16f9a3c1d9273267b7adb9ce9fee5c4",
+        "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/tools/check_large_matrix_performance.py": "2f99bf41adac0926e30aa2045fa0f6bb67ea938826bf6a4c69ed6cf278c10518",
+        "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine/tools/benchmark_memory.py": "b3862bb22e58f01f874bad0fd8466a3eb63ac4f3803186846184aafb47f4d7f8"
+      },
+      "records": [
+        {
+          "name": "public-timing",
+          "command": [
+            "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+            "/private/tmp/calmetrics-matmul-cache/formal-adapter.py",
+            "--old-install",
+            "/private/tmp/calmetrics-matmul-cache/install-old",
+            "--new-install",
+            "/private/tmp/calmetrics-matmul-cache/install-new",
+            "--output",
+            "/private/tmp/calmetrics-matmul-cache/formal-final/timing",
+            "--mode",
+            "timing"
+          ],
+          "status": "completed",
+          "returncode": 0,
+          "seconds": 142.8637150840368
+        },
+        {
+          "name": "public-memory",
+          "command": [
+            "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+            "/private/tmp/calmetrics-matmul-cache/formal-memory.py",
+            "--repo",
+            "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine",
+            "--old-install",
+            "/private/tmp/calmetrics-matmul-cache/install-old",
+            "--new-install",
+            "/private/tmp/calmetrics-matmul-cache/install-new",
+            "--heap-probe",
+            "/private/tmp/calmetrics-reaccept-20260929/heap_probe.dylib",
+            "--output",
+            "/private/tmp/calmetrics-matmul-cache/formal-final/memory",
+            "--prior-memory-driver",
+            "/private/tmp/calmetrics-matmul-libraries/run_matmul_memory.py"
+          ],
+          "status": "completed",
+          "returncode": 0,
+          "seconds": 214.17603270802647
+        }
+      ],
+      "frozen_new_build": "18977f51909481ec8e88ee73fd24b88ccc83743cc2e82d01c25c2d459547f4a0"
+    },
+    "source_files": {
+      "runner": "formal-final/formal-status.json",
+      "timing": "formal-final/timing/timing.json",
+      "timing_manifest": "formal-final/timing/formal-benchmark-manifest.json",
+      "memory": "formal-final/memory/memory.json",
+      "memory_manifest": "formal-final/memory/formal-benchmark-manifest.json",
+      "selection": "formal-final/memory/memory-selection.json"
+    },
+    "limitation": "Collection and identity checks do not establish speed, heap, RSS or joint acceptance."
+  },
+  "declared_current_status_files": {
+    "regression-status.json": [
+      {
+        "name": "native-test",
+        "status": "completed",
+        "command": [
+          "/opt/homebrew/bin/ctest",
+          "--test-dir",
+          "/private/tmp/calmetrics-matmul-cache-build",
+          "--output-on-failure"
+        ],
+        "rc": 0,
+        "seconds": 0.25423937500454485
+      },
+      {
+        "name": "asan-configure",
+        "status": "completed",
+        "command": [
+          "/opt/homebrew/bin/cmake",
+          "-S",
+          "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine",
+          "-B",
+          "/private/tmp/calmetrics-matmul-cache-asan",
+          "-G",
+          "Ninja",
+          "-DCMAKE_MAKE_PROGRAM=/private/tmp/calmetrics-perf-followup-deps/bin/ninja",
+          "-DCALMETRICS_ENGINE_BUILD_PYTHON=OFF",
+          "-DCALMETRICS_ENGINE_BUILD_TESTS=ON",
+          "-DCMAKE_BUILD_TYPE=Release",
+          "-DCALMETRICS_ENGINE_SANITIZE=ON",
+          "-DCMAKE_BUILD_TYPE=RelWithDebInfo"
+        ],
+        "rc": 0,
+        "seconds": 0.7401053751818836
+      },
+      {
+        "name": "asan-build",
+        "status": "completed",
+        "command": [
+          "/opt/homebrew/bin/cmake",
+          "--build",
+          "/private/tmp/calmetrics-matmul-cache-asan",
+          "-j",
+          "3"
+        ],
+        "rc": 0,
+        "seconds": 40.274855291005224
+      },
+      {
+        "name": "asan-test",
+        "status": "completed",
+        "command": [
+          "/opt/homebrew/bin/ctest",
+          "--test-dir",
+          "/private/tmp/calmetrics-matmul-cache-asan",
+          "--output-on-failure"
+        ],
+        "rc": 0,
+        "seconds": 5.17227566591464
+      },
+      {
+        "name": "off-configure",
+        "status": "completed",
+        "command": [
+          "/opt/homebrew/bin/cmake",
+          "-S",
+          "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine",
+          "-B",
+          "/private/tmp/calmetrics-matmul-cache-off",
+          "-G",
+          "Ninja",
+          "-DCMAKE_MAKE_PROGRAM=/private/tmp/calmetrics-perf-followup-deps/bin/ninja",
+          "-DCALMETRICS_ENGINE_BUILD_PYTHON=OFF",
+          "-DCALMETRICS_ENGINE_BUILD_TESTS=ON",
+          "-DCMAKE_BUILD_TYPE=Release",
+          "-DCALMETRICS_ENGINE_USE_EIGEN=OFF"
+        ],
+        "rc": 0,
+        "seconds": 0.46032704203389585
+      },
+      {
+        "name": "off-build",
+        "status": "completed",
+        "command": [
+          "/opt/homebrew/bin/cmake",
+          "--build",
+          "/private/tmp/calmetrics-matmul-cache-off",
+          "-j",
+          "3"
+        ],
+        "rc": 0,
+        "seconds": 16.023810958955437
+      },
+      {
+        "name": "off-test",
+        "status": "completed",
+        "command": [
+          "/opt/homebrew/bin/ctest",
+          "--test-dir",
+          "/private/tmp/calmetrics-matmul-cache-off",
+          "--output-on-failure"
+        ],
+        "rc": 0,
+        "seconds": 3.262157291872427
+      },
+      {
+        "name": "all-operators",
+        "status": "completed",
+        "command": [
+          "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+          "tools/check_all_operator_cases.py",
+          "--fixtures",
+          "/private/tmp/calmetrics-reaccept-20260929/direct-fixtures.pkl",
+          "--output",
+          "/private/tmp/calmetrics-matmul-cache/all-operators.json"
+        ],
+        "rc": 0,
+        "seconds": 4.969929040875286
+      },
+      {
+        "name": "excel-snapshot",
+        "status": "completed",
+        "command": [
+          "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+          "/private/tmp/calmetrics-matmul-cache/verify_excel_snapshot.py"
+        ],
+        "rc": 0,
+        "seconds": 44.01074037514627
+      }
+    ],
+    "python-gates-status.json": [
+      {
+        "name": "python-full",
+        "status": "completed",
+        "command": [
+          "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+          "-m",
+          "pytest",
+          "tests",
+          "-q",
+          "--import-mode=importlib"
+        ],
+        "rc": 0,
+        "seconds": 32.14899387490004
+      },
+      {
+        "name": "phase2",
+        "status": "completed",
+        "command": [
+          "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+          "tools/check_phase2_performance.py",
+          "--cpu-budget",
+          "4",
+          "--repeats",
+          "11",
+          "--output-dir",
+          "/private/tmp/calmetrics-matmul-cache/phase2-final"
+        ],
+        "rc": 0,
+        "seconds": 56.24186591710895
+      }
+    ],
+    "continued-acceptance-status.json": [
+      {
+        "name": "identity",
+        "command": [
+          "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+          "/private/tmp/calmetrics-matmul-cache/verify_identity.py"
+        ],
+        "rc": 0,
+        "seconds": 0.08636270789429545
+      },
+      {
+        "name": "python-gates",
+        "command": [
+          "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+          "/private/tmp/calmetrics-matmul-cache/run_python_gates.py"
+        ],
+        "rc": 0,
+        "seconds": 88.42353241587989
+      },
+      {
+        "name": "formal",
+        "command": [
+          "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+          "/private/tmp/calmetrics-matmul-cache/formal-run.py",
+          "--repo",
+          "/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine",
+          "--heap-probe",
+          "/private/tmp/calmetrics-reaccept-20260929/heap_probe.dylib",
+          "--output-root",
+          "/private/tmp/calmetrics-matmul-cache/formal-final"
+        ],
+        "rc": 0,
+        "seconds": 357.08217583294027
+      }
+    ]
+  },
+  "missing_current_status_files": [],
+  "phase2": {
+    "total": 4,
+    "passed": 4,
+    "rows": [
+      {
+        "products": 500,
+        "njit_ms": 73.391292,
+        "native_ms": 55.434125,
+        "ratio": 0.755322920326842,
+        "max_ratio": 0.9,
+        "passed": true
+      },
+      {
+        "products": 1000,
+        "njit_ms": 146.701917,
+        "native_ms": 110.649583,
+        "ratio": 0.754247696708694,
+        "max_ratio": 0.9,
+        "passed": true
+      },
+      {
+        "products": 1,
+        "intervals": 1,
+        "metrics": 5,
+        "history": 63,
+        "njit_us": 4.625,
+        "native_us": 3.333,
+        "ratio": 0.7206486486486486,
+        "max_ratio": 0.9,
+        "scheduler_us": 4.583,
+        "scheduler_ratio": 0.9822117445349335,
+        "max_scheduler_ratio": 1.0,
+        "passed": true
+      },
+      {
+        "products": 1,
+        "intervals": 1,
+        "metrics": 5,
+        "history": 252,
+        "njit_us": 9.416,
+        "native_us": 7.833,
+        "ratio": 0.8318819031435853,
+        "max_ratio": 0.9,
+        "scheduler_us": 9.167,
+        "scheduler_ratio": 0.9692323958553605,
+        "max_scheduler_ratio": 1.0,
+        "passed": true
+      }
+    ],
+    "thresholds_unchanged": true
+  },
+  "overall_acceptance_passed": null,
+  "acceptance": "not inferred by the archival tool",
+  "source_changes": [
+    {
+      "path": "cpp/include/calmetrics_engine/matrix_backend.hpp",
+      "before": "cd5972679b13b49a86ed40a54f2292cca2ff60ea3ebedb9559d934210b2cb2d5",
+      "after": "8ac92c958432045dd89e9ff68a668569de753c1d867328726925ba4794a97f28"
+    },
+    {
+      "path": "cpp/operators/matrix_backend.cpp",
+      "before": "aa30759a0e12710ad6e763fbe95550767cbf025e487aae35ce888ae59d94b3f5",
+      "after": "6d35c9896ec4233ee164cc2c404e506c727c33454e08b253d9647a120d50201e"
+    },
+    {
+      "path": "cpp/operators/matrix.cpp",
+      "before": "df2d948fd4530b2ba0df4f41624a41c11340a218abaecec7a82ca152a591f362",
+      "after": "3c4a4cc865393c85451a499b07f90f57c72af478199b4968ef5be7bb6db58572"
+    },
+    {
+      "path": "docs/execution-guide.md",
+      "before": "996b8e7b143aadbaaf9cf3d4f8a35aa5f273e002facd7979a5289451e107bf05",
+      "after": "91c6479f08732227da6942a017a8ccbc17c6e4b9bca1c8dde61da3574f87074c"
+    },
+    {
+      "path": "docs/physical-execution-optimization.md",
+      "before": "ea1aec6e648f7c79db2bc50b753fe67f32d8eccc26e61b34a266639830508b77",
+      "after": "d6cf04a738e11b6eab8d3040bb026be2f99fc1037d9dd57bf7ccaa076cb64f33"
+    },
+    {
+      "path": "docs/publishing.md",
+      "before": "6fc1b34839f0f0d782d41900e17c8b7045a93de6fc341dc1591856fbb54dc3a9",
+      "after": "e540f07efb4282723099b78ca11e3eaaf6f9124e934ceb1205c03ae11ee2a4c7"
+    },
+    {
+      "path": "tests/operator_native_tests.cpp",
+      "before": "44747b59472a90acd42404b61788317c02f75900053515b2bcfc7b642adc8622",
+      "after": "441379f95cc7fde596a72d044be77a377cec781d39463e8948d28990ff47b97a"
+    }
+  ],
+  "new_sources": [
+    {
+      "path": "docs/physical-execution-evidence/2026-09-30-matmul-cache/README.md",
+      "before": null,
+      "after": "34121ebbe94fbf04a47e44876c6040f07c31a21af1d90a268a03d0bb4f22784c"
+    },
+    {
+      "path": "tests/test_matmul_cache_library.py",
+      "before": null,
+      "after": "9f5944d8cb7f13b0b169ef6217e3be048d78699a2d92f57cb3a5348a5452a808"
+    }
+  ],
+  "historical_failures": "All original text logs/reports retained; not overwritten by later success.",
+  "omissions": "Install/build binaries, arrays/workbooks and nested compressed archives are indexed but excluded."
+}

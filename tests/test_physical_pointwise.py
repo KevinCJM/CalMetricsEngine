@@ -9,6 +9,121 @@ import pytest
 from calmetrics_engine import AdaptiveScheduler, GraphCompiler
 
 
+@pytest.mark.parametrize("roots", [1, 2, 4, 5, 17])
+@pytest.mark.parametrize("size", [0, 1, 4097])
+def test_snapshot_then_borrowed_execution_keeps_independent_results(roots, size):
+    x = np.arange(size, dtype=np.float64)
+    expressions = {f"r{i}": f"x*2+{i}" for i in range(roots)}
+    graph = GraphCompiler({"x": schema(x.shape)}).compile(expressions)
+    starts, ends = np.array([0], np.int64), np.array([1], np.int64)
+    with AdaptiveScheduler(cpu_budget=1) as engine:
+        prepared = engine.prepare_execution(graph, {"x": x}, starts, ends)
+        saved = prepared.run_snapshot()
+        x += 10
+        borrowed = prepared.run()
+        second = prepared.run_snapshot()
+        for i, (a, b, c) in enumerate(zip(saved.outputs, borrowed.outputs, second.outputs, strict=True)):
+            np.testing.assert_array_equal(a.values[0], (x-10)*2+i)
+            np.testing.assert_array_equal(b.values[0], x*2+i)
+            np.testing.assert_array_equal(c.values[0], x*2+i)
+            assert not np.shares_memory(a.values[0], b.values[0])
+            assert not np.shares_memory(b.values[0], c.values[0])
+
+
+def test_cached_plan_rechecks_mutated_interval_contents_and_explicit_plan():
+    x = np.arange(20.0)
+    graph = GraphCompiler({"x": "series"}).compile("sum(x)")
+    starts, ends = np.array([0], np.int64), np.array([10], np.int64)
+    with AdaptiveScheduler(cpu_budget=1) as engine:
+        old = engine.execute(graph, {"x": x}, starts, ends)
+        engine.execute(graph, {"x": x}, starts, ends)
+        ends[0] = 7
+        fresh = engine.execute(graph, {"x": x}, starts, ends)
+        assert fresh.values[0, 0] == 21
+        assert old.values[0, 0] == 45
+        with pytest.raises(ValueError, match="stale"):
+            engine.execute(graph, {"x": x}, starts, ends, plan=old.plan)
+        ends[0] = 30
+        with pytest.raises(ValueError, match="interval"):
+            engine.execute(graph, {"x": x}, starts, ends)
+
+
+def test_lazy_borrowed_output_keeps_identity_and_snapshot_tamper_guard():
+    x = np.arange(8.0)
+    graph = GraphCompiler({"x": "series"}).compile("sum(x)")
+    with AdaptiveScheduler(cpu_budget=1) as engine:
+        prepared = engine.prepare_execution(graph, {"x": x}, np.array([0], np.int64),
+                                            np.array([8], np.int64))
+        saved = prepared.run_snapshot()
+        output = prepared.output
+        assert prepared.output is output
+        assert prepared.run() is output
+        assert saved.values[0, 0] == output[0, 0] == 28
+        output.flags.writeable = False
+        with pytest.raises(ValueError, match="PREPARED_OUTPUT_CHANGED"):
+            prepared.run_snapshot()
+
+
+def test_closed_native_admission_precedes_stale_explicit_geometry():
+    engine = AdaptiveScheduler(cpu_budget=1)
+    graph = GraphCompiler({"x": "series"}).compile("sum(x)")
+    x, starts, ends = np.arange(8.0), np.array([0], np.int64), np.array([8], np.int64)
+    result = engine.execute(graph, {"x": x}, starts, ends)
+    engine.close()
+    ends[0] = 9
+    with pytest.raises(RuntimeError, match="closed"):
+        engine.execute(graph, {"x": x}, starts, ends, plan=result.plan)
+    with pytest.raises(ValueError, match="timeout"):
+        engine.execute(graph, {"x": x}, starts, ends, plan=result.plan, timeout=-1)
+
+
+@pytest.mark.parametrize("size", [1, 4097])
+def test_iteration_reused_captures_refresh_and_recover_after_nonfinite_initial(size):
+    x = np.full(size, 8.0)
+    coefficient = np.array([0.5])
+    expr = "iterate(iterate_x*c,x,1e-6,100)"
+    graph = GraphCompiler({"x": schema(x.shape), "c": "scalar"}).compile(
+        {"value": expr, "status": f"iteration_status({expr})", "count": f"iteration_count({expr})"}
+    )
+    with AdaptiveScheduler(cpu_budget=1) as engine:
+        prepared = engine.prepare_execution(graph, {"x": x}, np.array([0], np.int64),
+                                            np.array([1], np.int64), parameters=coefficient)
+        first = prepared.run_snapshot()
+        assert first.outputs[2].values[0] == 23
+        coefficient[0] = 0.25
+        second = prepared.run_snapshot()
+        assert second.outputs[2].values[0] == 13
+        x[0] = np.inf
+        failed = prepared.run_snapshot()
+        assert failed.outputs[1].values[0] == 5
+        x[0] = 8.0
+        restored = prepared.run_snapshot()
+        np.testing.assert_array_equal(restored.outputs[0].values[0], second.outputs[0].values[0])
+        assert first.outputs[2].values[0] == 23
+
+
+def test_region_bindings_refresh_when_crossing_tile_and_workspace_boundaries():
+    expression = "(((x*a+b)*3-4)*2)+1"
+    graph = GraphCompiler({"x": schema((1,)), "a": "scalar", "b": "scalar"}).compile(
+        {"value": expression, "mask": f"{expression}>0"}
+    )
+    starts, ends = np.array([0], np.int64), np.array([1], np.int64)
+    parameters = np.array([2.0, 1.0])
+    retained = []
+    with AdaptiveScheduler(cpu_budget=1) as engine:
+        for size in (2049, 24, 2048, 0, 4097):
+            x = np.linspace(-1, 1, size)
+            for a, b in ((2.0, 1.0), (-0.5, -1.0)):
+                parameters[:] = a, b
+                expected = (((x*a+b)*3-4)*2)+1
+                result = engine.execute(graph, {"x": x}, starts, ends, parameters=parameters)
+                np.testing.assert_array_equal(result.outputs[0].values[0], expected)
+                np.testing.assert_array_equal(result.outputs[1].values[0], expected > 0)
+                retained.append((result, expected))
+        for result, expected in retained:
+            np.testing.assert_array_equal(result.outputs[0].values[0], expected)
+
+
 def schema(shape):
     return {
         "kind": {1: "vector", 2: "matrix", 3: "tensor"}[len(shape)],

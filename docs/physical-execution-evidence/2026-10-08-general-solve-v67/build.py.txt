@@ -1,0 +1,62 @@
+"""Root-only current-worktree AOT build and source/native/worker identity."""
+import hashlib
+import json
+import os
+from pathlib import Path
+import subprocess
+import sys
+
+stage = Path(__file__).resolve().parent / "candidate"
+root = Path(__file__).resolve().parent / "source"
+assert json.loads((Path(__file__).resolve().parent / 'preparation.json').read_text())['status']=='isolated_candidate_prepared_not_built'
+stage.mkdir(exist_ok=False)
+env = dict(os.environ, PATH="/private/tmp/calmetrics-multiroot-matmul-v65-20261008/build-deps/bin:/opt/homebrew/bin:/usr/bin:/bin",
+           PYTHONPATH="/private/tmp/calmetrics-multiroot-matmul-v65-20261008/build-deps",
+           PIP_NO_INDEX="1", CMAKE_BUILD_PARALLEL_LEVEL="3", MACOSX_DEPLOYMENT_TARGET="15.0",
+           OPENBLAS_NUM_THREADS="1", OMP_NUM_THREADS="1", VECLIB_MAXIMUM_THREADS="1", NUMBA_NUM_THREADS="1")
+sha = lambda p: hashlib.sha256(Path(p).read_bytes()).hexdigest()
+def snapshot():
+    names = sorted([str(p.relative_to(root)) for p in (root / "cpp").rglob("*") if p.is_file()] +
+                   ["CMakeLists.txt", "pyproject.toml"])
+    return {name: sha(root / name) for name in names}
+before = snapshot()
+build = Path(__file__).resolve().parent / "candidate-build"
+command = [sys.executable, "-m", "pip", "wheel", ".", "--no-deps", "--no-build-isolation",
+           "-Cbuild-dir=" + str(build), "-Ccmake.define.CALMETRICS_ENGINE_BUILD_TESTS=ON",
+           "-Ccmake.define.CALMETRICS_ENGINE_USE_EIGEN=ON", "-Ccmake.define.CALMETRICS_ENGINE_USE_ACCELERATE=ON", "-Ccmake.define.CALMETRICS_ENGINE_USE_HIGHWAY=ON", "-w", str(stage / "wheels")]
+print("START production wheel", flush=True)
+with (stage / "build.log").open("x") as stream:
+    run = subprocess.run(command, cwd=root, env=env, stdout=stream, stderr=subprocess.STDOUT)
+if run.returncode:
+    print((stage / "build.log").read_text()[-7000:], flush=True)
+    raise SystemExit(run.returncode)
+assert before == snapshot(), "source changed while compiling"
+wheels = list((stage / "wheels").glob("*.whl"))
+assert len(wheels) == 1
+install = stage / "install"
+with (stage / "install.log").open("x") as stream:
+    subprocess.run([sys.executable, "-m", "pip", "install", "--no-deps", "--target", str(install), str(wheels[0])],
+                   env=env, stdout=stream, stderr=subprocess.STDOUT, check=True)
+probe = '''import sys,json;sys.path.insert(0,sys.argv[1])
+import numpy as np
+import calmetrics_engine as c
+g=c.GraphCompiler({'x':'series'}).compile('sum(x)')
+with c.AdaptiveScheduler(cpu_budget=1) as s:
+ r=s.execute(g,{'x':np.array([1.])},np.array([0],np.int64),np.array([1],np.int64))
+ print(json.dumps(dict(build_info=c.build_info(),engine_build_id=r.audit['engine_build_id'])))
+'''
+actual = json.loads(subprocess.check_output([sys.executable, "-c", probe, str(install)], env=env, text=True))
+compiler = ["0.3.0", "AppleClang", "17.0.0.17000603", "arm64", "Release", "", "-O3 -DNDEBUG",
+            "eigen_rotation=ON", "accelerate_covchol=ON", "highway_order=ON"]
+encoded = ";".join(compiler) + "".join(";" + name + ":" + value for name, value in before.items())
+expected = hashlib.sha256(encoded.encode()).hexdigest()
+assert expected == '56c12ede847d9ff9796dd5f08037b224d0315fafec1cfbab2c468aa1bd4d3dc8'
+assert actual["engine_build_id"] == expected, (actual, expected)
+native = list((install / "calmetrics_engine").glob("_native*.so"))
+assert len(native) == 1
+worker = install / "calmetrics_engine/calmetrics_worker"
+identity = dict(build_id=expected, source=before, compiler=compiler, build=str(build), installed=str(install),
+                wheel=str(wheels[0]), wheel_sha256=sha(wheels[0]), build_info=actual,
+                installed_binaries={str(p.relative_to(install)): sha(p) for p in (native[0], worker)})
+(stage / "identity.json").write_text(json.dumps(identity, indent=2) + "\n")
+print("PASS source/wheel/worker", expected, flush=True)

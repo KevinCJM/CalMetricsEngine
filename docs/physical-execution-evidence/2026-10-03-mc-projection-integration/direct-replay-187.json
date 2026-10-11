@@ -1,0 +1,1711 @@
+{
+  "build": {
+    "version": "0.3.0",
+    "compiler": "AppleClang 17.0.0.17000603",
+    "architecture": "arm64",
+    "cpu_policy": "baseline",
+    "thread_backend": "persistent_cpp_native_scheduler",
+    "cxx_standard": 17,
+    "execution_backend": "pybind11_aot",
+    "graph_execution_backend": "native_graph_interpreter",
+    "scheduler_backend": "bounded_thread_process_pool",
+    "scheduler_scope": "process_wide_cpp_cpu_admission",
+    "legacy_finance_scheduler": "shared_native_scheduler",
+    "coroutine_backend": "asyncio_orchestration_only",
+    "process_transport": "shared_memory_or_serialized_small_input",
+    "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+    "runtime_jit": 0,
+    "compiler_backend": "cpp_restricted_ast",
+    "planner_backend": "cpp",
+    "native_scheduler_backend": "persistent_cpp_threads_processes",
+    "native_worker_runtime": "standalone_no_python",
+    "python_role": "numpy_binding_async_adapter",
+    "input_memory_policy": "exact_dtype_strided_zero_copy"
+  },
+  "scope": "contiguous native scalar/auto replay; no NJIT speed claim",
+  "operators": [
+    {
+      "operator": "add",
+      "opcode": 1,
+      "test": "tests/test_column_library.py::test_fused_column_pair_preserves_operand_order[False-shape0-False-False-add-add]",
+      "elements": 1170,
+      "scalar_median_ns": 2531.382716049383,
+      "auto_median_ns": 2566.5374677002583,
+      "status": "PASS"
+    },
+    {
+      "operator": "subtract",
+      "opcode": 2,
+      "test": "tests/test_column_library.py::test_fused_column_pair_preserves_operand_order[False-shape0-False-False-add-subtract]",
+      "elements": 1170,
+      "scalar_median_ns": 2580.843853820598,
+      "auto_median_ns": 2581.207482993197,
+      "status": "PASS"
+    },
+    {
+      "operator": "multiply",
+      "opcode": 3,
+      "test": "tests/test_column_library.py::test_fused_column_pair_preserves_operand_order[False-shape0-False-False-add-multiply]",
+      "elements": 1170,
+      "scalar_median_ns": 2546.1594827586205,
+      "auto_median_ns": 2553.5307443365696,
+      "status": "PASS"
+    },
+    {
+      "operator": "divide",
+      "opcode": 4,
+      "test": "tests/test_column_library.py::test_fused_column_pair_preserves_operand_order[False-shape0-False-False-divide-add]",
+      "elements": 1170,
+      "scalar_median_ns": 2480.5589743589744,
+      "auto_median_ns": 2497.91875,
+      "status": "PASS"
+    },
+    {
+      "operator": "power",
+      "opcode": 5,
+      "test": "tests/test_recursive_state.py::test_kama_is_composition_with_true_seed_freeze_and_gap_rewarm[False]",
+      "elements": 55,
+      "scalar_median_ns": 1614.2676767676767,
+      "auto_median_ns": 1613.7152777777778,
+      "status": "PASS"
+    },
+    {
+      "operator": "minimum",
+      "opcode": 6,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-minimum:matrix]",
+      "elements": 42,
+      "scalar_median_ns": 1206.1688311688313,
+      "auto_median_ns": 1116.9354838709678,
+      "status": "PASS"
+    },
+    {
+      "operator": "maximum",
+      "opcode": 7,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-maximum:matrix]",
+      "elements": 42,
+      "scalar_median_ns": 1206.8359375,
+      "auto_median_ns": 1120.5651376146789,
+      "status": "PASS"
+    },
+    {
+      "operator": "negate",
+      "opcode": 8,
+      "test": "tests/test_operator_contracts.py::test_simd_tails_scalar_parity_and_real_lane[17-negate]",
+      "elements": 17,
+      "scalar_median_ns": 964.744939271255,
+      "auto_median_ns": 913.9884678747941,
+      "status": "PASS"
+    },
+    {
+      "operator": "absolute",
+      "opcode": 9,
+      "test": "tests/test_recursive_state.py::test_kama_is_composition_with_true_seed_freeze_and_gap_rewarm[False]",
+      "elements": 55,
+      "scalar_median_ns": 1087.9797297297298,
+      "auto_median_ns": 917.8003629764065,
+      "status": "PASS"
+    },
+    {
+      "operator": "sqrt",
+      "opcode": 10,
+      "test": "tests/test_operator_contracts.py::test_simd_tails_scalar_parity_and_real_lane[17-sqrt]",
+      "elements": 17,
+      "scalar_median_ns": 980.4537037037037,
+      "auto_median_ns": 925.2486085343228,
+      "status": "PASS"
+    },
+    {
+      "operator": "clip",
+      "opcode": 11,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-clip:matrix]",
+      "elements": 21,
+      "scalar_median_ns": 1200.390625,
+      "auto_median_ns": 1186.0655172413792,
+      "status": "PASS"
+    },
+    {
+      "operator": "log",
+      "opcode": 12,
+      "test": "tests/test_transcendental_cross_layout.py::test_tiles_in_actual_graph_and_transport[single-F-C-shape1-log]",
+      "elements": 72369,
+      "scalar_median_ns": 562333.3333333334,
+      "auto_median_ns": 232571.42857142858,
+      "status": "PASS"
+    },
+    {
+      "operator": "exp",
+      "opcode": 13,
+      "test": "tests/test_transcendental_cross_layout.py::test_tiles_in_actual_graph_and_transport[single-F-C-shape1-exp]",
+      "elements": 72369,
+      "scalar_median_ns": 1262166.0,
+      "auto_median_ns": 216208.375,
+      "status": "PASS"
+    },
+    {
+      "operator": "reciprocal",
+      "opcode": 14,
+      "test": "tests/test_operator_contracts.py::test_simd_tails_scalar_parity_and_real_lane[17-reciprocal]",
+      "elements": 17,
+      "scalar_median_ns": 971.888,
+      "auto_median_ns": 923.641134751773,
+      "status": "PASS"
+    },
+    {
+      "operator": "sign",
+      "opcode": 15,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-sign:vector]",
+      "elements": 8,
+      "scalar_median_ns": 921.0837606837607,
+      "auto_median_ns": 922.2338204592902,
+      "status": "PASS"
+    },
+    {
+      "operator": "equal",
+      "opcode": 16,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-equal:matrix]",
+      "elements": 42,
+      "scalar_median_ns": 1210.1032388663969,
+      "auto_median_ns": 1141.3935018050543,
+      "status": "PASS"
+    },
+    {
+      "operator": "not_equal",
+      "opcode": 17,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-not_equal:matrix]",
+      "elements": 42,
+      "scalar_median_ns": 1195.6933333333334,
+      "auto_median_ns": 1130.0383877159309,
+      "status": "PASS"
+    },
+    {
+      "operator": "less_than",
+      "opcode": 18,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-less_than:matrix]",
+      "elements": 42,
+      "scalar_median_ns": 1216.3301343570058,
+      "auto_median_ns": 1144.9579831932774,
+      "status": "PASS"
+    },
+    {
+      "operator": "less_equal",
+      "opcode": 19,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-less_equal:matrix]",
+      "elements": 42,
+      "scalar_median_ns": 1205.704954954955,
+      "auto_median_ns": 1141.7453271028037,
+      "status": "PASS"
+    },
+    {
+      "operator": "greater_than",
+      "opcode": 20,
+      "test": "tests/test_recursive_state.py::test_kama_is_composition_with_true_seed_freeze_and_gap_rewarm[False]",
+      "elements": 55,
+      "scalar_median_ns": 1138.6594663278272,
+      "auto_median_ns": 1015.4867256637168,
+      "status": "PASS"
+    },
+    {
+      "operator": "greater_equal",
+      "opcode": 21,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-greater_equal:matrix]",
+      "elements": 42,
+      "scalar_median_ns": 1181.3766891891892,
+      "auto_median_ns": 1116.9724770642201,
+      "status": "PASS"
+    },
+    {
+      "operator": "logical_and",
+      "opcode": 22,
+      "test": "tests/test_recursive_state.py::test_kama_is_composition_with_true_seed_freeze_and_gap_rewarm[False]",
+      "elements": 110,
+      "scalar_median_ns": 1555.819734345351,
+      "auto_median_ns": 1599.5443786982248,
+      "status": "PASS"
+    },
+    {
+      "operator": "logical_or",
+      "opcode": 23,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-logical_or:matrix]",
+      "elements": 42,
+      "scalar_median_ns": 1521.21409921671,
+      "auto_median_ns": 1460.1328903654485,
+      "status": "PASS"
+    },
+    {
+      "operator": "logical_not",
+      "opcode": 24,
+      "test": "tests/test_recursive_state.py::test_super_smoother_composes_coefficients_and_two_state_filter[3]",
+      "elements": 180,
+      "scalar_median_ns": 1714.1768292682927,
+      "auto_median_ns": 1709.2397094430992,
+      "status": "PASS"
+    },
+    {
+      "operator": "where",
+      "opcode": 25,
+      "test": "tests/test_recursive_state.py::test_kama_is_composition_with_true_seed_freeze_and_gap_rewarm[False]",
+      "elements": 110,
+      "scalar_median_ns": 1510.0235849056603,
+      "auto_median_ns": 1515.9313725490197,
+      "status": "PASS"
+    },
+    {
+      "operator": "sum_where",
+      "opcode": 26,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-sum_where:matrix]",
+      "elements": 42,
+      "scalar_median_ns": 1118.9469273743016,
+      "auto_median_ns": 1123.5394045534151,
+      "status": "PASS"
+    },
+    {
+      "operator": "mean_where",
+      "opcode": 27,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-mean_where:matrix]",
+      "elements": 42,
+      "scalar_median_ns": 1127.6694214876034,
+      "auto_median_ns": 1118.0,
+      "status": "PASS"
+    },
+    {
+      "operator": "variance_where",
+      "opcode": 28,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-variance_where:matrix]",
+      "elements": 42,
+      "scalar_median_ns": 1120.7446808510638,
+      "auto_median_ns": 1121.933110367893,
+      "status": "PASS"
+    },
+    {
+      "operator": "std_where",
+      "opcode": 29,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-std_where:matrix]",
+      "elements": 42,
+      "scalar_median_ns": 1121.2532110091743,
+      "auto_median_ns": 1114.908256880734,
+      "status": "PASS"
+    },
+    {
+      "operator": "min_where",
+      "opcode": 30,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-min_where:matrix]",
+      "elements": 42,
+      "scalar_median_ns": 1120.1538461538462,
+      "auto_median_ns": 1120.006309148265,
+      "status": "PASS"
+    },
+    {
+      "operator": "max_where",
+      "opcode": 31,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-max_where:matrix]",
+      "elements": 42,
+      "scalar_median_ns": 1123.56006006006,
+      "auto_median_ns": 1119.918699186992,
+      "status": "PASS"
+    },
+    {
+      "operator": "median_where",
+      "opcode": 32,
+      "test": "tests/test_order_selection_library.py::test_exceptional_ties_keep_the_native_full_sort_result[True-mixed_zero]",
+      "elements": 16388,
+      "scalar_median_ns": 16428.690721649484,
+      "auto_median_ns": 16450.867924528302,
+      "status": "PASS"
+    },
+    {
+      "operator": "quantile_where",
+      "opcode": 33,
+      "test": "tests/test_order_selection_library.py::test_exceptional_ties_keep_the_native_full_sort_result[True-mixed_zero]",
+      "elements": 16388,
+      "scalar_median_ns": 16524.305555555555,
+      "auto_median_ns": 16536.842105263157,
+      "status": "PASS"
+    },
+    {
+      "operator": "count_true",
+      "opcode": 34,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-count_true:matrix]",
+      "elements": 21,
+      "scalar_median_ns": 946.6557093425605,
+      "auto_median_ns": 949.2854640980736,
+      "status": "PASS"
+    },
+    {
+      "operator": "max_consecutive_true",
+      "opcode": 35,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-max_consecutive_true:vector]",
+      "elements": 8,
+      "scalar_median_ns": 835.8070500927644,
+      "auto_median_ns": 836.1294964028777,
+      "status": "PASS"
+    },
+    {
+      "operator": "sum",
+      "opcode": 36,
+      "test": "tests/test_tensor_protocol.py::test_tensor_direct_math_keeps_matrix_and_sequence_rank_constraints",
+      "elements": 24,
+      "scalar_median_ns": 875.3805175038052,
+      "auto_median_ns": 875.3834355828221,
+      "status": "PASS"
+    },
+    {
+      "operator": "product",
+      "opcode": 37,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-product:matrix]",
+      "elements": 21,
+      "scalar_median_ns": 812.242090784044,
+      "auto_median_ns": 808.7154471544716,
+      "status": "PASS"
+    },
+    {
+      "operator": "mean",
+      "opcode": 38,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-mean:matrix]",
+      "elements": 21,
+      "scalar_median_ns": 845.605700712589,
+      "auto_median_ns": 846.5094017094017,
+      "status": "PASS"
+    },
+    {
+      "operator": "min_value",
+      "opcode": 39,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-min_value:matrix]",
+      "elements": 21,
+      "scalar_median_ns": 816.8647214854111,
+      "auto_median_ns": 818.685393258427,
+      "status": "PASS"
+    },
+    {
+      "operator": "max_value",
+      "opcode": 40,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-max_value:matrix]",
+      "elements": 21,
+      "scalar_median_ns": 825.2184210526316,
+      "auto_median_ns": 824.4449541284404,
+      "status": "PASS"
+    },
+    {
+      "operator": "variance",
+      "opcode": 41,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-variance:matrix]",
+      "elements": 21,
+      "scalar_median_ns": 926.1743264659272,
+      "auto_median_ns": 927.2916666666666,
+      "status": "PASS"
+    },
+    {
+      "operator": "std",
+      "opcode": 42,
+      "test": "tests/test_operator_contracts.py::test_parallel_callers_and_workspace_exclusion",
+      "elements": 25000,
+      "scalar_median_ns": 130131.0,
+      "auto_median_ns": 130190.5,
+      "status": "PASS"
+    },
+    {
+      "operator": "cumulative_sum",
+      "opcode": 43,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-cumulative_sum:vector]",
+      "elements": 8,
+      "scalar_median_ns": 911.3256410256411,
+      "auto_median_ns": 909.1106666666667,
+      "status": "PASS"
+    },
+    {
+      "operator": "cumulative_product",
+      "opcode": 44,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-cumulative_product:vector]",
+      "elements": 8,
+      "scalar_median_ns": 920.6957210776545,
+      "auto_median_ns": 921.2644483362521,
+      "status": "PASS"
+    },
+    {
+      "operator": "cumulative_return",
+      "opcode": 45,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-cumulative_return:vector]",
+      "elements": 8,
+      "scalar_median_ns": 916.2234042553191,
+      "auto_median_ns": 917.209756097561,
+      "status": "PASS"
+    },
+    {
+      "operator": "cumulative_max",
+      "opcode": 46,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-cumulative_max:vector]",
+      "elements": 8,
+      "scalar_median_ns": 919.1743827160494,
+      "auto_median_ns": 913.3210412147505,
+      "status": "PASS"
+    },
+    {
+      "operator": "cumulative_min",
+      "opcode": 47,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-cumulative_min:vector]",
+      "elements": 8,
+      "scalar_median_ns": 924.113475177305,
+      "auto_median_ns": 920.8310344827586,
+      "status": "PASS"
+    },
+    {
+      "operator": "drawdown_series",
+      "opcode": 48,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-drawdown_series:levels]",
+      "elements": 8,
+      "scalar_median_ns": 925.0,
+      "auto_median_ns": 937.0893561103811,
+      "status": "PASS"
+    },
+    {
+      "operator": "new_high_mask",
+      "opcode": 49,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-new_high_mask:levels]",
+      "elements": 8,
+      "scalar_median_ns": 982.84625158831,
+      "auto_median_ns": 923.5738575982997,
+      "status": "PASS"
+    },
+    {
+      "operator": "rolling_mean",
+      "opcode": 50,
+      "test": "tests/test_recursive_state.py::test_kama_is_composition_with_true_seed_freeze_and_gap_rewarm[False]",
+      "elements": 55,
+      "scalar_median_ns": 1317.3631123919308,
+      "auto_median_ns": 1316.5787234042552,
+      "status": "PASS"
+    },
+    {
+      "operator": "rolling_std",
+      "opcode": 51,
+      "test": "tests/test_operator_contracts.py::test_named_arguments_defaults_and_preparation",
+      "elements": 8,
+      "scalar_median_ns": 1264.5710382513662,
+      "auto_median_ns": 1281.2755344418051,
+      "status": "PASS"
+    },
+    {
+      "operator": "rolling_min",
+      "opcode": 52,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-rolling_min:default]",
+      "elements": 8,
+      "scalar_median_ns": 1164.6608315098467,
+      "auto_median_ns": 1169.0371991247264,
+      "status": "PASS"
+    },
+    {
+      "operator": "rolling_max",
+      "opcode": 53,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-rolling_max:default]",
+      "elements": 8,
+      "scalar_median_ns": 1176.7024291497976,
+      "auto_median_ns": 1156.940082644628,
+      "status": "PASS"
+    },
+    {
+      "operator": "recursive_smooth",
+      "opcode": 54,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-recursive_smooth:dense]",
+      "elements": 8,
+      "scalar_median_ns": 1151.7857142857142,
+      "auto_median_ns": 1122.141592920354,
+      "status": "PASS"
+    },
+    {
+      "operator": "divide_or_default",
+      "opcode": 55,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-divide_or_default:dense]",
+      "elements": 16,
+      "scalar_median_ns": 1180.6042031523643,
+      "auto_median_ns": 1171.5425531914893,
+      "status": "PASS"
+    },
+    {
+      "operator": "first",
+      "opcode": 56,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-first:vector]",
+      "elements": 8,
+      "scalar_median_ns": 749.0825688073395,
+      "auto_median_ns": 748.2078853046595,
+      "status": "PASS"
+    },
+    {
+      "operator": "length",
+      "opcode": 57,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-length:vector]",
+      "elements": 8,
+      "scalar_median_ns": 743.660855784469,
+      "auto_median_ns": 744.1481481481482,
+      "status": "PASS"
+    },
+    {
+      "operator": "lag",
+      "opcode": 58,
+      "test": "tests/test_operator_contracts.py::test_view_owner_survives_input_deletion[lag]",
+      "elements": 24,
+      "scalar_median_ns": 883.6772983114447,
+      "auto_median_ns": 884.8227642276423,
+      "status": "PASS"
+    },
+    {
+      "operator": "difference",
+      "opcode": 59,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-difference:default]",
+      "elements": 8,
+      "scalar_median_ns": 978.8843788437885,
+      "auto_median_ns": 1008.3611556982344,
+      "status": "PASS"
+    },
+    {
+      "operator": "median",
+      "opcode": 60,
+      "test": "tests/test_order_selection_library.py::test_selection_repeated_values_infinities_and_original_arithmetic[sorted]",
+      "elements": 4097,
+      "scalar_median_ns": 7745.374269005848,
+      "auto_median_ns": 18861.10606060606,
+      "status": "PASS"
+    },
+    {
+      "operator": "skewness",
+      "opcode": 61,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-skewness:matrix]",
+      "elements": 21,
+      "scalar_median_ns": 925.73,
+      "auto_median_ns": 925.1043841336117,
+      "status": "PASS"
+    },
+    {
+      "operator": "excess_kurtosis",
+      "opcode": 62,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-excess_kurtosis:matrix]",
+      "elements": 21,
+      "scalar_median_ns": 926.3252595155709,
+      "auto_median_ns": 924.6935779816514,
+      "status": "PASS"
+    },
+    {
+      "operator": "mean_absolute_deviation",
+      "opcode": 63,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-mean_absolute_deviation:matrix]",
+      "elements": 21,
+      "scalar_median_ns": 912.8883048620237,
+      "auto_median_ns": 911.4186046511628,
+      "status": "PASS"
+    },
+    {
+      "operator": "root_mean_square",
+      "opcode": 64,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-root_mean_square:matrix]",
+      "elements": 21,
+      "scalar_median_ns": 841.3393393393393,
+      "auto_median_ns": 846.7039007092199,
+      "status": "PASS"
+    },
+    {
+      "operator": "argmin",
+      "opcode": 65,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-argmin:matrix]",
+      "elements": 21,
+      "scalar_median_ns": 822.584,
+      "auto_median_ns": 815.0038759689922,
+      "status": "PASS"
+    },
+    {
+      "operator": "argmax",
+      "opcode": 66,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-argmax:matrix]",
+      "elements": 21,
+      "scalar_median_ns": 824.7950963222416,
+      "auto_median_ns": 822.8781362007169,
+      "status": "PASS"
+    },
+    {
+      "operator": "quantile",
+      "opcode": 67,
+      "test": "tests/test_order_selection_library.py::test_selection_repeated_values_infinities_and_original_arithmetic[sorted]",
+      "elements": 4097,
+      "scalar_median_ns": 7833.567415730337,
+      "auto_median_ns": 17359.44,
+      "status": "PASS"
+    },
+    {
+      "operator": "linear_slope",
+      "opcode": 68,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-linear_slope:pair]",
+      "elements": 16,
+      "scalar_median_ns": 1001.584,
+      "auto_median_ns": 1004.5871559633027,
+      "status": "PASS"
+    },
+    {
+      "operator": "linear_intercept",
+      "opcode": 69,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-linear_intercept:pair]",
+      "elements": 16,
+      "scalar_median_ns": 1002.393581081081,
+      "auto_median_ns": 999.8658146964856,
+      "status": "PASS"
+    },
+    {
+      "operator": "linear_r_squared",
+      "opcode": 70,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-linear_r_squared:pair]",
+      "elements": 16,
+      "scalar_median_ns": 1006.19875,
+      "auto_median_ns": 1008.760834670947,
+      "status": "PASS"
+    },
+    {
+      "operator": "regression_standard_error",
+      "opcode": 71,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-regression_standard_error:pair]",
+      "elements": 16,
+      "scalar_median_ns": 971.3302752293578,
+      "auto_median_ns": 1016.4893617021277,
+      "status": "PASS"
+    },
+    {
+      "operator": "normal_pdf",
+      "opcode": 72,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-normal_pdf:vector]",
+      "elements": 8,
+      "scalar_median_ns": 946.3378119001919,
+      "auto_median_ns": 945.936660268714,
+      "status": "PASS"
+    },
+    {
+      "operator": "normal_ppf",
+      "opcode": 73,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-normal_ppf:vector]",
+      "elements": 8,
+      "scalar_median_ns": 936.6823529411764,
+      "auto_median_ns": 942.4199683042789,
+      "status": "PASS"
+    },
+    {
+      "operator": "last",
+      "opcode": 74,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-last:vector]",
+      "elements": 8,
+      "scalar_median_ns": 743.9707317073171,
+      "auto_median_ns": 744.8431654676259,
+      "status": "PASS"
+    },
+    {
+      "operator": "total_return",
+      "opcode": 75,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-total_return:vector]",
+      "elements": 8,
+      "scalar_median_ns": 757.6754385964912,
+      "auto_median_ns": 756.5225225225225,
+      "status": "PASS"
+    },
+    {
+      "operator": "annualized_return",
+      "opcode": 76,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-annualized_return:annual]",
+      "elements": 8,
+      "scalar_median_ns": 867.5,
+      "auto_median_ns": 860.8218298555378,
+      "status": "PASS"
+    },
+    {
+      "operator": "sum_time",
+      "opcode": 77,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-sum_time:matrix]",
+      "elements": 21,
+      "scalar_median_ns": 1019.8664192949907,
+      "auto_median_ns": 1018.6795096322242,
+      "status": "PASS"
+    },
+    {
+      "operator": "mean_time",
+      "opcode": 78,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-mean_time:matrix]",
+      "elements": 21,
+      "scalar_median_ns": 1008.7941176470588,
+      "auto_median_ns": 1009.7916666666666,
+      "status": "PASS"
+    },
+    {
+      "operator": "product_time",
+      "opcode": 79,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-product_time:matrix]",
+      "elements": 21,
+      "scalar_median_ns": 989.3617021276596,
+      "auto_median_ns": 992.922942206655,
+      "status": "PASS"
+    },
+    {
+      "operator": "variance_time",
+      "opcode": 80,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-variance_time:matrix]",
+      "elements": 21,
+      "scalar_median_ns": 1024.641577060932,
+      "auto_median_ns": 1024.0448028673836,
+      "status": "PASS"
+    },
+    {
+      "operator": "std_time",
+      "opcode": 81,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-std_time:matrix]",
+      "elements": 21,
+      "scalar_median_ns": 1039.6440129449838,
+      "auto_median_ns": 1036.7159420289854,
+      "status": "PASS"
+    },
+    {
+      "operator": "min_time",
+      "opcode": 82,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-min_time:matrix]",
+      "elements": 21,
+      "scalar_median_ns": 994.93,
+      "auto_median_ns": 989.2541743970315,
+      "status": "PASS"
+    },
+    {
+      "operator": "max_time",
+      "opcode": 83,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-max_time:matrix]",
+      "elements": 21,
+      "scalar_median_ns": 1006.7956989247311,
+      "auto_median_ns": 1009.0,
+      "status": "PASS"
+    },
+    {
+      "operator": "sum_asset",
+      "opcode": 84,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-sum_asset:matrix]",
+      "elements": 21,
+      "scalar_median_ns": 1046.226345083488,
+      "auto_median_ns": 1044.5920303605312,
+      "status": "PASS"
+    },
+    {
+      "operator": "mean_asset",
+      "opcode": 85,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-mean_asset:matrix]",
+      "elements": 21,
+      "scalar_median_ns": 1061.2959719789842,
+      "auto_median_ns": 1060.809900990099,
+      "status": "PASS"
+    },
+    {
+      "operator": "product_asset",
+      "opcode": 86,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-product_asset:matrix]",
+      "elements": 21,
+      "scalar_median_ns": 1022.360396039604,
+      "auto_median_ns": 1028.186274509804,
+      "status": "PASS"
+    },
+    {
+      "operator": "variance_asset",
+      "opcode": 87,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-variance_asset:matrix]",
+      "elements": 21,
+      "scalar_median_ns": 1058.055,
+      "auto_median_ns": 1054.5,
+      "status": "PASS"
+    },
+    {
+      "operator": "std_asset",
+      "opcode": 88,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-std_asset:matrix]",
+      "elements": 21,
+      "scalar_median_ns": 1054.8070500927645,
+      "auto_median_ns": 1053.115015974441,
+      "status": "PASS"
+    },
+    {
+      "operator": "min_asset",
+      "opcode": 89,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-min_asset:matrix]",
+      "elements": 21,
+      "scalar_median_ns": 1033.3781362007169,
+      "auto_median_ns": 1034.871244635193,
+      "status": "PASS"
+    },
+    {
+      "operator": "max_asset",
+      "opcode": 90,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-max_asset:matrix]",
+      "elements": 21,
+      "scalar_median_ns": 1068.4059701492538,
+      "auto_median_ns": 1073.5015625,
+      "status": "PASS"
+    },
+    {
+      "operator": "transpose",
+      "opcode": 91,
+      "test": "tests/test_operator_contracts.py::test_view_owner_survives_input_deletion[transpose]",
+      "elements": 24,
+      "scalar_median_ns": 871.4305555555555,
+      "auto_median_ns": 875.6869851729818,
+      "status": "PASS"
+    },
+    {
+      "operator": "dot",
+      "opcode": 92,
+      "test": "tests/test_quadratic_library.py::test_quadratic_keeps_transposed_projection_before_final_dot[C]",
+      "elements": 258,
+      "scalar_median_ns": 1920.4885321100917,
+      "auto_median_ns": 1933.375,
+      "status": "PASS"
+    },
+    {
+      "operator": "outer",
+      "opcode": 93,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-outer:vectors]",
+      "elements": 16,
+      "scalar_median_ns": 1330.75,
+      "auto_median_ns": 1344.895,
+      "status": "PASS"
+    },
+    {
+      "operator": "matmul",
+      "opcode": 94,
+      "test": "tests/test_matmul_cache_library.py::test_cache_blocks_borrow_strided_left_and_padded_right[shape3-negative_rows]",
+      "elements": 88920,
+      "scalar_median_ns": 555000.0,
+      "auto_median_ns": 310819.5,
+      "status": "PASS"
+    },
+    {
+      "operator": "matvec",
+      "opcode": 95,
+      "test": "tests/test_matrix_vector_library.py::test_matvec_dispatch_shape_boundaries_and_wide_matrix[C-shape7]",
+      "elements": 131072,
+      "scalar_median_ns": 67141.96296296296,
+      "auto_median_ns": 36255.82,
+      "status": "PASS"
+    },
+    {
+      "operator": "diag",
+      "opcode": 96,
+      "test": "tests/test_operator_contracts.py::test_view_owner_survives_input_deletion[diag]",
+      "elements": 24,
+      "scalar_median_ns": 828.4143518518518,
+      "auto_median_ns": 820.4379562043796,
+      "status": "PASS"
+    },
+    {
+      "operator": "trace",
+      "opcode": 97,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-trace:matrix]",
+      "elements": 21,
+      "scalar_median_ns": 745.6216216216217,
+      "auto_median_ns": 742.209756097561,
+      "status": "PASS"
+    },
+    {
+      "operator": "solve",
+      "opcode": 98,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-solve:pivoted]",
+      "elements": 12,
+      "scalar_median_ns": 1179.8294573643411,
+      "auto_median_ns": 1163.332,
+      "status": "PASS"
+    },
+    {
+      "operator": "covariance",
+      "opcode": 99,
+      "test": "tests/test_covcorr_accelerate.py::test_short_panel_amplitude_boundaries_do_not_change_values[8.0]",
+      "elements": 131072,
+      "scalar_median_ns": 22616750.0,
+      "auto_median_ns": 2094792.0,
+      "status": "PASS"
+    },
+    {
+      "operator": "correlation",
+      "opcode": 100,
+      "test": "tests/test_covcorr_accelerate.py::test_short_panel_amplitude_boundaries_do_not_change_values[8.0]",
+      "elements": 131072,
+      "scalar_median_ns": 22591291.0,
+      "auto_median_ns": 2105375.0,
+      "status": "PASS"
+    },
+    {
+      "operator": "portfolio_returns",
+      "opcode": 101,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-portfolio_returns:matrix_vector]",
+      "elements": 24,
+      "scalar_median_ns": 1135.448948948949,
+      "auto_median_ns": 1133.3932853717026,
+      "status": "PASS"
+    },
+    {
+      "operator": "quadratic_form",
+      "opcode": 102,
+      "test": "tests/test_quadratic_library.py::test_quadratic_signed_and_broadcast_vector_strides[-2-C]",
+      "elements": 16770,
+      "scalar_median_ns": 26248.015873015873,
+      "auto_median_ns": 6183.634020618557,
+      "status": "PASS"
+    },
+    {
+      "operator": "active_returns",
+      "opcode": 103,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-active_returns:vector]",
+      "elements": 16,
+      "scalar_median_ns": 1198.8071625344353,
+      "auto_median_ns": 1180.8236559139784,
+      "status": "PASS"
+    },
+    {
+      "operator": "last_drawdown_interval",
+      "opcode": 104,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-last_drawdown_interval:latest_tie]",
+      "elements": 8,
+      "scalar_median_ns": 810.83375,
+      "auto_median_ns": 800.416,
+      "status": "PASS"
+    },
+    {
+      "operator": "interval_start",
+      "opcode": 105,
+      "test": "tests/test_operator_contracts.py::test_domain_missing_and_tie_contracts",
+      "elements": 0,
+      "scalar_median_ns": 712.0966719492868,
+      "auto_median_ns": 713.917,
+      "status": "PASS"
+    },
+    {
+      "operator": "interval_trough",
+      "opcode": 106,
+      "test": "tests/test_operator_contracts.py::test_domain_missing_and_tie_contracts",
+      "elements": 0,
+      "scalar_median_ns": 713.2570356472795,
+      "auto_median_ns": 711.4596622889305,
+      "status": "PASS"
+    },
+    {
+      "operator": "interval_recovery",
+      "opcode": 107,
+      "test": "tests/test_operator_contracts.py::test_domain_missing_and_tie_contracts",
+      "elements": 0,
+      "scalar_median_ns": 715.4728171334432,
+      "auto_median_ns": 716.173835125448,
+      "status": "PASS"
+    },
+    {
+      "operator": "value_at",
+      "opcode": 108,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-value_at:position_0.0]",
+      "elements": 8,
+      "scalar_median_ns": 851.3671641791045,
+      "auto_median_ns": 855.4137931034483,
+      "status": "PASS"
+    },
+    {
+      "operator": "days_between",
+      "opcode": 109,
+      "test": "tests/test_operator_contracts.py::test_domain_missing_and_tie_contracts",
+      "elements": 0,
+      "scalar_median_ns": 787.6344086021505,
+      "auto_median_ns": 766.1875,
+      "status": "PASS"
+    },
+    {
+      "operator": "require_positive",
+      "opcode": 110,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-require_positive:value_1.0]",
+      "elements": 0,
+      "scalar_median_ns": 679.417,
+      "auto_median_ns": 678.6787479406919,
+      "status": "PASS"
+    },
+    {
+      "operator": "require_nonnegative",
+      "opcode": 111,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-require_nonnegative:value_0.0]",
+      "elements": 0,
+      "scalar_median_ns": 680.7432432432432,
+      "auto_median_ns": 685.0959349593496,
+      "status": "PASS"
+    },
+    {
+      "operator": "linear_fit",
+      "opcode": 112,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-linear_fit:pair]",
+      "elements": 16,
+      "scalar_median_ns": 1060.2686025408348,
+      "auto_median_ns": 1055.1948051948052,
+      "status": "PASS"
+    },
+    {
+      "operator": "fit_slope",
+      "opcode": 113,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-fit_slope:record]",
+      "elements": 0,
+      "scalar_median_ns": 724.4664634146342,
+      "auto_median_ns": 728.0326481257557,
+      "status": "PASS"
+    },
+    {
+      "operator": "fit_intercept",
+      "opcode": 114,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-fit_intercept:record]",
+      "elements": 0,
+      "scalar_median_ns": 737.75,
+      "auto_median_ns": 722.9466327827192,
+      "status": "PASS"
+    },
+    {
+      "operator": "fit_residual_sum_squares",
+      "opcode": 115,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-fit_residual_sum_squares:record]",
+      "elements": 0,
+      "scalar_median_ns": 722.9611510791367,
+      "auto_median_ns": 723.4402877697842,
+      "status": "PASS"
+    },
+    {
+      "operator": "fit_total_sum_squares",
+      "opcode": 116,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-fit_total_sum_squares:record]",
+      "elements": 0,
+      "scalar_median_ns": 723.9114114114114,
+      "auto_median_ns": 721.3957446808511,
+      "status": "PASS"
+    },
+    {
+      "operator": "fit_observation_count",
+      "opcode": 117,
+      "test": "tests/test_operator_independent_parity.py::test_independent_numpy_python_reference[scalar-fit_observation_count:record]",
+      "elements": 0,
+      "scalar_median_ns": 722.98125,
+      "auto_median_ns": 718.75,
+      "status": "PASS"
+    },
+    {
+      "operator": "finite_mask",
+      "opcode": 118,
+      "test": "tests/test_recursive_state.py::test_super_smoother_composes_coefficients_and_two_state_filter[3]",
+      "elements": 180,
+      "scalar_median_ns": 1742.3128342245989,
+      "auto_median_ns": 1424.8561403508772,
+      "status": "PASS"
+    },
+    {
+      "operator": "normal_cdf",
+      "opcode": 119,
+      "test": "tests/test_operator_extensions.py::test_normal_cdf_tails_nan_scalar_and_matrix[scalar]",
+      "elements": 9,
+      "scalar_median_ns": 1022.417439703154,
+      "auto_median_ns": 989.9155722326454,
+      "status": "PASS"
+    },
+    {
+      "operator": "aligned_shift",
+      "opcode": 120,
+      "test": "tests/test_recursive_state.py::test_kama_is_composition_with_true_seed_freeze_and_gap_rewarm[False]",
+      "elements": 55,
+      "scalar_median_ns": 1106.0,
+      "auto_median_ns": 1113.5019710906702,
+      "status": "PASS"
+    },
+    {
+      "operator": "recursive_filter",
+      "opcode": 121,
+      "test": "tests/test_operator_extensions.py::test_recursive_filter_explicit_state_contract[0-0-0.0]",
+      "elements": 12,
+      "scalar_median_ns": 1494.8440860215053,
+      "auto_median_ns": 1489.6343906510851,
+      "status": "PASS"
+    },
+    {
+      "operator": "argsort",
+      "opcode": 122,
+      "test": "tests/test_operator_extensions.py::test_index_scratch_is_explicit_and_inputs_are_zero_copy[argsort]",
+      "elements": 10,
+      "scalar_median_ns": 1095.4613861386138,
+      "auto_median_ns": 1093.942901234568,
+      "status": "PASS"
+    },
+    {
+      "operator": "gather",
+      "opcode": 123,
+      "test": "tests/test_operator_extensions.py::test_argsort_is_stable_and_gather_preserves_payload[1]",
+      "elements": 16,
+      "scalar_median_ns": 1135.0486725663716,
+      "auto_median_ns": 1133.2708719851578,
+      "status": "PASS"
+    },
+    {
+      "operator": "distinct_count",
+      "opcode": 124,
+      "test": "tests/test_operator_extensions.py::test_integer_order_gather_and_count_never_pass_through_float",
+      "elements": 12,
+      "scalar_median_ns": 1082.4437984496124,
+      "auto_median_ns": 1079.6516666666666,
+      "status": "PASS"
+    },
+    {
+      "operator": "floor",
+      "opcode": 125,
+      "test": "tests/test_operator_extensions.py::test_floor_is_numeric_and_retains_ieee_boundaries",
+      "elements": 7,
+      "scalar_median_ns": 929.4090056285178,
+      "auto_median_ns": 922.9143327841845,
+      "status": "PASS"
+    },
+    {
+      "operator": "cos",
+      "opcode": 126,
+      "test": "tests/test_recursive_state.py::test_cos_radians_scalar_strided_and_ieee_missing",
+      "elements": 7,
+      "scalar_median_ns": 943.4292682926829,
+      "auto_median_ns": 940.7867383512545,
+      "status": "PASS"
+    },
+    {
+      "operator": "recursive_filter_adaptive",
+      "opcode": 127,
+      "test": "tests/test_recursive_state.py::test_kama_is_composition_with_true_seed_freeze_and_gap_rewarm[False]",
+      "elements": 220,
+      "scalar_median_ns": 2194.1675,
+      "auto_median_ns": 2194.099173553719,
+      "status": "PASS"
+    },
+    {
+      "operator": "linear_filter2",
+      "opcode": 128,
+      "test": "tests/test_recursive_state.py::test_super_smoother_composes_coefficients_and_two_state_filter[3]",
+      "elements": 360,
+      "scalar_median_ns": 2976.5070921985816,
+      "auto_median_ns": 2977.189781021898,
+      "status": "PASS"
+    },
+    {
+      "operator": "scalar_kalman",
+      "opcode": 129,
+      "test": "tests/test_recursive_state.py::test_kalman_projections_share_one_result_and_retain_owner",
+      "elements": 10,
+      "scalar_median_ns": 1186.141052631579,
+      "auto_median_ns": 1167.3076923076924,
+      "status": "PASS"
+    },
+    {
+      "operator": "state_estimate",
+      "opcode": 130,
+      "test": "tests/test_recursive_state.py::test_kalman_projections_share_one_result_and_retain_owner",
+      "elements": 20,
+      "scalar_median_ns": 832.6623794212219,
+      "auto_median_ns": 839.47875,
+      "status": "PASS"
+    },
+    {
+      "operator": "state_variance",
+      "opcode": 131,
+      "test": "tests/test_recursive_state.py::test_kalman_projections_share_one_result_and_retain_owner",
+      "elements": 20,
+      "scalar_median_ns": 833.9382940108893,
+      "auto_median_ns": 831.7851458885941,
+      "status": "PASS"
+    },
+    {
+      "operator": "state_hysteresis",
+      "opcode": 132,
+      "test": "tests/test_state_events.py::test_hysteresis_inclusive_thresholds_gap_retention_and_jump_precedence",
+      "elements": 11,
+      "scalar_median_ns": 1281.9577981651375,
+      "auto_median_ns": 1275.2254697286012,
+      "status": "PASS"
+    },
+    {
+      "operator": "state_confirm",
+      "opcode": 133,
+      "test": "tests/test_state_events.py::test_confirmation_minimum_hold_is_one_joint_recurrence",
+      "elements": 9,
+      "scalar_median_ns": 1229.75,
+      "auto_median_ns": 1231.0397923875432,
+      "status": "PASS"
+    },
+    {
+      "operator": "state_continuous",
+      "opcode": 134,
+      "test": "tests/test_state_events.py::test_continuous_candidate_absence_is_not_missing_observation",
+      "elements": 24,
+      "scalar_median_ns": 1569.103825136612,
+      "auto_median_ns": 1570.0980392156862,
+      "status": "PASS"
+    },
+    {
+      "operator": "continuous_state_values",
+      "opcode": 135,
+      "test": "tests/test_state_events.py::test_continuous_candidate_absence_is_not_missing_observation",
+      "elements": 24,
+      "scalar_median_ns": 857.1931623931624,
+      "auto_median_ns": 865.75,
+      "status": "PASS"
+    },
+    {
+      "operator": "continuous_state_evidence",
+      "opcode": 136,
+      "test": "tests/test_state_events.py::test_continuous_candidate_absence_is_not_missing_observation",
+      "elements": 24,
+      "scalar_median_ns": 882.3155216284987,
+      "auto_median_ns": 880.8906666666667,
+      "status": "PASS"
+    },
+    {
+      "operator": "continuous_state_pending",
+      "opcode": 137,
+      "test": "tests/test_state_events.py::test_continuous_candidate_absence_is_not_missing_observation",
+      "elements": 24,
+      "scalar_median_ns": 884.7463863337714,
+      "auto_median_ns": 881.1974358974359,
+      "status": "PASS"
+    },
+    {
+      "operator": "drawdown_cycle_state",
+      "opcode": 138,
+      "test": "tests/test_state_events.py::test_realtime_drawdown_transitions_gap_reset_and_one_step_per_observation",
+      "elements": 30,
+      "scalar_median_ns": 1595.486111111111,
+      "auto_median_ns": 1583.248987854251,
+      "status": "PASS"
+    },
+    {
+      "operator": "local_extrema",
+      "opcode": 139,
+      "test": "tests/test_state_events.py::test_extrema_earliest_plateau_split_missing_and_endpoint_exclusion",
+      "elements": 11,
+      "scalar_median_ns": 1346.5553235908142,
+      "auto_median_ns": 1327.6237218813906,
+      "status": "PASS"
+    },
+    {
+      "operator": "ps_filter",
+      "opcode": 140,
+      "test": "tests/test_state_events.py::test_ps_fixed_platform_oracle_joint_iterations[prices7-events7-5-6-0.2-expected7]",
+      "elements": 64,
+      "scalar_median_ns": 1776.3465608465608,
+      "auto_median_ns": 1753.1349557522124,
+      "status": "PASS"
+    },
+    {
+      "operator": "between_events",
+      "opcode": 141,
+      "test": "tests/test_state_events.py::test_between_events_complete_half_open_intervals_only",
+      "elements": 11,
+      "scalar_median_ns": 1062.8834355828221,
+      "auto_median_ns": 1059.1715976331361,
+      "status": "PASS"
+    },
+    {
+      "operator": "segment_starts",
+      "opcode": 142,
+      "test": "tests/test_state_events.py::test_between_events_complete_half_open_intervals_only",
+      "elements": 22,
+      "scalar_median_ns": 889.3884892086331,
+      "auto_median_ns": 879.4704264099037,
+      "status": "PASS"
+    },
+    {
+      "operator": "segment_ends",
+      "opcode": 143,
+      "test": "tests/test_state_events.py::test_between_events_complete_half_open_intervals_only",
+      "elements": 22,
+      "scalar_median_ns": 894.630472854641,
+      "auto_median_ns": 886.5093922651934,
+      "status": "PASS"
+    },
+    {
+      "operator": "phase_direction",
+      "opcode": 144,
+      "test": "tests/test_state_events.py::test_phase_and_reference_cycle_keep_shared_pivot_ownership",
+      "elements": 27,
+      "scalar_median_ns": 1178.6756126021003,
+      "auto_median_ns": 1177.2277227722773,
+      "status": "PASS"
+    },
+    {
+      "operator": "drawdown_cycle_reference",
+      "opcode": 145,
+      "test": "tests/test_state_events.py::test_phase_and_reference_cycle_keep_shared_pivot_ownership",
+      "elements": 36,
+      "scalar_median_ns": 1384.416,
+      "auto_median_ns": 1377.8790786948177,
+      "status": "PASS"
+    },
+    {
+      "operator": "state_select",
+      "opcode": 146,
+      "test": "tests/test_recursive_state.py::test_state_select_nested_mapping_connects_to_confirmation",
+      "elements": 21,
+      "scalar_median_ns": 1475.9312977099237,
+      "auto_median_ns": 1468.4554655870445,
+      "status": "PASS"
+    },
+    {
+      "operator": "cholesky",
+      "opcode": 147,
+      "test": "tests/test_matrix_vector_library.py::test_cholesky_layout_scalar_parity_and_independent_results[c-129]",
+      "elements": 16641,
+      "scalar_median_ns": 117947.875,
+      "auto_median_ns": 117976.5625,
+      "status": "PASS"
+    },
+    {
+      "operator": "solve_multi",
+      "opcode": 148,
+      "test": "tests/test_solve_pair_reuse.py::test_terminal_pair_exact_layout_boundary_and_one_a_copy[257-negative]",
+      "elements": 67334,
+      "scalar_median_ns": 1640500.0,
+      "auto_median_ns": 1035500.0,
+      "status": "PASS"
+    },
+    {
+      "operator": "triangular_solve",
+      "opcode": 149,
+      "test": "tests/test_matrix_array_foundation.py::test_solvers_residual_and_ignored_triangle[False-False-17-5]",
+      "elements": 374,
+      "scalar_median_ns": 2959.9608938547485,
+      "auto_median_ns": 2951.8937198067633,
+      "status": "PASS"
+    },
+    {
+      "operator": "symmetric_eigh",
+      "opcode": 150,
+      "test": "tests/test_eigenvalue_projection.py::test_exact_projection_in_every_lane[single-C-257]",
+      "elements": 66049,
+      "scalar_median_ns": 66110458.0,
+      "auto_median_ns": 66141709.0,
+      "status": "PASS"
+    },
+    {
+      "operator": "eigenvalues",
+      "opcode": 151,
+      "test": "tests/test_eigenvalue_projection.py::test_exact_projection_in_every_lane[single-C-257]",
+      "elements": 66306,
+      "scalar_median_ns": 1306.7920792079208,
+      "auto_median_ns": 1307.5748373101953,
+      "status": "PASS"
+    },
+    {
+      "operator": "eigenvectors",
+      "opcode": 152,
+      "test": "tests/test_matrix_library_backend.py::test_packed_jacobi_contract_and_workspace[c-257]",
+      "elements": 66306,
+      "scalar_median_ns": 1363.585616438356,
+      "auto_median_ns": 1358.8298507462687,
+      "status": "PASS"
+    },
+    {
+      "operator": "take_axis",
+      "opcode": 153,
+      "test": "tests/test_mixed_graph_optimization.py::test_take_reduction_matches_materialization_and_skips_unselected_nan[False-0-c]",
+      "elements": 108,
+      "scalar_median_ns": 1676.9834905660377,
+      "auto_median_ns": 1731.5520833333333,
+      "status": "PASS"
+    },
+    {
+      "operator": "slice_axis",
+      "opcode": 154,
+      "test": "tests/test_matrix_array_foundation.py::test_array_operations_preserve_dtype_geometry_and_values[False-shape3-float64]",
+      "elements": 24,
+      "scalar_median_ns": 1315.2441860465117,
+      "auto_median_ns": 1318.421052631579,
+      "status": "PASS"
+    },
+    {
+      "operator": "concatenate",
+      "opcode": 155,
+      "test": "tests/test_matrix_array_foundation.py::test_array_operations_preserve_dtype_geometry_and_values[False-shape3-float64]",
+      "elements": 48,
+      "scalar_median_ns": 1402.084,
+      "auto_median_ns": 1436.987684729064,
+      "status": "PASS"
+    },
+    {
+      "operator": "stack",
+      "opcode": 156,
+      "test": "tests/test_matrix_array_foundation.py::test_array_operations_preserve_dtype_geometry_and_values[False-shape2-float64]",
+      "elements": 24,
+      "scalar_median_ns": 1362.5156794425086,
+      "auto_median_ns": 1356.6011131725418,
+      "status": "PASS"
+    },
+    {
+      "operator": "broadcast_like",
+      "opcode": 157,
+      "test": "tests/test_column_library.py::test_fused_column_pair_preserves_operand_order[False-shape0-False-False-add-add]",
+      "elements": 594,
+      "scalar_median_ns": 1533.1627906976744,
+      "auto_median_ns": 1487.1273712737127,
+      "status": "PASS"
+    },
+    {
+      "operator": "sum_axis",
+      "opcode": 158,
+      "test": "tests/test_column_library.py::test_ordered_column_reductions[f-shape3-sum_axis]",
+      "elements": 16705,
+      "scalar_median_ns": 10751.018404907976,
+      "auto_median_ns": 4601.755102040816,
+      "status": "PASS"
+    },
+    {
+      "operator": "mean_axis",
+      "opcode": 159,
+      "test": "tests/test_column_library.py::test_ordered_column_reductions[f-shape3-mean_axis]",
+      "elements": 16705,
+      "scalar_median_ns": 10721.24647887324,
+      "auto_median_ns": 4578.8247422680415,
+      "status": "PASS"
+    },
+    {
+      "operator": "swap_axes",
+      "opcode": 160,
+      "test": "tests/test_matrix_array_foundation.py::test_array_operations_preserve_dtype_geometry_and_values[False-shape3-float64]",
+      "elements": 24,
+      "scalar_median_ns": 1155.672340425532,
+      "auto_median_ns": 1158.5494672754946,
+      "status": "PASS"
+    },
+    {
+      "operator": "variance_axis",
+      "opcode": 161,
+      "test": "tests/test_density_state_library.py::test_density_admission_bits_workspace_canaries_and_retained_results[c-shape2]",
+      "elements": 131072,
+      "scalar_median_ns": 104043.94444444444,
+      "auto_median_ns": 67219.14814814815,
+      "status": "PASS"
+    },
+    {
+      "operator": "max_axis",
+      "opcode": 162,
+      "test": "tests/test_latent_operators.py::test_axis_math[c-shape2]",
+      "elements": 60,
+      "scalar_median_ns": 1112.2957317073171,
+      "auto_median_ns": 1111.8651488616463,
+      "status": "PASS"
+    },
+    {
+      "operator": "argmax_axis",
+      "opcode": 163,
+      "test": "tests/test_hmm_xi_tiles.py::test_hmm_tiled_model_matches_independent_reference_and_inference[258-4-12]",
+      "elements": 3096,
+      "scalar_median_ns": 3666.0193798449613,
+      "auto_median_ns": 3662.1863799283155,
+      "status": "PASS"
+    },
+    {
+      "operator": "logsumexp_axis",
+      "opcode": 164,
+      "test": "tests/test_latent_operators.py::test_axis_math[c-shape2]",
+      "elements": 60,
+      "scalar_median_ns": 1405.758389261745,
+      "auto_median_ns": 1401.171875,
+      "status": "PASS"
+    },
+    {
+      "operator": "softmax_axis",
+      "opcode": 165,
+      "test": "tests/test_softmax_library.py::test_normal_exponential_can_become_subnormal_after_normalization",
+      "elements": 8192,
+      "scalar_median_ns": 53369.8125,
+      "auto_median_ns": 61058.333333333336,
+      "status": "PASS"
+    },
+    {
+      "operator": "gaussian_log_density",
+      "opcode": 166,
+      "test": "tests/test_density_state_library.py::test_density_admission_bits_workspace_canaries_and_retained_results[c-shape1]",
+      "elements": 127472,
+      "scalar_median_ns": 752937.5,
+      "auto_median_ns": 749604.5,
+      "status": "PASS"
+    },
+    {
+      "operator": "gaussian_mixture_em",
+      "opcode": 167,
+      "test": "tests/test_latent_library_backend.py::test_explicit_scalar_disables_eigen_for_large_eligible_input[256-False]",
+      "elements": 67331,
+      "scalar_median_ns": 2498250.0,
+      "auto_median_ns": 1444917.0,
+      "status": "PASS"
+    },
+    {
+      "operator": "gaussian_hmm_em",
+      "opcode": 168,
+      "test": "tests/test_latent_library_backend.py::test_explicit_scalar_disables_eigen_for_large_eligible_input[256-True]",
+      "elements": 67340,
+      "scalar_median_ns": 2862000.0,
+      "auto_median_ns": 1614417.0,
+      "status": "PASS"
+    },
+    {
+      "operator": "mixture_weights",
+      "opcode": 169,
+      "test": "tests/test_latent_library_backend.py::test_em_eigen_matches_independent_explicit_reference[256-False]",
+      "elements": 1548,
+      "scalar_median_ns": 1288.5446685878962,
+      "auto_median_ns": 1277.809633027523,
+      "status": "PASS"
+    },
+    {
+      "operator": "mixture_means",
+      "opcode": 170,
+      "test": "tests/test_latent_library_backend.py::test_em_eigen_matches_independent_explicit_reference[256-False]",
+      "elements": 1548,
+      "scalar_median_ns": 1335.236559139785,
+      "auto_median_ns": 1335.5207877461708,
+      "status": "PASS"
+    },
+    {
+      "operator": "mixture_variances",
+      "opcode": 171,
+      "test": "tests/test_latent_library_backend.py::test_em_eigen_matches_independent_explicit_reference[256-False]",
+      "elements": 1548,
+      "scalar_median_ns": 1331.0425,
+      "auto_median_ns": 1336.5185950413222,
+      "status": "PASS"
+    },
+    {
+      "operator": "em_iterations",
+      "opcode": 172,
+      "test": "tests/test_latent_library_backend.py::test_em_eigen_matches_independent_explicit_reference[256-True]",
+      "elements": 1557,
+      "scalar_median_ns": 1217.2213333333334,
+      "auto_median_ns": 1223.4754098360656,
+      "status": "PASS"
+    },
+    {
+      "operator": "em_log_likelihood",
+      "opcode": 173,
+      "test": "tests/test_latent_library_backend.py::test_em_eigen_matches_independent_explicit_reference[256-True]",
+      "elements": 1557,
+      "scalar_median_ns": 1222.4801061007959,
+      "auto_median_ns": 1217.404761904762,
+      "status": "PASS"
+    },
+    {
+      "operator": "em_converged",
+      "opcode": 174,
+      "test": "tests/test_latent_library_backend.py::test_em_eigen_matches_independent_explicit_reference[256-True]",
+      "elements": 1557,
+      "scalar_median_ns": 1214.7562724014338,
+      "auto_median_ns": 1214.3030303030303,
+      "status": "PASS"
+    },
+    {
+      "operator": "hmm_initial",
+      "opcode": 175,
+      "test": "tests/test_latent_library_backend.py::test_em_eigen_matches_independent_explicit_reference[256-True]",
+      "elements": 1557,
+      "scalar_median_ns": 1295.143572621035,
+      "auto_median_ns": 1318.9470085470086,
+      "status": "PASS"
+    },
+    {
+      "operator": "hmm_transition",
+      "opcode": 176,
+      "test": "tests/test_latent_library_backend.py::test_em_eigen_matches_independent_explicit_reference[256-True]",
+      "elements": 1557,
+      "scalar_median_ns": 1340.7051282051282,
+      "auto_median_ns": 1348.1242603550295,
+      "status": "PASS"
+    },
+    {
+      "operator": "hmm_means",
+      "opcode": 177,
+      "test": "tests/test_latent_library_backend.py::test_em_eigen_matches_independent_explicit_reference[256-True]",
+      "elements": 1557,
+      "scalar_median_ns": 1352.734375,
+      "auto_median_ns": 1356.5891472868218,
+      "status": "PASS"
+    },
+    {
+      "operator": "hmm_variances",
+      "opcode": 178,
+      "test": "tests/test_latent_library_backend.py::test_em_eigen_matches_independent_explicit_reference[256-True]",
+      "elements": 1557,
+      "scalar_median_ns": 1356.2297297297298,
+      "auto_median_ns": 1385.3902439024391,
+      "status": "PASS"
+    },
+    {
+      "operator": "hmm_filter",
+      "opcode": 179,
+      "test": "tests/test_latent_operators.py::test_frozen_platform_em_and_inference[1-91-5-4]",
+      "elements": 204,
+      "scalar_median_ns": 3358.653846153846,
+      "auto_median_ns": 3352.9685863874347,
+      "status": "PASS"
+    },
+    {
+      "operator": "hmm_smooth",
+      "opcode": 180,
+      "test": "tests/test_hmm_xi_tiles.py::test_hmm_tiled_model_matches_independent_reference_and_inference[258-4-12]",
+      "elements": 3252,
+      "scalar_median_ns": 392864.75,
+      "auto_median_ns": 392614.5,
+      "status": "PASS"
+    },
+    {
+      "operator": "transition_counts",
+      "opcode": 181,
+      "test": "tests/test_latent_operators.py::test_transition_missing_does_not_bridge",
+      "elements": 7,
+      "scalar_median_ns": 1094.3587786259543,
+      "auto_median_ns": 1114.2201834862385,
+      "status": "PASS"
+    },
+    {
+      "operator": "one_hot",
+      "opcode": 182,
+      "test": "tests/test_latent_operators.py::test_transition_missing_does_not_bridge",
+      "elements": 7,
+      "scalar_median_ns": 1104.3906810035842,
+      "auto_median_ns": 1104.80943738657,
+      "status": "PASS"
+    },
+    {
+      "operator": "partition_mean",
+      "opcode": 183,
+      "test": "tests/test_latent_operators.py::test_initializers_and_scatter[100-17-9007199254740991]",
+      "elements": 300,
+      "scalar_median_ns": 2606.326219512195,
+      "auto_median_ns": 2598.340836012862,
+      "status": "PASS"
+    },
+    {
+      "operator": "sample_unique_indices",
+      "opcode": 184,
+      "test": "tests/test_latent_operators.py::test_initializers_and_scatter[100-17-9007199254740991]",
+      "elements": 200,
+      "scalar_median_ns": 1717.6495468277947,
+      "auto_median_ns": 1701.2635379061371,
+      "status": "PASS"
+    },
+    {
+      "operator": "scatter_rows",
+      "opcode": 185,
+      "test": "tests/test_latent_operators.py::test_scatter_tensor_and_strided_codes[c]",
+      "elements": 65,
+      "scalar_median_ns": 1409.5670391061453,
+      "auto_median_ns": 1405.7894736842106,
+      "status": "PASS"
+    },
+    {
+      "operator": "affine_contract",
+      "opcode": 186,
+      "test": "tests/test_mc_projection_excel.py::test_projection_symbolic_cell_budget_accepts_upper_bound_and_rejects_one_less[affine_contract]",
+      "elements": 13,
+      "scalar_median_ns": 1269.5868613138687,
+      "auto_median_ns": 1269.625,
+      "status": "PASS"
+    },
+    {
+      "operator": "expm1",
+      "opcode": 187,
+      "test": "tests/test_mc_projection_primitives.py::test_expm1_direct_ieee_precision_and_independent_results[c-shape1]",
+      "elements": 12,
+      "scalar_median_ns": 970.6086021505376,
+      "auto_median_ns": 979.4220665499124,
+      "status": "PASS"
+    }
+  ]
+}

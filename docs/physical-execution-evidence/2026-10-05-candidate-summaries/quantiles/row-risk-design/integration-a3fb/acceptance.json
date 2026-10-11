@@ -1,0 +1,103 @@
+{
+  "status": "passed",
+  "build_id": "a3fbac2690c5a6167411604c832f9f88aa8af195c898d80d4c445c052209b815",
+  "paths": [
+    "cpp/graph.cpp",
+    "cpp/planner.cpp",
+    "cpp/operators/numeric_line_sort.cpp",
+    "cpp/operators/axis_primitives.hpp",
+    "cpp/operators/elementwise.cpp",
+    "cpp/operators/matrix_foundation.cpp",
+    "cpp/operators/registry.cpp",
+    "cpp/operators/elementwise_math.hpp",
+    "cpp/operators/matrix.cpp",
+    "cpp/operators/numeric_line_sort.hpp",
+    "cpp/operators/axis_primitives.cpp",
+    "cpp/include/calmetrics_engine/graph.hpp",
+    "cpp/include/calmetrics_engine/operators.hpp",
+    "tests/test_square_reduce_fusion.py",
+    "tests/graph_native_tests.cpp",
+    "tests/test_scan_reduce_fusion.py",
+    "tests/test_numeric_line_sort_library.py",
+    "tests/test_row_batch_execution.py",
+    "tests/row_batch_native_cases.hpp",
+    "tests/test_where_sum_fusion.py",
+    "tests/test_single_axis_quantile_selection.py"
+  ],
+  "qualified_frozen_source": true,
+  "actual_rebuild_verified": true,
+  "whole_goal_complete": false,
+  "git_operations": false,
+  "actual_targeted_tests": 745,
+  "actual_native_tests": 9,
+  "qualified_same_source_full": 13271,
+  "qualified_same_source_san_off": {
+    "related": 745,
+    "native": 9
+  },
+  "production_adopted": true,
+  "time": [
+    {
+      "shape": [
+        16384,
+        2520,
+        30
+      ],
+      "layout": "C",
+      "medians_seconds": {
+        "candidate": 0.6355191665,
+        "bounded-select-njit": 0.421144042
+      },
+      "maximum_absolute_errors": {
+        "candidate": [
+          3.469446951953614e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "bounded-select-njit": [
+          4.336808689942018e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ]
+      }
+    },
+    {
+      "shape": [
+        16384,
+        2520,
+        30
+      ],
+      "layout": "F",
+      "medians_seconds": {
+        "candidate": 0.6417900205,
+        "bounded-select-njit": 0.423794917
+      },
+      "maximum_absolute_errors": {
+        "candidate": [
+          3.469446951953614e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ],
+        "bounded-select-njit": [
+          4.336808689942018e-18,
+          1.5178830414797062e-18,
+          5.551115123125783e-16
+        ]
+      }
+    }
+  ],
+  "memory": [
+    {
+      "backend": "candidate",
+      "requested_heap_warm_peak_bytes": 21335976,
+      "rss_delta_median_bytes": 40353792,
+      "rss_absolute_median_bytes": 127729664
+    },
+    {
+      "backend": "bounded-select-njit",
+      "requested_heap_warm_peak_bytes": 20309536,
+      "rss_delta_median_bytes": 48660480,
+      "rss_absolute_median_bytes": 206045184
+    }
+  ]
+}

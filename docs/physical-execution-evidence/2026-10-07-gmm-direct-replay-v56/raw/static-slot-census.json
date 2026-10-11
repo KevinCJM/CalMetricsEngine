@@ -1,0 +1,308 @@
+{
+  "scope": "logical slot maxima, not actual physical allocation proof",
+  "nodes": [
+    {
+      "storage": "integer",
+      "slot": 0,
+      "node": 48,
+      "operator": "argmax_axis",
+      "shape": [
+        "349526"
+      ],
+      "cells": 349526,
+      "last_use": 49
+    },
+    {
+      "storage": "integer",
+      "slot": 1,
+      "node": 54,
+      "operator": "gather",
+      "shape": [
+        "16"
+      ],
+      "cells": 16,
+      "last_use": 109
+    },
+    {
+      "storage": "integer",
+      "slot": 2,
+      "node": 57,
+      "operator": "argmax_axis",
+      "shape": [
+        "1398104"
+      ],
+      "cells": 1398104,
+      "last_use": 86
+    },
+    {
+      "storage": "integer",
+      "slot": 3,
+      "node": 90,
+      "operator": "state_select",
+      "shape": [
+        "1398104"
+      ],
+      "cells": 1398104,
+      "last_use": 91
+    },
+    {
+      "storage": "mask",
+      "slot": 0,
+      "node": 59,
+      "operator": "equal",
+      "shape": [
+        "1398104"
+      ],
+      "cells": 1398104,
+      "last_use": 104
+    },
+    {
+      "storage": "mask",
+      "slot": 1,
+      "node": 61,
+      "operator": "equal",
+      "shape": [
+        "1398104"
+      ],
+      "cells": 1398104,
+      "last_use": 103
+    },
+    {
+      "storage": "mask",
+      "slot": 2,
+      "node": 63,
+      "operator": "equal",
+      "shape": [
+        "1398104"
+      ],
+      "cells": 1398104,
+      "last_use": 102
+    },
+    {
+      "storage": "mask",
+      "slot": 3,
+      "node": 65,
+      "operator": "equal",
+      "shape": [
+        "1398104"
+      ],
+      "cells": 1398104,
+      "last_use": 101
+    },
+    {
+      "storage": "mask",
+      "slot": 4,
+      "node": 67,
+      "operator": "equal",
+      "shape": [
+        "1398104"
+      ],
+      "cells": 1398104,
+      "last_use": 100
+    },
+    {
+      "storage": "mask",
+      "slot": 5,
+      "node": 69,
+      "operator": "equal",
+      "shape": [
+        "1398104"
+      ],
+      "cells": 1398104,
+      "last_use": 99
+    },
+    {
+      "storage": "mask",
+      "slot": 6,
+      "node": 71,
+      "operator": "equal",
+      "shape": [
+        "1398104"
+      ],
+      "cells": 1398104,
+      "last_use": 98
+    },
+    {
+      "storage": "mask",
+      "slot": 7,
+      "node": 73,
+      "operator": "equal",
+      "shape": [
+        "1398104"
+      ],
+      "cells": 1398104,
+      "last_use": 97
+    },
+    {
+      "storage": "mask",
+      "slot": 8,
+      "node": 75,
+      "operator": "equal",
+      "shape": [
+        "1398104"
+      ],
+      "cells": 1398104,
+      "last_use": 96
+    },
+    {
+      "storage": "mask",
+      "slot": 9,
+      "node": 77,
+      "operator": "equal",
+      "shape": [
+        "1398104"
+      ],
+      "cells": 1398104,
+      "last_use": 95
+    },
+    {
+      "storage": "mask",
+      "slot": 10,
+      "node": 79,
+      "operator": "equal",
+      "shape": [
+        "1398104"
+      ],
+      "cells": 1398104,
+      "last_use": 94
+    },
+    {
+      "storage": "mask",
+      "slot": 11,
+      "node": 80,
+      "operator": "equal",
+      "shape": [
+        "1398104"
+      ],
+      "cells": 1398104,
+      "last_use": 93
+    },
+    {
+      "storage": "mask",
+      "slot": 12,
+      "node": 82,
+      "operator": "equal",
+      "shape": [
+        "1398104"
+      ],
+      "cells": 1398104,
+      "last_use": 92
+    },
+    {
+      "storage": "mask",
+      "slot": 13,
+      "node": 84,
+      "operator": "equal",
+      "shape": [
+        "1398104"
+      ],
+      "cells": 1398104,
+      "last_use": 91
+    },
+    {
+      "storage": "mask",
+      "slot": 14,
+      "node": 85,
+      "operator": "equal",
+      "shape": [
+        "1398104"
+      ],
+      "cells": 1398104,
+      "last_use": 90
+    },
+    {
+      "storage": "mask",
+      "slot": 15,
+      "node": 86,
+      "operator": "equal",
+      "shape": [
+        "1398104"
+      ],
+      "cells": 1398104,
+      "last_use": 89
+    },
+    {
+      "storage": "numeric",
+      "slot": 0,
+      "node": 110,
+      "operator": "scatter_rows",
+      "shape": [
+        "1398104",
+        "16"
+      ],
+      "cells": 22369664,
+      "last_use": 115
+    },
+    {
+      "storage": "numeric",
+      "slot": 1,
+      "node": 28,
+      "operator": "take_axis",
+      "shape": [
+        "16",
+        "8"
+      ],
+      "cells": 128,
+      "last_use": 30
+    },
+    {
+      "storage": "numeric",
+      "slot": 2,
+      "node": 56,
+      "operator": "scatter_rows",
+      "shape": [
+        "1398104",
+        "16"
+      ],
+      "cells": 22369664,
+      "last_use": 57
+    },
+    {
+      "storage": "numeric",
+      "slot": 3,
+      "node": 30,
+      "operator": "partition_mean",
+      "shape": [
+        "16",
+        "8"
+      ],
+      "cells": 128,
+      "last_use": 115
+    },
+    {
+      "storage": "numeric",
+      "slot": 4,
+      "node": 16,
+      "operator": "divide",
+      "shape": [
+        "1398104",
+        "8"
+      ],
+      "cells": 11184832,
+      "last_use": 115
+    },
+    {
+      "storage": "numeric",
+      "slot": 5,
+      "node": 21,
+      "operator": "subtract",
+      "shape": [
+        "1048578",
+        "8"
+      ],
+      "cells": 8388624,
+      "last_use": 23
+    },
+    {
+      "storage": "numeric",
+      "slot": 6,
+      "node": 108,
+      "operator": "scatter_rows",
+      "shape": [
+        "1398104"
+      ],
+      "cells": 1398104,
+      "last_use": 115
+    }
+  ]
+}

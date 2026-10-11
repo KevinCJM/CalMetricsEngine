@@ -1,0 +1,213 @@
+...............F....FFFF....FFFF..F..                                    [100%]
+=================================== FAILURES ===================================
+_____ test_projection_shared_recipe_is_budgeted_once_but_keeps_every_root ______
+
+    def test_projection_shared_recipe_is_budgeted_once_but_keeps_every_root():
+        affine = "affine_contract(x,k,i)"
+        simple = f"expm1({affine})"
+>       graph = GraphCompiler(affine_types()).compile({"left": simple, "right": simple, "linear": affine}, result_format="typed")
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       calmetrics_engine._native.graph.GraphCompileError: AXIS_MISMATCH: unsupported named axis: sample
+
+tests/test_mc_projection_excel.py:107: GraphCompileError
+_ test_affine_excel_domain_checks_internal_products_and_partial_sums_without_limiting_cpp[graph-product_overflow_hidden_by_nan] _
+
+case = 'product_overflow_hidden_by_nan', entry = 'graph'
+
+    @pytest.mark.parametrize("case", ["product_overflow_hidden_by_nan", "product_subnormal_hidden_by_initial",
+                                      "partial_overflow_hidden_by_nan", "partial_subnormal_hidden_by_later_term"])
+    @pytest.mark.parametrize("entry", ["operator", "graph"])
+    def test_affine_excel_domain_checks_internal_products_and_partial_sums_without_limiting_cpp(case, entry):
+        arguments, expected = unsafe_affine_arguments(case)
+        originals = [value.copy() for value in arguments]
+        if entry == "operator":
+            with pytest.raises(excel.ExcelExportError, match="UNREPRESENTABLE_VALUE.*affine_contract intermediate"):
+                excel.plan_operator("affine_contract", arguments)
+            actual = operators.affine_contract(*arguments)
+            assert actual.shape == (1, 1)
+            if np.isnan(expected):
+                assert np.isnan(actual[0, 0])
+            else:
+                assert actual[0, 0] == expected
+        else:
+            # The final bool is representable, so the export observer must check
+            # the affine recipe's real dependency/internal arithmetic, not roots.
+>           graph = GraphCompiler(affine_types()).compile("finite_mask(affine_contract(x,k,i))", result_format="typed")
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           calmetrics_engine._native.graph.GraphCompileError: AXIS_MISMATCH: unsupported named axis: sample
+
+tests/test_mc_projection_excel.py:150: GraphCompileError
+_ test_affine_excel_domain_checks_internal_products_and_partial_sums_without_limiting_cpp[graph-product_subnormal_hidden_by_initial] _
+
+case = 'product_subnormal_hidden_by_initial', entry = 'graph'
+
+    @pytest.mark.parametrize("case", ["product_overflow_hidden_by_nan", "product_subnormal_hidden_by_initial",
+                                      "partial_overflow_hidden_by_nan", "partial_subnormal_hidden_by_later_term"])
+    @pytest.mark.parametrize("entry", ["operator", "graph"])
+    def test_affine_excel_domain_checks_internal_products_and_partial_sums_without_limiting_cpp(case, entry):
+        arguments, expected = unsafe_affine_arguments(case)
+        originals = [value.copy() for value in arguments]
+        if entry == "operator":
+            with pytest.raises(excel.ExcelExportError, match="UNREPRESENTABLE_VALUE.*affine_contract intermediate"):
+                excel.plan_operator("affine_contract", arguments)
+            actual = operators.affine_contract(*arguments)
+            assert actual.shape == (1, 1)
+            if np.isnan(expected):
+                assert np.isnan(actual[0, 0])
+            else:
+                assert actual[0, 0] == expected
+        else:
+            # The final bool is representable, so the export observer must check
+            # the affine recipe's real dependency/internal arithmetic, not roots.
+>           graph = GraphCompiler(affine_types()).compile("finite_mask(affine_contract(x,k,i))", result_format="typed")
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           calmetrics_engine._native.graph.GraphCompileError: AXIS_MISMATCH: unsupported named axis: sample
+
+tests/test_mc_projection_excel.py:150: GraphCompileError
+_ test_affine_excel_domain_checks_internal_products_and_partial_sums_without_limiting_cpp[graph-partial_overflow_hidden_by_nan] _
+
+case = 'partial_overflow_hidden_by_nan', entry = 'graph'
+
+    @pytest.mark.parametrize("case", ["product_overflow_hidden_by_nan", "product_subnormal_hidden_by_initial",
+                                      "partial_overflow_hidden_by_nan", "partial_subnormal_hidden_by_later_term"])
+    @pytest.mark.parametrize("entry", ["operator", "graph"])
+    def test_affine_excel_domain_checks_internal_products_and_partial_sums_without_limiting_cpp(case, entry):
+        arguments, expected = unsafe_affine_arguments(case)
+        originals = [value.copy() for value in arguments]
+        if entry == "operator":
+            with pytest.raises(excel.ExcelExportError, match="UNREPRESENTABLE_VALUE.*affine_contract intermediate"):
+                excel.plan_operator("affine_contract", arguments)
+            actual = operators.affine_contract(*arguments)
+            assert actual.shape == (1, 1)
+            if np.isnan(expected):
+                assert np.isnan(actual[0, 0])
+            else:
+                assert actual[0, 0] == expected
+        else:
+            # The final bool is representable, so the export observer must check
+            # the affine recipe's real dependency/internal arithmetic, not roots.
+>           graph = GraphCompiler(affine_types()).compile("finite_mask(affine_contract(x,k,i))", result_format="typed")
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           calmetrics_engine._native.graph.GraphCompileError: AXIS_MISMATCH: unsupported named axis: sample
+
+tests/test_mc_projection_excel.py:150: GraphCompileError
+_ test_affine_excel_domain_checks_internal_products_and_partial_sums_without_limiting_cpp[graph-partial_subnormal_hidden_by_later_term] _
+
+case = 'partial_subnormal_hidden_by_later_term', entry = 'graph'
+
+    @pytest.mark.parametrize("case", ["product_overflow_hidden_by_nan", "product_subnormal_hidden_by_initial",
+                                      "partial_overflow_hidden_by_nan", "partial_subnormal_hidden_by_later_term"])
+    @pytest.mark.parametrize("entry", ["operator", "graph"])
+    def test_affine_excel_domain_checks_internal_products_and_partial_sums_without_limiting_cpp(case, entry):
+        arguments, expected = unsafe_affine_arguments(case)
+        originals = [value.copy() for value in arguments]
+        if entry == "operator":
+            with pytest.raises(excel.ExcelExportError, match="UNREPRESENTABLE_VALUE.*affine_contract intermediate"):
+                excel.plan_operator("affine_contract", arguments)
+            actual = operators.affine_contract(*arguments)
+            assert actual.shape == (1, 1)
+            if np.isnan(expected):
+                assert np.isnan(actual[0, 0])
+            else:
+                assert actual[0, 0] == expected
+        else:
+            # The final bool is representable, so the export observer must check
+            # the affine recipe's real dependency/internal arithmetic, not roots.
+>           graph = GraphCompiler(affine_types()).compile("finite_mask(affine_contract(x,k,i))", result_format="typed")
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           calmetrics_engine._native.graph.GraphCompileError: AXIS_MISMATCH: unsupported named axis: sample
+
+tests/test_mc_projection_excel.py:150: GraphCompileError
+_ test_expm1_excel_rejects_unsupported_domain_while_cpp_keeps_ieee_contract[graph-710.0-inf] _
+
+value = 710.0, expected = inf, entry = 'graph'
+
+    @pytest.mark.parametrize("value,expected", [(710., np.inf), (np.inf, np.inf), (-np.inf, -1.), (1e-320, 1e-320)])
+    @pytest.mark.parametrize("entry", ["operator", "graph"])
+    def test_expm1_excel_rejects_unsupported_domain_while_cpp_keeps_ieee_contract(value, expected, entry):
+        if entry == "operator":
+            with pytest.raises(excel.ExcelExportError, match="UNREPRESENTABLE_VALUE"):
+                excel.plan_operator("expm1", [value])
+            assert operators.expm1(value) == expected
+        else:
+>           graph = GraphCompiler({"x": dict(kind="vector", axes=["sample"], shape=["N"])}).compile(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                "greater_than(expm1(x),0)", result_format="typed")
+E           calmetrics_engine._native.graph.GraphCompileError: AXIS_MISMATCH: unsupported named axis: sample
+
+tests/test_mc_projection_excel.py:172: GraphCompileError
+_ test_expm1_excel_rejects_unsupported_domain_while_cpp_keeps_ieee_contract[graph-inf-inf] _
+
+value = inf, expected = inf, entry = 'graph'
+
+    @pytest.mark.parametrize("value,expected", [(710., np.inf), (np.inf, np.inf), (-np.inf, -1.), (1e-320, 1e-320)])
+    @pytest.mark.parametrize("entry", ["operator", "graph"])
+    def test_expm1_excel_rejects_unsupported_domain_while_cpp_keeps_ieee_contract(value, expected, entry):
+        if entry == "operator":
+            with pytest.raises(excel.ExcelExportError, match="UNREPRESENTABLE_VALUE"):
+                excel.plan_operator("expm1", [value])
+            assert operators.expm1(value) == expected
+        else:
+>           graph = GraphCompiler({"x": dict(kind="vector", axes=["sample"], shape=["N"])}).compile(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                "greater_than(expm1(x),0)", result_format="typed")
+E           calmetrics_engine._native.graph.GraphCompileError: AXIS_MISMATCH: unsupported named axis: sample
+
+tests/test_mc_projection_excel.py:172: GraphCompileError
+_ test_expm1_excel_rejects_unsupported_domain_while_cpp_keeps_ieee_contract[graph--inf--1.0] _
+
+value = -inf, expected = -1.0, entry = 'graph'
+
+    @pytest.mark.parametrize("value,expected", [(710., np.inf), (np.inf, np.inf), (-np.inf, -1.), (1e-320, 1e-320)])
+    @pytest.mark.parametrize("entry", ["operator", "graph"])
+    def test_expm1_excel_rejects_unsupported_domain_while_cpp_keeps_ieee_contract(value, expected, entry):
+        if entry == "operator":
+            with pytest.raises(excel.ExcelExportError, match="UNREPRESENTABLE_VALUE"):
+                excel.plan_operator("expm1", [value])
+            assert operators.expm1(value) == expected
+        else:
+>           graph = GraphCompiler({"x": dict(kind="vector", axes=["sample"], shape=["N"])}).compile(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                "greater_than(expm1(x),0)", result_format="typed")
+E           calmetrics_engine._native.graph.GraphCompileError: AXIS_MISMATCH: unsupported named axis: sample
+
+tests/test_mc_projection_excel.py:172: GraphCompileError
+_ test_expm1_excel_rejects_unsupported_domain_while_cpp_keeps_ieee_contract[graph-1e-320-1e-320] _
+
+value = 1e-320, expected = 1e-320, entry = 'graph'
+
+    @pytest.mark.parametrize("value,expected", [(710., np.inf), (np.inf, np.inf), (-np.inf, -1.), (1e-320, 1e-320)])
+    @pytest.mark.parametrize("entry", ["operator", "graph"])
+    def test_expm1_excel_rejects_unsupported_domain_while_cpp_keeps_ieee_contract(value, expected, entry):
+        if entry == "operator":
+            with pytest.raises(excel.ExcelExportError, match="UNREPRESENTABLE_VALUE"):
+                excel.plan_operator("expm1", [value])
+            assert operators.expm1(value) == expected
+        else:
+>           graph = GraphCompiler({"x": dict(kind="vector", axes=["sample"], shape=["N"])}).compile(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                "greater_than(expm1(x),0)", result_format="typed")
+E           calmetrics_engine._native.graph.GraphCompileError: AXIS_MISMATCH: unsupported named axis: sample
+
+tests/test_mc_projection_excel.py:172: GraphCompileError
+_ test_projection_excel_snapshot_keeps_initial_coefficients_and_input_identity _
+
+    def test_projection_excel_snapshot_keeps_initial_coefficients_and_input_identity():
+        arguments = small_operator_case("affine_contract")
+>       graph = GraphCompiler(affine_types()).compile("expm1(affine_contract(x,k,i))", result_format="typed")
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       calmetrics_engine._native.graph.GraphCompileError: AXIS_MISMATCH: unsupported named axis: sample
+
+tests/test_mc_projection_excel.py:209: GraphCompileError
+=========================== short test summary info ============================
+FAILED tests/test_mc_projection_excel.py::test_projection_shared_recipe_is_budgeted_once_but_keeps_every_root
+FAILED tests/test_mc_projection_excel.py::test_affine_excel_domain_checks_internal_products_and_partial_sums_without_limiting_cpp[graph-product_overflow_hidden_by_nan]
+FAILED tests/test_mc_projection_excel.py::test_affine_excel_domain_checks_internal_products_and_partial_sums_without_limiting_cpp[graph-product_subnormal_hidden_by_initial]
+FAILED tests/test_mc_projection_excel.py::test_affine_excel_domain_checks_internal_products_and_partial_sums_without_limiting_cpp[graph-partial_overflow_hidden_by_nan]
+FAILED tests/test_mc_projection_excel.py::test_affine_excel_domain_checks_internal_products_and_partial_sums_without_limiting_cpp[graph-partial_subnormal_hidden_by_later_term]
+FAILED tests/test_mc_projection_excel.py::test_expm1_excel_rejects_unsupported_domain_while_cpp_keeps_ieee_contract[graph-710.0-inf]
+FAILED tests/test_mc_projection_excel.py::test_expm1_excel_rejects_unsupported_domain_while_cpp_keeps_ieee_contract[graph-inf-inf]
+FAILED tests/test_mc_projection_excel.py::test_expm1_excel_rejects_unsupported_domain_while_cpp_keeps_ieee_contract[graph--inf--1.0]
+FAILED tests/test_mc_projection_excel.py::test_expm1_excel_rejects_unsupported_domain_while_cpp_keeps_ieee_contract[graph-1e-320-1e-320]
+FAILED tests/test_mc_projection_excel.py::test_projection_excel_snapshot_keeps_initial_coefficients_and_input_identity
+10 failed, 27 passed in 0.52s

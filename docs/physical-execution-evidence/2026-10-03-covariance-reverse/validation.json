@@ -1,0 +1,373 @@
+{
+  "status": "PASS_WITH_IDENTICAL_MACHINE_CODE_MEASUREMENT_REUSE_AND_DISCLOSED_LIMITS",
+  "source_inputs": 77,
+  "final_build_id": "c9a5ef102069a8942e2e8a06261140b14f278d45f988f779db0000df881b045c",
+  "measured_build_id": "27dd5ead862e95ffdfe7bf9704b11716de0495d9939f521ec2dab3630f1fc79d",
+  "final_request_cases": 13,
+  "original_timing_cases": 13,
+  "rounds": 9,
+  "original_fresh_memory_children": 12,
+  "final_timing_remeasured": false,
+  "final_memory_remeasured": false,
+  "proof": "Exact __TEXT,__text streams match for operator object, full extension and full worker; all 13 final complete requests match measured output hashes/audits.",
+  "original_validation": {
+    "status": "PASS_WITH_DISCLOSED_TRACKING_LIMITATION",
+    "timing_batches": 2,
+    "cases_per_batch": [
+      5,
+      8
+    ],
+    "rounds": 9,
+    "full_results_equal_within_original_tolerance": true,
+    "exact_diagonal_and_sign_zero_preserved": true,
+    "fresh_memory_children": 12,
+    "heap_stages": 36,
+    "source_inputs": 77,
+    "untracked_frees": [
+      {
+        "case": "medium2048_reverse",
+        "backend": "old",
+        "stage": "cold_retained_heap",
+        "count": 1
+      },
+      {
+        "case": "medium2048_reverse",
+        "backend": "old",
+        "stage": "warm_baseline_heap",
+        "count": 4
+      },
+      {
+        "case": "medium2048_reverse",
+        "backend": "old",
+        "stage": "warm_heap",
+        "count": 5
+      },
+      {
+        "case": "medium2048_reverse",
+        "backend": "old",
+        "stage": "warm_retained_heap",
+        "count": 5
+      },
+      {
+        "case": "medium2048_reverse",
+        "backend": "new",
+        "stage": "cold_retained_heap",
+        "count": 1
+      },
+      {
+        "case": "medium2048_reverse",
+        "backend": "new",
+        "stage": "warm_baseline_heap",
+        "count": 4
+      },
+      {
+        "case": "medium2048_reverse",
+        "backend": "new",
+        "stage": "warm_heap",
+        "count": 5
+      },
+      {
+        "case": "medium2048_reverse",
+        "backend": "new",
+        "stage": "warm_retained_heap",
+        "count": 5
+      },
+      {
+        "case": "medium2048_reverse",
+        "backend": "njit",
+        "stage": "warm_retained_heap",
+        "count": 1
+      },
+      {
+        "case": "large4096_reverse_f",
+        "backend": "old",
+        "stage": "cold_retained_heap",
+        "count": 1
+      },
+      {
+        "case": "large4096_reverse_f",
+        "backend": "old",
+        "stage": "warm_baseline_heap",
+        "count": 4
+      },
+      {
+        "case": "large4096_reverse_f",
+        "backend": "old",
+        "stage": "warm_heap",
+        "count": 5
+      },
+      {
+        "case": "large4096_reverse_f",
+        "backend": "old",
+        "stage": "warm_retained_heap",
+        "count": 5
+      },
+      {
+        "case": "large4096_reverse_f",
+        "backend": "new",
+        "stage": "cold_retained_heap",
+        "count": 1
+      },
+      {
+        "case": "large4096_reverse_f",
+        "backend": "new",
+        "stage": "warm_baseline_heap",
+        "count": 4
+      },
+      {
+        "case": "large4096_reverse_f",
+        "backend": "new",
+        "stage": "warm_heap",
+        "count": 5
+      },
+      {
+        "case": "large4096_reverse_f",
+        "backend": "new",
+        "stage": "warm_retained_heap",
+        "count": 5
+      },
+      {
+        "case": "large4096_reverse_f",
+        "backend": "njit",
+        "stage": "warm_retained_heap",
+        "count": 1
+      }
+    ],
+    "cpu_wall_ratios": [
+      {
+        "batch": "timing",
+        "case": "small63_reverse",
+        "backend": "old",
+        "cpu_wall_median_ratio": 1.0826416456153014
+      },
+      {
+        "batch": "timing",
+        "case": "small63_reverse",
+        "backend": "new",
+        "cpu_wall_median_ratio": 1.0435442557632104
+      },
+      {
+        "batch": "timing",
+        "case": "small63_reverse",
+        "backend": "njit",
+        "cpu_wall_median_ratio": 1.1111111111111112
+      },
+      {
+        "batch": "timing",
+        "case": "medium1024_reverse",
+        "backend": "old",
+        "cpu_wall_median_ratio": 0.9993972992160125
+      },
+      {
+        "batch": "timing",
+        "case": "medium1024_reverse",
+        "backend": "new",
+        "cpu_wall_median_ratio": 1.0000041421471104
+      },
+      {
+        "batch": "timing",
+        "case": "medium1024_reverse",
+        "backend": "njit",
+        "cpu_wall_median_ratio": 0.9994710874284587
+      },
+      {
+        "batch": "timing",
+        "case": "medium2048_reverse",
+        "backend": "old",
+        "cpu_wall_median_ratio": 0.999685857190199
+      },
+      {
+        "batch": "timing",
+        "case": "medium2048_reverse",
+        "backend": "new",
+        "cpu_wall_median_ratio": 1.0000467670684
+      },
+      {
+        "batch": "timing",
+        "case": "medium2048_reverse",
+        "backend": "njit",
+        "cpu_wall_median_ratio": 0.9983568525512082
+      },
+      {
+        "batch": "timing",
+        "case": "large4096_reverse_c",
+        "backend": "old",
+        "cpu_wall_median_ratio": 0.9995278969505992
+      },
+      {
+        "batch": "timing",
+        "case": "large4096_reverse_c",
+        "backend": "new",
+        "cpu_wall_median_ratio": 0.9990030946110912
+      },
+      {
+        "batch": "timing",
+        "case": "large4096_reverse_c",
+        "backend": "njit",
+        "cpu_wall_median_ratio": 0.9990434258783106
+      },
+      {
+        "batch": "timing",
+        "case": "large4096_reverse_f",
+        "backend": "old",
+        "cpu_wall_median_ratio": 0.999583447895058
+      },
+      {
+        "batch": "timing",
+        "case": "large4096_reverse_f",
+        "backend": "new",
+        "cpu_wall_median_ratio": 0.999641206121502
+      },
+      {
+        "batch": "timing",
+        "case": "large4096_reverse_f",
+        "backend": "njit",
+        "cpu_wall_median_ratio": 0.9991101253343949
+      },
+      {
+        "batch": "timing",
+        "case": "large4096_correlation",
+        "backend": "old",
+        "cpu_wall_median_ratio": 0.9993904333381319
+      },
+      {
+        "batch": "timing",
+        "case": "large4096_correlation",
+        "backend": "new",
+        "cpu_wall_median_ratio": 0.9996002142057192
+      },
+      {
+        "batch": "timing",
+        "case": "large4096_correlation",
+        "backend": "njit",
+        "cpu_wall_median_ratio": 0.9991257381876882
+      },
+      {
+        "batch": "timing",
+        "case": "large4096_covariance",
+        "backend": "old",
+        "cpu_wall_median_ratio": 0.9988826101321068
+      },
+      {
+        "batch": "timing",
+        "case": "large4096_covariance",
+        "backend": "new",
+        "cpu_wall_median_ratio": 0.9997081828028453
+      },
+      {
+        "batch": "timing",
+        "case": "large4096_covariance",
+        "backend": "njit",
+        "cpu_wall_median_ratio": 0.9994676979985764
+      },
+      {
+        "batch": "timing",
+        "case": "positive2048_pair",
+        "backend": "old",
+        "cpu_wall_median_ratio": 0.9988778317919741
+      },
+      {
+        "batch": "timing",
+        "case": "positive2048_pair",
+        "backend": "new",
+        "cpu_wall_median_ratio": 0.9997953352134403
+      },
+      {
+        "batch": "timing",
+        "case": "positive2048_pair",
+        "backend": "njit",
+        "cpu_wall_median_ratio": 1.00004049966066
+      },
+      {
+        "batch": "timing",
+        "case": "negative_f1024",
+        "backend": "old",
+        "cpu_wall_median_ratio": 0.9991138849278255
+      },
+      {
+        "batch": "timing",
+        "case": "negative_f1024",
+        "backend": "new",
+        "cpu_wall_median_ratio": 0.9995000869256996
+      },
+      {
+        "batch": "timing",
+        "case": "negative_f1024",
+        "backend": "njit",
+        "cpu_wall_median_ratio": 1.0002598614646194
+      },
+      {
+        "batch": "timing",
+        "case": "padded2048_reverse",
+        "backend": "old",
+        "cpu_wall_median_ratio": 0.9994175537589464
+      },
+      {
+        "batch": "timing",
+        "case": "padded2048_reverse",
+        "backend": "new",
+        "cpu_wall_median_ratio": 1.0000717449963945
+      },
+      {
+        "batch": "timing",
+        "case": "padded2048_reverse",
+        "backend": "njit",
+        "cpu_wall_median_ratio": 0.9996806520113651
+      },
+      {
+        "batch": "timing",
+        "case": "scaled2048_reverse",
+        "backend": "old",
+        "cpu_wall_median_ratio": 0.9994527730924625
+      },
+      {
+        "batch": "timing",
+        "case": "scaled2048_reverse",
+        "backend": "new",
+        "cpu_wall_median_ratio": 0.9990175244418019
+      },
+      {
+        "batch": "timing",
+        "case": "scaled2048_reverse",
+        "backend": "njit",
+        "cpu_wall_median_ratio": 0.9990826511959352
+      },
+      {
+        "batch": "timing",
+        "case": "tiny2048_reverse",
+        "backend": "old",
+        "cpu_wall_median_ratio": 0.9998215662278332
+      },
+      {
+        "batch": "timing",
+        "case": "tiny2048_reverse",
+        "backend": "new",
+        "cpu_wall_median_ratio": 0.9997449639187895
+      },
+      {
+        "batch": "timing",
+        "case": "tiny2048_reverse",
+        "backend": "njit",
+        "cpu_wall_median_ratio": 1.0000126676001877
+      },
+      {
+        "batch": "timing",
+        "case": "dense_replay_reverse",
+        "backend": "old",
+        "cpu_wall_median_ratio": 0.9992914344111166
+      },
+      {
+        "batch": "timing",
+        "case": "dense_replay_reverse",
+        "backend": "new",
+        "cpu_wall_median_ratio": 0.9993909401796689
+      },
+      {
+        "batch": "timing",
+        "case": "dense_replay_reverse",
+        "backend": "njit",
+        "cpu_wall_median_ratio": 0.9997731911998186
+      }
+    ]
+  }
+}

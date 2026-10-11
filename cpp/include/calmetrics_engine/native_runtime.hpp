@@ -2,9 +2,11 @@
 #include "calmetrics_engine/planner.hpp"
 #include "calmetrics_engine/scheduler.hpp"
 #include "calmetrics_engine/shared_memory.hpp"
+#include "calmetrics_engine/inline_vector.hpp"
 #include <atomic>
 #include <chrono>
 #include <mutex>
+#include <utility>
 
 namespace calmetrics_engine::native {
 using Clock = std::chrono::steady_clock;
@@ -30,7 +32,7 @@ struct Batch {
   std::vector<std::size_t> input_sizes() const;
 };
 struct ExecutionAudit {
-  std::vector<graph::Audit> chunks;
+  InlineVector<graph::Audit, 1> chunks;
   double queue_wait_ms = 0, compute_ms = 0, elapsed_ms = 0;
   std::size_t cpu_tokens = 0, cpu_budget = 0;
   std::size_t shared_memory_bytes = 0, boundary_copy_bytes = 0,
@@ -43,6 +45,23 @@ struct ExecutionAudit {
 class ProcessPool;
 class Engine {
 public:
+  // One request only: metadata/intervals must remain unchanged until execution.
+  // Not a cached proof; every public request must obtain a fresh check.
+  class CheckedBatch {
+    friend class Engine;
+    const Engine *owner_;
+    const planner::Plan *plan_;
+    const Batch *batch_;
+    Deadline started_;
+    CheckedBatch(const Engine *owner, const planner::Plan &plan, const Batch &batch, Deadline started)
+        : owner_(owner), plan_(&plan), batch_(&batch), started_(started) {}
+  public:
+    CheckedBatch(const CheckedBatch &) = delete;
+    CheckedBatch &operator=(const CheckedBatch &) = delete;
+    CheckedBatch(CheckedBatch &&other) noexcept
+        : owner_(std::exchange(other.owner_, nullptr)), plan_(other.plan_), batch_(other.batch_), started_(other.started_) {}
+    CheckedBatch &operator=(CheckedBatch &&) = delete;
+  };
   Engine(std::size_t cpu, planner::Config config, std::string worker_path);
   ~Engine();
   Engine(const Engine &) = delete;
@@ -54,16 +73,23 @@ public:
   ExecutionAudit execute(const planner::Plan &plan, const Batch &batch,
                          void *output,
                          std::optional<double> timeout_seconds = {},
-                         bool return_shared_output = false);
+                         bool return_shared_output = false,
+                         bool allow_workspace_loan = false);
+  CheckedBatch check(const planner::Plan &, const Batch &) const;
+  ExecutionAudit execute(CheckedBatch &&, void *output,
+                         std::optional<double> timeout_seconds = {},
+                         bool return_shared_output = false,
+                         bool allow_workspace_loan = false);
   void close();
   bool closed() const noexcept { return closed_.load(); }
-  std::size_t cpu() const { return budget_.total(); }
+  std::size_t cpu() const noexcept { return cpu_limit_; }
   std::size_t peak_active() const { return budget_.peak_active(); }
   const planner::Config &config() const noexcept { return config_; }
 
 private:
   ProcessPool &processes();
   planner::Config config_;
+  const std::size_t cpu_limit_;
   CpuBudget budget_;
   std::string worker_path_;
   std::mutex process_mutex_, close_mutex_;

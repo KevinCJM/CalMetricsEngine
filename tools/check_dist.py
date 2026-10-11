@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import tarfile
 import zipfile
 from email.parser import BytesParser
@@ -13,6 +14,12 @@ import tomllib
 ROOT = Path(__file__).resolve().parents[1]
 PACKAGE = "calmetrics_engine"
 DISTRIBUTION = "calmetrics-engine"
+EIGEN_ARCHIVE = "third_party/eigen/eigen-3.4.0.tar.gz"
+EIGEN_SHA256 = "8586084f71f9bde545ee7fa6d00288b264a2b7ac3607b974e54d13e7162c1c72"
+EIGEN_NOTICES = {"COPYING.MPL2", "COPYING.BSD", "COPYING.README", "README.md"}
+HIGHWAY_ARCHIVE = "third_party/highway/highway-1.3.0.tar.gz"
+HIGHWAY_SHA256 = "07b3c1ba2c1096878a85a31a5b9b3757427af963b1141ca904db2f9f4afe0bc2"
+HIGHWAY_NOTICES = {"LICENSE", "LICENSE-BSD3", "README.md"}
 PYTHON_FILES = {
     f"{PACKAGE}/__init__.py",
     f"{PACKAGE}/_api.py",
@@ -39,6 +46,12 @@ def check_wheel(path: Path, version: str) -> None:
         missing = PYTHON_FILES - names
         if missing:
             raise ValueError(f"{path.name}: missing Python files {sorted(missing)}")
+        for notice in EIGEN_NOTICES:
+            if not archive.read(f"{PACKAGE}/licenses/eigen/{notice}").strip():
+                raise ValueError(f"{path.name}: empty Eigen notice {notice}")
+        for notice in HIGHWAY_NOTICES:
+            if not archive.read(f"{PACKAGE}/licenses/highway/{notice}").strip():
+                raise ValueError(f"{path.name}: empty Highway notice {notice}")
 
         extensions = [name for name in names if name.endswith((".so", ".pyd"))]
         if len(extensions) != 1 or not extensions[0].startswith(f"{PACKAGE}/_native."):
@@ -75,6 +88,20 @@ def check_sdist(path: Path, version: str) -> None:
     prefix = f"{PACKAGE}-{version}/"
     with tarfile.open(path) as archive:
         names = {name.removeprefix(prefix) for name in archive.getnames()}
+        eigen = archive.extractfile(prefix + EIGEN_ARCHIVE)
+        if eigen is None or hashlib.sha256(eigen.read()).hexdigest() != EIGEN_SHA256:
+            raise ValueError(f"{path.name}: missing or modified Eigen release archive")
+        for notice in EIGEN_NOTICES:
+            content = archive.extractfile(prefix + f"third_party/eigen/{notice}")
+            if content is None or not content.read().strip():
+                raise ValueError(f"{path.name}: empty Eigen notice {notice}")
+        highway = archive.extractfile(prefix + HIGHWAY_ARCHIVE)
+        if highway is None or hashlib.sha256(highway.read()).hexdigest() != HIGHWAY_SHA256:
+            raise ValueError(f"{path.name}: missing or modified Highway release archive")
+        for notice in HIGHWAY_NOTICES:
+            content = archive.extractfile(prefix + f"third_party/highway/{notice}")
+            if content is None or not content.read().strip():
+                raise ValueError(f"{path.name}: empty Highway notice {notice}")
 
     required = {
         "pyproject.toml",
@@ -120,6 +147,26 @@ def check_sdist(path: Path, version: str) -> None:
         "cpp/operators/reduction.cpp",
         "cpp/operators/sequence.cpp",
         "cpp/operators/matrix.cpp",
+        "cpp/operators/matrix_backend.cpp",
+        "cpp/include/calmetrics_engine/matrix_backend.hpp",
+        "cpp/affine_projection.cpp",
+        "cpp/compact_path.cpp",
+        "cpp/include/calmetrics_engine/affine_projection.hpp",
+        "cpp/operators/axis_primitives.cpp",
+        "cpp/operators/axis_primitives.hpp",
+        "cpp/operators/elementwise_math.hpp",
+        "cpp/operators/matrix_foundation.cpp",
+        "cpp/operators/latent.cpp",
+        "cpp/operators/cholesky_library.hpp",
+        "cpp/operators/column_library.hpp",
+        "cpp/operators/matmul_partitioned.hpp",
+        "cpp/operators/matmul_packed.cpp",
+        "cpp/operators/matmul_statistics.cpp",
+        "cpp/operators/solve_multi_library.hpp",
+        "cpp/operators/mask_validation.hpp",
+        "cpp/operators/numeric_line_sort.hpp",
+        "cpp/operators/numeric_line_sort.cpp",
+        "tests/test_matrix_library_backend.py",
         "cpp/operators/state.cpp",
         "cpp/operators/simd.cpp",
         "cpp/operators/simd_avx2.cpp",
@@ -138,6 +185,38 @@ def check_sdist(path: Path, version: str) -> None:
         "tests/test_regression.py",
         "tests/native_tests.cpp",
         "tests/operator_native_tests.cpp",
+        "tests/affine_projection_native_cases.hpp",
+        "tests/axis_path_native_cases.hpp",
+        "tests/compact_path_native_cases.hpp",
+        "tests/derived_row_native_cases.hpp",
+        "tests/f_cache_native_cases.hpp",
+        "tests/hmm_checkpoint_native_cases.hpp",
+        "tests/latent_unwritten_result_native_cases.hpp",
+        "tests/mask_validation_native_cases.hpp",
+        "tests/masked_reduce_native_cases.hpp",
+        "tests/matmul_input_bounds_native_cases.hpp",
+        "tests/matmul_root_native_cases.hpp",
+        "tests/matmul_scalar_chain_native_cases.hpp",
+        "tests/matmul_shared_roots_native_cases.hpp",
+        "tests/matmul_statistics_native_cases.hpp",
+        "tests/mixed_row_native_cases.hpp",
+        "tests/node_type_sharing_native_cases.hpp",
+        "tests/numeric_line_sort_native_cases.hpp",
+        "tests/packed_f_native_cases.hpp",
+        "tests/partitioned_matmul_native_cases.hpp",
+        "tests/raw_prefix_native_cases.hpp",
+        "tests/row_batch_native_cases.hpp",
+        "tests/state_decision_native_cases.hpp",
+        "tests/state_root_loan_native_cases.hpp",
+        "tests/take_scatter_native_cases.hpp",
+        "tests/matmul_original_budget_cases.json",
+        "tests/latent_reference.py",
+        "tests/latent_chain.py",
+        "tests/reference_backend.py",
+        "tests/test_reference_backend.py",
+        "tests/conftest.py",
+        "tests/test_operator_acceptance_tool.py",
+        "tests/test_large_matrix_performance_tool.py",
         "tests/graph_native_tests.cpp",
         "tests/compiler_native_tests.cpp",
         "tests/runtime_native_tests.cpp",
@@ -160,6 +239,10 @@ def check_sdist(path: Path, version: str) -> None:
         "tools/benchmark_cpp_first_control.py",
         "tools/benchmark_cpp_vs_njit_matrix.py",
         "tools/check_phase2_performance.py",
+        "tools/check_all_operator_cases.py",
+        "tools/check_large_matrix_performance.py",
+        "tools/check_em_library_performance.py",
+        "tools/benchmark_memory.py",
         "docs/architecture.md",
         "docs/cpp-first-design.md",
         "docs/cpp-first-acceptance.md",
@@ -176,7 +259,10 @@ def check_sdist(path: Path, version: str) -> None:
     if missing := required - names:
         raise ValueError(f"{path.name}: missing source files {sorted(missing)}")
 
-    forbidden = (".venv", ".build", "docs/.ai-hermes-user-memory", "dist/", ".git/")
+    forbidden = (
+        ".venv", ".build", "docs/.ai-hermes-user-memory", "dist/", ".git/",
+        "docs/physical-execution-evidence/",
+    )
     if any(
         name.startswith(forbidden)
         or "__pycache__" in Path(name).parts

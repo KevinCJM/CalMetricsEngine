@@ -1,0 +1,49 @@
+{
+  "status": "prepared_not_executed",
+  "source_sha256": {
+    "benchmark_derived_risks_v29.py": "1c60e9210afca8d504a125351e2da973c1d573de29062a4e481642a7402971f6",
+    "screen-v29-derived.py": "32b8c0c28c67fe392aeb757cc9524f8d6c51551a9418c894f446612aa478286c",
+    "memory-v29-derived.py": "ced2f69a42a6b0ff878a2b0954321c46b2a21bb319c4e61636dce049624e9248",
+    "benchmark_mixed_risks_v29.py": "28b51d6a3b166cf65775e20bab4f4b23f0be8a4b5c552a3b0f4ab8f324e548ae",
+    "screen-v29-mixed.py": "e2b180ccc7cb9cdb41c8c1fcf2945eade041f40cf4715df31f8870ffbd56414c",
+    "memory-v29-mixed.py": "43e1745080a85a614fc9eb20e5d515dc13a21442b4affcc24c7186887a515bac",
+    "benchmark_risks_parallel_v29.py": "c01e017db54b4bc60522e81658660e5550d644fa149919470122a4ab690e2dca",
+    "screen-v29-supplied.py": "bb6779b56313667c1c824405ffb24d7d2250b5314cb7a55e50fda917d4ef8c7f",
+    "memory-v29-supplied.py": "cde0f2427121088551508669aa2528b7b36ac459fb81d99c1bddda32a10c0a83",
+    "risk_graphs_derived_v29.py": "2d8c4b7e44ea03311cfd0528201e9dd9efd5d277bed67dd40654300cad63f0c0",
+    "risk_graphs_mixed_v29.py": "f026607ba5b1417b2ab05d16ae542c2b6501ee6870a5097c9fdc49d85adbe1eb",
+    "risk_graphs.py": "e8a566dd3a991622f2f1d5c1f6368fca7a9cbea71f2cd3bc1be02e6b67b006d3",
+    "prepare-v29-performance.py": "a83620f59a252434043d431a7441832ec79ff6a63e59cab5baff7161991f27d1",
+    "benchmark_matmul_root_v29b.py": "50239f9689259c7b0d50c1968ed2345210ae82fc2043adc372b40d304a3e90bd",
+    "screen-v29b-matmul.py": "28df218df96b598364636a08bd8c5b33951ac2ddfad07d4673bf8852c109d89c",
+    "memory-v29b-matmul.py": "ab5024aa3aa0b4b9945212b8d7b3a42b0bdbb41d30b28e6e28338800c63f621b",
+    "correct-v29-performance-fixtures.py": "a345b10294124742c0ebcc634e0358ef1890c4e2020f6b954562d57f41499d40",
+    "run-v29-next-corrected.py": "42b638ac58a39619f28e56371ecb090f6a6d5e94592ae4db555198332476cc29"
+  },
+  "matrix": {
+    "time_jobs": 70,
+    "time_samples": 420,
+    "peak_jobs": 160,
+    "cases": "original12 plus rectangular1025/513/1537 rejectedF CC/FF; peak original4096 four plus square/rectangular rejectedF; every rejected engine call requires accelerate0"
+  },
+  "risk_regression": {
+    "time_jobs": 24,
+    "time_samples": 144,
+    "peak_jobs": 96,
+    "scope": "largest CPU4 C/F complete derived, mixed matrix roots, supplied; V28 broader predecessor observations retained"
+  },
+  "fairness": "same algorithm/data/output/CPU; owned readonly input preparation, ordinary Scheduler, two independent readonly generations, warmed NJIT; actual V21 package",
+  "measured_boundary": "complete requests; borrowed/reused kernel profile is not acceptance",
+  "new_compilation_excluded": true,
+  "predecessor": "qualified measured V28, including all material negative cases",
+  "production_adopted": false,
+  "whole_goal_complete": false,
+  "fixture_correction": {
+    "old_K": 257,
+    "new_K": 513,
+    "scale": 1024,
+    "required_accelerate_calls": 0,
+    "old_queue_jobs": 0,
+    "numerical_source_unchanged": true
+  }
+}

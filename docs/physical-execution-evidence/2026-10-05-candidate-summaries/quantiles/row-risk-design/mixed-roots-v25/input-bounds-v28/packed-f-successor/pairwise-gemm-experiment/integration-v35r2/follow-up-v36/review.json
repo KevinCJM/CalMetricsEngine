@@ -1,0 +1,72 @@
+{
+  "status": "closed_prescreen_no_production_adoption",
+  "original_controls_per_variant": 152,
+  "original_variants": 4,
+  "unchanged_original_inputs": true,
+  "tail_forced_cases_per_build": 96,
+  "tail_forced_borrow_cases_per_build": 40,
+  "tail_normal_and_asan_ubsan_passed": true,
+  "maximum_tail_decimal_error": 2.519587621713191e-08,
+  "measurement_scope": "owned readonly input preparation + ordinary Scheduler/native or warmed NJIT + existing general-signed MatMul; CPU1 and actual single-thread BLAS; two independent readonly result generations; compilation excluded; input=FF, output=F, pattern=rejected_scale; existing graph definition constructed once before measurement; ordinary Scheduler binding/plan validation/native execution/result return included only for engine backend; private cores are screening only; no IPC timed; not complete platform service",
+  "initial_medians_seconds": {
+    "actual-v35r2": 1.2155011039999999,
+    "base": 1.2358042085,
+    "physical-scan": 1.1326974994999999,
+    "deterministic-depth": 1.3786879795,
+    "combined": 1.253811021,
+    "njit_direct": 0.6811087915
+  },
+  "tail_medians_seconds": {
+    "actual-v35r2": 1.0803049165,
+    "base": 1.07086625,
+    "unpublished-tail": 1.1824369375,
+    "njit_direct": 0.6690294375000001
+  },
+  "reference_binding_controlled_medians_seconds": {
+    "actual-v35r2": 1.0402450205,
+    "njit_direct": 0.644695833
+  },
+  "tail_calls_per_request": {
+    "base": 512,
+    "candidate": 160
+  },
+  "decision": "do not adopt deterministic-depth, combined or unpublished-tail; fewer calls did not improve complete request; scan-only gain limited and no peak/adoption qualification",
+  "reference_binding": {
+    "source": "installed Numba C bridge -> SciPy Cython dgemm capsule -> imported Accelerate NEWLAPACK dgemm",
+    "backend": "Accelerate",
+    "scipy_blas_path": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/scipy/linalg/cython_blas.cpython-312-darwin.so",
+    "scipy_blas_sha256": "10f299b973bc7007f222d4be7c29f50618d092ea3d8f80dbe0ebdeecf2ad6631",
+    "numba_bridge_sha256": "5e7f2e50716058993c7958a5a356f21daceeedf1939bb02a20bc40a68025b0d6",
+    "capsule_resolved_file": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/scipy/linalg/cython_blas.cpython-312-darwin.so",
+    "capsule_resolved_symbol": "__pyx_f_5scipy_6linalg_11cython_blas_dgemm",
+    "imported_blas_symbol": "_dgemm$NEWLAPACK",
+    "dependencies": [
+      "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/scipy/linalg/cython_blas.cpython-312-darwin.so:",
+      "\t/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1345.120.2)",
+      "\t/System/Library/Frameworks/Accelerate.framework/Versions/A/Accelerate (compatibility version 1.0.0, current version 4.0.0)"
+    ],
+    "single_thread_model": 1,
+    "thread_control": "BLASSetThreading(1), read-back, restored in finally per actual calling thread",
+    "loaded_threadpool_info_is_not_actual_blas_binding": true
+  },
+  "historical_pool_metadata": "actual_blas_pools in earlier raw reports enumerates loaded NumPy OpenBLAS; it does not identify the SciPy Accelerate used by Numba. Raw historical records unchanged.",
+  "corrected_reference_cpu_to_wall": [
+    0.9988769252296081,
+    0.9988258312057471,
+    0.9992758802185926,
+    0.9995999293512389,
+    0.9993193426803643,
+    0.999740407897978
+  ],
+  "time_jobs": 12,
+  "time_samples": 72,
+  "fresh_peak_measurements_for_v36": 0,
+  "peak_reason": "failed time hypotheses rejected before more resource-expensive qualification; no memory-saving or no-memory-increase claim",
+  "actual_build_id": "b17f2bbea7aa9cf2c018f289c01757b69f5134046006a70ed9bac35cad16158a",
+  "actual_numerical_source_changed": false,
+  "full_engine_regression_rerun": false,
+  "reason": "actual code unchanged; private controls are not actual Graph/Planner/worker acceptance",
+  "committed": false,
+  "pushed": false,
+  "whole_goal_complete": false
+}

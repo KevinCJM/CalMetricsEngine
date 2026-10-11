@@ -1,0 +1,1634 @@
+[
+  {
+    "case": {
+      "n": 63,
+      "d": 8,
+      "layout": "c"
+    },
+    "builds": {
+      "native": {
+        "build": {
+          "version": "0.3.0",
+          "compiler": "AppleClang 17.0.0.17000603",
+          "architecture": "arm64",
+          "cpu_policy": "baseline",
+          "thread_backend": "persistent_cpp_native_scheduler",
+          "cxx_standard": 17,
+          "execution_backend": "pybind11_aot",
+          "graph_execution_backend": "native_graph_interpreter",
+          "scheduler_backend": "bounded_thread_process_pool",
+          "scheduler_scope": "process_wide_cpp_cpu_admission",
+          "legacy_finance_scheduler": "shared_native_scheduler",
+          "coroutine_backend": "asyncio_orchestration_only",
+          "process_transport": "shared_memory_or_serialized_small_input",
+          "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+          "runtime_jit": 0,
+          "compiler_backend": "cpp_restricted_ast",
+          "planner_backend": "cpp",
+          "native_scheduler_backend": "persistent_cpp_threads_processes",
+          "native_worker_runtime": "standalone_no_python",
+          "python_role": "numpy_binding_async_adapter",
+          "input_memory_policy": "exact_dtype_strided_zero_copy"
+        },
+        "engine_build_id": "33c2f2b95e374d396dc283c78d2ca5a43ad51a7a97995c3534ffdbae61ff7d39"
+      },
+      "candidate": {
+        "build": "candidate",
+        "counters": {
+          "dsyrk_calls": 1,
+          "replayed_cells": 0,
+          "full_native_fallback": 0,
+          "scratch_bytes": 32960,
+          "centered_bytes": 4032
+        }
+      },
+      "njit": {
+        "build": "njit"
+      }
+    },
+    "comparison": {
+      "candidate": {
+        "outside_tolerance": 0,
+        "max_abs": 1.1102230246251565e-16
+      },
+      "njit": {
+        "outside_tolerance": 0,
+        "max_abs": 2.220446049250313e-16
+      }
+    },
+    "samples_ns": {
+      "native": [
+        34334,
+        5792,
+        4625,
+        4250,
+        3916,
+        3792,
+        3833,
+        8375,
+        4167,
+        4041,
+        4041,
+        4041,
+        3709,
+        3750,
+        6375,
+        4083,
+        3958,
+        4083,
+        3834,
+        3792,
+        3584,
+        12791,
+        5625,
+        4458,
+        3916,
+        3875,
+        3708,
+        3667,
+        7417,
+        4542,
+        4459,
+        4500,
+        4416,
+        4417,
+        4500,
+        13416,
+        5750,
+        4292,
+        4042,
+        3750,
+        3792,
+        3708
+      ],
+      "candidate": [
+        42208,
+        11500,
+        9667,
+        8083,
+        7375,
+        7583,
+        8084,
+        10959,
+        7750,
+        8208,
+        8334,
+        7500,
+        7167,
+        7209,
+        18292,
+        10959,
+        9000,
+        9000,
+        9084,
+        7875,
+        8500,
+        10334,
+        8792,
+        8792,
+        8792,
+        9167,
+        8583,
+        8625,
+        10666,
+        9000,
+        8959,
+        8750,
+        8667,
+        8583,
+        11167,
+        18500,
+        10833,
+        9167,
+        8625,
+        9084,
+        7667,
+        8458
+      ],
+      "njit": [
+        12375,
+        4833,
+        3625,
+        3250,
+        3416,
+        3542,
+        3417,
+        11625,
+        4208,
+        3625,
+        4000,
+        3667,
+        3667,
+        3666,
+        4750,
+        3584,
+        3708,
+        3667,
+        3667,
+        3584,
+        3625,
+        5042,
+        3541,
+        3666,
+        3583,
+        3625,
+        3667,
+        3459,
+        11042,
+        5083,
+        3791,
+        3708,
+        3709,
+        3709,
+        3583,
+        9083,
+        4708,
+        3834,
+        3666,
+        3709,
+        3584,
+        3500
+      ]
+    },
+    "cpu_ns": {
+      "native": [
+        33000,
+        5000,
+        5000,
+        4000,
+        3000,
+        4000,
+        4000,
+        8000,
+        4000,
+        4000,
+        3000,
+        3000,
+        3000,
+        3000,
+        6000,
+        4000,
+        3000,
+        4000,
+        3000,
+        3000,
+        4000,
+        12000,
+        5000,
+        4000,
+        4000,
+        3000,
+        3000,
+        4000,
+        7000,
+        4000,
+        4000,
+        4000,
+        5000,
+        4000,
+        4000,
+        12000,
+        7000,
+        4000,
+        3000,
+        4000,
+        4000,
+        3000
+      ],
+      "candidate": [
+        41000,
+        11000,
+        9000,
+        8000,
+        7000,
+        7000,
+        7000,
+        10000,
+        8000,
+        7000,
+        8000,
+        6000,
+        7000,
+        6000,
+        17000,
+        10000,
+        8000,
+        8000,
+        8000,
+        8000,
+        7000,
+        11000,
+        8000,
+        9000,
+        8000,
+        10000,
+        8000,
+        8000,
+        10000,
+        9000,
+        8000,
+        9000,
+        7000,
+        8000,
+        11000,
+        17000,
+        10000,
+        9000,
+        8000,
+        8000,
+        8000,
+        8000
+      ],
+      "njit": [
+        12000,
+        4000,
+        2000,
+        3000,
+        4000,
+        3000,
+        4000,
+        11000,
+        4000,
+        3000,
+        3000,
+        4000,
+        3000,
+        4000,
+        4000,
+        3000,
+        3000,
+        3000,
+        3000,
+        4000,
+        3000,
+        4000,
+        3000,
+        3000,
+        2000,
+        4000,
+        3000,
+        3000,
+        10000,
+        5000,
+        3000,
+        3000,
+        3000,
+        3000,
+        2000,
+        8000,
+        4000,
+        3000,
+        3000,
+        3000,
+        3000,
+        3000
+      ]
+    },
+    "median_ms": {
+      "native": 0.004083,
+      "candidate": 0.008792,
+      "njit": 0.003667
+    },
+    "median_cpu_wall_ratio": {
+      "native": 0.9187792399989788,
+      "candidate": 0.9301852044840397,
+      "njit": 0.832348428586208
+    }
+  },
+  {
+    "case": {
+      "n": 63,
+      "d": 8,
+      "layout": "f"
+    },
+    "builds": {
+      "native": {
+        "build": {
+          "version": "0.3.0",
+          "compiler": "AppleClang 17.0.0.17000603",
+          "architecture": "arm64",
+          "cpu_policy": "baseline",
+          "thread_backend": "persistent_cpp_native_scheduler",
+          "cxx_standard": 17,
+          "execution_backend": "pybind11_aot",
+          "graph_execution_backend": "native_graph_interpreter",
+          "scheduler_backend": "bounded_thread_process_pool",
+          "scheduler_scope": "process_wide_cpp_cpu_admission",
+          "legacy_finance_scheduler": "shared_native_scheduler",
+          "coroutine_backend": "asyncio_orchestration_only",
+          "process_transport": "shared_memory_or_serialized_small_input",
+          "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+          "runtime_jit": 0,
+          "compiler_backend": "cpp_restricted_ast",
+          "planner_backend": "cpp",
+          "native_scheduler_backend": "persistent_cpp_threads_processes",
+          "native_worker_runtime": "standalone_no_python",
+          "python_role": "numpy_binding_async_adapter",
+          "input_memory_policy": "exact_dtype_strided_zero_copy"
+        },
+        "engine_build_id": "33c2f2b95e374d396dc283c78d2ca5a43ad51a7a97995c3534ffdbae61ff7d39"
+      },
+      "candidate": {
+        "build": "candidate",
+        "counters": {
+          "dsyrk_calls": 1,
+          "replayed_cells": 8,
+          "full_native_fallback": 0,
+          "scratch_bytes": 32960,
+          "centered_bytes": 4032
+        }
+      },
+      "njit": {
+        "build": "njit"
+      }
+    },
+    "comparison": {
+      "candidate": {
+        "outside_tolerance": 0,
+        "max_abs": 6.245004513516506e-17
+      },
+      "njit": {
+        "outside_tolerance": 0,
+        "max_abs": 2.220446049250313e-16
+      }
+    },
+    "samples_ns": {
+      "native": [
+        31417,
+        5083,
+        3625,
+        3875,
+        3584,
+        3541,
+        3333,
+        12250,
+        4833,
+        4084,
+        3666,
+        3417,
+        3334,
+        3334,
+        6541,
+        3834,
+        3375,
+        3458,
+        3334,
+        3625,
+        3250,
+        6375,
+        3416,
+        3542,
+        3250,
+        3750,
+        3291,
+        3542,
+        11500,
+        5208,
+        3750,
+        3583,
+        3375,
+        3542,
+        3291,
+        6084,
+        3375,
+        3208,
+        3125,
+        3333,
+        3167,
+        3375
+      ],
+      "candidate": [
+        34625,
+        8167,
+        6000,
+        5750,
+        5833,
+        5583,
+        5584,
+        17583,
+        10833,
+        6375,
+        6125,
+        6583,
+        5917,
+        11959,
+        10917,
+        6292,
+        5917,
+        5792,
+        5875,
+        5709,
+        5666,
+        8875,
+        5916,
+        5750,
+        5708,
+        5708,
+        5667,
+        5625,
+        17083,
+        7833,
+        6375,
+        6000,
+        5875,
+        5709,
+        5625,
+        10375,
+        6250,
+        5750,
+        5667,
+        5792,
+        5666,
+        5667
+      ],
+      "njit": [
+        8833,
+        4584,
+        3791,
+        3709,
+        3583,
+        3458,
+        3459,
+        10792,
+        4791,
+        3834,
+        3708,
+        3709,
+        3584,
+        3583,
+        10500,
+        5125,
+        3833,
+        3667,
+        3625,
+        3542,
+        3542,
+        13375,
+        4750,
+        3791,
+        3584,
+        3541,
+        3541,
+        3458,
+        5041,
+        3583,
+        3708,
+        3459,
+        3500,
+        3500,
+        3458,
+        4667,
+        3125,
+        3042,
+        3042,
+        3125,
+        3292,
+        3208
+      ]
+    },
+    "cpu_ns": {
+      "native": [
+        30000,
+        4000,
+        3000,
+        3000,
+        3000,
+        3000,
+        3000,
+        12000,
+        4000,
+        3000,
+        3000,
+        3000,
+        3000,
+        3000,
+        6000,
+        3000,
+        3000,
+        2000,
+        2000,
+        3000,
+        3000,
+        5000,
+        2000,
+        3000,
+        3000,
+        3000,
+        2000,
+        3000,
+        11000,
+        4000,
+        3000,
+        3000,
+        2000,
+        3000,
+        3000,
+        5000,
+        2000,
+        2000,
+        2000,
+        2000,
+        2000,
+        2000
+      ],
+      "candidate": [
+        34000,
+        7000,
+        5000,
+        6000,
+        5000,
+        5000,
+        5000,
+        16000,
+        10000,
+        6000,
+        6000,
+        6000,
+        5000,
+        11000,
+        10000,
+        5000,
+        6000,
+        6000,
+        5000,
+        7000,
+        5000,
+        8000,
+        6000,
+        6000,
+        5000,
+        6000,
+        5000,
+        5000,
+        16000,
+        7000,
+        7000,
+        6000,
+        5000,
+        6000,
+        5000,
+        9000,
+        6000,
+        5000,
+        6000,
+        5000,
+        6000,
+        5000
+      ],
+      "njit": [
+        8000,
+        4000,
+        4000,
+        3000,
+        3000,
+        3000,
+        2000,
+        9000,
+        4000,
+        4000,
+        3000,
+        4000,
+        3000,
+        3000,
+        9000,
+        5000,
+        3000,
+        3000,
+        3000,
+        4000,
+        3000,
+        13000,
+        4000,
+        3000,
+        3000,
+        3000,
+        3000,
+        3000,
+        5000,
+        3000,
+        2000,
+        3000,
+        3000,
+        3000,
+        3000,
+        4000,
+        3000,
+        3000,
+        3000,
+        2000,
+        2000,
+        2000
+      ]
+    },
+    "median_ms": {
+      "native": 0.003542,
+      "candidate": 0.0058955,
+      "njit": 0.003584
+    },
+    "median_cpu_wall_ratio": {
+      "native": 0.8247069759006098,
+      "candidate": 0.9107042055496533,
+      "njit": 0.8472182999152782
+    }
+  },
+  {
+    "case": {
+      "n": 32768,
+      "d": 64,
+      "layout": "c"
+    },
+    "builds": {
+      "native": {
+        "build": {
+          "version": "0.3.0",
+          "compiler": "AppleClang 17.0.0.17000603",
+          "architecture": "arm64",
+          "cpu_policy": "baseline",
+          "thread_backend": "persistent_cpp_native_scheduler",
+          "cxx_standard": 17,
+          "execution_backend": "pybind11_aot",
+          "graph_execution_backend": "native_graph_interpreter",
+          "scheduler_backend": "bounded_thread_process_pool",
+          "scheduler_scope": "process_wide_cpp_cpu_admission",
+          "legacy_finance_scheduler": "shared_native_scheduler",
+          "coroutine_backend": "asyncio_orchestration_only",
+          "process_transport": "shared_memory_or_serialized_small_input",
+          "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+          "runtime_jit": 0,
+          "compiler_backend": "cpp_restricted_ast",
+          "planner_backend": "cpp",
+          "native_scheduler_backend": "persistent_cpp_threads_processes",
+          "native_worker_runtime": "standalone_no_python",
+          "python_role": "numpy_binding_async_adapter",
+          "input_memory_policy": "exact_dtype_strided_zero_copy"
+        },
+        "engine_build_id": "33c2f2b95e374d396dc283c78d2ca5a43ad51a7a97995c3534ffdbae61ff7d39"
+      },
+      "candidate": {
+        "build": "candidate",
+        "counters": {
+          "dsyrk_calls": 64,
+          "replayed_cells": 0,
+          "full_native_fallback": 0,
+          "scratch_bytes": 263680,
+          "centered_bytes": 16777216
+        }
+      },
+      "njit": {
+        "build": "njit"
+      }
+    },
+    "comparison": {
+      "candidate": {
+        "outside_tolerance": 0,
+        "max_abs": 1.5439038936193583e-16
+      },
+      "njit": {
+        "outside_tolerance": 0,
+        "max_abs": 4.440892098500626e-16
+      }
+    },
+    "samples_ns": {
+      "native": [
+        8930000,
+        9061792,
+        8954333,
+        8927375,
+        8859958,
+        8780542
+      ],
+      "candidate": [
+        6615500,
+        6765500,
+        6552250,
+        6576334,
+        6686292,
+        6463750
+      ],
+      "njit": [
+        10871833,
+        10637542,
+        10918334,
+        10696750,
+        10448333,
+        10445042
+      ]
+    },
+    "cpu_ns": {
+      "native": [
+        8926000,
+        9058000,
+        8952000,
+        8925000,
+        8858000,
+        8778000
+      ],
+      "candidate": [
+        6614000,
+        6762000,
+        6550000,
+        6574000,
+        6682000,
+        6461000
+      ],
+      "njit": [
+        10869000,
+        10635000,
+        10915000,
+        10688000,
+        10445000,
+        10441000
+      ]
+    },
+    "median_ms": {
+      "native": 8.9286875,
+      "candidate": 6.595917,
+      "njit": 10.667146
+    },
+    "median_cpu_wall_ratio": {
+      "native": 0.9997222302912745,
+      "candidate": 0.9996098206979493,
+      "njit": 0.9996878219012586
+    }
+  },
+  {
+    "case": {
+      "n": 32768,
+      "d": 64,
+      "layout": "f"
+    },
+    "builds": {
+      "native": {
+        "build": {
+          "version": "0.3.0",
+          "compiler": "AppleClang 17.0.0.17000603",
+          "architecture": "arm64",
+          "cpu_policy": "baseline",
+          "thread_backend": "persistent_cpp_native_scheduler",
+          "cxx_standard": 17,
+          "execution_backend": "pybind11_aot",
+          "graph_execution_backend": "native_graph_interpreter",
+          "scheduler_backend": "bounded_thread_process_pool",
+          "scheduler_scope": "process_wide_cpp_cpu_admission",
+          "legacy_finance_scheduler": "shared_native_scheduler",
+          "coroutine_backend": "asyncio_orchestration_only",
+          "process_transport": "shared_memory_or_serialized_small_input",
+          "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+          "runtime_jit": 0,
+          "compiler_backend": "cpp_restricted_ast",
+          "planner_backend": "cpp",
+          "native_scheduler_backend": "persistent_cpp_threads_processes",
+          "native_worker_runtime": "standalone_no_python",
+          "python_role": "numpy_binding_async_adapter",
+          "input_memory_policy": "exact_dtype_strided_zero_copy"
+        },
+        "engine_build_id": "33c2f2b95e374d396dc283c78d2ca5a43ad51a7a97995c3534ffdbae61ff7d39"
+      },
+      "candidate": {
+        "build": "candidate",
+        "counters": {
+          "dsyrk_calls": 64,
+          "replayed_cells": 65,
+          "full_native_fallback": 0,
+          "scratch_bytes": 263680,
+          "centered_bytes": 16777216
+        }
+      },
+      "njit": {
+        "build": "njit"
+      }
+    },
+    "comparison": {
+      "candidate": {
+        "outside_tolerance": 0,
+        "max_abs": 1.9949319973733282e-16
+      },
+      "njit": {
+        "outside_tolerance": 0,
+        "max_abs": 1.1546319456101628e-14
+      }
+    },
+    "samples_ns": {
+      "native": [
+        11624708,
+        11491000,
+        11383250,
+        11492542,
+        11388209,
+        11356459
+      ],
+      "candidate": [
+        7257000,
+        7509792,
+        7314666,
+        7488542,
+        7399375,
+        7196250
+      ],
+      "njit": [
+        6645500,
+        6870000,
+        6680834,
+        6912250,
+        6673458,
+        6605375
+      ]
+    },
+    "cpu_ns": {
+      "native": [
+        11616000,
+        11488000,
+        11381000,
+        11490000,
+        11386000,
+        11354000
+      ],
+      "candidate": [
+        7255000,
+        7508000,
+        7312000,
+        7485000,
+        7395000,
+        7194000
+      ],
+      "njit": [
+        6644000,
+        6867000,
+        6678000,
+        6908000,
+        6669000,
+        6602000
+      ]
+    },
+    "median_ms": {
+      "native": 11.4396045,
+      "candidate": 7.3570205,
+      "njit": 6.677146
+    },
+    "median_cpu_wall_ratio": {
+      "native": 0.9997811421579568,
+      "candidate": 0.9996614319585144,
+      "njit": 0.9995261856267479
+    }
+  },
+  {
+    "case": {
+      "n": 512,
+      "d": 256,
+      "layout": "c"
+    },
+    "builds": {
+      "native": {
+        "build": {
+          "version": "0.3.0",
+          "compiler": "AppleClang 17.0.0.17000603",
+          "architecture": "arm64",
+          "cpu_policy": "baseline",
+          "thread_backend": "persistent_cpp_native_scheduler",
+          "cxx_standard": 17,
+          "execution_backend": "pybind11_aot",
+          "graph_execution_backend": "native_graph_interpreter",
+          "scheduler_backend": "bounded_thread_process_pool",
+          "scheduler_scope": "process_wide_cpp_cpu_admission",
+          "legacy_finance_scheduler": "shared_native_scheduler",
+          "coroutine_backend": "asyncio_orchestration_only",
+          "process_transport": "shared_memory_or_serialized_small_input",
+          "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+          "runtime_jit": 0,
+          "compiler_backend": "cpp_restricted_ast",
+          "planner_backend": "cpp",
+          "native_scheduler_backend": "persistent_cpp_threads_processes",
+          "native_worker_runtime": "standalone_no_python",
+          "python_role": "numpy_binding_async_adapter",
+          "input_memory_policy": "exact_dtype_strided_zero_copy"
+        },
+        "engine_build_id": "33c2f2b95e374d396dc283c78d2ca5a43ad51a7a97995c3534ffdbae61ff7d39"
+      },
+      "candidate": {
+        "build": "candidate",
+        "counters": {
+          "dsyrk_calls": 1,
+          "replayed_cells": 0,
+          "full_native_fallback": 0,
+          "scratch_bytes": 1054720,
+          "centered_bytes": 1048576
+        }
+      },
+      "njit": {
+        "build": "njit"
+      }
+    },
+    "comparison": {
+      "candidate": {
+        "outside_tolerance": 0,
+        "max_abs": 8.326672684688674e-17
+      },
+      "njit": {
+        "outside_tolerance": 0,
+        "max_abs": 4.440892098500626e-16
+      }
+    },
+    "samples_ns": {
+      "native": [
+        2224708,
+        2219500,
+        2236916,
+        2154541,
+        2171959,
+        2163958
+      ],
+      "candidate": [
+        800792,
+        785958,
+        677375,
+        702750,
+        847375,
+        737583
+      ],
+      "njit": [
+        808833,
+        687125,
+        763625,
+        786208,
+        692625,
+        707167
+      ]
+    },
+    "cpu_ns": {
+      "native": [
+        2221000,
+        2218000,
+        2235000,
+        2154000,
+        2171000,
+        2163000
+      ],
+      "candidate": [
+        800000,
+        786000,
+        676000,
+        702000,
+        846000,
+        738000
+      ],
+      "njit": [
+        808000,
+        687000,
+        762000,
+        784000,
+        692000,
+        706000
+      ]
+    },
+    "median_ms": {
+      "native": 2.1957295,
+      "candidate": 0.7617705,
+      "njit": 0.735396
+    },
+    "median_cpu_wall_ratio": {
+      "native": 0.9994407324062251,
+      "candidate": 0.9989718716357678,
+      "njit": 0.9986599372306534
+    }
+  },
+  {
+    "case": {
+      "n": 512,
+      "d": 256,
+      "layout": "f"
+    },
+    "builds": {
+      "native": {
+        "build": {
+          "version": "0.3.0",
+          "compiler": "AppleClang 17.0.0.17000603",
+          "architecture": "arm64",
+          "cpu_policy": "baseline",
+          "thread_backend": "persistent_cpp_native_scheduler",
+          "cxx_standard": 17,
+          "execution_backend": "pybind11_aot",
+          "graph_execution_backend": "native_graph_interpreter",
+          "scheduler_backend": "bounded_thread_process_pool",
+          "scheduler_scope": "process_wide_cpp_cpu_admission",
+          "legacy_finance_scheduler": "shared_native_scheduler",
+          "coroutine_backend": "asyncio_orchestration_only",
+          "process_transport": "shared_memory_or_serialized_small_input",
+          "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+          "runtime_jit": 0,
+          "compiler_backend": "cpp_restricted_ast",
+          "planner_backend": "cpp",
+          "native_scheduler_backend": "persistent_cpp_threads_processes",
+          "native_worker_runtime": "standalone_no_python",
+          "python_role": "numpy_binding_async_adapter",
+          "input_memory_policy": "exact_dtype_strided_zero_copy"
+        },
+        "engine_build_id": "33c2f2b95e374d396dc283c78d2ca5a43ad51a7a97995c3534ffdbae61ff7d39"
+      },
+      "candidate": {
+        "build": "candidate",
+        "counters": {
+          "dsyrk_calls": 1,
+          "replayed_cells": 256,
+          "full_native_fallback": 0,
+          "scratch_bytes": 1054720,
+          "centered_bytes": 1048576
+        }
+      },
+      "njit": {
+        "build": "njit"
+      }
+    },
+    "comparison": {
+      "candidate": {
+        "outside_tolerance": 0,
+        "max_abs": 3.469446951953614e-16
+      },
+      "njit": {
+        "outside_tolerance": 0,
+        "max_abs": 2.4424906541753444e-15
+      }
+    },
+    "samples_ns": {
+      "native": [
+        2397750,
+        2374917,
+        2374209,
+        2373709,
+        2372250,
+        2384250
+      ],
+      "candidate": [
+        831500,
+        784750,
+        818791,
+        755875,
+        731042,
+        873042
+      ],
+      "njit": [
+        642958,
+        681625,
+        634042,
+        757584,
+        532541,
+        631125
+      ]
+    },
+    "cpu_ns": {
+      "native": [
+        2398000,
+        2374000,
+        2373000,
+        2372000,
+        2372000,
+        2383000
+      ],
+      "candidate": [
+        830000,
+        784000,
+        818000,
+        755000,
+        731000,
+        873000
+      ],
+      "njit": [
+        642000,
+        681000,
+        633000,
+        757000,
+        532000,
+        630000
+      ]
+    },
+    "median_ms": {
+      "native": 2.374563,
+      "candidate": 0.8017705,
+      "njit": 0.6385
+    },
+    "median_cpu_wall_ratio": {
+      "native": 0.9995523295068125,
+      "candidate": 0.9990391115623952,
+      "njit": 0.9987470636587064
+    }
+  },
+  {
+    "case": {
+      "n": 2048,
+      "d": 2048,
+      "layout": "c"
+    },
+    "builds": {
+      "native": {
+        "build": {
+          "version": "0.3.0",
+          "compiler": "AppleClang 17.0.0.17000603",
+          "architecture": "arm64",
+          "cpu_policy": "baseline",
+          "thread_backend": "persistent_cpp_native_scheduler",
+          "cxx_standard": 17,
+          "execution_backend": "pybind11_aot",
+          "graph_execution_backend": "native_graph_interpreter",
+          "scheduler_backend": "bounded_thread_process_pool",
+          "scheduler_scope": "process_wide_cpp_cpu_admission",
+          "legacy_finance_scheduler": "shared_native_scheduler",
+          "coroutine_backend": "asyncio_orchestration_only",
+          "process_transport": "shared_memory_or_serialized_small_input",
+          "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+          "runtime_jit": 0,
+          "compiler_backend": "cpp_restricted_ast",
+          "planner_backend": "cpp",
+          "native_scheduler_backend": "persistent_cpp_threads_processes",
+          "native_worker_runtime": "standalone_no_python",
+          "python_role": "numpy_binding_async_adapter",
+          "input_memory_policy": "exact_dtype_strided_zero_copy"
+        },
+        "engine_build_id": "33c2f2b95e374d396dc283c78d2ca5a43ad51a7a97995c3534ffdbae61ff7d39"
+      },
+      "candidate": {
+        "build": "candidate",
+        "counters": {
+          "dsyrk_calls": 1,
+          "replayed_cells": 0,
+          "full_native_fallback": 0,
+          "scratch_bytes": 33603584,
+          "centered_bytes": 33554432
+        }
+      },
+      "njit": {
+        "build": "njit"
+      }
+    },
+    "comparison": {
+      "candidate": {
+        "outside_tolerance": 0,
+        "max_abs": 2.42861286636753e-16
+      },
+      "njit": {
+        "outside_tolerance": 0,
+        "max_abs": 6.661338147750939e-16
+      }
+    },
+    "samples_ns": {
+      "native": [
+        579267709,
+        578578250,
+        580914333,
+        578708167,
+        580270833,
+        577880208
+      ],
+      "candidate": [
+        83539834,
+        81853666,
+        80445167,
+        78876875,
+        81398792,
+        80351917
+      ],
+      "njit": [
+        95942250,
+        95047333,
+        94011542,
+        94582791,
+        93816417,
+        93110208
+      ]
+    },
+    "cpu_ns": {
+      "native": [
+        579141000,
+        578395000,
+        580803000,
+        578552000,
+        580024000,
+        577687000
+      ],
+      "candidate": [
+        83441000,
+        81835000,
+        80381000,
+        78858000,
+        81392000,
+        80343000
+      ],
+      "njit": [
+        95926000,
+        95006000,
+        94008000,
+        94542000,
+        93782000,
+        93090000
+      ]
+    },
+    "median_ms": {
+      "native": 578.987938,
+      "candidate": 80.9219795,
+      "njit": 94.2971665
+    },
+    "median_cpu_wall_ratio": {
+      "native": 0.9997067104222173,
+      "candidate": 0.9997663309473968,
+      "njit": 0.9997080560497709
+    }
+  },
+  {
+    "case": {
+      "n": 2048,
+      "d": 2048,
+      "layout": "f"
+    },
+    "builds": {
+      "native": {
+        "build": {
+          "version": "0.3.0",
+          "compiler": "AppleClang 17.0.0.17000603",
+          "architecture": "arm64",
+          "cpu_policy": "baseline",
+          "thread_backend": "persistent_cpp_native_scheduler",
+          "cxx_standard": 17,
+          "execution_backend": "pybind11_aot",
+          "graph_execution_backend": "native_graph_interpreter",
+          "scheduler_backend": "bounded_thread_process_pool",
+          "scheduler_scope": "process_wide_cpp_cpu_admission",
+          "legacy_finance_scheduler": "shared_native_scheduler",
+          "coroutine_backend": "asyncio_orchestration_only",
+          "process_transport": "shared_memory_or_serialized_small_input",
+          "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+          "runtime_jit": 0,
+          "compiler_backend": "cpp_restricted_ast",
+          "planner_backend": "cpp",
+          "native_scheduler_backend": "persistent_cpp_threads_processes",
+          "native_worker_runtime": "standalone_no_python",
+          "python_role": "numpy_binding_async_adapter",
+          "input_memory_policy": "exact_dtype_strided_zero_copy"
+        },
+        "engine_build_id": "33c2f2b95e374d396dc283c78d2ca5a43ad51a7a97995c3534ffdbae61ff7d39"
+      },
+      "candidate": {
+        "build": "candidate",
+        "counters": {
+          "dsyrk_calls": 1,
+          "replayed_cells": 2048,
+          "full_native_fallback": 0,
+          "scratch_bytes": 33603584,
+          "centered_bytes": 33554432
+        }
+      },
+      "njit": {
+        "build": "njit"
+      }
+    },
+    "comparison": {
+      "candidate": {
+        "outside_tolerance": 0,
+        "max_abs": 4.440892098500626e-16
+      },
+      "njit": {
+        "outside_tolerance": 0,
+        "max_abs": 4.3298697960381105e-15
+      }
+    },
+    "samples_ns": {
+      "native": [
+        605557334,
+        608177542,
+        607460958,
+        623554917,
+        607263625,
+        605671584
+      ],
+      "candidate": [
+        83271833,
+        83563458,
+        82584458,
+        87989250,
+        91969250,
+        82398292
+      ],
+      "njit": [
+        81400125,
+        81859584,
+        81582875,
+        88165083,
+        83839708,
+        81810959
+      ]
+    },
+    "cpu_ns": {
+      "native": [
+        605499000,
+        608081000,
+        607148000,
+        620286000,
+        607013000,
+        605370000
+      ],
+      "candidate": [
+        83267000,
+        83553000,
+        82542000,
+        87065000,
+        90999000,
+        82325000
+      ],
+      "njit": [
+        81335000,
+        81807000,
+        81579000,
+        87461000,
+        83784000,
+        81744000
+      ]
+    },
+    "median_ms": {
+      "native": 607.3622915,
+      "candidate": 83.4176455,
+      "njit": 81.8352715
+    },
+    "median_cpu_wall_ratio": {
+      "native": 0.9995446773795351,
+      "candidate": 0.9992981997183817,
+      "njit": 0.999267740691235
+    }
+  },
+  {
+    "case": {
+      "n": 4096,
+      "d": 4096,
+      "layout": "c"
+    },
+    "builds": {
+      "native": {
+        "build": {
+          "version": "0.3.0",
+          "compiler": "AppleClang 17.0.0.17000603",
+          "architecture": "arm64",
+          "cpu_policy": "baseline",
+          "thread_backend": "persistent_cpp_native_scheduler",
+          "cxx_standard": 17,
+          "execution_backend": "pybind11_aot",
+          "graph_execution_backend": "native_graph_interpreter",
+          "scheduler_backend": "bounded_thread_process_pool",
+          "scheduler_scope": "process_wide_cpp_cpu_admission",
+          "legacy_finance_scheduler": "shared_native_scheduler",
+          "coroutine_backend": "asyncio_orchestration_only",
+          "process_transport": "shared_memory_or_serialized_small_input",
+          "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+          "runtime_jit": 0,
+          "compiler_backend": "cpp_restricted_ast",
+          "planner_backend": "cpp",
+          "native_scheduler_backend": "persistent_cpp_threads_processes",
+          "native_worker_runtime": "standalone_no_python",
+          "python_role": "numpy_binding_async_adapter",
+          "input_memory_policy": "exact_dtype_strided_zero_copy"
+        },
+        "engine_build_id": "33c2f2b95e374d396dc283c78d2ca5a43ad51a7a97995c3534ffdbae61ff7d39"
+      },
+      "candidate": {
+        "build": "candidate",
+        "counters": {
+          "dsyrk_calls": 8,
+          "replayed_cells": 0,
+          "full_native_fallback": 0,
+          "scratch_bytes": 16875520,
+          "centered_bytes": 134217728
+        }
+      },
+      "njit": {
+        "build": "njit"
+      }
+    },
+    "comparison": {
+      "candidate": {
+        "outside_tolerance": 0,
+        "max_abs": 3.2612801348363973e-16
+      },
+      "njit": {
+        "outside_tolerance": 0,
+        "max_abs": 6.661338147750939e-16
+      }
+    },
+    "samples_ns": {
+      "native": [
+        5178597667,
+        5234484083,
+        5191553459,
+        5233877542,
+        5195396958,
+        5218681125
+      ],
+      "candidate": [
+        522697541,
+        506515541,
+        511559291,
+        510964417,
+        508741416,
+        504721000
+      ],
+      "njit": [
+        695427708,
+        758399625,
+        674808125,
+        714058416,
+        676120375,
+        687988042
+      ]
+    },
+    "cpu_ns": {
+      "native": [
+        5177397000,
+        5231680000,
+        5189898000,
+        5229424000,
+        5194389000,
+        5217823000
+      ],
+      "candidate": [
+        522576000,
+        506121000,
+        511392000,
+        510830000,
+        508469000,
+        504499000
+      ],
+      "njit": [
+        695028000,
+        758056000,
+        673283000,
+        713770000,
+        674776000,
+        687819000
+      ]
+    },
+    "median_ms": {
+      "native": 5207.0390415,
+      "candidate": 509.8529165,
+      "njit": 691.707875
+    },
+    "median_cpu_wall_ratio": {
+      "native": 0.9997246363881449,
+      "candidate": 0.9996165656567639,
+      "njit": 0.9994860710152952
+    }
+  },
+  {
+    "case": {
+      "n": 4096,
+      "d": 4096,
+      "layout": "f"
+    },
+    "builds": {
+      "native": {
+        "build": {
+          "version": "0.3.0",
+          "compiler": "AppleClang 17.0.0.17000603",
+          "architecture": "arm64",
+          "cpu_policy": "baseline",
+          "thread_backend": "persistent_cpp_native_scheduler",
+          "cxx_standard": 17,
+          "execution_backend": "pybind11_aot",
+          "graph_execution_backend": "native_graph_interpreter",
+          "scheduler_backend": "bounded_thread_process_pool",
+          "scheduler_scope": "process_wide_cpp_cpu_admission",
+          "legacy_finance_scheduler": "shared_native_scheduler",
+          "coroutine_backend": "asyncio_orchestration_only",
+          "process_transport": "shared_memory_or_serialized_small_input",
+          "graph_input_memory_policy": "product_major_contiguous_zero_copy",
+          "runtime_jit": 0,
+          "compiler_backend": "cpp_restricted_ast",
+          "planner_backend": "cpp",
+          "native_scheduler_backend": "persistent_cpp_threads_processes",
+          "native_worker_runtime": "standalone_no_python",
+          "python_role": "numpy_binding_async_adapter",
+          "input_memory_policy": "exact_dtype_strided_zero_copy"
+        },
+        "engine_build_id": "33c2f2b95e374d396dc283c78d2ca5a43ad51a7a97995c3534ffdbae61ff7d39"
+      },
+      "candidate": {
+        "build": "candidate",
+        "counters": {
+          "dsyrk_calls": 8,
+          "replayed_cells": 4096,
+          "full_native_fallback": 0,
+          "scratch_bytes": 16875520,
+          "centered_bytes": 134217728
+        }
+      },
+      "njit": {
+        "build": "njit"
+      }
+    },
+    "comparison": {
+      "candidate": {
+        "outside_tolerance": 0,
+        "max_abs": 5.620504062164855e-16
+      },
+      "njit": {
+        "outside_tolerance": 0,
+        "max_abs": 6.5503158452884236e-15
+      }
+    },
+    "samples_ns": {
+      "native": [
+        5295866209,
+        5241282708,
+        5244317334,
+        5269406083,
+        5258369666,
+        5251106667
+      ],
+      "candidate": [
+        510542833,
+        506728459,
+        504956542,
+        511614167,
+        507608542,
+        505063750
+      ],
+      "njit": [
+        674659041,
+        604535083,
+        621293875,
+        646285125,
+        661508708,
+        633976334
+      ]
+    },
+    "cpu_ns": {
+      "native": [
+        5285777000,
+        5240192000,
+        5242770000,
+        5266972000,
+        5257176000,
+        5246383000
+      ],
+      "candidate": [
+        510232000,
+        506418000,
+        504764000,
+        511425000,
+        507523000,
+        505031000
+      ],
+      "njit": [
+        674393000,
+        604398000,
+        620236000,
+        646137000,
+        659849000,
+        633847000
+      ]
+    },
+    "median_ms": {
+      "native": 5254.7381665,
+      "candidate": 507.1685005,
+      "njit": 640.1307295
+    },
+    "median_cpu_wall_ratio": {
+      "native": 0.9996215114793003,
+      "candidate": 0.9996244752349561,
+      "njit": 0.9996882357456893
+    }
+  }
+]

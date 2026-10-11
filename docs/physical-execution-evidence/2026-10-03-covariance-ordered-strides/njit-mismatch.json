@@ -1,0 +1,81 @@
+{
+  "status": "PRE_EXISTING_NJIT_EQUIVALENCE_FAILURE",
+  "case": {
+    "label": "source1024_reverse_f",
+    "n": 1024,
+    "d": 1024,
+    "layout": "negative_f",
+    "order": "F",
+    "pattern": "source_reject",
+    "name": "pair",
+    "entry": "ordinary",
+    "rtol": 1e-12,
+    "atol": 1e-12
+  },
+  "input": {
+    "x": {
+      "shape": [
+        1024,
+        1024
+      ],
+      "strides": [
+        -8,
+        8192
+      ],
+      "dtype": "float64",
+      "sha256": "cfd2827f7dd3153571ad3971381c1e47324bc110ff9c488ec9720be76454ca85",
+      "writeable": false
+    }
+  },
+  "native_old_new_bitwise_equal": true,
+  "original_tolerance_unchanged": true,
+  "njit_timing_comparable": false,
+  "outputs": [
+    {
+      "shape": [
+        1024,
+        1024
+      ],
+      "mismatches": 206,
+      "max_absolute_difference": 1.1920928955078125e-07
+    },
+    {
+      "shape": [
+        1024,
+        1024
+      ],
+      "mismatches": 0,
+      "max_absolute_difference": 4.440892098500626e-16
+    }
+  ],
+  "threads": {
+    "environment": {
+      "OPENBLAS_NUM_THREADS": "1",
+      "OMP_NUM_THREADS": "1",
+      "VECLIB_MAXIMUM_THREADS": "1",
+      "NUMBA_NUM_THREADS": "1",
+      "MKL_NUM_THREADS": "1"
+    },
+    "accelerate_thread_local": {
+      "prior": 0,
+      "active": 1,
+      "restored": 0
+    },
+    "pools": [
+      {
+        "user_api": "blas",
+        "internal_api": "openblas",
+        "num_threads": 1,
+        "prefix": "libopenblas",
+        "filepath": "/Users/chenjunming/Desktop/myenv_312/lib/python3.12/site-packages/numpy/.dylibs/libopenblas64_.0.dylib",
+        "version": "0.3.23.dev",
+        "threading_layer": "pthreads",
+        "architecture": "armv8"
+      }
+    ]
+  },
+  "njit_output_sha256": [
+    "8e06be69b4cf3fa01f10d0fda21275082e34561c8d8c86a126be721dbb1e6cc6",
+    "978d4ce39974c72f636134061232b80a5c39150f2281ba9112322dc432e73c6f"
+  ]
+}

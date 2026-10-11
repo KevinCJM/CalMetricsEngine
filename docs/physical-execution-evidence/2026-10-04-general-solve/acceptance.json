@@ -1,0 +1,27 @@
+{
+  "status": "candidate_time_verified_retained_memory_not_closed",
+  "production_adopted": false,
+  "goal_complete": false,
+  "candidate_build_id": "ac54d60db240f6989183728ce88881f575fa26ceb7e6a191e40380730f50c048",
+  "root_build_id": "924fb4681f9671e9a7adc645e74b4b1602029fa6ad16577226c88592e065de30",
+  "related_passed": 710,
+  "native_passed": 9,
+  "complete_task_jobs": 40,
+  "full_san_off": "normal full 12658; real ASan/UBSan related 710/native9; corrected OFF related710/native9 passed; all 88 numerical source files unchanged",
+  "candidate_cpp_changes": [
+    "cpp/graph.cpp",
+    "cpp/include/calmetrics_engine/graph.hpp",
+    "cpp/include/calmetrics_engine/matrix_backend.hpp",
+    "cpp/operators/solve_accelerate.cpp"
+  ],
+  "full_passed": 12658,
+  "asan_related_passed": 710,
+  "asan_native_passed": 9,
+  "off_related_passed": 710,
+  "off_native_passed": 9,
+  "test_only_off_audit_correction": {
+    "normal_selected_passed": 7,
+    "raw_initial_off_failed": 1,
+    "note": "Full normal and real SAN preceded only the OFF copy-audit assertion patch; OFF full related rerun passed."
+  }
+}

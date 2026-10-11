@@ -1,0 +1,44 @@
+from pathlib import Path
+import os,sys,json,hashlib,subprocess,time,statistics
+D=Path(__file__).resolve().parent;R=Path('/Users/chenjunming/Desktop/KevinGit/CppCalAST/CalMetricsEngine');S=D/'source'
+current=json.loads(Path('/private/tmp/calmetrics-sgemm-v66-20261008/array-lifetime-r2/actual/identity.json').read_text());vendor=json.loads((D/'candidate/identity.json').read_text())
+sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+def guards():
+ assert all(sha(R/n)==h for n,h in current['source'].items())
+ assert all(sha(S/n)==h for n,h in vendor['source'].items())
+ for identity in (current,vendor):
+  assert all(sha(Path(identity['installed'])/n)==h for n,h in identity['installed_binaries'].items())
+ assert sha(D/'benchmark.py')==driver_sha and sha(D/'heap_probe.dylib')==probe_sha
+q=json.loads((D/'qualification.json').read_text());assert q['status']=='passed'
+driver_sha=sha(D/'benchmark.py');probe_sha=sha(D/'heap_probe.dylib');guards()
+state={'status':'running','actual_adopted':False,'goal_complete':False,'current_build_id':current['build_id'],'vendor_build_id':vendor['build_id'],'driver_sha256':driver_sha,'probe_sha256':probe_sha,'smoke':[],'measurements':[],'started':time.time()}
+out=D/'screen-r2.json';assert not out.exists();logs=D/'screen-r2-logs';logs.mkdir()
+def persist():out.write_text(json.dumps(state,indent=2)+'\n')
+def run(variant,n,layout,metric,label,rounds=3,smoke=False):
+ guards();env=dict(os.environ,OPENBLAS_NUM_THREADS='1',OMP_NUM_THREADS='1',NUMBA_NUM_THREADS='1',VECLIB_MAXIMUM_THREADS='1')
+ if metric=='heap':env['DYLD_INSERT_LIBRARIES']=str(D/'heap_probe.dylib')
+ cmd=[sys.executable,str(D/'benchmark.py'),'--variant',variant,'--n',str(n),'--layout',layout,'--metric',metric,'--rounds',str(rounds)]
+ with (logs/(label+'.log')).open('x') as log:
+  child=subprocess.Popen(cmd,cwd=S,env=env,stdout=log,stderr=subprocess.STDOUT)
+  state['current']={'pid':child.pid,'label':label,'variant':variant,'n':n,'layout':layout,'metric':metric};persist();print('START',label,child.pid,flush=True)
+  code=child.wait()
+ raw=(logs/(label+'.log')).read_text();lines=[line for line in raw.splitlines() if line.startswith('{')]
+ if code or not lines:raise RuntimeError(label+' failed '+str(code)+'\n'+raw[-5000:])
+ v=json.loads(lines[-1]);assert v['full_parity']=='passed';v['label']=label;v['log']=str(logs/(label+'.log'));state['smoke' if smoke else 'measurements'].append(v);persist()
+ brief={k:v[k] for k in ('variant','n','layout','metric','median_seconds','warm_peak_bytes','warm_incremental_rss_bytes','max_full_absolute_error') if k in v}
+ print('DONE',label,json.dumps(brief),flush=True)
+try:
+ for variant,layout,metric in [('vendor','C','time'),('njit','C','time'),('vendor','F','heap'),('njit','F','rss')]:
+  run(variant,256,layout,metric,'smoke-'+variant+'-'+layout+'-'+metric,2,True)
+ for group in range(2):
+  variants=['current','vendor','njit','njit-c'];variants=variants[group:]+variants[:group]
+  for n,layout in [(4096,'C'),(4096,'F'),(8176,'C'),(8176,'F')]:
+   for variant in variants:run(variant,n,layout,'time',f'time-g{group}-{n}-{layout}-{variant}')
+ for n,layout in [(4096,'C'),(4096,'F'),(8176,'C'),(8176,'F')]:
+  def median(variant):return statistics.median(v['median_seconds'] for v in state['measurements'] if v['metric']=='time' and v['n']==n and v['layout']==layout and v['variant']==variant)
+  best=min(['njit','njit-c'],key=median)
+  for metric in ('heap','rss'):
+   for variant in ('current',best,'vendor'):run(variant,n,layout,metric,f'{metric}-{n}-{layout}-{variant}')
+ guards();state.update(status='passed',finished=time.time(),source_binary_driver_probe_guards='passed');state.pop('current',None);persist();print('SCREEN PASSED',len(state['measurements']),flush=True)
+except BaseException as error:
+ state.update(status='failed',error=repr(error),finished=time.time());persist();raise

@@ -1,0 +1,484 @@
+{
+  "scope": "logical type-description repetition only; no memory or time benefit inferred",
+  "build_id": "97fdfe5267e55ea83caffc38b333919bcf4c206dc1d37e57eeec500fb86f247c",
+  "installed_binary_sha256": {
+    "calmetrics_engine/_native.cpython-312-darwin.so": "f83110ce849ecfaba72900a493fd8425b7233384264adcc6290d0544cfdefe08",
+    "calmetrics_engine/calmetrics_worker": "ff4f7fc7b7b8aa11695b5cf6364e68afc7980f0394be3ebbbe27ab04b30ae3ab"
+  },
+  "graph_fingerprint": "native-3-770eaa22ec3d63dd7e7b8fd608c4ee12",
+  "node_count": 7405,
+  "unique_type_values": 28,
+  "public_graph_sha256": "94fa298494e245767b2122bec320f08b63512004098877e82a4931e66a0071d0",
+  "types": [
+    {
+      "count": 3748,
+      "type": {
+        "axes": [],
+        "display": "scalar",
+        "dtype": "float64",
+        "kind": "scalar",
+        "price_basis": null,
+        "semantic_dimension": "dimensionless",
+        "shape": []
+      }
+    },
+    {
+      "count": 1056,
+      "type": {
+        "axes": [
+          "time",
+          "path",
+          "asset"
+        ],
+        "display": "tensor<time,path,asset>[T,P,1]",
+        "dtype": "float64",
+        "kind": "tensor",
+        "price_basis": null,
+        "semantic_dimension": "dimensionless",
+        "shape": [
+          "T",
+          "P",
+          "1"
+        ]
+      }
+    },
+    {
+      "count": 1024,
+      "type": {
+        "axes": [
+          "asset"
+        ],
+        "display": "vector<asset>[1]",
+        "dtype": "float64",
+        "kind": "vector",
+        "price_basis": null,
+        "semantic_dimension": "dimensionless",
+        "shape": [
+          "1"
+        ]
+      }
+    },
+    {
+      "count": 289,
+      "type": {
+        "axes": [
+          "component"
+        ],
+        "display": "vector<component>[1]",
+        "dtype": "float64",
+        "kind": "vector",
+        "price_basis": null,
+        "semantic_dimension": "dimensionless",
+        "shape": [
+          "1"
+        ]
+      }
+    },
+    {
+      "count": 192,
+      "type": {
+        "axes": [
+          "time",
+          "path"
+        ],
+        "display": "matrix<time,path>[T,P]",
+        "dtype": "float64",
+        "kind": "matrix",
+        "price_basis": null,
+        "semantic_dimension": "dimensionless",
+        "shape": [
+          "T",
+          "P"
+        ]
+      }
+    },
+    {
+      "count": 160,
+      "type": {
+        "axes": [],
+        "display": "scalar",
+        "dtype": "float64",
+        "kind": "scalar",
+        "price_basis": null,
+        "semantic_dimension": "count",
+        "shape": []
+      }
+    },
+    {
+      "count": 128,
+      "type": {
+        "axes": [
+          "path"
+        ],
+        "display": "vector<path>[P]",
+        "dtype": "float64",
+        "kind": "vector",
+        "price_basis": null,
+        "semantic_dimension": "dimensionless",
+        "shape": [
+          "P"
+        ]
+      }
+    },
+    {
+      "count": 96,
+      "type": {
+        "axes": [
+          "time",
+          "path"
+        ],
+        "display": "matrix<time,path>[1,P]",
+        "dtype": "float64",
+        "kind": "matrix",
+        "price_basis": null,
+        "semantic_dimension": "dimensionless",
+        "shape": [
+          "1",
+          "P"
+        ]
+      }
+    },
+    {
+      "count": 96,
+      "type": {
+        "axes": [
+          "path"
+        ],
+        "display": "mask<path>[P]",
+        "dtype": "bool",
+        "kind": "vector",
+        "price_basis": null,
+        "semantic_dimension": "mask",
+        "shape": [
+          "P"
+        ]
+      }
+    },
+    {
+      "count": 66,
+      "type": {
+        "axes": [
+          "time",
+          "path",
+          "asset"
+        ],
+        "display": "tensor<time,path,asset>[T,P,A]",
+        "dtype": "float64",
+        "kind": "tensor",
+        "price_basis": null,
+        "semantic_dimension": "dimensionless",
+        "shape": [
+          "T",
+          "P",
+          "A"
+        ]
+      }
+    },
+    {
+      "count": 64,
+      "type": {
+        "axes": [
+          "path"
+        ],
+        "display": "vector<path>[1]",
+        "dtype": "float64",
+        "kind": "vector",
+        "price_basis": null,
+        "semantic_dimension": "dimensionless",
+        "shape": [
+          "1"
+        ]
+      }
+    },
+    {
+      "count": 64,
+      "type": {
+        "axes": [
+          "path"
+        ],
+        "display": "mask<path>[1]",
+        "dtype": "bool",
+        "kind": "vector",
+        "price_basis": null,
+        "semantic_dimension": "mask",
+        "shape": [
+          "1"
+        ]
+      }
+    },
+    {
+      "count": 33,
+      "type": {
+        "axes": [
+          "asset"
+        ],
+        "display": "vector<asset>[A]",
+        "dtype": "float64",
+        "kind": "vector",
+        "price_basis": null,
+        "semantic_dimension": "dimensionless",
+        "shape": [
+          "A"
+        ]
+      }
+    },
+    {
+      "count": 33,
+      "type": {
+        "axes": [
+          "component"
+        ],
+        "display": "vector<component>[5]",
+        "dtype": "float64",
+        "kind": "vector",
+        "price_basis": null,
+        "semantic_dimension": "dimensionless",
+        "shape": [
+          "5"
+        ]
+      }
+    },
+    {
+      "count": 33,
+      "type": {
+        "axes": [
+          "component"
+        ],
+        "display": "vector<component>[3]",
+        "dtype": "float64",
+        "kind": "vector",
+        "price_basis": null,
+        "semantic_dimension": "dimensionless",
+        "shape": [
+          "3"
+        ]
+      }
+    },
+    {
+      "count": 32,
+      "type": {
+        "axes": [
+          "time",
+          "path"
+        ],
+        "display": "mask<time,path>[1,P]",
+        "dtype": "bool",
+        "kind": "matrix",
+        "price_basis": null,
+        "semantic_dimension": "mask",
+        "shape": [
+          "1",
+          "P"
+        ]
+      }
+    },
+    {
+      "count": 32,
+      "type": {
+        "axes": [
+          "time",
+          "path"
+        ],
+        "display": "matrix<time,path>[(1+T),P]",
+        "dtype": "float64",
+        "kind": "matrix",
+        "price_basis": null,
+        "semantic_dimension": "dimensionless",
+        "shape": [
+          "(1+T)",
+          "P"
+        ]
+      }
+    },
+    {
+      "count": 32,
+      "type": {
+        "axes": [
+          "time",
+          "component"
+        ],
+        "display": "matrix<time,component>[(1+T),5]",
+        "dtype": "float64",
+        "kind": "matrix",
+        "price_basis": null,
+        "semantic_dimension": "dimensionless",
+        "shape": [
+          "(1+T)",
+          "5"
+        ]
+      }
+    },
+    {
+      "count": 32,
+      "type": {
+        "axes": [
+          "component",
+          "time"
+        ],
+        "display": "matrix<component,time>[5,(1+T)]",
+        "dtype": "float64",
+        "kind": "matrix",
+        "price_basis": null,
+        "semantic_dimension": "dimensionless",
+        "shape": [
+          "5",
+          "(1+T)"
+        ]
+      }
+    },
+    {
+      "count": 32,
+      "type": {
+        "axes": [
+          "time",
+          "path"
+        ],
+        "display": "matrix<time,path>[(1+T),12]",
+        "dtype": "float64",
+        "kind": "matrix",
+        "price_basis": null,
+        "semantic_dimension": "dimensionless",
+        "shape": [
+          "(1+T)",
+          "12"
+        ]
+      }
+    },
+    {
+      "count": 32,
+      "type": {
+        "axes": [
+          "path",
+          "time"
+        ],
+        "display": "matrix<path,time>[12,(1+T)]",
+        "dtype": "float64",
+        "kind": "matrix",
+        "price_basis": null,
+        "semantic_dimension": "dimensionless",
+        "shape": [
+          "12",
+          "(1+T)"
+        ]
+      }
+    },
+    {
+      "count": 32,
+      "type": {
+        "axes": [
+          "component",
+          "time"
+        ],
+        "display": "matrix<component,time>[5,1]",
+        "dtype": "float64",
+        "kind": "matrix",
+        "price_basis": null,
+        "semantic_dimension": "dimensionless",
+        "shape": [
+          "5",
+          "1"
+        ]
+      }
+    },
+    {
+      "count": 32,
+      "type": {
+        "axes": [],
+        "display": "mask",
+        "dtype": "bool",
+        "kind": "scalar",
+        "price_basis": null,
+        "semantic_dimension": "mask",
+        "shape": []
+      }
+    },
+    {
+      "count": 32,
+      "type": {
+        "axes": [
+          "path"
+        ],
+        "display": "vector<path>[(P+1)]",
+        "dtype": "float64",
+        "kind": "vector",
+        "price_basis": null,
+        "semantic_dimension": "dimensionless",
+        "shape": [
+          "(P+1)"
+        ]
+      }
+    },
+    {
+      "count": 32,
+      "type": {
+        "axes": [
+          "path"
+        ],
+        "display": "mask<path>[(P+1)]",
+        "dtype": "bool",
+        "kind": "vector",
+        "price_basis": null,
+        "semantic_dimension": "mask",
+        "shape": [
+          "(P+1)"
+        ]
+      }
+    },
+    {
+      "count": 1,
+      "type": {
+        "axes": [
+          "time",
+          "path",
+          "factor"
+        ],
+        "display": "tensor<time,path,factor>[T,P,F]",
+        "dtype": "float64",
+        "kind": "tensor",
+        "price_basis": null,
+        "semantic_dimension": "dimensionless",
+        "shape": [
+          "T",
+          "P",
+          "F"
+        ]
+      }
+    },
+    {
+      "count": 1,
+      "type": {
+        "axes": [
+          "asset",
+          "factor"
+        ],
+        "display": "matrix<asset,factor>[A,F]",
+        "dtype": "float64",
+        "kind": "matrix",
+        "price_basis": null,
+        "semantic_dimension": "dimensionless",
+        "shape": [
+          "A",
+          "F"
+        ]
+      }
+    },
+    {
+      "count": 1,
+      "type": {
+        "axes": [
+          "factor",
+          "asset"
+        ],
+        "display": "matrix<factor,asset>[F,A]",
+        "dtype": "float64",
+        "kind": "matrix",
+        "price_basis": null,
+        "semantic_dimension": "dimensionless",
+        "shape": [
+          "F",
+          "A"
+        ]
+      }
+    }
+  ]
+}

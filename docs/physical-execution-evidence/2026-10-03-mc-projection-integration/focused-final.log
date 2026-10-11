@@ -1,0 +1,150 @@
+........................................................................ [ 38%]
+........................................................................ [ 77%]
+...................FFF...................                                [100%]
+=================================== FAILURES ===================================
+__ test_private_projection_preserves_extreme_ieee_values_and_original_fold[c] __
+
+layout = 'c'
+
+    @pytest.mark.parametrize("layout", ["c", "f", "negative"])
+    def test_private_projection_preserves_extreme_ieee_values_and_original_fold(layout):
+        x = np.array([[[1e16, -1e16], [np.inf, 0.]],
+                      [[-0., -0.], [1e-20, -1e-20]],
+                      [[710., 0.], [-np.inf, 0.]],
+                      [[np.nan, 0.], [-745., 0.]]])
+        values = dict(x=x, beta=np.array([[1., 1.], [0., 0.], [1., 0.]]),
+                      initial=np.array([1., -0., 0.]), w0=np.array([1., 0., -1.]),
+                      w1=np.array([0., -1., 1.]))
+        inputs = {name: layout_view(value, layout) for name, value in values.items()}
+        expressions = projection_expressions(3, 2)
+        graph = GraphCompiler(declarations()).compile(expressions, result_format="typed", output_order="F")
+        reference_graph = GraphCompiler(declarations()).compile(expressions, result_format="typed", output_order="F", error_policy="isolate")
+        starts, ends = np.array([0], np.int64), np.array([4], np.int64)
+        with AdaptiveScheduler(cpu_budget=1) as scheduler:
+            result = scheduler.execute(graph, inputs, starts, ends)
+            reference = scheduler.execute(reference_graph, inputs, starts, ends)
+>       assert_same_outputs(result, reference)
+
+tests/test_mc_projection_primitives.py:582: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_mc_projection_primitives.py:438: in assert_same_outputs
+    np.testing.assert_array_equal(got.root_statuses, want.root_statuses)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (<built-in function eq>, array([0], dtype=int16), array([4], dtype=int16))
+kwds = {'err_msg': '', 'header': 'Arrays are not equal', 'strict': False, 'verbose': True}
+
+    @wraps(func)
+    def inner(*args, **kwds):
+        with self._recreate_cm():
+>           return func(*args, **kwds)
+                   ^^^^^^^^^^^^^^^^^^^
+E           AssertionError: 
+E           Arrays are not equal
+E           
+E           Mismatched elements: 1 / 1 (100%)
+E           Max absolute difference: 4
+E           Max relative difference: 1.
+E            x: array([0], dtype=int16)
+E            y: array([4], dtype=int16)
+
+/opt/homebrew/Cellar/python@3.12/3.12.11/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py:81: AssertionError
+__ test_private_projection_preserves_extreme_ieee_values_and_original_fold[f] __
+
+layout = 'f'
+
+    @pytest.mark.parametrize("layout", ["c", "f", "negative"])
+    def test_private_projection_preserves_extreme_ieee_values_and_original_fold(layout):
+        x = np.array([[[1e16, -1e16], [np.inf, 0.]],
+                      [[-0., -0.], [1e-20, -1e-20]],
+                      [[710., 0.], [-np.inf, 0.]],
+                      [[np.nan, 0.], [-745., 0.]]])
+        values = dict(x=x, beta=np.array([[1., 1.], [0., 0.], [1., 0.]]),
+                      initial=np.array([1., -0., 0.]), w0=np.array([1., 0., -1.]),
+                      w1=np.array([0., -1., 1.]))
+        inputs = {name: layout_view(value, layout) for name, value in values.items()}
+        expressions = projection_expressions(3, 2)
+        graph = GraphCompiler(declarations()).compile(expressions, result_format="typed", output_order="F")
+        reference_graph = GraphCompiler(declarations()).compile(expressions, result_format="typed", output_order="F", error_policy="isolate")
+        starts, ends = np.array([0], np.int64), np.array([4], np.int64)
+        with AdaptiveScheduler(cpu_budget=1) as scheduler:
+            result = scheduler.execute(graph, inputs, starts, ends)
+            reference = scheduler.execute(reference_graph, inputs, starts, ends)
+>       assert_same_outputs(result, reference)
+
+tests/test_mc_projection_primitives.py:582: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_mc_projection_primitives.py:438: in assert_same_outputs
+    np.testing.assert_array_equal(got.root_statuses, want.root_statuses)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (<built-in function eq>, array([0], dtype=int16), array([4], dtype=int16))
+kwds = {'err_msg': '', 'header': 'Arrays are not equal', 'strict': False, 'verbose': True}
+
+    @wraps(func)
+    def inner(*args, **kwds):
+        with self._recreate_cm():
+>           return func(*args, **kwds)
+                   ^^^^^^^^^^^^^^^^^^^
+E           AssertionError: 
+E           Arrays are not equal
+E           
+E           Mismatched elements: 1 / 1 (100%)
+E           Max absolute difference: 4
+E           Max relative difference: 1.
+E            x: array([0], dtype=int16)
+E            y: array([4], dtype=int16)
+
+/opt/homebrew/Cellar/python@3.12/3.12.11/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py:81: AssertionError
+_ test_private_projection_preserves_extreme_ieee_values_and_original_fold[negative] _
+
+layout = 'negative'
+
+    @pytest.mark.parametrize("layout", ["c", "f", "negative"])
+    def test_private_projection_preserves_extreme_ieee_values_and_original_fold(layout):
+        x = np.array([[[1e16, -1e16], [np.inf, 0.]],
+                      [[-0., -0.], [1e-20, -1e-20]],
+                      [[710., 0.], [-np.inf, 0.]],
+                      [[np.nan, 0.], [-745., 0.]]])
+        values = dict(x=x, beta=np.array([[1., 1.], [0., 0.], [1., 0.]]),
+                      initial=np.array([1., -0., 0.]), w0=np.array([1., 0., -1.]),
+                      w1=np.array([0., -1., 1.]))
+        inputs = {name: layout_view(value, layout) for name, value in values.items()}
+        expressions = projection_expressions(3, 2)
+        graph = GraphCompiler(declarations()).compile(expressions, result_format="typed", output_order="F")
+        reference_graph = GraphCompiler(declarations()).compile(expressions, result_format="typed", output_order="F", error_policy="isolate")
+        starts, ends = np.array([0], np.int64), np.array([4], np.int64)
+        with AdaptiveScheduler(cpu_budget=1) as scheduler:
+            result = scheduler.execute(graph, inputs, starts, ends)
+            reference = scheduler.execute(reference_graph, inputs, starts, ends)
+>       assert_same_outputs(result, reference)
+
+tests/test_mc_projection_primitives.py:582: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_mc_projection_primitives.py:438: in assert_same_outputs
+    np.testing.assert_array_equal(got.root_statuses, want.root_statuses)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (<built-in function eq>, array([0], dtype=int16), array([4], dtype=int16))
+kwds = {'err_msg': '', 'header': 'Arrays are not equal', 'strict': False, 'verbose': True}
+
+    @wraps(func)
+    def inner(*args, **kwds):
+        with self._recreate_cm():
+>           return func(*args, **kwds)
+                   ^^^^^^^^^^^^^^^^^^^
+E           AssertionError: 
+E           Arrays are not equal
+E           
+E           Mismatched elements: 1 / 1 (100%)
+E           Max absolute difference: 4
+E           Max relative difference: 1.
+E            x: array([0], dtype=int16)
+E            y: array([4], dtype=int16)
+
+/opt/homebrew/Cellar/python@3.12/3.12.11/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py:81: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_mc_projection_primitives.py::test_private_projection_preserves_extreme_ieee_values_and_original_fold[c]
+FAILED tests/test_mc_projection_primitives.py::test_private_projection_preserves_extreme_ieee_values_and_original_fold[f]
+FAILED tests/test_mc_projection_primitives.py::test_private_projection_preserves_extreme_ieee_values_and_original_fold[negative]
+3 failed, 182 passed in 1.67s

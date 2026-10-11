@@ -1,0 +1,72 @@
+{
+  "old": {
+    "object": "/private/tmp/calmetrics-covcorr-reuse-build/CMakeFiles/calmetrics_engine_operators.dir/cpp/operators/matrix_backend.cpp.o",
+    "object_sha256": "a0829a0add978bd7d841da6cef93ae935d2ef307115c3e380aaf454c3468bfc9",
+    "command": [
+      "/usr/bin/otool",
+      "-tvV",
+      "/private/tmp/calmetrics-covcorr-reuse-build/CMakeFiles/calmetrics_engine_operators.dir/cpp/operators/matrix_backend.cpp.o"
+    ],
+    "extract_symbols": [
+      "library_covariance_upper",
+      "covariance_c",
+      "setZero"
+    ]
+  },
+  "new": {
+    "object": "/private/tmp/calmetrics-covariance-tiles-final-build/CMakeFiles/calmetrics_engine_operators.dir/cpp/operators/matrix_backend.cpp.o",
+    "object_sha256": "d3fbd55eac3e3668c6fc27f0281ba2e5b7fe4d3e5c9a778dc9d299ff9ad80f6f",
+    "command": [
+      "/usr/bin/otool",
+      "-tvV",
+      "/private/tmp/calmetrics-covariance-tiles-final-build/CMakeFiles/calmetrics_engine_operators.dir/cpp/operators/matrix_backend.cpp.o"
+    ],
+    "extract_symbols": [
+      "library_covariance_upper",
+      "covariance_c",
+      "setZero"
+    ]
+  },
+  "scope": "Known local arithmetic chain only; excludes system availability/bzero/exception and whole request stack.",
+  "frames_bytes": {
+    "matrix": 320,
+    "old_library_covariance": 368,
+    "new_library_covariance": 272,
+    "new_C_driver": 48,
+    "new_C_means": 128,
+    "new_C_upper": 288,
+    "new_C_bottom": 64,
+    "new_F_zero_helper": 80,
+    "existing_reduce": 144,
+    "existing_shape": 32
+  },
+  "known_chain_bytes": {
+    "old_C": 688,
+    "new_C": 656,
+    "old_F": 864,
+    "new_F_batched_means": 672,
+    "new_F_reduce_fallback": 768
+  },
+  "tail_calls": {
+    "new_outer_to_C": true,
+    "C_driver_to_upper": false,
+    "upper_to_bottom": true
+  },
+  "numeric_stack": "Diagonal and bottom each use a fixed32-byte slot outside observation loops. No stack access, call or FMA inside three C observation loops. No new covariance allocator call.",
+  "review": "Two independent read-only reviews plus raw production-object inspection; initial non-tail failure retained.",
+  "unchanged_parent_and_reduce_objects": {
+    "cpp/operators/matrix.cpp.o": {
+      "old": "/private/tmp/calmetrics-covcorr-reuse-build/CMakeFiles/calmetrics_engine_operators.dir/cpp/operators/matrix.cpp.o",
+      "new": "/private/tmp/calmetrics-covariance-tiles-final-build/CMakeFiles/calmetrics_engine_operators.dir/cpp/operators/matrix.cpp.o",
+      "sha256": "9a9c5d1c217c02be08c3212035ea825a62d7e83bfb7e297cdd88920144318559",
+      "byte_identical": true
+    },
+    "cpp/operators/reduction.cpp.o": {
+      "old": "/private/tmp/calmetrics-covcorr-reuse-build/CMakeFiles/calmetrics_engine_operators.dir/cpp/operators/reduction.cpp.o",
+      "new": "/private/tmp/calmetrics-covariance-tiles-final-build/CMakeFiles/calmetrics_engine_operators.dir/cpp/operators/reduction.cpp.o",
+      "sha256": "f716d3a53d630c3171b4703de31d0ee6ca91d79e20ddf965d03362faaa30bc6b",
+      "byte_identical": true
+    }
+  },
+  "source_sha256": "442f3bc86afe731b208f7c505a00c495562a75603ceb822da0e5c6ed892bf648"
+}

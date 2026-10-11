@@ -20,9 +20,21 @@ struct Buffers {
   std::vector<ops::Value> values, block;
   std::vector<double> numeric;
   std::vector<std::uint8_t> masks;
+  // Cache only changing numbers. Output pointers belong to one tile and the
+  // operand-side flags already live in immutable graph metadata.
+  struct RegionScalars { std::array<double, 2> constants{}; double threshold = 0; };
+  std::vector<RegionScalars> regions;
   ops::Workspace workspace;
 };
 thread_local Buffers buffers;
+Buffers::RegionScalars bind_region_scalars(const PointwiseRegion &region,
+                                           const std::vector<ops::Value> &values) {
+  Buffers::RegionScalars result;
+  for (std::size_t j = 0; j < 2; ++j)
+    if (region.scalars[j] != UINT32_MAX) result.constants[j] = values[region.scalars[j]].scalar;
+  if (region.scalars[2] != UINT32_MAX) result.threshold = values[region.scalars[2]].scalar;
+  return result;
+}
 struct ChainBinding {
   ops::ScalarChain chain;
   ops::ScalarChainKernel kernel = nullptr;
@@ -150,19 +162,26 @@ void plan_pointwise_regions(const Program &p, ExecutionMetadata &m) {
       if (p.nodes[i].kind == NodeKind::operation && i != r.first && i != r.second && i != r.predicate)
         m.pointwise_complete_region = false;
   }
+  if (m.pointwise_complete_region) return;
+  std::vector<std::uint32_t> numeric(p.numeric_slots, UINT32_MAX), masks(p.mask_slots, UINT32_MAX);
+  m.pointwise_slots.resize(p.nodes.size(), UINT32_MAX);
   for (std::size_t i = 0; i < p.nodes.size(); ++i) {
     const auto &n = p.nodes[i];
     if (n.kind != NodeKind::operation || m.root_destinations[i] >= 0 || elided[i]) continue;
-    if (n.storage == StorageKind::numeric)
-      m.pointwise_numeric_slots = std::max(m.pointwise_numeric_slots, std::size_t(n.slot)+1);
-    if (n.storage == StorageKind::mask)
-      m.pointwise_mask_slots = std::max(m.pointwise_mask_slots, std::size_t(n.slot)+1);
+    if (n.storage != StorageKind::numeric && n.storage != StorageKind::mask) continue;
+    auto &map = n.storage == StorageKind::numeric ? numeric : masks;
+    auto &count = n.storage == StorageKind::numeric ? m.pointwise_numeric_slots : m.pointwise_mask_slots;
+    ops::require(static_cast<std::size_t>(n.slot) < map.size(), "GRAPH_STORAGE_SLOT");
+    auto &slot = map[n.slot];
+    if (slot == UINT32_MAX) slot = static_cast<std::uint32_t>(count++);
+    m.pointwise_slots[i] = slot;
   }
 }
 void release_pointwise_workspace() {
   auto clear = [](auto &v) { std::decay_t<decltype(v)>().swap(v); };
   clear(buffers.values); clear(buffers.block);
   clear(buffers.numeric); clear(buffers.masks);
+  clear(buffers.regions);
 }
 bool pointwise_iteration_inplace_safe(const Program &p, const std::vector<ops::Value> &inputs,
     const double *parameters, std::size_t state_input) {
@@ -208,7 +227,9 @@ bool pointwise_iteration_inplace_safe(const Program &p, const std::vector<ops::V
 std::size_t pointwise_workspace_bytes(const Program &p, std::size_t count) {
   const auto &m = *p.execution_metadata;
   if (m.pointwise_complete_region) return p.nodes.size() * sizeof(ops::Value);
-  return p.nodes.size() * (2 * sizeof(ops::Value)) + std::min(count, pointwise_tile_elements) *
+  return p.nodes.size() * (2 * sizeof(ops::Value))
+      + (count > pointwise_tile_elements ? m.pointwise_regions.size() * sizeof(Buffers::RegionScalars) : 0)
+      + std::min(count, pointwise_tile_elements) *
       (m.pointwise_numeric_slots * sizeof(double) + m.pointwise_mask_slots);
 }
 bool pointwise_eligible(const Program &p) {
@@ -230,7 +251,8 @@ bool execute_pointwise(const Program &p, const std::vector<ops::Value> &inputs,
     const std::int64_t *ends, std::size_t rows, void *output, const ResultLayout *layout,
     std::size_t result_row, Audit &audit, std::chrono::steady_clock::time_point deadline,
     const std::atomic<bool> *cancelled, bool prebound, std::size_t tile_begin, std::size_t tile_end,
-    const double *previous, double *residual, bool *finite, InplacePointwiseChain *capture) {
+    const double *previous, double *residual, bool *finite, InplacePointwiseChain *capture,
+    bool collect_shapes) {
   if (!p.execution_metadata->pointwise || !layout) return false;
   if (!prebound) release_graph_workspace();
   // Integer/mask inputs retain their exact-type general path.
@@ -252,8 +274,10 @@ bool execute_pointwise(const Program &p, const std::vector<ops::Value> &inputs,
   b.values.resize(p.nodes.size());
   const auto &roots = p.execution_metadata->root_destinations;
   audit = {}; audit.rows = rows; audit.nodes = p.nodes.size();
-  audit.result_shapes.resize(rows * p.roots.size());
-  audit.root_statuses.resize(rows * p.roots.size());
+  if (collect_shapes) {
+    audit.result_shapes.resize(rows * p.roots.size());
+    audit.root_statuses.resize(rows * p.roots.size());
+  }
   for (std::size_t row = 0; row < rows; ++row) {
     ops::require(starts[row] >= 0 && ends[row] >= starts[row], "GRAPH_INTERVAL_BOUNDS");
     const auto length = static_cast<std::size_t>(ends[row] - starts[row]);
@@ -308,13 +332,16 @@ bool execute_pointwise(const Program &p, const std::vector<ops::Value> &inputs,
     };
     resize(b.numeric, numeric); resize(b.masks, masks);
     resize(b.block, chain.kernel ? 0 : p.nodes.size());
+    resize(b.regions, chain.kernel || count <= tile_capacity ? 0 : p.execution_metadata->pointwise_regions.size());
+    for (std::size_t i = 0; i < b.regions.size(); ++i)
+      b.regions[i] = bind_region_scalars(p.execution_metadata->pointwise_regions[i], b.values);
     for (std::size_t r = 0; r < p.roots.size(); ++r) {
       const auto &v = b.values[p.roots[r]]; const auto &schema = p.root_outputs[r];
       const auto &slot = layout->slots[(result_row + row) * p.roots.size() + r];
       ops::require(v.shape.rank == schema.rank && v.size() <= slot.capacity, "RESULT_CAPACITY_MISMATCH");
       ops::require(schema.dtype == (v.kind == ops::Kind::mask ? OutputDType::boolean : OutputDType::float64),
           "RESULT_DTYPE_MISMATCH");
-      audit.result_shapes[row * p.roots.size() + r] = v.shape;
+      if (collect_shapes) audit.result_shapes[row * p.roots.size() + r] = v.shape;
       if (chain.kernel && p.nodes[p.roots[r]].kind == NodeKind::operation &&
           roots[p.roots[r]] == static_cast<std::int32_t>(r))
         audit.direct_output_bytes += (end-begin)*output_itemsize(schema.dtype);
@@ -327,6 +354,20 @@ bool execute_pointwise(const Program &p, const std::vector<ops::Value> &inputs,
             : layout->row_bytes[result_row + row + 1];
         ops::require(used <= limit, "RESULT_LAYOUT_BOUNDS");
         if (limit > used) std::memset(static_cast<std::uint8_t *>(output) + used, 0, limit - used);
+      }
+    }
+    ops::MemoryOrder traversal = ops::MemoryOrder::c;
+    bool selected = false;
+    for (std::size_t r=0;r<p.roots.size();++r) if (p.root_outputs[r].rank > 1) {
+      if (selected) ops::require(traversal == layout->order(r), "POINTWISE_OUTPUT_ORDER");
+      traversal = layout->order(r); selected = true;
+    }
+    if (traversal == ops::MemoryOrder::f) {
+      for (std::size_t i=0;i<p.nodes.size();++i) {
+        if (p.nodes[i].kind != NodeKind::input) continue;
+        auto &v=b.values[i];
+        std::reverse(v.shape.dim.begin(), v.shape.dim.begin()+v.shape.rank);
+        std::reverse(v.stride.begin(), v.stride.begin()+v.shape.rank);
       }
     }
     if (capture && rows == 1 && chain.kernel && chain.predicate == SIZE_MAX &&
@@ -397,21 +438,20 @@ bool execute_pointwise(const Program &p, const std::vector<ops::Value> &inputs,
                 layout->slots[(result_row+row)*p.roots.size()+r].byte_offset +
                 first*output_itemsize(p.root_outputs[r].dtype);
           } else if (value.kind == ops::Kind::mask)
-            dest = b.masks.data() + p.nodes[id].slot*tile_capacity;
-          else dest = b.numeric.data() + p.nodes[id].slot*tile_capacity;
+            dest = b.masks.data() + p.execution_metadata->pointwise_slots[id]*tile_capacity;
+          else dest = b.numeric.data() + p.execution_metadata->pointwise_slots[id]*tile_capacity;
           value.data = dest;
           return dest;
         };
         const auto &regions = p.execution_metadata->pointwise_regions;
         while (region_index < regions.size() && regions[region_index].first < i) ++region_index;
         if (region_index < regions.size() && regions[region_index].first == i) {
-          const auto &region = regions[region_index++];
+          const auto &region = regions[region_index];
+          const auto scalars = b.regions.empty() ? bind_region_scalars(region, b.values) : b.regions[region_index];
+          ++region_index;
           ops::ScalarChain local;
-          for (std::size_t j = 0; j < 2; ++j) {
-            if (region.scalars[j] != UINT32_MAX) local.constants[j] = b.values[region.scalars[j]].scalar;
-            local.constant_first[j] = region.scalar_first[j];
-          }
-          if (region.scalars[2] != UINT32_MAX) local.threshold = b.values[region.scalars[2]].scalar;
+          local.constants = scalars.constants; local.threshold = scalars.threshold;
+          local.constant_first = {region.scalar_first[0], region.scalar_first[1]};
           local.threshold_first = region.scalar_first[2];
           if (region.retain_first) local.first_output = static_cast<double *>(prepare_output(region.first));
           if (region.second != UINT32_MAX) local.value_output = static_cast<double *>(prepare_output(region.second));
@@ -461,7 +501,7 @@ bool execute_pointwise(const Program &p, const std::vector<ops::Value> &inputs,
   audit.numeric_arena_bytes = b.numeric.capacity() * sizeof(double);
   audit.mask_arena_bytes = b.masks.capacity();
   audit.operator_workspace_capacity_bytes = b.values.capacity() * sizeof(ops::Value)
-      + b.block.capacity() * sizeof(ops::Value);
+      + b.block.capacity() * sizeof(ops::Value) + b.regions.capacity() * sizeof(Buffers::RegionScalars);
   audit.fused_pointwise_calls = rows;
   audit.pointwise_workspace_capacity_bytes = audit.numeric_arena_bytes + audit.mask_arena_bytes
       + audit.operator_workspace_capacity_bytes;

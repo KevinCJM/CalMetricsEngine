@@ -1,0 +1,173 @@
+{
+  "status": "adopted_and_verified",
+  "build_id": "c6055f066ce04f8cd27d9480f4308c1d17dce2414be01d2d35217bc66f625b24",
+  "numerical_sources": 89,
+  "test_counts": {
+    "full-v4.xml": {
+      "tests": 13074,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "production-related.xml": {
+      "tests": 254,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "production-native.xml": {
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "asan-related.xml": {
+      "tests": 254,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "asan-native.xml": {
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "off-related.xml": {
+      "tests": 254,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "off-native.xml": {
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "production_timing": [
+    {
+      "shape": [
+        16384,
+        2520,
+        30
+      ],
+      "layout": "C",
+      "medians_seconds": {
+        "new": 0.0019888545,
+        "njit": 0.38917620799999997,
+        "moment-njit": 0.0015590209999999998
+      },
+      "maximum_absolute_error": {
+        "new": 2.7755575615628914e-17,
+        "njit": 4.440892098500626e-16,
+        "moment-njit": 6.245004513516506e-17
+      }
+    },
+    {
+      "shape": [
+        16384,
+        2520,
+        30
+      ],
+      "layout": "F",
+      "medians_seconds": {
+        "new": 0.002788375,
+        "njit": 1.280753833,
+        "moment-njit": 0.002047083
+      },
+      "maximum_absolute_error": {
+        "new": 1.6653345369377348e-16,
+        "njit": 4.3021142204224816e-16,
+        "moment-njit": 1.6653345369377348e-16
+      }
+    },
+    {
+      "shape": [
+        100000,
+        2520,
+        30
+      ],
+      "layout": "C",
+      "medians_seconds": {
+        "new": 0.007670541499999999,
+        "njit": 2.1658910000000002,
+        "moment-njit": 0.005130770999999999
+      },
+      "maximum_absolute_error": {
+        "new": 2.7755575615628914e-17,
+        "njit": 3.7470027081099033e-16,
+        "moment-njit": 7.632783294297951e-17
+      }
+    },
+    {
+      "shape": [
+        200000,
+        2520,
+        30
+      ],
+      "layout": "C",
+      "medians_seconds": {
+        "new": 0.014579,
+        "njit": 4.318262292,
+        "moment-njit": 0.010469042000000001
+      },
+      "maximum_absolute_error": {
+        "new": 2.7755575615628914e-17,
+        "njit": 5.273559366969494e-16,
+        "moment-njit": 8.326672684688674e-17
+      }
+    }
+  ],
+  "production_memory": [
+    {
+      "backend": "new",
+      "requested_heap_warm_peak_bytes": 56033224,
+      "rss_delta_median_bytes": 60850176,
+      "rss_absolute_median_bytes": 146784256
+    },
+    {
+      "backend": "njit",
+      "requested_heap_warm_peak_bytes": 52430736,
+      "rss_delta_median_bytes": 56131584,
+      "rss_absolute_median_bytes": 182239232
+    },
+    {
+      "backend": "moment-njit",
+      "requested_heap_warm_peak_bytes": 52667840,
+      "rss_delta_median_bytes": 56688640,
+      "rss_absolute_median_bytes": 195379200
+    }
+  ],
+  "fixed_candidate_memory": [
+    {
+      "backend": "old",
+      "requested_heap_warm_peak_bytes": 2069232568,
+      "rss_delta_median_bytes": 2073411584,
+      "rss_absolute_median_bytes": 2158641152
+    },
+    {
+      "backend": "new",
+      "requested_heap_warm_peak_bytes": 56033224,
+      "rss_delta_median_bytes": 60030976,
+      "rss_absolute_median_bytes": 144523264
+    },
+    {
+      "backend": "njit",
+      "requested_heap_warm_peak_bytes": 52430736,
+      "rss_delta_median_bytes": 55099392,
+      "rss_absolute_median_bytes": 181190656
+    },
+    {
+      "backend": "moment-njit",
+      "requested_heap_warm_peak_bytes": 52667840,
+      "rss_delta_median_bytes": 55902208,
+      "rss_absolute_median_bytes": 193150976
+    }
+  ],
+  "same_algorithm_njit_control": true,
+  "compilation_excluded": true,
+  "whole_goal_complete": false,
+  "scope": "supplied candidate mean/standard-deviation complete mathematical task; synthetic representative data; not full portfolio search or service"
+}

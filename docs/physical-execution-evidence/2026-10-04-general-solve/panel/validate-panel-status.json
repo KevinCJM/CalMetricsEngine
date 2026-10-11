@@ -1,0 +1,210 @@
+{
+  "status": "passed",
+  "source_build_id": "096e2d7077e89a5d2025526d2f355555a5b8f935210a3534ee3ddf3aa7ef6e8c",
+  "goal_complete": false,
+  "jobs": [
+    {
+      "label": "native-panel-config",
+      "pid": 17285,
+      "command": [
+        "/opt/homebrew/bin/cmake",
+        "-S",
+        "/private/tmp/calmetrics-lu-panel-20261004/source",
+        "-B",
+        "/private/tmp/calmetrics-lu-panel-20261004/build",
+        "-DCALMETRICS_ENGINE_BUILD_TESTS=ON"
+      ],
+      "started": 1791089145.7994921,
+      "exit_code": 0,
+      "elapsed_seconds": 0.6591928005218506
+    },
+    {
+      "label": "native-panel-build",
+      "pid": 17314,
+      "command": [
+        "/opt/homebrew/bin/cmake",
+        "--build",
+        "/private/tmp/calmetrics-lu-panel-20261004/build",
+        "-j",
+        "3"
+      ],
+      "started": 1791089146.464235,
+      "exit_code": 0,
+      "elapsed_seconds": 6.551825761795044
+    },
+    {
+      "label": "native-panel",
+      "pid": 17383,
+      "command": [
+        "/opt/homebrew/bin/ctest",
+        "--test-dir",
+        "/private/tmp/calmetrics-lu-panel-20261004/build",
+        "--output-on-failure",
+        "--output-junit",
+        "/private/tmp/calmetrics-lu-panel-20261004/native-panel.xml"
+      ],
+      "started": 1791089153.021694,
+      "exit_code": 0,
+      "elapsed_seconds": 6.556748151779175
+    },
+    {
+      "label": "full-panel",
+      "pid": 17422,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "-m",
+        "pytest",
+        "-q",
+        "tests",
+        "--junitxml=/private/tmp/calmetrics-lu-panel-20261004/full-panel.xml"
+      ],
+      "started": 1791089159.584787,
+      "exit_code": 0,
+      "elapsed_seconds": 946.1437182426453
+    },
+    {
+      "label": "build-asan",
+      "pid": 29879,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-lu-panel-20261004/build-asan.py"
+      ],
+      "started": 1791090105.745475,
+      "exit_code": 0,
+      "elapsed_seconds": 89.63293075561523
+    },
+    {
+      "label": "asan-related",
+      "pid": 30727,
+      "command": [
+        "/opt/homebrew/Cellar/python@3.12/3.12.11/Frameworks/Python.framework/Versions/3.12/Resources/Python.app/Contents/MacOS/Python",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/test_lu_panel_workspace.py",
+        "tests/test_dense_elementwise_f_graph.py",
+        "tests/test_retained_solve_library.py",
+        "tests/test_guarded_lu_graph.py",
+        "tests/test_private_solve_workspace.py",
+        "tests/test_solve_pair_reuse.py",
+        "tests/test_triangular_library.py",
+        "tests/test_solve_library.py",
+        "tests/test_solve_grouped_library.py",
+        "tests/test_single_solve_library.py",
+        "--junitxml=/private/tmp/calmetrics-lu-panel-20261004/asan-related.xml"
+      ],
+      "started": 1791090195.3846579,
+      "exit_code": 0,
+      "elapsed_seconds": 1472.9783761501312
+    },
+    {
+      "label": "asan-native",
+      "pid": 49055,
+      "command": [
+        "/opt/homebrew/bin/ctest",
+        "--test-dir",
+        "/private/tmp/calmetrics-lu-panel-20261004/asan-build",
+        "--output-on-failure",
+        "--output-junit",
+        "/private/tmp/calmetrics-lu-panel-20261004/asan-native.xml"
+      ],
+      "started": 1791091668.368665,
+      "exit_code": 0,
+      "elapsed_seconds": 94.49398112297058
+    },
+    {
+      "label": "build-off",
+      "pid": 49312,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-lu-panel-20261004/build-off.py"
+      ],
+      "started": 1791091762.8688362,
+      "exit_code": 0,
+      "elapsed_seconds": 35.83121085166931
+    },
+    {
+      "label": "off-related",
+      "pid": 50831,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/test_lu_panel_workspace.py",
+        "tests/test_dense_elementwise_f_graph.py",
+        "tests/test_retained_solve_library.py",
+        "tests/test_guarded_lu_graph.py",
+        "tests/test_private_solve_workspace.py",
+        "tests/test_solve_pair_reuse.py",
+        "tests/test_triangular_library.py",
+        "tests/test_solve_library.py",
+        "tests/test_solve_grouped_library.py",
+        "tests/test_single_solve_library.py",
+        "--junitxml=/private/tmp/calmetrics-lu-panel-20261004/off-related.xml"
+      ],
+      "started": 1791091798.706922,
+      "exit_code": 0,
+      "elapsed_seconds": 100.28223991394043
+    },
+    {
+      "label": "off-native",
+      "pid": 51205,
+      "command": [
+        "/opt/homebrew/bin/ctest",
+        "--test-dir",
+        "/private/tmp/calmetrics-lu-panel-20261004/off-build",
+        "--output-on-failure",
+        "--output-junit",
+        "/private/tmp/calmetrics-lu-panel-20261004/off-native.xml"
+      ],
+      "started": 1791091898.995221,
+      "exit_code": 0,
+      "elapsed_seconds": 12.250951051712036
+    }
+  ],
+  "counts": {
+    "related-panel": {
+      "tests": 726,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "native-panel": {
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "full-panel": {
+      "tests": 12674,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "asan-related": {
+      "tests": 726,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "asan-native": {
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "off-related": {
+      "tests": 726,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "off-native": {
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  }
+}

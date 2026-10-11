@@ -1,0 +1,43 @@
+{
+  "status": "SUPERSEDED_MISCONFIGURED_CONTROL",
+  "actual_lane_verified": false,
+  "limitation": "The requested process settings used cpu_budget=1 and one row, so the actual plan chose single. These raw values cannot establish a worker transport contract; the reason and worker-labelled field below were premature. Preserved without rewriting observations.",
+  "superseded_by": "transport-diagnosis-actual.json",
+  "rows": [
+    {
+      "lane": "process_inline",
+      "build_id": "33c2f2b95e374d396dc283c78d2ca5a43ad51a7a97995c3534ffdbae61ff7d39",
+      "diag_mismatch_to_c": 227,
+      "diag_mismatch_to_original_f": 0,
+      "max_abs_to_c": 1.7763568394002505e-15,
+      "backend": "old"
+    },
+    {
+      "lane": "process_inline",
+      "build_id": "a927b2efd545f34e20d67c4833466fe63428721aa023c86d3c1eee6d8760ade8",
+      "diag_mismatch_to_c": 227,
+      "diag_mismatch_to_original_f": 0,
+      "max_abs_to_c": 1.7763568394002505e-15,
+      "backend": "new"
+    },
+    {
+      "lane": "process_shared",
+      "build_id": "33c2f2b95e374d396dc283c78d2ca5a43ad51a7a97995c3534ffdbae61ff7d39",
+      "diag_mismatch_to_c": 227,
+      "diag_mismatch_to_original_f": 0,
+      "max_abs_to_c": 1.7763568394002505e-15,
+      "backend": "old"
+    },
+    {
+      "lane": "process_shared",
+      "build_id": "a927b2efd545f34e20d67c4833466fe63428721aa023c86d3c1eee6d8760ade8",
+      "diag_mismatch_to_c": 227,
+      "diag_mismatch_to_original_f": 0,
+      "max_abs_to_c": 1.7763568394002505e-15,
+      "backend": "new"
+    }
+  ],
+  "diagonal_bits_to_old_worker_equal": true,
+  "new_vs_old_tolerance": "rtol=atol=1e-12",
+  "reason": "Existing transport packs non-dense padded F into C. Direct original-F diagonal bits are not the old worker contract."
+}

@@ -1,0 +1,38 @@
+{
+  "status": "ADOPTED_NATIVE_PROGRESS_NOT_FULL_PERFORMANCE_ACCEPTANCE",
+  "method": "Root self-review; no subagents",
+  "old": "315171f9725b2c03070d2f525713f566f56dc2d719c52ca0ec6f0884c040fd94",
+  "new": "ecf16686c121d959600299583b9706e67bb337fc5cbaec42ebf09040ba627b2e",
+  "off": "4e16d542714555d27f3a37b0bc20ab1554350feb046a64f948f453772dd925d3",
+  "verification": {
+    "python": 11029,
+    "focused": 885,
+    "off_passed": 686,
+    "off_skipped": 199,
+    "native": "9/9",
+    "asan": "9/9",
+    "native-off": "9/9"
+  },
+  "checks": [
+    "One production file; existing Eigen 4x4 tile helper family is parameterized by feature stride, default C remains compile-time one. No parallel historical kernel or new dependency.",
+    "Each cell retains ascending logical observation fold; no reassociation, no FMA contraction or positive-F reduction tree. Tail, bottom-four and last mean slot all use the same signed feature stride.",
+    "Only time stride -1, positive feature stride >= T and existing T>=32,D>=8 are additionally admitted. Direct scalar, unsupported geometry/platform and library OFF remain unchanged.",
+    "Input is borrowed; output last row still holds means until consumed. Numeric scratch, input/algorithm copies, graph/Planner/IPC and thread policy do not grow.",
+    "Direct scalar parity, nonfinite/error classification, padded/tail canaries, internal/scoped roots, prepared mutation, retained ownership and actual process layout covered by existing expanded tests. Native negative F auto/scalar full bytes match.",
+    "12 qualified same-CPU cases, six paired rounds, full old/new output hashes equal. Extra amplified source case has pre-existing NI covariance mismatch; retain failure and independently verify it, do not loosen tolerance.",
+    "12 fresh heap/RSS children; measured old/new cold and warm requested peaks exactly equal. Current object contains double-lane SIMD multiply/add instructions; counts are static, not executed counts.",
+    "All 77 source inputs and installed wheel/extension/worker identities verified; 76 unchanged. Frozen scalar/auto and historical Excel parity retained, no new Excel recalculation."
+  ],
+  "limits": [
+    "Not full-engine or universal-input acceptance. Measured scaled/dense fallbacks are 4-7x faster but still 4.8-9.1x slower than NI; remaining time gaps stay open.",
+    "Amplified source NI qualification fails in 206/1048576 covariance cells, max absolute difference 1.1920928955078125e-7; original tolerance unchanged, no comparable NI timing claimed for this case. Correlation qualification passes.",
+    "Few-ms C/F control increases are recorded rather than standalone adoption vetoes. Source scale and long-correlation DSYRK guards still force expensive canonical work.",
+    "Complete allocator lifetime accounting remains limited by recorded untracked frees; RSS samples are supplementary, vendor reserve is an estimate, stack/mmap/process-tree coverage is not complete.",
+    "No fresh 4096 memory, cross-platform performance, platform-business or deployment acceptance. ASan excludes vendor instrumentation and detect_leaks=0. No commit/push."
+  ],
+  "next": [
+    "Review the existing deterministic per-block DSYRK certificate and panel sizing for scaled independent roots; do not replace the proof by empirical tolerance checks.",
+    "For highly correlated long sequences, inspect whether a beta-zero partial result plus explicit addition can tighten the prior-sum error bound at acceptable workspace cost. This is a proposal, not implemented or proved.",
+    "Explicit LAPACK eigen algorithm contract remains pending user decision."
+  ]
+}

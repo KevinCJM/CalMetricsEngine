@@ -87,7 +87,11 @@ std::string display(const ValueType &value);
 std::string normalize_semantic_dimension(std::string value);
 
 std::string canonical_operator_name(std::string_view name);
-ValueType infer(const ops::Spec &spec, const std::vector<ValueType> &inputs);
+ValueType infer(const ops::Spec &spec, const std::vector<ValueType> &inputs,
+                const std::vector<double> &constants = {});
+ValueType infer_latent(const ops::Spec &, const std::vector<ValueType> &, const std::vector<double> &);
+ValueType infer_foundation(const ops::Spec &, const std::vector<ValueType> &,
+                          const std::vector<double> &);
 
 bool same_structure(const ValueType &left, const ValueType &right) noexcept;
 bool same_type(const ValueType &left, const ValueType &right) noexcept;

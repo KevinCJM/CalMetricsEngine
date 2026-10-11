@@ -23,19 +23,53 @@ std::size_t byte_size(const std::vector<py::ssize_t> &shape,
     throw py::type_error(
         "shared arrays require a non-object fixed-width dtype");
   std::size_t count = 1;
+  bool empty = false;
   for (auto dimension : shape) {
     if (dimension < 0)
       throw py::value_error("negative shared dimension");
-    count = p::checked_mul(count, static_cast<std::size_t>(dimension));
+    empty = empty || dimension == 0;
   }
-  return p::checked_mul(count, static_cast<std::size_t>(dtype.itemsize()));
+  if (empty) return 0;
+  for (auto dimension : shape)
+    count = p::checked_mul(count, static_cast<std::size_t>(dimension));
+  const auto bytes = p::checked_mul(count, static_cast<std::size_t>(dtype.itemsize()));
+  if (bytes > static_cast<std::size_t>(PY_SSIZE_T_MAX))
+    throw py::value_error("shared array size overflow");
+  return bytes;
+}
+o::MemoryOrder memory_order(const std::string &order) {
+  if (order == "C") return o::MemoryOrder::c;
+  if (order == "F") return o::MemoryOrder::f;
+  throw py::value_error("order must be C or F");
+}
+// Shared arrays support arbitrary rank, unlike the rank-0/1/2/3 graph contract.
+std::vector<py::ssize_t> byte_strides(const std::vector<py::ssize_t> &shape,
+                                     const py::dtype &dtype, o::MemoryOrder order) {
+  const auto bytes = byte_size(shape, dtype);
+  std::vector<py::ssize_t> strides(shape.size(), 0);
+  if (!bytes) return strides;
+  std::size_t extent = static_cast<std::size_t>(dtype.itemsize());
+  for (std::size_t step = 0; step < shape.size(); ++step) {
+    const auto axis = order == o::MemoryOrder::c ? shape.size() - 1 - step : step;
+    if (extent > static_cast<std::size_t>(PY_SSIZE_T_MAX))
+      throw py::value_error("shared strides overflow");
+    strides[axis] = static_cast<py::ssize_t>(extent);
+    extent = p::checked_mul(extent, static_cast<std::size_t>(shape[axis]));
+  }
+  if (extent > static_cast<std::size_t>(PY_SSIZE_T_MAX))
+    throw py::value_error("shared array size overflow");
+  return strides;
 }
 struct SharedArrayDescriptor {
   std::string name;
   std::vector<py::ssize_t> shape;
   std::string dtype;
   bool readonly = false;
+  o::MemoryOrder order = o::MemoryOrder::c;
   std::size_t nbytes() const { return byte_size(shape, py::dtype(dtype)); }
+  std::vector<py::ssize_t> strides() const {
+    return byte_strides(shape, py::dtype(dtype), order);
+  }
 };
 class SharedArrayOwner {
 public:
@@ -43,35 +77,42 @@ public:
   std::vector<py::ssize_t> shape;
   py::dtype dtype;
   bool readonly = false;
+  o::MemoryOrder order = o::MemoryOrder::c;
   SharedArrayOwner(std::shared_ptr<n::SharedRegion> r,
-                   std::vector<py::ssize_t> s, py::dtype d, bool ro = false)
+                   std::vector<py::ssize_t> s, py::dtype d, bool ro = false,
+                   o::MemoryOrder layout = o::MemoryOrder::c)
       : region(std::move(r)), shape(std::move(s)), dtype(std::move(d)),
-        readonly(ro) {}
+        readonly(ro), order(layout) {}
   void ensure() const {
     if (!region)
       throw std::runtime_error("shared array owner is released");
   }
   static std::shared_ptr<SharedArrayOwner> from_array(py::handle item) {
     auto a = b::require_array(item);
-    if (!(a.flags() & py::array::c_style))
-      throw py::value_error("shared input must be C-contiguous");
+    if (!(a.flags() & (py::array::c_style | py::array::f_style)))
+      throw py::value_error("shared input must be C- or F-contiguous");
     b::validate_owner(a);
     std::vector<py::ssize_t> shape(a.shape(), a.shape() + a.ndim());
     const auto bytes = byte_size(shape, a.dtype());
+    const auto order = a.flags() & py::array::c_style ? o::MemoryOrder::c : o::MemoryOrder::f;
     auto region = n::SharedRegion::create(bytes);
     if (bytes)
       std::memcpy(region->data(), a.data(), bytes);
-    return std::make_shared<SharedArrayOwner>(region, shape, a.dtype());
+    return std::make_shared<SharedArrayOwner>(region, shape, a.dtype(), false, order);
   }
   static std::shared_ptr<SharedArrayOwner>
-  empty(const std::vector<py::ssize_t> &shape, const py::object &dtype) {
+  empty(const std::vector<py::ssize_t> &shape, const py::object &dtype,
+        const std::string &order) {
     py::dtype type = py::dtype::from_args(dtype);
+    const auto layout = memory_order(order);
     return std::make_shared<SharedArrayOwner>(
-        n::SharedRegion::create(byte_size(shape, type)), shape, type);
+        n::SharedRegion::create(byte_size(shape, type)), shape, type, false, layout);
   }
   py::array array() const {
     ensure();
-    py::array a(dtype, shape, {}, region->data(), py::cast(region));
+    const auto strides = order == o::MemoryOrder::c && region->size() != 0 ? std::vector<py::ssize_t>{}
+                                                   : byte_strides(shape, dtype, order);
+    py::array a(dtype, shape, strides, region->data(), py::cast(region));
     if (readonly)
       a.attr("setflags")(py::arg("write") = false);
     return a;
@@ -79,7 +120,7 @@ public:
   SharedArrayDescriptor descriptor() const {
     ensure();
     return {region->name(), shape, py::cast<std::string>(dtype.attr("str")),
-            readonly || !region->writable()};
+            readonly || !region->writable(), order};
   }
   std::size_t nbytes() const {
     ensure();
@@ -145,7 +186,7 @@ public:
 };
 
 struct ArrayPin {
-  py::array owner;
+  py::array owner = py::reinterpret_borrow<py::array>(py::handle{});
   py::dtype dtype;
   const void *data = nullptr;
   py::ssize_t size = 0, stride = 0;
@@ -153,16 +194,22 @@ struct ArrayPin {
   py::object allocation_owner = py::none();
   const void *allocation_data = nullptr;
   py::ssize_t allocation_bytes = 0;
+  // Non-owning identities are compared only to live request objects. Never
+  // dereference a cached identity; pointer reuse still requires the complete
+  // current layout/allocation validation before the descriptor is reused.
+  PyObject *owner_identity = nullptr, *allocation_identity = nullptr;
   static ArrayPin capture(const py::array &a) {
     ArrayPin pin{a, a.dtype(), a.data(), a.size(), a.ndim() ? a.strides(0) : 0,
                  {a.shape(), a.shape() + a.ndim()},
                  {a.strides(), a.strides() + a.ndim()}};
+    pin.owner_identity = a.ptr();
     py::object current = a;
     for (unsigned depth = 0; depth < 32; ++depth) {
       if (py::isinstance<py::array>(current)) {
         auto array = py::reinterpret_borrow<py::array>(current);
         if (array.owndata()) {
           pin.allocation_owner = current;
+          pin.allocation_identity = current.ptr();
           pin.allocation_data = array.data();
           pin.allocation_bytes = array.nbytes();
           break;
@@ -179,19 +226,41 @@ struct ArrayPin {
     b::exact<T>(a, 1, name);
     return capture(a);
   }
-  bool unchanged() const {
+  void forget_owner() {
+    // Dtype metadata can itself own arbitrary Python arrays. Keep only the
+    // validated numeric descriptor in the ordinary cache, without changing the
+    // caller's dtype. Prepared bindings never drop their strong owners.
+    if (owner) dtype = py::dtype::from_args(dtype.attr("str"));
+    owner = py::reinterpret_borrow<py::array>(py::handle{});
+    allocation_owner = py::none();
+  }
+  bool unchanged(const py::array &current) const {
     if (!allocation_owner.is_none()) {
       const auto allocation = py::reinterpret_borrow<py::array>(allocation_owner);
       if (allocation.data() != allocation_data || allocation.nbytes() != allocation_bytes)
         return false;
     }
-    return owner.data() == data && owner.size() == size &&
-           owner.ndim() == static_cast<py::ssize_t>(shape.size()) &&
-           std::equal(shape.begin(), shape.end(), owner.shape()) &&
-           std::equal(strides.begin(), strides.end(), owner.strides()) &&
-           owner.dtype().equal(dtype);
+    return current.data() == data && current.size() == size &&
+           current.ndim() == static_cast<py::ssize_t>(shape.size()) &&
+           std::equal(shape.begin(), shape.end(), current.shape()) &&
+           std::equal(strides.begin(), strides.end(), current.strides()) &&
+           (current.dtype().is(dtype) || current.dtype().equal(dtype));
   }
-  bool same(py::handle item) const { return item.is(owner) && unchanged(); }
+  bool unchanged() const {
+    return owner && unchanged(owner);
+  }
+  bool same(py::handle item) const {
+    if (item.ptr() != owner_identity || !py::isinstance<py::array>(item)) return false;
+    auto current = py::reinterpret_borrow<py::array>(item);
+    if (!unchanged(current)) return false;
+    const auto allocation = capture(current);
+    if (allocation.allocation_identity != allocation_identity ||
+        allocation.allocation_data != allocation_data ||
+        allocation.allocation_bytes != allocation_bytes) return false;
+    b::bounds(current);
+    b::validate_owner(current);
+    return true;
+  }
 };
 
 // Typed binding is an exact-dtype view. Shape/owner checks run before any GIL
@@ -253,7 +322,9 @@ py::dict payload_arrays(const n::ModelPayload &payload) {
     for (int axis = 0; axis < field.shape.rank; ++axis) shape.push_back(field.shape.dim[axis]);
     const auto dtype = field.kind == o::Kind::number ? py::dtype::of<double>() :
         field.kind == o::Kind::integer ? py::dtype::of<std::int64_t>() : py::dtype::of<bool>();
-    py::array value(dtype, shape, {}, field.data, py::cast(payload.owner()));
+    const auto strides = field.packed_order() == o::MemoryOrder::c && field.size() != 0 ? std::vector<py::ssize_t>{}
+        : byte_strides(shape, dtype, o::MemoryOrder::f);
+    py::array value(dtype, shape, strides, field.data, py::cast(payload.owner()));
     value.attr("setflags")(py::arg("write") = false);
     result[py::str(payload.schema()[i].name)] = std::move(value);
   }
@@ -307,8 +378,9 @@ public:
   std::shared_ptr<SharedInputBundle> bundle;
   std::shared_ptr<n::ModelPayload> model;
   n::Batch native;
-  // Owned by this EngineAPI binding cache. Read/publish only while holding the
-  // GIL; execution takes a local owner before releasing it. No output is cached.
+  // Ordinary cache holds metadata only. Each execution retains its strong owners
+  // before releasing the GIL. Prepared bindings keep their original strong pins.
+  // Read/publish this plan only under the GIL; no output is cached.
   std::shared_ptr<p::Plan> reusable_plan;
 
   BoundData(std::shared_ptr<c::CompiledGraph> g, const py::object &inputs,
@@ -418,9 +490,26 @@ public:
         return false;
     return true;
   }
+  void retain_control_owners(
+      std::vector<py::object> &owners, const py::array &a, const py::array &z,
+      const py::object &parameters, const py::object &products) const {
+    owners.reserve(pins.size() + 2 + bool(product_ids) + bool(parameter_pin));
+    owners.emplace_back(a);
+    owners.emplace_back(z);
+    if (product_ids) owners.emplace_back(b::require_array(products));
+    if (parameter_pin) owners.emplace_back(b::require_array(parameters));
+  }
+  void forget_ordinary_owners() {
+    starts.forget_owner();
+    ends.forget_owner();
+    for (auto &pin : pins) pin.forget_owner();
+    if (product_ids) product_ids->forget_owner();
+    if (parameter_pin) parameter_pin->forget_owner();
+  }
   bool matches(const std::shared_ptr<c::CompiledGraph> &g,
                const py::object &inputs, const py::array &a, const py::array &z,
-               const py::object &parameters, const py::object &products) const {
+               const py::object &parameters, const py::object &products,
+               std::vector<py::object> &owners) const {
     if (g.get() != graph.get() || !starts.same(a) || !ends.same(z))
       return false;
     if (products.is_none() != !product_ids)
@@ -444,11 +533,20 @@ public:
         return false;
       for (std::size_t i = 0; i < pins.size(); ++i) {
         const auto &key = input_keys[i];
+        py::object owner;
         if (PyDict_CheckExact(d.ptr())) {
           auto *value = PyDict_GetItemWithError(d.ptr(), key.ptr());
           if (!value && PyErr_Occurred()) throw py::error_already_set();
-          if (!value || !pins[i].same(py::handle(value))) return false;
-        } else if (!d.contains(key) || !pins[i].same(d[key])) return false;
+          if (!value) return false;
+          owner = py::reinterpret_borrow<py::object>(value);
+        } else {
+          if (!d.contains(key)) return false;
+          owner = d[key];
+        }
+        // Hold exactly the fetched object before validation can invoke Python.
+        // A second mapping access could return an entirely different array.
+        if (!pins[i].same(owner)) return false;
+        owners.push_back(std::move(owner));
       }
     }
     if (parameter_pin)
@@ -474,7 +572,9 @@ public:
 };
 
 struct TypedOutput {
-  std::string kind, dtype;
+  // These names are canonical static literals; do not allocate/store three
+  // owning strings in every result wrapper.
+  const char *kind = "", *dtype = "", *order = "C";
   std::vector<std::string> axes;
   py::tuple values, statuses, shape_known;
   py::array root_statuses, byte_offsets;
@@ -499,7 +599,7 @@ struct Result {
       if (!py::cast<bool>(out.shape_known[row]) ||
           *static_cast<const std::int16_t *>(out.root_statuses.data(row)) != 0)
         throw py::value_error("failed results cannot become a model payload");
-      auto type = plan->graph->nodes[plan->graph->program.roots[i]].inferred_type;
+      const auto &type = plan->graph->nodes[plan->graph->program.roots[i]].type();
       const auto key = py::str(plan->graph->output_names[i]);
       types[key] = b::type_metadata(type);
       fields[key] = out.values[row];
@@ -535,13 +635,14 @@ struct Result {
     status_owner.attr("setflags")(false);
     py::tuple result(columns);
     for (std::size_t root = 0; root < columns; ++root) {
-      const auto &type = plan->graph->nodes[plan->graph->program.roots[root]].inferred_type;
+      const auto &type = plan->graph->nodes[plan->graph->program.roots[root]].type();
       const auto dtype = type.dtype == calmetrics_engine::typed::DType::boolean ? py::dtype::of<bool>()
           : type.dtype == calmetrics_engine::typed::DType::int64 ? py::dtype::of<std::int64_t>() : py::dtype::of<double>();
       TypedOutput column;
       column.kind = calmetrics_engine::typed::kind_name(type.kind);
       column.dtype = calmetrics_engine::typed::dtype_name(type.dtype);
       column.axes = type.axes;
+      column.order = layout.order(root) == o::MemoryOrder::f ? "F" : "C";
       column.values = py::tuple(rows); column.statuses = py::tuple(rows); column.shape_known = py::tuple(rows);
       py::array_t<std::int16_t> root_status(rows);
       py::array_t<std::int64_t> offsets(rows);
@@ -555,7 +656,9 @@ struct Result {
         if (shape.rank >= 0 && (shape.rank != static_cast<int>(type.rank()) || shape.size() > slot.capacity))
           throw std::runtime_error("invalid typed result shape");
         auto *data = static_cast<const std::uint8_t *>(values.data()) + slot.byte_offset;
-        py::array view(dtype, dimensions, {}, data, values);
+        const auto strides = layout.order(root) == o::MemoryOrder::f
+            ? byte_strides(dimensions, dtype, o::MemoryOrder::f) : std::vector<py::ssize_t>{};
+        py::array view(dtype, dimensions, strides, data, values);
         view.attr("setflags")(false);
         column.values[row] = std::move(view);
         column.shape_known[row] = py::bool_(shape.rank >= 0);
@@ -605,7 +708,9 @@ struct Result {
     py::dict d;
     d["execution_backend"] = "cpp_aot";
     d["audit_schema"] = typed() ? "cpp-aot-execution-2" : "cpp-aot-execution-1";
-    d["result_protocol"] = typed() ? "typed-results-1" : "homogeneous-results-1";
+    const bool layout_protocol = typed() && std::any_of(plan->graph->program.root_outputs.begin(),
+        plan->graph->program.root_outputs.end(), [](const auto &r) { return r.order != calmetrics_engine::graph::OutputOrder::c; });
+    d["result_protocol"] = typed() ? (layout_protocol ? "typed-results-2" : "typed-results-1") : "homogeneous-results-1";
     d["engine"] = "calmetrics_engine";
     d["model_identity"] = plan->model_identity.empty() ? py::none() : py::cast(plan->model_identity);
     d["engine_version"] = CALMETRICS_ENGINE_VERSION;
@@ -638,7 +743,7 @@ struct Result {
     if (typed()) {
       py::list schemas;
       for (auto root : plan->graph->program.roots) {
-        const auto &type = plan->graph->nodes[root].inferred_type;
+        const auto &type = plan->graph->nodes[root].type();
         py::dict schema;
         schema["dtype"] = calmetrics_engine::typed::dtype_name(type.dtype);
         schema["kind"] = calmetrics_engine::typed::kind_name(type.kind);
@@ -696,16 +801,28 @@ py::dtype output_dtype(const calmetrics_engine::graph::Program &program) {
   }
   throw py::value_error("GRAPH_OUTPUT_DTYPE");
 }
+py::array allocate_result(py::dtype dtype, int rank, const py::ssize_t *shape) {
+  // Same NumPy owning-array API used by py::array. These fixed-rank shapes
+  // live on the stack; NumPy computes C strides without two temporary vectors.
+  auto &api = py::detail::npy_api::get();
+  auto result = py::reinterpret_steal<py::array>(api.PyArray_NewFromDescr_(
+      api.PyArray_Type_, dtype.release().ptr(), rank,
+      reinterpret_cast<const Py_intptr_t *>(shape), nullptr, nullptr, 0, nullptr));
+  if (!result) throw py::error_already_set();
+  return result;
+}
 py::array new_output(std::size_t rows, std::size_t columns,
                      const calmetrics_engine::graph::Program &program) {
   p::checked_mul(p::checked_mul(rows, columns),
                  calmetrics_engine::graph::output_itemsize(program.output_dtype));
-  return py::array(output_dtype(program),
-      {static_cast<py::ssize_t>(rows), static_cast<py::ssize_t>(columns)});
+  const py::ssize_t shape[]{static_cast<py::ssize_t>(rows), static_cast<py::ssize_t>(columns)};
+  return allocate_result(output_dtype(program), 2, shape);
 }
 py::array new_result_output(const p::Plan &plan) {
-  if (plan.result_layout)
-    return py::array_t<std::uint64_t>(std::max<std::size_t>(1, plan.estimated_output_bytes / 8));
+  if (plan.result_layout) {
+    const py::ssize_t size = static_cast<py::ssize_t>(std::max<std::size_t>(1, plan.estimated_output_bytes / 8));
+    return allocate_result(py::dtype::of<std::uint64_t>(), 1, &size);
+  }
   const auto rows = plan.graph->program.output_kind == calmetrics_engine::graph::OutputKind::series
       ? plan.interval_observations : plan.row_count;
   return new_output(rows, plan.graph->program.roots.size(), plan.graph->program);
@@ -745,27 +862,32 @@ public:
   std::shared_ptr<n::Engine> engine;
   std::shared_ptr<BoundData> bound;
   std::shared_ptr<p::Plan> plan;
-  py::array output;
+  py::array output = py::reinterpret_borrow<py::array>(py::handle{});
   py::object offsets;
-  const void *output_address;
+  const void *output_address = nullptr;
   std::mutex mutex;
   PreparedExecution(std::shared_ptr<n::Engine> e, std::shared_ptr<BoundData> b,
                     std::shared_ptr<p::Plan> p)
       : engine(std::move(e)), bound(std::move(b)), plan(std::move(p)),
-        output(new_result_output(*plan)),
-        offsets(output_offsets(*plan->graph, bound->native)),
-        output_address(output.data()) {}
+        offsets(output_offsets(*plan->graph, bound->native)) {}
+  void ensure_output() {
+    if (!output_address) {
+      output = new_result_output(*plan);
+      output_address = output.data();
+    }
+  }
   n::ExecutionAudit execute(void *destination = nullptr) {
     if (!bound->unchanged())
       throw py::value_error(
           "PREPARED_INPUT_CHANGED: rebind resized or retyped arrays");
-    if (plan->result_layout && (output.ndim() != 1 ||
+    if (!destination) ensure_output();
+    if (output_address && plan->result_layout && (output.ndim() != 1 ||
         static_cast<std::size_t>(output.size()) != std::max<std::size_t>(1, plan->estimated_output_bytes / 8) ||
         output.data() != output_address || !output.writeable() ||
         !output.dtype().equal(py::dtype::of<std::uint64_t>()) ||
         !(output.flags() & py::array::c_style)))
       throw py::value_error("PREPARED_OUTPUT_CHANGED");
-    if (!plan->result_layout && (output.ndim() != 2 ||
+    if (output_address && !plan->result_layout && (output.ndim() != 2 ||
         output.shape(0) != static_cast<py::ssize_t>(
                                output_rows(*plan->graph, bound->native)) ||
         output.shape(1) !=
@@ -774,12 +896,12 @@ public:
         !output.dtype().equal(output_dtype(plan->graph->program)) ||
         !(output.flags() & py::array::c_style)))
       throw py::value_error("PREPARED_OUTPUT_CHANGED");
-    auto *data = output.mutable_data();
+    auto *data = destination ? destination : output.mutable_data();
     py::gil_scoped_release release;
     std::unique_lock<std::mutex> guard(mutex, std::try_to_lock);
     if (!guard.owns_lock())
       throw std::runtime_error("PREPARED_BATCH_BUSY");
-    return engine->execute(*plan, bound->native, destination ? destination : data);
+    return engine->execute(*plan, bound->native, data);
   }
   py::object run() {
     auto audit = execute();
@@ -844,13 +966,19 @@ public:
   std::shared_ptr<BoundData>
   bind(std::shared_ptr<c::CompiledGraph> graph, const py::object &inputs,
        const py::array &starts, const py::array &ends, const py::object &params,
-       const py::object &products, bool &hit) {
-    hit = cached &&
-          cached->matches(graph, inputs, starts, ends, params, products);
+       const py::object &products, bool &hit, std::vector<py::object> &owners) {
+    const auto previous = cached;
+    hit = previous &&
+          previous->matches(graph, inputs, starts, ends, params, products, owners);
     if (hit)
-      return cached;
+      return previous;
+    owners.clear();
     auto bound = std::make_shared<BoundData>(std::move(graph), inputs, starts,
                                              ends, params, products, true);
+    // Capture the validated pins, never evaluate a mapping again for its lease.
+    // Complete lease allocation before publishing an ordinary cache entry.
+    owners.reserve(bound->pins.size());
+    for (const auto &pin : bound->pins) owners.emplace_back(pin.owner);
     // Shared bundles own explicit lifetimes; do not retain them in an implicit
     // ordinary-call cache.
     if (!bound->bundle && !bound->model)
@@ -865,7 +993,21 @@ public:
                  std::optional<double> timeout, const py::object &products,
                  bool async_io) {
     bool hit = false;
-    auto bound = bind(graph, inputs, starts, ends, params, products, hit);
+    std::vector<py::object> owners;
+    auto bound = bind(graph, inputs, starts, ends, params, products, hit, owners);
+    // A caller can drop its references or a concurrent call can replace cached
+    // while native work runs. Keep this execution's pins local through result
+    // construction and exception unwinding; prepared/shared/model owners stay
+    // under their explicit lifetime contracts.
+    try {
+      bound->retain_control_owners(owners, starts, ends, params, products);
+      if (!bound->bundle && !bound->model) bound->forget_ordinary_owners();
+    } catch (...) {
+      // Failed control-lease allocation must not leave strong cache pins.
+      if (cached == bound) cached.reset();
+      throw;
+    }
+    std::optional<n::Engine::CheckedBatch> checked;
     if (plan) {
       same_graph(graph, plan);
       if (hard_stop && !plan->hard_stop)
@@ -887,9 +1029,7 @@ public:
           try {
             // Interval/product arrays may mutate in place. Validate their
             // current contents and all geometry before reusing a native plan.
-            p::validate_plan(*previous, bound->native.input_sizes(), bound->native.starts,
-                bound->native.ends, bound->native.rows, bound->native.product_ids,
-                engine->cpu(), &bound->native.inputs);
+            checked.emplace(engine->check(*previous, bound->native));
             plan = previous;
           } catch (const std::invalid_argument &) {
             // Ordinary execution replans changed geometry. Explicitly passed
@@ -902,18 +1042,19 @@ public:
     }
     const bool shared_output =
         plan->lane == "process" && plan->use_shared_memory;
-    py::array output;
+    // py::array's default constructor allocates an empty NumPy array. Keep a
+    // null handle until the actual local/shared output has been constructed.
+    py::array output = py::reinterpret_borrow<py::array>(py::handle{});
     void *data = nullptr;
     if (!shared_output) {
       output = new_result_output(*plan);
       data = output.mutable_data();
     }
-    n::ExecutionAudit audit;
-    {
+    auto audit = [&] {
       py::gil_scoped_release release;
-      audit =
-          engine->execute(*plan, bound->native, data, timeout, shared_output);
-    }
+      return checked ? engine->execute(std::move(*checked), data, timeout, shared_output, true)
+          : engine->execute(*plan, bound->native, data, timeout, shared_output, true);
+    }();
     if (shared_output) {
       if (!audit.output_owner)
         throw std::runtime_error("native shared output owner missing");
@@ -943,6 +1084,16 @@ public:
     else {
       py::gil_scoped_release release;
       plan = engine->plan(graph, bound->native);
+      if (plan->parallel_dimension == "array_row") {
+        // Prepared output still uses the documented single-lane lifetime.
+        // Automatic row threading must not reject a formerly valid prepare.
+        plan = p::make_plan(graph, engine->config(), bound->native.input_sizes(),
+            bound->native.starts, bound->native.ends, bound->native.rows,
+            bound->native.product_ids, 1, {}, false, false,
+            !bound->native.shared_inputs.empty(), &bound->native.inputs,
+            bound->native.owned_input_bytes);
+        plan->model_identity = bound->native.model_identity;
+      }
     }
     if (plan->lane != "single")
       throw py::value_error(
@@ -1019,17 +1170,23 @@ void register_native_api(py::module_ &module) {
       });
   py::class_<SharedArrayDescriptor>(module, "SharedArrayDescriptor")
       .def(py::init([](std::string name, std::vector<py::ssize_t> shape,
-                       std::string dtype, bool readonly) {
+                       std::string dtype, bool readonly, std::string order) {
              SharedArrayDescriptor d{std::move(name), std::move(shape),
-                                     std::move(dtype), readonly};
+                                     std::move(dtype), readonly, memory_order(order)};
              d.nbytes();
              return d;
            }),
            py::arg("name"), py::arg("shape"), py::arg("dtype"),
-           py::arg("readonly") = false)
+           py::arg("readonly") = false, py::arg("order") = "C")
       .def_readonly("name", &SharedArrayDescriptor::name)
       .def_readonly("dtype", &SharedArrayDescriptor::dtype)
       .def_readonly("readonly", &SharedArrayDescriptor::readonly)
+      .def_property_readonly("order", [](const SharedArrayDescriptor &d) {
+        return d.order == o::MemoryOrder::c ? "C" : "F";
+      })
+      .def_property_readonly("strides", [](const SharedArrayDescriptor &d) {
+        return py::tuple(py::cast(d.strides()));
+      })
       .def_property_readonly("shape",
                              [](const SharedArrayDescriptor &d) {
                                return py::tuple(py::cast(d.shape));
@@ -1039,7 +1196,7 @@ void register_native_api(py::module_ &module) {
       module, "SharedArrayOwner")
       .def_static("from_array", &SharedArrayOwner::from_array, py::arg("value"))
       .def_static("empty", &SharedArrayOwner::empty, py::arg("shape"),
-                  py::arg("dtype"))
+                  py::arg("dtype"), py::arg("order") = "C")
       .def_property_readonly("array", &SharedArrayOwner::array)
       .def_property_readonly("descriptor", &SharedArrayOwner::descriptor)
       .def_property_readonly("nbytes", &SharedArrayOwner::nbytes)
@@ -1076,13 +1233,14 @@ void register_native_api(py::module_ &module) {
         const bool effective_readonly = readonly || d.readonly;
         auto owner = std::make_shared<SharedArrayOwner>(
             n::SharedRegion::attach(d.name, d.nbytes(), !effective_readonly),
-            d.shape, py::dtype(d.dtype), effective_readonly);
+            d.shape, py::dtype(d.dtype), effective_readonly, d.order);
         return py::make_tuple(owner, owner->array());
       },
       py::arg("descriptor"), py::kw_only(), py::arg("readonly") = true);
   py::class_<TypedOutput>(module, "TypedGraphOutput")
       .def_readonly("kind", &TypedOutput::kind)
       .def_readonly("dtype", &TypedOutput::dtype)
+      .def_readonly("order", &TypedOutput::order)
       .def_readonly("axes", &TypedOutput::axes)
       .def_readonly("values", &TypedOutput::values)
       .def_readonly("statuses", &TypedOutput::statuses)
@@ -1109,8 +1267,9 @@ void register_native_api(py::module_ &module) {
   py::class_<PreparedExecution, std::shared_ptr<PreparedExecution>>(
       module, "PreparedGraphExecution")
       .def_readonly("plan", &PreparedExecution::plan)
-      .def_property_readonly("output", [](const PreparedExecution &p) {
+      .def_property_readonly("output", [](PreparedExecution &p) {
         if (p.plan->result_layout) throw py::value_error("typed prepared output is available through run().outputs");
+        p.ensure_output();
         return p.output;
       })
       .def_readonly("offsets", &PreparedExecution::offsets)

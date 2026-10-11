@@ -1,0 +1,33 @@
+........................................................................ [ 52%]
+..............................................................F.         [100%]
+=================================== FAILURES ===================================
+____ test_single_rhs_nonfinite_propagation_across_grouped_panels[overflow] _____
+
+fault = 'overflow'
+
+    @pytest.mark.parametrize("fault", ["nan_pivot", "overflow", "zero_times_inf"])
+    def test_single_rhs_nonfinite_propagation_across_grouped_panels(fault):
+        n = 1024
+        a, b = np.eye(n) * 2, np.ones(n)
+        maximum = np.finfo(np.float64).max
+        if fault == "nan_pivot":
+            a[64, 64] = np.nan
+        elif fault == "overflow":
+            a[64:66, 64:66] = [[maximum, maximum], [-maximum, maximum]]
+        else:
+            a[0, 0], a[1, 0] = 1, -1
+            a[0, -1] = a[1, -1] = maximum
+        expected = op.solve(a, b, simd="scalar")
+        actual = op.solve(a, b)
+        same_ieee(actual, expected)
+>       assert np.isnan(actual).any()
+E       AssertionError: assert False
+E        +  where False = <built-in method any of numpy.ndarray object at 0x111f12850>()
+E        +    where <built-in method any of numpy.ndarray object at 0x111f12850> = array([False, False, False, ..., False, False, False]).any
+E        +      where array([False, False, False, ..., False, False, False]) = <ufunc 'isnan'>(array([0.5, 0.5, 0.5, ..., 0.5, 0.5, 0.5]))
+E        +        where <ufunc 'isnan'> = np.isnan
+
+tests/test_single_solve_library.py:45: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_single_solve_library.py::test_single_rhs_nonfinite_propagation_across_grouped_panels[overflow]
+1 failed, 135 passed in 10.19s

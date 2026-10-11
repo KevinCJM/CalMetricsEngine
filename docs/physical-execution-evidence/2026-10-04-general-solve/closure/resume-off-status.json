@@ -1,0 +1,39 @@
+{
+  "status": "passed",
+  "jobs": [
+    {
+      "label": "off-related-corrected",
+      "pid": 89365,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/test_dense_elementwise_f_graph.py",
+        "tests/test_retained_solve_library.py",
+        "tests/test_guarded_lu_graph.py",
+        "tests/test_private_solve_workspace.py",
+        "tests/test_solve_pair_reuse.py",
+        "tests/test_triangular_library.py",
+        "tests/test_solve_library.py",
+        "tests/test_solve_grouped_library.py",
+        "tests/test_single_solve_library.py",
+        "--junitxml=/private/tmp/calmetrics-general-solve-public-f-20261004/off-related-corrected.xml"
+      ],
+      "exit_code": 0
+    },
+    {
+      "label": "off-native",
+      "pid": 90925,
+      "command": [
+        "/opt/homebrew/bin/ctest",
+        "--test-dir",
+        "/private/tmp/calmetrics-general-solve-public-f-20261004/off-build",
+        "--output-on-failure",
+        "--output-junit",
+        "/private/tmp/calmetrics-general-solve-public-f-20261004/off-native.xml"
+      ],
+      "exit_code": 0
+    }
+  ]
+}

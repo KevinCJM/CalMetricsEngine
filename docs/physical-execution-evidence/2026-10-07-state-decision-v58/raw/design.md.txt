@@ -1,0 +1,91 @@
+# V58: private state-decision tiling (2026-10-07)
+
+Status: candidate only. V57 remains actual source until qualification and adoption.
+
+## Source finding and intended benefit
+
+The ordinary platform-style GMM graph compiles 16 comparisons of one int64 code
+series before 16 nested state_select calls. All comparison masks remain live until
+selection. Logical integer slots alternate during selection, including reuse of
+the dead code slot. The 1,398,104-row workload therefore retains 22,369,664 mask
+bytes and one extra 11,184,832-byte integer slot. Expected reduction: 33,554,496
+bytes, not a claim of reduced peak until a fair complete-request measurement.
+
+## Physical region, not a new operator
+
+Keep original AST/DAG/opcodes, source decisions, editable steps, logical node
+IDs, error positions and Excel expansion. Identify two or more single-use
+state_select steps, each driven by a private comparison of the same rank-one
+source with a stable scalar expression, sharing one input validity mask.
+The previous step may be either true or false branch; the other branch is a
+scalar code. The initial step has two scalar codes. The last step must retain
+an independent direct root destination. Intermediate masks and selections cannot
+be roots or have consumers outside the chain. Exclude isolation, minimum-count
+policies and programs containing scopes. Unknown or unmatched shapes fall back.
+
+Constants, parameters and scalar expressions depending only on them are stable.
+Rank-one input sources are stable for one call. For owned computed sources,
+trace backing and reject any actual slot writer between production and the final
+selection. Elided region writes do not overwrite that slot. Input validity is
+retained; computed masks currently require canonical execution.
+
+Finalize rebuilds process-local region metadata. No schema/wire/API change.
+Planner and arena execution share one shape/destination guard. Existing pair
+metadata may be empty; state regions have their own runtime eligibility flag.
+The planner reserves a 4,096-byte mask tile per execution. Original compiler slots
+and public result ownership stay unchanged; actual arena sizing omits private
+region members only when the same proof authorizes execution.
+
+## Mathematical and error discipline
+
+At every original comparison node, run canonical geometry/payload preparation,
+including exact integer scalar restrictions. Do not materialize its private mask.
+At every original selection, prepare with absent intermediate payloads and run
+canonical available-payload validation, preserving branch code, validity, shape,
+rank, storage and size failures. A missing internal payload is established only
+for a proven generated comparison or preceding state step. Other operands stay
+available and are checked at their original positions.
+
+After successful preparation, process 4,096 coordinates at a time. Reuse existing
+ops::elementwise and ops::state kernels. Float comparisons retain NaN/infinity
+behavior. int64 equality remains integer arithmetic. Each tile writes directly to
+this call's independent int64 root; previous state reads refer to that same
+coordinate, so in-place state selection is exact. No branch/finance-specific
+mapping, scalar rewrite or new mathematical kernel. Check deadline/cancellation
+at every tile. Partial roots on errors remain equivalent to canonical observed
+execution; observers and deferred-error contexts use full materialization.
+
+## Native library/public-method research
+
+LLVM MLIR's producer/consumer elementwise fusion and tiling reduce intermediate
+storage. This is an architectural reference, not proof of engine performance:
+https://mlir.llvm.org/docs/Passes/#-affine-loop-fusion
+https://mlir.llvm.org/docs/Passes/#-linalg-fuse-elementwise-ops
+The measured bottleneck is temporary lifetime and storage. Reuse our existing
+canonical AOT kernels rather than importing a second compiler/runtime or
+reimplementing integer/state mathematics. Existing Eigen/Accelerate/Highway
+capabilities and Scheduler CPU budget are preserved.
+
+## Qualification plan and boundaries
+
+- Correctness: all six numeric comparisons, integer equality/inequality past
+  2^53, both operand/previous-branch orientations, NaN/infinity, strides supported
+  by the existing boundary, empty/short/exact tile lengths, dynamic intervals,
+  computed code-slot lifetime, observable-intermediate fallback and root ownership.
+- Errors: invalid branch/threshold, null/raw wrong dtype, invalid mask/shape and
+  identical first error plus result prefix against observed canonical C++.
+- Transport: pickle/finalize, single/thread/process inline/shared, two retained
+  generations; prepared remains single-lane according to the existing contract.
+- Full Python/native, related ASan/UBSan and native-libraries-OFF regressions.
+- Whole ordinary GMM request: same CPU/library budgets, inputs/preparation,
+  thirteen outputs and two retained generations. Warm NJIT; definitions/compilation
+  excluded. Alternate fresh processes; time, intercepted malloc and RSS separately.
+  Bitwise comparison with V56/V57 and existing 4.9e-5 NJIT float budget; discrete exact.
+- No concurrent performance/correctness/build workloads. No micro KB/ms rejection.
+  HMM history costs, other large matrices and allocation/copy audit remain open.
+- Actual source adoption only after tests, fair benefit and self-review; then rebuild
+  and verify source/wheel/worker identity and actual-route results. No Git delivery.
+
+## D revision after self-review
+
+C passed 16,226 Python cases and the related sanitizer/library-OFF suites, but self-review still rejected it: geometry-only preparation made a real null source/validity payload look unavailable and could reorder a later domain error. A native double-fault probe reproduced NULL_INPUT versus INVALID_STATE_CODE. D restores full comparison preparation and exempts only proven internal descriptors during state preparation. Ten native fault cases compare canonical first error and untouched result prefix. All D quality and whole-workload performance must be requalified; C healthy performance is diagnostic evidence only.

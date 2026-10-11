@@ -1,6 +1,6 @@
 # Excel 公式复现与核验契约
 
-状态：当前 146 个算子、7 类作用域的 Microsoft Excel 全量夹具验收及独立符号预算已完成；平台下载入口迁移尚未完成。需求确认日期：2026-09-24。当前接口、适用域和证据见第 10 节。
+状态：当前目录为 190 个算子。原 146 个算子、7 类作用域的 Microsoft Excel 验收及独立符号预算记录保留在第 10 节；新增 14 个矩阵与数组算子的实现、真实重算及最终构建等价核对见[矩阵与数组基础验收](matrix-array-foundation.md)，新增 25 个概率模型算子的公式、数值域和验收边界见[情景识别数学基础](latent-model-operators.md)。新 affine_contract/expm1 的公式、上界与待重算状态见[投影原语](mc-projection-primitives.md)，不能沿用原 185 项的历史 PASS。新增按轴原语 188–190 的公式、空根错误与预算范围见[按轴原语设计](mc-axis-primitives.md)。平台下载入口迁移尚未完成。需求确认日期：2026-09-24。
 最初盘点时 CalMetricsEngine 尚无 Excel 后端，FundInvestmentResearchPlatform 已有 Python 实现。下文保留统一契约与迁移目标；当前引擎 API 及具体限制见[导出使用说明](excel-export.md)，不能把总体目标全部当作已验收能力。
 
 设计、开发与审核前须阅读 [Excel 公式生成的数学与编程纪律](excel-generation-rules.md)。本文维护功能范围、预算口径、产物状态与迁移阶段；生成和核验的实现纪律由该规范维护，不另立一套数学契约。
@@ -193,6 +193,8 @@ Excel 对数值精度和可表示范围的限制需要单独处理。int64 标�
 数值精度、重算与迭代行为见 [Excel 重算、迭代与精度](https://support.microsoft.com/en-us/excel/change-formula-recalculation-iteration-or-precision-in-excel)。这些限制与本项目 200 万单元格预算必须分别检查；不得通过“以显示精度为准”改变原数值契约来制造一致。
 
 ## 10. 原生实现与验收
+
+最新复验（2026-09-29）：当前 185 个算子的 469 组、3,056 个结果以及两项输入编辑，已分别在 Microsoft Excel 16.89.1 和 LibreOffice 25.8.4.2 实际重算通过。构建身份、工作簿哈希与适用边界见[全部计算算子复验](operator-acceptance.md)；下文保留各阶段的历史范围与结果。
 
 ### 实现设计
 

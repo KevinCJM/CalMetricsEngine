@@ -1,0 +1,511 @@
+--- a/cpp/operators/covariance_accelerate.cpp
++++ b/cpp/operators/covariance_accelerate.cpp
+@@ -55,8 +55,8 @@
+     if (n < 32 || d < 256 || n > 1000000 || d > 4096) return false;
+     // Bounded 32 MiB panel for medium squares; large inputs retain 512 rows.
+     if (n <= 2048 && d >= 256 && d <= 2048) block = static_cast<int>(n);
+-    // Paired C roots already retain two matrices; halve the medium panel.
+-    // F keeps its complete panel for the canonical centered fallback.
++    // Paired ordered-fold roots already retain two matrices; halve the medium panel.
++    // Positive F keeps its complete panel for the canonical centered fallback.
+     if (correlation_consumer && !layout) block = std::min(block, 1024);
+     const auto leading = input.stride[layout ? 1 : 0];
+     // Lower triangle carries transient error bounds; only a bounded panel and
+@@ -81,13 +81,23 @@
+         const double eta = gamma(static_cast<double>(count) + 8.0);
+         std::fill_n(norm, d, 0.0);
+         if (!layout) {
+-            const Eigen::Map<const Row> mu(means, d);
+-            for (std::size_t i = 0; i < count; ++i) {
+-                Eigen::Map<Row> target(panel + i * d, d);
+-                target = Eigen::Map<const Row>(x + static_cast<std::ptrdiff_t>(first + i) * leading, d) - mu;
+-                Eigen::Map<Row>(norm, d) += target.square();
+-                // Full ascending observation fold is the canonical C diagonal.
+-                Eigen::Map<Row>(total, d) += target.square();
++            const std::size_t width = input.stride[1] == 1 ? d : 8;
++            for (std::size_t j = 0; j < d; j += width) {
++                const auto columns = std::min(width, d - j);
++                const Eigen::Map<const Row> mu(means + j, columns);
++                for (std::size_t i = 0; i < count; ++i) {
++                    Eigen::Map<Row> target(panel + i * d + j, columns);
++                    const auto *row = x + static_cast<std::ptrdiff_t>(first + i) * leading +
++                                        static_cast<std::ptrdiff_t>(j) * input.stride[1];
++                    if (input.stride[1] == 1)
++                        target = Eigen::Map<const Row>(row, columns) - mu;
++                    else
++                        target = Eigen::Map<const Row, Eigen::Unaligned, Eigen::InnerStride<>>(
++                            row, columns, Eigen::InnerStride<>(input.stride[1])) - mu;
++                    Eigen::Map<Row>(norm + j, columns) += target.square();
++                    // Each diagonal keeps its full ascending observation fold.
++                    Eigen::Map<Row>(total + j, columns) += target.square();
++                }
+             }
+         } else {
+             for (std::size_t j = 0; j < d; ++j) {
+@@ -236,18 +246,23 @@
+         const bool c = input.stride[1] == 1 &&
+             (input.stride[0] >= columns || input.stride[0] <= -columns);
+         const bool f = input.stride[0] == 1 && input.stride[1] >= static_cast<std::ptrdiff_t>(n);
+-        if (!c && !f) { discard(); return false; }
+-        const int layout = c ? 0 : 1;
+-        const auto leading = input.stride[layout ? 1 : 0];
++        const bool reverse_f = input.stride[0] == -1 && input.stride[1] >= static_cast<std::ptrdiff_t>(n);
++        if (!c && !f && !reverse_f) { discard(); return false; }
++        // Negative F uses the canonical scalar observation fold, like C.
++        const int layout = f ? 1 : 0;
++        const bool column_scan = f || reverse_f;
++        const auto leading = input.stride[column_scan ? 1 : 0];
++        const auto inner_stride = input.stride[column_scan ? 0 : 1];
+         if (leading > INT_MAX || leading < -INT_MAX) { discard(); return false; }
+         const auto *data = static_cast<const double *>(input.data);
+         // Correlation normalizes its error bound. With n <= 1e6 this
+         // exponent cap keeps centered squares, norm folds and products finite.
+         const double source_limit = correlation ? 0x1p400 : 1e4;
+         bool all_zero = true, positive_zero = true;
+-        for (std::size_t outer = 0; outer < (layout ? d : n); ++outer)
+-            for (std::size_t inner = 0; inner < (layout ? n : d); ++inner) {
+-                const double value = data[static_cast<std::ptrdiff_t>(outer) * leading + static_cast<std::ptrdiff_t>(inner)];
++        for (std::size_t outer = 0; outer < (column_scan ? d : n); ++outer)
++            for (std::size_t inner = 0; inner < (column_scan ? n : d); ++inner) {
++                const double value = data[static_cast<std::ptrdiff_t>(outer) * leading +
++                                          static_cast<std::ptrdiff_t>(inner) * inner_stride];
+                 if (!std::isfinite(value) || std::abs(value) > source_limit) { discard(); return false; }
+                 all_zero = all_zero && value == 0.0;
+                 positive_zero = positive_zero && value == 0.0 && !std::signbit(value);
+--- a/cpp/operators/matrix_backend.cpp
++++ b/cpp/operators/matrix_backend.cpp
+@@ -73,26 +73,36 @@
+     covariance_write_tail<Width, s3>(out + (j + 3) * d + k, a3);
+ }
+ EIGEN_ALWAYS_INLINE double covariance_ordered_sum(const double* x, Eigen::Index n,
+-    Eigen::Index j, Eigen::Index k, std::ptrdiff_t rs, const double* means) {
++    Eigen::Index j, Eigen::Index k, std::ptrdiff_t rs, const double* means,
++    std::ptrdiff_t cs = 1) {
+     const double left = means[j], right = means[k];
+     double total = 0.0;
+     for (Eigen::Index i = 0; i < n; ++i) {
+         const auto* row = x + i * rs;
+-        total += (row[j] - left) * (row[k] - right);
++        total += (row[j * cs] - left) * (row[k * cs] - right);
+     }
+     return total;
+ }
++template<int ColumnStride = 1>
+ EIGEN_ALWAYS_INLINE void covariance_c_means_only(const Value &input, double *target) {
+     const auto *x = static_cast<const double *>(input.data);
+     const auto n = static_cast<Eigen::Index>(input.shape.dim[0]);
+     const auto d = static_cast<Eigen::Index>(input.shape.dim[1]);
+     const auto rs = input.stride[0];
+     using Row = Eigen::Array<double, 1, Eigen::Dynamic>;
+-    Eigen::Map<Row> means(target, d);
+-    means.setZero();
+-    for (Eigen::Index i = 0; i < n; ++i) {
+-        Eigen::Map<const Row> row(x + i * rs, d);
+-        means += (row - means) / static_cast<double>(i + 1);
++    using Read = Eigen::Map<const Row, Eigen::Unaligned, Eigen::InnerStride<ColumnStride>>;
++    // Descending F columns share a small working set; each feature still folds
++    // logical observations in the original order. Unit-stride C keeps full rows.
++    const Eigen::Index width = ColumnStride == 1 ? d : 8;
++    for (Eigen::Index first = 0; first < d; first += width) {
++        const auto columns = std::min(width, d - first);
++        Eigen::Map<Row> means(target + first, columns);
++        means.setZero();
++        for (Eigen::Index i = 0; i < n; ++i) {
++            Read row(x + i * rs + first * input.stride[1], columns,
++                     Eigen::InnerStride<ColumnStride>(input.stride[1]));
++            means += (row - means) / static_cast<double>(i + 1);
++        }
+     }
+ }
+ EIGEN_DONT_INLINE void covariance_c_means(const Value &input, double *out,
+@@ -597,6 +607,8 @@
+ void covariance_library_means(const Value &input, double *means) {
+     if (input.stride[1] == 1)
+         covariance_c_means_only(input, means);
++    else if (input.stride[0] != 1)
++        covariance_c_means_only<Eigen::Dynamic>(input, means);
+     else
+         covariance_f_detail::gather_means<8>(static_cast<const double *>(input.data),
+             input.shape.dim[0], input.shape.dim[1], input.stride[1], means);
+@@ -618,6 +630,8 @@
+     const auto n = input.shape.dim[0];
+     if (input.stride[1] == 1)
+         return covariance_ordered_sum(x, n, j, k, input.stride[0], means);
++    if (input.stride[0] != 1)
++        return covariance_ordered_sum(x, n, j, k, input.stride[0], means, input.stride[1]);
+     return covariance_f_detail::original_pair(x + j * input.stride[1],
+         x + k * input.stride[1], n, means[j], means[k]);
+ }
+--- a/docs/execution-guide.md
++++ b/docs/execution-guide.md
+@@ -58,7 +58,7 @@
+ 
+ 直接算子和普通 canonical 路径的单参数矩阵 `covariance/correlation` 复用独立结果的最后一行暂存均值和标准差，数值 scratch 为 0；输入、旧结果均不写入。macOS 15+ arm64、至少 32 行时，行方向连续且至少 8 列使用 Eigen Array 的 4×4 特征块和 128 行时间块，各结果格沿原顺序继续累加；均值仍按 Welford 顺序更新，尾部单独完成。列方向连续且至少 8 列、有限且在原溢出界限内、列 stride 不小于行数时，使用固定 8 列 Eigen Array 做 Welford 均值扫描，并将 2×2 列对的居中乘积合并计算，共享读取、保持原 Eigen 两包归约分组；不足块的列保留完整内积。其他列连续布局保持原逐列均值与 Eigen Map 内积。极值溢出风险的列归约、小样本、其他 strides/平台、显式 scalar 或禁用 Eigen 时使用原生标量路径。`eigen_covariance_calls` 记录成功完成的库协方差内核次数，相关矩阵也计一次，贯通子作用域和 worker。该字段不是 CPU 指令数；上三角完成后才归一化、镜像，样本除数、零方差错误和独立结果契约不变。Planner 的保守图容量、框架分配及 RSS 仍须单独计量。
+ 
+-独立 typed float64 矩阵根 `covariance(X)` 或 `correlation(X)` 在相同平台、Eigen/Accelerate 均启用、`32≤T≤1,000,000`、`256≤D≤4096` 时，可采用守卫 Accelerate DSYRK。支持单根及下文受限的同源双输出；限定无内部消费者、非 isolate、无子作用域和观察器的图。逐次检查输入布局、有限值与受控中心化尺度、标准舍入环境，不按地址缓存数值准入。C方向要求列步长为1、行步长绝对值至少D，支持倒序及带间隔的时间行；F方向仍要求正向leading dimension，准入leading步长限制在±INT_MAX。倒序行按逻辑顺序做均值、对角和重放，只有本来需要的中心化面板交给BLAS，不先复制整块输入；进程传输原有的非连续输入打包仍单独计量，不能称整链零复制。共用 canonical 均值和局部重放接口，以确定性舍入模型检查原 1e-12 容差、对角位模式及正负/零分类；不确定格局部重放，过密或尺度不合格时完整原生重放。模型假设及适用构建见[设计与验收](physical-execution-evidence/2026-10-01-covariance-syrk-integration/README.md)，不能外推成所有厂商库版本的形式化保证。倒序C方向扩展及完整正负证据见[倒序行验收](physical-execution-evidence/2026-10-03-covariance-reverse/README.md)。
++独立 typed float64 矩阵根 `covariance(X)` 或 `correlation(X)` 在相同平台、Eigen/Accelerate 均启用、`32≤T≤1,000,000`、`256≤D≤4096` 时，可采用守卫 Accelerate DSYRK。支持单根及下文受限的同源双输出；限定无内部消费者、非 isolate、无子作用域和观察器的图。逐次检查输入布局、有限值与受控中心化尺度、标准舍入环境，不按地址缓存数值准入。C方向要求列步长为1、行步长绝对值至少D，支持倒序及带间隔的时间行；F方向允许时间步长为+1或−1、特征步长至少T，准入leading步长限制在±INT_MAX。负向F沿原scalar顺序计算，不能改用正向F的归约树。倒序行按逻辑顺序做均值、对角和重放，只有本来需要的中心化面板交给BLAS，不先复制整块输入；进程传输原有的非连续输入打包仍单独计量，不能称整链零复制。共用 canonical 均值和局部重放接口，以确定性舍入模型检查原 1e-12 容差、对角位模式及正负/零分类；不确定格局部重放，过密或尺度不合格时完整原生重放。模型假设及适用构建见[设计与验收](physical-execution-evidence/2026-10-01-covariance-syrk-integration/README.md)，不能外推成所有厂商库版本的形式化保证。倒序C方向扩展见[倒序行验收](physical-execution-evidence/2026-10-03-covariance-reverse/README.md)，后续负向F扩展见[负向F验收](physical-execution-evidence/2026-10-03-covariance-reverse-f/README.md)。现有IPC将反向连续列打包为正向F，worker按该实际布局执行；本地负向F与worker的精确对角线分别对照各自canonical路径，完整结果保持原容差。
+ 
+ 相关矩阵使用独立的归一化误差检查：保留 canonical 对角，按原标准差乘积归一化后再检查原 1e-12 容差，不能用协方差的小绝对误差代替相关系数误差。协方差仍保留源幅度≤1e4及中心值幅度8的提前回退；相关矩阵允许有限源幅度≤2^400，保留非零中心值≥2^-400、标准舍入及归一化误差/符号检查。这些范围结合行数上限约束平方和、范数乘积与分母的浮点指数，不是公共输入限制；超界或误差不合格仍走canonical。[范围推导与验收](physical-execution-evidence/2026-10-03-correlation-range/README.md)。复用已不再使用的块范数向量保存标准差，不新增向量；局部重放后沿唯一原规则归一化与镜像，不强设对角为1或截断到[-1,1]。零方差/非有限分母拒绝候选并执行原错误路径，全零相关矩阵不能使用下文的协方差零成功特例。原审计字段统计两种算子共享的协方差计算阶段，不新增IPC字段。
+ 
+--- a/docs/physical-execution-optimization.md
++++ b/docs/physical-execution-optimization.md
+@@ -1,4 +1,14 @@
+ # 物理执行优化（性能验收未闭环）
++
++## 2026-10-03 负向F接入守卫库并改善读取局部性
++
++两项生产文件复用现有有序均值/重放、Eigen strided Map和DSYRK；负F按8特征分块写已有面板，每个特征的逻辑时间顺序、原精度/错误/所有权不变，未新增完整输入副本或缓冲。
++
++第一轮4096双输出原scalar **34.293s→1.272s**；第二轮单独配对测得初版库 **922.285→最终687.412ms**，NJIT **756.582ms**，分块省235ms，较NI快约9%。两批各12类6轮，样本不混用。1024/2048若干情况略慢NI；scaled和dense replay仍大幅落后，初次接入对dense新增约67.5ms代价未隐藏。几ms增加只记诊断，不能据此宣称全面验收。
++
++最终12个fresh内存子进程；4096最终cold **278.103MiB**、NI **390.000MiB**，warm **534.104/646.001MiB**；完整分配追踪限制仍保留。此内存的old是初版库，不是原scalar。
++
++Python **10969通过**；专项646，原生/ASan/UBSan/三库OFF原生各9/9，OFF专项447/199跳过。185夹具与469例/3056值历史Excel、77源码及包身份通过；无新Excel重算。初次测试的18处进程预期错误已按既有负F→正F传输事实修正，精度未放宽。[全部设计、正负性能、原失败及自审核](physical-execution-evidence/2026-10-03-covariance-reverse-f/README.md)。仅本地修改，未提交推送，全算子目标未关闭。
+ 
+ ## 2026-10-03 倒序时间行接入现有协方差库：保留重大收益与回退成本
+ 
+--- a/docs/physical-layout-design.md
++++ b/docs/physical-layout-design.md
+@@ -328,3 +328,12 @@
+ 独立 covariance/correlation 及第20节受限双根的库准入接受列步长+1、行步长≤−D的输入，包括带间隔行；正向路径和F准入不变，leading步长限制为±INT_MAX。源地址按有符号逻辑行索引计算，沿声明顺序做Welford均值、canonical对角及单元重放，不将倒序输入改成正序语义。DSYRK仍只消费已有的连续中心化面板；无额外完整输入副本或新工作区。
+ 
+ 根资格、数值/符号/零误差证书、失败重放、面板容量、Planner预算、CPU策略、输出C/F所有权及IPC均沿用原契约。观察器/内部消费者仍采用canonical，非连续进程输入仍可能按既有协议打包；输入绑定无复制不代表整个请求无复制。详见[本轮设计与验收](physical-execution-evidence/2026-10-03-covariance-reverse/README.md)。
++
++
++## 22. 负向 F 协方差复用既有有序路径（2026-10-03）
++
++在第21节基础上，守卫库根允许时间stride=−1、特征stride≥T的F方向视图，含列间padding。原canonical对这类输入采用逐逻辑时间Welford均值与顺序产品累加；因此复用C方向的有序均值、对角与单元重放，不使用正向F归约树。均值与重放共享原helper，仅扩展特征stride；Eigen带stride的Map按8特征小块、逐逻辑行直接中心化到既有连续面板；均值同步采用同一特征分块以改善负F读取局部性，每个特征的时间归约顺序不变。C保持整行、正F保持原树。面板、向量、DSYRK和双输出误差证书不变，没有新增完整输入副本或另一套数学实现。
++
++源预检沿物理列扫描，两个偏移项均为ptrdiff_t；有界维度与±INT_MAX leading检查维持安全索引。正向F保留其原树和完整中心化重放，负向F不进入该重放捷径。库拒绝、非有限、内部消费者、隔离、所有权、CPU恢复与预算沿既有契约。
++
++IPC规则未改：既有反向列打包产生正向F，worker数值精确对照该实际布局；本地保留负stride，精确对照其scalar顺序。两者完整结果均执行原1e-12及符号/零约束；不能将布局打包后的尾差误判为此次算法变化，也不能据此放宽原容差。详见[本轮实际验收](physical-execution-evidence/2026-10-03-covariance-reverse-f/README.md)。
+--- a/tests/result_native_tests.cpp
++++ b/tests/result_native_tests.cpp
+@@ -721,46 +721,50 @@
+ void covariance_descending_rows_contracts() {
+   constexpr std::size_t rows=65, cols=257, pitch=2*(cols+3), elements=cols*cols;
+   constexpr std::uint64_t sentinel=0x5a7f31be19d04c62ULL;
+-  std::vector<double> source(rows*pitch+2, -91.0), expected(2*elements);
+-  o::Value input; input.data=source.data()+1+(rows-1)*pitch;
+-  input.shape=o::matrix_shape(rows,cols);
+-  input.stride={-static_cast<std::ptrdiff_t>(pitch),1,1};
+-  std::uint64_t random=90317;
+-  for (std::size_t i=0;i<rows*cols;++i) {
+-    random=random*6364136223846793005ULL+1442695040888963407ULL;
+-    source[1+(rows-1)*pitch+input.offset(i)]=double(random>>40)*0x1p-24-.5;
+-  }
+-  const auto before=source;
+-  for (std::size_t root=0;root<2;++root) {
+-    auto prepared=o::prepare(o::lookup(root ? "correlation" : "covariance"),&input,1);
+-    o::Output out; out.kind=prepared.output_kind; out.shape=prepared.output_shape;
+-    out.data=expected.data()+root*elements; o::Workspace work; o::Audit audit;
+-    o::execute(prepared,out,work,o::Isa::automatic,audit);
+-  }
+-  for (auto order : {g::OutputOrder::c,g::OutputOrder::f}) {
+-    auto compiled=c::compile({"covariance(x)","correlation(x)"},
+-        std::vector<t::Variable>{{"x",t::ValueType::matrix()}},false,{}, {},0,100000000,true,{},order);
+-    auto program=c::decode_program(c::encode_program(compiled->program));
+-    const std::int64_t start=0,end=rows;
+-    const auto layout=g::result_layout(program,{input},&start,&end,1);
+-    std::vector<std::uint64_t> storage((layout.bytes()+7)/8+2,sentinel);
+-    const auto audit=g::execute(program,{input},nullptr,0,&start,&end,1,storage.data()+1,2,&layout);
+-    if (o::covariance_accelerate_reserve_doubles(input.shape))
+-      check(audit.accelerate_covariance_calls==1,"descending rows bypassed guarded library");
++  for (bool reverse_f : {false,true}) {
++    std::vector<double> source((reverse_f ? cols*(rows+3) : rows*pitch)+2, -91.0), expected(2*elements);
++    auto *data=source.data()+1+(rows-1)*(reverse_f ? 1 : pitch);
++    o::Value input; input.data=data;
++    input.shape=o::matrix_shape(rows,cols);
++    input.stride=reverse_f ? std::array<std::ptrdiff_t,3>{-1,rows+3,1}
++                            : std::array<std::ptrdiff_t,3>{-static_cast<std::ptrdiff_t>(pitch),1,1};
++    std::uint64_t random=90317;
++    for (std::size_t i=0;i<rows*cols;++i) {
++      random=random*6364136223846793005ULL+1442695040888963407ULL;
++      data[input.offset(i)]=double(random>>40)*0x1p-24-.5;
++    }
++    const auto before=source;
+     for (std::size_t root=0;root<2;++root) {
+-      const auto *actual=reinterpret_cast<const double *>(
+-          reinterpret_cast<const std::uint8_t *>(storage.data()+1)+layout.slots[root].byte_offset);
+-      for (std::size_t i=0;i<elements;++i) {
+-        const auto value=actual[i], reference=expected[root*elements+i];
+-        check(std::abs(value-reference)<=1e-12+1e-12*std::abs(reference) &&
+-              std::signbit(value)==std::signbit(reference) && (value==0)==(reference==0),
+-              "descending rows changed covariance/correlation contract");
+-        if (i/cols==i%cols)
+-          check(std::memcmp(&value,&reference,sizeof(value))==0,"descending rows changed diagonal");
++      auto prepared=o::prepare(o::lookup(root ? "correlation" : "covariance"),&input,1);
++      o::Output out; out.kind=prepared.output_kind; out.shape=prepared.output_shape;
++      out.data=expected.data()+root*elements; o::Workspace work; o::Audit audit;
++      o::execute(prepared,out,work,o::Isa::automatic,audit);
++    }
++    for (auto order : {g::OutputOrder::c,g::OutputOrder::f}) {
++      auto compiled=c::compile({"covariance(x)","correlation(x)"},
++          std::vector<t::Variable>{{"x",t::ValueType::matrix()}},false,{}, {},0,100000000,true,{},order);
++      auto program=c::decode_program(c::encode_program(compiled->program));
++      const std::int64_t start=0,end=rows;
++      const auto layout=g::result_layout(program,{input},&start,&end,1);
++      std::vector<std::uint64_t> storage((layout.bytes()+7)/8+2,sentinel);
++      const auto audit=g::execute(program,{input},nullptr,0,&start,&end,1,storage.data()+1,2,&layout);
++      if (o::covariance_accelerate_reserve_doubles(input.shape))
++        check(audit.accelerate_covariance_calls==1,"descending rows bypassed guarded library");
++      for (std::size_t root=0;root<2;++root) {
++        const auto *actual=reinterpret_cast<const double *>(
++            reinterpret_cast<const std::uint8_t *>(storage.data()+1)+layout.slots[root].byte_offset);
++        for (std::size_t i=0;i<elements;++i) {
++          const auto value=actual[i], reference=expected[root*elements+i];
++          check(std::abs(value-reference)<=1e-12+1e-12*std::abs(reference) &&
++                std::signbit(value)==std::signbit(reference) && (value==0)==(reference==0),
++                "descending rows changed covariance/correlation contract");
++          if (i/cols==i%cols)
++            check(std::memcmp(&value,&reference,sizeof(value))==0,"descending rows changed diagonal");
++        }
+       }
+-    }
+-    check(source==before && storage.front()==sentinel && storage.back()==sentinel,
+-          "descending rows changed source or output canary");
++      check(source==before && storage.front()==sentinel && storage.back()==sentinel,
++            "descending rows changed source or output canary");
++    }
+   }
+ }
+ 
+--- a/tests/test_correlation_accelerate.py
++++ b/tests/test_correlation_accelerate.py
+@@ -23,13 +23,16 @@
+                              np.full(rows, len(x), np.int64))
+ 
+ 
+-@pytest.mark.parametrize("layout", ["c", "f", "padded_c", "padded_f", "reverse_c"])
++@pytest.mark.parametrize("layout", ["c", "f", "padded_c", "padded_f", "reverse_c", "reverse_f"])
+ @pytest.mark.parametrize("order", ["C", "F", "auto"])
+ @pytest.mark.parametrize("lane", ["single", "thread", "process_inline", "process_shared"])
+ def test_correlation_complete_result_transport_layout_and_budget(layout, order, lane):
+     x = inputs(layout, n=129, d=257)
+     before = x.view(np.uint64).copy()
+-    transported = np.array(x, order="C") if lane.startswith("process") and layout == "padded_f" else x
++    # Match the existing worker packing; local descending F stays ordered.
++    transported = x
++    if lane.startswith("process") and layout in {"padded_f", "reverse_f"}:
++        transported = np.array(x, order="F" if layout == "reverse_f" else "C")
+     expected = op.correlation(transported)
+     compiled = pickle.loads(pickle.dumps(graph(order)))
+     with AdaptiveScheduler(cpu_budget=2, config=settings(lane)) as scheduler:
+@@ -97,9 +100,9 @@
+         np.testing.assert_allclose(actual, np.corrcoef(x.T), rtol=1e-12, atol=1e-12)
+     if ACTIVE and pattern in {"small", "heterogeneous", "signed", "orthogonal", "scaled", "large_scale", "high_scale", "wide_scale", "source_edge"}:
+         assert counts(result, "accelerate_covariance_calls") == 1
+-    if ACTIVE and layout == "c" and pattern == "reverse":
++    if ACTIVE and pattern == "reverse":
+         assert counts(result, "accelerate_covariance_calls") == 1
+-    if pattern in {"source_reject", "tiny", "nan", "inf"} or (pattern == "reverse" and (layout == "f" or not ACTIVE)):
++    if pattern in {"source_reject", "tiny", "nan", "inf"} or (pattern == "reverse" and not ACTIVE):
+         np.testing.assert_array_equal(actual.view(np.uint64), expected.view(np.uint64))
+     assert counts(result, "covariance_zero_calls") == 0
+ 
+@@ -121,7 +124,7 @@
+         np.testing.assert_array_equal(actual.view(np.uint64), op.covariance(x).view(np.uint64))
+ 
+ 
+-@pytest.mark.parametrize("layout", ["c", "f", "reverse_c"])
++@pytest.mark.parametrize("layout", ["c", "f", "reverse_c", "reverse_f"])
+ @pytest.mark.parametrize("pattern", ["all_zero", "signed_zero", "constant_column", "large_constant_column"])
+ def test_invalid_variance_retains_error_and_prepared_recovery(layout, pattern):
+     x = inputs(layout, n=65, d=256)
+--- a/tests/test_covariance_accelerate.py
++++ b/tests/test_covariance_accelerate.py
+@@ -25,7 +25,7 @@
+ 
+ def inputs(layout="c", n=513, d=257):
+     x = np.random.default_rng(91021).normal(size=(n, d))
+-    if layout == "f":
++    if layout in {"f", "reverse_f"}:
+         x = np.array(x, order="F")
+     elif layout == "padded_c":
+         owner = np.full((n, d + 3), np.nan)
+@@ -35,7 +35,7 @@
+         owner = np.full((n + 3, d), np.nan, order="F")
+         owner[:n] = x
+         x = owner[:n]
+-    if layout == "reverse_c":
++    if layout in {"reverse_c", "reverse_f"}:
+         x = x[::-1]
+     x.flags.writeable = False
+     return x
+@@ -58,16 +58,18 @@
+ 
+ 
+ @active
+-@pytest.mark.parametrize("layout", ["c", "f", "padded_c", "padded_f", "reverse_c"])
++@pytest.mark.parametrize("layout", ["c", "f", "padded_c", "padded_f", "reverse_c", "reverse_f"])
+ @pytest.mark.parametrize("order", ["C", "F", "auto"])
+ @pytest.mark.parametrize("lane", ["single", "thread", "process_inline", "process_shared"])
+ def test_library_root_transport_and_owned_results(layout, order, lane):
+     x = inputs(layout)
+     before = x.view(np.uint64).copy()
+     expected = op.covariance(x)
+-    # Existing process transport packs non-dense padded F into logical C.
+-    # Keep exact diagonal parity to the actual canonical worker input too.
+-    transported = op.covariance(np.array(x, order="C")) if lane.startswith("process") and layout == "padded_f" else expected
++    # Existing IPC packs padded F to C and descending F to positive F.
++    # Keep exact diagonal parity to the actual canonical worker input.
++    transported = expected
++    if lane.startswith("process") and layout in {"padded_f", "reverse_f"}:
++        transported = op.covariance(np.array(x, order="F" if layout == "reverse_f" else "C"))
+     graph = GraphCompiler({"x": MATRIX}).compile("covariance(x)", output_order=order)
+     starts, ends = np.zeros(2, np.int64), np.full(2, len(x), np.int64)
+     with AdaptiveScheduler(cpu_budget=2, config=settings(lane)) as scheduler:
+@@ -97,7 +99,7 @@
+ 
+ 
+ @active
+-@pytest.mark.parametrize("layout", ["c", "f"])
++@pytest.mark.parametrize("layout", ["c", "f", "reverse_f"])
+ @pytest.mark.parametrize("pattern", ["constant", "sparse", "dense", "scaled", "tiny", "late_tiny"])
+ def test_replay_preserves_classes_and_accounts_for_rejected_work(layout, pattern):
+     n = 1024 if pattern == "sparse" else 1041
+@@ -143,7 +145,7 @@
+         assert result.audit["native_chunks"][0]["operator_workspace_capacity_bytes"] == 0
+ 
+ 
+-@pytest.mark.parametrize("layout", ["c", "f"])
++@pytest.mark.parametrize("layout", ["c", "f", "reverse_f"])
+ @pytest.mark.parametrize("fault", [np.nan, np.inf, 1e8])
+ def test_unadmitted_payload_uses_canonical_without_attempt(layout, fault):
+     x = inputs(layout)
+@@ -177,7 +179,7 @@
+ 
+ 
+ @active
+-@pytest.mark.parametrize("layout,d", [("c", 257), ("f", 257), ("f", 256), ("padded_f", 256), ("reverse_c", 257)])
++@pytest.mark.parametrize("layout,d", [("c", 257), ("f", 257), ("f", 256), ("padded_f", 256), ("reverse_c", 257), ("reverse_f", 257), ("reverse_f", 256)])
+ def test_prepared_rereads_payload_releases_rejected_panel_and_preserves_snapshot(layout, d):
+     x = inputs(layout, d=d)
+     graph = GraphCompiler({"x": MATRIX}).compile("covariance(x)")
+@@ -266,7 +268,7 @@
+     graph = GraphCompiler({"x": MATRIX}).compile("covariance(x)")
+     with AdaptiveScheduler(cpu_budget=1) as scheduler:
+         result = scheduler.execute(graph, {"x": x}, np.zeros(1, np.int64), np.array([len(x)], np.int64))
+-    admitted = ACTIVE and layout == "c" and case == "reverse"
++    admitted = ACTIVE and case == "reverse"
+     assert counts(result, "accelerate_covariance_attempts") == int(admitted)
+     compare(result.outputs[0].values[0], expected)
+     if not admitted:
+@@ -274,7 +276,7 @@
+ 
+ 
+ @active
+-@pytest.mark.parametrize("layout", ["c", "f", "reverse_c"])
++@pytest.mark.parametrize("layout", ["c", "f", "reverse_c", "reverse_f"])
+ @pytest.mark.parametrize("policy", [0, 1])  # SDK thread_api.h: MULTI=0, SINGLE=1.
+ @pytest.mark.parametrize("replay", [False, True])
+ def test_calling_thread_policy_is_restored_after_acceptance_and_replay(layout, policy, replay):
+@@ -407,7 +409,7 @@
+ 
+ 
+ @active
+-@pytest.mark.parametrize("layout", ["c", "f"])
++@pytest.mark.parametrize("layout", ["c", "f", "reverse_f"])
+ @pytest.mark.parametrize("order", ["C", "F"])
+ @pytest.mark.parametrize("lane", ["single", "thread", "process_inline", "process_shared"])
+ @pytest.mark.parametrize("signed", [False, True])
+@@ -437,7 +439,7 @@
+ 
+ 
+ @active
+-@pytest.mark.parametrize("layout", ["c", "f"])
++@pytest.mark.parametrize("layout", ["c", "f", "reverse_f"])
+ def test_prepared_zero_rereads_sign_and_releases_earlier_panel(layout):
+     x = inputs(layout)
+     graph = GraphCompiler({"x": MATRIX}).compile("covariance(x)")
+@@ -463,11 +465,17 @@
+ @pytest.mark.parametrize("order", ["C", "F"])
+ @pytest.mark.parametrize("expression", ["covariance(x)", "correlation(x)", ["covariance(x)", "correlation(x)"]])
+ @pytest.mark.parametrize("pattern", ["normal", "tiny", "scaled", "nan", "constant", "internal"])
+-def test_descending_padded_rows_keep_intervals_errors_and_snapshots(order, expression, pattern):
++@pytest.mark.parametrize("layout", ["c", "f"])
++def test_descending_padded_rows_keep_intervals_errors_and_snapshots(order, expression, pattern, layout):
+     n, d = 133, 257
+-    owner = np.full((2*n, d+3), np.nan)
+-    owner[::2, :d] = inputs(n=n, d=d)
+-    x = owner[-2::-2, :d]
++    if layout == "c":
++        owner = np.full((2*n, d+3), np.nan)
++        owner[::2, :d] = inputs(n=n, d=d)
++        x = owner[-2::-2, :d]
++    else:
++        owner = np.full((n+3, d), np.nan, order="F")
++        owner[:n] = inputs(n=n, d=d)
++        x = owner[n-1::-1]
+     if pattern == "tiny":
+         x *= 2.0**-200
+     elif pattern == "scaled":
+--- a/tests/test_covcorr_accelerate.py
++++ b/tests/test_covcorr_accelerate.py
+@@ -23,13 +23,16 @@
+                              np.full(rows, len(x), np.int64))
+ 
+ 
+-@pytest.mark.parametrize("layout", ["c", "f", "padded_c", "padded_f", "reverse_c"])
++@pytest.mark.parametrize("layout", ["c", "f", "padded_c", "padded_f", "reverse_c", "reverse_f"])
+ @pytest.mark.parametrize("order", ["C", "F", "auto"])
+ @pytest.mark.parametrize("lane", ["single", "thread", "process_inline", "process_shared"])
+ def test_joint_bounds_transport_layout_and_independent_outputs(layout, order, lane):
+     x = inputs(layout, n=129, d=256)
+     before = x.view(np.uint64).copy()
+-    transported = np.array(x, order="C") if lane.startswith("process") and layout == "padded_f" else x
++    # Match the existing worker packing; local descending F stays ordered.
++    transported = x
++    if lane.startswith("process") and layout in {"padded_f", "reverse_f"}:
++        transported = np.array(x, order="F" if layout == "reverse_f" else "C")
+     expected = [op.covariance(transported), op.correlation(transported)]
+     compiled = pickle.loads(pickle.dumps(graph(order)))
+     with AdaptiveScheduler(cpu_budget=2, config=settings(lane)) as scheduler:
+@@ -45,6 +48,7 @@
+     for root, reference in enumerate(expected):
+         for actual in first.outputs[root].values:
+             compare(actual, reference)
++            np.testing.assert_allclose(actual, (op.covariance if root == 0 else op.correlation)(x), rtol=1e-12, atol=1e-12)
+             np.testing.assert_array_equal(actual.view(np.uint64), actual.T.view(np.uint64))
+             assert actual.flags.f_contiguous if order == "F" else actual.flags.c_contiguous
+             assert not actual.flags.writeable and not np.shares_memory(actual, x)
+@@ -82,10 +86,10 @@
+     for output, fn in zip(result.outputs, (op.covariance, op.correlation), strict=True):
+         reference = fn(x)
+         compare(output.values[0], reference)
+-        if pattern in {"dense_replay", "scaled", "source_reject", "nan"} or (pattern == "reverse" and (layout == "f" or not ACTIVE)):
++        if pattern in {"dense_replay", "scaled", "source_reject", "nan"} or (pattern == "reverse" and not ACTIVE):
+             np.testing.assert_array_equal(output.values[0].view(np.uint64), reference.view(np.uint64))
+     if ACTIVE:
+-        assert counts(result, "accelerate_covariance_calls") == int(pattern in {"tiny", "wide", "orthogonal"} or (pattern == "reverse" and layout == "c"))
++        assert counts(result, "accelerate_covariance_calls") == int(pattern in {"tiny", "wide", "orthogonal"} or pattern == "reverse")
+         assert counts(result, "covariance_fallbacks") == int(pattern in {"dense_replay", "scaled"})
+     assert counts(result, "numeric_arena_bytes") == counts(result, "root_copy_bytes") == 0
+ 
+@@ -115,7 +119,7 @@
+             np.testing.assert_array_equal(np.asarray(output.values[0]).view(np.uint64), np.asarray(reference).view(np.uint64))
+ 
+ 
+-@pytest.mark.parametrize("layout", ["c", "f"])
++@pytest.mark.parametrize("layout", ["c", "f", "reverse_f"])
+ def test_prepared_error_recovery_retains_prior_pair_and_budget(layout):
+     x = inputs(layout, n=129, d=256)
+     starts, ends = np.zeros(1, np.int64), np.array([len(x)], np.int64)
+@@ -148,7 +152,7 @@
+         assert not np.shares_memory(first.outputs[i].values[0], recovered.outputs[i].values[0])
+ 
+ 
+-@pytest.mark.parametrize("layout", ["c", "f"])
++@pytest.mark.parametrize("layout", ["c", "f", "reverse_f"])
+ @pytest.mark.parametrize("order", ["C", "F"])
+ @pytest.mark.parametrize("n", [1024, 1025, 2048, 2049])
+ def test_paired_panel_boundaries_preserve_both_results(layout, order, n):
+@@ -158,7 +162,7 @@
+     for output, fn in zip(result.outputs, (op.covariance, op.correlation), strict=True):
+         compare(output.values[0], fn(x))
+     if ACTIVE:
+-        block = min(n, 1024) if layout == "c" and n <= 2048 else n if n <= 2048 else 512
++        block = min(n, 1024) if layout != "f" and n <= 2048 else n if n <= 2048 else 512
+         assert counts(result, "accelerate_covariance_calls") == 1
+         assert counts(result, "covariance_syrk_calls") == (n+block-1)//block
+         assert counts(result, "covariance_panel_materialization_bytes") == x.nbytes

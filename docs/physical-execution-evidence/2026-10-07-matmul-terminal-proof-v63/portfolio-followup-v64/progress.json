@@ -1,0 +1,217 @@
+{
+  "recorded_utc": "2026-10-08T03:28:40.411017+00:00",
+  "status": "qualified_actual_built_verified_measured",
+  "candidate_build_id": "74bd1460606d2a6a8e4bfab8e2a4725cf46945c2420ef61b29c41945f4a146bf",
+  "actual_build_id": "74bd1460606d2a6a8e4bfab8e2a4725cf46945c2420ef61b29c41945f4a146bf",
+  "candidate_changed_source": [
+    "cpp/operators/sequence.cpp"
+  ],
+  "quality": {
+    "status": "passed",
+    "build_id": "74bd1460606d2a6a8e4bfab8e2a4725cf46945c2420ef61b29c41945f4a146bf",
+    "jobs": [
+      {
+        "name": "native",
+        "returncode": 0,
+        "counts": {
+          "tests": 9,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "evidence": "quality-r3-native.xml",
+        "evidence_sha256": "ca72f34b821c1509a0fbb7f45875f6c844007172d9c63bfcc203d07a9df73172"
+      },
+      {
+        "name": "targeted",
+        "returncode": 0,
+        "counts": {
+          "tests": 324,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      }
+    ],
+    "actual_adopted": false,
+    "goal_complete": false
+  },
+  "large_completed_at_snapshot": 22,
+  "large_planned": 40,
+  "actual_adopted": true,
+  "full_san_off_complete": true,
+  "goal_complete": false,
+  "note": "Snapshot/state files are not proof of a live process; verify the tool handle before waiting.",
+  "large_completed": 40,
+  "normal_observation": {
+    "status": "passed",
+    "build_id": "74bd1460606d2a6a8e4bfab8e2a4725cf46945c2420ef61b29c41945f4a146bf",
+    "source_count": 93,
+    "jobs": [
+      {
+        "label": "native",
+        "returncode": 0,
+        "counts": {
+          "tests": 9,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "skip_reasons": []
+      },
+      {
+        "label": "full",
+        "returncode": 0,
+        "counts": {
+          "tests": 16634,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "skip_reasons": []
+      }
+    ],
+    "actual_adopted": false,
+    "goal_complete": false,
+    "sanitizer_leak_detection": null,
+    "finished": 1791427017.29164
+  },
+  "normal_full_complete": true,
+  "qualification": {
+    "normal": {
+      "status": "passed",
+      "build_id": "74bd1460606d2a6a8e4bfab8e2a4725cf46945c2420ef61b29c41945f4a146bf",
+      "source_count": 93,
+      "jobs": [
+        {
+          "label": "native",
+          "returncode": 0,
+          "counts": {
+            "tests": 9,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "skip_reasons": []
+        },
+        {
+          "label": "full",
+          "returncode": 0,
+          "counts": {
+            "tests": 16634,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "skip_reasons": []
+        }
+      ],
+      "actual_adopted": false,
+      "goal_complete": false,
+      "sanitizer_leak_detection": null,
+      "finished": 1791427017.29164
+    },
+    "asan": {
+      "status": "passed",
+      "build_id": "af2cece2ce401bd095ed092e7c66431d1ae5c1b661f7e9d62f6728c61ff39e02",
+      "source_count": 93,
+      "jobs": [
+        {
+          "label": "native",
+          "returncode": 0,
+          "counts": {
+            "tests": 9,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "skip_reasons": []
+        },
+        {
+          "label": "related",
+          "returncode": 0,
+          "counts": {
+            "tests": 4577,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "skip_reasons": []
+        }
+      ],
+      "actual_adopted": false,
+      "goal_complete": false,
+      "sanitizer_leak_detection": false,
+      "finished": 1791427527.6690361
+    },
+    "off": {
+      "status": "passed",
+      "build_id": "779882a5b8d954454c31442bf959b41d18ffab7b0d144eae49f99f68549c3294",
+      "source_count": 93,
+      "jobs": [
+        {
+          "label": "native",
+          "returncode": 0,
+          "counts": {
+            "tests": 9,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "skip_reasons": []
+        },
+        {
+          "label": "related",
+          "returncode": 0,
+          "counts": {
+            "tests": 4577,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "skip_reasons": []
+        }
+      ],
+      "actual_adopted": false,
+      "goal_complete": false,
+      "sanitizer_leak_detection": null,
+      "finished": 1791427922.323531
+    }
+  },
+  "actual_verified": true,
+  "actual_measured": true,
+  "actual_verification": {
+    "status": "passed",
+    "build_id": "74bd1460606d2a6a8e4bfab8e2a4725cf46945c2420ef61b29c41945f4a146bf",
+    "source_count": 93,
+    "jobs": [
+      {
+        "label": "native",
+        "returncode": 0,
+        "counts": {
+          "tests": 9,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "skip_reasons": []
+      },
+      {
+        "label": "related",
+        "returncode": 0,
+        "counts": {
+          "tests": 4577,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "skip_reasons": []
+      }
+    ],
+    "actual_adopted": true,
+    "goal_complete": false,
+    "sanitizer_leak_detection": null,
+    "finished": 1791428323.7888582
+  },
+  "actual_measurement_processes": 6
+}

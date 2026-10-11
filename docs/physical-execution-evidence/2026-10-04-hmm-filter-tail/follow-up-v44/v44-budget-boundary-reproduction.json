@@ -1,0 +1,18 @@
+{
+  "status": "reproduced",
+  "priority": "P2",
+  "candidate_build_id": "259f4692f0dd74748e1a719fbeb32ce16d3c9af74624c904bb77f083d05b6a87",
+  "production_unchanged": true,
+  "input_shape": [4096, 1],
+  "components": 256,
+  "expression": "hmm_initial(gaussian_hmm_em(x,w,a,m,v,1))",
+  "observations": [
+    {"ends": [4095], "estimated_worker_scratch_bytes": 26756360},
+    {"ends": [4096], "estimated_worker_scratch_bytes": 18639112},
+    {"ends": [4095, 4096], "estimated_worker_scratch_bytes": 18639112}
+  ],
+  "smaller_window_hmm_minimum_bytes": 26217472,
+  "reason": "Primitive scratch is non-monotone at the two/three-history boundary. Planner applies the maximum row bound to latent_scratch, and must take the maximum of both regimes rather than assume primitive scratch grows monotonically.",
+  "scope": "Metadata-only plan calls, no numerical fit; current V44 candidate must not be adopted before repairing the planner upper envelope.",
+  "goal_complete": false
+}

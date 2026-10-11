@@ -1,0 +1,109 @@
+{
+  "status": "PROGRESS",
+  "candidate_status": "training memory benefit measured; unconditional replay not adopted",
+  "production_build_id": "83ea5357f58345479081b18a9514dce0f025e2fd456b5ac6ce2f6add3a64847a",
+  "candidate_build_id": "8d2c3f545ab2b7b68872d5e9c080d3d6b34a01dff763e78c4634e5000da06df1",
+  "actual_numerical_source_changed": false,
+  "production_numerical_source_unchanged": true,
+  "candidate_isolated": true,
+  "goal_complete": false,
+  "submission": false,
+  "tests": {
+    "selected_python": 783,
+    "native": 9,
+    "old_actual_bitwise_differential_cases": 16,
+    "candidate_full_regression": false,
+    "candidate_asan_ubsan": false,
+    "candidate_library_off": false
+  },
+  "time": {
+    "training": {
+      "cpp_actual": 5.073193499352783,
+      "cpp_candidate": 5.15555699984543,
+      "njit_hoisted": 10.52349835447967
+    },
+    "chain": {
+      "cpp_actual": 5.230844104429707,
+      "cpp_candidate": 5.307973833754659,
+      "njit_hoisted": 10.64896749984473
+    }
+  },
+  "wider_features": {
+    "cpp_actual": 0.39768991712480783,
+    "cpp_candidate": 0.4186875419691205,
+    "njit_hoisted": 1.2400388340465724
+  },
+  "memory": {
+    "training": {
+      "cpp_actual": {
+        "warm_heap_peak": 152602521,
+        "rss_deltas": [
+          173129728,
+          177651712,
+          177684480
+        ],
+        "rss_delta_median": 177651712
+      },
+      "cpp_candidate": {
+        "warm_heap_peak": 116614809,
+        "rss_deltas": [
+          137003008,
+          133120000,
+          137117696
+        ],
+        "rss_delta_median": 137003008
+      },
+      "njit_hoisted": {
+        "warm_heap_peak": 176512336,
+        "rss_deltas": [
+          177340416,
+          176766976,
+          172851200
+        ],
+        "rss_delta_median": 176766976
+      }
+    },
+    "chain": {
+      "cpp_actual": {
+        "warm_heap_peak": 275677220,
+        "rss_deltas": [
+          271761408,
+          280297472,
+          276267008
+        ],
+        "rss_delta_median": 276267008
+      },
+      "cpp_candidate": {
+        "warm_heap_peak": 275689508,
+        "rss_deltas": [
+          275611648,
+          276332544,
+          276201472
+        ],
+        "rss_delta_median": 276201472
+      },
+      "njit_hoisted": {
+        "warm_heap_peak": 272514528,
+        "rss_deltas": [
+          347553792,
+          345538560,
+          341016576
+        ],
+        "rss_delta_median": 345538560
+      }
+    }
+  },
+  "reasons": [
+    "Complete training removes one actually allocated NK matrix; malloc peak reduces 35,987,712 bytes.",
+    "Complete chain already loans two arena matrices and one current future result; replay removes no large allocation.",
+    "The small measured time increases are recorded, not independent gates; no new significant speed gain.",
+    "Select full history when the third matrix is already available without added reserve; use replay where a large allocation is actually avoided."
+  ],
+  "next": [
+    "Design cost-dependent two/three matrix loan selection without hiding persistent memory or reserving new copies.",
+    "Account for rolling-beta writes/copies and all buffer lifetimes.",
+    "Run full regression, sanitizers/library-off, then adopt and replay the actual checkout wheel if qualified.",
+    "Large matrix FF versus strong NJIT and platform/frontier complete-request gaps remain open."
+  ],
+  "limitations": "Malloc probe excludes CPython arena suballocations, some zones/mmap/stack/process-tree; RSS 0.5ms sampling; no complete allocation audit or Excel desktop recalculation claim."
+}

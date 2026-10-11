@@ -1,0 +1,111 @@
+{
+  "status": "passed_for_partial_adoption",
+  "source_build_id": "6a4114d3736f7967e011c5e7619172eb093685461cbacd3cbda74191de02aadb",
+  "logical_dag": "unchanged",
+  "mathematical_kernels": "canonical elementwise and state; no new numerical code",
+  "ownership": "direct independent root; retained source slots proved",
+  "errors": "Ten simultaneous/raw fault cases retain canonical first error and result prefix; the failed C candidate is preserved separately.",
+  "planner": "shared geometry guard, dedicated eligibility and 4096 byte tile",
+  "excel": "unchanged logical expansion; native export regression pending full quality",
+  "fair_comparison": "CPU1, same caller preparation, thirteen outputs, two retained generations, warm NJIT",
+  "actual_adopted": true,
+  "goal_complete": false,
+  "finding": "P2: geometry preparation on real null source/valid payload can defer NULL_INPUT and reorder a later independent state-domain failure",
+  "fixed": true,
+  "fix": "Comparisons use canonical full prepare; geometry-only state preparation exempts only proven predicate/previous-state placeholders. Every real parent retains canonical null checks before domain validation.",
+  "native_raw_faults": 10,
+  "qualification": {
+    "normal": {
+      "status": "passed",
+      "build_id": "6a4114d3736f7967e011c5e7619172eb093685461cbacd3cbda74191de02aadb",
+      "jobs": [
+        {
+          "label": "native",
+          "returncode": 0,
+          "counts": {
+            "tests": 9,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          }
+        },
+        {
+          "label": "full",
+          "returncode": 0,
+          "counts": {
+            "tests": 16226,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          }
+        }
+      ],
+      "actual_adopted": false,
+      "goal_complete": false,
+      "finished": 1791331901.471673
+    },
+    "asan": {
+      "status": "passed",
+      "build_id": "a7469a19caf829b14514276f89268d88e86cdd8eb144aa49a2297be381ef463f",
+      "jobs": [
+        {
+          "label": "native",
+          "returncode": 0,
+          "counts": {
+            "tests": 9,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          }
+        },
+        {
+          "label": "related",
+          "returncode": 0,
+          "counts": {
+            "tests": 1488,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          }
+        }
+      ],
+      "actual_adopted": false,
+      "goal_complete": false,
+      "finished": 1791331567.4298549
+    },
+    "off": {
+      "status": "passed",
+      "build_id": "aef87e8434cd21e35a5fec5d47d813818c26bdf590070c563d4bddf9b294f962",
+      "jobs": [
+        {
+          "label": "native",
+          "returncode": 0,
+          "counts": {
+            "tests": 9,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          }
+        },
+        {
+          "label": "related",
+          "returncode": 0,
+          "counts": {
+            "tests": 1488,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          }
+        }
+      ],
+      "actual_adopted": false,
+      "goal_complete": false,
+      "finished": 1791330660.208052
+    }
+  },
+  "benefit_review": "d-benefit-review.json",
+  "actual_build_id": "6a4114d3736f7967e011c5e7619172eb093685461cbacd3cbda74191de02aadb",
+  "actual_quality": "v58d-actual-quality.json",
+  "actual_confirmation": "v58d-actual-confirmation.json",
+  "integer_boundary_probe": "int64-precision-probes.json"
+}

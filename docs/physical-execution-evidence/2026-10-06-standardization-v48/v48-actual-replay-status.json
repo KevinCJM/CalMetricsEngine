@@ -1,0 +1,59 @@
+{
+  "status": "passed",
+  "build_id": "30722fb25c692505f924aec6755d8f3c5a6113507b9b54552fb22a895d8ab365",
+  "jobs": [
+    {
+      "label": "quality",
+      "pid": 11350,
+      "created": 1791292344.997496,
+      "started": 1791292344.9994419,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-broadcast-standardize-20261006/run_actual_v48_quality.py"
+      ],
+      "returncode": 0,
+      "finished": 1791292365.8431108
+    },
+    {
+      "label": "geometry",
+      "pid": 11973,
+      "created": 1791292365.900927,
+      "started": 1791292365.9030569,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-broadcast-standardize-20261006/run_v48_geometry_review.py",
+        "--stage",
+        "actual-v48"
+      ],
+      "returncode": 0,
+      "finished": 1791292366.23264
+    },
+    {
+      "label": "time",
+      "pid": 11983,
+      "created": 1791292366.255743,
+      "started": 1791292366.257762,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-broadcast-standardize-20261006/run_actual_v48_time.py"
+      ],
+      "returncode": 0,
+      "finished": 1791292391.815419
+    },
+    {
+      "label": "memory",
+      "pid": 13040,
+      "created": 1791292391.871211,
+      "started": 1791292391.873188,
+      "command": [
+        "/Users/chenjunming/Desktop/myenv_312/bin/python3.12",
+        "/private/tmp/calmetrics-broadcast-standardize-20261006/run_actual_v48_memory.py"
+      ],
+      "returncode": 0,
+      "finished": 1791292457.407802
+    }
+  ],
+  "production_adopted": true,
+  "goal_complete": false,
+  "finished": 1791292457.422512
+}

@@ -1,0 +1,62 @@
+{
+  "status": "verified_actual_complete_chain_replay",
+  "build_id": "d0f5e50fa5ce9b4440178b474f72f6970a24d404fc968826b6890bf7a01d31d8",
+  "rows": [
+    {
+      "n": 500000,
+      "actual_time_seconds": 0.8144373339964659,
+      "actual_heap_bytes": 122534582,
+      "actual_rss_increment_bytes": 115326976,
+      "paired_repeat_time_medians": {
+        "current": 0.8251587499980815,
+        "candidate": 0.8458999160066014,
+        "njit": 1.8985315409954637
+      },
+      "paired_repeat_heap_bytes": {
+        "candidate": 122534582,
+        "njit": 110503392,
+        "current": 131534582
+      },
+      "paired_repeat_rss_increment_bytes": {
+        "candidate": 111820800,
+        "njit": 141983744,
+        "current": 120307712
+      },
+      "actual_replay_same_input_hashes": true,
+      "actual_replay_is_separate_epoch": true,
+      "heap_saved_vs_old_cpp": 9000000,
+      "heap_excess_vs_njit": 12031190
+    },
+    {
+      "n": 2000000,
+      "actual_time_seconds": 3.0960119160008617,
+      "actual_heap_bytes": 490034582,
+      "actual_rss_increment_bytes": 414826496,
+      "paired_repeat_time_medians": {
+        "current": 3.213526458501292,
+        "candidate": 3.2213188749992696,
+        "njit": 7.616997041503055
+      },
+      "paired_repeat_heap_bytes": {
+        "candidate": 490034582,
+        "njit": 442003392,
+        "current": 526034582
+      },
+      "paired_repeat_rss_increment_bytes": {
+        "njit": 448233472,
+        "current": 448774144,
+        "candidate": 412729344
+      },
+      "actual_replay_same_input_hashes": true,
+      "actual_replay_is_separate_epoch": true,
+      "heap_saved_vs_old_cpp": 36000000,
+      "heap_excess_vs_njit": 48031190
+    }
+  ],
+  "measurements": 7,
+  "smokes": 2,
+  "paired_repeat_measurements": 21,
+  "scope": "Actual rebuilt replay is separate from paired old/candidate/warmed NJIT epochs; never mix these clocks into one paired comparison.",
+  "all_thirteen_outputs_and_ownership_passed": true,
+  "goal_complete": false
+}

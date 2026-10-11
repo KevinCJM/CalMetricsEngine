@@ -1,0 +1,344 @@
+{
+  "status": "passed",
+  "started": 1791292366.296832,
+  "layouts": {
+    "C": {
+      "medians_seconds": {
+        "native": 0.25193081250000005,
+        "actual": 0.167936937,
+        "njit": 0.091330167
+      },
+      "native_to_njit": 2.7584621902640345,
+      "actual_to_njit": 1.8387893345251412,
+      "actual_to_native": 0.6665994339219621,
+      "pairs": [
+        {
+          "repeat": 0,
+          "order": [
+            "native",
+            "actual",
+            "njit"
+          ],
+          "samples": {
+            "native": {
+              "wall": 0.314946458,
+              "cpu": 0.285781
+            },
+            "actual": {
+              "wall": 0.154508375,
+              "cpu": 0.135174
+            },
+            "njit": {
+              "wall": 0.106044333,
+              "cpu": 0.098424
+            }
+          }
+        },
+        {
+          "repeat": 1,
+          "order": [
+            "native",
+            "njit",
+            "actual"
+          ],
+          "samples": {
+            "native": {
+              "wall": 0.30881125,
+              "cpu": 0.304299
+            },
+            "njit": {
+              "wall": 0.091614042,
+              "cpu": 0.090641
+            },
+            "actual": {
+              "wall": 0.173099791,
+              "cpu": 0.170134
+            }
+          }
+        },
+        {
+          "repeat": 2,
+          "order": [
+            "actual",
+            "native",
+            "njit"
+          ],
+          "samples": {
+            "actual": {
+              "wall": 0.162774083,
+              "cpu": 0.148997
+            },
+            "native": {
+              "wall": 0.252778667,
+              "cpu": 0.250836
+            },
+            "njit": {
+              "wall": 0.089305917,
+              "cpu": 0.088956
+            }
+          }
+        },
+        {
+          "repeat": 3,
+          "order": [
+            "actual",
+            "njit",
+            "native"
+          ],
+          "samples": {
+            "actual": {
+              "wall": 0.116894917,
+              "cpu": 0.115961
+            },
+            "njit": {
+              "wall": 0.090493375,
+              "cpu": 0.089777
+            },
+            "native": {
+              "wall": 0.230775916,
+              "cpu": 0.227532
+            }
+          }
+        },
+        {
+          "repeat": 4,
+          "order": [
+            "njit",
+            "native",
+            "actual"
+          ],
+          "samples": {
+            "njit": {
+              "wall": 0.091046292,
+              "cpu": 0.090307
+            },
+            "native": {
+              "wall": 0.251082958,
+              "cpu": 0.235948
+            },
+            "actual": {
+              "wall": 0.18642725,
+              "cpu": 0.13949
+            }
+          }
+        },
+        {
+          "repeat": 5,
+          "order": [
+            "njit",
+            "actual",
+            "native"
+          ],
+          "samples": {
+            "njit": {
+              "wall": 0.140652458,
+              "cpu": 0.119364
+            },
+            "actual": {
+              "wall": 0.182303166,
+              "cpu": 0.129186
+            },
+            "native": {
+              "wall": 0.246338166,
+              "cpu": 0.239054
+            }
+          }
+        }
+      ],
+      "native_audit": {
+        "compact_path_raw_pack_bytes": 0,
+        "fused_pointwise_calls": 0,
+        "root_copy_bytes": 0,
+        "direct_output_bytes": 268435456,
+        "state_copy_bytes": 0,
+        "pointwise_workspace_capacity_bytes": 0,
+        "numeric_arena_bytes": 268435968,
+        "mask_arena_bytes": 0,
+        "operator_workspace_capacity_bytes": 0,
+        "order_scratch_capacity_bytes": 0,
+        "input_copy_bytes": 0,
+        "solve_residual_materialization_bytes": 0,
+        "covariance_panel_materialization_bytes": 0,
+        "native_library_workspace_reserve_bytes": 0,
+        "algorithm_copy_bytes": 0,
+        "fused_scalar_calls": 0
+      },
+      "maximum_absolute_errors": {
+        "native": 0.0,
+        "actual": 0.0,
+        "njit": 0.0
+      }
+    },
+    "F": {
+      "medians_seconds": {
+        "native": 0.4054461455,
+        "actual": 0.1098585005,
+        "njit": 0.1456358955
+      },
+      "native_to_njit": 2.783971246292093,
+      "actual_to_njit": 0.7543366978507026,
+      "actual_to_native": 0.2709570721520153,
+      "pairs": [
+        {
+          "repeat": 0,
+          "order": [
+            "native",
+            "actual",
+            "njit"
+          ],
+          "samples": {
+            "native": {
+              "wall": 0.38579275,
+              "cpu": 0.379927
+            },
+            "actual": {
+              "wall": 0.102264375,
+              "cpu": 0.099807
+            },
+            "njit": {
+              "wall": 0.201899334,
+              "cpu": 0.153285
+            }
+          }
+        },
+        {
+          "repeat": 1,
+          "order": [
+            "native",
+            "njit",
+            "actual"
+          ],
+          "samples": {
+            "native": {
+              "wall": 0.522451458,
+              "cpu": 0.482263
+            },
+            "njit": {
+              "wall": 0.152991,
+              "cpu": 0.150542
+            },
+            "actual": {
+              "wall": 0.173713375,
+              "cpu": 0.169817
+            }
+          }
+        },
+        {
+          "repeat": 2,
+          "order": [
+            "actual",
+            "native",
+            "njit"
+          ],
+          "samples": {
+            "actual": {
+              "wall": 0.122688416,
+              "cpu": 0.121623
+            },
+            "native": {
+              "wall": 0.441582125,
+              "cpu": 0.437904
+            },
+            "njit": {
+              "wall": 0.136863209,
+              "cpu": 0.135867
+            }
+          }
+        },
+        {
+          "repeat": 3,
+          "order": [
+            "actual",
+            "njit",
+            "native"
+          ],
+          "samples": {
+            "actual": {
+              "wall": 0.106546459,
+              "cpu": 0.099867
+            },
+            "njit": {
+              "wall": 0.183362,
+              "cpu": 0.13954
+            },
+            "native": {
+              "wall": 0.374955084,
+              "cpu": 0.370194
+            }
+          }
+        },
+        {
+          "repeat": 4,
+          "order": [
+            "njit",
+            "native",
+            "actual"
+          ],
+          "samples": {
+            "njit": {
+              "wall": 0.138280791,
+              "cpu": 0.13645
+            },
+            "native": {
+              "wall": 0.380870167,
+              "cpu": 0.378172
+            },
+            "actual": {
+              "wall": 0.102312458,
+              "cpu": 0.101008
+            }
+          }
+        },
+        {
+          "repeat": 5,
+          "order": [
+            "njit",
+            "actual",
+            "native"
+          ],
+          "samples": {
+            "njit": {
+              "wall": 0.1370075,
+              "cpu": 0.135458
+            },
+            "actual": {
+              "wall": 0.113170542,
+              "cpu": 0.110313
+            },
+            "native": {
+              "wall": 0.425099541,
+              "cpu": 0.403872
+            }
+          }
+        }
+      ],
+      "native_audit": {
+        "compact_path_raw_pack_bytes": 0,
+        "fused_pointwise_calls": 0,
+        "root_copy_bytes": 0,
+        "direct_output_bytes": 268435456,
+        "state_copy_bytes": 0,
+        "pointwise_workspace_capacity_bytes": 0,
+        "numeric_arena_bytes": 268435968,
+        "mask_arena_bytes": 0,
+        "operator_workspace_capacity_bytes": 0,
+        "order_scratch_capacity_bytes": 0,
+        "input_copy_bytes": 0,
+        "solve_residual_materialization_bytes": 0,
+        "covariance_panel_materialization_bytes": 0,
+        "native_library_workspace_reserve_bytes": 0,
+        "algorithm_copy_bytes": 0,
+        "fused_scalar_calls": 0
+      },
+      "maximum_absolute_errors": {
+        "native": 1.3233858453531866e-13,
+        "actual": 1.3233858453531866e-13,
+        "njit": 1.3233858453531866e-13
+      }
+    }
+  },
+  "goal_complete": false,
+  "finished": 1791292391.809648,
+  "actual_adopted": false,
+  "limitations": "No malloc/RSS acceptance or platform-service claim; six warm paired complete requests per layout"
+}

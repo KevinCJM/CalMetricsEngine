@@ -1,0 +1,43 @@
+........................................................................ [ 37%]
+........................................................................ [ 74%]
+......................F..........................                        [100%]
+=================================== FAILURES ===================================
+_ test_projection_isolate_keeps_existing_nonfinite_scalar_policy_and_healthy_root _
+
+    def test_projection_isolate_keeps_existing_nonfinite_scalar_policy_and_healthy_root():
+        inputs = dict(x=np.full((2, 2, 1), 710.), beta=np.ones((1, 1)),
+                      initial=np.zeros(1), w0=np.ones(1), w1=np.zeros(1))
+        expressions = projection_expressions(1, 2)
+        expressions["healthy"] = "mean(x)"
+        graph = GraphCompiler(declarations()).compile(expressions, result_format="typed", error_policy="isolate")
+        with AdaptiveScheduler(cpu_budget=1) as scheduler:
+            result = scheduler.execute(graph, inputs, np.array([0], np.int64), np.array([2], np.int64))
+        assert np.isposinf(result.named_outputs["period_0"].values[0]).all()
+        assert np.isnan(result.named_outputs["period_1"].values[0]).all()
+        for name in ("period_0", "period_1", "healthy"):
+>           np.testing.assert_array_equal(result.named_outputs[name].root_statuses, [0])
+
+tests/test_mc_projection_primitives.py:612: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (<built-in function eq>, array([4], dtype=int16), [0])
+kwds = {'err_msg': '', 'header': 'Arrays are not equal', 'strict': False, 'verbose': True}
+
+    @wraps(func)
+    def inner(*args, **kwds):
+        with self._recreate_cm():
+>           return func(*args, **kwds)
+                   ^^^^^^^^^^^^^^^^^^^
+E           AssertionError: 
+E           Arrays are not equal
+E           
+E           Mismatched elements: 1 / 1 (100%)
+E           Max absolute difference: 4
+E           Max relative difference: inf
+E            x: array([4], dtype=int16)
+E            y: array([0])
+
+/opt/homebrew/Cellar/python@3.12/3.12.11/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py:81: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_mc_projection_primitives.py::test_projection_isolate_keeps_existing_nonfinite_scalar_policy_and_healthy_root
+1 failed, 192 passed in 1.62s

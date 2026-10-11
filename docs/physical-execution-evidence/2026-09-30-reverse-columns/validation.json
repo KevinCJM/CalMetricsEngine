@@ -1,0 +1,174 @@
+{
+  "build_id": "31dfa69ffbed1033f99b4f3ab61de340f93a4d3d0e10fcc104ade95a4f98e6d8",
+  "python_passed": 8695,
+  "new_cases": 319,
+  "native": "9/9",
+  "asan_ubsan": "9/9",
+  "eigen_off": "9/9",
+  "canonical_operator_fixtures": 185,
+  "stages": [
+    {
+      "script": "build_production.py",
+      "rc": 0,
+      "seconds": 33.03117633308284
+    },
+    {
+      "script": "run_python_gates.py",
+      "rc": 0,
+      "seconds": 124.30414966703393
+    },
+    {
+      "script": "run_regressions.py",
+      "rc": 0,
+      "seconds": 99.53796775010414
+    },
+    {
+      "script": "verify_identity.py",
+      "rc": 0,
+      "seconds": 0.0681192500051111
+    },
+    {
+      "script": "run_benchmarks.py",
+      "rc": 0,
+      "seconds": 172.4660621250514
+    }
+  ],
+  "phase2": [
+    {
+      "products": 500,
+      "njit_ms": 74.176375,
+      "native_ms": 56.093625,
+      "ratio": 0.756219551036297,
+      "max_ratio": 0.9,
+      "passed": true
+    },
+    {
+      "products": 1000,
+      "njit_ms": 147.416625,
+      "native_ms": 111.220583,
+      "ratio": 0.7544643149983932,
+      "max_ratio": 0.9,
+      "passed": true
+    },
+    {
+      "products": 1,
+      "intervals": 1,
+      "metrics": 5,
+      "history": 63,
+      "njit_us": 4.541,
+      "native_us": 3.417,
+      "ratio": 0.7524774278793216,
+      "max_ratio": 0.9,
+      "scheduler_us": 4.625,
+      "scheduler_ratio": 0.9823704333050127,
+      "max_scheduler_ratio": 1.0,
+      "passed": true
+    },
+    {
+      "products": 1,
+      "intervals": 1,
+      "metrics": 5,
+      "history": 252,
+      "njit_us": 9.417,
+      "native_us": 7.916,
+      "ratio": 0.8406074121270044,
+      "max_ratio": 0.9,
+      "scheduler_us": 9.208,
+      "scheduler_ratio": 0.9692631578947368,
+      "max_scheduler_ratio": 1.0,
+      "passed": true
+    }
+  ],
+  "first_candidate_phase2": [
+    {
+      "products": 500,
+      "njit_ms": 73.570958,
+      "native_ms": 55.775708,
+      "ratio": 0.7581212684494335,
+      "max_ratio": 0.9,
+      "passed": true
+    },
+    {
+      "products": 1000,
+      "njit_ms": 146.289,
+      "native_ms": 110.861167,
+      "ratio": 0.7578229873743071,
+      "max_ratio": 0.9,
+      "passed": true
+    },
+    {
+      "products": 1,
+      "intervals": 1,
+      "metrics": 5,
+      "history": 63,
+      "njit_us": 4.416,
+      "native_us": 3.333,
+      "ratio": 0.7547554347826086,
+      "max_ratio": 0.9,
+      "scheduler_us": 4.583,
+      "scheduler_ratio": 1.028039479587259,
+      "max_scheduler_ratio": 1.0,
+      "passed": false
+    },
+    {
+      "products": 1,
+      "intervals": 1,
+      "metrics": 5,
+      "history": 252,
+      "njit_us": 9.291,
+      "native_us": 7.875,
+      "ratio": 0.847594446238295,
+      "max_ratio": 0.9,
+      "scheduler_us": 9.125,
+      "scheduler_ratio": 0.9690951571792693,
+      "max_scheduler_ratio": 1.0,
+      "passed": true
+    }
+  ],
+  "excel": {
+    "status": "PASS_AGAINST_RECALCULATED_SNAPSHOT",
+    "checked_values": 3056,
+    "failures": [],
+    "newly_recalculated": false,
+    "cases": 469,
+    "snapshot_engine": "Microsoft Excel 16.89.1 (16.89.24091630), macOS desktop full dependency rebuild",
+    "snapshot_sha256": "eab3361371bfff228fe3e6c1ea458fcb3e3d0a7a9b29cbda438c6e5604fb32b1",
+    "current_source_sha256": "b176bbe6113a86bcf454b5cb0007b1724dfe1a529e7992c447f93279b4dcdc5c",
+    "source_identity_differences": 938,
+    "allowed_identity_changes": "Only Readme B4 export identity and B9 build identity; formula and input cells unchanged.",
+    "engine_build_id": "31dfa69ffbed1033f99b4f3ab61de340f93a4d3d0e10fcc104ade95a4f98e6d8",
+    "historical_snapshot": "/private/tmp/calmetrics-reaccept-20260929/excel-ms"
+  },
+  "new_excel_recalculation": false,
+  "self_review": [
+    "same logical accumulation and two-operation order, divide-zero fallback and retained output ownership",
+    "signed column loading has no matrix scratch; wire F order matches copied bytes",
+    "IPC output uses memcpy into byte storage without typed-alignment/object-lifetime assumptions",
+    "RootOrders uses bitset up to 64 roots; independent overflow owner, strong copy/assign and empty moved-from state; 63/64/65/129 and real worker tests",
+    "candidate +3B heap regression repaired before final acceptance"
+  ],
+  "pre_existing_files_preserved": true,
+  "changed_existing_files": [
+    "cpp/operators/column_library.hpp",
+    "cpp/operators/latent.cpp",
+    "cpp/operators/matrix_foundation.cpp",
+    "docs/physical-layout-design.md",
+    "tests/test_column_library.py",
+    "cpp/compiler.cpp",
+    "cpp/include/calmetrics_engine/compiler.hpp",
+    "cpp/include/calmetrics_engine/graph.hpp",
+    "cpp/native_process.cpp",
+    "cpp/operators/elementwise.cpp",
+    "cpp/result_layout.cpp",
+    "docs/computation-design-rules.md",
+    "docs/execution-guide.md",
+    "docs/user-guide.md",
+    "tests/result_native_tests.cpp"
+  ],
+  "new_test_files": [
+    "tests/test_reverse_column_layout.py"
+  ],
+  "local_links_checked": 58,
+  "complete_engine_performance_acceptance": false,
+  "git_actions": "No commit or push."
+}

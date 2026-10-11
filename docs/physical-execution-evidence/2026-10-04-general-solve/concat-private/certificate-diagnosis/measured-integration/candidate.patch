@@ -1,0 +1,752 @@
+--- a/cpp/graph.cpp
++++ b/cpp/graph.cpp
+@@ -1225,6 +1225,16 @@
+       const auto n = shapes.empty() ? std::min<std::size_t>(capacity, 4096) : shapes.at(node.parents[0]).dim[0];
+       const auto k = shapes.empty() ? 64 : shapes.at(node.parents[1]).dim[1];
+       limit = std::max(limit, ops::solve_accelerate_copy_reserve_doubles(n, k));
++      if (!program.execution_metadata->concat_tree_roots.empty() &&
++          program.execution_metadata->concat_tree_roots[node.parents[0]])
++        limit = std::max(limit, ops::solve_concat_reserve_doubles(n, k));
++    } else if (op == ops::Op::solve_multi && !shapes.empty() &&
++               !program.execution_metadata->solve_private_source.empty() &&
++               program.execution_metadata->solve_private_source[index] >= 0 &&
++               !program.execution_metadata->concat_tree_roots.empty() &&
++               program.execution_metadata->concat_tree_roots[node.parents[0]]) {
++      limit = std::max(limit, ops::solve_concat_reserve_doubles(
++          shapes[node.parents[0]].dim[0], shapes[node.parents[1]].dim[1]));
+     } else if (op == ops::Op::cholesky) {
+       const auto n = shapes.empty() ? capacity : shapes.at(node.parents[0]).dim[0];
+       limit = std::max(limit, ops::cholesky_scratch_doubles(n));
+@@ -1256,14 +1266,24 @@
+ 
+ // No leaf lifetime is extended unless its backing is persistent. Intermediate
+ // descriptors are geometry only and are never read by this byte-copy lowering.
++struct ConcatRectangle { std::size_t row, rows, column, columns; };
+ static void execute_concat_tree(const Program &program, std::size_t target,
+-                                ops::Output &out, const Scratch &scratch) {
++                                ops::Output &out, const Scratch &scratch,
++                                const ConcatRectangle *rectangle = nullptr) {
+   struct Piece { std::uint32_t id; std::array<std::size_t, 3> origin{}; };
+   std::vector<Piece> pending{{static_cast<std::uint32_t>(target), {}}};
+   const auto &metadata = *program.execution_metadata;
+   ops::require(out.kind == ops::Kind::number && out.order == ops::MemoryOrder::c,
+                "CONCAT_TREE_CONTRACT");
+   auto *destination = static_cast<double *>(out.data);
++  auto geometry = out.shape;
++  if (rectangle) {
++    ops::require(out.shape.rank == 2 && rectangle->row <= out.shape.dim[0] &&
++        rectangle->rows <= out.shape.dim[0] - rectangle->row &&
++        rectangle->column <= out.shape.dim[1] &&
++        rectangle->columns <= out.shape.dim[1] - rectangle->column, "CONCAT_TREE_CONTRACT");
++    geometry = ops::matrix_shape(rectangle->rows, rectangle->columns);
++  }
+   while (!pending.empty()) {
+     const auto piece = pending.back(); pending.pop_back();
+     const auto &node = program.nodes[piece.id];
+@@ -1275,12 +1295,31 @@
+       pending.push_back({node.parents[0], piece.origin});
+       continue;
+     }
+-    const auto &leaf = scratch.values[piece.id];
++    auto leaf = scratch.values[piece.id];
++    auto origin = piece.origin;
+     ops::require(leaf.kind == ops::Kind::number && leaf.shape.rank == out.shape.rank,
+                  "CONCAT_TREE_CONTRACT");
+     for (int axis = 0; axis < out.shape.rank; ++axis)
+       ops::require(piece.origin[axis] <= out.shape.dim[axis] &&
+           leaf.shape.dim[axis] <= out.shape.dim[axis] - piece.origin[axis], "CONCAT_TREE_CONTRACT");
++    if (rectangle) {
++      const std::array<std::size_t,2> first{rectangle->row, rectangle->column};
++      const std::array<std::size_t,2> count{rectangle->rows, rectangle->columns};
++      std::ptrdiff_t offset = 0;
++      bool empty = false;
++      for (int axis = 0; axis < 2; ++axis) {
++        const auto lower = std::max(origin[axis], first[axis]);
++        const auto upper = std::min(origin[axis] + leaf.shape.dim[axis], first[axis] + count[axis]);
++        if (lower >= upper) { empty = true; break; }
++        offset += static_cast<std::ptrdiff_t>(lower - origin[axis]) * leaf.stride[axis];
++        leaf.shape.dim[axis] = upper - lower;
++        origin[axis] = lower - first[axis];
++        ops::require(origin[axis] <= count[axis] && leaf.shape.dim[axis] <= count[axis] - origin[axis],
++                     "CONCAT_TREE_CONTRACT");
++      }
++      if (empty) continue;
++      leaf.data = static_cast<const double *>(leaf.data) + offset;
++    }
+     if (!leaf.size()) continue;
+     const auto last = leaf.shape.rank - 1;
+     const auto width = leaf.shape.dim[last];
+@@ -1297,13 +1336,13 @@
+           const auto col_end = std::min(width, first_col + tile);
+           for (auto col = first_col; col < col_end; ++col)
+             for (auto row = first_row; row < row_end; ++row)
+-              destination[(piece.origin[0] + row) * out.shape.dim[1] + piece.origin[1] + col] =
++              destination[(origin[0] + row) * geometry.dim[1] + origin[1] + col] =
+                   source[static_cast<std::ptrdiff_t>(row) + static_cast<std::ptrdiff_t>(col) * leaf.stride[1]];
+         }
+       continue;
+     }
+     for (std::size_t line = 0; line < leaf.size() / width; ++line) {
+-      auto coordinates = piece.origin;
++      auto coordinates = origin;
+       auto remaining = line;
+       std::ptrdiff_t source_offset = 0;
+       for (int axis = last - 1; axis >= 0; --axis) {
+@@ -1313,7 +1352,7 @@
+         source_offset += static_cast<std::ptrdiff_t>(coordinate) * leaf.stride[axis];
+       }
+       std::size_t base = 0;
+-      for (int axis = 0; axis <= last; ++axis) base = base * out.shape.dim[axis] + coordinates[axis];
++      for (int axis = 0; axis <= last; ++axis) base = base * geometry.dim[axis] + coordinates[axis];
+       if (leaf.stride[last] == 1)
+         std::memcpy(destination + base, source + source_offset, width * sizeof(double));
+       else
+@@ -2659,14 +2698,47 @@
+   return true;
+ }
+ 
++struct ConcatCoefficientContext {
++  const Program *program;
++  const Scratch *scratch;
++  std::size_t source;
++  ops::Shape shape;
++};
++static void copy_concat_coefficients(const void *opaque, std::size_t row, std::size_t rows,
++    std::size_t column, std::size_t columns, double *target) {
++  const auto &context = *static_cast<const ConcatCoefficientContext *>(opaque);
++  ops::Output out; out.kind = ops::Kind::number; out.shape = context.shape; out.data = target;
++  const ConcatRectangle rectangle{row, rows, column, columns};
++  execute_concat_tree(*context.program, context.source, out, *context.scratch, &rectangle);
++}
++static bool independent_concat_solve(const Program &program, std::size_t index) {
++  const auto &metadata = *program.execution_metadata;
++  if (program.output_kind != OutputKind::typed || program.isolate_errors ||
++      !program.apply_scopes.empty() || !program.rolling_scopes.empty() ||
++      metadata.concat_tree_roots.empty() ||
++      !metadata.concat_tree_roots[program.nodes[index].parents[0]]) return false;
++  // F results may still use a small C root arena before final materialization.
++  // Terminal identity belongs to logical roots, independently of that layout.
++  const auto found = std::find(program.roots.begin(), program.roots.end(), index);
++  if (found == program.roots.end()) return false;
++  const auto &root = program.root_outputs[static_cast<std::size_t>(found - program.roots.begin())];
++  if (root.dtype != OutputDType::float64 || root.rank != 2) return false;
++  for (const auto &node : program.nodes)
++    for (std::size_t j = 0; j < node.parent_count; ++j)
++      if (node.parents[j] == index) return false;
++  return true;
++}
++
+ static bool reuse_private_solve(const Program &program, std::size_t index,
+     const ops::Prepared &prepared, ops::Output &destination, Scratch &scratch,
+-    ops::Audit &audit) {
++    ops::Audit &audit, bool allow_concat_library) {
+   const auto &sources = program.execution_metadata->solve_private_source;
+   const auto &metadata = *program.execution_metadata;
+-  const bool private_f = destination.order == ops::MemoryOrder::f &&
++  const bool concat_library = allow_concat_library && independent_concat_solve(program, index) &&
++      ops::solve_concat_reserve_doubles(prepared.args[0].shape.dim[0], prepared.args[1].shape.dim[1]);
++  const bool private_f = concat_library || (destination.order == ops::MemoryOrder::f &&
+       !metadata.solve_library_source.empty() && metadata.solve_library_source[index] >= 0 &&
+-      ops::solve_accelerate_scratch_doubles(prepared.args[0].shape.dim[0], prepared.args[1].shape.dim[1]);
++      ops::solve_accelerate_scratch_doubles(prepared.args[0].shape.dim[0], prepared.args[1].shape.dim[1]));
+   if (sources.empty() || sources[index] < 0 ||
+       (destination.order != ops::MemoryOrder::c && !private_f))
+     return false;
+@@ -2709,6 +2781,30 @@
+     if (lower > address / sizeof(double) || upper >= limit - lower) return false;
+     if (overlaps(address - lower * sizeof(double), (lower + upper + 1) * sizeof(double)))
+       return false;
++  }
++  if (concat_library) {
++    const ConcatCoefficientContext context{&program, &scratch, static_cast<std::size_t>(sources[index]), a.shape};
++    const ops::SolveCoefficientBlocks blocks{&context, copy_concat_coefficients};
++    if (ops::try_solve_accelerate_concat(prepared, blocks, destination,
++                                       scratch.workspace, audit, coefficients)) return true;
++    if (audit.accelerate_lu_attempts) {
++      blocks.copy(blocks.context, 0, a.shape.dim[0], 0, a.shape.dim[1], coefficients);
++      audit.algorithm_copy_bytes += bytes;
++    }
++    ops::Audit replay;
++    if (destination.order == ops::MemoryOrder::c)
++      ops::solve_multi_private(prepared, destination, scratch.workspace, replay, coefficients);
++    else
++      ops::execute(prepared, destination, scratch.workspace, ops::Isa::automatic, replay);
++    replay.accelerate_lu_attempts = audit.accelerate_lu_attempts;
++    replay.accelerate_lu_fallbacks = audit.accelerate_lu_fallbacks;
++    replay.solve_residual_materialization_bytes = audit.solve_residual_materialization_bytes;
++    replay.algorithm_copy_bytes += audit.algorithm_copy_bytes;
++    replay.native_library_workspace_reserve_bytes = std::max(
++        replay.native_library_workspace_reserve_bytes, audit.native_library_workspace_reserve_bytes);
++    replay.scratch_bytes = std::max(replay.scratch_bytes, audit.scratch_bytes);
++    audit = replay;
++    return true;
+   }
+   if (!metadata.solve_library_source.empty() && metadata.solve_library_source[index] >= 0 &&
+       (!a.contiguous() || ops::solve_accelerate_scratch_doubles(a.shape.dim[0], b.shape.dim[1]))) {
+@@ -3509,7 +3605,7 @@
+             if (!accelerated && !scratch.isolate_errors && !input_failures && typed_output &&
+                 spec.op == ops::Op::solve_multi)
+               accelerated = reuse_private_solve(program, node_index, prepared, native_output,
+-                                                 scratch, operator_audit);
++                                                 scratch, operator_audit, !prebound_inputs);
+             if (!accelerated && !scratch.isolate_errors && !input_failures && typed_output &&
+                 !program.execution_metadata->solve_copy_roots.empty() &&
+                 program.execution_metadata->solve_copy_roots[node_index])
+--- a/cpp/include/calmetrics_engine/matrix_backend.hpp
++++ b/cpp/include/calmetrics_engine/matrix_backend.hpp
+@@ -14,6 +14,13 @@
+ // Graph-only mature LU path, with canonical replay owned by the caller.
+ std::size_t solve_accelerate_scratch_doubles(std::size_t n, std::size_t k);
+ std::size_t solve_accelerate_copy_reserve_doubles(std::size_t n, std::size_t k);
++// Synchronous source owned by the running graph. Writes a checked dense C
++// rectangle; neither context nor target is retained after the call.
++struct SolveCoefficientBlocks {
++    const void *context;
++    void (*copy)(const void *, std::size_t, std::size_t, std::size_t, std::size_t, double *);
++};
++std::size_t solve_concat_reserve_doubles(std::size_t n, std::size_t k);
+ struct Value;
+ struct Workspace;
+ struct Prepared;
+@@ -26,6 +33,10 @@
+                                       Output &, Output &, Workspace &, Audit &, double *);
+ // Completes an admitted terminal graph root, including canonical replay.
+ bool try_solve_accelerate_copy(const Prepared &, Output &, Workspace &, Audit &);
++// May change private coefficients on rejection. Caller reconstructs and replays.
++bool try_solve_accelerate_concat(const Prepared &, const SolveCoefficientBlocks &,
++                                Output &, Workspace &, Audit &, double *);
++
+ bool matmul_packed_eligible(const Value &, const Value &);
+ bool library_matmul_packed(const Value &, const Value &, double *, Workspace &, Audit &);
+ // Caller proves an independent float root; rejected input never writes output.
+--- a/cpp/operators/solve_accelerate.cpp
++++ b/cpp/operators/solve_accelerate.cpp
+@@ -79,6 +79,19 @@
+ }
+ 
+ #if defined(CALMETRICS_HAVE_ACCELERATE_COVCHOL)
++struct ThreadLimit {
++        BLAS_THREADING prior;
++        bool active = false;
++        ThreadLimit() : prior(BLASGetThreading()) {
++            if (prior == BLAS_THREADING_MULTI_THREADED || prior == BLAS_THREADING_SINGLE_THREADED) {
++                active = BLASSetThreading(BLAS_THREADING_SINGLE_THREADED) == 0 &&
++                         BLASGetThreading() == BLAS_THREADING_SINGLE_THREADED;
++                if (!active) BLASSetThreading(prior);
++            }
++        }
++        ~ThreadLimit() { if (active) BLASSetThreading(prior); }
++};
++
+ // Bounded-panel orchestration of the same Netlib DGETRF sequence. All
+ // factor, pivot, triangular and rank-k mathematics stay in mature libraries.
+ void factor_bounded_panels(__LAPACK_int n, double *a, __LAPACK_int *pivots,
+@@ -214,6 +227,133 @@
+     return upper_change < .25 &&
+         canonical_upper_inverse * 1e50 / (1. - upper_change) < 1e90;
+ }
++// Initial error is measured against the original coefficients, independently
++// of the vendor LU algorithm. Q and the reconstruction use the conventional
++// FP64 BLAS product error model. No estimated inverse is used as a bound.
++bool measured_local_lu_certificate(const double *a, const __LAPACK_int *pivots,
++        std::size_t n, const SolveCoefficientBlocks &source, double *buffer, Audit &audit) {
++    constexpr std::size_t width = 512, block = 512;
++    const auto tiles = (n + width - 1) / width, cells = n * tiles;
++    auto *full = buffer;
++    auto *tail = full + cells;
++    auto *growth = tail + cells;
++    auto *error = growth + cells;
++    auto *panel = error + cells;
++    auto *rhs = panel + 64 * n;
++    auto *diagonal = rhs + n;
++    auto *solution = diagonal + n;
++    auto *left = solution + n;
++    auto *right = left + block * block;
++    auto *product = right + block * block;
++    std::fill_n(full, cells, 0.);
++    std::fill_n(tail, cells, 0.);
++    std::fill_n(error, cells, 0.);
++    std::fill_n(rhs, n, 1e6);
++    for (std::size_t j = 0; j < n; ++j)
++        for (std::size_t i = 0; i <= j; ++i) {
++            const auto value = std::abs(a[j * n + i]);
++            const auto t = j / width;
++            full[i * tiles + t] = std::max(full[i * tiles + t], value);
++            if (i != j) tail[i * tiles + t] = std::max(tail[i * tiles + t], value);
++        }
++    for (std::size_t first = 0; first < n; first += 64) {
++        const auto count = std::min<std::size_t>(64, n - first);
++        for (std::size_t i = 0; i < count; ++i)
++            for (std::size_t k = 0; k < n; ++k)
++                panel[i * n + k] = k < first + i ? std::abs(a[k * n + first + i]) : k == first + i ? 1. : 0.;
++        cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, int(count), int(tiles), int(n),
++                    1., panel, int(n), full, int(tiles), 0., growth + first * tiles, int(tiles));
++    }
++    const auto inflate = 1. / (1. - gamma(32));
++    const auto u = std::numeric_limits<double>::epsilon() * .5;
++    for (std::size_t i = 0; i < cells; ++i) {
++        growth[i] = std::nextafter(growth[i] / (1. - gamma(4 * n)) + 1e-270, INFINITY);
++        if (!std::isfinite(growth[i]) || growth[i] > 1e100) return false;
++    }
++    std::vector<std::size_t> permutation(n);
++    for (std::size_t i = 0; i < n; ++i) permutation[i] = i;
++    for (std::size_t i = 0; i < n; ++i) {
++        if (pivots[i] < static_cast<__LAPACK_int>(i + 1) || pivots[i] > static_cast<__LAPACK_int>(n)) return false;
++        std::swap(permutation[i], permutation[std::size_t(pivots[i] - 1)]);
++    }
++    // LU block multiplication exploits both triangular structures. Only three
++    // square tiles and an original-coefficient rectangle are materialized.
++    for (std::size_t column = 0; column < n; column += block) {
++        const auto columns = std::min(block, n - column);
++        for (std::size_t j = 0; j < columns; ++j)
++            for (std::size_t i = 0; i < columns; ++i)
++                right[j * columns + i] = i <= j ? a[(column + j) * n + column + i] : 0.;
++        for (std::size_t row = 0; row < n; row += block) {
++            const auto rows = std::min(block, n - row);
++            for (std::size_t j = 0; j < rows; ++j)
++                for (std::size_t i = 0; i < rows; ++i)
++                    left[j * rows + i] = j < i ? a[(row + j) * n + row + i] : i == j ? 1. : 0.;
++            for (std::size_t k = 0; k <= std::min(row, column); k += block) {
++                const auto inner = std::min(block, n - k);
++                const auto *l = k == row ? left : a + k * n + row;
++                const auto *v = k == column ? right : a + column * n + k;
++                cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, int(rows), int(columns), int(inner),
++                            1., l, int(k == row ? rows : n), v, int(k == column ? columns : n),
++                            k ? 1. : 0., product, int(rows));
++            }
++            for (std::size_t first = 0; first < rows;) {
++                auto count = std::min<std::size_t>(64, rows - first);
++                for (std::size_t i = 1; i < count; ++i)
++                    if (permutation[row + first + i] != permutation[row + first] + i) { count = i; break; }
++                source.copy(source.context, permutation[row + first], count, column, columns, panel);
++                audit.solve_residual_materialization_bytes += count * columns * sizeof(double);
++                for (std::size_t i = 0; i < count; ++i)
++                    for (std::size_t j = 0; j < columns; ++j) {
++                        const auto index = (row + first + i) * tiles + (column + j) / width;
++                        const auto difference = std::abs(product[j * rows + first + i] - panel[i * columns + j]);
++                        const auto bound = (difference + gamma(4 * n) * growth[index] + 1e-270) * inflate;
++                        if (!std::isfinite(bound)) return false;
++                        error[index] = std::max(error[index], bound);
++                    }
++                first += count;
++            }
++        }
++    }
++    // Local induction in final permutation coordinates. Strict separation
++    // rejects ties and any uncertainty around the original 1e-14 threshold.
++    for (std::size_t p = 0; p < n; ++p) {
++        const auto tile = p / width;
++        const auto d = std::abs(a[p * n + p]), ep = error[p * tiles + tile];
++        const auto lower = std::nextafter(d - ep, -INFINITY);
++        diagonal[p] = lower;
++        if (!std::isfinite(ep) || !(lower > 1e-10)) return false;
++        for (std::size_t i = p + 1; i < n; ++i)
++            if (!(lower > (std::abs(a[p * n + i]) * d + error[i * tiles + tile]) * inflate)) return false;
++        for (std::size_t i = p + 1; i < n; ++i) {
++            const auto multiplier = std::abs(a[p * n + i]), ei = error[i * tiles + tile];
++            const auto quotient = (multiplier * d + ei) / lower;
++            const auto delta = ((ei + multiplier * ep) / lower + u * quotient + 1e-270) * inflate;
++            const auto absolute = (multiplier + delta) * inflate;
++            if (!(absolute < 2.)) return false;
++            rhs[i] = ((1. + u) * rhs[i] + (1. + u) * (1. + u) * absolute * rhs[p] + 1e-270) * inflate;
++            if (!std::isfinite(rhs[i]) || rhs[i] > 1e100) return false;
++            for (std::size_t t = tile; t < tiles; ++t) {
++                const auto index = i * tiles + t;
++                const auto next = ((1. + u) * error[index] +
++                    (delta + u * absolute * (2. + u)) * tail[p * tiles + t] +
++                    (1. + u) * (1. + u) * absolute * error[p * tiles + t] +
++                    u * growth[index] + 1e-270) * inflate;
++                if (!std::isfinite(next) || next > 1e100) return false;
++                error[index] = next;
++            }
++        }
++    }
++    for (std::size_t reverse = 0; reverse < n; ++reverse) {
++        const auto i = n - 1 - reverse;
++        double bound = rhs[i];
++        for (std::size_t j = i + 1; j < n; ++j)
++            bound = (bound + (std::abs(a[j * n + i]) + error[i * tiles + j / width]) * solution[j] + 1e-270) * inflate;
++        solution[i] = (bound / diagonal[i] + 1e-270) * inflate;
++        if (!std::isfinite(solution[i]) || solution[i] > 1e100) return false;
++    }
++    return true;
++}
++
+ #endif
+ } // namespace
+ 
+@@ -317,18 +457,7 @@
+     const auto roundoff_budget = 8. * gamma(n) * double(n) * double(n) * maximum_a;
+     if (!(margin > 4. * roundoff_budget && margin / double(n) > 1e-10)) return false;
+ 
+-    struct ThreadLimit {
+-        BLAS_THREADING prior;
+-        bool active = false;
+-        ThreadLimit() : prior(BLASGetThreading()) {
+-            if (prior == BLAS_THREADING_MULTI_THREADED || prior == BLAS_THREADING_SINGLE_THREADED) {
+-                active = BLASSetThreading(BLAS_THREADING_SINGLE_THREADED) == 0 &&
+-                         BLASGetThreading() == BLAS_THREADING_SINGLE_THREADED;
+-                if (!active) BLASSetThreading(prior);
+-            }
+-        }
+-        ~ThreadLimit() { if (active) BLASSetThreading(prior); }
+-    } threads;
++    ThreadLimit threads;
+     if (!threads.active) return false;
+     ++audit.accelerate_lu_attempts;
+     audit.native_library_workspace_reserve_bytes = 512 * n * sizeof(double);
+@@ -509,4 +638,112 @@
+     audit = replay;
+     return true;
+ }
++std::size_t solve_concat_reserve_doubles(std::size_t n, std::size_t k) {
++#if defined(CALMETRICS_HAVE_ACCELERATE_COVCHOL)
++    if (__builtin_available(macOS 15.0, *))
++        if (n >= 1024 && n <= 8192 && k >= 1 && k <= 64)
++            return n * k + 4 * n * ((n + 511) / 512) + 67 * n + 3 * 512 * 512 + 514 * n;
++#endif
++    (void)n; (void)k;
++    return 0;
++}
++
++bool try_solve_accelerate_concat(const Prepared &p, const SolveCoefficientBlocks &source,
++        Output &out, Workspace &work, Audit &audit, double *coefficients) {
++#if defined(CALMETRICS_HAVE_ACCELERATE_COVCHOL)
++    if (__builtin_available(macOS 15.0, *)) {
++        const auto n = p.args[0].shape.dim[0], k = p.args[1].shape.dim[1];
++        const auto reserve = solve_concat_reserve_doubles(n, k);
++        if (!reserve || std::fegetround() != FE_TONEAREST || !source.copy ||
++            p.spec->op != Op::solve_multi || p.count != 2 || p.args[0].data != coefficients ||
++            !p.args[0].contiguous() || p.args[0].shape.rank != 2 || p.args[0].shape.dim[1] != n ||
++            p.args[1].shape.rank != 2 || out.kind != Kind::number) return false;
++        const auto &b = p.args[1];
++        double maximum_b = 0.;
++        for (std::size_t i = 0; i < b.size(); ++i) {
++            const auto value = b.f(i), absolute = std::abs(value);
++            if (!std::isfinite(value) || (absolute > 0. && absolute < 1e-280)) return false;
++            maximum_b = std::max(maximum_b, absolute);
++        }
++        if (!(maximum_b > 0.) || maximum_b > 1e6) return false;
++        double maximum_a = 0., a_norm = 0.;
++        for (std::size_t i = 0; i < n; ++i) {
++            double row = 0.;
++            for (std::size_t j = 0; j < n; ++j) {
++                const auto value = coefficients[i * n + j], absolute = std::abs(value);
++                if (!std::isfinite(value) || (absolute > 0. && absolute < 1e-280)) return false;
++                maximum_a = std::max(maximum_a, absolute); row += absolute;
++            }
++            a_norm = std::max(a_norm, row / (1. - gamma(n)));
++        }
++        if (!(maximum_a >= 1e-8 && maximum_a <= 1e6)) return false;
++        ThreadLimit threads;
++        if (!threads.active) return false;
++        const auto needed = reserve - 514 * n;
++        work.ensure(needed, 0);
++        auto *rhs = work.doubles.data();
++        auto *guard = rhs + n * k;
++        audit.scratch_bytes = needed * sizeof(double) + n * (sizeof(__LAPACK_int) + sizeof(std::size_t));
++        audit.native_library_workspace_reserve_bytes = 512 * n * sizeof(double);
++        for (std::size_t j = 0; j < k; ++j)
++            for (std::size_t i = 0; i < n; ++i) rhs[j * n + i] = b.at(i, j);
++        audit.algorithm_copy_bytes += n * k * sizeof(double);
++        ++audit.accelerate_lu_attempts;
++        transpose_square(coefficients, n);
++        audit.algorithm_copy_bytes += n * n * sizeof(double);
++        std::vector<__LAPACK_int> pivots(n);
++        __LAPACK_int size = static_cast<__LAPACK_int>(n), columns = static_cast<__LAPACK_int>(k), info = 0;
++        factor_bounded_panels(size, coefficients, pivots.data(), 512, info);
++        bool safe = info == 0;
++        for (std::size_t i = 0; i < n * n; ++i) safe = safe && std::isfinite(coefficients[i]);
++        if (!safe || !measured_local_lu_certificate(coefficients, pivots.data(), n, source, guard, audit)) {
++            ++audit.accelerate_lu_fallbacks; return false;
++        }
++        const char trans = 'N';
++        dgetrs_(&trans, &size, &columns, coefficients, &size, pivots.data(), rhs, &size, &info);
++        if (info != 0) { ++audit.accelerate_lu_fallbacks; return false; }
++        // Factor is dead. Its private arena holds the original-equation residual
++        // panels; only the solved RHS must remain live in separate workspace.
++        auto *panel = coefficients, *product = panel + 64 * n;
++        auto *absolute_x = product + 64 * k, *absolute_product = absolute_x + n * k;
++        double maximum_x = 0.;
++        for (std::size_t i = 0; i < n * k; ++i) {
++            if (!std::isfinite(rhs[i]) || std::abs(rhs[i]) > 1e100) {
++                ++audit.accelerate_lu_fallbacks; return false;
++            }
++            absolute_x[i] = std::abs(rhs[i]); maximum_x = std::max(maximum_x, absolute_x[i]);
++        }
++        double residual = 0.;
++        for (std::size_t first = 0; first < n; first += 64) {
++            const auto count = std::min<std::size_t>(64, n - first);
++            source.copy(source.context, first, count, 0, n, panel);
++            audit.solve_residual_materialization_bytes += count * n * sizeof(double);
++            cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans, int(count), int(k), int(n),
++                        1., panel, int(n), rhs, int(n), 0., product, int(k));
++            for (std::size_t i = 0; i < count * n; ++i) panel[i] = std::abs(panel[i]);
++            cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans, int(count), int(k), int(n),
++                        1., panel, int(n), absolute_x, int(n), 0., absolute_product, int(k));
++            for (std::size_t i = 0; i < count; ++i)
++                for (std::size_t j = 0; j < k; ++j) {
++                    const auto original_b = b.at(first + i, j);
++                    residual = std::max(residual, std::abs(product[i * k + j] - original_b) +
++                        gamma(4 * n) * (absolute_product[i * k + j] + std::abs(original_b)));
++                }
++        }
++        const auto scale = a_norm * maximum_x + maximum_b;
++        if (!std::isfinite(residual) || !std::isfinite(scale) || !(residual <= 1e-10 * scale)) {
++            ++audit.accelerate_lu_fallbacks; return false;
++        }
++        for (std::size_t i = 0; i < n; ++i)
++            for (std::size_t j = 0; j < k; ++j) out.set(i * k + j, rhs[j * n + i]);
++        audit.algorithm_copy_bytes += n * k * sizeof(double);
++        audit.isa = "accelerate-panel-lu-dgetrs-measured-private";
++        ++audit.accelerate_lu_calls;
++        return true;
++    }
++#endif
++    (void)p; (void)source; (void)out; (void)work; (void)audit; (void)coefficients;
++    return false;
++}
++
+ } // namespace calmetrics_engine::ops
+--- a/tests/test_concat_solve_workspace.py
++++ b/tests/test_concat_solve_workspace.py
+@@ -1,4 +1,7 @@
+ """The private block coefficient is consumed by the canonical solve, not copied."""
++import os
++import platform
++
+ import numpy as np
+ import pytest
+ 
+@@ -6,6 +9,11 @@
+ from calmetrics_engine import operators as op
+ from .test_solve_library import residual, same_ieee
+ from .test_guarded_lu_graph import count
++
++LIBRARY = int(os.environ.get('CALMETRICS_TEST_EXPECT_ACCELERATE', str(int(
++    platform.system() == 'Darwin' and platform.machine() == 'arm64'
++    and int(platform.mac_ver()[0].split('.')[0] or 0) >= 15
++    and os.environ.get('CME_EXPECT_ACCELERATE') != '0'))))
+ 
+ COEFFICIENT = 'concatenate(concatenate(h,transpose(g),1),concatenate(g,z,1),0)'
+ RHS = 'concatenate(b,zr,0)'
+@@ -44,16 +52,19 @@
+ @pytest.mark.parametrize('layout',['c','f'])
+ @pytest.mark.parametrize('order',['C','F'])
+ @pytest.mark.parametrize('active',[1,8])
+-def test_kkt_block_graph_one_dead_coefficient_zero_workspace(layout,order,active):
++def test_kkt_block_graph_private_coefficient_and_bounded_workspace(layout,order,active):
+     values = fixture(layout,active=active); saved = {k:v.copy() for k,v in values.items()}
+     for value in values.values(): value.flags.writeable=False
+     coefficient,rhs,expected = original(values)
+     result=run(graph(order),values);actual=result.outputs[0].values[0]
+-    same_ieee(actual,expected);residual(coefficient,actual,rhs)
+-    assert count(result,'accelerate_lu_calls')==0
+-    assert count(result,'accelerate_lu_attempts')==0
+-    assert count(result,'algorithm_copy_bytes')==rhs.nbytes
+-    assert count(result,'operator_workspace_capacity_bytes')==0
++    np.testing.assert_allclose(actual,expected,rtol=1e-10,atol=4.9e-5);residual(coefficient,actual,rhs)
++    assert count(result,'accelerate_lu_calls')==LIBRARY
++    assert count(result,'accelerate_lu_attempts')==LIBRARY
++    assert count(result,'algorithm_copy_bytes')==LIBRARY*coefficient.nbytes+(1+LIBRARY)*rhs.nbytes
++    if LIBRARY:assert 0<count(result,'operator_workspace_capacity_bytes')<coefficient.nbytes
++    else:
++        assert count(result,'operator_workspace_capacity_bytes')==0
++        same_ieee(actual,expected)
+     assert count(result,'input_copy_bytes')==0
+     assert not actual.flags.writeable
+     assert actual.flags.c_contiguous if order=='C' else actual.flags.f_contiguous
+@@ -107,10 +118,10 @@
+     saved=values['b'].copy();values['b'].flags.writeable=False
+     coefficient,rhs,expected=original(values)
+     result=run(graph(order),values)
+-    same_ieee(result.outputs[0].values[0],expected)
++    np.testing.assert_allclose(result.outputs[0].values[0],expected,rtol=1e-10,atol=4.9e-5)
+     residual(coefficient,result.outputs[0].values[0],rhs)
+     same_ieee(values['b'],saved)
+-    assert count(result,'algorithm_copy_bytes')==rhs.nbytes
++    assert count(result,'algorithm_copy_bytes')==LIBRARY*coefficient.nbytes+(1+LIBRARY)*rhs.nbytes
+ 
+ 
+ @pytest.mark.parametrize('order',['C','F'])
+--- a/tests/test_measured_concat_solve.py
++++ b/tests/test_measured_concat_solve.py
+@@ -0,0 +1,178 @@
++"""Terminal private concat LU: measured reconstruction, replay and ownership."""
++import os
++import pickle
++import platform
++
++import numpy as np
++import pytest
++from calmetrics_engine import AdaptiveScheduler, GraphCompiler, SharedInputBundle, operators as op
++from .test_guarded_lu_graph import count, COUNTEREXAMPLES
++from .test_solve_library import same_ieee, residual
++from .test_typed_results import config
++
++TYPES={k:dict(kind='matrix',axes=['asset','asset'],shape=shape) for k,shape in {
++    'h':['N','N'],'g':['M','N'],'z':['M','M'],'b':['N','K'],'zr':['M','K']}.items()}
++LIBRARY = int(os.environ.get('CALMETRICS_TEST_EXPECT_ACCELERATE', str(int(
++    platform.system() == 'Darwin' and platform.machine() == 'arm64'
++    and int(platform.mac_ver()[0].split('.')[0] or 0) >= 15
++    and os.environ.get('CME_EXPECT_ACCELERATE') != '0'))))
++
++COEFFICIENT='concatenate(concatenate(h,transpose(g),1),concatenate(g,z,1),0)'
++RHS='concatenate(b,zr,0)'
++EXPR=f'solve_multi({COEFFICIENT},{RHS})'
++
++
++def fixture(n=1024, mode='c', columns=2, constraints=16):
++    rng=np.random.default_rng(731)
++    f=rng.normal(size=(n,8))*.01
++    h=f@f.T+np.diag(np.linspace(.5,1.,n));g=np.zeros((constraints,n))
++    if constraints:g[0]=1.
++    for i in range(1,constraints):g[i,n-i]=-1.
++    values=dict(h=h,g=g,z=np.zeros((constraints,constraints)),b=rng.normal(size=(n,columns)),zr=np.zeros((constraints,columns)))
++    if mode=='f':values={k:np.asfortranarray(v) for k,v in values.items()}
++    elif mode=='reverse':values={k:v[::-1,::-1] for k,v in values.items()}
++    elif mode=='zero':values['b']=np.broadcast_to(values['b'][:,:1],values['b'].shape)
++    for v in values.values():v.flags.writeable=False
++    return values
++
++
++def original(data):
++    h,g,z,b,zr=[data[k] for k in TYPES]
++    return np.block([[h,g.T],[g,z]]),np.concatenate((b,zr),axis=0)
++
++
++def run(data,order='C',lane='single',expression=EXPR,**kwargs):
++    graph=GraphCompiler(TYPES).compile(expression,result_format='typed',output_order=order,**kwargs)
++    bounds=np.zeros(1,np.int64)
++    with AdaptiveScheduler(cpu_budget=2,config=config(lane)) as scheduler:
++        return scheduler.execute(graph,data,bounds,bounds)
++
++
++@pytest.mark.parametrize('n',[1008,1024,1031])
++@pytest.mark.parametrize('mode',['c','f','reverse','zero'])
++@pytest.mark.parametrize('order',['C','F'])
++def test_non_dd_math_ownership_and_rectangles(n,mode,order):
++    data=fixture(n,mode);a,b=original(data);expected=op.solve_multi(a,b)
++    result=run(data,order);value=result.outputs[0].values[0]
++    np.testing.assert_allclose(value,expected,rtol=1e-10,atol=4.9e-5)
++    residual(a,value,b)
++    assert count(result,'accelerate_lu_attempts')==LIBRARY
++    if LIBRARY and n!=1008 and mode!='reverse':
++        assert count(result,'accelerate_lu_calls')==1
++        assert count(result,'solve_residual_materialization_bytes')==2*a.nbytes
++    else:
++        assert count(result,'accelerate_lu_calls')==0
++        assert count(result,'accelerate_lu_fallbacks')==LIBRARY
++        same_ieee(value,expected)
++    assert count(result,'input_copy_bytes')==0
++    assert value.flags.c_contiguous if order=='C' else value.flags.f_contiguous
++    assert not value.flags.writeable
++    for input in data.values():assert not np.shares_memory(input,value)
++
++
++@pytest.mark.parametrize('entry',COUNTEREXAMPLES)
++@pytest.mark.parametrize('order',['C','F'])
++def test_original_threshold_counterexamples(entry,order):
++    data=fixture(constraints=0,columns=1);h=np.eye(1024)*2.;h[:2,:2]=entry['a'];data['h']=h
++    a,b=original(data)
++    try:expected=op.solve_multi(a,b)
++    except ValueError as error:
++        with pytest.raises(ValueError) as actual:run(data,order)
++        assert str(actual.value)==str(error)
++    else:
++        result=run(data,order);same_ieee(result.outputs[0].values[0],expected)
++        assert count(result,'accelerate_lu_calls')==0
++        assert count(result,'accelerate_lu_fallbacks')==LIBRARY
++
++
++@pytest.mark.parametrize('fault',['a_nan','b_nan','both','singular','zero_rhs','tiny_rhs','large_rhs'])
++@pytest.mark.parametrize('order',['C','F'])
++def test_input_errors_replay_and_zero_results(fault,order):
++    data={k:v.copy() for k,v in fixture(constraints=0).items()}
++    if fault in ['a_nan','both']:data['h'][-1,-1]=np.nan
++    if fault in ['b_nan','both']:data['b'][-1,-1]=np.nan
++    if fault=='singular':data['h'][-1]=0.
++    if fault=='zero_rhs':data['b'][:]=0.
++    if fault=='tiny_rhs':data['b'][:]=1e-300
++    if fault=='large_rhs':data['b'][:]=1e308
++    a,b=original(data)
++    try:expected=op.solve_multi(a,b)
++    except ValueError as error:
++        with pytest.raises(ValueError) as actual:run(data,order)
++        assert str(actual.value)==str(error)
++    else:
++        result=run(data,order);same_ieee(result.outputs[0].values[0],expected)
++        assert count(result,'accelerate_lu_calls')==0
++
++
++@pytest.mark.parametrize('mode',['downstream','isolate','extra'])
++def test_consumer_and_error_policy_exclusions(mode):
++    data=fixture();a,b=original(data)
++    if mode=='downstream':expr=EXPR+'+0';kwargs={}
++    elif mode=='isolate':expr=EXPR;kwargs=dict(error_policy='isolate')
++    else:expr=[EXPR,'sum_axis(b,0)'];kwargs={}
++    result=run(data,expression=expr,**kwargs)
++    if mode=='extra':assert count(result,'accelerate_lu_calls')==LIBRARY
++    else:
++        assert count(result,'accelerate_lu_calls')==0
++        same_ieee(result.outputs[0].values[0],op.add(op.solve_multi(a,b),0.) if mode=='downstream' else op.solve_multi(a,b))
++
++
++def test_retained_generations_and_changed_contents():
++    data={k:v.copy() for k,v in fixture(mode='f').items()}
++    graph=GraphCompiler(TYPES).compile(EXPR,result_format='typed',output_order='F')
++    bounds=np.zeros(1,np.int64)
++    with AdaptiveScheduler(cpu_budget=1) as scheduler:
++        first=scheduler.execute(graph,data,bounds,bounds);old=first.outputs[0].values[0].copy()
++        data['b']*=2
++        second=scheduler.execute(graph,data,bounds,bounds)
++        prepared=scheduler.prepare_execution(graph,data,bounds,bounds)
++        third=prepared.run_snapshot()
++        assert count(first,'accelerate_lu_calls')==count(second,'accelerate_lu_calls')==LIBRARY
++        assert count(third,'accelerate_lu_calls')==LIBRARY
++    same_ieee(first.outputs[0].values[0],old)
++    np.testing.assert_allclose(second.outputs[0].values[0],2*old,rtol=1e-10,atol=4.9e-5)
++    assert not np.shares_memory(first.outputs[0].values[0],second.outputs[0].values[0])
++    np.testing.assert_allclose(second.outputs[0].values[0],third.outputs[0].values[0],rtol=1e-10,atol=4.9e-5)
++
++
++@pytest.mark.parametrize('lane',['single','thread','process_inline','process_shared'])
++@pytest.mark.parametrize('order',['C','F'])
++@pytest.mark.parametrize('fault',[False,True],ids=['healthy','singular'])
++def test_concat_transport_and_lifetime(lane,order,fault):
++    data=fixture(mode='f',columns=1)
++    if fault:
++        data['g']=np.zeros_like(data['g']);data['g'].flags.writeable=False
++    saved={k:v.copy() for k,v in data.items()}
++    a,b=original(data)
++    graph=pickle.loads(pickle.dumps(GraphCompiler(TYPES).compile(
++        EXPR,result_format='typed',output_order=order)))
++    bounds=np.zeros(2,np.int64)
++    with AdaptiveScheduler(cpu_budget=2,config=config(lane)) as scheduler:
++        def execute(inputs):return scheduler.execute(graph,inputs,bounds,bounds)
++        def check_input(inputs):
++            if fault:
++                with pytest.raises(ValueError) as reference:op.solve_multi(a,b)
++                error_type=RuntimeError if lane.startswith('process') else ValueError
++                with pytest.raises(error_type) as actual:execute(inputs)
++                expected=('native worker: ' if lane.startswith('process') else '')+str(reference.value)
++                assert str(actual.value)==expected
++                return None
++            return execute(inputs),execute(inputs)
++        if lane=='process_shared':
++            with SharedInputBundle.from_inputs(data) as bundle:results=check_input(bundle)
++        else:results=check_input(data)
++    for k,v in data.items():same_ieee(v,saved[k])
++    if fault:return
++    first,second=results
++    assert first.plan.lane==('process' if lane.startswith('process') else lane)
++    assert count(first,'accelerate_lu_calls')==2*LIBRARY
++    for result in results:
++        for row in range(2):
++            value=result.outputs[0].values[row]
++            residual(a,value,b)
++            assert not value.flags.writeable
++            for input in data.values():assert not np.shares_memory(input,value)
++    for x in first.outputs[0].values:
++        for y in second.outputs[0].values:assert not np.shares_memory(x,y)
++    assert not np.shares_memory(*first.outputs[0].values)

@@ -1,0 +1,208 @@
+--- before/cpp/operators/matrix.cpp
++++ after/cpp/operators/matrix.cpp
+@@ -1,5 +1,6 @@
+ #include "calmetrics_engine/operators.hpp"
+ #include "calmetrics_engine/matrix_backend.hpp"
++#include "solve_multi_library.hpp"
+ #include <algorithm>
+ #include <cmath>
+ #include <numeric>
+@@ -81,7 +82,7 @@
+     }
+     finish_covariance_matrix(out, p.spec->op == Op::correlation);
+ }
+-void solve(const Prepared &p, Output &out, Workspace &work, Audit &audit) {
++void solve(const Prepared &p, Output &out, Workspace &work, Isa isa, Audit &audit) {
+     const auto &matrix = p.args[0];
+     const auto &y = p.args[1];
+     const auto n = y.size();
+@@ -96,6 +97,7 @@
+             coefficients[i * n + j] = matrix.at(i, j);
+     }
+     audit.algorithm_copy_bytes = (n * n + n) * sizeof(double);
++    if (isa == Isa::scalar || !library_eliminate_multi<false>(coefficients, rhs, n, 1, audit))
+     for (std::size_t col = 0; col < n; ++col) {
+         std::size_t pivot_row = col;
+         double magnitude = std::abs(coefficients[col * n + col]);
+@@ -164,7 +166,7 @@
+         return;
+     }
+     if (op == Op::solve) {
+-        solve(p, out, work, audit);
++        solve(p, out, work, requested, audit);
+         return;
+     }
+     auto *result = static_cast<double *>(out.data);
+--- before/cpp/operators/solve_multi_library.hpp
++++ after/cpp/operators/solve_multi_library.hpp
+@@ -59,13 +59,16 @@
+     for (std::size_t j = 0; j < count; ++j) target[j] -= factor * source[j];
+ }
+ 
++template <bool RejectNaNPivot>
+ CME_SOLVE_MULTI_INLINE void eliminate_panel(double *matrix, double *rhs,
+     std::size_t n, std::size_t columns, std::size_t first, std::size_t last) {
+     for (auto k = first; k < last; ++k) {
+         auto pivot = k;
+         for (auto i = k + 1; i < n; ++i)
+             if (std::abs(matrix[i * n + k]) > std::abs(matrix[pivot * n + k])) pivot = i;
+-        require(std::abs(matrix[pivot * n + k]) > 1e-14, "SINGULAR_MATRIX");
++        const auto magnitude = std::abs(matrix[pivot * n + k]);
++        // The two public solvers retain their different historical NaN rules.
++        require(RejectNaNPivot ? magnitude > 1e-14 : !(magnitude <= 1e-14), "SINGULAR_MATRIX");
+         if (pivot != k) {
+             // Saved multipliers from this panel must follow the row permutation.
+             // Lower cells belonging to earlier panels are no longer consumed.
+@@ -117,12 +120,13 @@
+     }
+ }
+ 
++template <bool RejectNaNPivot>
+ CME_SOLVE_MULTI_INLINE void eliminate(double *matrix, double *rhs,
+     std::size_t n, std::size_t columns) {
+     constexpr std::size_t panel_width = 32;
+     for (std::size_t first = 0; first < n;) {
+         const auto last = first + std::min(panel_width, n - first);
+-        eliminate_panel(matrix, rhs, n, columns, first, last);
++        eliminate_panel<RejectNaNPivot>(matrix, rhs, n, columns, first, last);
+         auto i = last;
+         if (n >= 1024)
+             for (; n - i >= 4; i += 4) update_group(matrix, n, i, first, last, last);
+@@ -136,12 +140,13 @@
+ 
+ // Private physical implementation. Input copies, back substitution and finite
+ // checks stay in the canonical caller; explicit scalar selection bypasses it.
++template <bool RejectNaNPivot = true>
+ CME_SOLVE_MULTI_INLINE bool library_eliminate_multi(double *matrix, double *rhs,
+     std::size_t n, std::size_t columns, Audit &audit) {
+ #if defined(CALMETRICS_HAVE_EIGEN_ROTATION) && defined(__APPLE__) && defined(__aarch64__)
+     if (__builtin_available(macOS 15.0, *)) {
+         if (n < 128) return false;
+-        solve_multi_detail::eliminate(matrix, rhs, n, columns);
++        solve_multi_detail::eliminate<RejectNaNPivot>(matrix, rhs, n, columns);
+         audit.isa = "eigen-array-blocked-lu";
+         return true;
+     }
+--- before/tests/operator_native_tests.cpp
++++ after/tests/operator_native_tests.cpp
+@@ -1113,6 +1113,38 @@
+             check(std::fegetround()==rounding,"solve changed caller rounding mode");
+         }
+         {
++            // Single solve permits NaN pivots and must leave out untouched on
++            // elimination failure, unlike the multi-RHS finite-check contract.
++            constexpr std::size_t n=129;
++            for (int fault=0;fault<3;++fault) {
++                std::vector<double> a(n*n,0.),b(n,2.),scalar(n+2,-913.25),automatic(n+2,-913.25);
++                for (std::size_t i=0;i<n;++i) a[i*n+i]=2.;
++                if (fault==1) a[64*n+64]=std::numeric_limits<double>::quiet_NaN();
++                if (fault==2) a[(n-1)*n+n-1]=0.;
++                const auto before_a=a,before_b=b;
++                std::array<ops::Value,8> args{matrix(a.data(),n,n),vector(b.data(),n)};
++                const auto plan=ops::prepare(ops::lookup("solve"),args.data(),2);
++                ops::Workspace workspace;workspace.ensure(plan.scratch_doubles,plan.scratch_indices);
++                for (auto isa:{ops::Isa::scalar,ops::Isa::automatic}) {
++                    auto &storage=isa==ops::Isa::scalar ? scalar : automatic;
++                    ops::Output out;out.shape=plan.output_shape;out.data=storage.data()+1;
++                    ops::Audit audit;bool failed=false;
++                    try {ops::execute(plan,out,workspace,isa,audit);}
++                    catch (const ops::Error &error) {failed=std::strcmp(error.what(),"SINGULAR_MATRIX")==0;}
++                    check(failed==(fault==2),"single solve changed pivot failure contract");
++                    check(storage.front()==-913.25 && storage.back()==-913.25,"single solve crossed output");
++                    if (fault==2)
++                        check(std::all_of(storage.begin(),storage.end(),[](double x){return x==-913.25;}),
++                              "single solve wrote output before elimination failure");
++                    else for (std::size_t i=0;i<n;++i)
++                        check(fault==1 ? std::isnan(storage[i+1]) : storage[i+1]==1.,
++                              "single solve changed NaN propagation or known solution");
++                }
++                check(std::memcmp(a.data(),before_a.data(),a.size()*8)==0 && b==before_b,
++                      "single solve changed inputs");
++            }
++        }
++        {
+             // Empty RHS/output buffers may be null, but A still has a solve
+             // contract. Complete finite validation precedes pivot rejection.
+             constexpr std::size_t n=129;
+--- before/tests/test_solve_library.py
++++ after/tests/test_solve_library.py
+@@ -1,4 +1,4 @@
+-"""Ordered solve_multi library contract and unchanged solve coverage.
++"""Shared ordered LU library with distinct solve/solve_multi contracts.
+ 
+ The reference below transcribes the pre-optimization per-k/per-row arithmetic
+ using separate NumPy multiply/subtract calls. It is test-only, not a fallback.
+@@ -160,7 +160,7 @@
+ 
+ 
+ def assert_dispatch(name, audit, n, simd, eigen_backend_available):
+-    if simd == "scalar" or name != "solve_multi" or n < MIN_N or not eigen_backend_available:
++    if simd == "scalar" or n < MIN_N or not eigen_backend_available:
+         assert audit["isa"] == "scalar"
+     else:
+         assert audit["isa"] == LIBRARY_ISA
+--- /dev/null
++++ after/tests/test_single_solve_library.py
+@@ -0,0 +1,51 @@
++"""Large single-RHS LU reuses Eigen without adopting multi-RHS NaN semantics."""
++import numpy as np
++import pytest
++
++from calmetrics_engine import operators as op
++
++from .test_solve_library import residual, same_ieee, sample
++
++
++@pytest.mark.parametrize("n", [1024, 1025])
++@pytest.mark.parametrize("layout", ["c", "f", "negative"])
++def test_single_rhs_grouped_pivots_and_owned_result(n, layout):
++    a, b = sample("solve", n, layout=layout)
++    indices = np.array([0, 32, 65, n - 1])
++    a[indices] = a[np.roll(indices, 1)]
++    before_a, before_b = a.copy(), b.copy()
++    a.flags.writeable = b.flags.writeable = False
++    expected = op.solve(a, b, simd="scalar")
++    storage = np.full(n + 2, -913.25)
++    actual, audit = op.solve(a, b, out=storage[1:-1], audit=True)
++    same_ieee(actual, expected)
++    residual(a, actual, b)
++    same_ieee(a, before_a)
++    same_ieee(b, before_b)
++    np.testing.assert_array_equal(storage[[0, -1]], -913.25)
++    assert audit["workspace_bytes"] == (n * n + n) * 8
++    assert audit["algorithm_copy_bytes"] == (n * n + n) * 8
++
++
++@pytest.mark.parametrize("fault", ["nan_pivot", "overflow", "zero_times_inf"])
++def test_single_rhs_nonfinite_propagation_across_grouped_panels(fault):
++    n = 1024
++    a, b = np.eye(n) * 2, np.ones(n)
++    maximum = np.finfo(np.float64).max
++    if fault == "nan_pivot":
++        a[64, 64] = np.nan
++    elif fault == "overflow":
++        a[64:66, 64:66] = [[maximum, maximum], [-maximum, maximum]]
++    else:
++        a[0, 0], a[1, 0] = 1, -1
++        a[0, -1] = a[1, -1] = maximum
++    expected = op.solve(a, b, simd="scalar")
++    actual = op.solve(a, b)
++    same_ieee(actual, expected)
++    if fault == "overflow":
++        # The historical solver permits the infinite pivot: division yields
++        # zero rather than an exception or necessarily a NaN result.
++        assert np.isfinite(actual).all()
++        assert actual[64] == 1.0 / maximum and actual[65] == 0.0
++    else:
++        assert np.isnan(actual).any()
+--- before/docs/execution-guide.md
++++ after/docs/execution-guide.md
+@@ -76,7 +76,7 @@
+ 
+ `eigen_matvec_calls` 记录完成算子的实际Eigen矩阵向量内核次数，贯通图、作用域与worker；失败算子的部分审计仍不保证返回。先前未发布的Accelerate GEMV路径已由Eigen实现替换；系统 Accelerate 用于上述受限协方差→Cholesky 和下述独立无消去 MatMul 图路径。连续rank-1 `dot` 和其消费者仍用标准C++ `std::inner_product`，保持原顺序及通用strides。直接调用的完整Cholesky及通用BLAS GEMM候选尚未替换；下述保序矩阵路径分别复用Eigen Array及固定版本的Eigen pack/gebp。
+ 
+-`solve_multi(A,B)` 在相同平台、Eigen开启、n≥128且非scalar时，按32列面板消元，并用固定16列Eigen Map融合两次有序更新。n≥1024时，已完成主元面板后的独立尾部行再用4行×8列的固定Eigen数组共享主元读取，按原主元顺序更新后一次写回；面板内递推、剩余行和列尾部保序。它复用原有n²工作区保存当前面板因子；分组数组的逻辑容量为256 B，不新增数值堆缓冲，实际调用栈另行测量。主元、阈值、RHS更新、回代和失败输出契约不变。直接审计的 `isa="eigen-array-blocked-lu"` 表示采用该物理路径；整图不单独归因此子步骤，不新增库调用计数。显式scalar、较小矩阵和未准入平台仍用原路径。`solve` 保留原实现；该优化不等于全部矩阵分解已由库实现，也不表示时间和完整内存验收已全面通过。
++`solve_multi(A,B)` 和单右端 `solve(A,b)` 在相同平台、Eigen开启、n≥128且非scalar时，复用同一32列面板消元，并用固定16列Eigen Map融合两次有序更新。n≥1024时，已完成主元面板后的独立尾部行再用4行×8列的固定Eigen数组共享主元读取，按原主元顺序更新后一次写回；面板内递推、剩余行和列尾部保序。它复用原有n²工作区保存当前面板因子；分组数组的逻辑容量为256 B，不新增数值堆缓冲，实际调用栈另行测量。主元、阈值、RHS更新、回代和失败输出契约不变。直接审计的 `isa="eigen-array-blocked-lu"` 表示采用该物理路径；整图不单独归因此子步骤，不新增库调用计数。显式scalar、较小矩阵和未准入平台仍用原路径。单右端仍保留原 `n²+n` 私有系数/RHS 工作区及原回代；共享内核用编译期主元判据保留其特殊规则：只拒绝 `abs(pivot)<=1e-14`，不把 NaN 主元改报奇异，也不新增有限性检查。单右端消元失败前不写公开输出；多右端仍保留其原有限性检查和失败前缀。这是物理内核复用，不统一两个数学契约，也不表示时间和完整内存验收已全面通过。
+ 
+ 单一 typed float64 矩阵根 `matmul(a,b)` 或私有 `transpose(matmul(a,b))`，在 macOS 15+ arm64、Accelerate 开启、M/N为512–4096且K为256–4096时，可先采用受限系统 DGEMM。两输入须为正向 C/F leading-dimension 布局；每次执行按物理连续方向扫描实际使用的数据，不读取padding，也不缓存 prepared 请求的数值资格。允许 +0 或绝对值位于 `[2^-128,2^128]` 的有限非零值；A 每行、B 每列的非零值须分别同号，保证每个点积不存在正负消去。含负值时另要求当前线程为 `FE_TONEAREST`，不修改调用者舍入模式。负零、A行或B列非零符号不一致、非有限、极端尺度、特殊stride或负值域的其他舍入模式沿原路径执行。多根、比较/状态等下游消费、isolate、子作用域及观察器不准入，避免改变离散或迭代行为；直接算子入口保持原实现。借用输入，直接写已规划 C 字节缓冲，私有转置的 auto/F 结果仍为连续 F。
+ 

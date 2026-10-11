@@ -1,0 +1,20 @@
+{
+  "review_against": "ac5da987ed48dcf6647098345618c02cf7d2fa1a82abedfcf90c721ecf9e5021",
+  "build_id": "a853e89270c0fc1ad63cd972e93514ea67de95a0dc6365286e25c4bd807147d9",
+  "changed_native_source_files": [
+    "cpp/graph.cpp"
+  ],
+  "findings": [],
+  "qualified_scope": "single independent typed float64 rank2 covariance root; no consumers, scopes or isolate; explicit F",
+  "proof": "canonical upper triangle is mirrored bitwise; internal C writer publishes F strides only after completion; final root addresses already coincide",
+  "planner": "one metadata admission governs root destination and removal of root arena; remaining budget unchanged",
+  "observer": "canonical math retained, actual F descriptors validated with canaries in native test",
+  "protocol": "no new fields; Program v7 and worker IPC17 unchanged; decode/pickle metadata reconstruction tested",
+  "runtime": "72 new Python cases plus 16 partial/derived-window cases; 6 native observer cases, all native and ASan suites passed",
+  "formula": "469 original Microsoft Excel snapshot cases / 3056 values passed; no new Excel recalculation",
+  "timed_cases": 14,
+  "timed_native_bit_patterns_changed": 0,
+  "memory_validation_pending": false,
+  "memory_validation": "60 fresh children; full F root matrix eliminated; allocation epoch decreases 32/128MiB; RSS request deltas disclosed",
+  "performance_status": "ADOPT_SCOPED_F_ROOT_IMPROVEMENT; ALL_ENGINE_TARGET_REMAINS_OPEN"
+}

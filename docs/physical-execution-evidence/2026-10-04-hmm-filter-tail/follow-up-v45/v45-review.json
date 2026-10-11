@@ -1,0 +1,106 @@
+{
+  "status": "PROGRESS",
+  "actual_integrated": true,
+  "goal_complete": false,
+  "submission": false,
+  "actual_build_id": "567024557ccd7fd60d85ce57d609ab0112fefbd816938a3a5c077165ee275b40",
+  "candidate_build_id": "567024557ccd7fd60d85ce57d609ab0112fefbd816938a3a5c077165ee275b40",
+  "candidate_full_counts": {
+    "tests": 15203,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "normal_related_python": 797,
+  "normal_native": 9,
+  "sanitizer_related_python": 797,
+  "sanitizer_native": 9,
+  "library_off_related_python": 797,
+  "library_off_native": 9,
+  "actual_related_python": 797,
+  "actual_native": 9,
+  "actual_full_rerun": false,
+  "full_evidence_boundary": "Full suite on candidate; exact 93-file native identity and matching test bytes on actual checkout, followed by actual native/797 and complete-request replay. Not a second full-suite run.",
+  "candidate_time": {
+    "training": {
+      "cpp_actual": 5.06335616693832,
+      "cpp_candidate": 5.139013812644407,
+      "njit_hoisted": 10.524112104205415
+    },
+    "chain": {
+      "cpp_actual": 5.237079937243834,
+      "cpp_candidate": 5.22732231230475,
+      "njit_hoisted": 10.63615966681391
+    }
+  },
+  "candidate_memory": {
+    "training": {
+      "cpp_actual": {
+        "warm_heap_peak": 152602521,
+        "rss_delta_median": 177635328
+      },
+      "cpp_candidate": {
+        "warm_heap_peak": 116614809,
+        "rss_delta_median": 136560640
+      },
+      "njit_hoisted": {
+        "warm_heap_peak": 176512336,
+        "rss_delta_median": 172621824
+      }
+    },
+    "chain": {
+      "cpp_actual": {
+        "warm_heap_peak": 275677220,
+        "rss_delta_median": 276152320
+      },
+      "cpp_candidate": {
+        "warm_heap_peak": 275689508,
+        "rss_delta_median": 280281088
+      },
+      "njit_hoisted": {
+        "warm_heap_peak": 272514528,
+        "rss_delta_median": 336265216
+      }
+    }
+  },
+  "actual_time": {
+    "training": {
+      "cpp_previous": 5.172823625151068,
+      "cpp_actual": 5.199548250064254,
+      "njit_hoisted": 10.764680624939501
+    },
+    "chain": {
+      "cpp_previous": 5.409957959316671,
+      "cpp_actual": 5.322503749746829,
+      "njit_hoisted": 11.134791125077754
+    }
+  },
+  "actual_fresh_memory": {
+    "training": {
+      "warm_heap_peak": 116614809,
+      "rss_deltas": [
+        141049856,
+        137003008,
+        141049856
+      ],
+      "rss_delta_median": 141049856
+    },
+    "chain": {
+      "warm_heap_peak": 275689508,
+      "rss_deltas": [
+        280166400,
+        270712832,
+        271695872
+      ],
+      "rss_delta_median": 271695872
+    }
+  },
+  "preserved_existing_files": 293,
+  "remaining": [
+    "High-amplitude large FF matrix workloads versus strong NJIT.",
+    "Platform random exploration/repair/multiround/frontier complete-request closure.",
+    "Full allocation/CPU arena/mmap/process-tree audit and cross-platform measurements."
+  ],
+  "excel": "X10 physical optimization only; mathematical recipes unchanged; no new Excel desktop recalculation.",
+  "limitations": "Malloc excludes Python arena suballocations, some zones/mmap/stack/process-tree; RSS 0.5ms sampling may miss short peaks. No complete leak/allocation or whole-platform qualification claim."
+}

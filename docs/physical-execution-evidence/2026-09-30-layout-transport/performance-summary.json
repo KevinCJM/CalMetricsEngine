@@ -1,0 +1,429 @@
+{
+  "cases": [
+    {
+      "case": {
+        "n": 252,
+        "d": 8,
+        "order": "C",
+        "mode": "model_create"
+      },
+      "median_ms": {
+        "old": 0.0454795,
+        "new": 0.040729
+      },
+      "new_over_old": 0.8955463450565639
+    },
+    {
+      "case": {
+        "n": 252,
+        "d": 8,
+        "order": "C",
+        "mode": "inline"
+      },
+      "median_ms": {
+        "old": 0.443083,
+        "new": 0.4434585
+      },
+      "new_over_old": 1.0008474710155884
+    },
+    {
+      "case": {
+        "n": 252,
+        "d": 8,
+        "order": "C",
+        "mode": "shared"
+      },
+      "median_ms": {
+        "old": 0.103458,
+        "new": 0.103333
+      },
+      "new_over_old": 0.9987917802393241
+    },
+    {
+      "case": {
+        "n": 252,
+        "d": 8,
+        "order": "F",
+        "mode": "model_create"
+      },
+      "median_ms": {
+        "old": 0.044667,
+        "new": 0.0398125
+      },
+      "new_over_old": 0.8913179752389908
+    },
+    {
+      "case": {
+        "n": 252,
+        "d": 8,
+        "order": "F",
+        "mode": "inline"
+      },
+      "median_ms": {
+        "old": 0.4064785,
+        "new": 0.387271
+      },
+      "new_over_old": 0.9527465782323049
+    },
+    {
+      "case": {
+        "n": 252,
+        "d": 8,
+        "order": "F",
+        "mode": "shared"
+      },
+      "median_ms": {
+        "old": 0.115875,
+        "new": 0.099959
+      },
+      "new_over_old": 0.8626450916936353
+    },
+    {
+      "case": {
+        "n": 32768,
+        "d": 128,
+        "order": "C",
+        "mode": "model_create"
+      },
+      "median_ms": {
+        "old": 59.3116875,
+        "new": 48.004771
+      },
+      "new_over_old": 0.8093644444022943
+    },
+    {
+      "case": {
+        "n": 32768,
+        "d": 128,
+        "order": "C",
+        "mode": "inline"
+      },
+      "median_ms": {
+        "old": 711.014021,
+        "new": 703.018625
+      },
+      "new_over_old": 0.9887549390534454
+    },
+    {
+      "case": {
+        "n": 32768,
+        "d": 128,
+        "order": "C",
+        "mode": "shared"
+      },
+      "median_ms": {
+        "old": 10.441979,
+        "new": 10.668812
+      },
+      "new_over_old": 1.0217231810176979
+    },
+    {
+      "case": {
+        "n": 32768,
+        "d": 128,
+        "order": "F",
+        "mode": "model_create"
+      },
+      "median_ms": {
+        "old": 64.7057295,
+        "new": 49.0903955
+      },
+      "new_over_old": 0.7586715408254534
+    },
+    {
+      "case": {
+        "n": 32768,
+        "d": 128,
+        "order": "F",
+        "mode": "inline"
+      },
+      "median_ms": {
+        "old": 820.773792,
+        "new": 752.3683335
+      },
+      "new_over_old": 0.9166573553313456
+    },
+    {
+      "case": {
+        "n": 32768,
+        "d": 128,
+        "order": "F",
+        "mode": "shared"
+      },
+      "median_ms": {
+        "old": 62.728896,
+        "new": 7.7876455
+      },
+      "new_over_old": 0.12414765756438628
+    }
+  ],
+  "memory_scope": "parent malloc includes first module import; mmap and workers excluded. RSS parent sampled warm peak plus independent child snapshot.",
+  "memory": [
+    {
+      "case": {
+        "n": 32768,
+        "d": 128,
+        "order": "C",
+        "mode": "model_create"
+      },
+      "backends": {
+        "old": {
+          "cold_peak_bytes": 985284.0,
+          "warm_peak_bytes": 986612.0,
+          "rss_peak": 176799744.0,
+          "rss_delta": 67141632.0,
+          "rss_idle_delta": 0.0,
+          "malloc_overflows": 0
+        },
+        "new": {
+          "cold_peak_bytes": 986060.0,
+          "warm_peak_bytes": 987388.0,
+          "rss_peak": 177176576.0,
+          "rss_delta": 67174400.0,
+          "rss_idle_delta": 0.0,
+          "malloc_overflows": 0
+        }
+      },
+      "new_minus_old": {
+        "cold_peak_bytes": 776.0,
+        "warm_peak_bytes": 776.0,
+        "rss_peak": 376832.0,
+        "rss_delta": 32768.0,
+        "rss_idle_delta": 0.0,
+        "malloc_overflows": 0
+      }
+    },
+    {
+      "case": {
+        "n": 32768,
+        "d": 128,
+        "order": "C",
+        "mode": "inline"
+      },
+      "backends": {
+        "old": {
+          "cold_peak_bytes": 202328971.0,
+          "warm_peak_bytes": 202332153.0,
+          "rss_peak": 244015104.0,
+          "rss_delta": 114688.0,
+          "rss_idle_delta": 0.0,
+          "malloc_overflows": 0
+        },
+        "new": {
+          "cold_peak_bytes": 202329747.0,
+          "warm_peak_bytes": 202332929.0,
+          "rss_peak": 243974144.0,
+          "rss_delta": 65536.0,
+          "rss_idle_delta": 0.0,
+          "malloc_overflows": 0
+        }
+      },
+      "new_minus_old": {
+        "cold_peak_bytes": 776.0,
+        "warm_peak_bytes": 776.0,
+        "rss_peak": -40960.0,
+        "rss_delta": -49152.0,
+        "rss_idle_delta": 0.0,
+        "malloc_overflows": 0
+      }
+    },
+    {
+      "case": {
+        "n": 32768,
+        "d": 128,
+        "order": "C",
+        "mode": "shared"
+      },
+      "backends": {
+        "old": {
+          "cold_peak_bytes": 1008879.0,
+          "warm_peak_bytes": 1002691.0,
+          "rss_peak": 143409152.0,
+          "rss_delta": 33644544.0,
+          "rss_idle_delta": 0.0,
+          "malloc_overflows": 0
+        },
+        "new": {
+          "cold_peak_bytes": 1009655.0,
+          "warm_peak_bytes": 1003499.0,
+          "rss_peak": 143335424.0,
+          "rss_delta": 33619968.0,
+          "rss_idle_delta": 0.0,
+          "malloc_overflows": 0
+        }
+      },
+      "new_minus_old": {
+        "cold_peak_bytes": 776.0,
+        "warm_peak_bytes": 808.0,
+        "rss_peak": -73728.0,
+        "rss_delta": -24576.0,
+        "rss_idle_delta": 0.0,
+        "malloc_overflows": 0
+      }
+    },
+    {
+      "case": {
+        "n": 32768,
+        "d": 128,
+        "order": "F",
+        "mode": "model_create"
+      },
+      "backends": {
+        "old": {
+          "cold_peak_bytes": 985284.0,
+          "warm_peak_bytes": 986612.0,
+          "rss_peak": 176562176.0,
+          "rss_delta": 67174400.0,
+          "rss_idle_delta": 0.0,
+          "malloc_overflows": 0
+        },
+        "new": {
+          "cold_peak_bytes": 986060.0,
+          "warm_peak_bytes": 987388.0,
+          "rss_peak": 177209344.0,
+          "rss_delta": 67158016.0,
+          "rss_idle_delta": 0.0,
+          "malloc_overflows": 0
+        }
+      },
+      "new_minus_old": {
+        "cold_peak_bytes": 776.0,
+        "warm_peak_bytes": 776.0,
+        "rss_peak": 647168.0,
+        "rss_delta": -16384.0,
+        "rss_idle_delta": 0.0,
+        "malloc_overflows": 0
+      }
+    },
+    {
+      "case": {
+        "n": 32768,
+        "d": 128,
+        "order": "F",
+        "mode": "inline"
+      },
+      "backends": {
+        "old": {
+          "cold_peak_bytes": 202328919.0,
+          "warm_peak_bytes": 202332153.0,
+          "rss_peak": 277643264.0,
+          "rss_delta": 98304.0,
+          "rss_idle_delta": 0.0,
+          "malloc_overflows": 0
+        },
+        "new": {
+          "cold_peak_bytes": 202329747.0,
+          "warm_peak_bytes": 202332929.0,
+          "rss_peak": 243752960.0,
+          "rss_delta": 131072.0,
+          "rss_idle_delta": 0.0,
+          "malloc_overflows": 0
+        }
+      },
+      "new_minus_old": {
+        "cold_peak_bytes": 828.0,
+        "warm_peak_bytes": 776.0,
+        "rss_peak": -33890304.0,
+        "rss_delta": 32768.0,
+        "rss_idle_delta": 0.0,
+        "malloc_overflows": 0
+      }
+    },
+    {
+      "case": {
+        "n": 32768,
+        "d": 128,
+        "order": "F",
+        "mode": "shared"
+      },
+      "backends": {
+        "old": {
+          "cold_peak_bytes": 1008879.0,
+          "warm_peak_bytes": 1002736.0,
+          "rss_peak": 142147584.0,
+          "rss_delta": 33701888.0,
+          "rss_idle_delta": 0.0,
+          "malloc_overflows": 0
+        },
+        "new": {
+          "cold_peak_bytes": 1009655.0,
+          "warm_peak_bytes": 1003483.0,
+          "rss_peak": 142172160.0,
+          "rss_delta": 33677312.0,
+          "rss_idle_delta": 0.0,
+          "malloc_overflows": 0
+        }
+      },
+      "new_minus_old": {
+        "cold_peak_bytes": 776.0,
+        "warm_peak_bytes": 747.0,
+        "rss_peak": 24576.0,
+        "rss_delta": -24576.0,
+        "rss_idle_delta": 0.0,
+        "malloc_overflows": 0
+      }
+    }
+  ],
+  "post_import_heap": [
+    {
+      "mode": "model_create",
+      "backends": {
+        "old": {
+          "cold_peak_bytes": 4664.0,
+          "warm_peak_bytes": 5992.0,
+          "warm_allocated_bytes": 16995.0
+        },
+        "new": {
+          "cold_peak_bytes": 4664.0,
+          "warm_peak_bytes": 5992.0,
+          "warm_allocated_bytes": 17075.0
+        }
+      },
+      "new_minus_old": {
+        "cold_peak_bytes": 0.0,
+        "warm_peak_bytes": 0.0,
+        "warm_allocated_bytes": 80.0
+      }
+    },
+    {
+      "mode": "inline",
+      "backends": {
+        "old": {
+          "cold_peak_bytes": 201348351.0,
+          "warm_peak_bytes": 201351533.0,
+          "warm_allocated_bytes": 1677784212.0
+        },
+        "new": {
+          "cold_peak_bytes": 201348351.0,
+          "warm_peak_bytes": 201351533.0,
+          "warm_allocated_bytes": 1342239892.0
+        }
+      },
+      "new_minus_old": {
+        "cold_peak_bytes": 0.0,
+        "warm_peak_bytes": 0.0,
+        "warm_allocated_bytes": -335544320.0
+      }
+    },
+    {
+      "mode": "shared",
+      "backends": {
+        "old": {
+          "cold_peak_bytes": 28259.0,
+          "warm_peak_bytes": 22095.0,
+          "warm_allocated_bytes": 36566.0
+        },
+        "new": {
+          "cold_peak_bytes": 28259.0,
+          "warm_peak_bytes": 22096.0,
+          "warm_allocated_bytes": 36569.0
+        }
+      },
+      "new_minus_old": {
+        "cold_peak_bytes": 0.0,
+        "warm_peak_bytes": 1.0,
+        "warm_allocated_bytes": 3.0
+      }
+    }
+  ]
+}

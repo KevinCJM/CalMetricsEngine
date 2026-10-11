@@ -1,0 +1,618 @@
+--- a/cpp/graph.cpp
++++ b/cpp/graph.cpp
+@@ -793,7 +793,8 @@
+     } else return nullptr;
+   }
+   for (std::size_t root = 0; root < program.roots.size(); ++root)
+-    if (plan->axes[program.roots[root]] != 0 || program.root_outputs[root].rank != 1 ||
++    if (plan->axes[program.roots[root]] != 0 || program.root_outputs[root].rank < 1 ||
++        program.root_outputs[root].rank > 2 ||
+         program.root_outputs[root].dtype != OutputDType::float64) return nullptr;
+   // Child execution explicitly disables physical reordering and uses the same
+   // canonical logical nodes. No parent/child ownership cycle is introduced.
+@@ -4774,6 +4775,147 @@
+   return audit;
+ }
+ 
++// The full root geometry belongs to the request, including a matrix's F
++// leading dimension. A worker range must never replace it with its local N.
++static Audit execute_row_batches(const Program &program,
++    const std::vector<ops::Value> &inputs, const double *parameters,
++    std::size_t parameter_count, const std::int64_t *starts,
++    const std::int64_t *ends, std::size_t rows, void *output,
++    Scratch &scratch, const ResultLayout &layout, std::size_t result_row,
++    std::size_t range_first = 0,
++    std::size_t range_last = std::numeric_limits<std::size_t>::max(),
++    bool clear_output = true) {
++  const auto &plan = *program.execution_metadata->row_batch;
++  const auto columns = program.roots.size();
++  if (scratch.arena_owner || (scratch.projection_owner &&
++      scratch.projection_owner.get() != program.execution_metadata.get()))
++    scratch.release_execution_buffers();
++  scratch.projection_owner = program.execution_metadata;
++  if (!scratch.compact_child) scratch.compact_child = std::make_unique<Scratch>();
++  release_pointwise_workspace();
++  auto &child_scratch = *scratch.compact_child;
++  child_scratch.deadline = scratch.deadline; child_scratch.cancelled = scratch.cancelled;
++  Program canonical = program; canonical.execution_metadata = plan.canonical_metadata;
++  const std::vector<const char *> errors(program.nodes.size(), nullptr);
++  Audit merged; merged.rows = rows; merged.nodes = program.nodes.size();
++  merged.result_shapes.resize(rows * columns);
++  merged.root_statuses.resize(rows * columns);
++  if (clear_output) {
++    const auto bytes = layout.row_bytes[result_row + rows] - layout.row_bytes[result_row];
++    if (bytes) std::memset(static_cast<std::uint8_t *>(output) +
++        layout.row_bytes[result_row], 0, bytes);
++  }
++  std::vector<ops::Value> blocked;
++  std::vector<ops::Shape> full;
++  for (std::size_t row = 0; row < rows; ++row) {
++    const auto length = std::size_t(ends[row] - starts[row]);
++    ops::require(length >= program.minimum_observations, "INSUFFICIENT_OBSERVATIONS");
++    std::size_t width = 0, total_count = 0;
++    ops::require(row_batch_inputs(program, inputs, length, blocked, width, total_count),
++                 "RESULT_CAPACITY_MISMATCH");
++    required_array_capacity(program, inputs, length, &full);
++    const auto last = range_last == std::numeric_limits<std::size_t>::max()
++        ? total_count : range_last;
++    ops::require(range_first <= last && last <= total_count, "ROW_BATCH_RANGE_GEOMETRY");
++    bool stage = false;
++    std::size_t block_elements = 0;
++    for (std::size_t root = 0; root < columns; ++root) {
++      const auto shape = full[program.roots[root]];
++      const auto elements = shape.size();
++      const auto &slot = layout.slots[(result_row + row) * columns + root];
++      ops::require(shape.rank >= 1 && shape.rank <= 2 && shape.dim[0] == total_count &&
++          slot.capacity >= elements && slot.byte_offset % alignof(double) == 0 &&
++          slot.byte_offset <= layout.bytes() &&
++          elements <= (layout.bytes() - slot.byte_offset) / sizeof(double),
++          "RESULT_CAPACITY_MISMATCH");
++      stage = stage || (shape.rank == 2 && layout.order(root) == ops::MemoryOrder::f);
++      const auto local_elements = width * (elements / total_count);
++      ops::require(local_elements <= std::size_t(PTRDIFF_MAX) / sizeof(double) - block_elements,
++          "RESULT_SIZE_OVERFLOW");
++      block_elements += local_elements;
++      merged.result_shapes[row * columns + root] = shape;
++    }
++    // Zero extent is valid. This request-local block never retains a larger
++    // prior request's allocation and is not part of the returned result owner.
++    std::vector<double> staged(stage ? block_elements : 0);
++    double empty_output = 0.;
++    void *staged_output = staged.empty() ? static_cast<void *>(&empty_output) : staged.data();
++    auto earliest = std::numeric_limits<std::size_t>::max();
++    std::string failure;
++    for (std::size_t first = range_first; first < last; first += width) {
++      native::check_deadline(scratch.deadline);
++      if (scratch.cancelled && scratch.cancelled->load()) throw native::Timeout("native row batch cancelled");
++      blocked = inputs;
++      auto &weights = blocked[plan.input];
++      if (weights.data && weights.shape.dim[1])
++        weights.data = static_cast<const double *>(weights.data) +
++            std::ptrdiff_t(first) * weights.stride[0];
++      const auto count = std::min(width, last - first);
++      weights.shape.dim[0] = count;
++      ResultLayout selected;
++      selected.columns = columns; selected.row_bytes = {0, 0};
++      selected.row_statuses = {0, 0}; selected.orders.assign(columns, ops::MemoryOrder::c);
++      std::size_t offset = 0;
++      for (std::size_t root = 0; root < columns; ++root) {
++        const auto root_width = full[program.roots[root]].size() / total_count;
++        auto slot = layout.slots[(result_row + row) * columns + root];
++        slot.capacity = count * root_width;
++        slot.byte_offset = stage ? offset * sizeof(double)
++            : slot.byte_offset + first * root_width * sizeof(double);
++        selected.slots.push_back(slot);
++        offset += slot.capacity;
++      }
++      try {
++        const auto child = execute_impl(canonical, blocked, parameters, parameter_count,
++            starts + row, ends + row, 1, stage ? staged_output : output, columns,
++            child_scratch, false, nullptr, true, false, &selected, 0, &errors);
++        for (auto member : {&Audit::root_copy_bytes, &Audit::direct_output_bytes,
++            &Audit::state_copy_bytes, &Audit::vector_elements, &Audit::pointwise_tiles,
++            &Audit::fused_pointwise_calls, &Audit::algorithm_copy_bytes,
++            &Audit::fused_scalar_calls, &Audit::summary_source_scans, &Audit::order_stat_sorts,
++            &Audit::highway_vqsort_calls, &Audit::eigen_rotation_calls,
++            &Audit::eigen_matvec_calls, &Audit::eigen_covariance_calls,
++            &Audit::accelerate_matmul_calls}) merged.*member += child.*member;
++        for (auto member : {&Audit::max_window, &Audit::numeric_arena_bytes, &Audit::mask_arena_bytes,
++            &Audit::order_scratch_capacity_bytes, &Audit::pointwise_workspace_capacity_bytes,
++            &Audit::native_library_workspace_reserve_bytes})
++          merged.*member = std::max(merged.*member, child.*member);
++        merged.operator_workspace_capacity_bytes = std::max(merged.operator_workspace_capacity_bytes,
++            child.operator_workspace_capacity_bytes + staged.capacity() * sizeof(double));
++        if (stage) {
++          for (std::size_t root = 0; root < columns; ++root) {
++            const auto shape = full[program.roots[root]];
++            const auto root_width = shape.size() / total_count;
++            const auto size = count * root_width;
++            if (!size) continue;
++            const auto source_offset = selected.slots[root].byte_offset;
++            const auto *source = staged.data() + source_offset / sizeof(double);
++            auto *target = reinterpret_cast<double *>(static_cast<std::uint8_t *>(output) +
++                layout.slots[(result_row + row) * columns + root].byte_offset);
++            if (shape.rank == 1 || layout.order(root) == ops::MemoryOrder::c)
++              std::memcpy(target + first * root_width, source, size * sizeof(double));
++            else
++              for (std::size_t j = 0; j < root_width; ++j)
++                for (std::size_t i = 0; i < count; ++i)
++                  target[j * total_count + first + i] = source[i * root_width + j];
++            merged.root_copy_bytes += size * sizeof(double);
++          }
++        }
++      } catch (const ops::Error &error) {
++        if (child_scratch.failed_node == std::numeric_limits<std::size_t>::max()) throw;
++        if (child_scratch.failed_node < earliest) {
++          earliest = child_scratch.failed_node; failure = error.what();
++        }
++      }
++    }
++    if (!failure.empty()) {
++      scratch.failed_node = earliest;
++      throw ops::Error(failure.c_str());
++    }
++  }
++  return merged;
++}
++
+ static Audit execute_impl(const Program &program, const std::vector<ops::Value> &inputs,
+     const double *parameters, std::size_t parameter_count, const std::int64_t *starts,
+     const std::int64_t *ends, std::size_t rows, void *output, std::size_t output_columns,
+@@ -4821,7 +4963,6 @@
+       layout->columns == output_columns && result_row + rows < layout->row_bytes.size() &&
+       layout->row_statuses.size() == layout->row_bytes.size() &&
+       reinterpret_cast<std::uintptr_t>(output) % alignof(double) == 0) {
+-    const auto &plan = *program.execution_metadata->row_batch;
+     std::vector<ops::Value> blocked;
+     bool admitted = layout->slots.size() >= (result_row + rows) * output_columns;
+     for (std::size_t row = 0; row < rows && admitted; ++row) {
+@@ -4836,87 +4977,20 @@
+       std::size_t width = 0, count = 0;
+       admitted = admitted && row_batch_inputs(program, inputs,
+           std::size_t(ends[row] - starts[row]), blocked, width, count);
++      std::vector<ops::Shape> full;
++      if (admitted)
++        required_array_capacity(program, inputs, std::size_t(ends[row] - starts[row]), &full);
+       for (std::size_t root = 0; root < output_columns && admitted; ++root) {
+         const auto &slot = layout->slots[(result_row + row) * output_columns + root];
+-        admitted = slot.capacity >= count;
+-      }
+-    }
+-    if (admitted) {
+-      if (scratch.arena_owner || (scratch.projection_owner &&
+-          scratch.projection_owner.get() != program.execution_metadata.get()))
+-        scratch.release_execution_buffers();
+-      scratch.projection_owner = program.execution_metadata;
+-      if (!scratch.compact_child) scratch.compact_child = std::make_unique<Scratch>();
+-      release_pointwise_workspace();
+-      auto &child_scratch = *scratch.compact_child;
+-      child_scratch.deadline = scratch.deadline; child_scratch.cancelled = scratch.cancelled;
+-      Program canonical = program; canonical.execution_metadata = plan.canonical_metadata;
+-      const std::vector<const char *> errors(program.nodes.size(), nullptr);
+-      Audit merged; merged.rows = rows; merged.nodes = program.nodes.size();
+-      merged.result_shapes.resize(rows * output_columns);
+-      merged.root_statuses.resize(rows * output_columns);
+-      const auto bytes = layout->row_bytes[result_row + rows] - layout->row_bytes[result_row];
+-      if (bytes) std::memset(static_cast<std::uint8_t *>(output) + layout->row_bytes[result_row], 0, bytes);
+-      for (std::size_t row = 0; row < rows; ++row) {
+-        const auto length = std::size_t(ends[row] - starts[row]);
+-        ops::require(length >= program.minimum_observations, "INSUFFICIENT_OBSERVATIONS");
+-        std::size_t width = 0, total_count = 0;
+-        // Retain no per-interval width/count arrays outside the scratch budget.
+-        // Read-only geometry is the same as in the all-interval admission pass.
+-        ops::require(row_batch_inputs(program, inputs, length, blocked, width, total_count),
+-                     "RESULT_CAPACITY_MISMATCH");
+-        auto earliest = std::numeric_limits<std::size_t>::max();
+-        std::string failure;
+-        for (std::size_t first = 0; first < total_count; first += width) {
+-          native::check_deadline(scratch.deadline);
+-          if (scratch.cancelled && scratch.cancelled->load()) throw native::Timeout("native row batch cancelled");
+-          blocked = inputs;
+-          auto &weights = blocked[plan.input];
+-          if (weights.data && weights.shape.dim[1])
+-            weights.data = static_cast<const double *>(weights.data) +
+-                std::ptrdiff_t(first) * weights.stride[0];
+-          const auto count = std::min(width, total_count - first);
+-          weights.shape.dim[0] = count;
+-          ResultLayout selected;
+-          selected.columns = output_columns; selected.row_bytes = {0, 0};
+-          selected.row_statuses = {0, 0}; selected.orders.assign(output_columns, ops::MemoryOrder::c);
+-          for (std::size_t root = 0; root < output_columns; ++root) {
+-            auto slot = layout->slots[(result_row + row) * output_columns + root];
+-            slot.byte_offset += first * sizeof(double); slot.capacity = count;
+-            selected.slots.push_back(slot);
+-          }
+-          try {
+-            const auto child = execute_impl(canonical, blocked, parameters, parameter_count,
+-                starts + row, ends + row, 1, output, output_columns, child_scratch,
+-                false, nullptr, true, false, &selected, 0, &errors);
+-            for (auto member : {&Audit::root_copy_bytes, &Audit::direct_output_bytes,
+-                &Audit::state_copy_bytes, &Audit::vector_elements, &Audit::pointwise_tiles,
+-                &Audit::fused_pointwise_calls, &Audit::algorithm_copy_bytes,
+-                &Audit::fused_scalar_calls, &Audit::summary_source_scans, &Audit::order_stat_sorts,
+-                &Audit::highway_vqsort_calls, &Audit::eigen_rotation_calls,
+-                &Audit::eigen_matvec_calls, &Audit::eigen_covariance_calls,
+-                &Audit::accelerate_matmul_calls}) merged.*member += child.*member;
+-            for (auto member : {&Audit::max_window, &Audit::numeric_arena_bytes, &Audit::mask_arena_bytes,
+-                &Audit::order_scratch_capacity_bytes, &Audit::pointwise_workspace_capacity_bytes,
+-                &Audit::operator_workspace_capacity_bytes,
+-                &Audit::native_library_workspace_reserve_bytes})
+-              merged.*member = std::max(merged.*member, child.*member);
+-          } catch (const ops::Error &error) {
+-            if (child_scratch.failed_node == std::numeric_limits<std::size_t>::max()) throw;
+-            if (child_scratch.failed_node < earliest) {
+-              earliest = child_scratch.failed_node; failure = error.what();
+-            }
+-          }
+-        }
+-        if (!failure.empty()) {
+-          scratch.failed_node = earliest;
+-          throw ops::Error(failure.c_str());
+-        }
+-        for (std::size_t root = 0; root < output_columns; ++root)
+-          merged.result_shapes[row * output_columns + root] = ops::vector_shape(total_count);
+-      }
+-      return merged;
+-    }
++        const auto elements = full[program.roots[root]].size();
++        admitted = slot.capacity >= elements && slot.byte_offset % alignof(double) == 0 &&
++            slot.byte_offset <= layout->bytes() &&
++            elements <= (layout->bytes() - slot.byte_offset) / sizeof(double);
++      }
++    }
++    if (admitted)
++      return execute_row_batches(program, inputs, parameters, parameter_count, starts,
++          ends, rows, output, scratch, *layout, result_row);
+   }
+   if (!deferred_errors && !value_observer && !prebound_inputs && !input_failures &&
+       interval_known && !propagate_scope_errors && !program.isolate_errors &&
+@@ -5094,33 +5168,16 @@
+   ops::require(layout.columns == columns && layout.slots.size() == columns &&
+       layout.row_bytes.size() == 2 && layout.row_statuses.size() == 2,
+       "ROW_BATCH_RANGE_LAYOUT");
+-  ResultLayout selected;
+-  selected.columns = columns; selected.orders = layout.orders;
+-  // Slots have global output offsets. Zero extent prevents the normal row
+-  // executor from clearing another worker's disjoint result fragments.
+-  selected.row_bytes = {0, 0}; selected.row_statuses = {0, 0};
+-  selected.slots.reserve(columns);
+-  for (const auto &source : layout.slots) {
+-    ops::require(source.capacity >= count && source.byte_offset <= layout.bytes() &&
+-        count <= (layout.bytes() - source.byte_offset) / sizeof(double),
+-        "ROW_BATCH_RANGE_LAYOUT");
+-    auto slot = source;
+-    slot.byte_offset += first * sizeof(double); slot.capacity = last - first;
+-    selected.slots.push_back(slot);
+-  }
+-  views = inputs;
+-  auto &matrix = views[program.execution_metadata->row_batch->input];
+-  if (matrix.data && matrix.shape.dim[1])
+-    matrix.data = static_cast<const double *>(matrix.data) +
+-        std::ptrdiff_t(first) * matrix.stride[0];
+-  matrix.shape.dim[0] = last - first;
++  struct RestoreLoan {
++    bool previous;
++    ~RestoreLoan() { root_scratch.allow_workspace_loan = previous; }
++  } restore{std::exchange(root_scratch.allow_workspace_loan, allow_workspace_loan)};
++  root_scratch.deadline = deadline; root_scratch.cancelled = cancelled;
+   root_scratch.failed_node = std::numeric_limits<std::size_t>::max();
+   try {
+-    auto result = execute(program, views, parameters, parameter_count, starts, ends,
+-        1, output, columns, &selected, 0, deadline, cancelled, allow_workspace_loan);
+-    if (publish_metadata) {
+-      result.result_shapes.assign(columns, ops::vector_shape(count));
+-    } else {
++    auto result = execute_row_batches(program, inputs, parameters, parameter_count,
++        starts, ends, 1, output, root_scratch, layout, 0, first, last, false);
++    if (!publish_metadata) {
+       result.result_shapes.clear(); result.root_statuses.clear();
+     }
+     return result;
+--- a/cpp/planner.cpp
++++ b/cpp/planner.cpp
+@@ -292,10 +292,25 @@
+       const auto current_work = graph::matrix_workspace_doubles(canonical, shapes, capacity);
+       const auto packed_gap = checked_mul(
+           packed_upper > current_work ? packed_upper - current_work : 0, sizeof(double));
++      // F matrix roots need a bounded C block before scattering into their
++      // full leading dimensions. Reserve it for all orders so geometry-only
++      // plans remain safe if a supported input layout selects F automatically.
++      std::size_t result_block = 0;
++      bool matrix_root = false;
++      for (const auto root : program.roots) {
++        const auto &shape = shapes[root];
++        matrix_root = matrix_root || shape.rank == 2;
++        const auto width = shape.size() / batch;
++        result_block = checked_add(result_block,
++            std::min(checked_mul(64, width), std::max(target, width)));
++      }
++      const auto result_bytes = matrix_root ? checked_mul(result_block, sizeof(double)) : 0;
+       const auto descriptors = checked_add(checked_mul(inputs->size(), sizeof(ops::Value)),
+-          checked_mul(program.nodes.size(), sizeof(graph::Node) + sizeof(const char *)));
+-      return checked_add(child, checked_add(packed_gap,
+-          checked_add(upper_gap, checked_add(descriptors, 4096))));
++          checked_add(checked_mul(program.nodes.size(),
++              sizeof(graph::Node) + sizeof(const char *) + 3 * sizeof(ops::Shape)),
++              checked_mul(program.roots.size(), sizeof(graph::ResultSlot) + 3 * sizeof(ops::Shape))));
++      return checked_add(child, checked_add(result_bytes, checked_add(packed_gap,
++          checked_add(upper_gap, checked_add(descriptors, 4096)))));
+     }
+   }
+   if (allow_physical_fusion && !inherited_isolation && !prebound_inputs && inputs && program.execution_metadata &&
+--- a/tests/graph_native_tests.cpp
++++ b/tests/graph_native_tests.cpp
+@@ -7,6 +7,7 @@
+ #include "matmul_root_native_cases.hpp"
+ #include "row_batch_native_cases.hpp"
+ #include "derived_row_native_cases.hpp"
++#include "mixed_row_native_cases.hpp"
+ #include "masked_reduce_native_cases.hpp"
+ 
+ #include <algorithm>
+@@ -135,6 +136,7 @@
+   test_scan_packet_exception_and_lifetime();
+   row_batch_native_cases::run();
+   derived_row_native_cases::run();
++  mixed_row_native_cases::run();
+   matmul_statistics_cases::run();
+     matmul_statistics_cases::run_quantiles();
+   {
+--- a/tests/test_derived_row_batch.py
++++ b/tests/test_derived_row_batch.py
+@@ -128,7 +128,10 @@
+                                    np.array([0], np.int64), np.array([129], np.int64))
+         control = scheduler.execute(compiler.compile(expressions + [y], result_format='typed'), inputs,
+                                     np.array([0], np.int64), np.array([129], np.int64))
+-    assert result.plan.parallel_dimension != 'array_row'
++    if prefix != 'matrix_root':
++        assert result.plan.parallel_dimension != 'array_row'
++    elif cpu == 4:
++        assert result.plan.parallel_dimension == 'array_row'
+     for a, b in zip(result.outputs, control.outputs[:len(expressions)], strict=True):
+         np.testing.assert_array_equal(a.values[0].view(np.uint64), b.values[0].view(np.uint64))
+ 
+--- a/tests/mixed_row_native_cases.hpp
++++ b/tests/mixed_row_native_cases.hpp
+@@ -0,0 +1,87 @@
++#pragma once
++#include "calmetrics_engine/graph.hpp"
++#include <climits>
++#include <stdexcept>
++#include <vector>
++
++namespace mixed_row_native_cases {
++inline void check(bool condition, const char *message) {
++  if (!condition) throw std::runtime_error(message);
++}
++inline void run() {
++  namespace g = calmetrics_engine::graph;
++  namespace o = calmetrics_engine::ops;
++  const auto input = [](unsigned index) { g::Node x; x.kind=g::NodeKind::input; x.input_index=index; return x; };
++  const auto constant = [](double value) { g::Node x; x.kind=g::NodeKind::constant; x.constant=value; return x; };
++  const auto op = [](o::Op code, std::initializer_list<std::uint32_t> parents, unsigned slot) {
++    g::Node x; x.kind=g::NodeKind::operation; x.opcode=std::uint16_t(code);
++    x.parent_count=parents.size(); x.storage=g::StorageKind::numeric; x.slot=slot;
++    unsigned j=0; for (auto parent:parents) x.parents[j++]=parent; return x;
++  };
++  constexpr std::size_t rows=257, times=129;
++  std::vector<double> weights(rows*7), returns(times*7);
++  for (std::size_t i=0;i<weights.size();++i) weights[i]=double(i%5)*.125;
++  for (std::size_t i=0;i<returns.size();++i) returns[i]=double(int(i%7)-3)*.0625;
++  const auto matrix=[](const double *data,std::size_t r,std::size_t c) {
++    o::Value x; x.kind=o::Kind::number; x.shape=o::matrix_shape(r,c);
++    x.data=data; x.stride[0]=c; x.stride[1]=1; return x;
++  };
++  const std::int64_t start=0,end=times;
++  for (const auto order : {g::OutputOrder::c,g::OutputOrder::f})
++  for (const auto columns : {std::size_t(0),std::size_t(7)})
++  for (const bool reverse : {false,true}) {
++    g::Program p; p.input_count=2; p.input_axes={1,2}; p.numeric_slots=4;
++    p.output_kind=g::OutputKind::typed;
++    p.root_outputs={{g::OutputDType::float64,2,order},{g::OutputDType::float64,1,g::OutputOrder::c}};
++    p.nodes={input(0),input(1),constant(2),op(o::Op::multiply,{0,2},0),
++             op(o::Op::transpose,{1},1),op(o::Op::matmul,{3,4},2),
++             constant(1),op(o::Op::sum_axis,{5,6},3)};
++    p.roots={3,7}; p.finalize();
++    check(bool(p.execution_metadata->row_batch),"mixed row proof missing");
++    double empty=3.;
++    auto left=matrix(columns ? weights.data() : &empty,rows,columns);
++    if (reverse && columns) {
++      left.data=weights.data()+(rows-1)*columns;
++      left.stride[0]=-std::ptrdiff_t(columns);
++    } else if (!columns) left.stride[0]=reverse ? PTRDIFF_MIN : PTRDIFF_MAX;
++    auto right=matrix(columns ? returns.data() : &empty,times,columns);
++    std::vector<o::Value> args{left,right};
++    auto layout=g::result_layout(p,args,&start,&end,1);
++    const auto elements=layout.bytes()/sizeof(double);
++    std::vector<double> serial(elements+8,-777.), ranged(elements+8,-777.);
++    auto audit=g::execute(p,args,nullptr,0,&start,&end,1,serial.data(),2,&layout);
++    check(audit.result_shapes[0]==o::matrix_shape(rows,columns),"mixed root shape lost");
++    check(audit.result_shapes[1]==o::vector_shape(rows),"mixed vector shape lost");
++    std::size_t failed=0;
++    const auto deadline=std::chrono::steady_clock::time_point::max();
++    auto a=g::execute_row_batch_range(p,args,nullptr,0,&start,&end,ranged.data(),layout,0,129,true,failed,deadline,nullptr,false);
++    auto b=g::execute_row_batch_range(p,args,nullptr,0,&start,&end,ranged.data(),layout,129,257,false,failed,deadline,nullptr,false);
++    check(a.result_shapes==audit.result_shapes && b.result_shapes.empty(),"mixed range metadata mismatch");
++    for (std::size_t i=0;i<elements;++i) check(ranged[i]==serial[i],"F full-stride range misplaced");
++    for (std::size_t i=0;i<rows;++i) {
++      for (std::size_t j=0;j<columns;++j) {
++        const auto index=order==g::OutputOrder::f ? j*rows+i : i*columns+j;
++        check(serial[index]==2.*left.at(i,j),"mixed matrix value changed");
++      }
++      double expected=0.;
++      for (std::size_t t=0;t<times;++t) {
++        double value=0.;
++        for (std::size_t k=0;k<columns;++k) value+=(left.at(i,k)*2.)*returns[t*columns+k];
++        expected+=value;
++      }
++      check(serial[layout.slots[1].byte_offset/8+i]==expected,"mixed vector fold changed");
++    }
++    for (std::size_t i=elements;i<serial.size();++i)
++      check(serial[i]==-777. && ranged[i]==-777.,"mixed output canary overwritten");
++    if (columns) {
++      auto invalid=layout; invalid.slots[0].capacity=rows;
++      std::vector<double> untouched(elements+8,-777.);
++      bool rejected=false;
++      try {g::execute_row_batch_range(p,args,nullptr,0,&start,&end,untouched.data(),invalid,0,129,true,failed,deadline,nullptr,false);}
++      catch (const o::Error &) {rejected=true;}
++      check(rejected,"matrix root capacity mismatch admitted");
++      for (const auto x:untouched) check(x==-777.,"invalid range wrote before validation");
++    }
++  }
++}
++}
+--- a/tests/test_mixed_row_batch.py
++++ b/tests/test_mixed_row_batch.py
+@@ -0,0 +1,152 @@
++"""Complete mixed outputs retain global geometry, owned storage and failures."""
++import numpy as np
++import pytest
++
++from calmetrics_engine import AdaptiveScheduler, GraphCompiler, PlannerConfig
++from .test_derived_row_batch import NORMALIZED, TRAJECTORY
++from .test_row_batch_execution import TYPES, Y, ROOTS, TAIL_COUNT, NEGATIVE_COUNT, arena
++from .test_array_row_parallel import data, config
++
++MIXED_TYPES = dict(TYPES, q=dict(kind='vector', axes=['channel'], shape=['3']))
++
++
++def roots():
++    # Different matrix widths surround all three independent risk vectors.
++    return ([NORMALIZED] + [x.replace(Y, TRAJECTORY) for x in ROOTS] +
++            [f'quantiles_axis({TRAJECTORY},q,1)'] +
++            [x.replace(Y, TRAJECTORY) for x in [TAIL_COUNT, NEGATIVE_COUNT]])
++
++
++def graph(order='C', expose=False):
++    return GraphCompiler(MIXED_TYPES).compile(roots() + ([TRAJECTORY] if expose else []),
++                                        result_format='typed', output_order=order)
++
++
++def inputs(n, t, k, layout='C'):
++    result = data(n, t, k, layout)
++    result['q'] = np.array([.05, .5, .95]); result['q'].flags.writeable = False
++    return result
++
++
++@pytest.mark.parametrize('layout', ['C', 'F', 'negative', 'padded'])
++@pytest.mark.parametrize('order', ['C', 'F', 'auto'])
++@pytest.mark.parametrize('n,k', [(127, 7), (128, 0), (257, 1), (517, 7)])
++@pytest.mark.parametrize('cpu', [1, 4])
++def test_mixed_roots_full_shape_order_budget_and_owned_generations(layout, order, n, k, cpu):
++    args = inputs(n, 129, k, layout)
++    original = {key: value.copy() for key, value in args.items()}
++    starts = np.array([0], np.int64); ends = np.array([129], np.int64)
++    with AdaptiveScheduler(cpu_budget=cpu, config=config()) as scheduler:
++        first = scheduler.execute(graph(order), args, starts, ends)
++        stable = [out.values[0].copy() for out in first.outputs]
++        full = scheduler.execute(graph(order, expose=True), args, starts, ends)
++        second = scheduler.execute(graph(order), args, starts, ends)
++    shapes = [(n, k)] + [(n,)] * 3 + [(n, 3)] + [(n,)] * 2
++    for index, out in enumerate(first.outputs):
++        value = out.values[0]
++        assert value.shape == shapes[index] and not value.flags.writeable
++        assert out.root_statuses[0] == 0
++        np.testing.assert_array_equal(value.view(np.uint64), full.outputs[index].values[0].view(np.uint64))
++        np.testing.assert_array_equal(value.view(np.uint64), stable[index].view(np.uint64))
++        assert not np.shares_memory(value, second.outputs[index].values[0])
++        assert all(not np.shares_memory(value, x) for x in args.values())
++        if value.ndim == 2:
++            assert value.flags.f_contiguous if order == 'F' else value.flags.c_contiguous
++    if k:
++        weights = first.outputs[0].values[0]
++        assert (weights > 0).all()
++        np.testing.assert_allclose(weights.sum(axis=1), 1., atol=2e-15, rtol=0)
++    for key, value in args.items():
++        np.testing.assert_array_equal(value.view(np.uint64), original[key].view(np.uint64))
++    observed = max(c['numeric_arena_bytes'] + c['mask_arena_bytes'] +
++                   c['operator_workspace_capacity_bytes'] for c in first.audit['native_chunks'])
++    assert first.plan.estimated_worker_scratch_bytes >= observed
++    if n >= 128:
++        assert arena(first) < arena(full) / 2
++    if cpu == 4 and n >= 256:
++        assert first.plan.parallel_dimension == 'array_row'
++        assert first.plan.thread_count == min(4, n // 128)
++    if order == 'F' and n >= 128:
++        assert sum(c['root_copy_bytes'] for c in first.audit['native_chunks']) >= sum(x.nbytes for x in stable)
++
++
++@pytest.mark.parametrize('layout', ['C', 'F', 'negative', 'padded'])
++@pytest.mark.parametrize('order', ['C', 'F'])
++@pytest.mark.parametrize('lane', ['single', 'thread', 'process_inline', 'process_shared'])
++def test_multi_interval_mixed_outputs_across_transports(layout, order, lane):
++    args = inputs(257, 257, 7, layout)
++    starts = np.array([0, 11], np.int64); ends = np.array([257, 257], np.int64)
++    cfg = PlannerConfig(thread_work_units=1e100 if lane == 'single' else 1,
++                        process_work_units=1 if lane.startswith('process') else 1e100,
++                        shared_memory_threshold_bytes=1 if lane == 'process_shared' else 1 << 30,
++                        min_rows_per_worker=1, max_processes=2)
++    with AdaptiveScheduler(cpu_budget=2, config=cfg) as scheduler:
++        actual = scheduler.execute(graph(order), args, starts, ends)
++        full = scheduler.execute(graph(order, expose=True), args, starts, ends)
++    assert actual.plan.lane == ('process' if lane.startswith('process') else lane)
++    for a, b in zip(actual.outputs, full.outputs[:7], strict=True):
++        for row in range(2):
++            np.testing.assert_array_equal(a.values[row].view(np.uint64), b.values[row].view(np.uint64))
++            assert not a.values[row].flags.writeable
++            if a.values[row].ndim == 2:
++                assert a.values[row].flags.f_contiguous if order == 'F' else a.values[row].flags.c_contiguous
++
++
++@pytest.mark.parametrize('order', ['C', 'F'])
++def test_worker_memory_admission_can_use_single_cpu_without_dropping_outputs(order):
++    args = inputs(4097, 257, 7)
++    starts = np.array([0], np.int64); ends = np.array([257], np.int64)
++    g = graph(order)
++    with AdaptiveScheduler(cpu_budget=1, config=config()) as scheduler:
++        budget = scheduler.plan(g, args, starts, ends).estimated_total_memory_bytes
++        reference = scheduler.execute(g, args, starts, ends)
++    with AdaptiveScheduler(cpu_budget=4, config=config()) as scheduler:
++        actual = scheduler.execute(g, args, starts, ends, memory_budget_bytes=budget)
++    assert actual.plan.lane == 'single' and actual.audit['cpu_tokens'] == 1
++    assert actual.plan.estimated_total_memory_bytes <= budget
++    for a, b in zip(actual.outputs, reference.outputs, strict=True):
++        np.testing.assert_array_equal(a.values[0], b.values[0])
++
++
++@pytest.mark.parametrize('order', ['C', 'F'])
++@pytest.mark.parametrize('cpu', [1, 4])
++@pytest.mark.parametrize('reverse', [False, True])
++def test_mixed_output_failure_keeps_earliest_logical_node_and_recovers(order, cpu, reverse):
++    args = inputs(517, 129, 1)
++    w = np.full((517, 1), 2.); w[10] = 1.; w[-5] = -1.
++    if reverse:
++        w = w[::-1]
++    w.flags.writeable = False
++    r = np.ones((129, 1)); r.flags.writeable = False
++    args.update(w=w, r=r)
++    y = 'matmul(log(w),transpose(r))'
++    expressions = ['log(w)', f'sum_axis(divide(1,{y}),1)']
++    starts = np.array([0], np.int64); ends = np.array([129], np.int64)
++    with AdaptiveScheduler(cpu_budget=cpu, config=config()) as scheduler:
++        messages = []
++        for ex in [expressions, expressions + [y]]:
++            with pytest.raises(ValueError) as error:
++                scheduler.execute(GraphCompiler(MIXED_TYPES).compile(ex, result_format='typed', output_order=order),
++                                  args, starts, ends)
++            messages.append(str(error.value))
++        assert messages[0] == messages[1] and 'DOMAIN_ERROR' in messages[0]
++        healthy = scheduler.execute(graph(order), inputs(517, 129, 1), starts, ends)
++        assert all(np.isfinite(x.values[0]).all() for x in healthy.outputs)
++
++
++@pytest.mark.parametrize('order', ['C', 'F'])
++@pytest.mark.parametrize('layout', ['C', 'F', 'negative', 'padded'])
++def test_mixed_prepared_snapshots_read_current_contents_without_overwriting_prior_results(order, layout):
++    args = inputs(517, 129, 7, layout); args['w'].flags.writeable = True
++    starts = np.array([0], np.int64); ends = np.array([129], np.int64)
++    with AdaptiveScheduler(cpu_budget=4, config=config()) as scheduler:
++        prepared = scheduler.prepare_execution(graph(order), args, starts, ends)
++        first = prepared.run_snapshot(); stable = [x.values[0].copy() for x in first.outputs]
++        args['w'] *= .5
++        current = prepared.run_snapshot()
++        ordinary = scheduler.execute(graph(order), args, starts, ends)
++    for index, out in enumerate(first.outputs):
++        np.testing.assert_array_equal(out.values[0].view(np.uint64), stable[index].view(np.uint64))
++        np.testing.assert_array_equal(current.outputs[index].values[0].view(np.uint64),
++                                      ordinary.outputs[index].values[0].view(np.uint64))
++        assert not np.shares_memory(out.values[0], current.outputs[index].values[0])

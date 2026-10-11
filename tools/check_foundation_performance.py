@@ -1,9 +1,17 @@
-"""Strict, reproducible M1 formula parity, paired timing and isolated RSS gate.
+"""Historical strict M1 timing/RSS diagnostics with formula parity checks.
 
 This developer tool never enters the wheel. NJIT is warmed with the exact input
 layout, and both backends retain the latest independent result. A sampled peak
 is only a lower bound; sub-page/zero deltas fail as unproven, never pass by equality.
 Full platform algorithm equivalence remains a separate M0/M2-M8 inventory gate.
+
+Strict performance failures and their nonzero exit status are historical
+diagnostics, not standalone adoption vetoes. Current adoption follows AGENTS
+Section 16 and computation-design-rules D8: assess absolute and relative changes
+in complete requests, actual batch/concurrency costs and resource budgets. A few
+KB of memory growth or a few milliseconds of latency growth cannot alone reject
+a candidate. Numerical correctness, ownership and budgets remain hard rules;
+material medium/large-workload regressions and the overall NJIT goal stay open.
 """
 
 from __future__ import annotations

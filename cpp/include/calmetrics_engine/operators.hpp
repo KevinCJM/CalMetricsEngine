@@ -13,7 +13,7 @@
 namespace calmetrics_engine::ops {
 
 inline constexpr const char *registry_version = "canonical-native-1";
-inline constexpr std::size_t operator_count = 146;
+inline constexpr std::size_t operator_count = 190;
 
 enum class Op : std::uint16_t {
 #define OP(id, name, family, lo, hi, params) name = id,
@@ -32,6 +32,7 @@ enum class Family {
 };
 enum class Kind { number, mask, fit, interval, integer };
 enum class Isa { automatic, scalar, sse2, avx2, neon };
+enum class MemoryOrder : std::uint8_t { c = 0, f = 1 };
 
 struct Error : std::runtime_error {
     explicit Error(const char *code) : std::runtime_error(code) {}
@@ -103,6 +104,7 @@ struct Value {
                    static_cast<std::ptrdiff_t>(within / shape.dim[2]) * stride[1] +
                    static_cast<std::ptrdiff_t>(within % shape.dim[2]) * stride[2];
         }
+        if (contiguous()) return static_cast<std::ptrdiff_t>(i);
         return static_cast<std::ptrdiff_t>(i / shape.dim[1]) * stride[0] +
                static_cast<std::ptrdiff_t>(i % shape.dim[1]) * stride[1];
     }
@@ -129,6 +131,51 @@ struct Value {
                (shape.rank == 1
                     ? stride[0] == 1
                     : stride[1] == 1 && stride[0] == static_cast<std::ptrdiff_t>(shape.dim[1]));
+    }
+    // Dense storage is distinct from the historical C-only contiguous() fast
+    // path: singleton strides do not affect physical storage; empty arrays
+    // contain no elements. Never use dense_contiguous() for logical-C indexing.
+    bool contiguous(MemoryOrder order) const noexcept {
+        if (shape.rank < 0 || shape.rank > 3 ||
+            (order != MemoryOrder::c && order != MemoryOrder::f)) return false;
+        bool empty = false;
+        for (int axis = 0; axis < shape.rank; ++axis) {
+            if (shape.dim[axis] > static_cast<std::size_t>(PTRDIFF_MAX)) return false;
+            empty = empty || shape.dim[axis] == 0;
+        }
+        if (empty) return true;
+        std::size_t extent = 1;
+        for (int step = 0; step < shape.rank; ++step) {
+            const auto axis = order == MemoryOrder::c ? shape.rank - 1 - step : step;
+            if (shape.dim[axis] > 1 && (stride[axis] < 0 ||
+                static_cast<std::size_t>(stride[axis]) != extent)) return false;
+            if (extent > static_cast<std::size_t>(PTRDIFF_MAX) / shape.dim[axis]) return false;
+            extent *= shape.dim[axis];
+        }
+        return true;
+    }
+    bool c_contiguous() const noexcept { return contiguous(MemoryOrder::c); }
+    bool f_contiguous() const noexcept { return contiguous(MemoryOrder::f); }
+    bool dense_contiguous() const noexcept { return c_contiguous() || f_contiguous(); }
+    // Non-dense inputs are packed in logical C order. Ambiguous layouts
+    // (rank 0/1, empty and singleton dimensions) normalize to C.
+    MemoryOrder packed_order() const noexcept {
+        return !c_contiguous() && f_contiguous() ? MemoryOrder::f : MemoryOrder::c;
+    }
+    void set_contiguous_strides(MemoryOrder order) {
+        require(order == MemoryOrder::c || order == MemoryOrder::f, "INVALID_MEMORY_ORDER");
+        require(shape.rank >= 0 && shape.rank <= 3, "RANK_MISMATCH");
+        for (int axis = 0; axis < shape.rank; ++axis)
+            require(shape.dim[axis] <= static_cast<std::size_t>(PTRDIFF_MAX), "SHAPE_OVERFLOW");
+        if (size() == 0) { stride = {0, 0, 0}; return; }
+        stride = {1, 1, 1};
+        std::size_t extent = 1;
+        for (int step = 0; step < shape.rank; ++step) {
+            const auto axis = order == MemoryOrder::c ? shape.rank - 1 - step : step;
+            stride[axis] = static_cast<std::ptrdiff_t>(extent);
+            require(extent <= static_cast<std::size_t>(PTRDIFF_MAX) / shape.dim[axis], "SHAPE_OVERFLOW");
+            extent *= shape.dim[axis];
+        }
     }
     void set_contiguous_strides() {
         if (shape.rank <= 1) { stride = {1, 1, 1}; return; }
@@ -169,6 +216,19 @@ const char *default_rule(const Spec &spec);
 const char *granularity(const Spec &spec);
 const char *temporal_dependency(const Spec &spec);
 bool series_record_projection(Op op) noexcept;
+inline bool matrix_foundation(Op op) noexcept { return op >= Op::cholesky && op <= Op::swap_axes; }
+inline bool latent_operator(Op op) noexcept { return op >= Op::variance_axis && op <= Op::scatter_rows; }
+inline bool axis_path_operator(Op op) noexcept {
+    return op >= Op::cumulative_product_axis && op <= Op::quantiles_axis;
+}
+inline bool latent_view(Op op) noexcept {
+    return (op >= Op::mixture_weights && op <= Op::mixture_variances) ||
+           (op >= Op::hmm_initial && op <= Op::hmm_variances);
+}
+inline bool foundation_view(Op op) noexcept {
+    return op == Op::slice_axis || op == Op::swap_axes || op == Op::broadcast_like ||
+           op == Op::eigenvalues || op == Op::eigenvectors;
+}
 std::vector<std::string> parameter_names(const Spec &spec, std::size_t arity);
 
 inline constexpr std::size_t max_operator_arguments = 32;
@@ -215,9 +275,16 @@ struct StructureResult {
     Shape output_shape{};
     bool geometry_known = false;
 };
+void prepare_foundation(Prepared &);
+void prepare_latent(Prepared &);
+std::size_t latent_scratch(Op, const Value *);
+
 StructureResult validate_structure(const Spec &spec, const Value *args, std::size_t count,
                                   std::uint32_t geometry_known,
                                   std::uint32_t payload_available);
+// Canonical payload preflight for physical execution that skips materialization.
+void validate_payload_structure(const Prepared &);
+
 Prepared prepare(const Spec &spec, const Value *args, std::size_t count);
 // Known geometry with not-yet-materialized intermediate payloads, for physical lowering.
 Prepared prepare_geometry(const Spec &spec, const Value *args, std::size_t count);
@@ -229,13 +296,25 @@ struct Output {
     double scalar = 0.0;
     std::int64_t integer = 0;
     std::array<double, 5> record{};
+    MemoryOrder order = MemoryOrder::c;
+    // Logical C-flat coordinates are independent of physical result storage.
+    std::size_t offset(std::size_t i) const noexcept {
+        if (order == MemoryOrder::c || shape.rank < 2) return i;
+        std::size_t result = 0;
+        for (int axis = shape.rank - 1; axis >= 0; --axis) {
+            const auto coordinate = i % shape.dim[axis];
+            i /= shape.dim[axis];
+            result = result * shape.dim[axis] + coordinate;
+        }
+        return result;
+    }
     void set(std::size_t i, double x) noexcept {
         if (shape.rank == 0) {
             scalar = x;
             if (data)
                 *static_cast<double *>(data) = x;
         } else
-            static_cast<double *>(data)[i] = x;
+            static_cast<double *>(data)[offset(i)] = x;
     }
     void set_mask(std::size_t i, std::uint8_t x) noexcept {
         if (shape.rank == 0) {
@@ -243,7 +322,7 @@ struct Output {
             if (data)
                 *static_cast<std::uint8_t *>(data) = x;
         } else
-            static_cast<std::uint8_t *>(data)[i] = x;
+            static_cast<std::uint8_t *>(data)[offset(i)] = x;
     }
     void set_integer(std::size_t i, std::int64_t x) noexcept {
         if (shape.rank == 0) {
@@ -251,7 +330,7 @@ struct Output {
             if (data)
                 *static_cast<std::int64_t *>(data) = x;
         } else
-            static_cast<std::int64_t *>(data)[i] = x;
+            static_cast<std::int64_t *>(data)[offset(i)] = x;
     }
 };
 
@@ -261,6 +340,10 @@ struct Workspace {
     std::vector<double> doubles;
     std::vector<std::size_t> indices;
     void ensure(std::size_t d, std::size_t i) {
+        // Scratch contents have no lifetime across calls. Release before growth
+        // so neither geometric spare capacity nor old+new storage escapes the
+        // shape-based admission bound; equal/smaller requests reuse capacity.
+        if (d > doubles.capacity()) std::vector<double>().swap(doubles);
         doubles.resize(d);
         indices.resize(i);
     }
@@ -269,23 +352,119 @@ struct Workspace {
     }
 };
 struct Audit {
+    std::size_t highway_vqsort_calls = 0;
+    std::size_t eigen_matvec_calls = 0;
+    std::size_t eigen_rotation_calls = 0;
+    std::size_t eigen_covariance_calls = 0;
+    std::size_t eigen_density_calls = 0;
+    std::size_t accelerate_covchol_calls = 0;
+  std::size_t accelerate_matmul_calls = 0, matmul_zero_calls = 0;
+  std::size_t accelerate_covariance_attempts = 0;
+  std::size_t accelerate_covariance_calls = 0;
+  std::size_t covariance_syrk_calls = 0;
+  std::size_t covariance_replayed_cells = 0;
+  std::size_t covariance_fallbacks = 0;
+  std::size_t covariance_zero_calls = 0;
+  std::size_t accelerate_vforce_calls = 0;
+  std::size_t accelerate_lu_attempts = 0;
+  std::size_t accelerate_lu_calls = 0;
+  std::size_t accelerate_lu_fallbacks = 0;
+  std::size_t solve_residual_materialization_bytes = 0;
+  std::size_t covariance_panel_materialization_bytes = 0;
+  std::size_t native_library_workspace_reserve_bytes = 0;
     const char *isa = "scalar";
     std::size_t vector_elements = 0;
     std::size_t scratch_bytes = 0;
     std::size_t algorithm_copy_bytes = 0;
 };
-void execute(const Prepared &plan, Output &output, Workspace &work, Isa isa, Audit &audit);
+// Geometry-only physical plan, shared by direct fits, registry and graph loans.
+// Large HMMs replay density after consuming it; scalar/library-off fits use the
+// same planned two-matrix storage and preserve ordered mathematical recurrences.
+// Internal measured GMM replay cutoff; shared by scratch geometry and Planner.
+inline constexpr std::size_t latent_gmm_replay_min_elements = 16 * 1024 * 1024;
+inline constexpr std::size_t latent_hmm_replay_min_rows = 4096;
+inline std::size_t latent_fit_matrix_count(Op op, std::size_t n, std::size_t k) {
+    return op != Op::gaussian_hmm_em ? 1 : n >= latent_hmm_replay_min_rows && k >= 3 ? 2 : 3;
+}
+// Large direct fits keep one beta/gamma history and sparse forward boundaries.
+inline constexpr std::size_t latent_hmm_alpha_checkpoint_min_elements = 8 * 1024 * 1024;
+inline constexpr std::size_t latent_hmm_alpha_checkpoint_block = 128;
+inline bool latent_hmm_alpha_checkpoint_eligible(std::size_t n, std::size_t k,
+                                               std::size_t d) {
+    return n >= latent_hmm_replay_min_rows && k >= 16 && k <= 128 && d > 0 && d <= 32 &&
+        n >= (latent_hmm_alpha_checkpoint_min_elements + k - 1) / k;
+}
+std::size_t latent_hmm_full_scratch(std::size_t n, std::size_t k);
+std::size_t latent_hmm_alpha_checkpoint_tail(std::size_t n, std::size_t k);
+// Internal E step: emission/history and the checked small span belong to this call.
+// Caller has filled logA, initial and Gaussian logs in the common small layout.
+double hmm_alpha_checkpoint_step(const Value &x, const Value &means, const Value &vars,
+    double *history, double *small, std::size_t small_count, Isa requested,
+    bool state_library, Audit &audit);
+// Internal physical fit scratch. Matrix spans are exclusive for this call;
+// the graph proves backing lifetimes and restores any loaned arena contents.
+// For a two-matrix HMM plan, beta==em selects replay. An independent beta span
+// is allowed only when the graph can loan the third matrix without reserving it;
+// small_count still follows the planned tail, including the conservative tile.
+struct LatentFitScratch {
+    double *em = nullptr, *alpha = nullptr, *beta = nullptr, *small = nullptr;
+    std::size_t cells = 0, small_count = 0;
+};
+// Internal physical projection; the graph proves that only this last row is used.
+void hmm_filter_tail(const Prepared &, Output &, Workspace &, Audit &);
+// Private physical pair; Gaussian validation must complete before filter replay.
+// Shared admission limits keep Planner and both replay kernels in agreement.
+inline constexpr std::size_t latent_gaussian_stream_max_components = 16;
+inline constexpr std::size_t latent_gaussian_stream_max_features = 32;
+void gaussian_density_stream_validate(const Prepared &, Workspace &, Isa, Audit &);
+void gaussian_filter_tail(const Prepared &, const Prepared &, Output &, Workspace &, Isa, Audit &);
+void execute(const Prepared &plan, Output &output, Workspace &work, Isa isa, Audit &audit,
+             const LatentFitScratch *fit_scratch = nullptr);
 
 // Family kernels. They never import/call Python or create worker threads.
 void elementwise(const Prepared &, Output &, Workspace &, Isa, Audit &);
 // Internal physical tile over validated numeric descriptors, without packing.
 void elementwise_span(const Prepared &, Output &, const std::array<std::size_t, 2> &);
-void reduction(const Prepared &, Output &, Workspace &, Audit &);
+// Optional terminal certificate: true only after all new packet results were
+// proved finite and farther from zero than the given absolute error bound.
+void elementwise_pair(const Prepared &, const Prepared &, Output &, bool first_left,
+                      bool *zero_separated = nullptr, double error_bound = 0.0);
+void take_reduce(const Prepared &, const Prepared &, Output &);
+// A single consumed eigenvalue projection keeps the bounded Jacobi solve, but
+// does not construct eigenvectors. Copies the source before destination writes.
+void symmetric_eigh_values_pair(const Prepared &, Output &, Workspace &, Audit &);
+std::size_t symmetric_eigh_split_scratch_doubles(std::size_t dimension);
+void symmetric_eigh_split_pair(const Prepared &, Output &values, Output &vectors, Workspace &, Audit &);
+// Physical pair only: caller proves a private single-use covariance result.
+// This does not permit aliasing inputs in the public direct-operator API.
+void covariance_cholesky_pair(const Prepared &, const Prepared &, Output &, Workspace &, Audit &,
+                              bool independent_root = false);
+// Additional bounded panel for the private, independent covariance/Cholesky root.
+std::size_t covariance_cholesky_accelerate_scratch_doubles(std::size_t dimension);
+bool try_accelerate_covariance_cholesky(const Prepared &, Output &, Workspace &, Audit &);
+void reduction(const Prepared &, Output &, Workspace &, Isa, Audit &);
 void sequence(const Prepared &, Output &, Workspace &, Audit &);
 void recurrence(const Prepared &, Output &, Workspace &, Audit &);
 void prepare_state_events(Prepared &);
 void state_events(const Prepared &, Output &, Workspace &, Audit &);
 void matrix(const Prepared &, Output &, Workspace &, Isa, Audit &);
+// Internal completion of a validated square covariance upper triangle.
+// Correlation may use the lower triangle as scratch; output must be independent.
+void finish_covariance_matrix(Output &, bool correlation);
+void latent_execute(const Prepared &, Output &, Workspace &, Isa, Audit &,
+                    const LatentFitScratch * = nullptr);
+// Private adjacent pair: validate at scatter's original node, then consume
+// its unique rows with no N*K materialization. Caller proves rank/axis/liveness.
+void validate_scatter_indices(const Prepared &, Workspace &, Audit &);
+// Optional validated private column take: original source/indices remain live.
+void scatter_argmax_pair(const Prepared &, const Prepared &, Output &, const Prepared * = nullptr);
+void scatter_take_pair(const Prepared &, const Prepared &, Output &, Workspace &, Audit &);
+void matrix_foundation_execute(const Prepared &, Output &, Workspace &, Isa, Audit &);
+void axis_path_prepare(Prepared &);
+void axis_path_execute(const Prepared &, Output &, Workspace &, Isa, Audit &);
+// Independent C roots with the same static coefficient input, no extra RHS packing.
+bool solve_multi_pair(const Prepared &, const Prepared &, Output &, Output &, Workspace &, Audit &);
+void solve_multi_private(const Prepared &, Output &, Workspace &, Audit &, double *);
 void regression(const Prepared &, Output &, Workspace &, Audit &);
 void state(const Prepared &, Output &, Workspace &, Audit &);
 void composite(const Prepared &, Output &, Workspace &, Isa, Audit &);

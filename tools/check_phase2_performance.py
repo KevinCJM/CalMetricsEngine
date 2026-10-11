@@ -1,9 +1,17 @@
-"""Run the Phase-2 paired C++ vs NJIT performance acceptance gate.
+"""Run historical Phase-2 paired C++ vs NJIT comparison diagnostics.
 
 This is intentionally not part of ordinary unit-test CI: it requires a local
 BetterSaaTaa checkout plus Numba and is sensitive to host load.  It executes the
 actual benchmark against the current source tree, then fails unless the paired
 Native/NJIT ratio stays below the configured ceiling.
+
+The strict thresholds and nonzero failure status preserve historical diagnostics;
+they are not standalone current adoption vetoes. Follow AGENTS Section 16 and
+computation-design-rules D8 using complete-request absolute and relative changes,
+actual batch/concurrency costs and resource budgets. A few KB of memory growth
+or a few milliseconds of latency growth cannot alone reject a candidate.
+Numerical correctness, ownership and budgets remain hard rules; material
+medium/large-workload regressions and the overall NJIT goal stay open.
 """
 
 from __future__ import annotations

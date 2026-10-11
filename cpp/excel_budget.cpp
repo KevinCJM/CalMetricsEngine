@@ -220,8 +220,90 @@ struct Analyzer {
     const N o = out.size();
     N recipe = 0;
     if (!unavailable) {
-      if (spec.family == ops::Family::elementwise || op == Op::active_returns) {
-        recipe = mul(o, op == Op::normal_ppf ? 23 : op == Op::clip ? 2 : 1);
+      if (op == Op::affine_contract) {
+        // One visible initial cell, then a separate coeff*X and running+term
+        // cell for each ascending factor. Never budget this as one MMULT.
+        recipe = add(o, product({o, a[1].shape.dim[0], 2}));
+        c.work = add(c.work, mul(16, recipe));
+      } else if (op == Op::cumulative_product_axis ||
+                 op == Op::cumulative_max_axis || op == Op::quantiles_axis) {
+        const bool quantiles = op == Op::quantiles_axis;
+        const auto axis = bound(a[quantiles ? 2 : 1], c, "axis", 2);
+        if (!quantiles) {
+          // Each nonempty line has an explicit seed and one ordered update per
+          // value. Empty output has no seed/helper payload cells.
+          if (o) {
+            const auto length = a[0].shape.dim[axis];
+            recipe = add(o, o / length);
+          }
+        } else {
+          const auto q = a[1].size();
+          // Q validation is independent of output geometry. One predicate and
+          // one all() term per q, bounded-fan-in sum and one failure cell.
+          recipe = add(add(mul(2, q), sum_cells(q)), 1);
+          if (o) {
+            const auto length = a[0].shape.dim[axis];
+            const auto lines = o / q;
+            // Rank each source once per line, then all probabilities share it.
+            // Each pick is an N-cell selection chain. Position/fraction/two
+            // guarded products/final selection are five cells per q.
+            recipe = add(recipe,
+                mul(lines, add(mul(length, add(length, sum_cells(length))),
+                               mul(q, add(mul(2, length), 5)))));
+          }
+        }
+        c.work = add(c.work, mul(16, recipe));
+      } else if (ops::latent_operator(op)) {
+        const N rows=a[0].shape.dim[0];
+        recipe=add(mul(24,add(n,o)),64);
+        if(op==Op::gaussian_mixture_em || op==Op::gaussian_hmm_em || op==Op::gaussian_log_density){
+          const bool hmm=op==Op::gaussian_hmm_em,fit=op!=Op::gaussian_log_density;
+          const N k=a[fit?(hmm?3:2):1].shape.dim[0],d=a[0].shape.dim[1];
+          const N iterations=fit?bound(a[hmm?5:4],c,"EM iterations",10000):1;
+          recipe=add(recipe,product({iterations,16,add(rows,1),add(k,1),add(add(d,1),hmm?k:0)}));
+        } else if(op==Op::hmm_filter || op==Op::hmm_smooth)
+          recipe=add(recipe,product({48,add(rows,1),add(a[1].size(),1),add(a[1].size(),1)}));
+        else if(op==Op::sample_unique_indices){auto k=bound(a[1],c,"sample count",9007199254740991ULL);recipe=add(recipe,add(mul(3,k),mul(triangular(k),add(all_cells(k),1))));}
+        else if(op==Op::partition_mean || op==Op::scatter_rows){bound(a[2],c,"output extent",9007199254740991ULL);recipe=add(recipe,add(product({8,add(n,1),add(a[1].size(),1)}),product({4,add(o,1),add(rows,1)})));}
+        else if(op==Op::transition_counts || op==Op::one_hot){bound(a[1],c,"state count",9007199254740991ULL);recipe=add(recipe,product({4,add(o,1),add(rows,1)}));}
+        else if(op>=Op::variance_axis && op<=Op::softmax_axis)bound(a[1],c,"axis",2);
+        c.work=add(c.work,mul(16,recipe));
+      } else if (ops::matrix_foundation(op)) {
+        const auto m = a[0].shape.dim[0];
+        if (op == Op::symmetric_eigh) {
+          const auto sweeps = bound(a[2], c, "eigen sweeps", 128);
+          const auto pairs = m ? triangular(m - 1) : 0;
+          recipe = add(product({sweeps, pairs, add(mul(4,m),12)}),
+                    add(mul(10,mul(m,m)), add(mul(pairs,add(mul(2,m),3)), add(mul(5,o),16))));
+        } else if (op == Op::cholesky)
+          recipe = add(product({m,m,m}), add(mul(4,n),add(o,16)));
+        else if (op == Op::solve_multi) {
+          const auto cols = a[1].shape.dim[1];
+          recipe = add(product({3,m,m,m}), add(product({3,m,m,cols}),add(mul(10,n),add(product({8,m,cols}),32))));
+        } else if (op == Op::triangular_solve) {
+          bound(a[2],c,"lower",1); bound(a[3],c,"unit diagonal",1);
+          const auto cols = a[1].shape.rank==1 ? 1 : a[1].shape.dim[1];
+          recipe = add(product({m,m,cols}),add(mul(3,n),add(mul(4,o),16)));
+        } else if (op == Op::eigenvalues || op == Op::eigenvectors)
+          recipe = 0;
+        else {
+          N axis = 0;
+          if (op != Op::broadcast_like)
+            axis=bound(a[(op==Op::take_axis || op==Op::concatenate || op==Op::stack) ? 2 : 1],c,"axis",3);
+          if (op == Op::slice_axis)
+            for(N j=2;j<5;++j) bound(a[j],c,"slice parameter",9007199254740991ULL);
+          if (op == Op::swap_axes) bound(a[2],c,"second axis",2);
+          if (op == Op::take_axis) recipe=mul(o,add(a[0].shape.dim[axis],3));
+          else if (op == Op::sum_axis || op == Op::mean_axis) recipe=add(mul(4,n),o);
+        }
+        c.work=add(c.work,mul(16,recipe));
+      } else if (spec.family == ops::Family::elementwise || op == Op::active_returns) {
+        // expm1: one near-zero guard, eleven guarded Horner helpers and one
+        // final formula. Public error/ownership cells are accounted below.
+        recipe = mul(o, op == Op::normal_ppf ? 23
+                        : op == Op::expm1   ? 13
+                        : op == Op::clip    ? 2
+                                           : 1);
         if (!out.shape.rank && given[0].scalar &&
             (given.size() == 1 || given[1].scalar) &&
             out.kind == ops::Kind::number) {
@@ -652,6 +734,8 @@ Budget symbolic_budget(const compiler::CompiledGraph *graph,
       throw Error("UNKNOWN_BOUND: failed root has unknown geometry");
     cost.text(add(4, mul(2, v.size())));
     cost.steps(mul(3, v.size()));
+    if (v.size() == 0)
+      cost.steps(1); // Visible root status; there is no result element row.
   }
   a.check(cost);
   report.cells = cost.cells;

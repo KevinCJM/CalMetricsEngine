@@ -2,7 +2,7 @@
 
 [文档导航](README.md) · [数学算子](operator-reference.md) · [复现契约与验收](excel-reproduction-design.md#10-原生实现与验收)
 
-`calmetrics_engine.excel` 是按需调用的导出模块。C++ 根据现有逻辑 DAG 展开公式，Python 仅流式写 xlsx。普通 `operators`、Scheduler、prepared、线程和进程计算不运行此模块。当前 146 个算子和 7 类作用域已通过 Microsoft Excel 16.89.1 的全量夹具验收（391 组、2,533 个结果）；具体构建、版本和适用域见复现契约。新生成文件仍须单独重算，不能把生成成功当作本次结果已验证。
+`calmetrics_engine.excel` 是按需调用的导出模块。C++ 根据现有逻辑 DAG 展开公式，Python 仅流式写 xlsx。普通 `operators`、Scheduler、prepared、线程和进程计算不运行此模块。原 146 个算子和 7 类作用域已通过 Microsoft Excel 16.89.1 的全量夹具验收（391 组、2,533 个结果）；具体构建、版本和适用域见复现契约。新生成文件仍须单独重算，不能把生成成功当作本次结果已验证。
 
 ## 1. 安装与调用
 
@@ -30,7 +30,7 @@ with tempfile.TemporaryDirectory() as directory:
 
 同一 `mean(x)` 只展开一次。多输出仍保留各自 dtype、shape、axes 和地址，矩阵/张量按行优先线性展开；`Outputs` 表说明可逆映射。当前一次计划绑定一个完整输入范围，需要多产品/区间时由调用方显式选择范围并分别导出，不能把拼接的不同产品当成一条递推序列。
 
-直接算子入口是 `excel.plan_operator("solve", [matrix, rhs])`。146 个 canonical 算子都登记了展开实现，完整名称与参数沿用算子参考。fit/interval 直接导出包含全部字段；图内仍使用正式投影算子。`coverage()` 是不绑定 Excel 版本或输入的静态实现目录，保持 `implemented_unverified`；特定构建/版本的验收以独立 PASS 报告为准。未来新增 opcode 不会自动标为实现。
+直接算子入口是 `excel.plan_operator("solve", [matrix, rhs])`。新增矩阵/数组 14 项的真实重算与预算记录见[本轮验收](matrix-array-foundation.md)。新增概率模型 25 项见[本轮设计与验收](latent-model-operators.md)，EM 按最大轮数展开并在收敛后冻结，初始化和停止参数仍可追溯；大模型可能首先触及公式字符/工作量预算。190 个 canonical 算子都登记了展开实现，完整名称与参数沿用算子参考。fit/interval 直接导出包含全部字段；图内仍使用正式投影算子。`coverage()` 是不绑定 Excel 版本或输入的静态实现目录，保持 `implemented_unverified`；特定构建/版本的验收以独立 PASS 报告为准。未来新增 opcode 不会自动标为实现。
 
 ## 2. 参数、快照与预算
 
@@ -79,3 +79,5 @@ python tools/check_excel_parity.py --engine libreoffice --all-cases --check-edit
 Windows 安装真实桌面 Excel 和 `pywin32` 后使用 `--engine excel --check-edits`：测试创建独立 Excel 实例、禁用宏/链接更新、执行 `CalculateFullRebuild`、保存读取并关闭。编辑检查另改动数值和窗口参数，分别验证重新计算/旧参考失效和布局失效提示。普通 GitHub hosted runner 不假定装有 Excel。
 
 macOS 可先 `--engine generate --check-edits`，在真实 Excel 强制重算并保存 `conformance.xlsx`，同时重算保存 `input-edits/value.xlsx` 与 `input-edits/layout.xlsx`，再用 `--engine read --check-edits --engine-version 'Microsoft Excel 实际版本'` 校验。`source.xlsx` 是原始身份基准，不能替换成重算文件。测试所需 `openpyxl` 只用于验收，不进入生产导出依赖。
+
+新增按轴递推和多分位数的公式、符号上界与验收范围见[按轴原语设计](mc-axis-primitives.md)。空数组不生成虚构数值行：`Outputs` 第五列显示 `EMPTY` 或根错误，布局变化仍提示重新导出；`reference()` 保留空形状与独立根错误。所有空根状态单元格计入全工作簿预算。

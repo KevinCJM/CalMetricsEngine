@@ -1,0 +1,122 @@
+{
+  "status": "completed_current_C_three_group40_screen",
+  "actual_build_id": "a87f2c25ae40a633f3f22ae0bfc66ecdefb721294e349d2ae21d74687eb960a2",
+  "complete_processes": 40,
+  "time_processes": 24,
+  "heap_processes": 8,
+  "rss_processes": 8,
+  "smoke_separate": 2,
+  "all_input_hashes_paired_equal": true,
+  "all_full_output_checks_passed": true,
+  "rows": [
+    {
+      "case": {
+        "name": "hmm12",
+        "model": "hmm",
+        "n": 500000,
+        "d": 4,
+        "k": 12,
+        "iterations": 4
+      },
+      "times": {
+        "cpp": 4.191065334001905,
+        "njit": 8.943256416998338
+      },
+      "time_saved": 0.5313714447417611,
+      "memory": {
+        "heap": {
+          "cpp": 265576238,
+          "njit": 272514520
+        },
+        "rss": {
+          "cpp": 270401536,
+          "njit": 360513536
+        }
+      },
+      "heap_saved_MiB": 6.616861343383789,
+      "rss_saved_MiB": 85.9375
+    },
+    {
+      "case": {
+        "name": "hmm3-default60",
+        "model": "hmm",
+        "n": 250000,
+        "d": 4,
+        "k": 3,
+        "iterations": 60
+      },
+      "times": {
+        "cpp": 0.8253082919982262,
+        "njit": 1.7764563329983503
+      },
+      "time_saved": 0.5354187566179862,
+      "memory": {
+        "heap": {
+          "cpp": 79795726,
+          "njit": 64255112
+        },
+        "rss": {
+          "cpp": 97075200,
+          "njit": 157007872
+        }
+      },
+      "heap_saved_MiB": -14.820684432983398,
+      "rss_saved_MiB": 57.15625
+    },
+    {
+      "case": {
+        "name": "gmm16",
+        "model": "gmm",
+        "n": 1398104,
+        "d": 8,
+        "k": 16,
+        "iterations": 4
+      },
+      "times": {
+        "cpp": 2.077305917002377,
+        "njit": 7.328689916997973
+      },
+      "time_saved": 0.7165515336944018,
+      "memory": {
+        "heap": {
+          "cpp": 834750338,
+          "njit": 851456912
+        },
+        "rss": {
+          "cpp": 736198656,
+          "njit": 1086685184
+        }
+      },
+      "heap_saved_MiB": 15.93263053894043,
+      "rss_saved_MiB": 334.25
+    },
+    {
+      "case": {
+        "name": "gmm3-default60",
+        "model": "gmm",
+        "n": 500000,
+        "d": 4,
+        "k": 3,
+        "iterations": 60
+      },
+      "times": {
+        "cpp": 0.8259064159938134,
+        "njit": 1.8948767499969108
+      },
+      "time_saved": 0.5641371313489598,
+      "memory": {
+        "heap": {
+          "cpp": 131534582,
+          "njit": 110503392
+        },
+        "rss": {
+          "cpp": 120766464,
+          "njit": 116359168
+        }
+      },
+      "heap_saved_MiB": -20.05690574645996,
+      "rss_saved_MiB": -4.203125
+    }
+  ],
+  "goal_complete": false
+}

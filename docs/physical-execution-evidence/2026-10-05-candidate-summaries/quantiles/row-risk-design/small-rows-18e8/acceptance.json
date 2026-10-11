@@ -1,0 +1,138 @@
+{
+  "build_id": "18e8a40a5ea987f5a2538ec41795e17401ab66b53a55312ae96c6106dcae489a",
+  "related_tests": 831,
+  "native_tests": 9,
+  "new_cases": 86,
+  "time": [
+    {
+      "load": "many-short",
+      "shape": [
+        65536,
+        252,
+        30
+      ],
+      "layout": "C",
+      "medians_seconds": {
+        "v11": 0.6673201665,
+        "candidate": 0.6600549585,
+        "bounded-select-njit": 0.2919652705
+      },
+      "maximum_absolute_errors": {
+        "v11": [
+          2.6020852139652106e-18,
+          6.505213034913027e-19,
+          1.1102230246251565e-16
+        ],
+        "candidate": [
+          2.6020852139652106e-18,
+          6.505213034913027e-19,
+          1.1102230246251565e-16
+        ],
+        "bounded-select-njit": [
+          2.6020852139652106e-18,
+          4.336808689942018e-19,
+          1.1102230246251565e-16
+        ]
+      }
+    },
+    {
+      "load": "many-short",
+      "shape": [
+        65536,
+        252,
+        30
+      ],
+      "layout": "F",
+      "medians_seconds": {
+        "v11": 0.756628021,
+        "candidate": 0.689588104,
+        "bounded-select-njit": 0.3141585415
+      },
+      "maximum_absolute_errors": {
+        "v11": [
+          2.6020852139652106e-18,
+          6.505213034913027e-19,
+          1.1102230246251565e-16
+        ],
+        "candidate": [
+          2.6020852139652106e-18,
+          6.505213034913027e-19,
+          1.1102230246251565e-16
+        ],
+        "bounded-select-njit": [
+          2.6020852139652106e-18,
+          4.336808689942018e-19,
+          1.1102230246251565e-16
+        ]
+      }
+    },
+    {
+      "load": "few-long",
+      "shape": [
+        256,
+        200000,
+        30
+      ],
+      "layout": "C",
+      "medians_seconds": {
+        "v11": 8.859636625,
+        "candidate": 0.949986063,
+        "bounded-select-njit": 1.0540338955
+      },
+      "maximum_absolute_errors": {
+        "v11": [
+          2.862293735361732e-17,
+          1.3660947373317356e-17,
+          1.887379141862766e-15
+        ],
+        "candidate": [
+          2.862293735361732e-17,
+          1.3660947373317356e-17,
+          1.887379141862766e-15
+        ],
+        "bounded-select-njit": [
+          2.7755575615628914e-17,
+          1.3660947373317356e-17,
+          2.886579864025407e-15
+        ]
+      }
+    },
+    {
+      "load": "few-long",
+      "shape": [
+        256,
+        200000,
+        30
+      ],
+      "layout": "F",
+      "medians_seconds": {
+        "v11": 1.060394563,
+        "candidate": 1.3379814374999999,
+        "bounded-select-njit": 1.5054509585
+      },
+      "maximum_absolute_errors": {
+        "v11": [
+          2.862293735361732e-17,
+          1.3660947373317356e-17,
+          1.887379141862766e-15
+        ],
+        "candidate": [
+          2.862293735361732e-17,
+          1.3660947373317356e-17,
+          1.887379141862766e-15
+        ],
+        "bounded-select-njit": [
+          2.7755575615628914e-17,
+          1.3660947373317356e-17,
+          2.886579864025407e-15
+        ]
+      }
+    }
+  ],
+  "full_regression": false,
+  "sanitizers": false,
+  "libraries_off": false,
+  "production_adopted": false,
+  "whole_goal_complete": false,
+  "acceptance": "rejected uniform admission: long C improves 8.86 to 0.95 s, long F regresses 1.06 to 1.34 s; keep better existing C-right-operand path"
+}

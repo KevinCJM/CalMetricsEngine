@@ -1,0 +1,184 @@
+{
+  "status": "qualified_actual_built_verified_measured",
+  "build_id": "74bd1460606d2a6a8e4bfab8e2a4725cf46945c2420ef61b29c41945f4a146bf",
+  "source_count": 93,
+  "test_fixture_count": 186,
+  "production_changed": [
+    "cpp/operators/sequence.cpp"
+  ],
+  "test_added": "tests/test_portfolio_matvec_library.py",
+  "self_review": "no remaining actionable defect found in the one-file delegation; original failures retained; public contracts unchanged",
+  "qualification": {
+    "normal": {
+      "status": "passed",
+      "build_id": "74bd1460606d2a6a8e4bfab8e2a4725cf46945c2420ef61b29c41945f4a146bf",
+      "source_count": 93,
+      "jobs": [
+        {
+          "label": "native",
+          "returncode": 0,
+          "counts": {
+            "tests": 9,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "skip_reasons": []
+        },
+        {
+          "label": "full",
+          "returncode": 0,
+          "counts": {
+            "tests": 16634,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "skip_reasons": []
+        }
+      ],
+      "actual_adopted": false,
+      "goal_complete": false,
+      "sanitizer_leak_detection": null,
+      "finished": 1791427017.29164
+    },
+    "asan": {
+      "status": "passed",
+      "build_id": "af2cece2ce401bd095ed092e7c66431d1ae5c1b661f7e9d62f6728c61ff39e02",
+      "source_count": 93,
+      "jobs": [
+        {
+          "label": "native",
+          "returncode": 0,
+          "counts": {
+            "tests": 9,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "skip_reasons": []
+        },
+        {
+          "label": "related",
+          "returncode": 0,
+          "counts": {
+            "tests": 4577,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "skip_reasons": []
+        }
+      ],
+      "actual_adopted": false,
+      "goal_complete": false,
+      "sanitizer_leak_detection": false,
+      "finished": 1791427527.6690361
+    },
+    "off": {
+      "status": "passed",
+      "build_id": "779882a5b8d954454c31442bf959b41d18ffab7b0d144eae49f99f68549c3294",
+      "source_count": 93,
+      "jobs": [
+        {
+          "label": "native",
+          "returncode": 0,
+          "counts": {
+            "tests": 9,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "skip_reasons": []
+        },
+        {
+          "label": "related",
+          "returncode": 0,
+          "counts": {
+            "tests": 4577,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "skip_reasons": []
+        }
+      ],
+      "actual_adopted": false,
+      "goal_complete": false,
+      "sanitizer_leak_detection": null,
+      "finished": 1791427922.323531
+    }
+  },
+  "actual_verification": {
+    "status": "passed",
+    "build_id": "74bd1460606d2a6a8e4bfab8e2a4725cf46945c2420ef61b29c41945f4a146bf",
+    "source_count": 93,
+    "jobs": [
+      {
+        "label": "native",
+        "returncode": 0,
+        "counts": {
+          "tests": 9,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "skip_reasons": []
+      },
+      {
+        "label": "related",
+        "returncode": 0,
+        "counts": {
+          "tests": 4577,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "skip_reasons": []
+      }
+    ],
+    "actual_adopted": true,
+    "goal_complete": false,
+    "sanitizer_leak_detection": null,
+    "finished": 1791428323.7888582
+  },
+  "actual_measurement_processes": 6,
+  "actual_measurements": {
+    "actual-time-C": {
+      "median_seconds": 1.7220780421048403,
+      "max_full_absolute_error": 0.0
+    },
+    "actual-time-F": {
+      "median_seconds": 1.784463374875486,
+      "max_full_absolute_error": 0.0
+    },
+    "actual-heap-C": {
+      "warm_peak_bytes": 69364338,
+      "max_full_absolute_error": 0.0
+    },
+    "actual-heap-F": {
+      "warm_peak_bytes": 69364338,
+      "max_full_absolute_error": 0.0
+    },
+    "actual-rss-C": {
+      "warm_incremental_rss_bytes": 2080768,
+      "max_full_absolute_error": 0.0
+    },
+    "actual-rss-F": {
+      "warm_incremental_rss_bytes": 3096576,
+      "max_full_absolute_error": 0.0
+    }
+  },
+  "actual_library_calls_per_request": 512,
+  "original_complete_paired_processes": 40,
+  "actual_adopted": true,
+  "goal_complete": false,
+  "limitations": [
+    "F layout remains slower than the stronger ordered-column NJIT control",
+    "no material memory-peak reduction in this risk chain",
+    "actual confirmations are one fresh process per layout/metric, not replacement repeated paired statistics",
+    "full platform random generation, constraints, frontier and other major chains remain open",
+    "no cross-platform, deployment or live Excel recalculation claim; SAN leak detection disabled"
+  ],
+  "recorded_utc": "2026-10-08T03:28:40.411017+00:00"
+}

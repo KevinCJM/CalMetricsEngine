@@ -1,0 +1,115 @@
+{
+  "date": "2026-10-07",
+  "adopted": false,
+  "goal_complete": false,
+  "measurement_status": "passed",
+  "performance_objective_met": false,
+  "baseline_build_id": "69be4ac9b4a216a212a3b4e4b0b20d8fc2cff1f37585817287dbe6d9f3bcff72",
+  "candidate_build_id": "7278b9d1bc594873815ad02d264f5173314753de1ca6f1306f1d1210a505bfd3",
+  "shape": [
+    8192,
+    1024,
+    8192
+  ],
+  "cpu_budget": 1,
+  "timing": "3 fresh processes per backend/layout, each 3 timed complete requests, rotating order",
+  "memory": "one separate fresh malloc process and one RSS process per backend/layout, three generations",
+  "parity": "both final retained full outputs, rtol=0 and existing atol=0.000049",
+  "layouts": {
+    "C": {
+      "baseline": {
+        "fresh_process_medians": [
+          6.375214457977563,
+          6.379005458205938,
+          6.3839531247504056
+        ],
+        "median_seconds": 6.379005458205938,
+        "warm_peak_malloc_bytes": 1747464724,
+        "warm_incremental_rss_bytes": 1680850944,
+        "max_full_absolute_error": 5.551115123125783e-17
+      },
+      "candidate": {
+        "fresh_process_medians": [
+          0.7277977499179542,
+          0.7035295409150422,
+          0.6704946672543883
+        ],
+        "median_seconds": 0.7035295409150422,
+        "warm_peak_malloc_bytes": 1214259180,
+        "warm_incremental_rss_bytes": 1153875968,
+        "max_full_absolute_error": 0.0
+      },
+      "njit": {
+        "fresh_process_medians": [
+          0.6448389575816691,
+          0.630218000151217,
+          0.6309104170650244
+        ],
+        "median_seconds": 0.6309104170650244,
+        "warm_peak_malloc_bytes": 1744830992,
+        "warm_incremental_rss_bytes": 1694236672,
+        "max_full_absolute_error": 0.0
+      },
+      "candidate_over_njit_time": 1.1151021157454328,
+      "candidate_malloc_saved_vs_njit_bytes": 530571812,
+      "candidate_malloc_saved_vs_baseline_bytes": 533205544
+    },
+    "F": {
+      "baseline": {
+        "fresh_process_medians": [
+          6.301133417058736,
+          6.310470750089735,
+          6.316603959072381
+        ],
+        "median_seconds": 6.310470750089735,
+        "warm_peak_malloc_bytes": 1747464724,
+        "warm_incremental_rss_bytes": 1680834560,
+        "max_full_absolute_error": 5.551115123125783e-17
+      },
+      "candidate": {
+        "fresh_process_medians": [
+          0.6965209166519344,
+          0.678628291003406,
+          0.705406750086695
+        ],
+        "median_seconds": 0.6965209166519344,
+        "warm_peak_malloc_bytes": 1214259180,
+        "warm_incremental_rss_bytes": 1153908736,
+        "max_full_absolute_error": 0.0
+      },
+      "njit": {
+        "fresh_process_medians": [
+          0.6382798342965543,
+          0.628418707754463,
+          0.6335014589130878
+        ],
+        "median_seconds": 0.6335014589130878,
+        "warm_peak_malloc_bytes": 1744830992,
+        "warm_incremental_rss_bytes": 1693007872,
+        "max_full_absolute_error": 0.0
+      },
+      "candidate_over_njit_time": 1.099477999382938,
+      "candidate_malloc_saved_vs_njit_bytes": 530571812,
+      "candidate_malloc_saved_vs_baseline_bytes": 533205544
+    }
+  },
+  "quality": {
+    "targeted_python": 78,
+    "native": 9,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "full_regression": false,
+    "asan_ubsan": false,
+    "library_off": false,
+    "cross_platform": false,
+    "live_excel": false
+  },
+  "pending_qualification": [
+    "Unknown-shape/child-scope Planner admission and library workspace envelope",
+    "Resource exceptions, deadline/cancellation and all raw failure-buffer branches",
+    "Full regression, ASan/UBSan, library OFF and cross-platform qualification",
+    "Full allocation/copy audit and representative platform complete-chain coverage",
+    "Stable substantial medium/large lead over same-core warmed NJIT"
+  ]
+}

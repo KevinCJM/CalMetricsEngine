@@ -87,6 +87,14 @@ __attribute__((visibility("default"))) void cme_heap_begin() {
 __attribute__((visibility("default"))) void cme_heap_end(Counters *output) {
     pthread_mutex_lock(&mutex); active = false; *output = counters; pthread_mutex_unlock(&mutex);
 }
+// Snapshot without changing the epoch: subsequent frees must retire allocations
+// made during setup/cold execution, including results released before warm runs.
+__attribute__((visibility("default"))) void cme_heap_snapshot(Counters *output) {
+    pthread_mutex_lock(&mutex); *output = counters; pthread_mutex_unlock(&mutex);
+}
+__attribute__((visibility("default"))) void cme_heap_reset_peak() {
+    pthread_mutex_lock(&mutex); counters.peak_bytes = counters.live_bytes; pthread_mutex_unlock(&mutex);
+}
 void *cme_malloc(std::size_t size) { auto *p = std::malloc(size); track(p, size); return p; }
 void *cme_calloc(std::size_t n, std::size_t size) {
     auto *p = std::calloc(n, size); if (p) track(p, n * size); return p;

@@ -1,0 +1,29 @@
+{
+  "status": "correctness_passed_superseded_before_performance",
+  "build_id": "8a38e5110448807f3f5935af920245119706283d589efe1a03f8d5bae4844662",
+  "related": 1496,
+  "native": 9,
+  "new_python_cases": 96,
+  "native_exception_and_checkpoint_cases": true,
+  "machine_proof": {
+    "status": "passed",
+    "build_id": "8a38e5110448807f3f5935af920245119706283d589efe1a03f8d5bae4844662",
+    "object_sha256": "8e162587eb19a0128ca3de3a8d9a24674a2aeeda46d48ce9015f646f7d8f21c2",
+    "instructions": 179,
+    "packet_arithmetic": true,
+    "fma": false,
+    "runtime_native_exception_probe": "used=1 errors=3 floating_flags=1 divide_by_zero=0\n",
+    "production_adopted": false,
+    "whole_goal_complete": false,
+    "scope": "production object disassembly and runtime call linked to same operator archive; complete performance pending"
+  },
+  "performance": false,
+  "memory": false,
+  "full_regression": false,
+  "sanitizers": false,
+  "libraries_off": false,
+  "production_adopted": false,
+  "whole_goal_complete": false,
+  "finding": "Existing Eigen packets keep four independent chronological states; native tests prove actual dispatch, no added FE_DIVBYZERO, flags/canaries/cancellation. Formal complete time waits on live e2a quality; no gain claimed.",
+  "reason": "Exact compiled Eigen generic g,w barriers spill safe operands to stack every packet and reload metadata. Replace compilation barrier only; mathematical native library path and safe masks remain."
+}

@@ -1,6 +1,10 @@
 #include "calmetrics_engine/operators.hpp"
 #include <algorithm>
 #include <cmath>
+#if defined(CALMETRICS_HAVE_HIGHWAY_ORDER)
+#include "hwy/contrib/sort/vqsort.h"
+#include "hwy/per_target.h"
+#endif
 
 namespace calmetrics_engine::ops {
 namespace {
@@ -36,23 +40,91 @@ Op axis_op(Op op) {
   return mapping[index];
 }
 double ordered_stat(Op op, const Value &x, const Value *mask,
-                    double probability, Workspace &work) {
+                    double probability, Workspace &work, Audit *audit = nullptr,
+                    Isa requested = Isa::scalar) {
   auto *ordered = work.doubles.data();
+  const auto n = x.size();
   std::size_t count = 0;
-  for (std::size_t i = 0; i < x.size(); ++i)
-    if (!mask || mask->u(i))
-      ordered[count++] = x.f(i);
+  bool has_nan = false, positive_zero = false, negative_zero = false;
+  const auto append = [&](double value) {
+    ordered[count++] = value;
+    has_nan |= std::isnan(value);
+    if (value == 0.0) {
+      if (std::signbit(value))
+        negative_zero = true;
+      else
+        positive_zero = true;
+    }
+  };
+  // Only logical-C-contiguous arrays can preserve the existing scratch order
+  // through a raw pointer. Scalars live inline; other views keep logical access.
+  if (x.shape.rank > 0 && x.c_contiguous() &&
+      (!mask || (mask->shape.rank > 0 && mask->c_contiguous()))) {
+    const auto *source = static_cast<const double *>(x.data);
+    if (mask) {
+      const auto *selected = static_cast<const std::uint8_t *>(mask->data);
+      for (std::size_t i = 0; i < n; ++i)
+        if (selected[i])
+          append(source[i]);
+    } else {
+      for (std::size_t i = 0; i < n; ++i)
+        append(source[i]);
+    }
+  } else {
+    for (std::size_t i = 0; i < n; ++i)
+      if (!mask || mask->u(i))
+        append(x.f(i));
+  }
+  // The packing pass already knows the exact consumption count. Keep this
+  // physical-copy audit before numerical selection, including empty masks.
+  if (audit)
+    audit->algorithm_copy_bytes = count * sizeof(double);
   require(count > 0, "INSUFFICIENT_SAMPLE");
   // A contiguous numeric scratch copy is deliberate algorithm workspace.
   // It keeps the caller input read-only while avoiding cache-hostile indirect
   // comparisons through an index array.
-  std::sort(ordered, ordered + count, [](double a, double b) {
-    if (std::isnan(a))
-      return false;
-    if (std::isnan(b))
-      return true;
-    return a < b;
-  });
+  if (count >= 1024 && !has_nan && !(positive_zero && negative_zero)) {
+    // Without NaNs or mixed zero signs, equal numeric values have identical
+    // bits. Select one rank and scan the shorter side for its neighbor; both
+    // order statistics remain exact, including infinities and repeated values.
+    std::size_t upper = count / 2;
+    bool need_lower = count % 2 == 0;
+    if (op != Op::median) {
+      const double position = static_cast<double>(count - 1) * probability;
+      upper = static_cast<std::size_t>(std::ceil(position));
+      need_lower = std::floor(position) < static_cast<double>(upper);
+    }
+    const auto select_rank = [&](std::size_t rank) {
+#if defined(CALMETRICS_HAVE_HIGHWAY_ORDER)
+      if (requested == Isa::automatic && hwy::HaveFloat64()) {
+        hwy::VQSelect(ordered, count, rank, hwy::SortAscending{});
+        if (audit)
+          audit->isa = "highway_vqselect";
+        return;
+      }
+#else
+      (void)requested;
+#endif
+      std::nth_element(ordered, ordered + rank, ordered + count);
+    };
+    if (need_lower && upper > count / 2) {
+      select_rank(upper - 1);
+      ordered[upper] = *std::min_element(ordered + upper, ordered + count);
+    } else {
+      select_rank(upper);
+      if (need_lower)
+        ordered[upper - 1] = *std::max_element(ordered, ordered + upper);
+    }
+  } else {
+    // NaN payloads and mixed signed zeros retain the existing sort's tie order.
+    std::sort(ordered, ordered + count, [](double a, double b) {
+      if (std::isnan(a))
+        return false;
+      if (std::isnan(b))
+        return true;
+      return a < b;
+    });
+  }
   if (op == Op::median) {
     const auto middle = count / 2;
     return count % 2 ? ordered[middle]
@@ -159,7 +231,8 @@ double reduce_value(Op raw_op, const Value &x, const Value *mask,
   return (n - 1) / ((n - 2) * (n - 3)) * ((n + 1) * excess + 6.0);
 }
 
-void reduction(const Prepared &p, Output &out, Workspace &work, Audit &audit) {
+void reduction(const Prepared &p, Output &out, Workspace &work, Isa requested,
+               Audit &audit) {
   const auto op = p.spec->op;
   const auto &x = p.args[0];
   if (op == Op::distinct_count) {
@@ -209,13 +282,9 @@ void reduction(const Prepared &p, Output &out, Workspace &work, Audit &audit) {
                                               : 0.5;
   if (op == Op::median || op == Op::quantile || op == Op::median_where ||
       op == Op::quantile_where) {
-    std::size_t copied = x.size();
-    if (masked) {
-      copied = 0;
-      for (std::size_t i = 0; i < x.size(); ++i)
-        copied += p.args[1].u(i) != 0;
-    }
-    audit.algorithm_copy_bytes = copied * sizeof(double);
+    out.set(0, ordered_stat(unmasked_op(op), x, masked ? &p.args[1] : nullptr,
+                            q, work, &audit, requested));
+    return;
   }
   out.set(0, reduce_value(op, x, masked ? &p.args[1] : nullptr, ddof, q, work));
 }

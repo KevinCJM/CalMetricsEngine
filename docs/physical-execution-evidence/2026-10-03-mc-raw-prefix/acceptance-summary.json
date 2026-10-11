@@ -1,0 +1,174 @@
+{
+  "build_id": "85d2003fc8c93506d85d561346577e4894097f7aff00cd36d715edd26eff4581",
+  "scope": "successful_readonly_raw_fixed_tape_transform_projection_nav_fan_14stats_samples_contributions",
+  "excluded": [
+    "old_random_stream",
+    "covariance_root_generation",
+    "coverage",
+    "limits",
+    "JSON_packaging",
+    "platform_stage_ordered_first_fault"
+  ],
+  "same_cpu_budget": 1,
+  "ordinary_C_results": true,
+  "readonly_raw_replay_copy_in_reference": true,
+  "owned_platform_RNG_request_verified": false,
+  "timing_pairs": 6,
+  "heap_pairs": 6,
+  "rss_pairs": 1,
+  "fresh_memory_pid_records": 15,
+  "tables": [
+    {
+      "case": "large_c1",
+      "distribution": "normal",
+      "dimensions": {
+        "steps": 200,
+        "paths": 10000,
+        "factors": 4,
+        "assets": 32,
+        "combinations": 1,
+        "tier": "large"
+      },
+      "median_ms": {
+        "cpp_ms": 349.923125,
+        "njit_ms": 406.334875
+      },
+      "warm_requested_heap_peak_bytes": {
+        "ordinary": 68372142,
+        "njit": 160520504
+      },
+      "compared_named_roots": 48,
+      "time_reduction_fraction": 0.13883068737331483,
+      "heap_reduction_fraction": 0.5740597599917827
+    },
+    {
+      "case": "large_c1",
+      "distribution": "student",
+      "dimensions": {
+        "steps": 200,
+        "paths": 10000,
+        "factors": 4,
+        "assets": 32,
+        "combinations": 1,
+        "tier": "large"
+      },
+      "median_ms": {
+        "cpp_ms": 355.2476255,
+        "njit_ms": 406.88687500000003
+      },
+      "warm_requested_heap_peak_bytes": {
+        "ordinary": 100383731,
+        "njit": 176520504
+      },
+      "compared_named_roots": 48,
+      "time_reduction_fraction": 0.12691303817553712,
+      "heap_reduction_fraction": 0.4313197122981248
+    },
+    {
+      "case": "large_c8",
+      "distribution": "normal",
+      "dimensions": {
+        "steps": 200,
+        "paths": 10000,
+        "factors": 4,
+        "assets": 32,
+        "combinations": 8,
+        "tier": "large"
+      },
+      "median_ms": {
+        "cpp_ms": 1310.517958,
+        "njit_ms": 3088.058354
+      },
+      "warm_requested_heap_peak_bytes": {
+        "ordinary": 71710243,
+        "njit": 176906472
+      },
+      "compared_named_roots": 384,
+      "time_reduction_fraction": 0.575617489124689,
+      "heap_reduction_fraction": 0.5946431908946779
+    },
+    {
+      "case": "large_c8",
+      "distribution": "student",
+      "dimensions": {
+        "steps": 200,
+        "paths": 10000,
+        "factors": 4,
+        "assets": 32,
+        "combinations": 8,
+        "tier": "large"
+      },
+      "median_ms": {
+        "cpp_ms": 1325.4285625000002,
+        "njit_ms": 3088.4931045000003
+      },
+      "warm_requested_heap_peak_bytes": {
+        "ordinary": 103785336,
+        "njit": 192906472
+      },
+      "compared_named_roots": 384,
+      "time_reduction_fraction": 0.5708494344478793,
+      "heap_reduction_fraction": 0.46199142556502715
+    },
+    {
+      "case": "short_many",
+      "distribution": "normal",
+      "dimensions": {
+        "steps": 5,
+        "paths": 50000,
+        "factors": 32,
+        "assets": 32,
+        "combinations": 32,
+        "tier": "large_short_wide_horizon"
+      },
+      "median_ms": {
+        "cpp_ms": 860.5703125,
+        "njit_ms": 4091.8203125
+      },
+      "warm_requested_heap_peak_bytes": {
+        "ordinary": 114078041,
+        "njit": 136527744
+      },
+      "compared_named_roots": 1536,
+      "time_reduction_fraction": 0.7896852142135702,
+      "heap_reduction_fraction": 0.1644332671314045
+    },
+    {
+      "case": "short_many",
+      "distribution": "student",
+      "dimensions": {
+        "steps": 5,
+        "paths": 50000,
+        "factors": 32,
+        "assets": 32,
+        "combinations": 32,
+        "tier": "large_short_wide_horizon"
+      },
+      "median_ms": {
+        "cpp_ms": 858.043542,
+        "njit_ms": 4084.31925
+      },
+      "warm_requested_heap_peak_bytes": {
+        "ordinary": 118351518,
+        "njit": 138527744
+      },
+      "compared_named_roots": 1536,
+      "time_reduction_fraction": 0.7899176118517179,
+      "heap_reduction_fraction": 0.14564754624171172
+    }
+  ],
+  "current_unique_python_tests": 12267,
+  "native_variants": {
+    "native": 9,
+    "asan": 9,
+    "all_libraries_off": 9
+  },
+  "complete_allocator_evidence": false,
+  "stable_rss_advantage_proved": false,
+  "full_platform_goal_complete": false,
+  "submitted": false,
+  "pushed": false,
+  "current_regression_coverage": "completed/regression-coverage-style.json",
+  "current_empty_test_sha256": "6c94c05911155f690f4a52098e888544fd8ac222c8d07b26c12fe9796ca308cc",
+  "current_source_snapshot_files": 244
+}

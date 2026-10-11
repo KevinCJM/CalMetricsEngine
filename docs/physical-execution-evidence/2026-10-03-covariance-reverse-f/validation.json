@@ -1,0 +1,341 @@
+{
+  "status": "PASS_WITH_DISCLOSED_TRACKING_LIMITATION",
+  "timing_batches": 1,
+  "cases_per_batch": [
+    12
+  ],
+  "rounds": 6,
+  "full_results_equal_within_original_tolerance": true,
+  "exact_diagonal_and_sign_zero_preserved": true,
+  "fresh_memory_children": 12,
+  "heap_stages": 36,
+  "source_inputs": 77,
+  "untracked_frees": [
+    {
+      "case": "medium2048_reverse_f",
+      "backend": "old",
+      "stage": "cold_retained_heap",
+      "count": 1
+    },
+    {
+      "case": "medium2048_reverse_f",
+      "backend": "old",
+      "stage": "warm_baseline_heap",
+      "count": 4
+    },
+    {
+      "case": "medium2048_reverse_f",
+      "backend": "old",
+      "stage": "warm_heap",
+      "count": 5
+    },
+    {
+      "case": "medium2048_reverse_f",
+      "backend": "old",
+      "stage": "warm_retained_heap",
+      "count": 5
+    },
+    {
+      "case": "medium2048_reverse_f",
+      "backend": "new",
+      "stage": "cold_retained_heap",
+      "count": 1
+    },
+    {
+      "case": "medium2048_reverse_f",
+      "backend": "new",
+      "stage": "warm_baseline_heap",
+      "count": 4
+    },
+    {
+      "case": "medium2048_reverse_f",
+      "backend": "new",
+      "stage": "warm_heap",
+      "count": 5
+    },
+    {
+      "case": "medium2048_reverse_f",
+      "backend": "new",
+      "stage": "warm_retained_heap",
+      "count": 5
+    },
+    {
+      "case": "medium2048_reverse_f",
+      "backend": "njit",
+      "stage": "warm_retained_heap",
+      "count": 1
+    },
+    {
+      "case": "large4096_reverse_f",
+      "backend": "old",
+      "stage": "cold_retained_heap",
+      "count": 1
+    },
+    {
+      "case": "large4096_reverse_f",
+      "backend": "old",
+      "stage": "warm_baseline_heap",
+      "count": 4
+    },
+    {
+      "case": "large4096_reverse_f",
+      "backend": "old",
+      "stage": "warm_heap",
+      "count": 5
+    },
+    {
+      "case": "large4096_reverse_f",
+      "backend": "old",
+      "stage": "warm_retained_heap",
+      "count": 5
+    },
+    {
+      "case": "large4096_reverse_f",
+      "backend": "new",
+      "stage": "cold_retained_heap",
+      "count": 1
+    },
+    {
+      "case": "large4096_reverse_f",
+      "backend": "new",
+      "stage": "warm_baseline_heap",
+      "count": 4
+    },
+    {
+      "case": "large4096_reverse_f",
+      "backend": "new",
+      "stage": "warm_heap",
+      "count": 5
+    },
+    {
+      "case": "large4096_reverse_f",
+      "backend": "new",
+      "stage": "warm_retained_heap",
+      "count": 5
+    },
+    {
+      "case": "large4096_reverse_f",
+      "backend": "njit",
+      "stage": "warm_retained_heap",
+      "count": 1
+    }
+  ],
+  "cpu_wall_ratios": [
+    {
+      "batch": "timing",
+      "case": "small63_reverse_f",
+      "backend": "old",
+      "cpu_wall_median_ratio": 1.0450880859958196
+    },
+    {
+      "batch": "timing",
+      "case": "small63_reverse_f",
+      "backend": "new",
+      "cpu_wall_median_ratio": 1.0311477741430806
+    },
+    {
+      "batch": "timing",
+      "case": "small63_reverse_f",
+      "backend": "njit",
+      "cpu_wall_median_ratio": 1.1321181931393638
+    },
+    {
+      "batch": "timing",
+      "case": "medium1024_reverse_f",
+      "backend": "old",
+      "cpu_wall_median_ratio": 1.0001560363591164
+    },
+    {
+      "batch": "timing",
+      "case": "medium1024_reverse_f",
+      "backend": "new",
+      "cpu_wall_median_ratio": 0.9996003087531404
+    },
+    {
+      "batch": "timing",
+      "case": "medium1024_reverse_f",
+      "backend": "njit",
+      "cpu_wall_median_ratio": 1.0000084232515436
+    },
+    {
+      "batch": "timing",
+      "case": "medium2048_reverse_f",
+      "backend": "old",
+      "cpu_wall_median_ratio": 0.9990757652002542
+    },
+    {
+      "batch": "timing",
+      "case": "medium2048_reverse_f",
+      "backend": "new",
+      "cpu_wall_median_ratio": 0.9978409929433867
+    },
+    {
+      "batch": "timing",
+      "case": "medium2048_reverse_f",
+      "backend": "njit",
+      "cpu_wall_median_ratio": 0.9996745590274823
+    },
+    {
+      "batch": "timing",
+      "case": "large4096_reverse_f",
+      "backend": "old",
+      "cpu_wall_median_ratio": 0.9991360678313863
+    },
+    {
+      "batch": "timing",
+      "case": "large4096_reverse_f",
+      "backend": "new",
+      "cpu_wall_median_ratio": 0.9988761586715372
+    },
+    {
+      "batch": "timing",
+      "case": "large4096_reverse_f",
+      "backend": "njit",
+      "cpu_wall_median_ratio": 0.9957851852068274
+    },
+    {
+      "batch": "timing",
+      "case": "medium2048_covariance",
+      "backend": "old",
+      "cpu_wall_median_ratio": 0.9990302827138853
+    },
+    {
+      "batch": "timing",
+      "case": "medium2048_covariance",
+      "backend": "new",
+      "cpu_wall_median_ratio": 0.9994386190573514
+    },
+    {
+      "batch": "timing",
+      "case": "medium2048_covariance",
+      "backend": "njit",
+      "cpu_wall_median_ratio": 0.9997984166744874
+    },
+    {
+      "batch": "timing",
+      "case": "medium2048_correlation",
+      "backend": "old",
+      "cpu_wall_median_ratio": 0.9989307196640322
+    },
+    {
+      "batch": "timing",
+      "case": "medium2048_correlation",
+      "backend": "new",
+      "cpu_wall_median_ratio": 0.9994523484556076
+    },
+    {
+      "batch": "timing",
+      "case": "medium2048_correlation",
+      "backend": "njit",
+      "cpu_wall_median_ratio": 0.9993296488576299
+    },
+    {
+      "batch": "timing",
+      "case": "positive2048_f_pair",
+      "backend": "old",
+      "cpu_wall_median_ratio": 0.9997759854749894
+    },
+    {
+      "batch": "timing",
+      "case": "positive2048_f_pair",
+      "backend": "new",
+      "cpu_wall_median_ratio": 0.9994253228318929
+    },
+    {
+      "batch": "timing",
+      "case": "positive2048_f_pair",
+      "backend": "njit",
+      "cpu_wall_median_ratio": 0.9994500842721155
+    },
+    {
+      "batch": "timing",
+      "case": "reverse2048_c_pair",
+      "backend": "old",
+      "cpu_wall_median_ratio": 0.9998591455927038
+    },
+    {
+      "batch": "timing",
+      "case": "reverse2048_c_pair",
+      "backend": "new",
+      "cpu_wall_median_ratio": 0.9998132360195959
+    },
+    {
+      "batch": "timing",
+      "case": "reverse2048_c_pair",
+      "backend": "njit",
+      "cpu_wall_median_ratio": 0.9995667927692323
+    },
+    {
+      "batch": "timing",
+      "case": "padded2048_reverse_f",
+      "backend": "old",
+      "cpu_wall_median_ratio": 0.9995704603691502
+    },
+    {
+      "batch": "timing",
+      "case": "padded2048_reverse_f",
+      "backend": "new",
+      "cpu_wall_median_ratio": 0.9991318574537361
+    },
+    {
+      "batch": "timing",
+      "case": "padded2048_reverse_f",
+      "backend": "njit",
+      "cpu_wall_median_ratio": 0.9989607261456376
+    },
+    {
+      "batch": "timing",
+      "case": "scaled1024_reverse_f",
+      "backend": "old",
+      "cpu_wall_median_ratio": 0.9993870198909858
+    },
+    {
+      "batch": "timing",
+      "case": "scaled1024_reverse_f",
+      "backend": "new",
+      "cpu_wall_median_ratio": 0.9995085417760038
+    },
+    {
+      "batch": "timing",
+      "case": "scaled1024_reverse_f",
+      "backend": "njit",
+      "cpu_wall_median_ratio": 1.0002908159278123
+    },
+    {
+      "batch": "timing",
+      "case": "tiny1024_reverse_f",
+      "backend": "old",
+      "cpu_wall_median_ratio": 1.0001437192471818
+    },
+    {
+      "batch": "timing",
+      "case": "tiny1024_reverse_f",
+      "backend": "new",
+      "cpu_wall_median_ratio": 0.9996935734505561
+    },
+    {
+      "batch": "timing",
+      "case": "tiny1024_reverse_f",
+      "backend": "njit",
+      "cpu_wall_median_ratio": 0.9994815079475496
+    },
+    {
+      "batch": "timing",
+      "case": "dense_replay_reverse_f",
+      "backend": "old",
+      "cpu_wall_median_ratio": 0.9993804724207774
+    },
+    {
+      "batch": "timing",
+      "case": "dense_replay_reverse_f",
+      "backend": "new",
+      "cpu_wall_median_ratio": 0.99946509458771
+    },
+    {
+      "batch": "timing",
+      "case": "dense_replay_reverse_f",
+      "backend": "njit",
+      "cpu_wall_median_ratio": 0.9998548784531213
+    }
+  ]
+}

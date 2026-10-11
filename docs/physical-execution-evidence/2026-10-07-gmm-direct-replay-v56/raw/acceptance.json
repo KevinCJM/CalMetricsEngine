@@ -1,0 +1,117 @@
+{
+  "classification": "adopted_progress_not_goal_complete",
+  "date": "2026-10-07",
+  "branch": "codex/submission-policy",
+  "head": "d17b371abbd692e3ac839c7ba191a44d11054d7f",
+  "build_id": "2744d7e24c146eb873a1db3be0a3d90715de797116e4485eb6276b1cad194d80",
+  "source_files_verified": 93,
+  "qualification": {
+    "v56-normal-corrected-quality.json": {
+      "native": {
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "related": {
+        "tests": 654,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "full": {
+        "tests": 15898,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    },
+    "v56-asan-quality.json": {
+      "native": {
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "related": {
+        "tests": 654,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    },
+    "v56-off-quality.json": {
+      "native": {
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "related": {
+        "tests": 654,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    },
+    "actual-v56-normal-quality.json": {
+      "native": {
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "related": {
+        "tests": 654,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    }
+  },
+  "actual_fit": {
+    "median_seconds": 2.5044983332045376,
+    "cpu_utilization_percent": 99.93830450296345,
+    "observations_per_second": 418677.0604308343
+  },
+  "actual_fit_njit_seconds": 10.805416124872863,
+  "fit_six_pair_seconds": {
+    "baseline": 3.2615338335745037,
+    "candidate": 2.5413445625454187,
+    "njit": 10.890217937529087
+  },
+  "fit_heap_bytes": {
+    "baseline": 268464526,
+    "candidate": 67173774,
+    "njit": 469774681
+  },
+  "actual_chain_seconds": 2.1149832918308675,
+  "chain_candidate_seconds": 2.1092418329790235,
+  "chain_baseline_seconds": 2.3850492918863893,
+  "chain_njit_seconds": 7.326318708714098,
+  "chain_heap_bytes": {
+    "baseline": 1022072178,
+    "candidate": 932617522,
+    "njit": 851456928
+  },
+  "actual_chain_heap_bytes": 932617522,
+  "whole_chain_extra_heap_vs_njit_bytes": 81160594,
+  "unchanged_contracts": [
+    "public operators/signatures",
+    "logical AST/DAG",
+    "mathematical ordering/floors/stopping/failure prefix",
+    "result dtype/layout/ownership",
+    "CPU budgets and IPC",
+    "Excel recipes and budgets"
+  ],
+  "open_items": [
+    "chain training-standardization private ~64MiB intermediate",
+    "chain ~21MiB component masks",
+    "large matrix NJIT time gaps",
+    "major platform workload and allocation/copy coverage"
+  ],
+  "git_submitted": false,
+  "git_pushed": false,
+  "deployment": false,
+  "goal_complete": false
+}

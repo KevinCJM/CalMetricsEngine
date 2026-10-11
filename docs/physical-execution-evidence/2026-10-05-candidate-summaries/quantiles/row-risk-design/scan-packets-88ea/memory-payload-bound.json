@@ -1,0 +1,23 @@
+{
+  "status": "source_derived_payload_bound",
+  "shape": [
+    262144,
+    2520,
+    30
+  ],
+  "source_fixture_bytes": 63519368,
+  "current_owned_input_bytes": 63519368,
+  "two_output_generations_bytes": 12582912,
+  "payload_bound_bytes": 139621648,
+  "candidate_requested_heap_peak_bytes": 142503720,
+  "remaining_above_payload_bound_bytes": 2882072,
+  "implication": "Even removing all non-payload requested heap saves at most about 2.9 MB in this frozen ownership scenario; prioritize time here and larger avoidable arrays in other real loads.",
+  "scope": "During complete computation, original immutable fixture and owned readonly request inputs coexist with three current and three previous vector results. Excludes ndarray/metadata/allocator overhead, scratch, Python arenas and mmap. This is a storage bound for this benchmark scope, not a universal production memory bound.",
+  "unchanged_fair_comparison": true,
+  "whole_goal_complete": false,
+  "source_files": {
+    "benchmark_risks.py": "33b18dee53a8822ac239452c3d72449fab94915ef78644d39f0553a0e8b8a9a7",
+    "benchmark_risks_select.py": "02ff8f00b5fc5b301f5f7a8fa698a63cda83d87ed09458fe1a63c0f8bb37c027",
+    "risk_graphs.py": "e8a566dd3a991622f2f1d5c1f6368fca7a9cbea71f2cd3bc1be02e6b67b006d3"
+  }
+}

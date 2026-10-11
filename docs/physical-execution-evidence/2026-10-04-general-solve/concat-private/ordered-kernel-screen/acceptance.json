@@ -1,0 +1,378 @@
+{
+  "status": "rejected_no_runtime_adoption",
+  "production_source_build_id": "3d7d503d48d3adfeb5156f95815e982a31cc9598e1f8e86b09f0a835373c9792",
+  "production_changed": false,
+  "goal_complete": false,
+  "scope": "solver-entry screening only: coefficient/RHS copy, elimination, back-substitution and own output; no complete KKT construction/input preparation/graph/Planner/IPC acceptance",
+  "column_no_padding": {
+    "cases": 99,
+    "medians": [
+      {
+        "variables": 1024,
+        "matrix_order": 1040,
+        "layout": "c",
+        "samples_seconds": {
+          "old": [
+            0.03935825,
+            0.040373459,
+            0.039532208,
+            0.039309125
+          ],
+          "new": [
+            0.038313167,
+            0.041907958,
+            0.038649208,
+            0.037971833
+          ],
+          "njit": [
+            0.0067405,
+            0.007098584,
+            0.006836541,
+            0.0067735
+          ]
+        },
+        "medians_seconds": {
+          "old": 0.039445229,
+          "new": 0.0384811875,
+          "njit": 0.0068050205
+        },
+        "bitwise_old_new": true,
+        "new_over_njit": 5.654823155933182,
+        "input_sha256": "88e05f86306936f1d59d7247bb343e2be38b80254d36dc322573bebfb985a81b",
+        "readonly_signature": "[(Array(float64, 2, 'C', True, aligned=True), Array(float64, 2, 'C', True, aligned=True))]"
+      },
+      {
+        "variables": 2048,
+        "matrix_order": 2064,
+        "layout": "c",
+        "samples_seconds": {
+          "old": [
+            0.292719416,
+            0.294538292,
+            0.29288025,
+            0.293939041
+          ],
+          "new": [
+            0.345737459,
+            0.34606675,
+            0.34475625,
+            0.345018084
+          ],
+          "njit": [
+            0.05717675,
+            0.056565458,
+            0.056127667,
+            0.055736416
+          ]
+        },
+        "medians_seconds": {
+          "old": 0.29340964550000004,
+          "new": 0.34537777150000004,
+          "njit": 0.0563465625
+        },
+        "bitwise_old_new": true,
+        "new_over_njit": 6.129526916570998,
+        "input_sha256": "e71764f8354e07b8bc6adb350828aa2220af3066efb08d88dc4eb4214d859687",
+        "readonly_signature": "[(Array(float64, 2, 'C', True, aligned=True), Array(float64, 2, 'C', True, aligned=True))]"
+      },
+      {
+        "variables": 4096,
+        "matrix_order": 4112,
+        "layout": "c",
+        "samples_seconds": {
+          "old": [
+            2.4109645,
+            2.41441125,
+            2.428973042,
+            2.429047292
+          ],
+          "new": [
+            5.278316625,
+            5.282938125,
+            5.308622542,
+            5.289402708
+          ],
+          "njit": [
+            0.577502875,
+            0.658142334,
+            0.568335041,
+            0.559456542
+          ]
+        },
+        "medians_seconds": {
+          "old": 2.421692146,
+          "new": 5.2861704165,
+          "njit": 0.572918958
+        },
+        "bitwise_old_new": true,
+        "new_over_njit": 9.226733279962433,
+        "input_sha256": "515dfb47780581fc0aeac8d7d49a3658d49db8d776704f51f9f60bbe4297ba74",
+        "readonly_signature": "[(Array(float64, 2, 'C', True, aligned=True), Array(float64, 2, 'C', True, aligned=True))]"
+      },
+      {
+        "variables": 4096,
+        "matrix_order": 4112,
+        "layout": "f",
+        "samples_seconds": {
+          "old": [
+            2.487689958,
+            2.487249083,
+            2.49039425,
+            2.488993042
+          ],
+          "new": [
+            5.414299917,
+            5.373891834,
+            5.3844245,
+            5.339201833
+          ],
+          "njit": [
+            0.500147208,
+            0.539678208,
+            0.513083292,
+            0.508775167
+          ]
+        },
+        "medians_seconds": {
+          "old": 2.4883414999999998,
+          "new": 5.379158167,
+          "njit": 0.5109292295000001
+        },
+        "bitwise_old_new": true,
+        "new_over_njit": 10.528186403162122,
+        "input_sha256": "515dfb47780581fc0aeac8d7d49a3658d49db8d776704f51f9f60bbe4297ba74",
+        "readonly_signature": "[(Array(float64, 2, 'C', True, aligned=True), Array(float64, 2, 'C', True, aligned=True)), (Array(float64, 2, 'F', True, aligned=True), Array(float64, 2, 'C', True, aligned=True))]"
+      }
+    ]
+  },
+  "column_padding": {
+    "cases": 99,
+    "extra_storage": "17N doubles",
+    "medians": [
+      {
+        "variables": 2048,
+        "matrix_order": 2064,
+        "layout": "c",
+        "samples_seconds": {
+          "old": [
+            0.29268775,
+            0.289330042,
+            0.28899725,
+            0.2885285
+          ],
+          "new": [
+            0.37546675,
+            0.380904792,
+            0.374243334,
+            0.374569209
+          ],
+          "njit": [
+            0.054234625,
+            0.059101084,
+            0.060352958,
+            0.056264125
+          ]
+        },
+        "medians_seconds": {
+          "old": 0.289163646,
+          "new": 0.37501797950000004,
+          "njit": 0.0576826045
+        },
+        "bitwise_old_new": true,
+        "new_over_njit": 6.501405107323128,
+        "input_sha256": "e71764f8354e07b8bc6adb350828aa2220af3066efb08d88dc4eb4214d859687",
+        "readonly_signature": "[(Array(float64, 2, 'C', True, aligned=True), Array(float64, 2, 'C', True, aligned=True))]"
+      },
+      {
+        "variables": 4096,
+        "matrix_order": 4112,
+        "layout": "c",
+        "samples_seconds": {
+          "old": [
+            2.416717667,
+            2.410825458,
+            2.416658167,
+            2.424638625
+          ],
+          "new": [
+            6.035245416,
+            6.066232125,
+            6.050192875,
+            6.021019041
+          ],
+          "njit": [
+            0.560881458,
+            0.6244705,
+            0.581371292,
+            0.575614375
+          ]
+        },
+        "medians_seconds": {
+          "old": 2.416687917,
+          "new": 6.0427191454999996,
+          "njit": 0.5784928335
+        },
+        "bitwise_old_new": true,
+        "new_over_njit": 10.445624898998856,
+        "input_sha256": "515dfb47780581fc0aeac8d7d49a3658d49db8d776704f51f9f60bbe4297ba74",
+        "readonly_signature": "[(Array(float64, 2, 'C', True, aligned=True), Array(float64, 2, 'C', True, aligned=True))]"
+      },
+      {
+        "variables": 4096,
+        "matrix_order": 4112,
+        "layout": "f",
+        "samples_seconds": {
+          "old": [
+            2.537169083,
+            2.547475,
+            2.550443916,
+            2.556973666
+          ],
+          "new": [
+            6.10393725,
+            6.11281625,
+            6.126534125,
+            6.109422792
+          ],
+          "njit": [
+            0.504948959,
+            0.485426792,
+            0.486455,
+            0.494088583
+          ]
+        },
+        "medians_seconds": {
+          "old": 2.5489594579999997,
+          "new": 6.111119521,
+          "njit": 0.4902717915
+        },
+        "bitwise_old_new": true,
+        "new_over_njit": 12.464758582791113,
+        "input_sha256": "515dfb47780581fc0aeac8d7d49a3658d49db8d776704f51f9f60bbe4297ba74",
+        "readonly_signature": "[(Array(float64, 2, 'C', True, aligned=True), Array(float64, 2, 'C', True, aligned=True)), (Array(float64, 2, 'F', True, aligned=True), Array(float64, 2, 'C', True, aligned=True))]"
+      }
+    ]
+  },
+  "c_row_panels": {
+    "cases": 67,
+    "medians": [
+      {
+        "variables": 2048,
+        "matrix_order": 2064,
+        "layout": "c",
+        "samples_seconds": {
+          "old32": [
+            0.288857,
+            0.286377209,
+            0.286346666,
+            0.288332791,
+            0.2856165
+          ],
+          "p128": [
+            0.311977334,
+            0.313624292,
+            0.3108,
+            0.311994875,
+            0.310688542
+          ],
+          "p256": [
+            0.341705959,
+            0.341671208,
+            0.339735,
+            0.341159625,
+            0.34022
+          ],
+          "p512": [
+            0.416691042,
+            0.445623583,
+            0.446162958,
+            0.446206334,
+            0.4448875
+          ],
+          "njit": [
+            0.05370625,
+            0.054336291,
+            0.061289583,
+            0.054988125,
+            0.054067083
+          ]
+        },
+        "medians_seconds": {
+          "old32": 0.286377209,
+          "p128": 0.311977334,
+          "p256": 0.341159625,
+          "p512": 0.445623583,
+          "njit": 0.054336291
+        },
+        "bitwise_old_new": true,
+        "candidate_over_njit": {
+          "p128": 5.7416015752713045,
+          "p256": 6.278669720021928,
+          "p512": 8.201214598913275
+        },
+        "input_sha256": "e71764f8354e07b8bc6adb350828aa2220af3066efb08d88dc4eb4214d859687",
+        "readonly_signature": "[(Array(float64, 2, 'C', True, aligned=True), Array(float64, 2, 'C', True, aligned=True))]"
+      },
+      {
+        "variables": 4096,
+        "matrix_order": 4112,
+        "layout": "c",
+        "samples_seconds": {
+          "old32": [
+            2.392933417,
+            2.403430084,
+            2.406349333,
+            2.408271875,
+            2.402044458
+          ],
+          "p128": [
+            2.415976709,
+            2.409416417,
+            2.403211667,
+            2.405783125,
+            2.404586875
+          ],
+          "p256": [
+            2.782185417,
+            2.7756265,
+            2.784062583,
+            2.775156083,
+            2.790294625
+          ],
+          "p512": [
+            3.581303667,
+            3.556335584,
+            3.626971083,
+            3.579739125,
+            3.602242208
+          ],
+          "njit": [
+            0.680613625,
+            0.63153225,
+            0.611103459,
+            0.605460625,
+            0.541201417
+          ]
+        },
+        "medians_seconds": {
+          "old32": 2.403430084,
+          "p128": 2.405783125,
+          "p256": 2.782185417,
+          "p512": 3.581303667,
+          "njit": 0.611103459
+        },
+        "bitwise_old_new": true,
+        "candidate_over_njit": {
+          "p128": 3.9367853177214633,
+          "p256": 4.552724053555063,
+          "p512": 5.860388473107956
+        },
+        "input_sha256": "515dfb47780581fc0aeac8d7d49a3658d49db8d776704f51f9f60bbe4297ba74",
+        "readonly_signature": "[(Array(float64, 2, 'C', True, aligned=True), Array(float64, 2, 'C', True, aligned=True))]"
+      }
+    ],
+    "value_scope": "67 small/boundary cases check all128/256/512 panels up to1025; the large screen explicitly checks512 versus32, not all three candidates"
+  },
+  "decision": "No candidate has material time benefit. No peak-memory/formal DAG adoption tests warranted for rejected candidates. Padding did not improve the column variant; no hardware-counter cause is claimed. Retain existing32-panel and3d7d root.",
+  "next": "Broader mature-LAPACK admission/error replay proof and other material complete-chain gaps; no more tiny panel tuning"
+}

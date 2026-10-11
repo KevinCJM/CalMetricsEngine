@@ -1,0 +1,8 @@
+{
+  "reason": "benchmark declared time-axis R but passed an empty [0,0] interval, triggering original INSUFFICIENT_SAMPLE before READY",
+  "accepted_samples": 0,
+  "all_exact_handles_terminal": true,
+  "source_math_unchanged": true,
+  "fix": "pass [0,T] to ordinary Scheduler to match full-history warmed NJIT",
+  "goal_complete": false
+}

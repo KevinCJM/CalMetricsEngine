@@ -1,0 +1,43 @@
+{
+  "production_review": "No unresolved actionable production finding in the two-file increment.",
+  "reviewers": [
+    "root self-review",
+    "remaining_heavy_priorities: implementation and benchmark/documentation checks",
+    "cholesky_large_next_review: independent eligibility, fallback, planner and final review"
+  ],
+  "checked": [
+    "fresh metadata proof for already-fused private pair",
+    "same C numerical execution and DPOTRF U/replay",
+    "success-only transpose; correct F strides and no input/old output mutation",
+    "observer/prebound/inherited-failure C arena downgrade and prebound Planner geometry",
+    "independent native output and worker transport",
+    "bounded-memory input generation/hash before RSS",
+    "complete ordinary Scheduler vs warmed one-CPU NJIT",
+    "strict output bits old/new; declared NI diagnostic failure separate from production math",
+    "exact algorithm copy delta and library route audit"
+  ],
+  "finding": {
+    "priority": "P2",
+    "scope": "stage benchmark evidence, not production",
+    "problem": "Post-batch normalization could leave correctness=true for a known NJIT-unequal completed case after a later error.",
+    "fix": "Construct strict status in every row before writing timing.json; original numerical and measurement code unchanged.",
+    "validation": "timing-scaled-fixed/timing.json records false at the per-row write; known strict failure and both diagnostic batches preserved.",
+    "independent_recheck": "cholesky_large_next_review confirmed P2 closed: strict states are assigned before per-row JSON write; batch-end rewriting removed; rerun false/false. Read-only verification."
+  },
+  "test_gap": "No new standalone native F child inherited-input-error then recovery fixture; shared downgrade branch reviewed, existing full regression plus new observer/prebound/failure-recovery checks passed.",
+  "performance_decision": "Adopt the scoped full-matrix memory removal; do not claim universal time improvements or full-engine NI superiority. High-scale fallback timing variation and strict NI numerical non-equivalence remain open.",
+  "documentation": [
+    "execution-guide.md",
+    "physical-layout-design.md",
+    "physical-execution-optimization.md"
+  ],
+  "unchanged_contracts": [
+    "operator signatures and math",
+    "AST/DAG semantics",
+    "output schema and IPC",
+    "direct output alias/F admission",
+    "Excel formulas",
+    "CPU and memory budgets"
+  ],
+  "git": "No commit or push."
+}

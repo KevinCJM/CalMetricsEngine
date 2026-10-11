@@ -1,0 +1,80 @@
+{
+  "status": "passed",
+  "candidate_build_id": "6a4114d3736f7967e011c5e7619172eb093685461cbacd3cbda74191de02aadb",
+  "changes": {
+    "cpp/graph.cpp": {
+      "before": "26d019436246774247089aeb2b948efb7ef5cc7deff99a5935f6b2065b308cbc",
+      "after": "30c2204fb3a164919ee98711891f19efac2eaad939eaa2f2f337ff4e663a649c"
+    },
+    "cpp/include/calmetrics_engine/graph.hpp": {
+      "before": "fdc188ccce3c23384ecc3f5258fd652d86c05dc9c7af5e84cf2916279f7a68dd",
+      "after": "da71b574e77fc5f2a52c80eae2d9481c45d5131edb38805f77f7a2c840f8793c"
+    },
+    "cpp/planner.cpp": {
+      "before": "9634ae8359d4f30a522db73c93ef3fd6c90919e30d5748801df0e63d0146bd6a",
+      "after": "b86b689d221f7bb8247b20517b6b7bb21ff80a3c5caf0ff82a75164bcbf094a6"
+    },
+    "tests/graph_native_tests.cpp": {
+      "before": "5e4f7daf5f77065da229544032f7b8c55e3e988f9199feec0ced6113de361dfe",
+      "after": "2bd4a639b2be8a044835b7879f79851c2638ecc8bcc1643fd16ea75bc485c7da"
+    },
+    "tests/state_decision_native_cases.hpp": {
+      "before": null,
+      "after": "0960c7e2c7f3dc44e35fa7a8f17dbfaa14ca181de41f359870de7aeb7edbed5b"
+    },
+    "tests/test_state_decision_regions.py": {
+      "before": null,
+      "after": "09a7a936a1545aba9063a0360f3a0823c1b6585a18c1e587b2668372dcaa591e"
+    },
+    "docs/execution-guide.md": {
+      "before": "6399976469f50815c89ffc2399c316bf80d6e96e1b2bb4022d7af1e52b91f3d0",
+      "after": "201025643340e1fa0314ea0e95820c279a2e86c56b6e658fdb5c39398a7ef1ce"
+    },
+    "docs/latent-model-operators.md": {
+      "before": "5513c8696bb83cf6145a7ae845a42063fa5e4125de47620e9140cdf9ea226036",
+      "after": "b383b62ba580ddb2d44ce6352fad10fd5958e7a17a062d9889f686ea58fa9a89"
+    },
+    "docs/physical-execution-optimization.md": {
+      "before": "f610e58694da0664694f3c3eb2dd560cde64e7748016d39050f5652edaa32b55",
+      "after": "60b894538fce614855d33fa2c2b4ac2627145ae68248c64a6a66a417b5590c19"
+    }
+  },
+  "baseline_files_preserved_outside_scope": 324,
+  "benefit_review": {
+    "status": "qualified_for_partial_adoption",
+    "source_build_id": "6a4114d3736f7967e011c5e7619172eb093685461cbacd3cbda74191de02aadb",
+    "median_seconds": {
+      "baseline": 2.094073624815792,
+      "candidate": 2.09992304071784,
+      "njit": 7.488517417106777
+    },
+    "malloc_peak_bytes": {
+      "baseline": 868304738,
+      "candidate": 834750250,
+      "njit": 851456928
+    },
+    "saved_malloc_peak_bytes": 33554488,
+    "candidate_less_than_njit_bytes": 16706678,
+    "rss_absolute_bytes": {
+      "baseline": 1062600704,
+      "candidate": 1028653056,
+      "njit": 1423736832
+    },
+    "rss_incremental_bytes": {
+      "baseline": 769884160,
+      "candidate": 736215040,
+      "njit": 1093664768
+    },
+    "timing_difference_diagnostic_only": true,
+    "reason": "material whole-request peak allocation reduction around 32 MiB, no material whole-request slowdown",
+    "other_large_matrix_and_platform_chains_open": true,
+    "goal_complete": false,
+    "actual_adopted": false
+  },
+  "docs_pending": false,
+  "git_delivery": false,
+  "goal_complete": false,
+  "actual_build_id": "6a4114d3736f7967e011c5e7619172eb093685461cbacd3cbda74191de02aadb",
+  "actual_quality": "v58d-actual-quality.json",
+  "actual_confirmation": "v58d-actual-confirmation.json"
+}

@@ -1,4 +1,5 @@
 #include "calmetrics_engine/operators.hpp"
+#include "calmetrics_engine/matrix_backend.hpp"
 #include <algorithm>
 #include <cmath>
 #include <numeric>
@@ -258,6 +259,11 @@ void composite(const Prepared &p, Output &out, Workspace &work, Isa isa, Audit &
         return;
     }
     if (op == Op::portfolio_returns) {
+        // The compatibility operator has the same ordered matrix-vector
+        // contract; reuse the qualified library without packing or workspace.
+        if (isa != Isa::scalar &&
+            library_matvec(a[0], a[1], static_cast<double *>(out.data), audit))
+            return;
         matvec_value(a[0], a[1], static_cast<double *>(out.data));
         return;
     }
@@ -265,7 +271,9 @@ void composite(const Prepared &p, Output &out, Workspace &work, Isa isa, Audit &
         Value transposed = a[1];
         std::swap(transposed.shape.dim[0], transposed.shape.dim[1]);
         std::swap(transposed.stride[0], transposed.stride[1]);
-        matvec_value(transposed, a[0], work.doubles.data());
+        if (isa == Isa::scalar ||
+            !library_matvec(transposed, a[0], work.doubles.data(), audit))
+            matvec_value(transposed, a[0], work.doubles.data());
         Value projected;
         projected.shape = a[0].shape;
         projected.data = work.doubles.data();

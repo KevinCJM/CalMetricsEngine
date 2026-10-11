@@ -1,0 +1,2934 @@
+[
+  {
+    "node_id": 0,
+    "kind": "input",
+    "opcode": 0,
+    "operator_id": null,
+    "parents": [],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 106,
+    "inferred_type": {
+      "kind": "matrix",
+      "dtype": "float64",
+      "axes": [
+        "time",
+        "factor"
+      ],
+      "shape": [
+        "1398104",
+        "8"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "matrix<time,factor>[1398104,8]"
+    }
+  },
+  {
+    "node_id": 1,
+    "kind": "input",
+    "opcode": 0,
+    "operator_id": null,
+    "parents": [],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 110,
+    "inferred_type": {
+      "kind": "series",
+      "dtype": "int64",
+      "axes": [
+        "time"
+      ],
+      "shape": [
+        "1398104"
+      ],
+      "semantic_dimension": "index",
+      "price_basis": null,
+      "display": "series<time>[1398104]"
+    }
+  },
+  {
+    "node_id": 2,
+    "kind": "constant",
+    "opcode": 0,
+    "operator_id": null,
+    "parents": [],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 114,
+    "inferred_type": {
+      "kind": "scalar",
+      "dtype": "float64",
+      "axes": [],
+      "shape": [],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "scalar"
+    }
+  },
+  {
+    "node_id": 3,
+    "kind": "constant",
+    "opcode": 0,
+    "operator_id": null,
+    "parents": [],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 18,
+    "inferred_type": {
+      "kind": "scalar",
+      "dtype": "float64",
+      "axes": [],
+      "shape": [],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "scalar"
+    }
+  },
+  {
+    "node_id": 4,
+    "kind": "constant",
+    "opcode": 0,
+    "operator_id": null,
+    "parents": [],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 114,
+    "inferred_type": {
+      "kind": "scalar",
+      "dtype": "float64",
+      "axes": [],
+      "shape": [],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "scalar"
+    }
+  },
+  {
+    "node_id": 5,
+    "kind": "operation",
+    "opcode": 154,
+    "operator_id": "slice_axis",
+    "parents": [
+      1,
+      2,
+      2,
+      3,
+      4
+    ],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 6,
+    "inferred_type": {
+      "kind": "series",
+      "dtype": "int64",
+      "axes": [
+        "time"
+      ],
+      "shape": [
+        "1048578"
+      ],
+      "semantic_dimension": "index",
+      "price_basis": null,
+      "display": "series<time>[1048578]"
+    }
+  },
+  {
+    "node_id": 6,
+    "kind": "operation",
+    "opcode": 153,
+    "operator_id": "take_axis",
+    "parents": [
+      0,
+      5,
+      2
+    ],
+    "slot": 0,
+    "storage": "numeric",
+    "last_use": 22,
+    "inferred_type": {
+      "kind": "matrix",
+      "dtype": "float64",
+      "axes": [
+        "time",
+        "factor"
+      ],
+      "shape": [
+        "1048578",
+        "8"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "matrix<time,factor>[1048578,8]"
+    }
+  },
+  {
+    "node_id": 7,
+    "kind": "operation",
+    "opcode": 159,
+    "operator_id": "mean_axis",
+    "parents": [
+      6,
+      2
+    ],
+    "slot": 1,
+    "storage": "numeric",
+    "last_use": 21,
+    "inferred_type": {
+      "kind": "vector",
+      "dtype": "float64",
+      "axes": [
+        "factor"
+      ],
+      "shape": [
+        "8"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "vector<factor>[8]"
+    }
+  },
+  {
+    "node_id": 8,
+    "kind": "operation",
+    "opcode": 157,
+    "operator_id": "broadcast_like",
+    "parents": [
+      7,
+      0
+    ],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 9,
+    "inferred_type": {
+      "kind": "matrix",
+      "dtype": "float64",
+      "axes": [
+        "time",
+        "factor"
+      ],
+      "shape": [
+        "1398104",
+        "8"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "matrix<time,factor>[1398104,8]"
+    }
+  },
+  {
+    "node_id": 9,
+    "kind": "operation",
+    "opcode": 2,
+    "operator_id": "subtract",
+    "parents": [
+      0,
+      8
+    ],
+    "slot": 2,
+    "storage": "numeric",
+    "last_use": 16,
+    "inferred_type": {
+      "kind": "matrix",
+      "dtype": "float64",
+      "axes": [
+        "time",
+        "factor"
+      ],
+      "shape": [
+        "1398104",
+        "8"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "matrix<time,factor>[1398104,8]"
+    }
+  },
+  {
+    "node_id": 10,
+    "kind": "operation",
+    "opcode": 161,
+    "operator_id": "variance_axis",
+    "parents": [
+      6,
+      2,
+      2
+    ],
+    "slot": 3,
+    "storage": "numeric",
+    "last_use": 11,
+    "inferred_type": {
+      "kind": "vector",
+      "dtype": "float64",
+      "axes": [
+        "factor"
+      ],
+      "shape": [
+        "8"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "vector<factor>[8]"
+    }
+  },
+  {
+    "node_id": 11,
+    "kind": "operation",
+    "opcode": 10,
+    "operator_id": "sqrt",
+    "parents": [
+      10
+    ],
+    "slot": 4,
+    "storage": "numeric",
+    "last_use": 14,
+    "inferred_type": {
+      "kind": "vector",
+      "dtype": "float64",
+      "axes": [
+        "factor"
+      ],
+      "shape": [
+        "8"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "vector<factor>[8]"
+    }
+  },
+  {
+    "node_id": 12,
+    "kind": "constant",
+    "opcode": 0,
+    "operator_id": null,
+    "parents": [],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 13,
+    "inferred_type": {
+      "kind": "scalar",
+      "dtype": "float64",
+      "axes": [],
+      "shape": [],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "scalar"
+    }
+  },
+  {
+    "node_id": 13,
+    "kind": "operation",
+    "opcode": 18,
+    "operator_id": "less_than",
+    "parents": [
+      11,
+      12
+    ],
+    "slot": 0,
+    "storage": "mask",
+    "last_use": 14,
+    "inferred_type": {
+      "kind": "vector",
+      "dtype": "bool",
+      "axes": [
+        "factor"
+      ],
+      "shape": [
+        "8"
+      ],
+      "semantic_dimension": "mask",
+      "price_basis": null,
+      "display": "mask<factor>[8]"
+    }
+  },
+  {
+    "node_id": 14,
+    "kind": "operation",
+    "opcode": 25,
+    "operator_id": "where",
+    "parents": [
+      13,
+      4,
+      11
+    ],
+    "slot": 3,
+    "storage": "numeric",
+    "last_use": 23,
+    "inferred_type": {
+      "kind": "vector",
+      "dtype": "float64",
+      "axes": [
+        "factor"
+      ],
+      "shape": [
+        "8"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "vector<factor>[8]"
+    }
+  },
+  {
+    "node_id": 15,
+    "kind": "operation",
+    "opcode": 157,
+    "operator_id": "broadcast_like",
+    "parents": [
+      14,
+      0
+    ],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 16,
+    "inferred_type": {
+      "kind": "matrix",
+      "dtype": "float64",
+      "axes": [
+        "time",
+        "factor"
+      ],
+      "shape": [
+        "1398104",
+        "8"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "matrix<time,factor>[1398104,8]"
+    }
+  },
+  {
+    "node_id": 16,
+    "kind": "operation",
+    "opcode": 4,
+    "operator_id": "divide",
+    "parents": [
+      9,
+      15
+    ],
+    "slot": 4,
+    "storage": "numeric",
+    "last_use": 115,
+    "inferred_type": {
+      "kind": "matrix",
+      "dtype": "float64",
+      "axes": [
+        "time",
+        "factor"
+      ],
+      "shape": [
+        "1398104",
+        "8"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "matrix<time,factor>[1398104,8]"
+    }
+  },
+  {
+    "node_id": 17,
+    "kind": "constant",
+    "opcode": 0,
+    "operator_id": null,
+    "parents": [],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 110,
+    "inferred_type": {
+      "kind": "scalar",
+      "dtype": "float64",
+      "axes": [],
+      "shape": [],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "scalar"
+    }
+  },
+  {
+    "node_id": 18,
+    "kind": "operation",
+    "opcode": 154,
+    "operator_id": "slice_axis",
+    "parents": [
+      1,
+      2,
+      3,
+      17,
+      4
+    ],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 110,
+    "inferred_type": {
+      "kind": "series",
+      "dtype": "int64",
+      "axes": [
+        "time"
+      ],
+      "shape": [
+        "349526"
+      ],
+      "semantic_dimension": "index",
+      "price_basis": null,
+      "display": "series<time>[349526]"
+    }
+  },
+  {
+    "node_id": 19,
+    "kind": "operation",
+    "opcode": 153,
+    "operator_id": "take_axis",
+    "parents": [
+      16,
+      18,
+      2
+    ],
+    "slot": 2,
+    "storage": "numeric",
+    "last_use": 40,
+    "inferred_type": {
+      "kind": "matrix",
+      "dtype": "float64",
+      "axes": [
+        "time",
+        "factor"
+      ],
+      "shape": [
+        "349526",
+        "8"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "matrix<time,factor>[349526,8]"
+    }
+  },
+  {
+    "node_id": 20,
+    "kind": "operation",
+    "opcode": 157,
+    "operator_id": "broadcast_like",
+    "parents": [
+      7,
+      6
+    ],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 21,
+    "inferred_type": {
+      "kind": "matrix",
+      "dtype": "float64",
+      "axes": [
+        "time",
+        "factor"
+      ],
+      "shape": [
+        "1048578",
+        "8"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "matrix<time,factor>[1048578,8]"
+    }
+  },
+  {
+    "node_id": 21,
+    "kind": "operation",
+    "opcode": 2,
+    "operator_id": "subtract",
+    "parents": [
+      6,
+      20
+    ],
+    "slot": 5,
+    "storage": "numeric",
+    "last_use": 23,
+    "inferred_type": {
+      "kind": "matrix",
+      "dtype": "float64",
+      "axes": [
+        "time",
+        "factor"
+      ],
+      "shape": [
+        "1048578",
+        "8"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "matrix<time,factor>[1048578,8]"
+    }
+  },
+  {
+    "node_id": 22,
+    "kind": "operation",
+    "opcode": 157,
+    "operator_id": "broadcast_like",
+    "parents": [
+      14,
+      6
+    ],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 23,
+    "inferred_type": {
+      "kind": "matrix",
+      "dtype": "float64",
+      "axes": [
+        "time",
+        "factor"
+      ],
+      "shape": [
+        "1048578",
+        "8"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "matrix<time,factor>[1048578,8]"
+    }
+  },
+  {
+    "node_id": 23,
+    "kind": "operation",
+    "opcode": 4,
+    "operator_id": "divide",
+    "parents": [
+      21,
+      22
+    ],
+    "slot": 0,
+    "storage": "numeric",
+    "last_use": 37,
+    "inferred_type": {
+      "kind": "matrix",
+      "dtype": "float64",
+      "axes": [
+        "time",
+        "factor"
+      ],
+      "shape": [
+        "1048578",
+        "8"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "matrix<time,factor>[1048578,8]"
+    }
+  },
+  {
+    "node_id": 24,
+    "kind": "input",
+    "opcode": 0,
+    "operator_id": null,
+    "parents": [],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 37,
+    "inferred_type": {
+      "kind": "vector",
+      "dtype": "float64",
+      "axes": [
+        "component"
+      ],
+      "shape": [
+        "16"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "vector<component>[16]"
+    }
+  },
+  {
+    "node_id": 25,
+    "kind": "constant",
+    "opcode": 0,
+    "operator_id": null,
+    "parents": [],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 49,
+    "inferred_type": {
+      "kind": "scalar",
+      "dtype": "float64",
+      "axes": [],
+      "shape": [],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "scalar"
+    }
+  },
+  {
+    "node_id": 26,
+    "kind": "constant",
+    "opcode": 0,
+    "operator_id": null,
+    "parents": [],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 27,
+    "inferred_type": {
+      "kind": "scalar",
+      "dtype": "float64",
+      "axes": [],
+      "shape": [],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "scalar"
+    }
+  },
+  {
+    "node_id": 27,
+    "kind": "operation",
+    "opcode": 184,
+    "operator_id": "sample_unique_indices",
+    "parents": [
+      23,
+      25,
+      26
+    ],
+    "slot": 0,
+    "storage": "integer",
+    "last_use": 28,
+    "inferred_type": {
+      "kind": "series",
+      "dtype": "int64",
+      "axes": [
+        "time"
+      ],
+      "shape": [
+        "16"
+      ],
+      "semantic_dimension": "index",
+      "price_basis": null,
+      "display": "series<time>[16]"
+    }
+  },
+  {
+    "node_id": 28,
+    "kind": "operation",
+    "opcode": 153,
+    "operator_id": "take_axis",
+    "parents": [
+      23,
+      27,
+      2
+    ],
+    "slot": 1,
+    "storage": "numeric",
+    "last_use": 30,
+    "inferred_type": {
+      "kind": "matrix",
+      "dtype": "float64",
+      "axes": [
+        "time",
+        "factor"
+      ],
+      "shape": [
+        "16",
+        "8"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "matrix<time,factor>[16,8]"
+    }
+  },
+  {
+    "node_id": 29,
+    "kind": "operation",
+    "opcode": 154,
+    "operator_id": "slice_axis",
+    "parents": [
+      1,
+      2,
+      2,
+      25,
+      4
+    ],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 30,
+    "inferred_type": {
+      "kind": "series",
+      "dtype": "int64",
+      "axes": [
+        "time"
+      ],
+      "shape": [
+        "16"
+      ],
+      "semantic_dimension": "index",
+      "price_basis": null,
+      "display": "series<time>[16]"
+    }
+  },
+  {
+    "node_id": 30,
+    "kind": "operation",
+    "opcode": 183,
+    "operator_id": "partition_mean",
+    "parents": [
+      28,
+      29,
+      25
+    ],
+    "slot": 3,
+    "storage": "numeric",
+    "last_use": 115,
+    "inferred_type": {
+      "kind": "matrix",
+      "dtype": "float64",
+      "axes": [
+        "component",
+        "factor"
+      ],
+      "shape": [
+        "16",
+        "8"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "matrix<component,factor>[16,8]"
+    }
+  },
+  {
+    "node_id": 31,
+    "kind": "operation",
+    "opcode": 161,
+    "operator_id": "variance_axis",
+    "parents": [
+      23,
+      2,
+      2
+    ],
+    "slot": 1,
+    "storage": "numeric",
+    "last_use": 33,
+    "inferred_type": {
+      "kind": "vector",
+      "dtype": "float64",
+      "axes": [
+        "factor"
+      ],
+      "shape": [
+        "8"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "vector<factor>[8]"
+    }
+  },
+  {
+    "node_id": 32,
+    "kind": "constant",
+    "opcode": 0,
+    "operator_id": null,
+    "parents": [],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 33,
+    "inferred_type": {
+      "kind": "scalar",
+      "dtype": "float64",
+      "axes": [],
+      "shape": [],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "scalar"
+    }
+  },
+  {
+    "node_id": 33,
+    "kind": "operation",
+    "opcode": 7,
+    "operator_id": "maximum",
+    "parents": [
+      31,
+      32
+    ],
+    "slot": 5,
+    "storage": "numeric",
+    "last_use": 37,
+    "inferred_type": {
+      "kind": "vector",
+      "dtype": "float64",
+      "axes": [
+        "factor"
+      ],
+      "shape": [
+        "8"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "vector<factor>[8]"
+    }
+  },
+  {
+    "node_id": 34,
+    "kind": "operation",
+    "opcode": 157,
+    "operator_id": "broadcast_like",
+    "parents": [
+      33,
+      30
+    ],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 37,
+    "inferred_type": {
+      "kind": "matrix",
+      "dtype": "float64",
+      "axes": [
+        "component",
+        "factor"
+      ],
+      "shape": [
+        "16",
+        "8"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "matrix<component,factor>[16,8]"
+    }
+  },
+  {
+    "node_id": 35,
+    "kind": "constant",
+    "opcode": 0,
+    "operator_id": null,
+    "parents": [],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 93,
+    "inferred_type": {
+      "kind": "scalar",
+      "dtype": "float64",
+      "axes": [],
+      "shape": [],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "scalar"
+    }
+  },
+  {
+    "node_id": 36,
+    "kind": "constant",
+    "opcode": 0,
+    "operator_id": null,
+    "parents": [],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 37,
+    "inferred_type": {
+      "kind": "scalar",
+      "dtype": "float64",
+      "axes": [],
+      "shape": [],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "scalar"
+    }
+  },
+  {
+    "node_id": 37,
+    "kind": "operation",
+    "opcode": 167,
+    "operator_id": "gaussian_mixture_em",
+    "parents": [
+      23,
+      24,
+      30,
+      34,
+      35,
+      36
+    ],
+    "slot": 1,
+    "storage": "numeric",
+    "last_use": 115,
+    "inferred_type": {
+      "kind": "matrix",
+      "dtype": "float64",
+      "axes": [
+        "component",
+        "factor"
+      ],
+      "shape": [
+        "16",
+        "(2*(8)+4)"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "record_tag": "gaussian_mixture",
+      "fields": [
+        "weights",
+        "means",
+        "variances",
+        "iterations",
+        "log_likelihood",
+        "converged"
+      ],
+      "display": "matrix<component,factor>[16,(2*(8)+4)]"
+    }
+  },
+  {
+    "node_id": 38,
+    "kind": "operation",
+    "opcode": 170,
+    "operator_id": "mixture_means",
+    "parents": [
+      37
+    ],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 115,
+    "inferred_type": {
+      "kind": "matrix",
+      "dtype": "float64",
+      "axes": [
+        "component",
+        "factor"
+      ],
+      "shape": [
+        "16",
+        "8"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "matrix<component,factor>[16,8]"
+    }
+  },
+  {
+    "node_id": 39,
+    "kind": "operation",
+    "opcode": 171,
+    "operator_id": "mixture_variances",
+    "parents": [
+      37
+    ],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 115,
+    "inferred_type": {
+      "kind": "matrix",
+      "dtype": "float64",
+      "axes": [
+        "component",
+        "factor"
+      ],
+      "shape": [
+        "16",
+        "8"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "matrix<component,factor>[16,8]"
+    }
+  },
+  {
+    "node_id": 40,
+    "kind": "operation",
+    "opcode": 166,
+    "operator_id": "gaussian_log_density",
+    "parents": [
+      19,
+      38,
+      39
+    ],
+    "slot": 0,
+    "storage": "numeric",
+    "last_use": 46,
+    "inferred_type": {
+      "kind": "matrix",
+      "dtype": "float64",
+      "axes": [
+        "time",
+        "component"
+      ],
+      "shape": [
+        "349526",
+        "16"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "matrix<time,component>[349526,16]"
+    }
+  },
+  {
+    "node_id": 41,
+    "kind": "operation",
+    "opcode": 169,
+    "operator_id": "mixture_weights",
+    "parents": [
+      37
+    ],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 115,
+    "inferred_type": {
+      "kind": "vector",
+      "dtype": "float64",
+      "axes": [
+        "component"
+      ],
+      "shape": [
+        "16"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "vector<component>[16]"
+    }
+  },
+  {
+    "node_id": 42,
+    "kind": "constant",
+    "opcode": 0,
+    "operator_id": null,
+    "parents": [],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 43,
+    "inferred_type": {
+      "kind": "scalar",
+      "dtype": "float64",
+      "axes": [],
+      "shape": [],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "scalar"
+    }
+  },
+  {
+    "node_id": 43,
+    "kind": "operation",
+    "opcode": 7,
+    "operator_id": "maximum",
+    "parents": [
+      41,
+      42
+    ],
+    "slot": 2,
+    "storage": "numeric",
+    "last_use": 44,
+    "inferred_type": {
+      "kind": "vector",
+      "dtype": "float64",
+      "axes": [
+        "component"
+      ],
+      "shape": [
+        "16"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "vector<component>[16]"
+    }
+  },
+  {
+    "node_id": 44,
+    "kind": "operation",
+    "opcode": 12,
+    "operator_id": "log",
+    "parents": [
+      43
+    ],
+    "slot": 5,
+    "storage": "numeric",
+    "last_use": 46,
+    "inferred_type": {
+      "kind": "vector",
+      "dtype": "float64",
+      "axes": [
+        "component"
+      ],
+      "shape": [
+        "16"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "vector<component>[16]"
+    }
+  },
+  {
+    "node_id": 45,
+    "kind": "operation",
+    "opcode": 157,
+    "operator_id": "broadcast_like",
+    "parents": [
+      44,
+      40
+    ],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 46,
+    "inferred_type": {
+      "kind": "matrix",
+      "dtype": "float64",
+      "axes": [
+        "time",
+        "component"
+      ],
+      "shape": [
+        "349526",
+        "16"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "matrix<time,component>[349526,16]"
+    }
+  },
+  {
+    "node_id": 46,
+    "kind": "operation",
+    "opcode": 1,
+    "operator_id": "add",
+    "parents": [
+      40,
+      45
+    ],
+    "slot": 2,
+    "storage": "numeric",
+    "last_use": 47,
+    "inferred_type": {
+      "kind": "matrix",
+      "dtype": "float64",
+      "axes": [
+        "time",
+        "component"
+      ],
+      "shape": [
+        "349526",
+        "16"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "matrix<time,component>[349526,16]"
+    }
+  },
+  {
+    "node_id": 47,
+    "kind": "operation",
+    "opcode": 165,
+    "operator_id": "softmax_axis",
+    "parents": [
+      46,
+      4
+    ],
+    "slot": 0,
+    "storage": "numeric",
+    "last_use": 109,
+    "inferred_type": {
+      "kind": "matrix",
+      "dtype": "float64",
+      "axes": [
+        "time",
+        "component"
+      ],
+      "shape": [
+        "349526",
+        "16"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "matrix<time,component>[349526,16]"
+    }
+  },
+  {
+    "node_id": 48,
+    "kind": "operation",
+    "opcode": 163,
+    "operator_id": "argmax_axis",
+    "parents": [
+      47,
+      4
+    ],
+    "slot": 0,
+    "storage": "integer",
+    "last_use": 49,
+    "inferred_type": {
+      "kind": "series",
+      "dtype": "int64",
+      "axes": [
+        "time"
+      ],
+      "shape": [
+        "349526"
+      ],
+      "semantic_dimension": "index",
+      "price_basis": null,
+      "display": "series<time>[349526]"
+    }
+  },
+  {
+    "node_id": 49,
+    "kind": "operation",
+    "opcode": 182,
+    "operator_id": "one_hot",
+    "parents": [
+      48,
+      25
+    ],
+    "slot": 2,
+    "storage": "numeric",
+    "last_use": 55,
+    "inferred_type": {
+      "kind": "matrix",
+      "dtype": "float64",
+      "axes": [
+        "time",
+        "component"
+      ],
+      "shape": [
+        "349526",
+        "16"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "matrix<time,component>[349526,16]"
+    }
+  },
+  {
+    "node_id": 50,
+    "kind": "operation",
+    "opcode": 154,
+    "operator_id": "slice_axis",
+    "parents": [
+      38,
+      4,
+      2,
+      4,
+      4
+    ],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 51,
+    "inferred_type": {
+      "kind": "matrix",
+      "dtype": "float64",
+      "axes": [
+        "component",
+        "factor"
+      ],
+      "shape": [
+        "16",
+        "1"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "matrix<component,factor>[16,1]"
+    }
+  },
+  {
+    "node_id": 51,
+    "kind": "operation",
+    "opcode": 162,
+    "operator_id": "max_axis",
+    "parents": [
+      50,
+      4
+    ],
+    "slot": 5,
+    "storage": "numeric",
+    "last_use": 52,
+    "inferred_type": {
+      "kind": "vector",
+      "dtype": "float64",
+      "axes": [
+        "component"
+      ],
+      "shape": [
+        "16"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "vector<component>[16]"
+    }
+  },
+  {
+    "node_id": 52,
+    "kind": "operation",
+    "opcode": 122,
+    "operator_id": "argsort",
+    "parents": [
+      51
+    ],
+    "slot": 0,
+    "storage": "integer",
+    "last_use": 115,
+    "inferred_type": {
+      "kind": "vector",
+      "dtype": "int64",
+      "axes": [
+        "asset"
+      ],
+      "shape": [
+        "16"
+      ],
+      "semantic_dimension": "count",
+      "price_basis": null,
+      "display": "vector<asset>[16]"
+    }
+  },
+  {
+    "node_id": 53,
+    "kind": "input",
+    "opcode": 0,
+    "operator_id": null,
+    "parents": [],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 54,
+    "inferred_type": {
+      "kind": "vector",
+      "dtype": "int64",
+      "axes": [
+        "component"
+      ],
+      "shape": [
+        "16"
+      ],
+      "semantic_dimension": "index",
+      "price_basis": null,
+      "display": "vector<component>[16]"
+    }
+  },
+  {
+    "node_id": 54,
+    "kind": "operation",
+    "opcode": 123,
+    "operator_id": "gather",
+    "parents": [
+      52,
+      53
+    ],
+    "slot": 1,
+    "storage": "integer",
+    "last_use": 109,
+    "inferred_type": {
+      "kind": "vector",
+      "dtype": "int64",
+      "axes": [
+        "asset"
+      ],
+      "shape": [
+        "16"
+      ],
+      "semantic_dimension": "count",
+      "price_basis": null,
+      "display": "vector<asset>[16]"
+    }
+  },
+  {
+    "node_id": 55,
+    "kind": "operation",
+    "opcode": 153,
+    "operator_id": "take_axis",
+    "parents": [
+      49,
+      54,
+      4
+    ],
+    "slot": 5,
+    "storage": "numeric",
+    "last_use": 56,
+    "inferred_type": {
+      "kind": "matrix",
+      "dtype": "float64",
+      "axes": [
+        "time",
+        "component"
+      ],
+      "shape": [
+        "349526",
+        "16"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "matrix<time,component>[349526,16]"
+    }
+  },
+  {
+    "node_id": 56,
+    "kind": "operation",
+    "opcode": 185,
+    "operator_id": "scatter_rows",
+    "parents": [
+      55,
+      18,
+      17,
+      2
+    ],
+    "slot": 2,
+    "storage": "numeric",
+    "last_use": 57,
+    "inferred_type": {
+      "kind": "matrix",
+      "dtype": "float64",
+      "axes": [
+        "time",
+        "component"
+      ],
+      "shape": [
+        "1398104",
+        "16"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "matrix<time,component>[1398104,16]"
+    }
+  },
+  {
+    "node_id": 57,
+    "kind": "operation",
+    "opcode": 163,
+    "operator_id": "argmax_axis",
+    "parents": [
+      56,
+      4
+    ],
+    "slot": 2,
+    "storage": "integer",
+    "last_use": 86,
+    "inferred_type": {
+      "kind": "series",
+      "dtype": "int64",
+      "axes": [
+        "time"
+      ],
+      "shape": [
+        "1398104"
+      ],
+      "semantic_dimension": "index",
+      "price_basis": null,
+      "display": "series<time>[1398104]"
+    }
+  },
+  {
+    "node_id": 58,
+    "kind": "constant",
+    "opcode": 0,
+    "operator_id": null,
+    "parents": [],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 104,
+    "inferred_type": {
+      "kind": "scalar",
+      "dtype": "float64",
+      "axes": [],
+      "shape": [],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "scalar"
+    }
+  },
+  {
+    "node_id": 59,
+    "kind": "operation",
+    "opcode": 16,
+    "operator_id": "equal",
+    "parents": [
+      57,
+      58
+    ],
+    "slot": 0,
+    "storage": "mask",
+    "last_use": 104,
+    "inferred_type": {
+      "kind": "series",
+      "dtype": "bool",
+      "axes": [
+        "time"
+      ],
+      "shape": [
+        "1398104"
+      ],
+      "semantic_dimension": "mask",
+      "price_basis": null,
+      "display": "mask<time>[1398104]"
+    }
+  },
+  {
+    "node_id": 60,
+    "kind": "constant",
+    "opcode": 0,
+    "operator_id": null,
+    "parents": [],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 103,
+    "inferred_type": {
+      "kind": "scalar",
+      "dtype": "float64",
+      "axes": [],
+      "shape": [],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "scalar"
+    }
+  },
+  {
+    "node_id": 61,
+    "kind": "operation",
+    "opcode": 16,
+    "operator_id": "equal",
+    "parents": [
+      57,
+      60
+    ],
+    "slot": 1,
+    "storage": "mask",
+    "last_use": 103,
+    "inferred_type": {
+      "kind": "series",
+      "dtype": "bool",
+      "axes": [
+        "time"
+      ],
+      "shape": [
+        "1398104"
+      ],
+      "semantic_dimension": "mask",
+      "price_basis": null,
+      "display": "mask<time>[1398104]"
+    }
+  },
+  {
+    "node_id": 62,
+    "kind": "constant",
+    "opcode": 0,
+    "operator_id": null,
+    "parents": [],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 102,
+    "inferred_type": {
+      "kind": "scalar",
+      "dtype": "float64",
+      "axes": [],
+      "shape": [],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "scalar"
+    }
+  },
+  {
+    "node_id": 63,
+    "kind": "operation",
+    "opcode": 16,
+    "operator_id": "equal",
+    "parents": [
+      57,
+      62
+    ],
+    "slot": 2,
+    "storage": "mask",
+    "last_use": 102,
+    "inferred_type": {
+      "kind": "series",
+      "dtype": "bool",
+      "axes": [
+        "time"
+      ],
+      "shape": [
+        "1398104"
+      ],
+      "semantic_dimension": "mask",
+      "price_basis": null,
+      "display": "mask<time>[1398104]"
+    }
+  },
+  {
+    "node_id": 64,
+    "kind": "constant",
+    "opcode": 0,
+    "operator_id": null,
+    "parents": [],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 101,
+    "inferred_type": {
+      "kind": "scalar",
+      "dtype": "float64",
+      "axes": [],
+      "shape": [],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "scalar"
+    }
+  },
+  {
+    "node_id": 65,
+    "kind": "operation",
+    "opcode": 16,
+    "operator_id": "equal",
+    "parents": [
+      57,
+      64
+    ],
+    "slot": 3,
+    "storage": "mask",
+    "last_use": 101,
+    "inferred_type": {
+      "kind": "series",
+      "dtype": "bool",
+      "axes": [
+        "time"
+      ],
+      "shape": [
+        "1398104"
+      ],
+      "semantic_dimension": "mask",
+      "price_basis": null,
+      "display": "mask<time>[1398104]"
+    }
+  },
+  {
+    "node_id": 66,
+    "kind": "constant",
+    "opcode": 0,
+    "operator_id": null,
+    "parents": [],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 100,
+    "inferred_type": {
+      "kind": "scalar",
+      "dtype": "float64",
+      "axes": [],
+      "shape": [],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "scalar"
+    }
+  },
+  {
+    "node_id": 67,
+    "kind": "operation",
+    "opcode": 16,
+    "operator_id": "equal",
+    "parents": [
+      57,
+      66
+    ],
+    "slot": 4,
+    "storage": "mask",
+    "last_use": 100,
+    "inferred_type": {
+      "kind": "series",
+      "dtype": "bool",
+      "axes": [
+        "time"
+      ],
+      "shape": [
+        "1398104"
+      ],
+      "semantic_dimension": "mask",
+      "price_basis": null,
+      "display": "mask<time>[1398104]"
+    }
+  },
+  {
+    "node_id": 68,
+    "kind": "constant",
+    "opcode": 0,
+    "operator_id": null,
+    "parents": [],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 99,
+    "inferred_type": {
+      "kind": "scalar",
+      "dtype": "float64",
+      "axes": [],
+      "shape": [],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "scalar"
+    }
+  },
+  {
+    "node_id": 69,
+    "kind": "operation",
+    "opcode": 16,
+    "operator_id": "equal",
+    "parents": [
+      57,
+      68
+    ],
+    "slot": 5,
+    "storage": "mask",
+    "last_use": 99,
+    "inferred_type": {
+      "kind": "series",
+      "dtype": "bool",
+      "axes": [
+        "time"
+      ],
+      "shape": [
+        "1398104"
+      ],
+      "semantic_dimension": "mask",
+      "price_basis": null,
+      "display": "mask<time>[1398104]"
+    }
+  },
+  {
+    "node_id": 70,
+    "kind": "constant",
+    "opcode": 0,
+    "operator_id": null,
+    "parents": [],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 98,
+    "inferred_type": {
+      "kind": "scalar",
+      "dtype": "float64",
+      "axes": [],
+      "shape": [],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "scalar"
+    }
+  },
+  {
+    "node_id": 71,
+    "kind": "operation",
+    "opcode": 16,
+    "operator_id": "equal",
+    "parents": [
+      57,
+      70
+    ],
+    "slot": 6,
+    "storage": "mask",
+    "last_use": 98,
+    "inferred_type": {
+      "kind": "series",
+      "dtype": "bool",
+      "axes": [
+        "time"
+      ],
+      "shape": [
+        "1398104"
+      ],
+      "semantic_dimension": "mask",
+      "price_basis": null,
+      "display": "mask<time>[1398104]"
+    }
+  },
+  {
+    "node_id": 72,
+    "kind": "constant",
+    "opcode": 0,
+    "operator_id": null,
+    "parents": [],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 97,
+    "inferred_type": {
+      "kind": "scalar",
+      "dtype": "float64",
+      "axes": [],
+      "shape": [],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "scalar"
+    }
+  },
+  {
+    "node_id": 73,
+    "kind": "operation",
+    "opcode": 16,
+    "operator_id": "equal",
+    "parents": [
+      57,
+      72
+    ],
+    "slot": 7,
+    "storage": "mask",
+    "last_use": 97,
+    "inferred_type": {
+      "kind": "series",
+      "dtype": "bool",
+      "axes": [
+        "time"
+      ],
+      "shape": [
+        "1398104"
+      ],
+      "semantic_dimension": "mask",
+      "price_basis": null,
+      "display": "mask<time>[1398104]"
+    }
+  },
+  {
+    "node_id": 74,
+    "kind": "constant",
+    "opcode": 0,
+    "operator_id": null,
+    "parents": [],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 96,
+    "inferred_type": {
+      "kind": "scalar",
+      "dtype": "float64",
+      "axes": [],
+      "shape": [],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "scalar"
+    }
+  },
+  {
+    "node_id": 75,
+    "kind": "operation",
+    "opcode": 16,
+    "operator_id": "equal",
+    "parents": [
+      57,
+      74
+    ],
+    "slot": 8,
+    "storage": "mask",
+    "last_use": 96,
+    "inferred_type": {
+      "kind": "series",
+      "dtype": "bool",
+      "axes": [
+        "time"
+      ],
+      "shape": [
+        "1398104"
+      ],
+      "semantic_dimension": "mask",
+      "price_basis": null,
+      "display": "mask<time>[1398104]"
+    }
+  },
+  {
+    "node_id": 76,
+    "kind": "constant",
+    "opcode": 0,
+    "operator_id": null,
+    "parents": [],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 95,
+    "inferred_type": {
+      "kind": "scalar",
+      "dtype": "float64",
+      "axes": [],
+      "shape": [],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "scalar"
+    }
+  },
+  {
+    "node_id": 77,
+    "kind": "operation",
+    "opcode": 16,
+    "operator_id": "equal",
+    "parents": [
+      57,
+      76
+    ],
+    "slot": 9,
+    "storage": "mask",
+    "last_use": 95,
+    "inferred_type": {
+      "kind": "series",
+      "dtype": "bool",
+      "axes": [
+        "time"
+      ],
+      "shape": [
+        "1398104"
+      ],
+      "semantic_dimension": "mask",
+      "price_basis": null,
+      "display": "mask<time>[1398104]"
+    }
+  },
+  {
+    "node_id": 78,
+    "kind": "constant",
+    "opcode": 0,
+    "operator_id": null,
+    "parents": [],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 94,
+    "inferred_type": {
+      "kind": "scalar",
+      "dtype": "float64",
+      "axes": [],
+      "shape": [],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "scalar"
+    }
+  },
+  {
+    "node_id": 79,
+    "kind": "operation",
+    "opcode": 16,
+    "operator_id": "equal",
+    "parents": [
+      57,
+      78
+    ],
+    "slot": 10,
+    "storage": "mask",
+    "last_use": 94,
+    "inferred_type": {
+      "kind": "series",
+      "dtype": "bool",
+      "axes": [
+        "time"
+      ],
+      "shape": [
+        "1398104"
+      ],
+      "semantic_dimension": "mask",
+      "price_basis": null,
+      "display": "mask<time>[1398104]"
+    }
+  },
+  {
+    "node_id": 80,
+    "kind": "operation",
+    "opcode": 16,
+    "operator_id": "equal",
+    "parents": [
+      57,
+      35
+    ],
+    "slot": 11,
+    "storage": "mask",
+    "last_use": 93,
+    "inferred_type": {
+      "kind": "series",
+      "dtype": "bool",
+      "axes": [
+        "time"
+      ],
+      "shape": [
+        "1398104"
+      ],
+      "semantic_dimension": "mask",
+      "price_basis": null,
+      "display": "mask<time>[1398104]"
+    }
+  },
+  {
+    "node_id": 81,
+    "kind": "constant",
+    "opcode": 0,
+    "operator_id": null,
+    "parents": [],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 92,
+    "inferred_type": {
+      "kind": "scalar",
+      "dtype": "float64",
+      "axes": [],
+      "shape": [],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "scalar"
+    }
+  },
+  {
+    "node_id": 82,
+    "kind": "operation",
+    "opcode": 16,
+    "operator_id": "equal",
+    "parents": [
+      57,
+      81
+    ],
+    "slot": 12,
+    "storage": "mask",
+    "last_use": 92,
+    "inferred_type": {
+      "kind": "series",
+      "dtype": "bool",
+      "axes": [
+        "time"
+      ],
+      "shape": [
+        "1398104"
+      ],
+      "semantic_dimension": "mask",
+      "price_basis": null,
+      "display": "mask<time>[1398104]"
+    }
+  },
+  {
+    "node_id": 83,
+    "kind": "constant",
+    "opcode": 0,
+    "operator_id": null,
+    "parents": [],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 91,
+    "inferred_type": {
+      "kind": "scalar",
+      "dtype": "float64",
+      "axes": [],
+      "shape": [],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "scalar"
+    }
+  },
+  {
+    "node_id": 84,
+    "kind": "operation",
+    "opcode": 16,
+    "operator_id": "equal",
+    "parents": [
+      57,
+      83
+    ],
+    "slot": 13,
+    "storage": "mask",
+    "last_use": 91,
+    "inferred_type": {
+      "kind": "series",
+      "dtype": "bool",
+      "axes": [
+        "time"
+      ],
+      "shape": [
+        "1398104"
+      ],
+      "semantic_dimension": "mask",
+      "price_basis": null,
+      "display": "mask<time>[1398104]"
+    }
+  },
+  {
+    "node_id": 85,
+    "kind": "operation",
+    "opcode": 16,
+    "operator_id": "equal",
+    "parents": [
+      57,
+      4
+    ],
+    "slot": 14,
+    "storage": "mask",
+    "last_use": 90,
+    "inferred_type": {
+      "kind": "series",
+      "dtype": "bool",
+      "axes": [
+        "time"
+      ],
+      "shape": [
+        "1398104"
+      ],
+      "semantic_dimension": "mask",
+      "price_basis": null,
+      "display": "mask<time>[1398104]"
+    }
+  },
+  {
+    "node_id": 86,
+    "kind": "operation",
+    "opcode": 16,
+    "operator_id": "equal",
+    "parents": [
+      57,
+      2
+    ],
+    "slot": 15,
+    "storage": "mask",
+    "last_use": 89,
+    "inferred_type": {
+      "kind": "series",
+      "dtype": "bool",
+      "axes": [
+        "time"
+      ],
+      "shape": [
+        "1398104"
+      ],
+      "semantic_dimension": "mask",
+      "price_basis": null,
+      "display": "mask<time>[1398104]"
+    }
+  },
+  {
+    "node_id": 87,
+    "kind": "operation",
+    "opcode": 8,
+    "operator_id": "negate",
+    "parents": [
+      4
+    ],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 89,
+    "inferred_type": {
+      "kind": "scalar",
+      "dtype": "float64",
+      "axes": [],
+      "shape": [],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "scalar"
+    }
+  },
+  {
+    "node_id": 88,
+    "kind": "input",
+    "opcode": 0,
+    "operator_id": null,
+    "parents": [],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 104,
+    "inferred_type": {
+      "kind": "series",
+      "dtype": "bool",
+      "axes": [
+        "time"
+      ],
+      "shape": [
+        "1398104"
+      ],
+      "semantic_dimension": "mask",
+      "price_basis": null,
+      "display": "mask<time>[1398104]"
+    }
+  },
+  {
+    "node_id": 89,
+    "kind": "operation",
+    "opcode": 146,
+    "operator_id": "state_select",
+    "parents": [
+      86,
+      2,
+      87,
+      88
+    ],
+    "slot": 2,
+    "storage": "integer",
+    "last_use": 90,
+    "inferred_type": {
+      "kind": "series",
+      "dtype": "int64",
+      "axes": [
+        "time"
+      ],
+      "shape": [
+        "1398104"
+      ],
+      "semantic_dimension": "state",
+      "price_basis": null,
+      "display": "series<time>[1398104]"
+    }
+  },
+  {
+    "node_id": 90,
+    "kind": "operation",
+    "opcode": 146,
+    "operator_id": "state_select",
+    "parents": [
+      85,
+      4,
+      89,
+      88
+    ],
+    "slot": 3,
+    "storage": "integer",
+    "last_use": 91,
+    "inferred_type": {
+      "kind": "series",
+      "dtype": "int64",
+      "axes": [
+        "time"
+      ],
+      "shape": [
+        "1398104"
+      ],
+      "semantic_dimension": "state",
+      "price_basis": null,
+      "display": "series<time>[1398104]"
+    }
+  },
+  {
+    "node_id": 91,
+    "kind": "operation",
+    "opcode": 146,
+    "operator_id": "state_select",
+    "parents": [
+      84,
+      83,
+      90,
+      88
+    ],
+    "slot": 2,
+    "storage": "integer",
+    "last_use": 92,
+    "inferred_type": {
+      "kind": "series",
+      "dtype": "int64",
+      "axes": [
+        "time"
+      ],
+      "shape": [
+        "1398104"
+      ],
+      "semantic_dimension": "state",
+      "price_basis": null,
+      "display": "series<time>[1398104]"
+    }
+  },
+  {
+    "node_id": 92,
+    "kind": "operation",
+    "opcode": 146,
+    "operator_id": "state_select",
+    "parents": [
+      82,
+      81,
+      91,
+      88
+    ],
+    "slot": 3,
+    "storage": "integer",
+    "last_use": 93,
+    "inferred_type": {
+      "kind": "series",
+      "dtype": "int64",
+      "axes": [
+        "time"
+      ],
+      "shape": [
+        "1398104"
+      ],
+      "semantic_dimension": "state",
+      "price_basis": null,
+      "display": "series<time>[1398104]"
+    }
+  },
+  {
+    "node_id": 93,
+    "kind": "operation",
+    "opcode": 146,
+    "operator_id": "state_select",
+    "parents": [
+      80,
+      35,
+      92,
+      88
+    ],
+    "slot": 2,
+    "storage": "integer",
+    "last_use": 94,
+    "inferred_type": {
+      "kind": "series",
+      "dtype": "int64",
+      "axes": [
+        "time"
+      ],
+      "shape": [
+        "1398104"
+      ],
+      "semantic_dimension": "state",
+      "price_basis": null,
+      "display": "series<time>[1398104]"
+    }
+  },
+  {
+    "node_id": 94,
+    "kind": "operation",
+    "opcode": 146,
+    "operator_id": "state_select",
+    "parents": [
+      79,
+      78,
+      93,
+      88
+    ],
+    "slot": 3,
+    "storage": "integer",
+    "last_use": 95,
+    "inferred_type": {
+      "kind": "series",
+      "dtype": "int64",
+      "axes": [
+        "time"
+      ],
+      "shape": [
+        "1398104"
+      ],
+      "semantic_dimension": "state",
+      "price_basis": null,
+      "display": "series<time>[1398104]"
+    }
+  },
+  {
+    "node_id": 95,
+    "kind": "operation",
+    "opcode": 146,
+    "operator_id": "state_select",
+    "parents": [
+      77,
+      76,
+      94,
+      88
+    ],
+    "slot": 2,
+    "storage": "integer",
+    "last_use": 96,
+    "inferred_type": {
+      "kind": "series",
+      "dtype": "int64",
+      "axes": [
+        "time"
+      ],
+      "shape": [
+        "1398104"
+      ],
+      "semantic_dimension": "state",
+      "price_basis": null,
+      "display": "series<time>[1398104]"
+    }
+  },
+  {
+    "node_id": 96,
+    "kind": "operation",
+    "opcode": 146,
+    "operator_id": "state_select",
+    "parents": [
+      75,
+      74,
+      95,
+      88
+    ],
+    "slot": 3,
+    "storage": "integer",
+    "last_use": 97,
+    "inferred_type": {
+      "kind": "series",
+      "dtype": "int64",
+      "axes": [
+        "time"
+      ],
+      "shape": [
+        "1398104"
+      ],
+      "semantic_dimension": "state",
+      "price_basis": null,
+      "display": "series<time>[1398104]"
+    }
+  },
+  {
+    "node_id": 97,
+    "kind": "operation",
+    "opcode": 146,
+    "operator_id": "state_select",
+    "parents": [
+      73,
+      72,
+      96,
+      88
+    ],
+    "slot": 2,
+    "storage": "integer",
+    "last_use": 98,
+    "inferred_type": {
+      "kind": "series",
+      "dtype": "int64",
+      "axes": [
+        "time"
+      ],
+      "shape": [
+        "1398104"
+      ],
+      "semantic_dimension": "state",
+      "price_basis": null,
+      "display": "series<time>[1398104]"
+    }
+  },
+  {
+    "node_id": 98,
+    "kind": "operation",
+    "opcode": 146,
+    "operator_id": "state_select",
+    "parents": [
+      71,
+      70,
+      97,
+      88
+    ],
+    "slot": 3,
+    "storage": "integer",
+    "last_use": 99,
+    "inferred_type": {
+      "kind": "series",
+      "dtype": "int64",
+      "axes": [
+        "time"
+      ],
+      "shape": [
+        "1398104"
+      ],
+      "semantic_dimension": "state",
+      "price_basis": null,
+      "display": "series<time>[1398104]"
+    }
+  },
+  {
+    "node_id": 99,
+    "kind": "operation",
+    "opcode": 146,
+    "operator_id": "state_select",
+    "parents": [
+      69,
+      68,
+      98,
+      88
+    ],
+    "slot": 2,
+    "storage": "integer",
+    "last_use": 100,
+    "inferred_type": {
+      "kind": "series",
+      "dtype": "int64",
+      "axes": [
+        "time"
+      ],
+      "shape": [
+        "1398104"
+      ],
+      "semantic_dimension": "state",
+      "price_basis": null,
+      "display": "series<time>[1398104]"
+    }
+  },
+  {
+    "node_id": 100,
+    "kind": "operation",
+    "opcode": 146,
+    "operator_id": "state_select",
+    "parents": [
+      67,
+      66,
+      99,
+      88
+    ],
+    "slot": 3,
+    "storage": "integer",
+    "last_use": 101,
+    "inferred_type": {
+      "kind": "series",
+      "dtype": "int64",
+      "axes": [
+        "time"
+      ],
+      "shape": [
+        "1398104"
+      ],
+      "semantic_dimension": "state",
+      "price_basis": null,
+      "display": "series<time>[1398104]"
+    }
+  },
+  {
+    "node_id": 101,
+    "kind": "operation",
+    "opcode": 146,
+    "operator_id": "state_select",
+    "parents": [
+      65,
+      64,
+      100,
+      88
+    ],
+    "slot": 2,
+    "storage": "integer",
+    "last_use": 102,
+    "inferred_type": {
+      "kind": "series",
+      "dtype": "int64",
+      "axes": [
+        "time"
+      ],
+      "shape": [
+        "1398104"
+      ],
+      "semantic_dimension": "state",
+      "price_basis": null,
+      "display": "series<time>[1398104]"
+    }
+  },
+  {
+    "node_id": 102,
+    "kind": "operation",
+    "opcode": 146,
+    "operator_id": "state_select",
+    "parents": [
+      63,
+      62,
+      101,
+      88
+    ],
+    "slot": 3,
+    "storage": "integer",
+    "last_use": 103,
+    "inferred_type": {
+      "kind": "series",
+      "dtype": "int64",
+      "axes": [
+        "time"
+      ],
+      "shape": [
+        "1398104"
+      ],
+      "semantic_dimension": "state",
+      "price_basis": null,
+      "display": "series<time>[1398104]"
+    }
+  },
+  {
+    "node_id": 103,
+    "kind": "operation",
+    "opcode": 146,
+    "operator_id": "state_select",
+    "parents": [
+      61,
+      60,
+      102,
+      88
+    ],
+    "slot": 2,
+    "storage": "integer",
+    "last_use": 104,
+    "inferred_type": {
+      "kind": "series",
+      "dtype": "int64",
+      "axes": [
+        "time"
+      ],
+      "shape": [
+        "1398104"
+      ],
+      "semantic_dimension": "state",
+      "price_basis": null,
+      "display": "series<time>[1398104]"
+    }
+  },
+  {
+    "node_id": 104,
+    "kind": "operation",
+    "opcode": 146,
+    "operator_id": "state_select",
+    "parents": [
+      59,
+      58,
+      103,
+      88
+    ],
+    "slot": 3,
+    "storage": "integer",
+    "last_use": 115,
+    "inferred_type": {
+      "kind": "series",
+      "dtype": "int64",
+      "axes": [
+        "time"
+      ],
+      "shape": [
+        "1398104"
+      ],
+      "semantic_dimension": "state",
+      "price_basis": null,
+      "display": "series<time>[1398104]"
+    }
+  },
+  {
+    "node_id": 105,
+    "kind": "operation",
+    "opcode": 154,
+    "operator_id": "slice_axis",
+    "parents": [
+      0,
+      4,
+      2,
+      4,
+      4
+    ],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 106,
+    "inferred_type": {
+      "kind": "matrix",
+      "dtype": "float64",
+      "axes": [
+        "time",
+        "factor"
+      ],
+      "shape": [
+        "1398104",
+        "1"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "matrix<time,factor>[1398104,1]"
+    }
+  },
+  {
+    "node_id": 106,
+    "kind": "operation",
+    "opcode": 162,
+    "operator_id": "max_axis",
+    "parents": [
+      105,
+      4
+    ],
+    "slot": 2,
+    "storage": "numeric",
+    "last_use": 115,
+    "inferred_type": {
+      "kind": "series",
+      "dtype": "float64",
+      "axes": [
+        "time"
+      ],
+      "shape": [
+        "1398104"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "series<time>[1398104]"
+    }
+  },
+  {
+    "node_id": 107,
+    "kind": "operation",
+    "opcode": 162,
+    "operator_id": "max_axis",
+    "parents": [
+      47,
+      4
+    ],
+    "slot": 5,
+    "storage": "numeric",
+    "last_use": 108,
+    "inferred_type": {
+      "kind": "series",
+      "dtype": "float64",
+      "axes": [
+        "time"
+      ],
+      "shape": [
+        "349526"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "series<time>[349526]"
+    }
+  },
+  {
+    "node_id": 108,
+    "kind": "operation",
+    "opcode": 185,
+    "operator_id": "scatter_rows",
+    "parents": [
+      107,
+      18,
+      17
+    ],
+    "slot": 6,
+    "storage": "numeric",
+    "last_use": 115,
+    "inferred_type": {
+      "kind": "series",
+      "dtype": "float64",
+      "axes": [
+        "time"
+      ],
+      "shape": [
+        "1398104"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "series<time>[1398104]"
+    }
+  },
+  {
+    "node_id": 109,
+    "kind": "operation",
+    "opcode": 153,
+    "operator_id": "take_axis",
+    "parents": [
+      47,
+      54,
+      4
+    ],
+    "slot": 5,
+    "storage": "numeric",
+    "last_use": 110,
+    "inferred_type": {
+      "kind": "matrix",
+      "dtype": "float64",
+      "axes": [
+        "time",
+        "component"
+      ],
+      "shape": [
+        "349526",
+        "16"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "matrix<time,component>[349526,16]"
+    }
+  },
+  {
+    "node_id": 110,
+    "kind": "operation",
+    "opcode": 185,
+    "operator_id": "scatter_rows",
+    "parents": [
+      109,
+      18,
+      17,
+      2
+    ],
+    "slot": 0,
+    "storage": "numeric",
+    "last_use": 115,
+    "inferred_type": {
+      "kind": "matrix",
+      "dtype": "float64",
+      "axes": [
+        "time",
+        "component"
+      ],
+      "shape": [
+        "1398104",
+        "16"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "matrix<time,component>[1398104,16]"
+    }
+  },
+  {
+    "node_id": 111,
+    "kind": "operation",
+    "opcode": 172,
+    "operator_id": "em_iterations",
+    "parents": [
+      37
+    ],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 115,
+    "inferred_type": {
+      "kind": "value",
+      "dtype": "int64",
+      "axes": [],
+      "shape": [],
+      "semantic_dimension": "count",
+      "price_basis": null,
+      "display": "scalar"
+    }
+  },
+  {
+    "node_id": 112,
+    "kind": "input",
+    "opcode": 0,
+    "operator_id": null,
+    "parents": [],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 115,
+    "inferred_type": {
+      "kind": "matrix",
+      "dtype": "float64",
+      "axes": [
+        "component",
+        "component"
+      ],
+      "shape": [
+        "16",
+        "16"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "matrix<component,component>[16,16]"
+    }
+  },
+  {
+    "node_id": 113,
+    "kind": "operation",
+    "opcode": 154,
+    "operator_id": "slice_axis",
+    "parents": [
+      112,
+      2,
+      2,
+      2,
+      4
+    ],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 115,
+    "inferred_type": {
+      "kind": "matrix",
+      "dtype": "float64",
+      "axes": [
+        "component",
+        "component"
+      ],
+      "shape": [
+        "0",
+        "16"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "matrix<component,component>[0,16]"
+    }
+  },
+  {
+    "node_id": 114,
+    "kind": "operation",
+    "opcode": 154,
+    "operator_id": "slice_axis",
+    "parents": [
+      113,
+      4,
+      2,
+      2,
+      4
+    ],
+    "slot": 0,
+    "storage": "inline",
+    "last_use": 115,
+    "inferred_type": {
+      "kind": "matrix",
+      "dtype": "float64",
+      "axes": [
+        "component",
+        "component"
+      ],
+      "shape": [
+        "0",
+        "0"
+      ],
+      "semantic_dimension": "dimensionless",
+      "price_basis": null,
+      "display": "matrix<component,component>[0,0]"
+    }
+  }
+]

@@ -1,0 +1,48 @@
+{
+  "exact_inputs_unchanged": true,
+  "verified_cases": [
+    {
+      "name": "median_where",
+      "n": 4194304,
+      "layout": "c",
+      "entry": "ordinary",
+      "pattern": "random"
+    },
+    {
+      "name": "quantile_where",
+      "n": 4194304,
+      "layout": "c",
+      "entry": "ordinary",
+      "pattern": "random"
+    },
+    {
+      "name": "exp",
+      "n": 4096,
+      "d": 4096,
+      "layout": "f",
+      "order": "F",
+      "entry": "ordinary",
+      "pattern": "late_outlier",
+      "baseline": "vector"
+    },
+    {
+      "name": "log",
+      "n": 4096,
+      "d": 4096,
+      "layout": "f",
+      "order": "F",
+      "entry": "ordinary",
+      "pattern": "late_outlier",
+      "baseline": "vector"
+    },
+    {
+      "name": "cholesky",
+      "n": 4096,
+      "layout": "f",
+      "order": "F",
+      "entry": "ordinary"
+    }
+  ],
+  "preserved_logical_c_sha256": true,
+  "preparation_temporary_limit_bytes": 65536
+}

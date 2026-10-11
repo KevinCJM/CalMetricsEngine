@@ -1,0 +1,2228 @@
+{
+  "status": "complete_chain_baseline_closed_checkpoint_partial_qualification_only",
+  "actual_build_id": "b17f2bbea7aa9cf2c018f289c01757b69f5134046006a70ed9bac35cad16158a",
+  "actual_numerical_source_changed": false,
+  "complete_chain_time": {
+    "shape": [
+      500000,
+      4,
+      12
+    ],
+    "model": "hmm",
+    "max_iterations": 5,
+    "rounds": 6,
+    "medians_seconds": {
+      "cpp": 5.703690145397559,
+      "njit_original": 11.274102791910991,
+      "njit_hoisted": 10.788136854069307
+    },
+    "samples": {
+      "cpp": [
+        {
+          "seconds": 5.987851958256215,
+          "cpu_seconds": 5.809029000000001
+        },
+        {
+          "seconds": 5.964053874835372,
+          "cpu_seconds": 5.798798999999999
+        },
+        {
+          "seconds": 5.696851707994938,
+          "cpu_seconds": 5.691175000000001
+        },
+        {
+          "seconds": 5.688880499918014,
+          "cpu_seconds": 5.685996000000003
+        },
+        {
+          "seconds": 5.707912540994585,
+          "cpu_seconds": 5.701377000000004
+        },
+        {
+          "seconds": 5.699467749800533,
+          "cpu_seconds": 5.688020000000002
+        }
+      ],
+      "njit_original": [
+        {
+          "seconds": 11.598595874849707,
+          "cpu_seconds": 11.455597999999998
+        },
+        {
+          "seconds": 11.60318333376199,
+          "cpu_seconds": 11.450499
+        },
+        {
+          "seconds": 11.287205416709185,
+          "cpu_seconds": 11.274772999999996
+        },
+        {
+          "seconds": 11.237727167084813,
+          "cpu_seconds": 11.230014000000004
+        },
+        {
+          "seconds": 11.261000167112797,
+          "cpu_seconds": 11.253876999999996
+        },
+        {
+          "seconds": 11.258244874887168,
+          "cpu_seconds": 11.251046000000002
+        }
+      ],
+      "njit_hoisted": [
+        {
+          "seconds": 11.104783250018954,
+          "cpu_seconds": 10.828509
+        },
+        {
+          "seconds": 11.075840333942324,
+          "cpu_seconds": 10.822481999999997
+        },
+        {
+          "seconds": 10.936202333308756,
+          "cpu_seconds": 10.753248
+        },
+        {
+          "seconds": 10.611042458098382,
+          "cpu_seconds": 10.602459000000003
+        },
+        {
+          "seconds": 10.640071374829859,
+          "cpu_seconds": 10.628038999999994
+        },
+        {
+          "seconds": 10.609767124988139,
+          "cpu_seconds": 10.60292600000001
+        }
+      ]
+    },
+    "initial": {
+      "cpp": {
+        "ready": true,
+        "backend": "cpp",
+        "shape": [
+          500000,
+          4,
+          12
+        ],
+        "model": "hmm",
+        "cpu_budget": 1,
+        "input_hashes": {
+          "raw": "c3a215ab82905488cd8f44095818212db5686984b1dc34d8eec34a0469d53dbb",
+          "positions": "be4b3c536ea19ff1514e0cf2d086c66fd06ba637c2b0b48d7768dd8b42f57cad",
+          "training_positions": "0d0efe11908d7dcccb566a86065dfed8653088cf726b14ad754727a929b70cce",
+          "classify_positions": "99a9840030a8891019ee6ed8d14caaf291dc37288e82e99610ebc10baf3bf900",
+          "valid": "a52dfe8421ed2a1974f3cabb8c04af9250aca7feaa5f30a134ebd41e20ebf7c7",
+          "uniform": "b97c0b3aa31c16a89ee68583bb7b4ad61416fc232671c7e59a8ecb0e6d353216",
+          "reverse_order": "b75680c5701f7f478fc391316977726479e2df552241e6c3519b0f674a8f22c3",
+          "transition_template": "40b86579a4fad6d15a6667eebf1b793a60e79c62078ed44535dd3bcb5f281756"
+        },
+        "output_shapes": [
+          [
+            500000
+          ],
+          [
+            500000
+          ],
+          [
+            500000
+          ],
+          [
+            500000,
+            12
+          ],
+          [
+            12,
+            4
+          ],
+          [
+            12
+          ],
+          [],
+          [],
+          [
+            500000,
+            4
+          ],
+          [
+            12
+          ],
+          [
+            12,
+            4
+          ],
+          [
+            12,
+            4
+          ],
+          [
+            12,
+            12
+          ]
+        ],
+        "output_dtypes": [
+          "int64",
+          "float64",
+          "float64",
+          "float64",
+          "float64",
+          "int64",
+          "int64",
+          "int64",
+          "float64",
+          "float64",
+          "float64",
+          "float64",
+          "float64"
+        ],
+        "output_bytes": 76002512,
+        "iterations": 5,
+        "pretrain_iterations": 5,
+        "engine_build_id": "b17f2bbea7aa9cf2c018f289c01757b69f5134046006a70ed9bac35cad16158a",
+        "audit": {
+          "execution_backend": "cpp_aot",
+          "audit_schema": "cpp-aot-execution-2",
+          "result_protocol": "typed-results-2",
+          "engine": "calmetrics_engine",
+          "model_identity": null,
+          "engine_version": "0.3.0",
+          "engine_build_id": "b17f2bbea7aa9cf2c018f289c01757b69f5134046006a70ed9bac35cad16158a",
+          "operator_registry_version": "canonical-native-1",
+          "typed_ir_version": "cpp-typed-ir-1",
+          "plan_fingerprint": "native-3-3c5d1752f7b3d6cd1894dc3d73afea92",
+          "source_contracts": [],
+          "status_result_copy_bytes": 0,
+          "status_transport_bytes": 0,
+          "native_aot": true,
+          "python_fallback": 0,
+          "python_operator_calls": 0,
+          "request_time_compilation": 0,
+          "input_dtype": "mixed",
+          "input_dtypes": {
+            "raw": "float64",
+            "positions": "int64",
+            "valid": "bool",
+            "uniform": "float64",
+            "reverse_order": "int64",
+            "transition_template": "float64"
+          },
+          "output_dtype": "per_output",
+          "outputs": [
+            {
+              "dtype": "int64",
+              "kind": "series",
+              "axes": [
+                "time"
+              ],
+              "shape": [
+                "500000"
+              ]
+            },
+            {
+              "dtype": "float64",
+              "kind": "series",
+              "axes": [
+                "time"
+              ],
+              "shape": [
+                "500000"
+              ]
+            },
+            {
+              "dtype": "float64",
+              "kind": "series",
+              "axes": [
+                "time"
+              ],
+              "shape": [
+                "500000"
+              ]
+            },
+            {
+              "dtype": "float64",
+              "kind": "matrix",
+              "axes": [
+                "time",
+                "component"
+              ],
+              "shape": [
+                "500000",
+                "12"
+              ]
+            },
+            {
+              "dtype": "float64",
+              "kind": "matrix",
+              "axes": [
+                "component",
+                "factor"
+              ],
+              "shape": [
+                "12",
+                "4"
+              ]
+            },
+            {
+              "dtype": "int64",
+              "kind": "vector",
+              "axes": [
+                "asset"
+              ],
+              "shape": [
+                "12"
+              ]
+            },
+            {
+              "dtype": "int64",
+              "kind": "value",
+              "axes": [],
+              "shape": []
+            },
+            {
+              "dtype": "int64",
+              "kind": "value",
+              "axes": [],
+              "shape": []
+            },
+            {
+              "dtype": "float64",
+              "kind": "matrix",
+              "axes": [
+                "time",
+                "factor"
+              ],
+              "shape": [
+                "500000",
+                "4"
+              ]
+            },
+            {
+              "dtype": "float64",
+              "kind": "vector",
+              "axes": [
+                "component"
+              ],
+              "shape": [
+                "12"
+              ]
+            },
+            {
+              "dtype": "float64",
+              "kind": "matrix",
+              "axes": [
+                "component",
+                "factor"
+              ],
+              "shape": [
+                "12",
+                "4"
+              ]
+            },
+            {
+              "dtype": "float64",
+              "kind": "matrix",
+              "axes": [
+                "component",
+                "factor"
+              ],
+              "shape": [
+                "12",
+                "4"
+              ]
+            },
+            {
+              "dtype": "float64",
+              "kind": "matrix",
+              "axes": [
+                "component",
+                "component"
+              ],
+              "shape": [
+                "12",
+                "12"
+              ]
+            }
+          ],
+          "result_layout": "interval_root_aligned_8",
+          "result_capacity_bytes": 76002512,
+          "error_policy": "raise",
+          "status_contract": "indicator-status-1",
+          "result_lifetime": "independent",
+          "lane": "single",
+          "elapsed_ms": 5953.282708,
+          "queue_wait_ms": 0.001583,
+          "compute_ms": 5953.281125,
+          "cpu_tokens": 1,
+          "cpu_budget": 1,
+          "process_count": 1,
+          "thread_count": 1,
+          "threads_per_process": 1,
+          "async_orchestration": false,
+          "hard_stop": false,
+          "use_shared_memory": false,
+          "reason_codes": [
+            "typed_array_shape_work_accounted",
+            "typed_result_capacity_write_work_accounted",
+            "parallel_overhead_expected_to_dominate",
+            "eligible_nodes_use_native_runtime_simd_dispatch"
+          ],
+          "parallel_dimension": "interval",
+          "product_count": 1,
+          "estimated_work_units": 4501251830559.997,
+          "prepared": false,
+          "prepared_cached": false,
+          "shared_memory_bytes": 0,
+          "boundary_copy_bytes": 0,
+          "output_copy_bytes": 0,
+          "scheduler_backend": "cpp",
+          "native_threads": 1,
+          "native_processes": 0,
+          "python_worker_callbacks": 0,
+          "python_native_transitions": 1,
+          "output_ownership": "numpy_owned",
+          "output_kind": "typed",
+          "native_chunks": [
+            {
+              "compact_path_groups": 0,
+              "compact_path_batches": 0,
+              "compact_path_steps": 0,
+              "compact_path_raw_rows": 0,
+              "compact_path_raw_scale_elements": 0,
+              "compact_path_raw_pack_bytes": 0,
+              "highway_vqsort_calls": 0,
+              "fused_pointwise_calls": 1,
+              "pointwise_tiles": 0,
+              "vector_elements": 24,
+              "root_copy_bytes": 2032,
+              "direct_output_bytes": 76000480,
+              "state_copy_bytes": 0,
+              "pointwise_workspace_capacity_bytes": 0,
+              "rows": 1,
+              "nodes": 116,
+              "max_window": 500000,
+              "numeric_arena_bytes": 81002464,
+              "mask_arena_bytes": 6000000,
+              "operator_workspace_capacity_bytes": 16008512,
+              "order_scratch_capacity_bytes": 0,
+              "input_copy_bytes": 0,
+              "eigen_rotation_calls": 0,
+              "eigen_matvec_calls": 0,
+              "eigen_covariance_calls": 0,
+              "eigen_density_calls": 0,
+              "accelerate_covchol_calls": 0,
+              "accelerate_matmul_calls": 0,
+              "matmul_zero_calls": 0,
+              "accelerate_covariance_attempts": 0,
+              "accelerate_covariance_calls": 0,
+              "covariance_syrk_calls": 0,
+              "covariance_replayed_cells": 0,
+              "covariance_fallbacks": 0,
+              "covariance_zero_calls": 0,
+              "accelerate_vforce_calls": 0,
+              "accelerate_lu_attempts": 0,
+              "accelerate_lu_calls": 0,
+              "accelerate_lu_fallbacks": 0,
+              "solve_residual_materialization_bytes": 0,
+              "covariance_panel_materialization_bytes": 0,
+              "native_library_workspace_reserve_bytes": 0,
+              "algorithm_copy_bytes": 77011296,
+              "fused_scalar_calls": 0,
+              "summary_source_scans": 0,
+              "order_stat_sorts": 0,
+              "python_operator_calls": 0,
+              "execution_backend": "native_graph_interpreter"
+            }
+          ]
+        },
+        "owned_input_preparation_counted": true,
+        "outputs_readonly": true,
+        "original_hoisted_reference_qualified": true
+      },
+      "njit_original": {
+        "ready": true,
+        "backend": "njit_original",
+        "shape": [
+          500000,
+          4,
+          12
+        ],
+        "model": "hmm",
+        "cpu_budget": 1,
+        "input_hashes": {
+          "raw": "c3a215ab82905488cd8f44095818212db5686984b1dc34d8eec34a0469d53dbb",
+          "positions": "be4b3c536ea19ff1514e0cf2d086c66fd06ba637c2b0b48d7768dd8b42f57cad",
+          "training_positions": "0d0efe11908d7dcccb566a86065dfed8653088cf726b14ad754727a929b70cce",
+          "classify_positions": "99a9840030a8891019ee6ed8d14caaf291dc37288e82e99610ebc10baf3bf900",
+          "valid": "a52dfe8421ed2a1974f3cabb8c04af9250aca7feaa5f30a134ebd41e20ebf7c7",
+          "uniform": "b97c0b3aa31c16a89ee68583bb7b4ad61416fc232671c7e59a8ecb0e6d353216",
+          "reverse_order": "b75680c5701f7f478fc391316977726479e2df552241e6c3519b0f674a8f22c3",
+          "transition_template": "40b86579a4fad6d15a6667eebf1b793a60e79c62078ed44535dd3bcb5f281756"
+        },
+        "output_shapes": [
+          [
+            500000
+          ],
+          [
+            500000
+          ],
+          [
+            500000
+          ],
+          [
+            500000,
+            12
+          ],
+          [
+            12,
+            4
+          ],
+          [
+            12
+          ],
+          [],
+          [],
+          [
+            500000,
+            4
+          ],
+          [
+            12
+          ],
+          [
+            12,
+            4
+          ],
+          [
+            12,
+            4
+          ],
+          [
+            12,
+            12
+          ]
+        ],
+        "output_dtypes": [
+          "int64",
+          "float64",
+          "float64",
+          "float64",
+          "float64",
+          "int64",
+          "int64",
+          "int64",
+          "float64",
+          "float64",
+          "float64",
+          "float64",
+          "float64"
+        ],
+        "output_bytes": 76002512,
+        "iterations": 5,
+        "pretrain_iterations": 5,
+        "engine_build_id": null,
+        "audit": {},
+        "owned_input_preparation_counted": true,
+        "outputs_readonly": true,
+        "original_hoisted_reference_qualified": true
+      },
+      "njit_hoisted": {
+        "ready": true,
+        "backend": "njit_hoisted",
+        "shape": [
+          500000,
+          4,
+          12
+        ],
+        "model": "hmm",
+        "cpu_budget": 1,
+        "input_hashes": {
+          "raw": "c3a215ab82905488cd8f44095818212db5686984b1dc34d8eec34a0469d53dbb",
+          "positions": "be4b3c536ea19ff1514e0cf2d086c66fd06ba637c2b0b48d7768dd8b42f57cad",
+          "training_positions": "0d0efe11908d7dcccb566a86065dfed8653088cf726b14ad754727a929b70cce",
+          "classify_positions": "99a9840030a8891019ee6ed8d14caaf291dc37288e82e99610ebc10baf3bf900",
+          "valid": "a52dfe8421ed2a1974f3cabb8c04af9250aca7feaa5f30a134ebd41e20ebf7c7",
+          "uniform": "b97c0b3aa31c16a89ee68583bb7b4ad61416fc232671c7e59a8ecb0e6d353216",
+          "reverse_order": "b75680c5701f7f478fc391316977726479e2df552241e6c3519b0f674a8f22c3",
+          "transition_template": "40b86579a4fad6d15a6667eebf1b793a60e79c62078ed44535dd3bcb5f281756"
+        },
+        "output_shapes": [
+          [
+            500000
+          ],
+          [
+            500000
+          ],
+          [
+            500000
+          ],
+          [
+            500000,
+            12
+          ],
+          [
+            12,
+            4
+          ],
+          [
+            12
+          ],
+          [],
+          [],
+          [
+            500000,
+            4
+          ],
+          [
+            12
+          ],
+          [
+            12,
+            4
+          ],
+          [
+            12,
+            4
+          ],
+          [
+            12,
+            12
+          ]
+        ],
+        "output_dtypes": [
+          "int64",
+          "float64",
+          "float64",
+          "float64",
+          "float64",
+          "int64",
+          "int64",
+          "int64",
+          "float64",
+          "float64",
+          "float64",
+          "float64",
+          "float64"
+        ],
+        "output_bytes": 76002512,
+        "iterations": 5,
+        "pretrain_iterations": 5,
+        "engine_build_id": null,
+        "audit": {},
+        "owned_input_preparation_counted": true,
+        "outputs_readonly": true,
+        "original_hoisted_reference_qualified": true
+      }
+    },
+    "validation": {
+      "state": {
+        "shape": [
+          500000
+        ],
+        "dtype": "int64",
+        "maximum_absolute_error": 0,
+        "original_hoisted_bitwise": true
+      },
+      "score": {
+        "shape": [
+          500000
+        ],
+        "dtype": "float64",
+        "maximum_absolute_error": 0.0,
+        "original_hoisted_bitwise": true
+      },
+      "confidence": {
+        "shape": [
+          500000
+        ],
+        "dtype": "float64",
+        "maximum_absolute_error": 0.0,
+        "original_hoisted_bitwise": true
+      },
+      "probabilities": {
+        "shape": [
+          500000,
+          12
+        ],
+        "dtype": "float64",
+        "maximum_absolute_error": 0.0,
+        "original_hoisted_bitwise": true
+      },
+      "initial_means": {
+        "shape": [
+          12,
+          4
+        ],
+        "dtype": "float64",
+        "maximum_absolute_error": 0.0,
+        "original_hoisted_bitwise": true
+      },
+      "component_order": {
+        "shape": [
+          12
+        ],
+        "dtype": "int64",
+        "maximum_absolute_error": 0,
+        "original_hoisted_bitwise": true
+      },
+      "iterations": {
+        "shape": [],
+        "dtype": "int64",
+        "maximum_absolute_error": 0,
+        "original_hoisted_bitwise": true
+      },
+      "pretrain_iterations": {
+        "shape": [],
+        "dtype": "int64",
+        "maximum_absolute_error": 0,
+        "original_hoisted_bitwise": true
+      },
+      "standardized": {
+        "shape": [
+          500000,
+          4
+        ],
+        "dtype": "float64",
+        "maximum_absolute_error": 0.0,
+        "original_hoisted_bitwise": true
+      },
+      "model_weights": {
+        "shape": [
+          12
+        ],
+        "dtype": "float64",
+        "maximum_absolute_error": 0.0,
+        "original_hoisted_bitwise": true
+      },
+      "model_means": {
+        "shape": [
+          12,
+          4
+        ],
+        "dtype": "float64",
+        "maximum_absolute_error": 0.0,
+        "original_hoisted_bitwise": true
+      },
+      "model_variances": {
+        "shape": [
+          12,
+          4
+        ],
+        "dtype": "float64",
+        "maximum_absolute_error": 0.0,
+        "original_hoisted_bitwise": true
+      },
+      "model_transition": {
+        "shape": [
+          12,
+          12
+        ],
+        "dtype": "float64",
+        "maximum_absolute_error": 0.0,
+        "original_hoisted_bitwise": true
+      }
+    },
+    "actual_numerical_source_changed": false,
+    "scope": "owned readonly input preparation; finite fixed realtime random-init GMM pretraining/HMM fitting and continuation; mapping/scatter and13 independently retained readonly outputs; ordinary binding/planning/native graph/result return included; static fixture, one-time graph definition, JIT/wheel compilation and warmup excluded; CPU1; no IPC",
+    "whole_goal_complete": false
+  },
+  "complete_chain_fresh_memory": [
+    {
+      "setup_heap": {
+        "allocations": 3081468,
+        "frees": 3080516,
+        "allocated_bytes": 186813563,
+        "live_bytes": 114876,
+        "peak_bytes": 203612,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_heap": {
+        "allocations": 3081601,
+        "frees": 3080589,
+        "allocated_bytes": 402394946,
+        "live_bytes": 179164470,
+        "peak_bytes": 199669066,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_retained_heap": {
+        "allocations": 3081601,
+        "frees": 3080594,
+        "allocated_bytes": 402394946,
+        "live_bytes": 103160900,
+        "peak_bytes": 199669066,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_baseline_heap": {
+        "allocations": 3082151,
+        "frees": 3081144,
+        "allocated_bytes": 1045125071,
+        "live_bytes": 103160900,
+        "peak_bytes": 199669186,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_heap": {
+        "allocations": 3082372,
+        "frees": 3081359,
+        "allocated_bytes": 1302217137,
+        "live_bytes": 179164486,
+        "peak_bytes": 275674140,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "warm_retained_heap": {
+        "allocations": 3082372,
+        "frees": 3081365,
+        "allocated_bytes": 1302217137,
+        "live_bytes": 103160900,
+        "peak_bytes": 275674140,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "heap_schema": "continuous-live-1",
+      "cold_peak_bytes": 199669066,
+      "warm_peak_bytes": 275674140,
+      "backend": "cpp",
+      "metric": "heap",
+      "input_hashes": {
+        "raw": "c3a215ab82905488cd8f44095818212db5686984b1dc34d8eec34a0469d53dbb",
+        "positions": "be4b3c536ea19ff1514e0cf2d086c66fd06ba637c2b0b48d7768dd8b42f57cad",
+        "training_positions": "0d0efe11908d7dcccb566a86065dfed8653088cf726b14ad754727a929b70cce",
+        "classify_positions": "99a9840030a8891019ee6ed8d14caaf291dc37288e82e99610ebc10baf3bf900",
+        "valid": "a52dfe8421ed2a1974f3cabb8c04af9250aca7feaa5f30a134ebd41e20ebf7c7",
+        "uniform": "b97c0b3aa31c16a89ee68583bb7b4ad61416fc232671c7e59a8ecb0e6d353216",
+        "reverse_order": "b75680c5701f7f478fc391316977726479e2df552241e6c3519b0f674a8f22c3",
+        "transition_template": "40b86579a4fad6d15a6667eebf1b793a60e79c62078ed44535dd3bcb5f281756"
+      },
+      "actual_build_id": "b17f2bbea7aa9cf2c018f289c01757b69f5134046006a70ed9bac35cad16158a",
+      "all13_match_time_snapshot": true,
+      "cpu_budget": 1,
+      "audit": {
+        "execution_backend": "cpp_aot",
+        "audit_schema": "cpp-aot-execution-2",
+        "result_protocol": "typed-results-2",
+        "engine": "calmetrics_engine",
+        "model_identity": null,
+        "engine_version": "0.3.0",
+        "engine_build_id": "b17f2bbea7aa9cf2c018f289c01757b69f5134046006a70ed9bac35cad16158a",
+        "operator_registry_version": "canonical-native-1",
+        "typed_ir_version": "cpp-typed-ir-1",
+        "plan_fingerprint": "native-3-3c5d1752f7b3d6cd1894dc3d73afea92",
+        "source_contracts": [],
+        "status_result_copy_bytes": 0,
+        "status_transport_bytes": 0,
+        "native_aot": true,
+        "python_fallback": 0,
+        "python_operator_calls": 0,
+        "request_time_compilation": 0,
+        "input_dtype": "mixed",
+        "input_dtypes": {
+          "raw": "float64",
+          "positions": "int64",
+          "valid": "bool",
+          "uniform": "float64",
+          "reverse_order": "int64",
+          "transition_template": "float64"
+        },
+        "output_dtype": "per_output",
+        "outputs": [
+          {
+            "dtype": "int64",
+            "kind": "series",
+            "axes": [
+              "time"
+            ],
+            "shape": [
+              "500000"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "series",
+            "axes": [
+              "time"
+            ],
+            "shape": [
+              "500000"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "series",
+            "axes": [
+              "time"
+            ],
+            "shape": [
+              "500000"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "time",
+              "component"
+            ],
+            "shape": [
+              "500000",
+              "12"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "component",
+              "factor"
+            ],
+            "shape": [
+              "12",
+              "4"
+            ]
+          },
+          {
+            "dtype": "int64",
+            "kind": "vector",
+            "axes": [
+              "asset"
+            ],
+            "shape": [
+              "12"
+            ]
+          },
+          {
+            "dtype": "int64",
+            "kind": "value",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "int64",
+            "kind": "value",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "time",
+              "factor"
+            ],
+            "shape": [
+              "500000",
+              "4"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "vector",
+            "axes": [
+              "component"
+            ],
+            "shape": [
+              "12"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "component",
+              "factor"
+            ],
+            "shape": [
+              "12",
+              "4"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "component",
+              "factor"
+            ],
+            "shape": [
+              "12",
+              "4"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "component",
+              "component"
+            ],
+            "shape": [
+              "12",
+              "12"
+            ]
+          }
+        ],
+        "result_layout": "interval_root_aligned_8",
+        "result_capacity_bytes": 76002512,
+        "error_policy": "raise",
+        "status_contract": "indicator-status-1",
+        "result_lifetime": "independent",
+        "lane": "single",
+        "elapsed_ms": 5677.297041,
+        "queue_wait_ms": 0.001083,
+        "compute_ms": 5677.295958,
+        "cpu_tokens": 1,
+        "cpu_budget": 1,
+        "process_count": 1,
+        "thread_count": 1,
+        "threads_per_process": 1,
+        "async_orchestration": false,
+        "hard_stop": false,
+        "use_shared_memory": false,
+        "reason_codes": [
+          "typed_array_shape_work_accounted",
+          "typed_result_capacity_write_work_accounted",
+          "parallel_overhead_expected_to_dominate",
+          "eligible_nodes_use_native_runtime_simd_dispatch"
+        ],
+        "parallel_dimension": "interval",
+        "product_count": 1,
+        "estimated_work_units": 4501251830559.997,
+        "prepared": false,
+        "prepared_cached": false,
+        "shared_memory_bytes": 0,
+        "boundary_copy_bytes": 0,
+        "output_copy_bytes": 0,
+        "scheduler_backend": "cpp",
+        "native_threads": 1,
+        "native_processes": 0,
+        "python_worker_callbacks": 0,
+        "python_native_transitions": 1,
+        "output_ownership": "numpy_owned",
+        "output_kind": "typed",
+        "native_chunks": [
+          {
+            "compact_path_groups": 0,
+            "compact_path_batches": 0,
+            "compact_path_steps": 0,
+            "compact_path_raw_rows": 0,
+            "compact_path_raw_scale_elements": 0,
+            "compact_path_raw_pack_bytes": 0,
+            "highway_vqsort_calls": 0,
+            "fused_pointwise_calls": 1,
+            "pointwise_tiles": 0,
+            "vector_elements": 24,
+            "root_copy_bytes": 2032,
+            "direct_output_bytes": 76000480,
+            "state_copy_bytes": 0,
+            "pointwise_workspace_capacity_bytes": 0,
+            "rows": 1,
+            "nodes": 116,
+            "max_window": 500000,
+            "numeric_arena_bytes": 81002464,
+            "mask_arena_bytes": 6000000,
+            "operator_workspace_capacity_bytes": 16008512,
+            "order_scratch_capacity_bytes": 0,
+            "input_copy_bytes": 0,
+            "eigen_rotation_calls": 0,
+            "eigen_matvec_calls": 0,
+            "eigen_covariance_calls": 0,
+            "eigen_density_calls": 0,
+            "accelerate_covchol_calls": 0,
+            "accelerate_matmul_calls": 0,
+            "matmul_zero_calls": 0,
+            "accelerate_covariance_attempts": 0,
+            "accelerate_covariance_calls": 0,
+            "covariance_syrk_calls": 0,
+            "covariance_replayed_cells": 0,
+            "covariance_fallbacks": 0,
+            "covariance_zero_calls": 0,
+            "accelerate_vforce_calls": 0,
+            "accelerate_lu_attempts": 0,
+            "accelerate_lu_calls": 0,
+            "accelerate_lu_fallbacks": 0,
+            "solve_residual_materialization_bytes": 0,
+            "covariance_panel_materialization_bytes": 0,
+            "native_library_workspace_reserve_bytes": 0,
+            "algorithm_copy_bytes": 77011296,
+            "fused_scalar_calls": 0,
+            "summary_source_scans": 0,
+            "order_stat_sorts": 0,
+            "python_operator_calls": 0,
+            "execution_backend": "native_graph_interpreter"
+          }
+        ]
+      },
+      "scope": "same owned input preparation and complete13-output numerical request as time; fixture/import/compilation excluded; heap includes graph/setup, cold call and warm pair; RSS excludes precreated graph and observes two retained output generations; no sum of phase peaks",
+      "limitations": "malloc probe excludes CPython arena suballocations, some allocator zones/mmap/stack/process-tree; RSS0.5ms sampling may miss short peaks; no complete allocation-audit claim",
+      "whole_goal_complete": false
+    },
+    {
+      "rss_baseline": 175423488,
+      "rss_peak": 447135744,
+      "rss_delta": 271712256,
+      "rss_idle_delta": 0,
+      "rss_schema": "warm-monitor-control-1",
+      "backend": "cpp",
+      "metric": "rss",
+      "input_hashes": {
+        "raw": "c3a215ab82905488cd8f44095818212db5686984b1dc34d8eec34a0469d53dbb",
+        "positions": "be4b3c536ea19ff1514e0cf2d086c66fd06ba637c2b0b48d7768dd8b42f57cad",
+        "training_positions": "0d0efe11908d7dcccb566a86065dfed8653088cf726b14ad754727a929b70cce",
+        "classify_positions": "99a9840030a8891019ee6ed8d14caaf291dc37288e82e99610ebc10baf3bf900",
+        "valid": "a52dfe8421ed2a1974f3cabb8c04af9250aca7feaa5f30a134ebd41e20ebf7c7",
+        "uniform": "b97c0b3aa31c16a89ee68583bb7b4ad61416fc232671c7e59a8ecb0e6d353216",
+        "reverse_order": "b75680c5701f7f478fc391316977726479e2df552241e6c3519b0f674a8f22c3",
+        "transition_template": "40b86579a4fad6d15a6667eebf1b793a60e79c62078ed44535dd3bcb5f281756"
+      },
+      "actual_build_id": "b17f2bbea7aa9cf2c018f289c01757b69f5134046006a70ed9bac35cad16158a",
+      "all13_match_time_snapshot": true,
+      "cpu_budget": 1,
+      "audit": {
+        "execution_backend": "cpp_aot",
+        "audit_schema": "cpp-aot-execution-2",
+        "result_protocol": "typed-results-2",
+        "engine": "calmetrics_engine",
+        "model_identity": null,
+        "engine_version": "0.3.0",
+        "engine_build_id": "b17f2bbea7aa9cf2c018f289c01757b69f5134046006a70ed9bac35cad16158a",
+        "operator_registry_version": "canonical-native-1",
+        "typed_ir_version": "cpp-typed-ir-1",
+        "plan_fingerprint": "native-3-3c5d1752f7b3d6cd1894dc3d73afea92",
+        "source_contracts": [],
+        "status_result_copy_bytes": 0,
+        "status_transport_bytes": 0,
+        "native_aot": true,
+        "python_fallback": 0,
+        "python_operator_calls": 0,
+        "request_time_compilation": 0,
+        "input_dtype": "mixed",
+        "input_dtypes": {
+          "raw": "float64",
+          "positions": "int64",
+          "valid": "bool",
+          "uniform": "float64",
+          "reverse_order": "int64",
+          "transition_template": "float64"
+        },
+        "output_dtype": "per_output",
+        "outputs": [
+          {
+            "dtype": "int64",
+            "kind": "series",
+            "axes": [
+              "time"
+            ],
+            "shape": [
+              "500000"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "series",
+            "axes": [
+              "time"
+            ],
+            "shape": [
+              "500000"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "series",
+            "axes": [
+              "time"
+            ],
+            "shape": [
+              "500000"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "time",
+              "component"
+            ],
+            "shape": [
+              "500000",
+              "12"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "component",
+              "factor"
+            ],
+            "shape": [
+              "12",
+              "4"
+            ]
+          },
+          {
+            "dtype": "int64",
+            "kind": "vector",
+            "axes": [
+              "asset"
+            ],
+            "shape": [
+              "12"
+            ]
+          },
+          {
+            "dtype": "int64",
+            "kind": "value",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "int64",
+            "kind": "value",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "time",
+              "factor"
+            ],
+            "shape": [
+              "500000",
+              "4"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "vector",
+            "axes": [
+              "component"
+            ],
+            "shape": [
+              "12"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "component",
+              "factor"
+            ],
+            "shape": [
+              "12",
+              "4"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "component",
+              "factor"
+            ],
+            "shape": [
+              "12",
+              "4"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "component",
+              "component"
+            ],
+            "shape": [
+              "12",
+              "12"
+            ]
+          }
+        ],
+        "result_layout": "interval_root_aligned_8",
+        "result_capacity_bytes": 76002512,
+        "error_policy": "raise",
+        "status_contract": "indicator-status-1",
+        "result_lifetime": "independent",
+        "lane": "single",
+        "elapsed_ms": 5684.91,
+        "queue_wait_ms": 0.001333,
+        "compute_ms": 5684.908667,
+        "cpu_tokens": 1,
+        "cpu_budget": 1,
+        "process_count": 1,
+        "thread_count": 1,
+        "threads_per_process": 1,
+        "async_orchestration": false,
+        "hard_stop": false,
+        "use_shared_memory": false,
+        "reason_codes": [
+          "typed_array_shape_work_accounted",
+          "typed_result_capacity_write_work_accounted",
+          "parallel_overhead_expected_to_dominate",
+          "eligible_nodes_use_native_runtime_simd_dispatch"
+        ],
+        "parallel_dimension": "interval",
+        "product_count": 1,
+        "estimated_work_units": 4501251830559.997,
+        "prepared": false,
+        "prepared_cached": false,
+        "shared_memory_bytes": 0,
+        "boundary_copy_bytes": 0,
+        "output_copy_bytes": 0,
+        "scheduler_backend": "cpp",
+        "native_threads": 1,
+        "native_processes": 0,
+        "python_worker_callbacks": 0,
+        "python_native_transitions": 1,
+        "output_ownership": "numpy_owned",
+        "output_kind": "typed",
+        "native_chunks": [
+          {
+            "compact_path_groups": 0,
+            "compact_path_batches": 0,
+            "compact_path_steps": 0,
+            "compact_path_raw_rows": 0,
+            "compact_path_raw_scale_elements": 0,
+            "compact_path_raw_pack_bytes": 0,
+            "highway_vqsort_calls": 0,
+            "fused_pointwise_calls": 1,
+            "pointwise_tiles": 0,
+            "vector_elements": 24,
+            "root_copy_bytes": 2032,
+            "direct_output_bytes": 76000480,
+            "state_copy_bytes": 0,
+            "pointwise_workspace_capacity_bytes": 0,
+            "rows": 1,
+            "nodes": 116,
+            "max_window": 500000,
+            "numeric_arena_bytes": 81002464,
+            "mask_arena_bytes": 6000000,
+            "operator_workspace_capacity_bytes": 16008512,
+            "order_scratch_capacity_bytes": 0,
+            "input_copy_bytes": 0,
+            "eigen_rotation_calls": 0,
+            "eigen_matvec_calls": 0,
+            "eigen_covariance_calls": 0,
+            "eigen_density_calls": 0,
+            "accelerate_covchol_calls": 0,
+            "accelerate_matmul_calls": 0,
+            "matmul_zero_calls": 0,
+            "accelerate_covariance_attempts": 0,
+            "accelerate_covariance_calls": 0,
+            "covariance_syrk_calls": 0,
+            "covariance_replayed_cells": 0,
+            "covariance_fallbacks": 0,
+            "covariance_zero_calls": 0,
+            "accelerate_vforce_calls": 0,
+            "accelerate_lu_attempts": 0,
+            "accelerate_lu_calls": 0,
+            "accelerate_lu_fallbacks": 0,
+            "solve_residual_materialization_bytes": 0,
+            "covariance_panel_materialization_bytes": 0,
+            "native_library_workspace_reserve_bytes": 0,
+            "algorithm_copy_bytes": 77011296,
+            "fused_scalar_calls": 0,
+            "summary_source_scans": 0,
+            "order_stat_sorts": 0,
+            "python_operator_calls": 0,
+            "execution_backend": "native_graph_interpreter"
+          }
+        ]
+      },
+      "scope": "same owned input preparation and complete13-output numerical request as time; fixture/import/compilation excluded; heap includes graph/setup, cold call and warm pair; RSS excludes precreated graph and observes two retained output generations; no sum of phase peaks",
+      "limitations": "malloc probe excludes CPython arena suballocations, some allocator zones/mmap/stack/process-tree; RSS0.5ms sampling may miss short peaks; no complete allocation-audit claim",
+      "whole_goal_complete": false
+    },
+    {
+      "rss_baseline": 178814976,
+      "rss_peak": 459145216,
+      "rss_delta": 280330240,
+      "rss_idle_delta": 32768,
+      "rss_schema": "warm-monitor-control-1",
+      "backend": "cpp",
+      "metric": "rss",
+      "input_hashes": {
+        "raw": "c3a215ab82905488cd8f44095818212db5686984b1dc34d8eec34a0469d53dbb",
+        "positions": "be4b3c536ea19ff1514e0cf2d086c66fd06ba637c2b0b48d7768dd8b42f57cad",
+        "training_positions": "0d0efe11908d7dcccb566a86065dfed8653088cf726b14ad754727a929b70cce",
+        "classify_positions": "99a9840030a8891019ee6ed8d14caaf291dc37288e82e99610ebc10baf3bf900",
+        "valid": "a52dfe8421ed2a1974f3cabb8c04af9250aca7feaa5f30a134ebd41e20ebf7c7",
+        "uniform": "b97c0b3aa31c16a89ee68583bb7b4ad61416fc232671c7e59a8ecb0e6d353216",
+        "reverse_order": "b75680c5701f7f478fc391316977726479e2df552241e6c3519b0f674a8f22c3",
+        "transition_template": "40b86579a4fad6d15a6667eebf1b793a60e79c62078ed44535dd3bcb5f281756"
+      },
+      "actual_build_id": "b17f2bbea7aa9cf2c018f289c01757b69f5134046006a70ed9bac35cad16158a",
+      "all13_match_time_snapshot": true,
+      "cpu_budget": 1,
+      "audit": {
+        "execution_backend": "cpp_aot",
+        "audit_schema": "cpp-aot-execution-2",
+        "result_protocol": "typed-results-2",
+        "engine": "calmetrics_engine",
+        "model_identity": null,
+        "engine_version": "0.3.0",
+        "engine_build_id": "b17f2bbea7aa9cf2c018f289c01757b69f5134046006a70ed9bac35cad16158a",
+        "operator_registry_version": "canonical-native-1",
+        "typed_ir_version": "cpp-typed-ir-1",
+        "plan_fingerprint": "native-3-3c5d1752f7b3d6cd1894dc3d73afea92",
+        "source_contracts": [],
+        "status_result_copy_bytes": 0,
+        "status_transport_bytes": 0,
+        "native_aot": true,
+        "python_fallback": 0,
+        "python_operator_calls": 0,
+        "request_time_compilation": 0,
+        "input_dtype": "mixed",
+        "input_dtypes": {
+          "raw": "float64",
+          "positions": "int64",
+          "valid": "bool",
+          "uniform": "float64",
+          "reverse_order": "int64",
+          "transition_template": "float64"
+        },
+        "output_dtype": "per_output",
+        "outputs": [
+          {
+            "dtype": "int64",
+            "kind": "series",
+            "axes": [
+              "time"
+            ],
+            "shape": [
+              "500000"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "series",
+            "axes": [
+              "time"
+            ],
+            "shape": [
+              "500000"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "series",
+            "axes": [
+              "time"
+            ],
+            "shape": [
+              "500000"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "time",
+              "component"
+            ],
+            "shape": [
+              "500000",
+              "12"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "component",
+              "factor"
+            ],
+            "shape": [
+              "12",
+              "4"
+            ]
+          },
+          {
+            "dtype": "int64",
+            "kind": "vector",
+            "axes": [
+              "asset"
+            ],
+            "shape": [
+              "12"
+            ]
+          },
+          {
+            "dtype": "int64",
+            "kind": "value",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "int64",
+            "kind": "value",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "time",
+              "factor"
+            ],
+            "shape": [
+              "500000",
+              "4"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "vector",
+            "axes": [
+              "component"
+            ],
+            "shape": [
+              "12"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "component",
+              "factor"
+            ],
+            "shape": [
+              "12",
+              "4"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "component",
+              "factor"
+            ],
+            "shape": [
+              "12",
+              "4"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "component",
+              "component"
+            ],
+            "shape": [
+              "12",
+              "12"
+            ]
+          }
+        ],
+        "result_layout": "interval_root_aligned_8",
+        "result_capacity_bytes": 76002512,
+        "error_policy": "raise",
+        "status_contract": "indicator-status-1",
+        "result_lifetime": "independent",
+        "lane": "single",
+        "elapsed_ms": 5703.452917,
+        "queue_wait_ms": 0.001084,
+        "compute_ms": 5703.451833,
+        "cpu_tokens": 1,
+        "cpu_budget": 1,
+        "process_count": 1,
+        "thread_count": 1,
+        "threads_per_process": 1,
+        "async_orchestration": false,
+        "hard_stop": false,
+        "use_shared_memory": false,
+        "reason_codes": [
+          "typed_array_shape_work_accounted",
+          "typed_result_capacity_write_work_accounted",
+          "parallel_overhead_expected_to_dominate",
+          "eligible_nodes_use_native_runtime_simd_dispatch"
+        ],
+        "parallel_dimension": "interval",
+        "product_count": 1,
+        "estimated_work_units": 4501251830559.997,
+        "prepared": false,
+        "prepared_cached": false,
+        "shared_memory_bytes": 0,
+        "boundary_copy_bytes": 0,
+        "output_copy_bytes": 0,
+        "scheduler_backend": "cpp",
+        "native_threads": 1,
+        "native_processes": 0,
+        "python_worker_callbacks": 0,
+        "python_native_transitions": 1,
+        "output_ownership": "numpy_owned",
+        "output_kind": "typed",
+        "native_chunks": [
+          {
+            "compact_path_groups": 0,
+            "compact_path_batches": 0,
+            "compact_path_steps": 0,
+            "compact_path_raw_rows": 0,
+            "compact_path_raw_scale_elements": 0,
+            "compact_path_raw_pack_bytes": 0,
+            "highway_vqsort_calls": 0,
+            "fused_pointwise_calls": 1,
+            "pointwise_tiles": 0,
+            "vector_elements": 24,
+            "root_copy_bytes": 2032,
+            "direct_output_bytes": 76000480,
+            "state_copy_bytes": 0,
+            "pointwise_workspace_capacity_bytes": 0,
+            "rows": 1,
+            "nodes": 116,
+            "max_window": 500000,
+            "numeric_arena_bytes": 81002464,
+            "mask_arena_bytes": 6000000,
+            "operator_workspace_capacity_bytes": 16008512,
+            "order_scratch_capacity_bytes": 0,
+            "input_copy_bytes": 0,
+            "eigen_rotation_calls": 0,
+            "eigen_matvec_calls": 0,
+            "eigen_covariance_calls": 0,
+            "eigen_density_calls": 0,
+            "accelerate_covchol_calls": 0,
+            "accelerate_matmul_calls": 0,
+            "matmul_zero_calls": 0,
+            "accelerate_covariance_attempts": 0,
+            "accelerate_covariance_calls": 0,
+            "covariance_syrk_calls": 0,
+            "covariance_replayed_cells": 0,
+            "covariance_fallbacks": 0,
+            "covariance_zero_calls": 0,
+            "accelerate_vforce_calls": 0,
+            "accelerate_lu_attempts": 0,
+            "accelerate_lu_calls": 0,
+            "accelerate_lu_fallbacks": 0,
+            "solve_residual_materialization_bytes": 0,
+            "covariance_panel_materialization_bytes": 0,
+            "native_library_workspace_reserve_bytes": 0,
+            "algorithm_copy_bytes": 77011296,
+            "fused_scalar_calls": 0,
+            "summary_source_scans": 0,
+            "order_stat_sorts": 0,
+            "python_operator_calls": 0,
+            "execution_backend": "native_graph_interpreter"
+          }
+        ]
+      },
+      "scope": "same owned input preparation and complete13-output numerical request as time; fixture/import/compilation excluded; heap includes graph/setup, cold call and warm pair; RSS excludes precreated graph and observes two retained output generations; no sum of phase peaks",
+      "limitations": "malloc probe excludes CPython arena suballocations, some allocator zones/mmap/stack/process-tree; RSS0.5ms sampling may miss short peaks; no complete allocation-audit claim",
+      "whole_goal_complete": false
+    },
+    {
+      "rss_baseline": 174260224,
+      "rss_peak": 445939712,
+      "rss_delta": 271679488,
+      "rss_idle_delta": 0,
+      "rss_schema": "warm-monitor-control-1",
+      "backend": "cpp",
+      "metric": "rss",
+      "input_hashes": {
+        "raw": "c3a215ab82905488cd8f44095818212db5686984b1dc34d8eec34a0469d53dbb",
+        "positions": "be4b3c536ea19ff1514e0cf2d086c66fd06ba637c2b0b48d7768dd8b42f57cad",
+        "training_positions": "0d0efe11908d7dcccb566a86065dfed8653088cf726b14ad754727a929b70cce",
+        "classify_positions": "99a9840030a8891019ee6ed8d14caaf291dc37288e82e99610ebc10baf3bf900",
+        "valid": "a52dfe8421ed2a1974f3cabb8c04af9250aca7feaa5f30a134ebd41e20ebf7c7",
+        "uniform": "b97c0b3aa31c16a89ee68583bb7b4ad61416fc232671c7e59a8ecb0e6d353216",
+        "reverse_order": "b75680c5701f7f478fc391316977726479e2df552241e6c3519b0f674a8f22c3",
+        "transition_template": "40b86579a4fad6d15a6667eebf1b793a60e79c62078ed44535dd3bcb5f281756"
+      },
+      "actual_build_id": "b17f2bbea7aa9cf2c018f289c01757b69f5134046006a70ed9bac35cad16158a",
+      "all13_match_time_snapshot": true,
+      "cpu_budget": 1,
+      "audit": {
+        "execution_backend": "cpp_aot",
+        "audit_schema": "cpp-aot-execution-2",
+        "result_protocol": "typed-results-2",
+        "engine": "calmetrics_engine",
+        "model_identity": null,
+        "engine_version": "0.3.0",
+        "engine_build_id": "b17f2bbea7aa9cf2c018f289c01757b69f5134046006a70ed9bac35cad16158a",
+        "operator_registry_version": "canonical-native-1",
+        "typed_ir_version": "cpp-typed-ir-1",
+        "plan_fingerprint": "native-3-3c5d1752f7b3d6cd1894dc3d73afea92",
+        "source_contracts": [],
+        "status_result_copy_bytes": 0,
+        "status_transport_bytes": 0,
+        "native_aot": true,
+        "python_fallback": 0,
+        "python_operator_calls": 0,
+        "request_time_compilation": 0,
+        "input_dtype": "mixed",
+        "input_dtypes": {
+          "raw": "float64",
+          "positions": "int64",
+          "valid": "bool",
+          "uniform": "float64",
+          "reverse_order": "int64",
+          "transition_template": "float64"
+        },
+        "output_dtype": "per_output",
+        "outputs": [
+          {
+            "dtype": "int64",
+            "kind": "series",
+            "axes": [
+              "time"
+            ],
+            "shape": [
+              "500000"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "series",
+            "axes": [
+              "time"
+            ],
+            "shape": [
+              "500000"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "series",
+            "axes": [
+              "time"
+            ],
+            "shape": [
+              "500000"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "time",
+              "component"
+            ],
+            "shape": [
+              "500000",
+              "12"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "component",
+              "factor"
+            ],
+            "shape": [
+              "12",
+              "4"
+            ]
+          },
+          {
+            "dtype": "int64",
+            "kind": "vector",
+            "axes": [
+              "asset"
+            ],
+            "shape": [
+              "12"
+            ]
+          },
+          {
+            "dtype": "int64",
+            "kind": "value",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "int64",
+            "kind": "value",
+            "axes": [],
+            "shape": []
+          },
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "time",
+              "factor"
+            ],
+            "shape": [
+              "500000",
+              "4"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "vector",
+            "axes": [
+              "component"
+            ],
+            "shape": [
+              "12"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "component",
+              "factor"
+            ],
+            "shape": [
+              "12",
+              "4"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "component",
+              "factor"
+            ],
+            "shape": [
+              "12",
+              "4"
+            ]
+          },
+          {
+            "dtype": "float64",
+            "kind": "matrix",
+            "axes": [
+              "component",
+              "component"
+            ],
+            "shape": [
+              "12",
+              "12"
+            ]
+          }
+        ],
+        "result_layout": "interval_root_aligned_8",
+        "result_capacity_bytes": 76002512,
+        "error_policy": "raise",
+        "status_contract": "indicator-status-1",
+        "result_lifetime": "independent",
+        "lane": "single",
+        "elapsed_ms": 5691.279042,
+        "queue_wait_ms": 0.001,
+        "compute_ms": 5691.278042,
+        "cpu_tokens": 1,
+        "cpu_budget": 1,
+        "process_count": 1,
+        "thread_count": 1,
+        "threads_per_process": 1,
+        "async_orchestration": false,
+        "hard_stop": false,
+        "use_shared_memory": false,
+        "reason_codes": [
+          "typed_array_shape_work_accounted",
+          "typed_result_capacity_write_work_accounted",
+          "parallel_overhead_expected_to_dominate",
+          "eligible_nodes_use_native_runtime_simd_dispatch"
+        ],
+        "parallel_dimension": "interval",
+        "product_count": 1,
+        "estimated_work_units": 4501251830559.997,
+        "prepared": false,
+        "prepared_cached": false,
+        "shared_memory_bytes": 0,
+        "boundary_copy_bytes": 0,
+        "output_copy_bytes": 0,
+        "scheduler_backend": "cpp",
+        "native_threads": 1,
+        "native_processes": 0,
+        "python_worker_callbacks": 0,
+        "python_native_transitions": 1,
+        "output_ownership": "numpy_owned",
+        "output_kind": "typed",
+        "native_chunks": [
+          {
+            "compact_path_groups": 0,
+            "compact_path_batches": 0,
+            "compact_path_steps": 0,
+            "compact_path_raw_rows": 0,
+            "compact_path_raw_scale_elements": 0,
+            "compact_path_raw_pack_bytes": 0,
+            "highway_vqsort_calls": 0,
+            "fused_pointwise_calls": 1,
+            "pointwise_tiles": 0,
+            "vector_elements": 24,
+            "root_copy_bytes": 2032,
+            "direct_output_bytes": 76000480,
+            "state_copy_bytes": 0,
+            "pointwise_workspace_capacity_bytes": 0,
+            "rows": 1,
+            "nodes": 116,
+            "max_window": 500000,
+            "numeric_arena_bytes": 81002464,
+            "mask_arena_bytes": 6000000,
+            "operator_workspace_capacity_bytes": 16008512,
+            "order_scratch_capacity_bytes": 0,
+            "input_copy_bytes": 0,
+            "eigen_rotation_calls": 0,
+            "eigen_matvec_calls": 0,
+            "eigen_covariance_calls": 0,
+            "eigen_density_calls": 0,
+            "accelerate_covchol_calls": 0,
+            "accelerate_matmul_calls": 0,
+            "matmul_zero_calls": 0,
+            "accelerate_covariance_attempts": 0,
+            "accelerate_covariance_calls": 0,
+            "covariance_syrk_calls": 0,
+            "covariance_replayed_cells": 0,
+            "covariance_fallbacks": 0,
+            "covariance_zero_calls": 0,
+            "accelerate_vforce_calls": 0,
+            "accelerate_lu_attempts": 0,
+            "accelerate_lu_calls": 0,
+            "accelerate_lu_fallbacks": 0,
+            "solve_residual_materialization_bytes": 0,
+            "covariance_panel_materialization_bytes": 0,
+            "native_library_workspace_reserve_bytes": 0,
+            "algorithm_copy_bytes": 77011296,
+            "fused_scalar_calls": 0,
+            "summary_source_scans": 0,
+            "order_stat_sorts": 0,
+            "python_operator_calls": 0,
+            "execution_backend": "native_graph_interpreter"
+          }
+        ]
+      },
+      "scope": "same owned input preparation and complete13-output numerical request as time; fixture/import/compilation excluded; heap includes graph/setup, cold call and warm pair; RSS excludes precreated graph and observes two retained output generations; no sum of phase peaks",
+      "limitations": "malloc probe excludes CPython arena suballocations, some allocator zones/mmap/stack/process-tree; RSS0.5ms sampling may miss short peaks; no complete allocation-audit claim",
+      "whole_goal_complete": false
+    },
+    {
+      "setup_heap": {
+        "allocations": 0,
+        "frees": 0,
+        "allocated_bytes": 0,
+        "live_bytes": 0,
+        "peak_bytes": 0,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_heap": {
+        "allocations": 1000125,
+        "frees": 1000099,
+        "allocated_bytes": 1474533792,
+        "live_bytes": 76004176,
+        "peak_bytes": 196510512,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_retained_heap": {
+        "allocations": 1000125,
+        "frees": 1000114,
+        "allocated_bytes": 1474533792,
+        "live_bytes": 384,
+        "peak_bytes": 196510512,
+        "untracked_frees": 1,
+        "table_overflows": 0
+      },
+      "warm_baseline_heap": {
+        "allocations": 6000700,
+        "frees": 6000686,
+        "allocated_bytes": 8847200992,
+        "live_bytes": 464,
+        "peak_bytes": 196510704,
+        "untracked_frees": 4,
+        "table_overflows": 0
+      },
+      "warm_heap": {
+        "allocations": 8000937,
+        "frees": 8000900,
+        "allocated_bytes": 11796268056,
+        "live_bytes": 76004472,
+        "peak_bytes": 272514528,
+        "untracked_frees": 4,
+        "table_overflows": 0
+      },
+      "warm_retained_heap": {
+        "allocations": 8000937,
+        "frees": 8000922,
+        "allocated_bytes": 11796268056,
+        "live_bytes": 472,
+        "peak_bytes": 272514528,
+        "untracked_frees": 4,
+        "table_overflows": 0
+      },
+      "heap_schema": "continuous-live-1",
+      "cold_peak_bytes": 196510512,
+      "warm_peak_bytes": 272514528,
+      "backend": "njit_hoisted",
+      "metric": "heap",
+      "input_hashes": {
+        "raw": "c3a215ab82905488cd8f44095818212db5686984b1dc34d8eec34a0469d53dbb",
+        "positions": "be4b3c536ea19ff1514e0cf2d086c66fd06ba637c2b0b48d7768dd8b42f57cad",
+        "training_positions": "0d0efe11908d7dcccb566a86065dfed8653088cf726b14ad754727a929b70cce",
+        "classify_positions": "99a9840030a8891019ee6ed8d14caaf291dc37288e82e99610ebc10baf3bf900",
+        "valid": "a52dfe8421ed2a1974f3cabb8c04af9250aca7feaa5f30a134ebd41e20ebf7c7",
+        "uniform": "b97c0b3aa31c16a89ee68583bb7b4ad61416fc232671c7e59a8ecb0e6d353216",
+        "reverse_order": "b75680c5701f7f478fc391316977726479e2df552241e6c3519b0f674a8f22c3",
+        "transition_template": "40b86579a4fad6d15a6667eebf1b793a60e79c62078ed44535dd3bcb5f281756"
+      },
+      "actual_build_id": null,
+      "all13_match_time_snapshot": true,
+      "cpu_budget": 1,
+      "audit": {},
+      "scope": "same owned input preparation and complete13-output numerical request as time; fixture/import/compilation excluded; heap includes graph/setup, cold call and warm pair; RSS excludes precreated graph and observes two retained output generations; no sum of phase peaks",
+      "limitations": "malloc probe excludes CPython arena suballocations, some allocator zones/mmap/stack/process-tree; RSS0.5ms sampling may miss short peaks; no complete allocation-audit claim",
+      "whole_goal_complete": false
+    },
+    {
+      "rss_baseline": 174309376,
+      "rss_peak": 518815744,
+      "rss_delta": 344506368,
+      "rss_idle_delta": 0,
+      "rss_schema": "warm-monitor-control-1",
+      "backend": "njit_hoisted",
+      "metric": "rss",
+      "input_hashes": {
+        "raw": "c3a215ab82905488cd8f44095818212db5686984b1dc34d8eec34a0469d53dbb",
+        "positions": "be4b3c536ea19ff1514e0cf2d086c66fd06ba637c2b0b48d7768dd8b42f57cad",
+        "training_positions": "0d0efe11908d7dcccb566a86065dfed8653088cf726b14ad754727a929b70cce",
+        "classify_positions": "99a9840030a8891019ee6ed8d14caaf291dc37288e82e99610ebc10baf3bf900",
+        "valid": "a52dfe8421ed2a1974f3cabb8c04af9250aca7feaa5f30a134ebd41e20ebf7c7",
+        "uniform": "b97c0b3aa31c16a89ee68583bb7b4ad61416fc232671c7e59a8ecb0e6d353216",
+        "reverse_order": "b75680c5701f7f478fc391316977726479e2df552241e6c3519b0f674a8f22c3",
+        "transition_template": "40b86579a4fad6d15a6667eebf1b793a60e79c62078ed44535dd3bcb5f281756"
+      },
+      "actual_build_id": null,
+      "all13_match_time_snapshot": true,
+      "cpu_budget": 1,
+      "audit": {},
+      "scope": "same owned input preparation and complete13-output numerical request as time; fixture/import/compilation excluded; heap includes graph/setup, cold call and warm pair; RSS excludes precreated graph and observes two retained output generations; no sum of phase peaks",
+      "limitations": "malloc probe excludes CPython arena suballocations, some allocator zones/mmap/stack/process-tree; RSS0.5ms sampling may miss short peaks; no complete allocation-audit claim",
+      "whole_goal_complete": false
+    },
+    {
+      "rss_baseline": 182812672,
+      "rss_peak": 511229952,
+      "rss_delta": 328417280,
+      "rss_idle_delta": 0,
+      "rss_schema": "warm-monitor-control-1",
+      "backend": "njit_hoisted",
+      "metric": "rss",
+      "input_hashes": {
+        "raw": "c3a215ab82905488cd8f44095818212db5686984b1dc34d8eec34a0469d53dbb",
+        "positions": "be4b3c536ea19ff1514e0cf2d086c66fd06ba637c2b0b48d7768dd8b42f57cad",
+        "training_positions": "0d0efe11908d7dcccb566a86065dfed8653088cf726b14ad754727a929b70cce",
+        "classify_positions": "99a9840030a8891019ee6ed8d14caaf291dc37288e82e99610ebc10baf3bf900",
+        "valid": "a52dfe8421ed2a1974f3cabb8c04af9250aca7feaa5f30a134ebd41e20ebf7c7",
+        "uniform": "b97c0b3aa31c16a89ee68583bb7b4ad61416fc232671c7e59a8ecb0e6d353216",
+        "reverse_order": "b75680c5701f7f478fc391316977726479e2df552241e6c3519b0f674a8f22c3",
+        "transition_template": "40b86579a4fad6d15a6667eebf1b793a60e79c62078ed44535dd3bcb5f281756"
+      },
+      "actual_build_id": null,
+      "all13_match_time_snapshot": true,
+      "cpu_budget": 1,
+      "audit": {},
+      "scope": "same owned input preparation and complete13-output numerical request as time; fixture/import/compilation excluded; heap includes graph/setup, cold call and warm pair; RSS excludes precreated graph and observes two retained output generations; no sum of phase peaks",
+      "limitations": "malloc probe excludes CPython arena suballocations, some allocator zones/mmap/stack/process-tree; RSS0.5ms sampling may miss short peaks; no complete allocation-audit claim",
+      "whole_goal_complete": false
+    },
+    {
+      "rss_baseline": 174129152,
+      "rss_peak": 508575744,
+      "rss_delta": 334446592,
+      "rss_idle_delta": 0,
+      "rss_schema": "warm-monitor-control-1",
+      "backend": "njit_hoisted",
+      "metric": "rss",
+      "input_hashes": {
+        "raw": "c3a215ab82905488cd8f44095818212db5686984b1dc34d8eec34a0469d53dbb",
+        "positions": "be4b3c536ea19ff1514e0cf2d086c66fd06ba637c2b0b48d7768dd8b42f57cad",
+        "training_positions": "0d0efe11908d7dcccb566a86065dfed8653088cf726b14ad754727a929b70cce",
+        "classify_positions": "99a9840030a8891019ee6ed8d14caaf291dc37288e82e99610ebc10baf3bf900",
+        "valid": "a52dfe8421ed2a1974f3cabb8c04af9250aca7feaa5f30a134ebd41e20ebf7c7",
+        "uniform": "b97c0b3aa31c16a89ee68583bb7b4ad61416fc232671c7e59a8ecb0e6d353216",
+        "reverse_order": "b75680c5701f7f478fc391316977726479e2df552241e6c3519b0f674a8f22c3",
+        "transition_template": "40b86579a4fad6d15a6667eebf1b793a60e79c62078ed44535dd3bcb5f281756"
+      },
+      "actual_build_id": null,
+      "all13_match_time_snapshot": true,
+      "cpu_budget": 1,
+      "audit": {},
+      "scope": "same owned input preparation and complete13-output numerical request as time; fixture/import/compilation excluded; heap includes graph/setup, cold call and warm pair; RSS excludes precreated graph and observes two retained output generations; no sum of phase peaks",
+      "limitations": "malloc probe excludes CPython arena suballocations, some allocator zones/mmap/stack/process-tree; RSS0.5ms sampling may miss short peaks; no complete allocation-audit claim",
+      "whole_goal_complete": false
+    },
+    {
+      "setup_heap": {
+        "allocations": 0,
+        "frees": 0,
+        "allocated_bytes": 0,
+        "live_bytes": 0,
+        "peak_bytes": 0,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_heap": {
+        "allocations": 1000113,
+        "frees": 1000087,
+        "allocated_bytes": 1474531296,
+        "live_bytes": 76004176,
+        "peak_bytes": 196510512,
+        "untracked_frees": 0,
+        "table_overflows": 0
+      },
+      "cold_retained_heap": {
+        "allocations": 1000113,
+        "frees": 1000102,
+        "allocated_bytes": 1474531296,
+        "live_bytes": 384,
+        "peak_bytes": 196510512,
+        "untracked_frees": 1,
+        "table_overflows": 0
+      },
+      "warm_baseline_heap": {
+        "allocations": 6000628,
+        "frees": 6000614,
+        "allocated_bytes": 8847186016,
+        "live_bytes": 464,
+        "peak_bytes": 196510704,
+        "untracked_frees": 4,
+        "table_overflows": 0
+      },
+      "warm_heap": {
+        "allocations": 8000841,
+        "frees": 8000804,
+        "allocated_bytes": 11796248088,
+        "live_bytes": 76004472,
+        "peak_bytes": 272514528,
+        "untracked_frees": 4,
+        "table_overflows": 0
+      },
+      "warm_retained_heap": {
+        "allocations": 8000841,
+        "frees": 8000826,
+        "allocated_bytes": 11796248088,
+        "live_bytes": 472,
+        "peak_bytes": 272514528,
+        "untracked_frees": 4,
+        "table_overflows": 0
+      },
+      "heap_schema": "continuous-live-1",
+      "cold_peak_bytes": 196510512,
+      "warm_peak_bytes": 272514528,
+      "backend": "njit_original",
+      "metric": "heap",
+      "input_hashes": {
+        "raw": "c3a215ab82905488cd8f44095818212db5686984b1dc34d8eec34a0469d53dbb",
+        "positions": "be4b3c536ea19ff1514e0cf2d086c66fd06ba637c2b0b48d7768dd8b42f57cad",
+        "training_positions": "0d0efe11908d7dcccb566a86065dfed8653088cf726b14ad754727a929b70cce",
+        "classify_positions": "99a9840030a8891019ee6ed8d14caaf291dc37288e82e99610ebc10baf3bf900",
+        "valid": "a52dfe8421ed2a1974f3cabb8c04af9250aca7feaa5f30a134ebd41e20ebf7c7",
+        "uniform": "b97c0b3aa31c16a89ee68583bb7b4ad61416fc232671c7e59a8ecb0e6d353216",
+        "reverse_order": "b75680c5701f7f478fc391316977726479e2df552241e6c3519b0f674a8f22c3",
+        "transition_template": "40b86579a4fad6d15a6667eebf1b793a60e79c62078ed44535dd3bcb5f281756"
+      },
+      "actual_build_id": null,
+      "all13_match_time_snapshot": true,
+      "cpu_budget": 1,
+      "audit": {},
+      "scope": "same owned input preparation and complete13-output numerical request as time; fixture/import/compilation excluded; heap includes graph/setup, cold call and warm pair; RSS excludes precreated graph and observes two retained output generations; no sum of phase peaks",
+      "limitations": "malloc probe excludes CPython arena suballocations, some allocator zones/mmap/stack/process-tree; RSS0.5ms sampling may miss short peaks; no complete allocation-audit claim",
+      "whole_goal_complete": false
+    },
+    {
+      "rss_baseline": 175603712,
+      "rss_peak": 524664832,
+      "rss_delta": 349061120,
+      "rss_idle_delta": 0,
+      "rss_schema": "warm-monitor-control-1",
+      "backend": "njit_original",
+      "metric": "rss",
+      "input_hashes": {
+        "raw": "c3a215ab82905488cd8f44095818212db5686984b1dc34d8eec34a0469d53dbb",
+        "positions": "be4b3c536ea19ff1514e0cf2d086c66fd06ba637c2b0b48d7768dd8b42f57cad",
+        "training_positions": "0d0efe11908d7dcccb566a86065dfed8653088cf726b14ad754727a929b70cce",
+        "classify_positions": "99a9840030a8891019ee6ed8d14caaf291dc37288e82e99610ebc10baf3bf900",
+        "valid": "a52dfe8421ed2a1974f3cabb8c04af9250aca7feaa5f30a134ebd41e20ebf7c7",
+        "uniform": "b97c0b3aa31c16a89ee68583bb7b4ad61416fc232671c7e59a8ecb0e6d353216",
+        "reverse_order": "b75680c5701f7f478fc391316977726479e2df552241e6c3519b0f674a8f22c3",
+        "transition_template": "40b86579a4fad6d15a6667eebf1b793a60e79c62078ed44535dd3bcb5f281756"
+      },
+      "actual_build_id": null,
+      "all13_match_time_snapshot": true,
+      "cpu_budget": 1,
+      "audit": {},
+      "scope": "same owned input preparation and complete13-output numerical request as time; fixture/import/compilation excluded; heap includes graph/setup, cold call and warm pair; RSS excludes precreated graph and observes two retained output generations; no sum of phase peaks",
+      "limitations": "malloc probe excludes CPython arena suballocations, some allocator zones/mmap/stack/process-tree; RSS0.5ms sampling may miss short peaks; no complete allocation-audit claim",
+      "whole_goal_complete": false
+    },
+    {
+      "rss_baseline": 178634752,
+      "rss_peak": 514195456,
+      "rss_delta": 335560704,
+      "rss_idle_delta": 0,
+      "rss_schema": "warm-monitor-control-1",
+      "backend": "njit_original",
+      "metric": "rss",
+      "input_hashes": {
+        "raw": "c3a215ab82905488cd8f44095818212db5686984b1dc34d8eec34a0469d53dbb",
+        "positions": "be4b3c536ea19ff1514e0cf2d086c66fd06ba637c2b0b48d7768dd8b42f57cad",
+        "training_positions": "0d0efe11908d7dcccb566a86065dfed8653088cf726b14ad754727a929b70cce",
+        "classify_positions": "99a9840030a8891019ee6ed8d14caaf291dc37288e82e99610ebc10baf3bf900",
+        "valid": "a52dfe8421ed2a1974f3cabb8c04af9250aca7feaa5f30a134ebd41e20ebf7c7",
+        "uniform": "b97c0b3aa31c16a89ee68583bb7b4ad61416fc232671c7e59a8ecb0e6d353216",
+        "reverse_order": "b75680c5701f7f478fc391316977726479e2df552241e6c3519b0f674a8f22c3",
+        "transition_template": "40b86579a4fad6d15a6667eebf1b793a60e79c62078ed44535dd3bcb5f281756"
+      },
+      "actual_build_id": null,
+      "all13_match_time_snapshot": true,
+      "cpu_budget": 1,
+      "audit": {},
+      "scope": "same owned input preparation and complete13-output numerical request as time; fixture/import/compilation excluded; heap includes graph/setup, cold call and warm pair; RSS excludes precreated graph and observes two retained output generations; no sum of phase peaks",
+      "limitations": "malloc probe excludes CPython arena suballocations, some allocator zones/mmap/stack/process-tree; RSS0.5ms sampling may miss short peaks; no complete allocation-audit claim",
+      "whole_goal_complete": false
+    },
+    {
+      "rss_baseline": 176259072,
+      "rss_peak": 520683520,
+      "rss_delta": 344424448,
+      "rss_idle_delta": 0,
+      "rss_schema": "warm-monitor-control-1",
+      "backend": "njit_original",
+      "metric": "rss",
+      "input_hashes": {
+        "raw": "c3a215ab82905488cd8f44095818212db5686984b1dc34d8eec34a0469d53dbb",
+        "positions": "be4b3c536ea19ff1514e0cf2d086c66fd06ba637c2b0b48d7768dd8b42f57cad",
+        "training_positions": "0d0efe11908d7dcccb566a86065dfed8653088cf726b14ad754727a929b70cce",
+        "classify_positions": "99a9840030a8891019ee6ed8d14caaf291dc37288e82e99610ebc10baf3bf900",
+        "valid": "a52dfe8421ed2a1974f3cabb8c04af9250aca7feaa5f30a134ebd41e20ebf7c7",
+        "uniform": "b97c0b3aa31c16a89ee68583bb7b4ad61416fc232671c7e59a8ecb0e6d353216",
+        "reverse_order": "b75680c5701f7f478fc391316977726479e2df552241e6c3519b0f674a8f22c3",
+        "transition_template": "40b86579a4fad6d15a6667eebf1b793a60e79c62078ed44535dd3bcb5f281756"
+      },
+      "actual_build_id": null,
+      "all13_match_time_snapshot": true,
+      "cpu_budget": 1,
+      "audit": {},
+      "scope": "same owned input preparation and complete13-output numerical request as time; fixture/import/compilation excluded; heap includes graph/setup, cold call and warm pair; RSS excludes precreated graph and observes two retained output generations; no sum of phase peaks",
+      "limitations": "malloc probe excludes CPython arena suballocations, some allocator zones/mmap/stack/process-tree; RSS0.5ms sampling may miss short peaks; no complete allocation-audit claim",
+      "whole_goal_complete": false
+    }
+  ],
+  "reference_controls": 72,
+  "checkpoint_private_controls": 132,
+  "checkpoint_native_controls": 132,
+  "checkpoint_asan_ubsan_controls": 132,
+  "checkpoint_inplace_controls": 48,
+  "checkpoint_full_fit_or_graph_qualified": false,
+  "checkpoint_performance_accepted": false,
+  "historical_large_matrix_gaps_still_open": true,
+  "next": "qualify compact beta schedule in isolated full model-training requests without usable arena/future-output loans; preserve current loan path; then actual Planner/lifetime/error/transport and full performance before adoption",
+  "public_math_operator_ownership_ipc_excel_unchanged": true,
+  "full_regression_or_actual_wheel_rebuilt_this_round": false,
+  "committed": false,
+  "pushed": false,
+  "whole_goal_complete": false
+}
