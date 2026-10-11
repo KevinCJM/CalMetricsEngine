@@ -374,11 +374,15 @@ void compact_parent_storage_contracts() {
   require(empty.size() == 32 && empty.prefix(0).empty() && empty.overflow_bytes() == 0,
           "parent slot maximum or empty allocation changed");
   for (std::size_t i = 0; i < empty.size(); ++i) require(empty[i] == 0, "default parent slot not zero");
+  require(&empty[8] == &empty[31], "absent parent tail must refer to the shared immutable zero");
   g::ParentSlots values;
   for (std::size_t i = 0; i < 8; ++i) values[i] = static_cast<std::uint32_t>(i + 1);
   require(values.overflow_bytes() == 0, "low-arity parent slots allocate a tail");
   for (std::size_t i = 0; i < values.size(); ++i) values[i] = static_cast<std::uint32_t>(i + 1);
   require(values.overflow_bytes() == 24 * sizeof(std::uint32_t), "parent tail allocation size changed");
+  const auto &const_values = values;
+  for (std::size_t i = 0; i < values.size(); ++i)
+    require(&const_values[i] == &values[i], "const parent access returned a temporary reference");
   require(values.prefix(32).size() == 32 && values.contains(32, 32) &&
           !values.contains(9, 8), "parent prefix or dependency membership changed");
   auto copy = values;

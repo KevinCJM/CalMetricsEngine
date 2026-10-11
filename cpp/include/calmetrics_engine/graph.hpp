@@ -163,7 +163,10 @@ public:
   static constexpr std::size_t size() noexcept { return total_count; }
   std::size_t overflow_bytes() const noexcept { return tail_ ? sizeof(*tail_) : 0; }
   const std::uint32_t &operator[](std::size_t index) const noexcept {
-    return index < inline_count ? local_[index] : tail_ ? (*tail_)[index - inline_count] : zero_;
+    // Explicit branches preserve the lvalue in MSVC's default conditional mode.
+    if (index < inline_count) return local_[index];
+    if (tail_) return (*tail_)[index - inline_count];
+    return zero_;
   }
   std::uint32_t &operator[](std::size_t index) {
     if (index < inline_count) return local_[index];

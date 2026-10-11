@@ -4,7 +4,7 @@
 inline void state_root_loan_native_contracts() {
   constexpr std::size_t rows = 262145, columns = 3;
   constexpr std::uint64_t sentinel = 0x5a7f31be19d04c62ULL;
-  const auto expression = [](bool bad_state, bool bad_threshold) {
+  const auto expression = [columns](bool bad_state, bool bad_threshold) {
     std::string result = "-1";
     for (std::size_t state = 0; state < columns; ++state) {
       const auto threshold = bad_threshold && state == 1 ? "1.5" : std::to_string(state);

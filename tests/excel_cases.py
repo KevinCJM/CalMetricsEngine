@@ -188,7 +188,7 @@ def projection_primitive_cases():
         "affine_empty_factor": ("affine_contract", [
             np.empty((2, 0)), np.empty((0, 3)), np.array([.1, .2, .3])]),
         "affine_empty_output": ("affine_contract", [
-            np.empty((2, 3)), np.empty((3, 0)), np.empty(0)]),
+            np.zeros((2, 3)), np.empty((3, 0)), np.empty(0)]),
         "affine_missing": ("affine_contract", [
             np.array([[np.nan, 1.], [2., 3.]]), np.ones((2, 1)), .1]),
         "expm1_domain": ("expm1", [np.array([

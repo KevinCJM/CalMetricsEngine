@@ -155,11 +155,16 @@ inline void compare(const std::vector<double> &input, const std::string &name,
         if (count) {
             const std::array<double, 9> probabilities{{0., 1., .05, .5, .95, .5,
                 .125, .875, count > 1 ? double(count / 2) / double(count - 1) : .25}};
+            // Use one machine-code body on both sides. Distinct inlined NaN
+            // additions can select different payload operands without changing
+            // the sorted input or the canonical interpolation expression.
+            using Interpolate = double (*)(const double *, std::size_t, double) noexcept;
+            Interpolate volatile interpolate = &d::sorted_quantile;
             for (double probability : probabilities) {
                 // Compare the one canonical interpolation body, not a separate
                 // reimplementation or approximate/allclose reference.
-                const double reference = d::sorted_quantile(expected.data(), count, probability);
-                const double actual = d::sorted_quantile(keys, count, probability);
+                const double reference = interpolate(expected.data(), count, probability);
+                const double actual = interpolate(keys, count, probability);
                 check(to_bits(actual) == to_bits(reference), "canonical quantile bits differ", name);
             }
             check(std::fegetround() == rounding && fpcr() == control,
