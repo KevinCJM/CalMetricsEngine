@@ -496,7 +496,7 @@ def test_planner_covers_latent_nk_workspace_when_k_exceeds_features(hmm):
         plan = scheduler.plan(graph, inputs, starts, ends)
         assert plan.estimated_worker_scratch_bytes >= expected
         with pytest.raises(
-            (ValueError, RuntimeError, MemoryError), match="memory|MEMORY|bad_alloc"
+            (ValueError, RuntimeError, MemoryError), match="memory|MEMORY|bad_alloc|bad allocation"
         ):
             scheduler.execute(
                 graph, inputs, starts, ends, memory_budget_bytes=expected - 1

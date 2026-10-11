@@ -35,20 +35,23 @@ def test_column_variance_preserves_order_workspace_and_ownership(shape, layout, 
     np.testing.assert_array_equal(actual.view("u8"), expected.view("u8"))
     np.testing.assert_allclose(actual, np.var(x, axis=0, ddof=ddof), rtol=1e-12, atol=1e-14)
     assert scalar["isa"] == "scalar"
-    eligible = (
+    # Contiguous row packets are portable; strided column packets are Apple-only.
+    row_eligible = x.flags.c_contiguous and shape[0] >= 32 and 8 <= shape[1] <= 256
+    column_eligible = (
         platform.system() == "Darwin"
         and platform.machine() == "arm64"
         and int(platform.mac_ver()[0].split(".")[0]) >= 15
         and shape[0] >= 32
         and shape[1] >= 8
-        and (x.flags.c_contiguous or (x.strides[0] == 8 and x.strides[1] >= shape[0] * 8))
+        and abs(x.strides[0]) == 8
+        and x.strides[1] >= shape[0] * 8
     )
+    eligible = row_eligible or column_eligible
+    enabled = os.environ.get("CME_EXPECT_EIGEN", os.environ.get("CALMETRICS_TEST_EXPECT_EIGEN"))
     if not eligible:
         assert audit["isa"] == "scalar"
-    elif "CME_EXPECT_EIGEN" in os.environ:
-        assert audit["isa"] == (
-            "eigen-array" if os.environ["CME_EXPECT_EIGEN"] == "1" else "scalar"
-        )
+    elif enabled is not None:
+        assert audit["isa"] == ("eigen-array" if enabled == "1" else "scalar")
     for key in ("workspace_bytes", "algorithm_copy_bytes", "input_copy_bytes"):
         assert audit[key] == scalar[key] == 0
     frozen = actual.copy()

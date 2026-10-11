@@ -213,7 +213,7 @@ def test_interval_reserve_covers_nonmonotonic_medium_panels_and_rejects_low_budg
     with AdaptiveScheduler(cpu_budget=1) as scheduler:
         plan = scheduler.plan(graph, {"x": x}, starts, ends)
         assert plan.estimated_worker_scratch_bytes >= reserve
-        with pytest.raises((ValueError, RuntimeError, MemoryError), match="memory|MEMORY|bad_alloc"):
+        with pytest.raises((ValueError, RuntimeError, MemoryError), match="memory|MEMORY|bad_alloc|bad allocation"):
             scheduler.execute(graph, {"x": x}, starts, ends, memory_budget_bytes=reserve - 1)
         result = scheduler.execute(graph, {"x": x}, starts, ends)
     for a, b, actual in zip(starts, ends, result.outputs[0].values, strict=True):

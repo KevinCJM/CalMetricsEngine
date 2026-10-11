@@ -112,6 +112,9 @@ test-command = "python -m pytest tests -v --import-mode=importlib -o faulthandle
 environment = { CALMETRICS_TEST_REFERENCE_BACKEND = "python", CALMETRICS_TEST_EXPECT_EIGEN = "1" }
 
 [tool.cibuildwheel.linux]
+# Retained shared results in the full suite exceed Docker's 64 MiB default.
+# This sets the container tmpfs capacity, not the engine's memory budget.
+container-engine = { name = "docker", create-args = ["--shm-size=1g"] }
 manylinux-x86_64-image = "manylinux2014"
 manylinux-aarch64-image = "manylinux2014"
 musllinux-x86_64-image = "musllinux_1_2"

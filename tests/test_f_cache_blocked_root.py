@@ -112,6 +112,6 @@ def test_cache_still_enforces_root_result_budget():
     bounds = np.zeros(1, np.int64)
     with AdaptiveScheduler(cpu_budget=1, config=settings("single")) as scheduler:
         with pytest.raises(
-            (ValueError, RuntimeError, MemoryError), match="memory|MEMORY|bad_alloc"
+            (ValueError, RuntimeError, MemoryError), match="memory|MEMORY|bad_alloc|bad allocation"
         ):
             scheduler.execute(graph(), {"a": a, "b": b}, bounds, bounds, memory_budget_bytes=1)

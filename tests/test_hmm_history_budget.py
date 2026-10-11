@@ -32,5 +32,5 @@ def test_hmm_history_plan_covers_shorter_window_at_cutoff(k, ends):
         assert plan.estimated_worker_scratch_bytes >= smaller_required
         if k == 256:
             # Reject before numerical execution, including either row order.
-            with pytest.raises((ValueError, RuntimeError, MemoryError), match="memory|MEMORY|bad_alloc"):
+            with pytest.raises((ValueError, RuntimeError, MemoryError), match="memory|MEMORY|bad_alloc|bad allocation"):
                 scheduler.execute(graph, inputs, starts, ends, memory_budget_bytes=smaller_required - 1)

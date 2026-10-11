@@ -384,7 +384,11 @@ def test_independent_new_operator_f_root_writer_preserves_ownership(name, rank, 
     else:
         inputs = dict(x=x)
         types = {"x": declarations(rank)["x"]}
-        expression, expected = "expm1(x)", stable_expm1(x)
+        expression, expected = "expm1(x)", op.expm1(x, simd="scalar")
+        # Python and C++ may link different libm implementations on Windows.
+        # Check the independent math reference with the existing projection
+        # tolerance; the F writer must still match the canonical operator bits.
+        np.testing.assert_allclose(expected, stable_expm1(x), rtol=2e-14, atol=2e-16)
     graph = GraphCompiler(types).compile({"value": expression}, result_format="typed", output_order="F")
     originals = {key: value.copy() for key, value in inputs.items()}
     starts, ends = np.array([0], np.int64), np.array([3], np.int64)

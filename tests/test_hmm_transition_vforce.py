@@ -342,7 +342,7 @@ def test_graph_budget_and_snapshot_ownership(prepared):
     with AdaptiveScheduler(cpu_budget=1) as scheduler:
         plan = scheduler.plan(g, inputs, bounds, bounds)
         with pytest.raises(
-            (ValueError, RuntimeError, MemoryError), match="memory|MEMORY|bad_alloc"
+            (ValueError, RuntimeError, MemoryError), match="memory|MEMORY|bad_alloc|bad allocation"
         ):
             scheduler.execute(g, inputs, bounds, bounds, memory_budget_bytes=1000)
         session = scheduler.prepare_execution(g, inputs, bounds, bounds) if prepared else None

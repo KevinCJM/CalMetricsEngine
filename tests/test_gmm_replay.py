@@ -135,7 +135,7 @@ def test_plan_covers_original_history_below_replay_cutoff(ends):
         assert plan.estimated_worker_scratch_bytes >= largest_original
         # This bound applies also when only a maximum-sized interval was requested.
         with pytest.raises(
-            (ValueError, RuntimeError, MemoryError), match="memory|MEMORY|bad_alloc"
+            (ValueError, RuntimeError, MemoryError), match="memory|MEMORY|bad_alloc|bad allocation"
         ):
             scheduler.execute(g, data, starts, ends, memory_budget_bytes=largest_original - 1)
         prepared = scheduler.prepare_execution(g, data, starts, ends).run_snapshot()

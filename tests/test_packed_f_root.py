@@ -137,6 +137,6 @@ def test_f_pack_memory_budget_includes_existing_panels():
     bounds = np.zeros(1, np.int64)
     with AdaptiveScheduler(cpu_budget=1, config=settings("single")) as scheduler:
         planned = scheduler.plan(graph(), {"a": a, "b": b}, bounds, bounds)
-        with pytest.raises((ValueError, RuntimeError, MemoryError), match="memory|MEMORY|bad_alloc"):
+        with pytest.raises((ValueError, RuntimeError, MemoryError), match="memory|MEMORY|bad_alloc|bad allocation"):
             scheduler.execute(graph(), {"a": a, "b": b}, bounds, bounds, memory_budget_bytes=1)
     assert planned.estimated_worker_scratch_bytes >= op.get("matmul").requirements(a, b)["scratch_doubles"] * 8

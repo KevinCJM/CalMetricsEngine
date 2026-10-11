@@ -181,7 +181,7 @@ def test_partitioned_scratch_and_vendor_workspace_both_admitted():
         plan = scheduler.plan(graph, {"a": a, "b": b}, bounds, bounds)
         assert plan.estimated_worker_scratch_bytes >= reserve
         with pytest.raises(
-            (ValueError, RuntimeError, MemoryError), match="memory|MEMORY|bad_alloc"
+            (ValueError, RuntimeError, MemoryError), match="memory|MEMORY|bad_alloc|bad allocation"
         ):
             scheduler.execute(
                 graph, {"a": a, "b": b}, bounds, bounds, memory_budget_bytes=reserve - 1

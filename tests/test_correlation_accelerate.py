@@ -204,7 +204,7 @@ def test_correlation_budget_and_thread_policy_after_error():
         with AdaptiveScheduler(cpu_budget=1) as scheduler:
             plan = scheduler.plan(compiled, {"x": x}, starts, ends)
             assert plan.estimated_worker_scratch_bytes >= reserve
-            with pytest.raises((ValueError, RuntimeError, MemoryError), match="memory|MEMORY|bad_alloc"):
+            with pytest.raises((ValueError, RuntimeError, MemoryError), match="memory|MEMORY|bad_alloc|bad allocation"):
                 scheduler.execute(compiled, {"x": x}, starts, ends, memory_budget_bytes=reserve-1)
             result = scheduler.execute(compiled, {"x": x}, starts, ends)
             for first, last, actual in zip(starts, ends, result.outputs[0].values, strict=True):

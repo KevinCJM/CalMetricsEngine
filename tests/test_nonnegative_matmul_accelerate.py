@@ -299,5 +299,5 @@ def test_planner_rejects_before_library_when_reserve_does_not_fit():
     with AdaptiveScheduler(cpu_budget=1) as scheduler:
         plan = scheduler.plan(graph, {"a": a, "b": b}, bounds, bounds)
         assert plan.estimated_worker_scratch_bytes >= reserve
-        with pytest.raises((ValueError, RuntimeError, MemoryError), match="memory|MEMORY|bad_alloc"):
+        with pytest.raises((ValueError, RuntimeError, MemoryError), match="memory|MEMORY|bad_alloc|bad allocation"):
             scheduler.execute(graph, {"a": a, "b": b}, bounds, bounds, memory_budget_bytes=reserve - 1)

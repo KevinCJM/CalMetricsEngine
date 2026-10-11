@@ -62,6 +62,11 @@ manylinux、musllinux 及宿主机最新兼容 NumPy。每个 wheel 仍执行完
 五个原有受保护的 `Wheels` 检查名保持不变；只有全部 ABI 任务成功时才通过，
 失败、取消或跳过均不通过。单任务上限为 180 分钟，用于包含大型参考计算的全量验收。
 
+Linux wheel 测试容器将 `/dev/shm` 容量设为 1 GiB。大型共享结果用例的单代输出
+预算约为 73 MB，且需同时保留两代结果，超过 Docker 默认的 64 MiB。
+此设置只提供测试所需的共享映射容量，不修改引擎内存预算、测试数据量或所有权断言；
+容器内完整测试失败仍会阻止交付。
+
 公开 wheel 使用 baseline CPU，不允许强制 `-mavx*`、`-march=native` 或 fast-math。
 
 默认构建使用随源码固定的 Eigen 3.4.0 上游归档；CMake 校验 SHA-256 后仅在构建目录解压，不下载依赖、不读取本机 Eigen。头文件以 `EIGEN_MPL2_ONLY`、`EIGEN_DONT_PARALLELIZE`、`EIGEN_FAST_MATH=0` 编译。wheel 随附许可说明，sdist 包含原始归档和许可；`tools/check_dist.py` 校验这些内容。`CALMETRICS_ENGINE_USE_EIGEN=OFF` 测试无 Eigen 的受支持路径。

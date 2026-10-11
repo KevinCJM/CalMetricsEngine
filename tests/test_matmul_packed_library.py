@@ -131,7 +131,7 @@ def test_packed_graph_worker_ownership_copy_audit_and_budget(lane):
         plan = scheduler.plan(graph, values, bounds, bounds)
         if PACKING_PLATFORM and os.environ.get("CME_EXPECT_EIGEN") == "1":
             assert plan.estimated_worker_scratch_bytes >= expected_panels(256)
-        with pytest.raises((ValueError, RuntimeError, MemoryError), match="memory|MEMORY|bad_alloc"):
+        with pytest.raises((ValueError, RuntimeError, MemoryError), match="memory|MEMORY|bad_alloc|bad allocation"):
             scheduler.execute(graph, values, bounds, bounds, memory_budget_bytes=expected_panels(256) - 1)
         result = scheduler.execute(graph, values, bounds, bounds)
     assert result.plan.lane == ("process" if lane.startswith("process") else lane)

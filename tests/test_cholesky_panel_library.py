@@ -163,7 +163,7 @@ def test_graph_lane_budget_retention_and_ownership(lane):
         if PACKING_PLATFORM and os.environ.get("CME_EXPECT_EIGEN") == "1":
             assert plan.estimated_worker_scratch_bytes >= panel_bytes(len(a))
         with pytest.raises(
-            (ValueError, RuntimeError, MemoryError), match="memory|MEMORY|bad_alloc"
+            (ValueError, RuntimeError, MemoryError), match="memory|MEMORY|bad_alloc|bad allocation"
         ):
             scheduler.execute(
                 graph, {"a": a}, bounds, bounds, memory_budget_bytes=panel_bytes(len(a)) - 1
