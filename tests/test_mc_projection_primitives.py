@@ -6,6 +6,7 @@ ordered first-fault prefix protocol are deliberately outside these tests.
 
 import gc
 import math
+from contextlib import nullcontext
 
 import numpy as np
 import pytest
@@ -338,7 +339,14 @@ def test_prepared_projection_reads_current_content_and_rejects_changed_geometry(
         current = prepared.run_snapshot()
         assert np.all(first.outputs[0].values[0] == 0.)
         np.testing.assert_allclose(current.outputs[0].values[0], math.expm1(.3), rtol=2e-14)
-        initial.shape = (1, 2)
+        address, size = initial.ctypes.data, initial.nbytes
+        expected_warning = (
+            pytest.warns(DeprecationWarning, match=r"^Setting the shape on a NumPy array has been deprecated")
+            if np.lib.NumpyVersion(np.__version__) >= "2.5.0.dev0" else nullcontext()
+        )
+        with expected_warning:
+            initial.shape = (1, 2)
+        assert initial.ctypes.data == address and initial.nbytes == size
         with pytest.raises(ValueError, match="PREPARED_INPUT_CHANGED"):
             prepared.run_snapshot()
 

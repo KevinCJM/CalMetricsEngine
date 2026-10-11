@@ -130,7 +130,8 @@ def test_cache_blocks_borrow_strided_left_and_padded_right(shape, left_layout):
     actual, audit = op.matmul(a, b, audit=True)
     assert_blocked_dispatch(audit)
     assert_no_numeric_scratch_or_copy(audit)
-    np.testing.assert_allclose(actual, a @ b, rtol=RTOL, atol=ATOL)
+    np.testing.assert_allclose(actual, fsum_product_reference(a, b), rtol=RTOL, atol=ATOL)
+    assert_fixture_matches_scalar(actual, a, b)
     assert not np.shares_memory(actual, a) and not np.shares_memory(actual, b)
     for array, before in zip([a, b, *owners], saved, strict=True):
         np.testing.assert_array_equal(array, before)

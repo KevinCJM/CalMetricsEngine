@@ -1,6 +1,5 @@
 """Private matrix quantiles and row statistics: shared bounded physical path."""
 
-import os
 import pickle
 
 import numpy as np
@@ -8,7 +7,7 @@ import pytest
 
 from calmetrics_engine import AdaptiveScheduler, GraphCompiler, SharedInputBundle
 
-from .test_matmul_statistics import count, fixture
+from .test_matmul_statistics import LIBRARY, count, fixture
 from .test_typed_results import config
 
 TYPES = {
@@ -124,7 +123,7 @@ def test_shared_rows_match_independent_extended_precision(layout, n, t, k):
     np.testing.assert_allclose(actual.outputs[1].values[0], std, atol=4e-5, rtol=1e-12)
     assert count(actual, "numeric_arena_bytes") < n * t * 8
     assert count(actual, "input_copy_bytes") == 0
-    if k and int(os.environ.get("CALMETRICS_TEST_EXPECT_ACCELERATE", "1")):
+    if k and LIBRARY:
         assert count(actual, "accelerate_matmul_calls") > 0
     else:
         assert count(actual, "accelerate_matmul_calls") == 0
@@ -595,9 +594,11 @@ def test_long_history_has_bounded_working_set_and_certified_sqrt(layout):
     # Admission also reserves a canonical sorting line and vendor workspace;
     # those estimates are distinct from the actually allocated private cache.
     assert plan.estimated_worker_scratch_bytes < 5_000_000
-    if int(os.environ.get("CALMETRICS_TEST_EXPECT_ACCELERATE", "1")):
+    if LIBRARY:
         assert count(first, "accelerate_matmul_calls") == 32
         assert count(first, "summary_source_scans") == 0
+    else:
+        assert count(first, "accelerate_matmul_calls") == 0
     for old, new, snapshot in zip(first.outputs, second.outputs, saved, strict=True):
         np.testing.assert_array_equal(old.values[0], snapshot)
         assert not np.shares_memory(old.values[0], new.values[0])

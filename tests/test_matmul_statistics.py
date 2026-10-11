@@ -9,6 +9,7 @@ import pytest
 from calmetrics_engine import AdaptiveScheduler, GraphCompiler, SharedInputBundle
 from calmetrics_engine import operators as op
 
+from .test_matrix_library_backend import PACKING_PLATFORM
 from .test_typed_results import config
 
 TYPES = {
@@ -17,7 +18,10 @@ TYPES = {
 }
 Y = "matmul(w,transpose(r))"
 ROOTS = [f"mean_axis({Y},1)*252", f"sqrt(variance_axis({Y},1,1)*252)"]
-LIBRARY = int(os.environ.get("CALMETRICS_TEST_EXPECT_ACCELERATE", "1"))
+LIBRARY = int(os.environ.get(
+    "CALMETRICS_TEST_EXPECT_ACCELERATE",
+    str(int(PACKING_PLATFORM and os.environ.get("CME_EXPECT_ACCELERATE") != "0")),
+))
 
 
 def fixture(n=65, t=63, k=7, layout="C"):

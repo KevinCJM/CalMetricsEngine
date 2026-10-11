@@ -5,6 +5,7 @@ Monte Carlo service or its first-fault-prefix/compact-result protocol.
 """
 
 import math
+from contextlib import nullcontext
 
 import numpy as np
 import pytest
@@ -357,7 +358,16 @@ def test_prepared_reads_mutable_values_q_and_seed_without_reusing_old_result(nam
         ieee_equal(later.outputs[0].values[0], expected)
         ieee_equal(first.outputs[0].values[0], saved)
         assert not np.shares_memory(first.outputs[0].values[0], later.outputs[0].values[0])
-        values.shape = (2, 6)
+        # Mutate the same bound descriptor; reshape() would create a new view.
+        # NumPy 2.5 warns about this deliberate adversarial test operation.
+        address, size = values.ctypes.data, values.nbytes
+        expected_warning = (
+            pytest.warns(DeprecationWarning, match=r"^Setting the shape on a NumPy array has been deprecated")
+            if np.lib.NumpyVersion(np.__version__) >= "2.5.0.dev0" else nullcontext()
+        )
+        with expected_warning:
+            values.shape = (2, 6)
+        assert values.ctypes.data == address and values.nbytes == size
         with pytest.raises(ValueError, match="PREPARED_INPUT_CHANGED"):
             prepared.run_snapshot()
 
