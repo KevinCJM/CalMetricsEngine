@@ -1,5 +1,6 @@
 #pragma once
 #include "matmul_scalar_chain_native_cases.hpp"
+#include <cmath>
 #include <cstring>
 #include <limits>
 #include <stdexcept>

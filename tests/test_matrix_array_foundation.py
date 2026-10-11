@@ -272,7 +272,7 @@ def test_mask_views_reject_invalid_bytes(name, args):
 
 @pytest.mark.parametrize(
     "name,make_plan",
-    foundation_cases(),
+    list(foundation_cases()),
 )
 def test_excel_recipe_symbolic_bound_and_stream(name, make_plan, tmp_path):
     import json

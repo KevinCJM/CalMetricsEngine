@@ -4,6 +4,7 @@
 #include "calmetrics_engine/native_runtime.hpp"
 #include <new>
 #include <algorithm>
+#include <cmath>
 #include <cstring>
 #include <stdexcept>
 #include <iostream>
